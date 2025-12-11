@@ -23,9 +23,9 @@ class EtteroppgjoerRepository(
                     """
                     INSERT INTO etteroppgjoer_beregnet_resultat(id, aar, siste_iverksatte_behandling_id, forbehandling_id, utbetalt_stoenad, ny_brutto_stoenad, differanse, grense, resultat_type,
                             tidspunkt, regel_resultat, kilde, referanse_avkorting_sist_iverksatte, har_ingen_inntekt,
-                            referanse_avkorting_forbehandling)
+                            referanse_avkorting_forbehandling, vedtak_referanse)
                     VALUES (:id, :aar, :siste_iverksatte_behandling_id, :forbehandling_id, :utbetalt_stoenad, :ny_brutto_stoenad, :differanse, :grense, :resultat_type, :tidspunkt, :regel_resultat,
-                            :kilde, :referanse_avkorting_sist_iverksatte, :har_ingen_inntekt, :referanse_avkorting_forbehandling)
+                            :kilde, :referanse_avkorting_sist_iverksatte, :har_ingen_inntekt, :referanse_avkorting_forbehandling, :vedtak_referanse)
                     ON CONFLICT (
                         aar, siste_iverksatte_behandling_id, forbehandling_id
                         ) DO UPDATE SET utbetalt_stoenad = excluded.utbetalt_stoenad,
@@ -55,6 +55,7 @@ class EtteroppgjoerRepository(
                         "har_ingen_inntekt" to resultat.harIngenInntekt,
                         "referanse_avkorting_sist_iverksatte" to resultat.referanseAvkorting.avkortingSisteIverksatte,
                         "referanse_avkorting_forbehandling" to resultat.referanseAvkorting.avkortingForbehandling,
+                        "vedtak_referanse" to resultat.referanseAvkorting.vedtakReferanse,
                     ),
             ).let { query -> tx.run(query.asUpdate) }
                 .let { antallOppdatert ->
@@ -116,6 +117,7 @@ class EtteroppgjoerRepository(
                 ReferanseEtteroppgjoer(
                     avkortingForbehandling = uuid("referanse_avkorting_forbehandling"),
                     avkortingSisteIverksatte = uuid("referanse_avkorting_sist_iverksatte"),
-                ), // TODO: introdusere nytt felt for å lagre referanse til vedtak brukt i utbetalt stoenad
+                    vedtakReferanse = objectMapper.readValue(this.string("vedtak_referanse")),
+                ),
         )
 }

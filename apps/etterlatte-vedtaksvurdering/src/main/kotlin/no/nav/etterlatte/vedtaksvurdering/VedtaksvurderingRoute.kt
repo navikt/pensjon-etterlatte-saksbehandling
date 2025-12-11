@@ -341,7 +341,7 @@ fun Route.etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService: Vedta
             val vedtaksliste =
                 vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
                     sakId = request.sakId,
-                    etteroppgjoersAar = request.etteroppgjoersAar,
+                    aar = request.etteroppgjoersAar,
                 )
             call.respond(vedtaksliste)
         }

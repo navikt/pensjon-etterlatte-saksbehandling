@@ -4,12 +4,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.AvkortetYtelsePeriode
-import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
+import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
@@ -21,8 +19,8 @@ class VedtakEtteroppgjoerService(
 ) {
     fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
-        etteroppgjoersAar: Int,
-    ): List<VedtakSamordningDto> {
+        aar: Int,
+    ): List<VedtakEtteroppgjoerDto> {
         val vedtak = repository.hentVedtakForSak(sakId).firstOrNull()
         krevIkkeNull(vedtak) { "Fant ingen vedtak for sakId=$sakId" }
 
@@ -31,10 +29,10 @@ class VedtakEtteroppgjoerService(
 
         val tidslinjeJustert =
             Vedtakstidslinje(vedtaksliste)
-                .sammenstill(YearMonth.of(etteroppgjoersAar, 1))
+                .sammenstill(YearMonth.of(aar, 1))
                 .filter {
                     (it.innhold is VedtakInnhold.Behandling) &&
-                        it.innhold.virkningstidspunkt.year == etteroppgjoersAar
+                        it.innhold.virkningstidspunkt.year == aar
                 }
 
         val avkortetYtelsePerioderByVedtak =
@@ -47,38 +45,23 @@ class VedtakEtteroppgjoerService(
     }
 }
 
-private fun Vedtak.toEtteroppgjoervedtakDto(avkortetYtelsePerioder: List<AvkortetYtelsePeriode>): VedtakSamordningDto {
+private fun Vedtak.toEtteroppgjoervedtakDto(avkortetYtelsePerioder: List<AvkortetYtelsePeriode>): VedtakEtteroppgjoerDto {
     val innhold = innhold as VedtakInnhold.Behandling
 
-    return VedtakSamordningDto(
+    return VedtakEtteroppgjoerDto(
         vedtakId = id,
-        fnr = soeker.value,
-        status = status,
-        sak = VedtakSak(soeker.value, sakType, sakId),
-        type = type,
-        vedtakFattet = vedtakFattet,
-        attestasjon = attestasjon,
-        behandling =
-            Behandling(
-                innhold.behandlingType,
-                behandlingId,
-                innhold.revurderingAarsak,
-            ),
-        virkningstidspunkt = innhold.virkningstidspunkt,
-        beregning = innhold.beregning,
         perioder =
             avkortetYtelsePerioder
                 .map { it.toEtteroppgjoerVedtakPeriode(innhold.utbetalingsperioder) },
     )
 }
 
-private fun AvkortetYtelsePeriode.toEtteroppgjoerVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): VedtakSamordningPeriode {
+private fun AvkortetYtelsePeriode.toEtteroppgjoerVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): VedtakEtteroppgjoerPeriode {
     val justertPeriode = utbetalingsperioder.firstOrNull { this.fom == it.periode.fom }
 
-    return VedtakSamordningPeriode(
+    return VedtakEtteroppgjoerPeriode(
         fom = fom,
         tom = justertPeriode?.periode?.tom ?: tom,
-        ytelseFoerAvkorting = ytelseFoerAvkorting,
         ytelseEtterAvkorting = ytelseEtterAvkorting,
     )
 }

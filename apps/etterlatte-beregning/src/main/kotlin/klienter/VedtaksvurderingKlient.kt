@@ -8,8 +8,8 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -22,11 +22,11 @@ interface VedtaksvurderingKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto>
 
-    suspend fun hentVedtakslisteForEtteroppgjoersAar(
+    suspend fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<VedtakSamordningDto>
+    ): List<VedtakEtteroppgjoerDto>
 }
 
 class VedtaksvurderingKlientException(
@@ -76,12 +76,12 @@ class VedtaksvurderingKlientImpl(
         }
     }
 
-    override suspend fun hentVedtakslisteForEtteroppgjoersAar(
+    override suspend fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<VedtakSamordningDto> =
-        retry<List<VedtakSamordningDto>> {
+    ): List<VedtakEtteroppgjoerDto> =
+        retry<List<VedtakEtteroppgjoerDto>> {
             downstreamResourceClient
                 .post(
                     resource =

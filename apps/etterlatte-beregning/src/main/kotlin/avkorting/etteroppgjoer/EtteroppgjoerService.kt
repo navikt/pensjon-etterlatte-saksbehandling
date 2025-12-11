@@ -27,7 +27,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
+import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.regler.FaktumNode
@@ -143,7 +143,7 @@ class EtteroppgjoerService(
 
         val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
 
-        val vedtaksperioderIEtteroppgjoersAar = hentVedtaksperioderIEtteroppgjoersAar(sakId, etteroppgjoersAar)
+        val (vedtakReferanse, vedtakPerioder) = hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar)
         val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId, false)
 
         val inntektsgrunnlag =
@@ -153,7 +153,7 @@ class EtteroppgjoerService(
 
         val differanseGrunnlag =
             EtteroppgjoerDifferanseGrunnlag(
-                FaktumNode(vedtaksperioderIEtteroppgjoersAar, "", ""),
+                FaktumNode(vedtakPerioder, "", ""),
                 FaktumNode(nyForbehandlingAvkorting, forbehandlingId, ""),
                 FaktumNode(inntektsgrunnlag, nyForbehandlingAvkorting.id, ""),
                 FaktumNode(harDoedsfall, forbehandlingId, ""),
@@ -189,7 +189,8 @@ class EtteroppgjoerService(
                     referanseAvkorting =
                         ReferanseEtteroppgjoer(
                             avkortingForbehandling = nyForbehandlingAvkorting.id,
-                            avkortingSisteIverksatte = nyForbehandlingAvkorting.id, // TODO: bytt ut med rett,
+                            avkortingSisteIverksatte = null, // ikke relevant lengre
+                            vedtakReferanse = vedtakReferanse,
                         ),
                     harIngenInntekt = data.harIngenInntekt,
                     aar = etteroppgjoersAar,
@@ -201,12 +202,13 @@ class EtteroppgjoerService(
         }
     }
 
-    private suspend fun hentVedtaksperioderIEtteroppgjoersAar(
+    private suspend fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
-    ): List<VedtakSamordningPeriode> {
-        val vedtaksliste = vedtakKlient.hentVedtakslisteForEtteroppgjoersAar(sakId, etteroppgjoersAar, HardkodaSystembruker.etteroppgjoer)
+    ): Pair<List<Long>, List<VedtakEtteroppgjoerPeriode>> {
+        val vedtaksliste = vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, HardkodaSystembruker.etteroppgjoer)
 
+        val vedtakReferanse = vedtaksliste.map { it.vedtakId }
         val vedtakPerioder =
             vedtaksliste
                 .flatMap { it.perioder }
@@ -214,7 +216,7 @@ class EtteroppgjoerService(
 
         // TODO: validere riktig perioder innenfor etteroppgjoersAar?
 
-        return vedtakPerioder
+        return vedtakReferanse to vedtakPerioder
     }
 
     private fun hentAvkortingForBehandling(
@@ -305,10 +307,12 @@ data class BeregnetEtteroppgjoerResultat(
             kilde = this.kilde,
             avkortingForbehandlingId = this.referanseAvkorting.avkortingForbehandling,
             avkortingSisteIverksatteId = this.referanseAvkorting.avkortingSisteIverksatte,
+            vedtakReferanse = this.referanseAvkorting.vedtakReferanse,
         )
 }
 
 data class ReferanseEtteroppgjoer(
     val avkortingForbehandling: UUID,
-    val avkortingSisteIverksatte: UUID,
+    val avkortingSisteIverksatte: UUID?,
+    val vedtakReferanse: List<Long>?,
 )

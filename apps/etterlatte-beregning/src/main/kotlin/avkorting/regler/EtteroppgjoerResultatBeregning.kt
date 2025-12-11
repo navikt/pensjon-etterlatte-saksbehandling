@@ -7,6 +7,7 @@ import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerGrenseDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
@@ -26,7 +27,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 data class EtteroppgjoerDifferanseGrunnlag(
-    val utbetaltStoenad: FaktumNode<List<VedtakSamordningPeriode>>,
+    val utbetaltStoenad: FaktumNode<List<VedtakEtteroppgjoerPeriode>>,
     val nyBruttoStoenad: FaktumNode<Aarsoppgjoer>,
     val grunnlagForEtteroppgjoer: FaktumNode<FaktiskInntekt>,
     val harDoedsfall: FaktumNode<Boolean>,
@@ -68,7 +69,7 @@ val nyBruttoStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<AvkortetYtelse>
         finnFelt = { it.avkortetYtelse },
     )
 
-val utbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<VedtakSamordningPeriode>> =
+val utbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<VedtakEtteroppgjoerPeriode>> =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
@@ -91,7 +92,7 @@ private fun normaliserPerioder(avkortingsperioder: List<AvkortetYtelse>): List<M
         )
     }
 
-private fun normaliserVedtakPerioder(vedtakPerioder: List<VedtakSamordningPeriode>): List<MaanederMedAvkortetYtelse> =
+private fun normaliserVedtakPerioder(vedtakPerioder: List<VedtakEtteroppgjoerPeriode>): List<MaanederMedAvkortetYtelse> =
     vedtakPerioder.map {
         val tom = it.tom ?: YearMonth.of(it.fom.year, Month.DECEMBER)
         val antallMaaneder = it.fom.until(tom, ChronoUnit.MONTHS) + 1

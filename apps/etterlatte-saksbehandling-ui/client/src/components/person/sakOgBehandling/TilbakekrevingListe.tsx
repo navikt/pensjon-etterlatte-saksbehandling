@@ -14,6 +14,8 @@ import { hentTilbakekrevingerISak } from '~shared/api/tilbakekreving'
 import { VedtakKolonner } from '~components/person/VedtakKoloner'
 import { MapApiResult } from '~shared/components/MapApiResult'
 import { lastDayOfMonth } from 'date-fns'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { OmgjoerTilbakekreving } from '~components/person/sakOgBehandling/OmgjoerTilbakekreving'
 
 function lenkeTilTilbakekrevingMedId(id: string): string {
   return `/tilbakekreving/${id}/`
@@ -28,6 +30,7 @@ function formaterPeriode(perioder: TilbakekrevingPeriode[]): string {
 
 function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBehandling> }) {
   const { tilbakekrevinger } = props
+  const omgjoerTilbakekrevingEnabled = useFeaturetoggle(FeatureToggle.omgjoer_tilbakekreving)
 
   if (!tilbakekrevinger?.length) {
     return (
@@ -47,6 +50,7 @@ function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBeh
           <Table.HeaderCell>Vedtaksdato</Table.HeaderCell>
           <Table.HeaderCell>Resultat</Table.HeaderCell>
           <Table.HeaderCell>Handling</Table.HeaderCell>
+          {omgjoerTilbakekrevingEnabled && <Table.HeaderCell></Table.HeaderCell>}
         </Table.Row>
       </Table.Header>
       <Table.Body>
@@ -59,6 +63,11 @@ function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBeh
             <Table.DataCell>
               <Link href={lenkeTilTilbakekrevingMedId(tilbakekreving.id)}>Se behandling</Link>
             </Table.DataCell>
+            {omgjoerTilbakekrevingEnabled && (
+              <Table.DataCell>
+                <OmgjoerTilbakekreving tilbakekreving={tilbakekreving} />
+              </Table.DataCell>
+            )}
           </Table.Row>
         ))}
       </Table.Body>

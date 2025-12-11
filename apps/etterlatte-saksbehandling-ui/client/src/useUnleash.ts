@@ -28,6 +28,7 @@ export const enum FeatureToggle {
   ny_simuleringsvisning = 'ny-simuleringsvisning',
   etteroppgjoer_opphoer_skyldes_doedsfall = 'etteroppgjoer-opphoer-skyldes-doedsfall',
   vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
+  omgjoer_tilbakekreving = 'omgjoer-tilbakekreving',
 }
 
 export interface Toggle {
@@ -120,6 +121,11 @@ const vis_tilbakestill_etteroppgjoer: Toggle = {
   enabled: false,
 }
 
+const omgjoer_tilbakekreving: Toggle = {
+  togglename: FeatureToggle.omgjoer_tilbakekreving,
+  enabled: false,
+}
+
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.sanksjon]: sanksjon,
@@ -142,6 +148,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.ny_simuleringsvisning]: ny_simuleringsvisning,
   [FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall]: etteroppgjoer_opphoer_skyldes_doedsfall,
   [FeatureToggle.vis_tilbakestill_etteroppgjoer]: vis_tilbakestill_etteroppgjoer,
+  [FeatureToggle.omgjoer_tilbakekreving]: omgjoer_tilbakekreving,
 }
 
 export const Unleashcontext = createContext<{

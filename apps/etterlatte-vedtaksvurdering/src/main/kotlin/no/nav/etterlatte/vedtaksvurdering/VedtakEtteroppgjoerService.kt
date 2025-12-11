@@ -22,7 +22,7 @@ class VedtakEtteroppgjoerService(
     fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
-    ): List<VedtakSamordningDto> { // TODO: egen dto?
+    ): List<VedtakSamordningDto> {
         val vedtak = repository.hentVedtakForSak(sakId).firstOrNull()
         krevIkkeNull(vedtak) { "Fant ingen vedtak for sakId=$sakId" }
 
@@ -41,8 +41,6 @@ class VedtakEtteroppgjoerService(
             repository
                 .hentAvkortetYtelsePerioder(tidslinjeJustert.map { it.id }.toSet())
                 .groupBy { it.vedtakId }
-
-        // TODO: filtrere eller validere på datofom ? - periode i vedtak ?
 
         return tidslinjeJustert
             .map { it.toEtteroppgjoervedtakDto(avkortetYtelsePerioderByVedtak[it.id] ?: emptyList()) }

@@ -116,8 +116,8 @@ class EtteroppgjoerRepository(
             referanseAvkorting =
                 ReferanseEtteroppgjoer(
                     avkortingForbehandling = uuid("referanse_avkorting_forbehandling"),
-                    avkortingSisteIverksatte = uuid("referanse_avkorting_sist_iverksatte"),
-                    vedtakReferanse = objectMapper.readValue(this.string("vedtak_referanse")),
+                    avkortingSisteIverksatte = uuidOrNull("referanse_avkorting_sist_iverksatte"),
+                    vedtakReferanse = this.stringOrNull("vedtak_referanse")?.let { objectMapper.readValue(it) },
                 ),
         )
 }

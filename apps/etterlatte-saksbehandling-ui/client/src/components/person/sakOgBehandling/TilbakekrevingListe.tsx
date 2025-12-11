@@ -17,7 +17,7 @@ import { lastDayOfMonth } from 'date-fns'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { OmgjoerTilbakekreving } from '~components/person/sakOgBehandling/OmgjoerTilbakekreving'
 
-function lenkeTilTilbakekrevingMedId(id: string): string {
+export function lenkeTilTilbakekrevingMedId(id: string): string {
   return `/tilbakekreving/${id}/`
 }
 

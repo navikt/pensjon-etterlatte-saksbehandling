@@ -5,6 +5,7 @@ import { opprettOmgjoeringTilbakekreving } from '~shared/api/tilbakekreving'
 import { Alert, BodyShort, Button, Modal, VStack } from '@navikt/ds-react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { lenkeTilTilbakekrevingMedId } from '~components/person/sakOgBehandling/TilbakekrevingListe'
 
 export function OmgjoerTilbakekreving({ tilbakekreving }: { tilbakekreving: TilbakekrevingBehandling }) {
   const [modalOpen, setModalOpen] = useState(false)
@@ -21,7 +22,7 @@ export function OmgjoerTilbakekreving({ tilbakekreving }: { tilbakekreving: Tilb
 
   return (
     <>
-      <Button size="small" onClick={() => setModalOpen(true)}>
+      <Button variant="secondary" size="small" onClick={() => setModalOpen(true)}>
         Omgjør
       </Button>
       <Modal open={modalOpen} header={{ heading: 'Omgjør tilbakekreving' }} onClose={lukkModal}>
@@ -29,7 +30,16 @@ export function OmgjoerTilbakekreving({ tilbakekreving }: { tilbakekreving: Tilb
           <VStack gap="4">
             <BodyShort>En tilbakekreving kan omgjøres på grunn av feil i vedtaket.</BodyShort>
             {mapResult(opprettOmgjoeringResult, {
-              success: () => <Alert variant="success">Omgjøring av tilbakekrevingen opprettet!</Alert>,
+              success: (tilbakekreving) => (
+                <Alert variant="success">
+                  <VStack gap="2">
+                    <BodyShort>Omgjøring av tilbakekrevingen er opprettet.</BodyShort>
+                    <Button size="small" as="a" href={lenkeTilTilbakekrevingMedId(tilbakekreving.id)}>
+                      Gå til tilbakekreving
+                    </Button>
+                  </VStack>
+                </Alert>
+              ),
               error: (error) => (
                 <ApiErrorAlert>
                   Kunne ikke lage omgjøring av tilbakekrevingen, på grunn av feil: {error.detail}

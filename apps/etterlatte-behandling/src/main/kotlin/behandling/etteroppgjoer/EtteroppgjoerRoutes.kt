@@ -21,6 +21,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -114,7 +115,18 @@ fun Route.etteroppgjoerRoutes(
                 sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService)
                 kunSkrivetilgang {
                     inTransaction {
-                        val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
+                            ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjør for sak ${sakId}")
+
+                        if(etteroppgjoer.status == EtteroppgjoerStatus.FERDIGSTILT) {
+                            val forbehandling = forbehandlingService.hentForbehandling(etteroppgjoer.sisteFerdigstilteForbehandling!!)
+
+                            if(forbehandling.etteroppgjoerResultatType != EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
+                                throw IkkeTillattException(code="UTFALL_IKKE_TILLATT", "Vi støtter ikke " +
+                                        "tilbakestilling med resultat ${forbehandling.etteroppgjoerResultatType}. " +
+                                        "Ta kontakt hvis forbehandlingen skal tilbakestilles.")
+                            }
+                        }
 
                         krev(etteroppgjoer.kanTilbakestillesMedNyForbehandling()) {
                             "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke tilbakestille " +
@@ -130,7 +142,6 @@ fun Route.etteroppgjoerRoutes(
                             etteroppgjoer.inntektsaar,
                             EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
                         )
-
 
                         forbehandlingService.opprettOppgaveForOpprettForbehandling(
                             sakId = sakId,

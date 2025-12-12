@@ -67,6 +67,24 @@ data class EtteroppgjoerForbehandling(
 
     fun skyldesOpphoerDoedsfallIEtteroppgjoersaar() = opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
 
+    fun skalEtterbetalesTilDoedsbo(): Boolean {
+        val doedsfallEtterEtteroppgjoer = opphoerSkyldesDoedsfall == JaNei.JA && opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.NEI
+        return doedsfallEtterEtteroppgjoer && etteroppgjoerResultatType == EtteroppgjoerResultatType.ETTERBETALING
+    }
+
+    fun kanFerdigstillesUtenBrev(): Boolean {
+        if (brevId == null) {
+            val ingenEndringUtenUtbetaling =
+                etteroppgjoerResultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+
+            val doedsfall = opphoerSkyldesDoedsfall == JaNei.JA
+
+            return doedsfall || ingenEndringUtenUtbetaling
+        }
+
+        return true
+    }
+
     fun tilBeregnet(beregnetEtteroppgjoerResultatDto: BeregnetEtteroppgjoerResultatDto): EtteroppgjoerForbehandling {
         if (!erUnderBehandling()) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.BEREGNET)
@@ -94,7 +112,9 @@ data class EtteroppgjoerForbehandling(
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         }
 
-        // TODO: validere her at vi kan ferdigstille uten brev?
+        if (!kanFerdigstillesUtenBrev()) {
+            throw InternfeilException("Kan ikke ferdigstille forbehandling uten brev, forbehandlingId=$id")
+        }
 
         return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
     }

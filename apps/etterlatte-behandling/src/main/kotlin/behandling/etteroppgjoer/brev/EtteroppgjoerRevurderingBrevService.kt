@@ -25,6 +25,7 @@ import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -191,13 +192,12 @@ class EtteroppgjoerRevurderingBrevService(
                 ?.let { etteroppgjoerForbehandlingService.hentForbehandling(it) }
                 ?: throw InternfeilException("Mangler opprinnelig forbehandling for behandlingId=$behandlingId")
 
-        if (forbehandling.brevId == null) {
-            if (forbehandling.kanFerdigstillesUtenBrev()) {
-                return null
-            }
-            throw InternfeilException(
-                "Denne forbehandlingen er ferdigstilt uten brev, men det forventes et forhåndsvarselbrev for behandlingId=$behandlingId",
-            )
+        if (forbehandling.kanFerdigstillesUtenBrev()) {
+            return null
+        }
+
+        krevIkkeNull(forbehandling.brevId) {
+            "Finner ikke brevId for forbehandlingId=${forbehandling.id}"
         }
 
         val forhaandsvarselBrev =

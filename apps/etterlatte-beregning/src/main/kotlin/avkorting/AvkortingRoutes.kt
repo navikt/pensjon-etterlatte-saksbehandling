@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.Month
@@ -158,56 +159,68 @@ fun Route.avkorting(
         route("etteroppgjoer") {
             post("hent") {
                 val request = call.receive<EtteroppgjoerBeregnetAvkortingRequest>()
-                logger.info(
-                    "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
-                )
-                val dto =
-                    etteroppgjoerService.hentBeregnetAvkorting(
-                        forbehandlingId = request.forbehandling,
-                        sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
-                        aar = request.aar,
-                        sakId = request.sakId,
-                        brukerTokenInfo = brukerTokenInfo,
+                withBehandlingId(behandlingId = request.forbehandling, behandlingTilgangsSjekk = behandlingKlient, skrivetilgang = false) {
+                    logger.info(
+                        "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
                     )
-                call.respond(dto)
+                    val dto =
+                        etteroppgjoerService.hentBeregnetAvkorting(
+                            forbehandlingId = request.forbehandling,
+                            sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
+                            aar = request.aar,
+                            sakId = request.sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    call.respond(dto)
+                }
             }
 
             post("beregn-faktisk-inntekt") {
                 val request = call.receive<EtteroppgjoerBeregnFaktiskInntektRequest>()
-                logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
-                etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
-                val resultat =
-                    etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
-                        forbehandlingId = request.forbehandlingId,
-                        sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
-                        etteroppgjoersAar = request.aar,
-                        harDoedsfall = request.harDoedsfall,
-                    )
-                call.respond(resultat.toDto())
+                withBehandlingId(behandlingId = request.forbehandlingId, behandlingTilgangsSjekk = behandlingKlient, skrivetilgang = true) {
+                    logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
+                    etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
+                    val resultat =
+                        etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
+                            forbehandlingId = request.forbehandlingId,
+                            sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
+                            etteroppgjoersAar = request.aar,
+                            harDoedsfall = request.harDoedsfall,
+                        )
+                    call.respond(resultat.toDto())
+                }
             }
 
             post("hent-beregnet-resultat") {
                 val request = call.receive<EtteroppgjoerHentBeregnetResultatRequest>()
-                val resultat =
-                    etteroppgjoerService.hentBeregnetEtteroppgjoerResultat(
-                        request.forbehandlingId,
-                        request.sisteIverksatteBehandlingId,
-                        request.aar,
-                    )
+                withBehandlingId(
+                    behandlingId = request.forbehandlingId,
+                    behandlingTilgangsSjekk = behandlingKlient,
+                    skrivetilgang = false,
+                ) {
+                    val resultat =
+                        etteroppgjoerService.hentBeregnetEtteroppgjoerResultat(
+                            request.forbehandlingId,
+                            request.sisteIverksatteBehandlingId,
+                            request.aar,
+                        )
 
-                when (resultat) {
-                    null -> call.respond(HttpStatusCode.NoContent)
-                    else -> call.respond(resultat.toDto())
+                    when (resultat) {
+                        null -> call.respond(HttpStatusCode.NoContent)
+                        else -> call.respond(resultat.toDto())
+                    }
                 }
             }
         }
 
         route("behandlinger-med-aarsoppgjoer/{$SAKID_CALL_PARAMETER}") {
             get {
-                val behandlinger = avkortingService.hentBehandlingerMedAarsoppgjoerForSak(sakId)
+                withSakId(behandlingKlient, skrivetilgang = false) {
+                    val behandlinger = avkortingService.hentBehandlingerMedAarsoppgjoerForSak(sakId)
 
-                if (behandlinger.isEmpty()) throw InternfeilException("Fant ingen behandlinger med årsoppgjør for sak $sakId")
-                call.respond(behandlinger)
+                    if (behandlinger.isEmpty()) throw InternfeilException("Fant ingen behandlinger med årsoppgjør for sak $sakId")
+                    call.respond(behandlinger)
+                }
             }
         }
     }

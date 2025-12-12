@@ -73,7 +73,7 @@ data class EtteroppgjoerForbehandling(
     }
 
     fun kanFerdigstillesUtenBrev(): Boolean {
-        if (brevId == null) {
+        if (brevId == null && !erRevurdering()) {
             val ingenEndringUtenUtbetaling =
                 etteroppgjoerResultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
 

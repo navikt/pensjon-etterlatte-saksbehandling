@@ -65,3 +65,9 @@ export const underkjennVedtak = async (args: {
     valgtBegrunnelse: args.valgtBegrunnelse,
   })
 }
+
+export const opprettOmgjoeringTilbakekreving = async (args: {
+  tilbakekrevingId: string
+}): Promise<ApiResponse<TilbakekrevingBehandling>> => {
+  return apiClient.post(`/tilbakekreving/${args.tilbakekrevingId}/omgjoer`, {})
+}

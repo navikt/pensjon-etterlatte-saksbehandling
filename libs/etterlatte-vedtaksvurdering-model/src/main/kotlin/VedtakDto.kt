@@ -153,6 +153,22 @@ data class VedtakSamordningPeriode(
     val ytelseEtterAvkorting: Int,
 )
 
+data class VedtakEtteroppgjoerDto(
+    val vedtakId: Long,
+    val perioder: List<VedtakEtteroppgjoerPeriode>,
+)
+
+data class VedtakslisteEtteroppgjoerRequest(
+    val sakId: SakId,
+    val etteroppgjoersAar: Int,
+)
+
+data class VedtakEtteroppgjoerPeriode(
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val ytelseEtterAvkorting: Int,
+)
+
 data class TilbakekrevingVedtakDto(
     val tilbakekrevingId: UUID,
     val sakId: SakId,

@@ -8,6 +8,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.avkorting.inntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringService
@@ -183,7 +184,7 @@ fun Route.avkorting(
                         etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
                             forbehandlingId = request.forbehandlingId,
                             sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
-                            aar = request.aar,
+                            etteroppgjoersAar = request.aar,
                             harDoedsfall = request.harDoedsfall,
                         )
                     call.respond(resultat.toDto())

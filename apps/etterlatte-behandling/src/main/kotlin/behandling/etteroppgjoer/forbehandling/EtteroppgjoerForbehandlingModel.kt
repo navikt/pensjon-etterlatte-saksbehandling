@@ -67,6 +67,24 @@ data class EtteroppgjoerForbehandling(
 
     fun skyldesOpphoerDoedsfallIEtteroppgjoersaar() = opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
 
+    fun skalEtterbetalesTilDoedsbo(): Boolean {
+        val doedsfallEtterEtteroppgjoer = opphoerSkyldesDoedsfall == JaNei.JA && opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.NEI
+        return doedsfallEtterEtteroppgjoer && etteroppgjoerResultatType == EtteroppgjoerResultatType.ETTERBETALING
+    }
+
+    fun kanFerdigstillesUtenBrev(): Boolean {
+        if (brevId == null && !erRevurdering()) {
+            val ingenEndringUtenUtbetaling =
+                etteroppgjoerResultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+
+            val doedsfall = opphoerSkyldesDoedsfall == JaNei.JA
+
+            return doedsfall || ingenEndringUtenUtbetaling
+        }
+
+        return true
+    }
+
     fun tilBeregnet(beregnetEtteroppgjoerResultatDto: BeregnetEtteroppgjoerResultatDto): EtteroppgjoerForbehandling {
         if (!erUnderBehandling()) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.BEREGNET)
@@ -84,17 +102,18 @@ data class EtteroppgjoerForbehandling(
 
     fun tilFerdigstilt(): EtteroppgjoerForbehandling {
         val kanFerdigstille =
-            if (skyldesOpphoerDoedsfallIEtteroppgjoersaar()) {
-                erUnderBehandling()
-            } else {
-                status == EtteroppgjoerForbehandlingStatus.BEREGNET
+            when {
+                skyldesOpphoerDoedsfallIEtteroppgjoersaar() -> erUnderBehandling()
+                else -> status == EtteroppgjoerForbehandlingStatus.BEREGNET
             }
 
         if (!kanFerdigstille) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         }
 
-        // TODO: validere her at vi kan ferdigstille uten brev?
+        if (!kanFerdigstillesUtenBrev()) {
+            throw InternfeilException("Kan ikke ferdigstille forbehandling uten brev, forbehandlingId=$id")
+        }
 
         return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
     }

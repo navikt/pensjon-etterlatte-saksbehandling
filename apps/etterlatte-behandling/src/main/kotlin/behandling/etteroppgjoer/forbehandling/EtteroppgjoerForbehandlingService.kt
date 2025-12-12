@@ -103,7 +103,6 @@ class EtteroppgjoerForbehandlingService(
         sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
 
         ferdigstillEtteroppgjoerOppgave(forbehandling, brukerTokenInfo)
-        // TODO: bør nok validere at brev er generert i tilfeller vi skal ferdigstille med brev
 
         haandterDoedsfallEtterEtteroppgjoersAar(forbehandling)
 
@@ -120,7 +119,7 @@ class EtteroppgjoerForbehandlingService(
     ): EtteroppgjoerForbehandling {
         val forbehandling = hentForbehandling(forbehandlingId)
 
-        if (!kanFerdigstilleForbehandlingUtenBrev(forbehandling)) {
+        if (!forbehandling.kanFerdigstillesUtenBrev()) {
             throw UgyldigForespoerselException(
                 "ETTEROPPGJOER_RESULTAT_TRENGER_BREV",
                 "Etteroppgjøret kan kun ferdigstilles uten utsendt brev dersom resultatet er 'ingen utbetaling' " +
@@ -394,10 +393,14 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    fun opprettOppgaveForOpprettForbehandling(sakId: SakId, opprettetManuelt : Boolean) {
+    fun opprettOppgaveForOpprettForbehandling(
+        sakId: SakId,
+        opprettetManuelt: Boolean,
+    ) {
         etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(
             sakId = sakId,
-            opprettetManuelt = opprettetManuelt)
+            opprettetManuelt = opprettetManuelt,
+        )
     }
 
     fun opprettEtteroppgjoerForbehandlingIBulk(
@@ -785,30 +788,18 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun kanFerdigstilleForbehandlingUtenBrev(forbehandling: EtteroppgjoerForbehandling): Boolean {
-        val etteroppgjoerResultat = forbehandling.etteroppgjoerResultatType
-
-        val ingenEndringUtenUtbetaling =
-            etteroppgjoerResultat == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
-
-        val doedsfall = forbehandling.opphoerSkyldesDoedsfall == JaNei.JA
-
-        return doedsfall || ingenEndringUtenUtbetaling
-    }
-
     private fun hentUtlandstilknytning(ferdigstiltForbehandling: EtteroppgjoerForbehandling): Utlandstilknytning? =
         behandlingService.hentUtlandstilknytningForSak(ferdigstiltForbehandling.sak.id)
 
     private fun haandterDoedsfallEtterEtteroppgjoersAar(forbehandling: EtteroppgjoerForbehandling) {
         val opphoerSkyldesDoedsfall = forbehandling.opphoerSkyldesDoedsfall == JaNei.JA
-        val resultatErEtterbetaling = forbehandling.etteroppgjoerResultatType == EtteroppgjoerResultatType.ETTERBETALING
 
         if (opphoerSkyldesDoedsfall) {
             krevIkkeNull(forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar) {
                 "Mangler svar på opphør skyldes dødsfall i etteroppgjørsåret"
             }
 
-            if (!forbehandling.skyldesOpphoerDoedsfallIEtteroppgjoersaar() && resultatErEtterbetaling) {
+            if (forbehandling.skalEtterbetalesTilDoedsbo()) {
                 oppgaveService.opprettOppgave(
                     referanse = forbehandling.id.toString(),
                     sakId = forbehandling.sak.id,

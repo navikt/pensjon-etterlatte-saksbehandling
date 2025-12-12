@@ -102,10 +102,9 @@ data class EtteroppgjoerForbehandling(
 
     fun tilFerdigstilt(): EtteroppgjoerForbehandling {
         val kanFerdigstille =
-            if (skyldesOpphoerDoedsfallIEtteroppgjoersaar()) {
-                erUnderBehandling()
-            } else {
-                status == EtteroppgjoerForbehandlingStatus.BEREGNET
+            when {
+                skyldesOpphoerDoedsfallIEtteroppgjoersaar() -> erUnderBehandling()
+                else -> status == EtteroppgjoerForbehandlingStatus.BEREGNET
             }
 
         if (!kanFerdigstille) {

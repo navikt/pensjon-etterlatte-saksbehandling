@@ -195,9 +195,10 @@ class EtteroppgjoerForbehandlingServiceTest {
         coEvery { ctx.behandlingService.hentBehandlingerForSak(sakId1) } returns
             listOf(behandling, revurdering, underBehandling)
 
-        val sisteIverksatteBehandling = runBlocking { ctx.service.hentSisteIverksatteBehandlingMedAvkorting(sakId1, mockk()) }
+        val sisteIverksatteAvkortingOgOpphoer = runBlocking { ctx.service.hentSisteIverksatteBehandlingMedAvkorting(sakId1, mockk()) }
 
-        sisteIverksatteBehandling shouldBe behandling
+        sisteIverksatteAvkortingOgOpphoer.sisteBehandlingMedAvkorting shouldBe behandling.id
+        sisteIverksatteAvkortingOgOpphoer.opphoerFom shouldBe null
     }
 
     @ParameterizedTest(name = "skal ikke opprette forbehandling hvis det allerede eksisterer en med status={0}")

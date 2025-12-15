@@ -8,7 +8,6 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.avkorting.inntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.avkorting.inntektsjustering.MottattInntektsjusteringService
@@ -25,14 +24,10 @@ import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.medBody
-import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.Month
@@ -212,23 +207,8 @@ fun Route.avkorting(
                 }
             }
         }
-
-        route("behandlinger-med-aarsoppgjoer/{$SAKID_CALL_PARAMETER}") {
-            get {
-                withSakId(behandlingKlient, skrivetilgang = false) {
-                    val behandlinger = avkortingService.hentBehandlingerMedAarsoppgjoerForSak(sakId)
-
-                    if (behandlinger.isEmpty()) throw InternfeilException("Fant ingen behandlinger med årsoppgjør for sak $sakId")
-                    call.respond(behandlinger)
-                }
-            }
-        }
     }
 }
-
-data class AvkortingSkalHaInntektNesteAarDTO(
-    val skalHaInntektNesteAar: Boolean,
-)
 
 fun ForventetInntekt.toDto() =
     ForventetInntektDto(

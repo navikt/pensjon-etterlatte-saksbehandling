@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
+import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerRevurderingService(
@@ -62,9 +63,16 @@ class EtteroppgjoerRevurderingService(
 
                 kanOppretteEtteroppgjoerRevurdering(etteroppgjoer, sisteFerdigstilteForbehandling.id)
 
-                val sisteIverksatteBehandling = hentSisteIverksatteBehandling(sakId, brukerTokenInfo)
+                val (sisteIverksatteBehandling, opphoerFom) = hentSisteIverksatteBehandlingOgOpphoer(sakId, brukerTokenInfo)
                 val revurdering =
-                    opprettRevurdering(sakId, sisteIverksatteBehandling, sisteFerdigstilteForbehandling.id, opprinnelse, brukerTokenInfo)
+                    opprettRevurdering(
+                        sakId,
+                        sisteIverksatteBehandling,
+                        sisteFerdigstilteForbehandling.id,
+                        opprinnelse,
+                        opphoerFom,
+                        brukerTokenInfo,
+                    )
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = revurdering.id,
@@ -114,6 +122,7 @@ class EtteroppgjoerRevurderingService(
         sisteIverksatteBehandling: Behandling,
         sisteFerdigstilteForbehandlingId: UUID,
         opprinnelse: BehandlingOpprinnelse,
+        opphoerFom: YearMonth?,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val forbehandling =
@@ -150,16 +159,17 @@ class EtteroppgjoerRevurderingService(
                 frist = null,
                 paaGrunnAvOppgave = null,
                 opprinnelse = opprinnelse,
+                opphoerFraOgMed = opphoerFom,
             ).oppdater()
     }
 
     private fun hentSisteIverksatteVedtakIkkeOpphoer(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): UUID =
+    ): SisteAvkortingOgOpphoer =
         runBlocking {
             if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_OPPHOER_SKYLDES_DOEDSFALL, false)) {
-                etteroppgjoerForbehandlingService.hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo).id
+                etteroppgjoerForbehandlingService.hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo)
             } else {
                 val iverksatteVedtak =
                     vedtakKlient
@@ -178,7 +188,7 @@ class EtteroppgjoerRevurderingService(
                     throw InternfeilException("Siste iverksatte vedtak har opphør fra og med, dette er ikke støttet enda")
                 }
 
-                sisteIverksatteVedtak.behandlingId
+                SisteAvkortingOgOpphoer(sisteIverksatteVedtak.behandlingId, null)
             }
         }
 
@@ -225,13 +235,20 @@ class EtteroppgjoerRevurderingService(
         }
     }
 
-    private fun hentSisteIverksatteBehandling(
+    private fun hentSisteIverksatteBehandlingOgOpphoer(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Behandling {
-        val sisteIverksatteBehandlingId = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
+    ): Pair<Behandling, YearMonth?> {
+        val sisteAvkortingOgOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
+        val behandling =
+            behandlingService.hentBehandling(sisteAvkortingOgOpphoer.sisteBehandlingMedAvkorting)
+                ?: throw InternfeilException("Fant ikke iverksatt behandling $sisteAvkortingOgOpphoer")
 
-        return behandlingService.hentBehandling(sisteIverksatteBehandlingId)
-            ?: throw InternfeilException("Fant ikke iverksatt behandling $sisteIverksatteBehandlingId")
+        return behandling to sisteAvkortingOgOpphoer.opphoerFom
     }
 }
+
+data class SisteAvkortingOgOpphoer(
+    val sisteBehandlingMedAvkorting: UUID,
+    val opphoerFom: YearMonth?,
+)

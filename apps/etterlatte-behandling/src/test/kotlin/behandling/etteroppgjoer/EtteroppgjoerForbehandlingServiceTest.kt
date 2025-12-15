@@ -27,6 +27,10 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
@@ -172,8 +176,21 @@ class EtteroppgjoerForbehandlingServiceTest {
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
             )
 
-        coEvery { ctx.beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(sakId1, any()) } returns
-            listOf(behandling.id)
+        coEvery { ctx.vedtakKlient.hentIverksatteVedtak(sakId1, any()) } returns
+            listOf(
+                VedtakSammendragDto(
+                    id = "1",
+                    behandlingId = behandling.id,
+                    vedtakType = VedtakType.INNVILGELSE,
+                    behandlendeSaksbehandler = "saksbehandler",
+                    datoFattet = Tidspunkt.now().toNorskTid(),
+                    attesterendeSaksbehandler = "attestant",
+                    datoAttestert = Tidspunkt.now().toNorskTid(),
+                    virkningstidspunkt = behandling.virkningstidspunkt?.dato!!,
+                    opphoerFraOgMed = null,
+                    iverksettelsesTidspunkt = Tidspunkt.now(),
+                ),
+            )
 
         coEvery { ctx.behandlingService.hentBehandlingerForSak(sakId1) } returns
             listOf(behandling, revurdering, underBehandling)
@@ -316,8 +333,21 @@ class EtteroppgjoerForbehandlingServiceTest {
                 ).copy(brevId = 123L, varselbrevSendt = LocalDate.now())
 
         ctx.returnsForbehandling(forbehandling)
-
-        every { runBlocking { ctx.beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(any(), any()) } } returns listOf(ctx.behandling.id)
+        coEvery { ctx.vedtakKlient.hentIverksatteVedtak(sakId1, any()) } returns
+            listOf(
+                VedtakSammendragDto(
+                    id = "1",
+                    behandlingId = ctx.behandling.id,
+                    vedtakType = VedtakType.INNVILGELSE,
+                    behandlendeSaksbehandler = "saksbehandler",
+                    datoFattet = Tidspunkt.now().toNorskTid(),
+                    attesterendeSaksbehandler = "attestant",
+                    datoAttestert = Tidspunkt.now().toNorskTid(),
+                    virkningstidspunkt = ctx.behandling.virkningstidspunkt?.dato!!,
+                    opphoerFraOgMed = null,
+                    iverksettelsesTidspunkt = Tidspunkt.now(),
+                ),
+            )
         every { ctx.behandlingService.hentBehandlingerForSak(any()) } returns listOf(ctx.behandling)
 
         val kopiertForbehandling = ctx.service.kopierOgLagreNyForbehandling(uuid, sakId1, mockk())

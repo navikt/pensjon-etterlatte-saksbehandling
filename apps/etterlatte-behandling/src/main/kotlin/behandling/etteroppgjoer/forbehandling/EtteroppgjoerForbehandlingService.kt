@@ -9,12 +9,12 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
+import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.SisteAvkortingOgOpphoer
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntekt
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -43,7 +42,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
@@ -442,6 +440,12 @@ class EtteroppgjoerForbehandlingService(
             throw ForbehandlingKanIkkeEndres()
         }
 
+        val opphoerFom =
+            runBlocking { vedtakKlient.hentInnvilgedePerioder(forbehandling.sak.id, brukerTokenInfo) }
+                .maxBy { it.periode.fom }
+                .periode.tom
+                ?.plusMonths(1)
+
         val beregningRequest =
             EtteroppgjoerBeregnFaktiskInntektRequest(
                 sakId = forbehandling.sak.id,
@@ -456,6 +460,8 @@ class EtteroppgjoerForbehandlingService(
                 harDoedsfall =
                     forbehandling.opphoerSkyldesDoedsfall == JaNei.JA &&
                         forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.NEI,
+                innvilgetPeriodeIEtteroppgjoersAar = forbehandling.innvilgetPeriode,
+                opphoerFom = opphoerFom,
             )
 
         val beregnetEtteroppgjoerResultat =
@@ -610,24 +616,16 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
-        val sisteIverksatteBehandling =
+        val sisteAvkortingOgOpphoer =
             runBlocking { hentSisteIverksatteBehandlingMedAvkorting(sak.id, brukerTokenInfo) }
 
-        krevIkkeNull(sisteIverksatteBehandling) {
+        krevIkkeNull(sisteAvkortingOgOpphoer) {
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
         }
 
         logger.info(
-            "Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id $sisteIverksatteBehandling",
+            "Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id $sisteAvkortingOgOpphoer",
         )
-
-        val attesterteVedtak =
-            runBlocking {
-                vedtakKlient
-                    .hentIverksatteVedtak(sak.id, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
-                    .sortedByDescending { it.datoAttestert }
-            }
-        val harVedtakAvTypeOpphoer = attesterteVedtak.any { it.vedtakType == VedtakType.OPPHOER }
 
         val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
@@ -636,9 +634,8 @@ class EtteroppgjoerForbehandlingService(
             .opprett(
                 sak,
                 innvilgetPeriode,
-                sisteIverksatteBehandling.id,
-                harVedtakAvTypeOpphoer =
-                    harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
+                sisteAvkortingOgOpphoer.sisteBehandlingMedAvkorting,
+                harVedtakAvTypeOpphoer = sisteAvkortingOgOpphoer.opphoerFom != null,
             ).also {
                 dao.lagreForbehandling(it)
             }
@@ -647,17 +644,24 @@ class EtteroppgjoerForbehandlingService(
     suspend fun hentSisteIverksatteBehandlingMedAvkorting(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Behandling {
-        // TODO: finn heller siste iverksatte behandling fra siste løpende vedtak i vedtaksvurdering
-        // TODO: se inntektsjusteringJobb for eksempel
+    ): SisteAvkortingOgOpphoer {
+        // TODO: Med periodisert vilkårsvurdering kan vi være smartere her
+        val iverksatteVedtak =
+            vedtakKlient
+                .hentIverksatteVedtak(sakId, brukerTokenInfo)
+                .sortedByDescending { it.datoFattet }
 
-        val behandlingerMedAarsoppgjoer = beregningKlient.hentBehandlingerMedAarsoppgjoerForSak(sakId, brukerTokenInfo)
+        val sisteVedtakMedAvkorting = iverksatteVedtak.first { it.vedtakType != VedtakType.OPPHOER }
+        val opphoer =
+            iverksatteVedtak.firstOrNull {
+                it.vedtakType == VedtakType.OPPHOER &&
+                    it.datoAttestert!! > sisteVedtakMedAvkorting.datoAttestert!!
+            }
 
-        return behandlingService
-            .hentBehandlingerForSak(sakId)
-            .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) && !it.erAvslagNySoeknad() }
-            .filter { it.id in behandlingerMedAarsoppgjoer }
-            .maxBy { it.behandlingOpprettet }
+        return SisteAvkortingOgOpphoer(
+            sisteBehandlingMedAvkorting = sisteVedtakMedAvkorting.behandlingId,
+            opphoerFom = opphoer?.virkningstidspunkt ?: sisteVedtakMedAvkorting.opphoerFraOgMed,
+        )
     }
 
     private fun utledInnvilgetPeriode(
@@ -721,7 +725,7 @@ class EtteroppgjoerForbehandlingService(
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(), // ny dato
                 kopiertFra = forbehandling.id,
-                sisteIverksatteBehandlingId = sisteIverksatteBehandling.id,
+                sisteIverksatteBehandlingId = sisteIverksatteBehandling.sisteBehandlingMedAvkorting,
                 brevId = null,
                 varselbrevSendt = null,
             )
@@ -781,9 +785,9 @@ class EtteroppgjoerForbehandlingService(
         val sisteIverksatteBehandling = runBlocking { hentSisteIverksatteBehandlingMedAvkorting(forbehandling.sak.id, brukerTokenInfo) }
 
         // verifisere at vi bruker siste iverksatte behandling
-        if (sisteIverksatteBehandling.id != forbehandling.sisteIverksatteBehandlingId) {
+        if (sisteIverksatteBehandling.sisteBehandlingMedAvkorting != forbehandling.sisteIverksatteBehandlingId) {
             throw InternfeilException(
-                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteIverksatteBehandling.id}",
+                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteIverksatteBehandling.sisteBehandlingMedAvkorting}",
             )
         }
     }

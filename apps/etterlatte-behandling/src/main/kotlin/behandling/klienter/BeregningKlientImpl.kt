@@ -93,11 +93,6 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregningDTO?
-
-    suspend fun hentBehandlingerMedAarsoppgjoerForSak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): List<UUID>
 }
 
 class BeregningKlientImpl(
@@ -155,30 +150,6 @@ class BeregningKlientImpl(
                 )
         } catch (e: Exception) {
             throw InternfeilException("Kunne ikke hente om behandling hadde overstyrt beregning", e)
-        }
-    }
-
-    override suspend fun hentBehandlingerMedAarsoppgjoerForSak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo
-    ): List<UUID> {
-        try {
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/api/beregning/avkorting/behandlinger-med-aarsoppgjoer/$sakId",
-                        ),
-                    brukerTokenInfo = brukerTokenInfo,
-                ).mapBoth(
-                    success = { resource ->
-                      deserialize(resource.response.toString())
-                    },
-                    failure = { errorResponse -> throw errorResponse },
-                )
-        } catch (e: Exception) {
-            throw InternfeilException("Kunne ikke hente ut behandlinger med avkorting årsoppgjør", e)
         }
     }
 

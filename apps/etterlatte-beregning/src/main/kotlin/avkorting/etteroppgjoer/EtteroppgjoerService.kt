@@ -124,6 +124,8 @@ class EtteroppgjoerService(
                     utland = utlandsinntekt,
                     sanksjoner = sanksjoner,
                     spesifikasjon = spesifikasjon,
+                    innvilgetPeriodeIEtteroppgjoersAar = innvilgetPeriodeIEtteroppgjoersAar,
+                    opphoerFom = opphoerFom,
                 )
             }
 

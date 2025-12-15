@@ -312,18 +312,25 @@ data class Avkorting(
         utland: Int,
         sanksjoner: List<Sanksjon>,
         spesifikasjon: String,
+        innvilgetPeriodeIEtteroppgjoersAar: Periode,
+        opphoerFom: YearMonth?,
     ): Avkorting {
         val tidligereAarsoppgjoer = aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == aar }
-
-        // TODO kan ha endret seg? slik at forrige behandling sin avkorting ikke lenger stemmer?
-        val innvilgetPeriodeIAaret = tidligereAarsoppgjoer.periode()
 
         val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
         val inntekt =
             FaktiskInntekt(
                 id = UUID.randomUUID(),
-                periode = innvilgetPeriodeIAaret,
-                innvilgaMaaneder = tidligereAarsoppgjoer.innvilgaMaaneder(),
+                periode = innvilgetPeriodeIEtteroppgjoersAar,
+                innvilgaMaaneder =
+                    finnAntallInnvilgaMaanederForAar(
+                        aarsoppgjoerFom = innvilgetPeriodeIEtteroppgjoersAar.fom,
+                        tom = innvilgetPeriodeIEtteroppgjoersAar.tom,
+                        // Hvis det har vært en reell aldersovergang i saken så skal den være et opphør her. Vi kan
+                        // kanskje ta med oss opphør som ikke skyldes aldersovergang, men da vil vi uansett justere ned
+                        // antall innvilgede måneder i beregningen.
+                        aldersovergang = opphoerFom,
+                    ),
                 loennsinntekt = loennsinntekt,
                 naeringsinntekt = naeringsinntekt,
                 utlandsinntekt = utland,
@@ -345,19 +352,16 @@ data class Avkorting(
                     ),
             )
 
-        // TODO: opphør fom må utledes riktig for saker med opphør i etteroppgjøret
-        val opphoerFom = null
-
         val etteroppgjoer =
             Etteroppgjoer(
                 id = UUID.randomUUID(),
                 aar = tidligereAarsoppgjoer.aar,
-                fom = innvilgetPeriodeIAaret.fom,
+                fom = innvilgetPeriodeIEtteroppgjoersAar.fom,
                 ytelseFoerAvkorting = tidligereAarsoppgjoer.ytelseFoerAvkorting,
                 inntekt = inntekt,
             )
         val nyAvkorting = erstattAarsoppgjoer(etteroppgjoer)
-        return nyAvkorting.beregnAvkorting(tidligereAarsoppgjoer.fom, null, sanksjoner, opphoerFom)
+        return nyAvkorting.beregnAvkorting(innvilgetPeriodeIEtteroppgjoersAar.fom, null, sanksjoner, opphoerFom)
     }
 
     /**

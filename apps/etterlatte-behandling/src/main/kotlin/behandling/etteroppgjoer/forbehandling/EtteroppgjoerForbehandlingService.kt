@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntekt
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -442,6 +441,12 @@ class EtteroppgjoerForbehandlingService(
             throw ForbehandlingKanIkkeEndres()
         }
 
+        val opphoerFom =
+            runBlocking { vedtakKlient.hentInnvilgedePerioder(forbehandling.sak.id, brukerTokenInfo) }
+                .maxBy { it.periode.fom }
+                .periode.tom
+                ?.plusMonths(1)
+
         val beregningRequest =
             EtteroppgjoerBeregnFaktiskInntektRequest(
                 sakId = forbehandling.sak.id,
@@ -456,6 +461,8 @@ class EtteroppgjoerForbehandlingService(
                 harDoedsfall =
                     forbehandling.opphoerSkyldesDoedsfall == JaNei.JA &&
                         forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.NEI,
+                innvilgetPeriodeIEtteroppgjoersAar = forbehandling.innvilgetPeriode,
+                opphoerFom = opphoerFom,
             )
 
         val beregnetEtteroppgjoerResultat =

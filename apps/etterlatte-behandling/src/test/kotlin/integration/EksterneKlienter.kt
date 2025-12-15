@@ -102,7 +102,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.soeker
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
-import no.nav.etterlatte.oppgaveGosys.FeilregistrerOppgaveRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
@@ -857,7 +856,7 @@ class SigrunKlienTest : SigrunKlient {
     override suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
-    ): PensjonsgivendeInntektAarResponse = PensjonsgivendeInntektAarResponse.stub(ident)
+    ): PensjonsgivendeInntektAarResponse = PensjonsgivendeInntektAarResponse.stub(ident, inntektsaar)
 
     override suspend fun hentHendelsesliste(
         antall: Int,

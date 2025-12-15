@@ -119,7 +119,7 @@ class EtteroppgjoerServiceTest {
                     any(),
                     any(),
                 )
-            } returns PensjonsgivendeInntektAarResponse.stub("09498230323")
+            } returns PensjonsgivendeInntektAarResponse.stub("09498230323", 2024)
         }
 
         fun sigrunKasterFeil() {

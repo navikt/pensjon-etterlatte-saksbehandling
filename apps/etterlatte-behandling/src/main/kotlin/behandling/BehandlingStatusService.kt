@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
@@ -349,8 +350,8 @@ class BehandlingStatusServiceImpl(
             val virkAar = virk.dato.year
             val aar = Year.now().value
 
-            // TODO: litt for enkelt, må kanskje sjekke mer
-            if (aar > virkAar) {
+            // TODO: Dette må tilpasses bedre når vi faktisk behandler EO for 2024 og 2025
+            if (aar > virkAar && virkAar == ETTEROPPGJOER_AAR) {
                 try {
                     etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, virkAar)
                 } catch (e: Exception) {

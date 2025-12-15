@@ -59,7 +59,7 @@ class SigrunKlientImpl(
         inntektsaar: Int,
     ): PensjonsgivendeInntektAarResponse {
         if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_STUB_PGI, false)) {
-            return PensjonsgivendeInntektAarResponse.stub(ident)
+            return PensjonsgivendeInntektAarResponse.stub(ident, inntektsaar)
         }
 
         return retry {
@@ -162,15 +162,17 @@ data class PensjonsgivendeInntektAarResponse(
     val pensjonsgivendeInntekt: List<PensjonsgivendeInntektResponse>,
 ) {
     companion object {
-        fun stub(ident: String) =
-            PensjonsgivendeInntektAarResponse(
-                2024,
-                ident,
-                listOf(
-                    PensjonsgivendeInntektResponse("FASTLAND", 4000, 5000, 500),
-                    PensjonsgivendeInntektResponse("SVALBARD", 3100, 3200, 200),
-                ),
-            )
+        fun stub(
+            ident: String,
+            inntektsaar: Int,
+        ) = PensjonsgivendeInntektAarResponse(
+            inntektsaar,
+            ident,
+            listOf(
+                PensjonsgivendeInntektResponse("FASTLAND", 4000, 5000, 500),
+                PensjonsgivendeInntektResponse("SVALBARD", 3100, 3200, 200),
+            ),
+        )
     }
 }
 

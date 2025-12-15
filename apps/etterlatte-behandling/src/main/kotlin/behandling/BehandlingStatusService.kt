@@ -351,7 +351,7 @@ class BehandlingStatusServiceImpl(
             val aar = Year.now().value
 
             // TODO: Dette må tilpasses bedre når vi faktisk behandler EO for 2024 og 2025
-            if (aar > virkAar && virkAar != ETTEROPPGJOER_AAR) {
+            if (aar > virkAar && virkAar == ETTEROPPGJOER_AAR) {
                 try {
                     etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, virkAar)
                 } catch (e: Exception) {

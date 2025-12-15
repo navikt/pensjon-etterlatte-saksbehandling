@@ -3,6 +3,8 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseFeatureToggle
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -21,6 +23,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshen
 class DoedshendelseService(
     private val doedshendelseDao: DoedshendelseDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -237,7 +240,6 @@ class DoedshendelseService(
 
         return avdoedesSivilstander
             .asSequence()
-            .filter { it.verdi.relatertVedSiviltilstand?.value != null }
             .filter {
                 it.verdi.sivilstatus in
                     listOf(
@@ -248,10 +250,36 @@ class DoedshendelseService(
                         Sivilstatus.SEPARERT_PARTNER,
                         Sivilstatus.SKILT_PARTNER,
                     )
+            }.filter {
+                val potensiellEktefelle = it.verdi.relatertVedSiviltilstand?.value
+                loggManglendeIdent(potensiellEktefelle, avdoed)
+                potensiellEktefelle != null
             }.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
             .filter { ektefelle -> samboere.none { samboer -> samboer.fnr == ektefelle.fnr } }
             .distinct()
             .toList()
+    }
+
+    private fun loggManglendeIdent(
+        potensiellEktefelle: String?,
+        avdoed: PersonDoedshendelseDto,
+    ) {
+        val loggingAktivert =
+            featureToggleService.isEnabled(
+                GrunnlagsendringshendelseFeatureToggle.LOGG_MANGLENDE_EKTEFELLE_IDENT,
+                false,
+            )
+        if (loggingAktivert && potensiellEktefelle == null) {
+            val avdoedFnr = avdoed.foedselsnummer.verdi
+            logger.error(
+                "Det er registrert en partner til avdøde $avdoedFnr uten ident. " +
+                    "Sjekk manuelt om infobrev kan sendes ut til vedkommende likevel. Se sikkerlogg.",
+            )
+            sikkerLogg.error(
+                "Det er registrert en partner til avdøde ${avdoedFnr.value} uten ident. " +
+                    "Sjekk manuelt om infobrev kan sendes ut til vedkommende likevel.",
+            )
+        }
     }
 }
 

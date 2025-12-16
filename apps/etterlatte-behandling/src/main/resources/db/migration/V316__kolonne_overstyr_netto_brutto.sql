@@ -1,1 +1,1 @@
-alter table tilbakekreving add column overstyr_netto_brutto text;
+ALTER TABLE tilbakekreving ADD COLUMN overstyr_netto_brutto TEXT;

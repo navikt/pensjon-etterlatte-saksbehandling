@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.toJson
@@ -213,6 +214,13 @@ class TilbakekrevingskomponentenKlient(
             return utenOverstyring.apply {
                 belopTilbakekreves = nettoTilbakekreving!!.medToDesimaler()
                 belopSkatt = BigDecimal.ZERO
+                // TODO: Gå opp om dette blir riktig mapping?
+                kodeResultat =
+                    if (resultat == TilbakekrevingResultat.FULL_TILBAKEKREV) {
+                        TilbakekrevingResultat.DELVIS_TILBAKEKREV.name
+                    } else {
+                        kodeResultat
+                    }
             }
         } else {
             return utenOverstyring

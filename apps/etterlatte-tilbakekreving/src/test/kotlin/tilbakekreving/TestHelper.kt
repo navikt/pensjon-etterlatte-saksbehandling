@@ -92,6 +92,7 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
         hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD,
         kravgrunnlagId = "1",
         kontrollfelt = "2023-09-19-10.01.03.842916",
+        overstyrBehandletNettoTilBruttoMotTilbakekreving = false,
     )
 
 fun kravgrunnlag(

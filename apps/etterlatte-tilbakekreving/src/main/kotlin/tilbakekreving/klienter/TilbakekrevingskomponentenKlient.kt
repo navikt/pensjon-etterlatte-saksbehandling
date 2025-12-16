@@ -38,6 +38,7 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsperi
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.time.LocalDate
 import javax.xml.datatype.DatatypeFactory
 import javax.xml.datatype.XMLGregorianCalendar
@@ -171,7 +172,14 @@ class TilbakekrevingskomponentenKlient(
                                     tilbakekrevingPeriode.tilbakekrevingsbeloep
                                         .filter {
                                             it.klasseType == KlasseType.YTEL.name
-                                        }.forEach { add(it.toTilbakekreivngsbelopYtelse(vedtak.aarsak)) }
+                                        }.forEach {
+                                            add(
+                                                it.toTilbakekrevingsbelopYtelse(
+                                                    vedtak.aarsak,
+                                                    vedtak.overstyrBehandletNettoTilBruttoMotTilbakekreving,
+                                                ),
+                                            )
+                                        }
 
                                     // Andre klassetyper, blant annet FEIL
                                     tilbakekrevingPeriode.tilbakekrevingsbeloep
@@ -185,17 +193,31 @@ class TilbakekrevingskomponentenKlient(
                 }
         }
 
-    private fun Tilbakekrevingsbelop.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
-        TilbakekrevingsbelopDto().apply {
-            kodeKlasse = klasseKode
-            belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
-            belopNy = nyBruttoUtbetaling.medToDesimaler()
-            belopTilbakekreves = krevIkkeNull(bruttoTilbakekreving?.medToDesimaler()) { "Tilbakekrevingsbeløp mangler" }
-            belopSkatt = krevIkkeNull(skatt?.medToDesimaler()) { "Skattebeløp mangler" }
-            kodeResultat = krevIkkeNull(resultat?.name) { "Resultatkode mangler" }
-            kodeAarsak = mapFraTilbakekrevingAarsak(aarsak)
-            kodeSkyld = krevIkkeNull(skyld?.name) { "Skyldkode mangler" }
+    private fun Tilbakekrevingsbelop.toTilbakekrevingsbelopYtelse(
+        aarsak: TilbakekrevingAarsak,
+        overstyrBehandletNettoTilBrutto: Boolean,
+    ): TilbakekrevingsbelopDto {
+        val utenOverstyring =
+            TilbakekrevingsbelopDto().apply {
+                kodeKlasse = klasseKode
+                belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
+                belopNy = nyBruttoUtbetaling.medToDesimaler()
+                belopTilbakekreves = krevIkkeNull(bruttoTilbakekreving?.medToDesimaler()) { "Tilbakekrevingsbeløp mangler" }
+                belopSkatt = krevIkkeNull(skatt?.medToDesimaler()) { "Skattebeløp mangler" }
+                kodeResultat = krevIkkeNull(resultat?.name) { "Resultatkode mangler" }
+                kodeAarsak = mapFraTilbakekrevingAarsak(aarsak)
+                kodeSkyld = krevIkkeNull(skyld?.name) { "Skyldkode mangler" }
+            }
+        if (overstyrBehandletNettoTilBrutto) {
+            logger.info("Overstyrer opprinnelig tilbakekrevingsbeløp, med å sette beløp tilbakekreves = netto, og skattebeløp til 0")
+            return utenOverstyring.apply {
+                belopTilbakekreves = nettoTilbakekreving!!.medToDesimaler()
+                belopSkatt = BigDecimal.ZERO
+            }
+        } else {
+            return utenOverstyring
         }
+    }
 
     private fun mapFraTilbakekrevingAarsak(aarsak: TilbakekrevingAarsak): String =
         when (aarsak) {

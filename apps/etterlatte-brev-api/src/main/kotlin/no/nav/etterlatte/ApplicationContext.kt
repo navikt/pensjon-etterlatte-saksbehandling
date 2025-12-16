@@ -193,6 +193,7 @@ internal class ApplicationContext {
             brevDataMapperFerdigstilling,
             behandlingService,
             featureToggleService,
+            behandlingKlient,
         )
     val brevDataMapperFerdigstillVarsel =
         BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, behandlingService, vilkaarsvurderingService)

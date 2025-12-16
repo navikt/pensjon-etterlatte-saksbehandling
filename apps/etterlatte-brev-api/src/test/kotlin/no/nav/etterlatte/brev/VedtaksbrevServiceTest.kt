@@ -25,6 +25,7 @@ import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
@@ -104,6 +105,7 @@ internal class VedtaksbrevServiceTest {
     private val brevKodeMappingVedtak = BrevKodeMapperVedtak()
     private val brevbakerService = mockk<BrevbakerService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val behandlingKlient = mockk<BehandlingKlient>()
     private val featureToggleService =
         mockk<FeatureToggleService> {
             every { isEnabled(any(), any(), any()) } returnsArgument 1
@@ -140,6 +142,7 @@ internal class VedtaksbrevServiceTest {
             brevDataMapperFerdigstilling,
             behandlingService,
             featureToggleService,
+            behandlingKlient,
         )
 
     @BeforeEach

@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
@@ -53,6 +54,7 @@ class VedtaksbrevService(
     private val brevDataMapperFerdigstilling: BrevDataMapperFerdigstillingVedtak,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
+    private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
@@ -244,6 +246,8 @@ class VedtaksbrevService(
                     brukerTokenInfo,
                     it.utlandstilknytningType,
                     it.revurderingsaarsak,
+                    behandlingKlient.hentGrunnlag(behandlingId, brukerTokenInfo),
+                    behandlingService.hentBehandling(behandlingId, brukerTokenInfo),
                 )
             } else {
                 brevDataMapperRedigerbartUtfallVedtak.brevData(it)

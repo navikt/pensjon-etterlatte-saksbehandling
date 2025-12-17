@@ -3,7 +3,7 @@ import {
   useEtteroppgjoerForbehandling,
 } from '~store/reducers/EtteroppgjoerReducer'
 import { useState } from 'react'
-import { BodyShort, Button, Heading, HStack, Label, Radio, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, HStack, Label, Link, Radio, VStack } from '@navikt/ds-react'
 import { FieldErrors, useForm } from 'react-hook-form'
 import { JaNei } from '~shared/types/ISvar'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
@@ -74,6 +74,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
         <Heading size="large">Opphør skyldes dødsfall</Heading>
         <BodyShort>
           Det er registrert et opphør på saken, du må derfor svare på om opphøret skyldes et dødsfall.
+          <Link href="https://lovdata.no/pro/forskrift/2023-06-21-1007/§9">Se forskriften §9</Link>
         </BodyShort>
 
         {opphoerSkyldesDoedsfallSkjemaErAapen && erRedigerbar ? (

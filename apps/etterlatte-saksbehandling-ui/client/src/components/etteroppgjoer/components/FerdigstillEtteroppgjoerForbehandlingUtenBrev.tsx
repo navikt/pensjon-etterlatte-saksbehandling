@@ -5,12 +5,15 @@ import { ferdigstillEtteroppgjoerForbehandlingUtenBrev } from '~shared/api/etter
 import { useAppDispatch } from '~store/Store'
 import { Alert, BodyLong, Button, Modal, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
-import { kanRedigereEtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import {
+  EtteroppgjoerResultatType,
+  kanRedigereEtteroppgjoerForbehandling,
+} from '~shared/types/EtteroppgjoerForbehandling'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { JaNei } from '~shared/types/ISvar'
 
 export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
-  const { forbehandling } = useEtteroppgjoerForbehandling()
+  const { forbehandling, beregnetEtteroppgjoerResultat } = useEtteroppgjoerForbehandling()
   const [modalOpen, setModalOpen] = useState(false)
   const [ferdigstillForbehandlingUtenBrevResult, ferdigstillForbehandlingUtenBrevRequest, resetForbehandlingUtenBrev] =
     useApiCall(ferdigstillEtteroppgjoerForbehandlingUtenBrev)
@@ -29,7 +32,14 @@ export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
     })
   }
 
-  const doedsfallIEtteroppgjoersaaret = forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA
+  const opphoerSkyldesDoedsfall = forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
+  const opphoerSkyldesDoedsfallIEtteroppgjoersaaret =
+    forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA
+  const etterbetaling = beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.ETTERBETALING
+
+  const doedsfallIEtteroppgjoersaaret = opphoerSkyldesDoedsfall && opphoerSkyldesDoedsfallIEtteroppgjoersaaret
+  const etterbetalingTilDoedsbo =
+    opphoerSkyldesDoedsfall && !opphoerSkyldesDoedsfallIEtteroppgjoersaaret && etterbetaling
 
   return (
     <>
@@ -43,7 +53,13 @@ export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
       <Modal open={modalOpen} onClose={avbryt} header={{ heading: 'Ferdigstill etteroppgjør uten brev' }}>
         <Modal.Body>
           <VStack gap="4">
-            {doedsfallIEtteroppgjoersaaret ? (
+            {etterbetalingTilDoedsbo ? (
+              <BodyLong>
+                Siden etteroppgjøret viser etterbetaling og opphøret skyldes dødsfall etter etteroppgjørsåret, skal
+                etterbetalingen utbetales til dødsbo. Oppgave for å behandle etterbetalingsvedtaket er automatisk
+                opprettet. Forbehandlingen skal ferdigstilles uten brev.
+              </BodyLong>
+            ) : doedsfallIEtteroppgjoersaaret ? (
               <BodyLong>
                 Siden opphøret gjelder dødsfall i etteroppgjørsåret skal forbehandlingen ferdigstilles uten brev.
               </BodyLong>
@@ -53,6 +69,7 @@ export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
                 etteroppgjøret ferdigstilles uten brev.
               </BodyLong>
             )}
+
             {mapResult(ferdigstillForbehandlingUtenBrevResult, {
               success: () => <Alert variant="success">Etteroppgjøret er ferdigstilt uten varselbrev.</Alert>,
               error: (error) => (

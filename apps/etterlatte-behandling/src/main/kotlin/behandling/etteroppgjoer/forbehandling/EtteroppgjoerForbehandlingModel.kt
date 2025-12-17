@@ -116,7 +116,7 @@ data class EtteroppgjoerForbehandling(
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         }
 
-        if (!kanFerdigstillesUtenBrev()) {
+        if (brevId == null && !kanFerdigstillesUtenBrev()) {
             throw InternfeilException("Kan ikke ferdigstille forbehandling uten brev, forbehandlingId=$id")
         }
 

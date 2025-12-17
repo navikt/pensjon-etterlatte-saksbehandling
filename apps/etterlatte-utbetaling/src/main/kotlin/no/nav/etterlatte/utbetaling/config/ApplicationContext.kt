@@ -24,11 +24,10 @@ import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
 import no.nav.etterlatte.utbetaling.common.april
+import no.nav.etterlatte.utbetaling.common.august
 import no.nav.etterlatte.utbetaling.common.februar
 import no.nav.etterlatte.utbetaling.common.januar
-import no.nav.etterlatte.utbetaling.common.juli
 import no.nav.etterlatte.utbetaling.common.juni
-import no.nav.etterlatte.utbetaling.common.mai
 import no.nav.etterlatte.utbetaling.common.mars
 import no.nav.etterlatte.utbetaling.common.november
 import no.nav.etterlatte.utbetaling.common.oktober
@@ -193,16 +192,16 @@ class ApplicationContext(
  */
 private fun kjoereplanKonsistensavstemming() =
     setOf(
-        3.januar(2025),
-        30.januar(2025),
-        27.februar(2025),
-        27.mars(2025),
-        29.april(2025),
-        23.mai(2025),
-        27.juni(2025),
-        30.juli(2025),
-        1.september(2025),
-        29.september(2025),
-        30.oktober(2025),
-        21.november(2025),
+        7.januar(2026),
+        3.februar(2026),
+        3.mars(2026),
+        31.mars(2026),
+        27.april(2026),
+        2.juni(2026),
+        30.juni(2026),
+        3.august(2026),
+        1.september(2026),
+        1.oktober(2026),
+        3.november(2026),
+        24.november(2026),
     )

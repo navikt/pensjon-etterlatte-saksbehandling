@@ -589,7 +589,7 @@ internal class ApplicationContext(
             sigrunKlient = sigrunKlient,
         )
 
-    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
+    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
     val inntektsjusteringSelvbetjeningService =
         InntektsjusteringSelvbetjeningService(

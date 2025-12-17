@@ -73,16 +73,21 @@ data class EtteroppgjoerForbehandling(
     }
 
     fun kanFerdigstillesUtenBrev(): Boolean {
-        if (brevId == null && !erRevurdering()) {
-            val ingenEndringUtenUtbetaling =
-                etteroppgjoerResultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+        // Revurderinger trenger aldri et eget info/varsel knyttet til forbehandlingen, de har bare vedtaksbrevet
+        if (erRevurdering()) {
+            return true
+        }
+        val ingenEndringUtenUtbetaling =
+            etteroppgjoerResultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+        val doedsfall = opphoerSkyldesDoedsfall == JaNei.JA
 
-            val doedsfall = opphoerSkyldesDoedsfall == JaNei.JA
-
-            return doedsfall || ingenEndringUtenUtbetaling
+        // Hvis resultatet er ingen endring uten utbetaling eller det er et dødsfall i saken, så skal man ikke sende brev
+        if (doedsfall || ingenEndringUtenUtbetaling) {
+            return true
         }
 
-        return true
+        // I alle andre tilfeller må forbehandlingen ha et infobrev/forhåndsvarsel for å kunne ferdigstilles
+        return false
     }
 
     fun tilBeregnet(beregnetEtteroppgjoerResultatDto: BeregnetEtteroppgjoerResultatDto): EtteroppgjoerForbehandling {

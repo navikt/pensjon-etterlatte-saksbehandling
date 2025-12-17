@@ -175,7 +175,7 @@ internal class TilgangServiceTest(
                 null,
                 Tidspunkt.now(),
                 aarsakForAvbrytelse = null,
-                Tilbakekreving(tilbakekrevingVurdering(), emptyList(), kravgrunnlag(sak)),
+                Tilbakekreving(tilbakekrevingVurdering(), emptyList(), kravgrunnlag(sak), null),
                 true,
             )
         tilbakekrevingDao.lagreTilbakekreving(tilbakekreving)

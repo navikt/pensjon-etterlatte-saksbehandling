@@ -33,6 +33,7 @@ fun tilbakekreving(
     vurdering = vurdering,
     perioder = perioder,
     kravgrunnlag = kravgrunnlag(),
+    overstyrBehandletNettoTilBruttoMotTilbakekreving = null,
 )
 
 fun tilbakekrevingvurdering() =

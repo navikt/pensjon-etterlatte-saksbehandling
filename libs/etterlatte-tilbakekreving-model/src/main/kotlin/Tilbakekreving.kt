@@ -11,6 +11,7 @@ data class Tilbakekreving(
     val vurdering: TilbakekrevingVurdering?,
     val perioder: List<TilbakekrevingPeriode>,
     val kravgrunnlag: Kravgrunnlag,
+    val overstyrBehandletNettoTilBruttoMotTilbakekreving: JaNei?,
 )
 
 data class TilbakekrevingVurdering(
@@ -183,6 +184,7 @@ data class TilbakekrevingVedtak(
     val kravgrunnlagId: String,
     val kontrollfelt: String,
     val perioder: List<TilbakekrevingPeriode>,
+    val overstyrBehandletNettoTilBruttoMotTilbakekreving: Boolean,
 )
 
 data class FattetVedtak(

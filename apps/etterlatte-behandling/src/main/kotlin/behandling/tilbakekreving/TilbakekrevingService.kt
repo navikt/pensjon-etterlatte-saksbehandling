@@ -735,4 +735,26 @@ class TilbakekrevingService(
         )
             ?: throw InternfeilException("Kunne ikke hente kravgrunnlaget vi vil omgjøre")
     }
+
+    fun lagreOverstyrNettoBrutto(
+        tilbakekrevingId: UUID,
+        request: TilbakekrevingOverstyrNettoRequest,
+        it: Saksbehandler,
+    ): TilbakekrevingBehandling {
+        logger.info("Overstyrer netto-brutto med svar ${request.overstyrNettoBrutto} i tilbakekreving $tilbakekrevingId")
+        return inTransaction {
+            val tilbakekreving = hentTilbakekreving(tilbakekrevingId)
+            val oppdatertTilbakekreving = tilbakekreving.oppdaterOverstyringNettoBrutto(request.overstyrNettoBrutto)
+            tilbakekrevingDao.lagreTilbakekreving(oppdatertTilbakekreving)
+            lagreTilbakekrevingHendelse(
+                tilbakekreving = oppdatertTilbakekreving,
+                hendelseType = TilbakekrevingHendelseType.OPPDATER_OVERSTYRING_NETTO_BRUTTO,
+                vedtakId = null,
+                saksbehandler = it,
+                kommentar = "Overstyr netto-brutto: ${request.overstyrNettoBrutto}",
+                begrunnelse = null,
+            )
+            oppdatertTilbakekreving
+        }
+    }
 }

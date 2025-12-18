@@ -13,6 +13,7 @@ export interface TilbakekrevingBehandling {
 export interface Tilbakekreving {
   vurdering?: TilbakekrevingVurdering | null
   perioder: TilbakekrevingPeriode[]
+  overstyrBehandletNettoTilBruttoMotTilbakekreving?: JaNei
 }
 
 export interface TilbakekrevingVurdering {

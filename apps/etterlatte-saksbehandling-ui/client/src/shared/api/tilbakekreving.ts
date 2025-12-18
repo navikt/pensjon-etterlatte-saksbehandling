@@ -1,5 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { TilbakekrevingBehandling, TilbakekrevingPeriode, TilbakekrevingVurdering } from '~shared/types/Tilbakekreving'
+import { JaNei } from '~shared/types/ISvar'
 
 export function hentTilbakekreving(tilbakekrevingId: string): Promise<ApiResponse<TilbakekrevingBehandling>> {
   return apiClient.get(`/tilbakekreving/${tilbakekrevingId}`)
@@ -70,4 +71,12 @@ export const opprettOmgjoeringTilbakekreving = async (args: {
   tilbakekrevingId: string
 }): Promise<ApiResponse<TilbakekrevingBehandling>> => {
   return apiClient.post(`/tilbakekreving/${args.tilbakekrevingId}/omgjoer`, {})
+}
+export const oppdaterOverstyringNettoBrutto = async (args: {
+  tilbakekrevingId: string
+  overstyrNettoBrutto?: JaNei
+}): Promise<ApiResponse<TilbakekrevingBehandling>> => {
+  return apiClient.put(`/tilbakekreving/${args.tilbakekrevingId}/overstyr-netto-brutto`, {
+    overstyrNettoBrutto: args.overstyrNettoBrutto,
+  })
 }

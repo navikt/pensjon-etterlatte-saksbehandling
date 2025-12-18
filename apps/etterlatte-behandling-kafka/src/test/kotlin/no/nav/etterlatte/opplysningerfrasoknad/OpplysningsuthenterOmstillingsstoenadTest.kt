@@ -142,7 +142,7 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                   "@skjema_info": ${soeknad.toJson()},
                   "@lagret_soeknad_id": 360,
                   "@template": "soeknad",
-                  "@fnr_soeker": "20110875720",
+                  "@fnr_soeker": "30450174714",
                   "@hendelse_gyldig_til": "2025-01-03T13:15:31.249299158Z",
                   "system_read_count": 1,
                   "system_participating_services": [

@@ -9,7 +9,7 @@ describe('Test validering av fnr - med kontrollsiffer', () => {
     expect(fnrErGyldig('26117512737')).to.be.true
     expect(fnrErGyldig('26104500284')).to.be.true
     expect(fnrErGyldig('24116324268')).to.be.true
-    expect(fnrErGyldig('04096222195')).to.be.true
+    expect(fnrErGyldig('19440397142')).to.be.true
     expect(fnrErGyldig('05126307952')).to.be.true
   })
 

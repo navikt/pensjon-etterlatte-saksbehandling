@@ -273,12 +273,16 @@ class DoedshendelseService(
         if (loggingAktivert) {
             val avdoedFnr = avdoed.foedselsnummer.verdi
             logger.error(
-                "OBS! Det er registrert en partner til avdøde $avdoedFnr uten ident. Sivilstatusen er ${sivilstand.sivilstatus}. " +
-                    "Sjekk manuelt om infobrev kan sendes ut til berørte likevel. Se sikkerlogg.",
+                "OBS! Det er registrert en partner til avdøde $avdoedFnr uten ident. " +
+                    "Bør vurderes av saksbehandler. Se sikkerlogg",
             )
             sikkerLogg.error(
-                "OBS! Det er registrert en partner til avdøde ${avdoedFnr.value} uten ident. Sivilstatusen er ${sivilstand.sivilstatus}. " +
-                    "Sjekk manuelt om infobrev kan sendes ut til berørte likevel.",
+                """
+                OBS! Det er registrert en partner til avdøde ${avdoedFnr.value} uten ident.
+                Sivilstatus: ${sivilstand.sivilstatus}, historisk: ${sivilstand.historisk}, 
+                gyldigFraOgMed: ${sivilstand.gyldigFraOgMed}, bekreftelsesdato: ${sivilstand.bekreftelsesdato}.
+                "Sjekk manuelt om infobrev kan sendes ut til berørte likevel.",
+                """.trimIndent(),
             )
         }
     }

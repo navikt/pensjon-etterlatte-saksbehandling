@@ -6,6 +6,7 @@ export interface TilbakekrevingBehandling {
   status: TilbakekrevingStatus
   sak: ISak
   opprettet: string
+  omgjoeringAvId?: string
   sendeBrev: boolean
   tilbakekreving: Tilbakekreving
 }

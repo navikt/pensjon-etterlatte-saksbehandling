@@ -73,11 +73,15 @@ internal fun Route.tilbakekrevingRoutes(
             post("/omgjoer") {
                 kunSaksbehandlerMedSkrivetilgang {
                     if (featureToggleService.isEnabled(TilbakekrevingToggles.OMGJOER, false)) {
-                        val kravgrunnlagForOmgjoering = service.hentKravgrunnlagForOmgjoering(tilbakekrevingId, it)
+                        val kravgrunnlagForOmgjoering = service.hentKravgrunnlagForOmgjoering(tilbakekrevingId)
                         val omgjoering = service.opprettTilbakekreving(kravgrunnlagForOmgjoering, tilbakekrevingId)
                         call.respond(omgjoering)
+                    } else {
+                        throw IkkeTillattException(
+                            "OMGJOERING_IKKE_ENABLED",
+                            "Det er ikke skrudd på å kunne omgjøre tilbakekrevinger",
+                        )
                     }
-                    throw IkkeTillattException("OMGJOERING_IKKE_ENABLED", "Det er ikke skrudd på å kunne omgjøre tilbakekrevinger")
                 }
             }
 

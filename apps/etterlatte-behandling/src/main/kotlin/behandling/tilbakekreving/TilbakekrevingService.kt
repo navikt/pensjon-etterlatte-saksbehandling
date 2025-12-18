@@ -714,10 +714,7 @@ class TilbakekrevingService(
         }
     }
 
-    suspend fun hentKravgrunnlagForOmgjoering(
-        tilbakekrevingId: UUID,
-        it: Saksbehandler,
-    ): Kravgrunnlag {
+    fun hentKravgrunnlagForOmgjoering(tilbakekrevingId: UUID): Kravgrunnlag {
         val tilbakekrevingSomSkalOmgjoeres =
             inTransaction {
                 tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
@@ -728,11 +725,6 @@ class TilbakekrevingService(
                 "Kan ikke omgjøre en tilbakekreving som er under behandling",
             )
         }
-        return tilbakekrevingKlient.hentKravgrunnlag(
-            it,
-            tilbakekrevingSomSkalOmgjoeres.sak.id,
-            tilbakekrevingSomSkalOmgjoeres.tilbakekreving.kravgrunnlag.kravgrunnlagId.value,
-        )
-            ?: throw InternfeilException("Kunne ikke hente kravgrunnlaget vi vil omgjøre")
+        return tilbakekrevingSomSkalOmgjoeres.tilbakekreving.kravgrunnlag
     }
 }

@@ -5,7 +5,16 @@ import { JaNei } from '~shared/types/ISvar'
 
 export interface Etteroppgjoer {
   inntektsaar: number
-  status: string
+  status: EtteroppgjoerStatus
+}
+
+enum EtteroppgjoerStatus {
+  VENTER_PAA_SKATTEOPPGJOER = 'VENTER_PAA_SKATTEOPPGJOER',
+  MOTTATT_SKATTEOPPGJOER = 'MOTTATT_SKATTEOPPGJOER',
+  VENTER_PAA_SVAR = 'VENTER_PAA_SVAR',
+  UNDER_FORBEHANDLING = 'UNDER_FORBEHANDLING',
+  UNDER_REVURDERING = 'UNDER_REVURDERING',
+  FERDIGSTILT = 'FERDIGSTILT',
 }
 
 export interface EtteroppgjoerForbehandling {
@@ -24,10 +33,12 @@ export interface EtteroppgjoerForbehandling {
   endringErTilUgunstForBruker?: JaNei
   beskrivelseAvUgunst?: string
   harVedtakAvTypeOpphoer?: boolean
+  opphoerSkyldesDoedsfall?: JaNei
+  opphoerSkyldesDoedsfallIEtteroppgjoersaar?: JaNei
 }
 
-export interface EtteroppgjoerDetaljertForbehandling {
-  behandling: EtteroppgjoerForbehandling
+export interface DetaljertEtteroppgjoerForbehandling {
+  forbehandling: EtteroppgjoerForbehandling
   opplysninger: EtteroppgjoerOpplysninger
   faktiskInntekt?: FaktiskInntekt
   beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto | undefined
@@ -40,7 +51,7 @@ export enum EtteroppgjoerForbehandlingStatus {
   AVBRUTT = 'AVBRUTT',
 }
 
-export function kanRedigereEtteroppgjoerBehandling(status: EtteroppgjoerForbehandlingStatus): boolean {
+export function kanRedigereEtteroppgjoerForbehandling(status: EtteroppgjoerForbehandlingStatus): boolean {
   return [EtteroppgjoerForbehandlingStatus.OPPRETTET, EtteroppgjoerForbehandlingStatus.BEREGNET].includes(status)
 }
 

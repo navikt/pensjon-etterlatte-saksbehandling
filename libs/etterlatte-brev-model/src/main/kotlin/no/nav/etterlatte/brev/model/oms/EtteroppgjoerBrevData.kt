@@ -109,7 +109,7 @@ object EtteroppgjoerBrevData {
 
     data class VedtakInnhold(
         val etteroppgjoersAar: Int,
-        val forhaandsvarselSendtDato: LocalDate,
+        val forhaandsvarselSendtDato: LocalDate?,
         val mottattSvarDato: LocalDate?,
     ) : BrevRedigerbarInnholdData() {
         override val type: String = "OMS_EO_VEDTAK_UTFALL"

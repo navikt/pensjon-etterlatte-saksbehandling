@@ -19,7 +19,8 @@ data class BeregnetEtteroppgjoerResultatDto(
     val tidspunkt: Tidspunkt,
     val kilde: Grunnlagsopplysning.Kilde,
     val avkortingForbehandlingId: UUID,
-    val avkortingSisteIverksatteId: UUID,
+    val avkortingSisteIverksatteId: UUID?,
+    val vedtakReferanse: List<Long>?,
 )
 
 data class EtteroppgjoerGrenseDto(

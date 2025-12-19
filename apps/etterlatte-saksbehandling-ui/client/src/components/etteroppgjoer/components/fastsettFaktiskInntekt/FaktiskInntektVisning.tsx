@@ -1,11 +1,11 @@
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { SumAvFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/SumAvFaktiskInntekt'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { NOK } from '~utils/formatering/formatering'
 import { TekstMedMellomrom } from '~shared/TekstMedMellomrom'
 
 export const FaktiskInntektVisning = () => {
-  const { faktiskInntekt } = useEtteroppgjoer()
+  const { faktiskInntekt } = useEtteroppgjoerForbehandling()
 
   return !!faktiskInntekt ? (
     <VStack gap="4">

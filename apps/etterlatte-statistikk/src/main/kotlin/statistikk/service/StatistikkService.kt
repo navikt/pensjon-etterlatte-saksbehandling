@@ -140,7 +140,8 @@ class StatistikkService(
         val vedtak = stoenadRepository.hentStoenadRaderInnenforMaaned(maaned)
         val omsSaker = vedtak.filter { it.sakYtelse == SakType.OMSTILLINGSSTOENAD.name }.map { it.sakId }
         val aktiviteterForOmsSaker = aktivitetspliktService.mapAktivitetForSaker(omsSaker, maaned)
-        return MaanedStatistikk(maaned, vedtak, aktiviteterForOmsSaker)
+        val etteroppgjoerRader = etteroppgjoerService.hentRaderForMaaned(maaned)
+        return MaanedStatistikk(maaned, vedtak, aktiviteterForOmsSaker, etteroppgjoerRader)
     }
 
     fun registrerStatistikkForBehandlinghendelse(
@@ -235,7 +236,7 @@ class StatistikkService(
 
     fun statistikkProdusertForMaaned(maaned: YearMonth): KjoertStatus = stoenadRepository.kjoertStatusForMaanedsstatistikk(maaned)
 
-    fun lagreMaanedsstatistikk(maanedsstatistikkk: MaanedStatistikk) {
+    fun lagreMaanedsstatistikk(maanedsstatistikkk: MaanedStatistikk): Pair<Long, Long> {
         var raderMedFeil = 0L
         var raderRegistrert = 0L
         maanedsstatistikkk.rader.forEach {
@@ -252,6 +253,7 @@ class StatistikkService(
             raderMedFeil,
             raderRegistrert,
         )
+        return raderRegistrert to raderMedFeil
     }
 
     fun registrerEtteroppgjoerHendelse(

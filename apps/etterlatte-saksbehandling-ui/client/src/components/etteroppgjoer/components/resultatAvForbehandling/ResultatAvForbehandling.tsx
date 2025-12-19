@@ -1,10 +1,11 @@
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { BodyShort, Box, HStack, Label, VStack } from '@navikt/ds-react'
 import { EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
 import { NOK } from '~utils/formatering/formatering'
+import { JaNei } from '~shared/types/ISvar'
 
 export const ResultatAvForbehandling = () => {
-  const { beregnetEtteroppgjoerResultat, behandling } = useEtteroppgjoer()
+  const { beregnetEtteroppgjoerResultat, forbehandling } = useEtteroppgjoerForbehandling()
   if (!beregnetEtteroppgjoerResultat) return null
 
   const { resultatType, differanse } = beregnetEtteroppgjoerResultat
@@ -17,30 +18,35 @@ export const ResultatAvForbehandling = () => {
     INGEN_ENDRING_UTEN_UTBETALING: 'Ikke utbetalt stønad og ingen endring',
   }
 
-  const beskrivelse = (() => {
+  const velgBeskrivelse = () => {
     if (resultatType === EtteroppgjoerResultatType.TILBAKEKREVING) {
-      return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${behandling.aar}. Beløpet blir derfor krevd tilbake.`
+      return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${forbehandling.aar}. Beløpet blir derfor krevd tilbake.`
     }
 
     if (resultatType === EtteroppgjoerResultatType.ETTERBETALING) {
-      return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${behandling.aar}. Beløpet blir derfor etterbetalt.`
+      return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${forbehandling.aar}. Beløpet blir derfor etterbetalt.`
     }
 
     if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING) {
-      if (differanse > 0) {
-        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for tilbakekreving, og det kreves derfor ikke tilbake.`
+      if (
+        forbehandling.opphoerSkyldesDoedsfall === JaNei.JA &&
+        forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.NEI
+      ) {
+        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${forbehandling.aar}. Siden opphøret er oppgitt å skyldes dødsfall etter etteroppgjørsåret, kreves beløpet ikke tilbake.`
+      } else if (differanse > 0) {
+        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for mye stønad i ${forbehandling.aar}, men beløpet er innenfor toleransegrensen for tilbakekreving, og det kreves derfor ikke tilbake.`
       }
 
       if (differanse < 0) {
-        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${behandling.aar}, men beløpet er innenfor toleransegrensen for etterbetaling, og det blir derfor ikke utbetalt.`
+        return `Resultatet viser at det er utbetalt ${NOK(absoluttBeloep)} for lite stønad i ${forbehandling.aar}, men beløpet er innenfor toleransegrensen for etterbetaling, og det blir derfor ikke utbetalt.`
       }
 
-      return `Resultatet viser ingen endring, bruker fikk utbetalt rett stønad i ${behandling.aar}.`
+      return `Resultatet viser ingen endring, bruker fikk utbetalt rett stønad i ${forbehandling.aar}.`
     }
     if (resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
-      return `Resultatet viser at faktisk inntekt for ${behandling.aar} er for høy til at stønaden kommer til utbetaling. Bruker har ikke hatt utbetaling. Etteroppgjøret kan ferdigstilles uten å sende brev.`
+      return `Resultatet viser at faktisk inntekt for ${forbehandling.aar} er for høy til at stønaden kommer til utbetaling. Bruker har ikke hatt utbetaling. Etteroppgjøret kan ferdigstilles uten å sende brev.`
     }
-  })()
+  }
 
   return (
     <Box
@@ -55,7 +61,7 @@ export const ResultatAvForbehandling = () => {
       <HStack gap="2" maxWidth="fit-content">
         <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
           <Label>{resultatTekst[resultatType]}</Label>
-          <BodyShort>{beskrivelse}</BodyShort>
+          <BodyShort>{velgBeskrivelse()}</BodyShort>
         </VStack>
       </HStack>
     </Box>

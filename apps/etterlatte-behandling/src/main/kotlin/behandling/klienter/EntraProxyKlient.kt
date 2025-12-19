@@ -18,14 +18,14 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
-interface AxsysKlient : Pingable {
+interface EntraProxyKlient : Pingable {
     suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet>
 }
 
-class AxsysKlientImpl(
+class EntraProxyKlientImpl(
     private val client: HttpClient,
     private val url: String,
-) : AxsysKlient {
+) : EntraProxyKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val enhetCache =
@@ -35,7 +35,7 @@ class AxsysKlientImpl(
             .build<String, List<SaksbehandlerEnhet>>()
 
     override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> {
-        logger.info("Henter enheter fra Axsys for saksbehandlerident $ident.")
+        logger.info("Henter enheter fra EntraProxy for saksbehandlerident $ident.")
 
         val cachedEnhet = enhetCache.getIfPresent(ident)
         if (cachedEnhet != null) {
@@ -43,21 +43,20 @@ class AxsysKlientImpl(
         }
         return try {
             val response =
-                client.get("$url/api/v2/tilgang/$ident?inkluderAlleEnheter=false") {
+                client.get("$url/api/v1/enhet/ansatt/$ident") {
                     navConsumerId("etterlatte-behandling")
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                 }
 
             response
-                .body<EnhetslisteResponse?>()
-                ?.enheter
-                ?.map { SaksbehandlerEnhet(it.enhetId, it.navn) }
+                .body<Set<EntraEnhet>?>()
+                ?.map { SaksbehandlerEnhet(Enhetsnummer(it.enhetnummer), it.navn) }
                 ?.also {
                     enhetCache.put(ident, it)
                 } ?: emptyList()
         } catch (cause: Throwable) {
-            val feilmelding = "Klarte ikke å hente enheter for ident $ident fra axsys."
+            val feilmelding = "Klarte ikke å hente enheter for ident $ident fra EntraProxy."
             logger.error(feilmelding, cause)
             throw HentEnhetException(feilmelding, cause)
         }
@@ -65,19 +64,24 @@ class AxsysKlientImpl(
 
     override suspend fun ping(konsument: String?): PingResult =
         client.ping(
-            pingUrl = url.plus("/internal/isReady"),
+            pingUrl = url.plus("/monitoring/health/readiness"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
         )
 
     override val serviceName: String
-        get() = "Axsysklient"
+        get() = "EntraProxyKlient"
     override val beskrivelse: String
         get() = "Sjekker om en person er skjermet"
     override val endpoint: String
         get() = this.url
 }
+
+data class EntraEnhet(
+    val enhetnummer: String,
+    val navn: String,
+)
 
 class HentEnhetException(
     override val detail: String,
@@ -91,9 +95,4 @@ data class Enheter(
     // EYB EYO
     val temaer: ArrayList<String>?,
     val navn: String,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class EnhetslisteResponse(
-    val enheter: List<Enheter>,
 )

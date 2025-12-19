@@ -63,6 +63,7 @@ class TidshendelseService(
     }
 
     private fun oppdaterSkjerming(hendelse: TidshendelsePacket): TidshendelseResult {
+        logger.info("Oppdaterer skjerming (hvis endringer) for sak=${hendelse.sakId}")
         behandlingService.oppdaterSkjerming(hendelse.sakId)
         return TidshendelseResult.OppdatertSak
     }

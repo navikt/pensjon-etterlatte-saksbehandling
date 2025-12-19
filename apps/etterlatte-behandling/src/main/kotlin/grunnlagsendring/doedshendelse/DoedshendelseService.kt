@@ -3,6 +3,8 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseFeatureToggle
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -11,6 +13,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -21,6 +24,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshen
 class DoedshendelseService(
     private val doedshendelseDao: DoedshendelseDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -237,9 +241,9 @@ class DoedshendelseService(
 
         return avdoedesSivilstander
             .asSequence()
-            .filter { it.verdi.relatertVedSiviltilstand?.value != null }
-            .filter {
-                it.verdi.sivilstatus in
+            .map { it -> it.verdi }
+            .filter { sivilstand ->
+                sivilstand.sivilstatus in
                     listOf(
                         Sivilstatus.GIFT,
                         Sivilstatus.SEPARERT,
@@ -248,10 +252,39 @@ class DoedshendelseService(
                         Sivilstatus.SEPARERT_PARTNER,
                         Sivilstatus.SKILT_PARTNER,
                     )
-            }.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
+            }.filter { sivilstand ->
+                val potensiellEktefelle = sivilstand.relatertVedSiviltilstand?.value
+                if (potensiellEktefelle == null) {
+                    loggManglendeIdent(sivilstand, avdoed)
+                }
+                potensiellEktefelle != null
+            }.map { PersonFnrMedRelasjon(it.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
             .filter { ektefelle -> samboere.none { samboer -> samboer.fnr == ektefelle.fnr } }
             .distinct()
             .toList()
+    }
+
+    private fun loggManglendeIdent(
+        sivilstand: Sivilstand,
+        avdoed: PersonDoedshendelseDto,
+    ) {
+        val loggingAktivert =
+            featureToggleService.isEnabled(GrunnlagsendringshendelseFeatureToggle.LOGG_MANGLENDE_EKTEFELLE_IDENT, false)
+        if (loggingAktivert) {
+            val avdoedFnr = avdoed.foedselsnummer.verdi
+            logger.error(
+                "OBS! Det er registrert en partner til avdøde $avdoedFnr uten ident. " +
+                    "Bør vurderes av saksbehandler. Se sikkerlogg",
+            )
+            sikkerLogg.error(
+                """
+                OBS! Det er registrert en partner til avdøde ${avdoedFnr.value} uten ident.
+                Sivilstatus: ${sivilstand.sivilstatus}, historisk: ${sivilstand.historisk}, 
+                gyldigFraOgMed: ${sivilstand.gyldigFraOgMed}, bekreftelsesdato: ${sivilstand.bekreftelsesdato}.
+                "Sjekk manuelt om infobrev kan sendes ut til berørte likevel.",
+                """.trimIndent(),
+            )
+        }
     }
 }
 

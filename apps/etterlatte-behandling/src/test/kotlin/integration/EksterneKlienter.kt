@@ -11,9 +11,9 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentenFilter
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
-import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
@@ -105,6 +105,8 @@ import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
+import no.nav.etterlatte.oppgaveGosys.RedigerFristGosysRequest
+import no.nav.etterlatte.oppgaveGosys.SaksbehandlerEndringGosysRequest
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import java.time.LocalDate
@@ -568,6 +570,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         id: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
+        enhetsnr: String,
     ): GosysApiOppgave = gosysApiOppgave()
 
     override suspend fun feilregistrer(
@@ -595,15 +598,13 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
 
     override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        tildeles: String,
+        request: SaksbehandlerEndringGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 
     override suspend fun endreFrist(
         oppgaveId: String,
-        oppgaveVersjon: Long,
-        nyFrist: LocalDate,
+        request: RedigerFristGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 }
@@ -649,7 +650,7 @@ class KrrklientTest : KrrKlient {
         )
 }
 
-class AxsysKlientTest : AxsysKlient {
+class EntraProxyKlientTest : EntraProxyKlient {
     override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> =
         listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
@@ -657,7 +658,7 @@ class AxsysKlientTest : AxsysKlient {
         )
 
     override val serviceName: String
-        get() = "Axsys"
+        get() = "EntraProxy"
     override val beskrivelse: String
         get() = "Henter enheter for saksbehandlerident"
     override val endpoint: String
@@ -850,7 +851,7 @@ class SigrunKlienTest : SigrunKlient {
     override suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
-    ): PensjonsgivendeInntektAarResponse = PensjonsgivendeInntektAarResponse.stub(ident)
+    ): PensjonsgivendeInntektAarResponse = PensjonsgivendeInntektAarResponse.stub(ident, inntektsaar)
 
     override suspend fun hentHendelsesliste(
         antall: Int,

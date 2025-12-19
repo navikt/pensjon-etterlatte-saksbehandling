@@ -1,0 +1,179 @@
+import {
+  addDetaljertEtteroppgjoerForbehandling,
+  useEtteroppgjoerForbehandling,
+} from '~store/reducers/EtteroppgjoerReducer'
+import { useState } from 'react'
+import { BodyShort, Button, Heading, HStack, Label, Link, Radio, VStack } from '@navikt/ds-react'
+import { FieldErrors, useForm } from 'react-hook-form'
+import { JaNei } from '~shared/types/ISvar'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { PencilIcon } from '@navikt/aksel-icons'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentEtteroppgjoerForbehandling, lagreOmOpphoerSkyldesDoedsfall } from '~shared/api/etteroppgjoer'
+import { useAppDispatch } from '~store/Store'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { isPending } from '~shared/api/apiUtils'
+
+export interface OpphoerSkyldesDoedsfallSkjema {
+  opphoerSkyldesDoedsfall: JaNei
+  opphoerSkyldesDoedsfallIEtteroppgjoersaar?: JaNei
+}
+
+interface Props {
+  erRedigerbar: boolean
+  setOpphoerSkyldesDoedsfallSkjemaErrors: (errors: FieldErrors<OpphoerSkyldesDoedsfallSkjema> | undefined) => void
+}
+
+export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfallSkjemaErrors }: Props) => {
+  const { forbehandling } = useEtteroppgjoerForbehandling()
+  const dispatch = useAppDispatch()
+
+  const [lagreOmOpphoerSkyldesDoedsfallResult, lagreOmOpphoerSkyldesDoedsfallRequest] =
+    useApiCall(lagreOmOpphoerSkyldesDoedsfall)
+  const [hentEtteroppgjoerForbehandlingResult, hentEtteroppgjoerForbehandlingFetch] =
+    useApiCall(hentEtteroppgjoerForbehandling)
+
+  const [opphoerSkyldesDoedsfallSkjemaErAapen, setOpphoerSkyldesDoedsfallSkjemaErAapen] = useState<boolean>(
+    erRedigerbar && !forbehandling.opphoerSkyldesDoedsfall
+  )
+
+  const { control, handleSubmit, watch } = useForm<OpphoerSkyldesDoedsfallSkjema>({
+    defaultValues: {
+      opphoerSkyldesDoedsfall: forbehandling.opphoerSkyldesDoedsfall,
+      opphoerSkyldesDoedsfallIEtteroppgjoersaar: forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
+    },
+  })
+
+  const opphoerSkyldesDoedsfallVerdi = watch('opphoerSkyldesDoedsfall')
+
+  const avbryt = () => {
+    setOpphoerSkyldesDoedsfallSkjemaErrors(undefined)
+    setOpphoerSkyldesDoedsfallSkjemaErAapen(false)
+  }
+
+  const submitOmOpphoerSkyldesDoedsfall = (data: OpphoerSkyldesDoedsfallSkjema) => {
+    setOpphoerSkyldesDoedsfallSkjemaErrors(undefined)
+    lagreOmOpphoerSkyldesDoedsfallRequest(
+      {
+        forbehandlingId: forbehandling.id,
+        opphoerSkyldesDoedsfall: data.opphoerSkyldesDoedsfall,
+        opphoerSkyldesDoedsfallIEtteroppgjoersaar: data.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
+      },
+      () => {
+        hentEtteroppgjoerForbehandlingFetch(forbehandling.id, (etteroppgjoerForbehandling) => {
+          dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoerForbehandling))
+          setOpphoerSkyldesDoedsfallSkjemaErAapen(false)
+        })
+      }
+    )
+  }
+
+  return (
+    <form>
+      <VStack gap="4">
+        <Heading size="large">Opphør skyldes dødsfall</Heading>
+        <BodyShort>
+          Det er registrert et opphør på saken, du må derfor svare på om opphøret skyldes et dødsfall.
+          <Link href="https://lovdata.no/pro/forskrift/2023-06-21-1007/§9">Se forskriften §9</Link>
+        </BodyShort>
+
+        {opphoerSkyldesDoedsfallSkjemaErAapen && erRedigerbar ? (
+          <VStack gap="4">
+            <ControlledRadioGruppe
+              name="opphoerSkyldesDoedsfall"
+              control={control}
+              legend="Skyldes opphøret et dødsfall?"
+              errorVedTomInput="Du må svare på om opphøret gjelder et dødsfall"
+              radios={
+                <>
+                  <Radio value={JaNei.JA}>Ja</Radio>
+                  <Radio value={JaNei.NEI}>Nei</Radio>
+                </>
+              }
+            />
+
+            {opphoerSkyldesDoedsfallVerdi === JaNei.JA && (
+              <ControlledRadioGruppe
+                name="opphoerSkyldesDoedsfallIEtteroppgjoersaar"
+                control={control}
+                legend="Skjedde dødsfallet i etteroppgjørsåret?"
+                errorVedTomInput="Du må svare på om dødsfallet skjedde i etteroppgjørsåret"
+                radios={
+                  <>
+                    <Radio value={JaNei.JA}>Ja</Radio>
+                    <Radio value={JaNei.NEI}>Nei</Radio>
+                  </>
+                }
+              />
+            )}
+
+            {isFailureHandler({
+              apiResult: lagreOmOpphoerSkyldesDoedsfallResult,
+              errorMessage: 'Kunne ikke lagre om opphør skyldes dødsfall',
+            })}
+            {isFailureHandler({
+              apiResult: hentEtteroppgjoerForbehandlingResult,
+              errorMessage: 'Kunne ikke hente oppdatert etteroppgjør',
+            })}
+
+            <HStack gap="4">
+              <Button
+                size="small"
+                onClick={handleSubmit(submitOmOpphoerSkyldesDoedsfall, setOpphoerSkyldesDoedsfallSkjemaErrors)}
+                loading={
+                  isPending(lagreOmOpphoerSkyldesDoedsfallResult) || isPending(hentEtteroppgjoerForbehandlingResult)
+                }
+              >
+                Lagre
+              </Button>
+              {!!forbehandling.opphoerSkyldesDoedsfall && (
+                <Button
+                  type="button"
+                  size="small"
+                  variant="secondary"
+                  onClick={avbryt}
+                  disabled={
+                    isPending(lagreOmOpphoerSkyldesDoedsfallResult) || isPending(hentEtteroppgjoerForbehandlingResult)
+                  }
+                >
+                  Avbryt
+                </Button>
+              )}
+            </HStack>
+          </VStack>
+        ) : (
+          <VStack gap="4">
+            <VStack gap="2">
+              <Label>Om opphør skyldes dødsfall</Label>
+              <BodyShort>{forbehandling.opphoerSkyldesDoedsfall === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
+            </VStack>
+            {forbehandling.opphoerSkyldesDoedsfall === JaNei.JA && (
+              <VStack gap="2">
+                <Label>Om dødsfallet skjedde i etteroppgjørsåret</Label>
+                <BodyShort>
+                  {forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar && (
+                    <BodyShort>
+                      {forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA ? 'Ja' : 'Nei'}
+                    </BodyShort>
+                  )}
+                </BodyShort>
+              </VStack>
+            )}
+            {erRedigerbar && (
+              <div>
+                <Button
+                  size="small"
+                  variant="secondary"
+                  icon={<PencilIcon aria-hidden />}
+                  onClick={() => setOpphoerSkyldesDoedsfallSkjemaErAapen(true)}
+                >
+                  Rediger
+                </Button>
+              </div>
+            )}
+          </VStack>
+        )}
+      </VStack>
+    </form>
+  )
+}

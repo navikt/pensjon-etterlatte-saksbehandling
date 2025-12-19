@@ -225,6 +225,8 @@ class EtteroppgjoerDaoTest(
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = LocalDate.now().minusMonths(1),
+                opphoerSkyldesDoedsfall = null,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
 
@@ -288,6 +290,7 @@ class EtteroppgjoerDaoTest(
                 true,
                 true,
                 true,
+                true,
                 uuid,
             ),
         )
@@ -300,6 +303,7 @@ class EtteroppgjoerDaoTest(
             harSanksjon shouldBe true
             harOpphoer shouldBe true
             harBosattUtland shouldBe true
+            harUtlandstilsnitt shouldBe true
             harInstitusjonsopphold shouldBe true
             harAdressebeskyttelseEllerSkjermet shouldBe true
             harAktivitetskrav shouldBe true

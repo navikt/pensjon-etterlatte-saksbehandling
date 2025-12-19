@@ -13,6 +13,7 @@ data class Etteroppgjoer(
     val harAdressebeskyttelseEllerSkjermet: Boolean = false,
     val harAktivitetskrav: Boolean = false,
     val harBosattUtland: Boolean = false,
+    val harUtlandstilsnitt: Boolean = false,
     val harOverstyrtBeregning: Boolean = false,
     val sisteFerdigstilteForbehandling: UUID? = null,
 ) {
@@ -24,6 +25,8 @@ data class Etteroppgjoer(
             )
 
     fun mottattSkatteoppgjoer() = status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+
+    fun kanTilbakestillesMedNyForbehandling() = status in listOf(EtteroppgjoerStatus.VENTER_PAA_SVAR, EtteroppgjoerStatus.FERDIGSTILT)
 
     fun kanOppretteRevurdering() = status in listOf(EtteroppgjoerStatus.VENTER_PAA_SVAR, EtteroppgjoerStatus.FERDIGSTILT)
 

@@ -745,4 +745,38 @@ class AvkortingRepository(
                 )
             }
         }
+
+    fun hentAlleBehandlingerMedAarsoppgjoer(sakId: SakId): List<UUID> =
+        dataSource.transaction { tx ->
+            queryOf(
+                "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id= ? ORDER BY aar DESC",
+                sakId.sakId,
+            ).let { query ->
+                tx.run(
+                    query
+                        .map { row ->
+                            row.uuid("behandling_id")
+                        }.asList,
+                )
+            }
+        }
+
+    fun hentAlleAarsoppgjoer(behandlinger: List<UUID>): List<AarsoppgjoerLoepende> =
+        dataSource.transaction { tx ->
+            queryOf(
+                "SELECT * FROM avkorting_aarsoppgjoer WHERE behandling_id = ANY (?) ORDER BY aar ASC",
+                behandlinger.toTypedArray(),
+            ).let { query ->
+                tx.run(
+                    query
+                        .map { row ->
+                            AarsoppgjoerLoepende(
+                                id = row.uuid("id"),
+                                aar = row.int("aar"),
+                                fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                            )
+                        }.asList,
+                )
+            }
+        }
 }

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -10,6 +9,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -119,7 +119,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/institusjonsopphold") {
             kunSystembruker {
                 val oppholdsHendelse = call.receive<InstitusjonsoppholdHendelseBeriket>()
-                logger.info("Mottar en institusjons-hendelse fra inst2 hendelsesid: ${oppholdsHendelse.hendelseId}")
+                logger.info("Mottar institusjons-hendelse med ID ${oppholdsHendelse.hendelseId} fra inst2")
                 grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -169,4 +169,13 @@ enum class VedtaksType {
     INNV,
     ENDR,
     OPPH,
+}
+
+internal enum class GrunnlagsendringshendelseFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    LOGG_MANGLENDE_EKTEFELLE_IDENT("logg-manglende-ektefelle-ident"),
+    ;
+
+    override fun key(): String = key
 }

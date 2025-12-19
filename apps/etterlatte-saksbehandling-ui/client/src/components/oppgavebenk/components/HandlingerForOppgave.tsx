@@ -21,7 +21,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OppfoelgingsOppgaveModal'
-import { EtteroppgjoerSvarfristUtloeptModal } from '~components/oppgavebenk/oppgaveModal/EtteroppgjoerSvarfristUtloeptModal'
+import { EtteroppgjoerOpprettRevurderingModal } from '~components/oppgavebenk/oppgaveModal/EtteroppgjoerOpprettRevurderingModal'
 import { OpprettEtteroppgjoerForbehandlingModal } from '~components/oppgavebenk/oppgaveModal/OpprettEtteroppgjoerForbehandlingModal'
 import { KlageBehandleSvarFraKa } from '~components/oppgavebenk/oppgaveModal/KlageBehandleSvarFraKa'
 
@@ -140,10 +140,10 @@ export const HandlingerForOppgave = ({
         </>
       )
 
-    case Oppgavetype.ETTEROPPGJOER_SVARFRIST_UTLOEPT:
+    case Oppgavetype.ETTEROPPGJOER_OPPRETT_REVURDERING:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <EtteroppgjoerSvarfristUtloeptModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+          <EtteroppgjoerOpprettRevurderingModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
 

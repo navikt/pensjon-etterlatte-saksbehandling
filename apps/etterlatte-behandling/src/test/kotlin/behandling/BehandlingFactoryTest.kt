@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -45,6 +46,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -141,6 +143,7 @@ internal class BehandlingFactoryTest {
 
     private val sakLesDaoMock = mockk<SakLesDao>()
     private val sakServiceMock = mockk<SakService>()
+    private val featureToggleService = DummyFeatureToggleService()
     private val behandlingFactory =
         BehandlingFactory(
             oppgaveService,
@@ -163,6 +166,7 @@ internal class BehandlingFactoryTest {
                     mockk(relaxed = true),
                     sakTilgang,
                     sakLesDaoMock,
+                    featureToggleService,
                 ),
         )
 
@@ -171,6 +175,7 @@ internal class BehandlingFactoryTest {
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
         justRun { oppgaveService.avbrytAapneOppgaverMedReferanse(any()) }
+        every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns Grunnlag.empty()
 
         nyKontekstMedBruker(user)
     }
@@ -294,8 +299,11 @@ internal class BehandlingFactoryTest {
                 // Sjekker at oppgave opprettes med null for frist
                 frist = null,
             )
+            grunnlagService.hentOpplysningsgrunnlagForSak(any())
         }
-        coVerify(exactly = 1) { grunnlagService.opprettGrunnlag(any(), any()) }
+        coVerify(exactly = 1) {
+            grunnlagService.opprettGrunnlag(any(), any())
+        }
         verify(exactly = 1) {
             sakTilgang.oppdaterAdressebeskyttelse(any(), any())
         }
@@ -394,8 +402,11 @@ internal class BehandlingFactoryTest {
                 gruppeId = persongalleri.avdoed.single(),
                 frist = tidspunktMottattBehandling.plusMonths(1L).toNorskTidspunkt(),
             )
+            grunnlagService.hentOpplysningsgrunnlagForSak(any())
         }
-        coVerify { grunnlagService.opprettGrunnlag(any(), any()) }
+        coVerify {
+            grunnlagService.opprettGrunnlag(any(), any())
+        }
         verify(exactly = 1) {
             sakTilgang.oppdaterAdressebeskyttelse(any(), any())
         }
@@ -508,7 +519,9 @@ internal class BehandlingFactoryTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
         }
-        coVerify { grunnlagService.opprettGrunnlag(any(), any()) }
+        coVerify {
+            grunnlagService.opprettGrunnlag(any(), any())
+        }
         verify {
             oppgaveService.opprettOppgave(
                 referanse = foerstegangsbehandling.id.toString(),
@@ -519,6 +532,7 @@ internal class BehandlingFactoryTest {
                 gruppeId = persongalleri.avdoed.single(),
                 frist = any(),
             )
+            grunnlagService.hentOpplysningsgrunnlagForSak(any())
         }
         verify(exactly = 1) {
             sakTilgang.oppdaterAdressebeskyttelse(any(), any())
@@ -1034,8 +1048,11 @@ internal class BehandlingFactoryTest {
                 gruppeId = persongalleri.avdoed.single(),
                 frist = any(),
             )
+            grunnlagService.hentOpplysningsgrunnlagForSak(any())
         }
-        coVerify { grunnlagService.opprettGrunnlag(any(), any()) }
+        coVerify {
+            grunnlagService.opprettGrunnlag(any(), any())
+        }
 
         verify(exactly = 2) {
             behandlingDaoMock.hentBehandling(any())
@@ -1219,7 +1236,9 @@ internal class BehandlingFactoryTest {
                 gruppeId = persongalleri.avdoed.single(),
             )
         }
-        coVerify { grunnlagService.opprettGrunnlag(any(), any()) }
+        coVerify {
+            grunnlagService.opprettGrunnlag(any(), any())
+        }
         verify(exactly = 2) {
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
@@ -1232,6 +1251,7 @@ internal class BehandlingFactoryTest {
         }
         verify(exactly = 1) {
             sakTilgang.oppdaterAdressebeskyttelse(any(), any())
+            grunnlagService.hentOpplysningsgrunnlagForSak(any())
         }
     }
 
@@ -1341,6 +1361,7 @@ internal class BehandlingFactoryTest {
             grunnlagService.opprettGrunnlag(any(), any())
         }
         verify(exactly = 1) {
+            grunnlagService.hentOpplysningsgrunnlagForSak(any())
             sakTilgang.oppdaterAdressebeskyttelse(any(), any())
             grunnlagService.lagreNyeSaksopplysninger(any(), any(), any())
         }

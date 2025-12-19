@@ -133,5 +133,6 @@ internal class BehandlingMedBrevDaoTest(
                     referanse = UUID30(""),
                     perioder = emptyList(),
                 ),
+            omgjoeringAvId = null,
         )
 }

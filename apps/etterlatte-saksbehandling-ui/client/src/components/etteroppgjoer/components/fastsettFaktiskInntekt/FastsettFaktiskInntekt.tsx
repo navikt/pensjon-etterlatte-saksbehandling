@@ -1,5 +1,5 @@
-import { BodyShort, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
-import { useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { BodyShort, Button, Heading, Tag, VStack } from '@navikt/ds-react'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { maanedNavn } from '~utils/formatering/dato'
 import { FaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { FaktiskInntektVisning } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektVisning'
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntektSkjemaErrors }: Props) => {
-  const { behandling, faktiskInntekt } = useEtteroppgjoer()
+  const { forbehandling, faktiskInntekt } = useEtteroppgjoerForbehandling()
 
   const [faktiskInntektSkjemaErAapen, setFaktiskInntektSkjemaErAapen] = useState<boolean>(
     erRedigerbar && !faktiskInntekt
@@ -23,12 +23,10 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntekt
   return (
     <VStack gap="4">
       <Heading size="large">Fastsett faktisk inntekt</Heading>
-      <HStack gap="2" align="center">
-        <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
-      </HStack>
+      <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
       <div>
         <Tag variant="neutral">
-          {maanedNavn(behandling.innvilgetPeriode.fom)} - {maanedNavn(behandling.innvilgetPeriode.tom)}
+          {maanedNavn(forbehandling.innvilgetPeriode.fom)} - {maanedNavn(forbehandling.innvilgetPeriode.tom)}
         </Tag>
       </div>
 

@@ -8,7 +8,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.libs.ktor.PingResultDown
@@ -30,7 +30,7 @@ val SAKSBEHANDLERPATTERN = Regex("[a-zA-Z]\\d{6}")
 class SaksbehandlerJobService(
     private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
     private val navAnsattKlient: NavAnsattKlient,
-    private val axsysKlient: AxsysKlient,
+    private val entraProxyKlient: EntraProxyKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -49,7 +49,7 @@ class SaksbehandlerJobService(
                     logger.error("Kunne ikke hente navn for saksbehandlere", e)
                 }
                 try {
-                    oppdaterSaksbehandlerEnhet(logger, saksbehandlerInfoDao, axsysKlient, subCoroutineExceptionHandler)
+                    oppdaterSaksbehandlerEnhet(logger, saksbehandlerInfoDao, entraProxyKlient, subCoroutineExceptionHandler)
                 } catch (e: Exception) {
                     logger.error("Kunne ikke hente enheter for saksbehandlere", e)
                 }
@@ -61,12 +61,14 @@ class SaksbehandlerJobService(
 internal suspend fun oppdaterSaksbehandlerEnhet(
     logger: Logger,
     saksbehandlerInfoDao: SaksbehandlerInfoDao,
-    axsysKlient: AxsysKlient,
+    entraProxyKlient: EntraProxyKlient,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
 ) {
-    when (val pingRes = axsysKlient.ping()) {
+    when (val pingRes = entraProxyKlient.ping()) {
         is PingResultDown -> {
-            logger.warn("Axsysklient er ikke ready, forsøker ikke å oppdatere saksbehandleres enheter. ${pingRes.toStringServiceDown()}")
+            logger.warn(
+                "EntraProxyKlient er ikke ready, forsøker ikke å oppdatere saksbehandleres enheter. ${pingRes.toStringServiceDown()}",
+            )
         }
         is PingResultUp -> {
             val tidbrukt =
@@ -84,7 +86,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                                 it to
                                     scope.async(
                                         subCoroutineExceptionHandler,
-                                    ) { axsysKlient.hentEnheterForIdent(it) }
+                                    ) { entraProxyKlient.hentEnheterForIdent(it) }
                             }.mapNotNull { (ident, enheter) ->
                                 try {
                                     val enheterAwait = enheter.await()

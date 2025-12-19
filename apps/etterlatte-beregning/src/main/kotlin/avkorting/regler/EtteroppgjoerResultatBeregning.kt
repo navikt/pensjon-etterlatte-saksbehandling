@@ -7,6 +7,8 @@ import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerGrenseDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
@@ -25,9 +27,10 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 data class EtteroppgjoerDifferanseGrunnlag(
-    val utbetaltStoenad: FaktumNode<Aarsoppgjoer>,
+    val utbetaltStoenad: FaktumNode<List<VedtakEtteroppgjoerPeriode>>,
     val nyBruttoStoenad: FaktumNode<Aarsoppgjoer>,
     val grunnlagForEtteroppgjoer: FaktumNode<FaktiskInntekt>,
+    val harDoedsfall: FaktumNode<Boolean>,
 )
 
 val inntektIEtteroppgjoerAar: Regel<EtteroppgjoerDifferanseGrunnlag, FaktiskInntekt> =
@@ -35,6 +38,14 @@ val inntektIEtteroppgjoerAar: Regel<EtteroppgjoerDifferanseGrunnlag, FaktiskInnt
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         finnFaktum = EtteroppgjoerDifferanseGrunnlag::grunnlagForEtteroppgjoer,
+        finnFelt = { it },
+    )
+
+val harDoedsfall: Regel<EtteroppgjoerDifferanseGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        finnFaktum = EtteroppgjoerDifferanseGrunnlag::harDoedsfall,
         finnFelt = { it },
     )
 
@@ -58,12 +69,12 @@ val nyBruttoStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<AvkortetYtelse>
         finnFelt = { it.avkortetYtelse },
     )
 
-val utbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<AvkortetYtelse>> =
+val utbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, List<VedtakEtteroppgjoerPeriode>> =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         finnFaktum = EtteroppgjoerDifferanseGrunnlag::utbetaltStoenad,
-        finnFelt = { it.avkortetYtelse },
+        finnFelt = { it },
     )
 
 data class MaanederMedAvkortetYtelse(
@@ -75,6 +86,16 @@ private fun normaliserPerioder(avkortingsperioder: List<AvkortetYtelse>): List<M
     avkortingsperioder.map {
         val tom = it.periode.tom ?: YearMonth.of(it.periode.fom.year, Month.DECEMBER)
         val antallMaaneder = it.periode.fom.until(tom, ChronoUnit.MONTHS) + 1
+        MaanederMedAvkortetYtelse(
+            antallMaaneder = antallMaaneder,
+            ytelseEtterAvkorting = it.ytelseEtterAvkorting,
+        )
+    }
+
+private fun normaliserVedtakPerioder(vedtakPerioder: List<VedtakEtteroppgjoerPeriode>): List<MaanederMedAvkortetYtelse> =
+    vedtakPerioder.map {
+        val tom = it.tom ?: YearMonth.of(it.fom.year, Month.DECEMBER)
+        val antallMaaneder = it.fom.until(tom, ChronoUnit.MONTHS) + 1
         MaanederMedAvkortetYtelse(
             antallMaaneder = antallMaaneder,
             ytelseEtterAvkorting = it.ytelseEtterAvkorting,
@@ -95,8 +116,8 @@ val normalisertBruttoUtbetaltStoenad: Regel<EtteroppgjoerDifferanseGrunnlag, Lis
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Gjør om en periode med brutto avkortet ytelse til en mellomverdi med antall måneder med avkortet ytelse",
         regelReferanse = RegelReferanse("REGEL-ETTEROPPGJOER-NORMALISER-BRUTTO-UTBETALT-STOENAD"),
-    ) benytter utbetaltStoenad med { avkorteYtelse ->
-        normaliserPerioder(avkorteYtelse)
+    ) benytter utbetaltStoenad med { vedtakPerioder ->
+        normaliserVedtakPerioder(vedtakPerioder)
     }
 
 val sumNyBruttoStoenad =
@@ -187,7 +208,28 @@ val beregneEtteroppgjoerRegel =
             grense = grenser,
             harIngenInntekt = ingenInntekt,
             differanse = differanse,
+            opprinneligResultatType = null,
         )
+    }
+
+val beregneEtteroppgjoerRegelMedDoedsfall =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        regelReferanse = RegelReferanse(id = "REGEL-ETTEROPPGJOER-RESULTAT-MED-DOEDSFALL"),
+    ) benytter beregneEtteroppgjoerRegel og harDoedsfall med { resultat, doedsfall ->
+
+        if (doedsfall) {
+            val overstyrtResultat =
+                when (resultat.resultatType) {
+                    EtteroppgjoerResultatType.TILBAKEKREVING -> EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING
+                    else -> resultat.resultatType
+                }
+
+            resultat.copy(resultatType = overstyrtResultat, opprinneligResultatType = resultat.resultatType)
+        } else {
+            resultat
+        }
     }
 
 data class EtteroppgjoerDifferanse(
@@ -198,6 +240,7 @@ data class EtteroppgjoerDifferanse(
 
 data class EtteroppgjoerRegelResultat(
     val resultatType: EtteroppgjoerResultatType,
+    val opprinneligResultatType: EtteroppgjoerResultatType?,
     val grense: EtteroppgjoerGrense,
     val harIngenInntekt: Boolean,
     val differanse: EtteroppgjoerDifferanse,

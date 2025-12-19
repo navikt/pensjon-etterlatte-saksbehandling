@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -905,6 +906,42 @@ internal class VedtakstidslinjeTest {
                 { sammenstilt[1].utbetalingsperioder[1].periode.fom shouldBe mars2024 },
                 { sammenstilt[1].utbetalingsperioder[1].periode.tom shouldBe null },
                 { sammenstilt[1].utbetalingsperioder[1].type shouldBe UtbetalingsperiodeType.OPPHOER },
+            )
+        }
+
+        @Test
+        fun `skal kun bruke vedtak med innhold type Behandling og ignorere Tilbakekreving`() {
+            val januar2024 = YearMonth.of(2024, Month.JANUARY)
+            val behandlingVedtak =
+                lagVedtak(
+                    id = 1,
+                    virkningsDato = januar2024.atDay(1),
+                    vedtakStatus = VedtakStatus.IVERKSATT,
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakFattetDato = Tidspunkt.now(),
+                    utbetalingsperioder = listOf(),
+                )
+
+            val tilbakekrevingVedtak =
+                Vedtak(
+                    id = 2,
+                    sakId = sakId1,
+                    sakType = SakType.OMSTILLINGSSTOENAD,
+                    behandlingId = UUID.randomUUID(),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    status = VedtakStatus.IVERKSATT,
+                    type = VedtakType.TILBAKEKREVING,
+                    vedtakFattet = behandlingVedtak.vedtakFattet,
+                    attestasjon = behandlingVedtak.attestasjon,
+                    innhold = VedtakInnhold.Tilbakekreving(mockk(relaxed = true)),
+                )
+
+            val tidslinje = Vedtakstidslinje(listOf(behandlingVedtak, tilbakekrevingVedtak))
+            val sammenstilt = tidslinje.sammenstill(januar2024)
+
+            assertAll(
+                { sammenstilt.size shouldBe 1 },
+                { (sammenstilt[0].innhold is VedtakInnhold.Behandling) shouldBe true },
             )
         }
 

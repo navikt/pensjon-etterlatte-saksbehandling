@@ -20,6 +20,7 @@ import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -43,17 +44,16 @@ import javax.sql.DataSource
 internal class DoedshendelseRouteTest(
     val dataSource: DataSource,
 ) {
+    private val featureToggleService: FeatureToggleService = DummyFeatureToggleService()
     private val mockOAuth2Server = MockOAuth2Server()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val doedshendelseDao: DoedshendelseDao = DoedshendelseDao(ConnectionAutoclosingTest(dataSource))
-    private val toggle =
-        mockk<FeatureToggleService> {
-            every { isEnabled(any(), any()) } returns true
-        }
+
     private val service =
         DoedshendelseService(
-            pdlTjenesterKlient = pdlTjenesterKlient,
             doedshendelseDao = doedshendelseDao,
+            pdlTjenesterKlient = pdlTjenesterKlient,
+            featureToggleService = featureToggleService,
         )
 
     @BeforeAll

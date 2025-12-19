@@ -173,6 +173,25 @@ internal class AvkortingRepositoryTest(
     }
 
     @Test
+    fun `hent alle aarsoppgjoer for behandlinger`() {
+        val sakId = randomSakId()
+        val behandlingId = UUID.randomUUID()
+        avkortingRepository.lagreAvkorting(
+            behandlingId,
+            sakId,
+            Avkorting(
+                aarsoppgjoer = listOf(nyAvkorting(2024), nyAvkorting(2025)),
+            ),
+        )
+
+        val alle = avkortingRepository.hentAlleAarsoppgjoer(listOf(behandlingId))
+
+        alle.size shouldBe 2
+        alle[0].aar shouldBe 2024
+        alle[1].aar shouldBe 2025
+    }
+
+    @Test
     fun `Skal lagre og oppdatere avkorting med etteroppgjoer`() {
         val behandlingId: UUID = UUID.randomUUID()
         val etteroppgjoer = nyAvkortingEtteroppgjoer(2024)

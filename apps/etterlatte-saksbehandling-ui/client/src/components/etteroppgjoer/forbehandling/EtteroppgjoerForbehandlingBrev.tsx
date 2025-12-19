@@ -5,24 +5,24 @@ import { Alert, BodyShort, Box, Button, ConfirmationPanel, Heading, HStack, Moda
 import { isPending, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { Link } from 'react-router-dom'
-import { addEtteroppgjoerBrev, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addEtteroppgjoerBrev, useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import Spinner from '~shared/Spinner'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { ferdigstillEtteroppgjoerForbehandlingMedBrev } from '~shared/api/etteroppgjoer'
-import {
-  EtteroppgjoerDetaljertForbehandling,
-  kanRedigereEtteroppgjoerBehandling,
-} from '~shared/types/EtteroppgjoerForbehandling'
+import { kanRedigereEtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IBrev } from '~shared/types/Brev'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export function EtteroppgjoerForbehandlingBrev() {
-  const etteroppgjoer = useEtteroppgjoer()
+  const etteroppgjoerForbehandling = useEtteroppgjoerForbehandling()
+
+  const { forbehandling, beregnetEtteroppgjoerResultat } = etteroppgjoerForbehandling
+
   const dispatch = useAppDispatch()
   const [brevResult, fetchBrev] = useApiCall(hentBrevTilBehandling)
   const [opprettBrevResult, opprettBrevApi] = useApiCall(opprettBrevTilBehandling)
@@ -31,7 +31,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   const [ferdigstillForbehandlingResult, ferdigstillForbehandlingRequest, resetFerdigstillForbehandlingStatus] =
     useApiCall(ferdigstillEtteroppgjoerForbehandlingMedBrev)
 
-  const kanRedigeres = kanRedigereEtteroppgjoerBehandling(etteroppgjoer.behandling.status)
+  const kanRedigeres = kanRedigereEtteroppgjoerForbehandling(forbehandling.status)
   const [tilbakestilt, setTilbakestilt] = useState(false)
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
   const [bekreftetSettOverBrev, setBekreftetSettOverBrev] = useState<boolean>(false)
@@ -40,20 +40,17 @@ export function EtteroppgjoerForbehandlingBrev() {
     setVisAdvarselBehandlingEndret(false)
   }
 
-  const etteroppgjoerBeregnetEtterOpprettetBrev = (brev: IBrev, etteroppgjoer: EtteroppgjoerDetaljertForbehandling) => {
-    if (etteroppgjoer.beregnetEtteroppgjoerResultat != undefined) {
-      return (
-        new Date(etteroppgjoer.beregnetEtteroppgjoerResultat?.tidspunkt).getTime() >
-        new Date(brev.statusEndret).getTime()
-      )
+  const etteroppgjoerBeregnetEtterOpprettetBrev = (brev: IBrev) => {
+    if (!!beregnetEtteroppgjoerResultat) {
+      return new Date(beregnetEtteroppgjoerResultat.tidspunkt).getTime() > new Date(brev.statusEndret).getTime()
     }
     return false
   }
 
   const ferdigstillForbehandling = async () => {
-    const forbehandlingId = etteroppgjoer.behandling.id
+    const forbehandlingId = forbehandling.id
     ferdigstillForbehandlingRequest({ forbehandlingId }, () => {
-      navigerTilPersonOversikt(etteroppgjoer.behandling.sak.ident)
+      navigerTilPersonOversikt(forbehandling.sak.ident)
     })
   }
 
@@ -64,20 +61,20 @@ export function EtteroppgjoerForbehandlingBrev() {
   }
 
   useEffect(() => {
-    if (etteroppgjoer.behandling.brevId) {
-      fetchBrev(etteroppgjoer.behandling.id, (brev) => {
-        setVisAdvarselBehandlingEndret(etteroppgjoerBeregnetEtterOpprettetBrev(brev, etteroppgjoer))
+    if (forbehandling.brevId) {
+      fetchBrev(forbehandling.id, (brev) => {
+        setVisAdvarselBehandlingEndret(etteroppgjoerBeregnetEtterOpprettetBrev(brev))
       })
     } else {
       opprettBrevApi(
         {
-          behandlingId: etteroppgjoer.behandling.id,
-          sakId: etteroppgjoer.behandling.sak.id,
+          behandlingId: forbehandling.id,
+          sakId: forbehandling.sak.id,
         },
         (brev) => dispatch(addEtteroppgjoerBrev(brev))
       )
     }
-  }, [etteroppgjoer.behandling.brevId, tilbakestilt])
+  }, [forbehandling.brevId, tilbakestilt])
 
   return (
     <HStack height="100%" minHeight="100%" wrap={false}>
@@ -188,7 +185,7 @@ export function EtteroppgjoerForbehandlingBrev() {
             <div>
               <Button
                 as={Link}
-                to={`/etteroppgjoer/${etteroppgjoer.behandling.id}/${EtteroppjoerForbehandlingSteg.OVERSIKT}`}
+                to={`/etteroppgjoer/${forbehandling.id}/${EtteroppjoerForbehandlingSteg.OVERSIKT}`}
                 variant="secondary"
               >
                 Gå tilbake

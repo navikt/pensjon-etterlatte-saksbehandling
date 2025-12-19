@@ -8,11 +8,12 @@ import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.NyeAarMedInntektMaaStarteIJanuar
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -24,7 +25,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
     @Test
     fun `hvis det ikke mangler tidligere aarsoppgjoer paa forrige avkorting skal den returneres`() {
-        val sakId = SakId(123L)
         val forrigeAvkorting =
             mockk<Avkorting> {
                 every { aarsoppgjoer } returns
@@ -36,7 +36,7 @@ class AvkortingReparerAarsoppgjoeretTest {
         val virk = YearMonth.of(2024, 12)
         val alleVedtak = emptyList<VedtakSammendragDto>()
 
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
             listOf(
                 aarsoppgjoer(aar = 2024),
                 aarsoppgjoer(aar = 2025),
@@ -46,37 +46,6 @@ class AvkortingReparerAarsoppgjoeretTest {
             service.hentSisteAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
                 virk,
-                sakId,
-                alleVedtak,
-            )
-
-        reparertAvkorting shouldBe forrigeAvkorting
-    }
-
-    @Test
-    fun `hvis det mangler aarsoppgjoer men det er fordi nytt aarsoppgjoer er et nytt aar skal forrige avkorting returneres`() {
-        val sakId = SakId(123L)
-        val forrigeAvkorting =
-            mockk<Avkorting> {
-                every { aarsoppgjoer } returns
-                    listOf(
-                        aarsoppgjoer(aar = 2024),
-                    )
-            }
-        val virk = YearMonth.of(2025, 1)
-        val alleVedtak = emptyList<VedtakSammendragDto>()
-
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
-            listOf(
-                aarsoppgjoer(aar = 2024),
-                aarsoppgjoer(aar = 2025),
-            )
-
-        val reparertAvkorting =
-            service.hentSisteAvkortingMedReparertAarsoppgjoer(
-                forrigeAvkorting,
-                virk,
-                sakId,
                 alleVedtak,
             )
 
@@ -85,7 +54,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
     @Test
     fun `hvis det mangler aarsoppgjoer men det er fordi nytt aarsoppgjoer er et nytt aar skal det feile hvis virk ikke er januar`() {
-        val sakId = SakId(123L)
         val forrigeAvkorting =
             mockk<Avkorting> {
                 every { aarsoppgjoer } returns
@@ -94,9 +62,15 @@ class AvkortingReparerAarsoppgjoeretTest {
                     )
             }
         val virk = YearMonth.of(2025, 2)
-        val alleVedtak = emptyList<VedtakSammendragDto>()
+        val alleVedtak =
+            listOf(
+                vedtakSammendragDto(
+                    virk = YearMonth.of(2024, 1),
+                    datoAttestert = YearMonth.of(2024, 1),
+                ),
+            )
 
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
             listOf(
                 aarsoppgjoer(aar = 2024),
                 aarsoppgjoer(aar = 2025),
@@ -106,7 +80,6 @@ class AvkortingReparerAarsoppgjoeretTest {
             service.hentSisteAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
                 virk,
-                sakId,
                 alleVedtak,
             )
         }
@@ -114,7 +87,6 @@ class AvkortingReparerAarsoppgjoeretTest {
 
     @Test
     fun `hvis det mangler aarsoppgjoer for aar samme som virk skal det tidligere avkorting hentes for kopiering`() {
-        val sakId = SakId(123L)
         val forrigeAvkorting =
             Avkorting(
                 aarsoppgjoer = listOf(aarsoppgjoer(aar = 2025)),
@@ -145,7 +117,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                 ),
             )
 
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
             listOf(
                 aarsoppgjoer(aar = 2024),
                 aarsoppgjoer(aar = 2025),
@@ -156,7 +128,50 @@ class AvkortingReparerAarsoppgjoeretTest {
             service.hentSisteAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
                 virk,
-                sakId,
+                alleVedtak,
+            )
+
+        reparertAvkorting.aarsoppgjoer.size shouldBe 2
+        reparertAvkorting.aarsoppgjoer[0].aar shouldBe 2024
+        reparertAvkorting.aarsoppgjoer[1].aar shouldBe 2025
+    }
+
+    @ParameterizedTest
+    @CsvSource("2025-01", "2025-06", "2026-01")
+    fun `hvis det mangler aarsoppgjoer for 2024 i forrige iverksatte skal disse hentes og legges til`(nyVirkParam: String) {
+        val forrigeAvkorting = Avkorting(listOf(aarsoppgjoer(aar = 2025)))
+        val nyVirk = YearMonth.parse(nyVirkParam)
+
+        val sistebehandlingIdManglendeAar = UUID.randomUUID()
+        val sisteAvkortingManglendeAar =
+            Avkorting(listOf(aarsoppgjoer(aar = 2024)))
+
+        val alleVedtak =
+            listOf(
+                vedtakSammendragDto(virk = YearMonth.of(2025, 1), datoAttestert = YearMonth.of(2024, 11)),
+                vedtakSammendragDto(
+                    behandlingId = sistebehandlingIdManglendeAar,
+                    virk = YearMonth.of(2024, 10),
+                    datoAttestert = YearMonth.of(2024, 9),
+                ),
+                vedtakSammendragDto(
+                    type = VedtakType.INNVILGELSE,
+                    virk = YearMonth.of(2024, 3),
+                    datoAttestert = YearMonth.of(2024, 2),
+                ),
+            )
+
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
+            listOf(
+                aarsoppgjoer(aar = 2024),
+                aarsoppgjoer(aar = 2025),
+            )
+        every { repo.hentAvkorting(sistebehandlingIdManglendeAar) } returns sisteAvkortingManglendeAar
+
+        val reparertAvkorting =
+            service.hentSisteAvkortingMedReparertAarsoppgjoer(
+                forrigeAvkorting,
+                nyVirk,
                 alleVedtak,
             )
 
@@ -166,13 +181,11 @@ class AvkortingReparerAarsoppgjoeretTest {
     }
 
     @Test
-    fun `hvis det mangler aarsoppgjoer for tidligere aar enn virk skal disse hentes og legges til`() {
-        val sakId = SakId(123L)
+    fun `skal hente avkorting for sist iverksatte`() {
         val forrigeAvkorting =
             Avkorting(
                 aarsoppgjoer = listOf(aarsoppgjoer(aar = 2025)),
             )
-        val virk = YearMonth.of(2025, 2)
 
         val sistebehandlingIdManglendeAar = UUID.randomUUID()
         val sisteAvkortingManglendeAar =
@@ -198,7 +211,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                 ),
             )
 
-        every { repo.hentAlleAarsoppgjoer(sakId) } returns
+        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
             listOf(
                 aarsoppgjoer(aar = 2024),
                 aarsoppgjoer(aar = 2025),
@@ -206,11 +219,9 @@ class AvkortingReparerAarsoppgjoeretTest {
         every { repo.hentAvkorting(sistebehandlingIdManglendeAar) } returns sisteAvkortingManglendeAar
 
         val reparertAvkorting =
-            service.hentSisteAvkortingMedReparertAarsoppgjoer(
-                forrigeAvkorting,
-                virk,
-                sakId,
+            service.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
                 alleVedtak,
+                forrigeAvkorting,
             )
 
         reparertAvkorting.aarsoppgjoer.size shouldBe 2

@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
@@ -21,6 +22,7 @@ class InstitusjonsoppholdKlient(
                 .get("$url/api/v1/person/institusjonsopphold/$oppholdId?Med-Institusjonsinformasjon=true") {
                     contentType(ContentType.Application.Json)
                     navConsumerId("etterlatte-institusjonsopphold")
+                    header("Nav-Formaal", "ETTERLATTEYTELSER")
                 }.body()
         }.let {
             when (it) {

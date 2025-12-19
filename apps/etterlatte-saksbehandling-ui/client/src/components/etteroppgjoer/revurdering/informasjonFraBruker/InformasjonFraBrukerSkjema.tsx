@@ -1,7 +1,10 @@
 import { Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { FieldErrors, useForm } from 'react-hook-form'
 import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
-import { addEtteroppgjoer, useEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import {
+  addDetaljertEtteroppgjoerForbehandling,
+  useEtteroppgjoerForbehandling,
+} from '~store/reducers/EtteroppgjoerReducer'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerForbehandling, lagreInformasjonFraBruker } from '~shared/api/etteroppgjoer'
@@ -27,7 +30,7 @@ export const InformasjonFraBrukerSkjema = ({
   setInformasjonFraBrukerSkjemaErrors,
   setValideringFeilmedling,
 }: Props) => {
-  const etteroppgjoer = useEtteroppgjoer()
+  const { forbehandling } = useEtteroppgjoerForbehandling()
 
   const dispatch = useAppDispatch()
 
@@ -42,9 +45,9 @@ export const InformasjonFraBrukerSkjema = ({
     formState: { errors },
   } = useForm<IInformasjonFraBruker>({
     defaultValues: {
-      harMottattNyInformasjon: etteroppgjoer.behandling.harMottattNyInformasjon,
-      endringErTilUgunstForBruker: etteroppgjoer.behandling.endringErTilUgunstForBruker,
-      beskrivelseAvUgunst: etteroppgjoer.behandling.beskrivelseAvUgunst,
+      harMottattNyInformasjon: forbehandling.harMottattNyInformasjon,
+      endringErTilUgunstForBruker: forbehandling.endringErTilUgunstForBruker,
+      beskrivelseAvUgunst: forbehandling.beskrivelseAvUgunst,
     },
   })
 
@@ -58,7 +61,7 @@ export const InformasjonFraBrukerSkjema = ({
     setValideringFeilmedling('')
     informasjonFraBrukerRequest({ forbehandlingId: behandling.relatertBehandlingId!, endringFraBruker: data }, () => {
       hentEtteroppgjoerRequest(behandling.relatertBehandlingId!, (etteroppgjoer) => {
-        dispatch(addEtteroppgjoer(etteroppgjoer))
+        dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoer))
         setInformasjonFraBrukerSkjemaErAapen(false)
       })
     })
@@ -133,7 +136,7 @@ export const InformasjonFraBrukerSkjema = ({
             Lagre
           </Button>
 
-          {!!etteroppgjoer.behandling.harMottattNyInformasjon && (
+          {!!forbehandling.harMottattNyInformasjon && (
             <Button
               type="button"
               variant="secondary"

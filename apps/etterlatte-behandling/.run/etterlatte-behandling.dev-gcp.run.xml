@@ -45,8 +45,8 @@
             <env name="PEN_URL" value="https://pensjon-pen-q2.dev-fss-pub.nais.io/api"/>
             <env name="KRR_ENDPOINT_URL" value="https://digdir-krr-proxy.intern.dev.nav.no"/>
             <env name="KRR_SCOPE" value="api://dev-gcp.team-rocket.digdir-krr-proxy/.default"/>
-            <env name="AXSYS_URL" value="https://axsys.dev-fss-pub.nais.io"/>
-            <env name="AXSYS_SCOPE" value="api://dev-fss.org.axsys/.default"/>
+            <env name="ENTRA_PROXY_URL" value="https://entraproxy.intern.dev.nav.no"/>
+            <env name="ENTRA_PROXY_SCOPE" value="api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default"/>
             <env name="JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS" value="00-23"/>
             <env name="JOBB_SAKSBEHANDLER_OPENING_HOURS" value="00-23"/>
             <env name="JOBB_METRIKKER_OPENING_HOURS" value="00-23"/>

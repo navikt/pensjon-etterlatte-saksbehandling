@@ -20,7 +20,7 @@ type Props = {
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }
 
-export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: Props) => {
+export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }: Props) => {
   const [open, setOpen] = useState(false)
 
   const navigate = useNavigate()
@@ -69,7 +69,7 @@ export const EtteroppgjoerSvarfristUtloeptModal = ({ oppgave, oppdaterStatus }: 
         aria-labelledby="modal-heading"
         width="medium"
         onClose={() => setOpen(false)}
-        header={{ heading: 'Etteroppgjør – svarfrist utløpt' }}
+        header={{ heading: 'Etteroppgjør - opprett revurdering' }}
       >
         <Modal.Body>
           <VStack gap="4">

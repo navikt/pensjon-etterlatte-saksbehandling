@@ -20,9 +20,9 @@ interface Props {
 export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTildeling }: Props): ReactNode => {
   const [openDropdown, setOpenDropdown] = useState<boolean>(false)
 
-  const { id: oppgaveId, versjon, saksbehandler } = oppgave
+  const { id: oppgaveId, versjon, saksbehandler, enhet } = oppgave
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const erRedigerbar = enhetErSkrivbar(oppgave.enhet, innloggetSaksbehandler.skriveEnheter)
+  const erRedigerbar = enhetErSkrivbar(enhet, innloggetSaksbehandler.skriveEnheter)
 
   const [valgtSaksbehandler, setValgtSaksbehandler] = useState<OppgaveSaksbehandler | undefined>(saksbehandler)
   const [tildelResult, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
@@ -41,7 +41,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
 
   const tildelOppgave = (saksbehandler?: OppgaveSaksbehandler) => {
     tildelSaksbehandler(
-      { oppgaveId, nysaksbehandler: { saksbehandler: saksbehandler?.ident || '', versjon } },
+      { oppgaveId, nysaksbehandler: { saksbehandler: saksbehandler?.ident || '', versjon }, enhetsnr: enhet },
       (oppgaveVersjon) => {
         setValgtSaksbehandler(saksbehandler)
         oppdaterTildeling(oppgaveVersjon, saksbehandler)

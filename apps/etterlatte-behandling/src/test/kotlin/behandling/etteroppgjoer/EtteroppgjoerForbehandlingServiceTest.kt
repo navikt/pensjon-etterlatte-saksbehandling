@@ -1,9 +1,11 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
@@ -16,6 +18,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -24,8 +27,13 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak
 import no.nav.etterlatte.sak.SakLesDao
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -72,7 +80,7 @@ class EtteroppgjoerForbehandlingServiceTest {
             foerstegangsbehandling(
                 sakId = sakId1,
                 sakType = SakType.OMSTILLINGSSTOENAD,
-                status = BehandlingStatus.ATTESTERT,
+                status = BehandlingStatus.IVERKSATT,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
             )
 
@@ -136,6 +144,61 @@ class EtteroppgjoerForbehandlingServiceTest {
         fun returnsEtteroppgjoer(etteroppgjoer: Etteroppgjoer?) {
             coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer
         }
+    }
+
+    @Test
+    fun `skal hente siste iverksatte behandling med avkorting`() {
+        val ctx = TestContext()
+
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.IVERKSATT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+
+        val revurdering =
+            revurdering(
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                revurderingAarsak = Revurderingaarsak.ANNEN,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+
+        val underBehandling =
+            revurdering(
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.BEREGNET,
+                revurderingAarsak = Revurderingaarsak.ANNEN,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+            )
+
+        coEvery { ctx.vedtakKlient.hentIverksatteVedtak(sakId1, any()) } returns
+            listOf(
+                VedtakSammendragDto(
+                    id = "1",
+                    behandlingId = behandling.id,
+                    vedtakType = VedtakType.INNVILGELSE,
+                    behandlendeSaksbehandler = "saksbehandler",
+                    datoFattet = Tidspunkt.now().toNorskTid(),
+                    attesterendeSaksbehandler = "attestant",
+                    datoAttestert = Tidspunkt.now().toNorskTid(),
+                    virkningstidspunkt = behandling.virkningstidspunkt?.dato!!,
+                    opphoerFraOgMed = null,
+                    iverksettelsesTidspunkt = Tidspunkt.now(),
+                ),
+            )
+
+        coEvery { ctx.behandlingService.hentBehandlingerForSak(sakId1) } returns
+            listOf(behandling, revurdering, underBehandling)
+
+        val sisteIverksatteAvkortingOgOpphoer = runBlocking { ctx.service.hentSisteIverksatteBehandlingMedAvkorting(sakId1, mockk()) }
+
+        sisteIverksatteAvkortingOgOpphoer.sisteBehandlingMedAvkorting shouldBe behandling.id
+        sisteIverksatteAvkortingOgOpphoer.opphoerFom shouldBe null
     }
 
     @ParameterizedTest(name = "skal ikke opprette forbehandling hvis det allerede eksisterer en med status={0}")
@@ -271,8 +334,24 @@ class EtteroppgjoerForbehandlingServiceTest {
                 ).copy(brevId = 123L, varselbrevSendt = LocalDate.now())
 
         ctx.returnsForbehandling(forbehandling)
+        coEvery { ctx.vedtakKlient.hentIverksatteVedtak(sakId1, any()) } returns
+            listOf(
+                VedtakSammendragDto(
+                    id = "1",
+                    behandlingId = ctx.behandling.id,
+                    vedtakType = VedtakType.INNVILGELSE,
+                    behandlendeSaksbehandler = "saksbehandler",
+                    datoFattet = Tidspunkt.now().toNorskTid(),
+                    attesterendeSaksbehandler = "attestant",
+                    datoAttestert = Tidspunkt.now().toNorskTid(),
+                    virkningstidspunkt = ctx.behandling.virkningstidspunkt?.dato!!,
+                    opphoerFraOgMed = null,
+                    iverksettelsesTidspunkt = Tidspunkt.now(),
+                ),
+            )
+        every { ctx.behandlingService.hentBehandlingerForSak(any()) } returns listOf(ctx.behandling)
 
-        val kopiertForbehandling = ctx.service.kopierOgLagreNyForbehandling(uuid, sakId1)
+        val kopiertForbehandling = ctx.service.kopierOgLagreNyForbehandling(uuid, sakId1, mockk())
 
         with(kopiertForbehandling) {
             assertNotEquals(id, forbehandling.id)

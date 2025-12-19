@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
@@ -363,6 +364,13 @@ class StoenadRepositoryTest(
                 oppfyllerAktivitet = true,
                 aktivitet = "100_PROSENT_ARBEIDSSOEKER",
                 sanksjon = null,
+                etteroppgjoerAar = 2024,
+                etteroppgjoerUtbetalt = 100_000,
+                etteroppgjoerNyStoenad = 120_000,
+                etteroppgjoerDifferanse = 20_000,
+                etteroppgjoerResultat = EtteroppgjoerResultatType.ETTERBETALING.name,
+                etterbetaltBeloep = 20_000,
+                tilbakekrevdBeloep = null,
             )
 
         assertDoesNotThrow {

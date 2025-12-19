@@ -28,7 +28,7 @@ class MaanedStatistikkTest {
             )
 
         val maaned = YearMonth.of(2023, 2)
-        val statistikk = MaanedStatistikk(maaned, rader, emptyMap())
+        val statistikk = MaanedStatistikk(maaned, rader, emptyMap(), emptyMap())
 
         Assertions.assertEquals(statistikk.rader.size, 2)
         Assertions.assertEquals(statistikk.rader.map { it.sakId }.toSet(), setOf(sak1, sak2))
@@ -46,7 +46,7 @@ class MaanedStatistikkTest {
             )
 
         val maaned = YearMonth.of(2023, 2)
-        val statistikk = MaanedStatistikk(maaned, rader, emptyMap())
+        val statistikk = MaanedStatistikk(maaned, rader, emptyMap(), emptyMap())
 
         Assertions.assertEquals(statistikk.rader.size, 1)
         Assertions.assertEquals(statistikk.rader[0].sakId, sak2)
@@ -61,7 +61,7 @@ class MaanedStatistikkTest {
                 stoenadRad(sakId = sak1, vedtakLoependeFom = LocalDate.of(2023, 1, 1), nettoYtelse = "20"),
             )
         val maaned = YearMonth.of(2023, 2)
-        val statistikk = MaanedStatistikk(maaned, rader, emptyMap())
+        val statistikk = MaanedStatistikk(maaned, rader, emptyMap(), emptyMap())
         val statistikkRad = statistikk.rader[0]
 
         Assertions.assertEquals(statistikkRad.nettoYtelse, "20")
@@ -106,8 +106,8 @@ class MaanedStatistikkTest {
                 ),
             )
 
-        val statistikkMai = MaanedStatistikk(YearMonth.of(2024, Month.MAY), rader, emptyMap())
-        val statisitkkJuni = MaanedStatistikk(YearMonth.of(2024, Month.JUNE), rader, emptyMap())
+        val statistikkMai = MaanedStatistikk(YearMonth.of(2024, Month.MAY), rader, emptyMap(), emptyMap())
+        val statisitkkJuni = MaanedStatistikk(YearMonth.of(2024, Month.JUNE), rader, emptyMap(), emptyMap())
 
         with(statistikkMai.rader) {
             size shouldBe 1

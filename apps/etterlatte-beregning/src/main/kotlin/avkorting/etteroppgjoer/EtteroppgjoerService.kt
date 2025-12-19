@@ -11,7 +11,7 @@ import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.Etteroppgjoer
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
-import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
+import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegelMedDoedsfall
 import no.nav.etterlatte.avkorting.toDto
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.regler.FaktumNode
@@ -50,12 +51,14 @@ class EtteroppgjoerService(
 ) {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerService::class.java)
 
-    fun beregnOgLagreEtteroppgjoerResultat(
+    suspend fun beregnOgLagreEtteroppgjoerResultat(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
-        aar: Int,
+        etteroppgjoersAar: Int,
+        harDoedsfall: Boolean,
     ): BeregnetEtteroppgjoerResultat {
-        val etteroppgjoerResultat = beregnEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
+        val etteroppgjoerResultat =
+            beregnEtteroppgjoerResultat(etteroppgjoersAar, forbehandlingId, sisteIverksatteBehandlingId, harDoedsfall)
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
         return etteroppgjoerResultat
     }
@@ -121,24 +124,30 @@ class EtteroppgjoerService(
                     utland = utlandsinntekt,
                     sanksjoner = sanksjoner,
                     spesifikasjon = spesifikasjon,
+                    innvilgetPeriodeIEtteroppgjoersAar = innvilgetPeriodeIEtteroppgjoersAar,
+                    opphoerFom = opphoerFom,
                 )
             }
 
         avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
 
-    private fun beregnEtteroppgjoerResultat(
-        aar: Int,
+    private suspend fun beregnEtteroppgjoerResultat(
+        etteroppgjoersAar: Int,
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
+        harDoedsfall: Boolean,
     ): BeregnetEtteroppgjoerResultat {
         // For å sikre at rettsgebyret forblir konsekvent i senere kjøringer, setter vi regelperioden basert på etteroppgjørsåret og ikke tidspunktet for kjøringen.
         // vi skal og bruke siste gjeldene rettsgebyr for etteroppgjoersAaret dvs det som er gjeldende 31. Desember
-        val fomTom = LocalDate.of(aar, 12, 31)
+        val fomTom = LocalDate.of(etteroppgjoersAar, 12, 31)
         val regelPeriode = RegelPeriode(fomTom, fomTom)
 
-        val sisteIverksatteAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, sisteIverksatteBehandlingId, true)
-        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(aar, forbehandlingId, false)
+        val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
+
+        val (vedtakReferanse, vedtakPerioder) = hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar)
+        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId, false)
+
         val inntektsgrunnlag =
             krevIkkeNull(avkortingRepository.hentFaktiskInntekt(nyForbehandlingAvkorting.id)) {
                 "Avkortingen for etteroppgjøret må ha lagret et inntektsgrunnlag"
@@ -146,14 +155,15 @@ class EtteroppgjoerService(
 
         val differanseGrunnlag =
             EtteroppgjoerDifferanseGrunnlag(
-                FaktumNode(sisteIverksatteAvkorting, sisteIverksatteBehandlingId, ""),
+                FaktumNode(vedtakPerioder, "", ""),
                 FaktumNode(nyForbehandlingAvkorting, forbehandlingId, ""),
                 FaktumNode(inntektsgrunnlag, nyForbehandlingAvkorting.id, ""),
+                FaktumNode(harDoedsfall, forbehandlingId, ""),
             )
 
         return when (
             val beregningResultat =
-                beregneEtteroppgjoerRegel.eksekver(KonstantGrunnlag(differanseGrunnlag), regelPeriode)
+                beregneEtteroppgjoerRegelMedDoedsfall.eksekver(KonstantGrunnlag(differanseGrunnlag), regelPeriode)
         ) {
             is RegelkjoeringResultat.Suksess -> {
                 val data =
@@ -174,23 +184,39 @@ class EtteroppgjoerService(
                     regelResultat = beregningResultat.toJsonNode(),
                     kilde =
                         Grunnlagsopplysning.RegelKilde(
-                            navn = beregneEtteroppgjoerRegel.regelReferanse.id,
+                            navn = beregneEtteroppgjoerRegelMedDoedsfall.regelReferanse.id,
                             ts = data.tidspunkt,
                             versjon = beregningResultat.reglerVersjon,
                         ),
                     referanseAvkorting =
                         ReferanseEtteroppgjoer(
                             avkortingForbehandling = nyForbehandlingAvkorting.id,
-                            avkortingSisteIverksatte = sisteIverksatteAvkorting.id,
+                            avkortingSisteIverksatte = null, // ikke relevant lengre
+                            vedtakReferanse = vedtakReferanse,
                         ),
                     harIngenInntekt = data.harIngenInntekt,
-                    aar = aar,
+                    aar = etteroppgjoersAar,
                 )
             }
 
             is RegelkjoeringResultat.UgyldigPeriode ->
                 throw InternfeilException("Ugyldig regler for periode: ${beregningResultat.ugyldigeReglerForPeriode}")
         }
+    }
+
+    private suspend fun hentVedtakslisteIEtteroppgjoersAar(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+    ): Pair<List<Long>, List<VedtakEtteroppgjoerPeriode>> {
+        val vedtaksliste = vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, HardkodaSystembruker.etteroppgjoer)
+
+        val vedtakReferanse = vedtaksliste.map { it.vedtakId }
+        val vedtakPerioder =
+            vedtaksliste
+                .flatMap { it.perioder }
+                .filter { it.fom.year == etteroppgjoersAar || it.tom?.year == etteroppgjoersAar }
+
+        return vedtakReferanse to vedtakPerioder
     }
 
     private fun hentAvkortingForBehandling(
@@ -230,7 +256,6 @@ class EtteroppgjoerService(
                 val vedtak = runBlocking { vedtakKlient.hentIverksatteVedtak(sakId, HardkodaSystembruker.etteroppgjoer) }
                 val nyAvkorting =
                     reparerAarsoppgjoeret.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-                        sakId = sakId,
                         alleVedtak = vedtak,
                         avkortingSistIverksatt = avkorting,
                     )
@@ -282,10 +307,12 @@ data class BeregnetEtteroppgjoerResultat(
             kilde = this.kilde,
             avkortingForbehandlingId = this.referanseAvkorting.avkortingForbehandling,
             avkortingSisteIverksatteId = this.referanseAvkorting.avkortingSisteIverksatte,
+            vedtakReferanse = this.referanseAvkorting.vedtakReferanse,
         )
 }
 
 data class ReferanseEtteroppgjoer(
     val avkortingForbehandling: UUID,
-    val avkortingSisteIverksatte: UUID,
+    val avkortingSisteIverksatte: UUID?,
+    val vedtakReferanse: List<Long>?,
 )

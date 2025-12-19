@@ -36,6 +36,8 @@ data class EtteroppgjoerForbehandling(
     val kopiertFra: UUID? = null,
     val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
     val harVedtakAvTypeOpphoer: Boolean? = null,
+    val opphoerSkyldesDoedsfall: JaNei?,
+    val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
 ) {
     companion object {
         fun opprett(
@@ -58,7 +60,34 @@ data class EtteroppgjoerForbehandling(
             beskrivelseAvUgunst = null,
             varselbrevSendt = null,
             harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
+            opphoerSkyldesDoedsfall = null,
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
         )
+    }
+
+    fun skyldesOpphoerDoedsfallIEtteroppgjoersaar() = opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA
+
+    fun skalEtterbetalesTilDoedsbo(): Boolean {
+        val doedsfallEtterEtteroppgjoer = opphoerSkyldesDoedsfall == JaNei.JA && opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.NEI
+        return doedsfallEtterEtteroppgjoer && etteroppgjoerResultatType == EtteroppgjoerResultatType.ETTERBETALING
+    }
+
+    fun kanFerdigstillesUtenBrev(): Boolean {
+        // Revurderinger trenger aldri et eget info/varsel knyttet til forbehandlingen, de har bare vedtaksbrevet
+        if (erRevurdering()) {
+            return true
+        }
+        val ingenEndringUtenUtbetaling =
+            etteroppgjoerResultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+        val doedsfall = opphoerSkyldesDoedsfall == JaNei.JA
+
+        // Hvis resultatet er ingen endring uten utbetaling eller det er et dødsfall i saken, så skal man ikke sende brev
+        if (doedsfall || ingenEndringUtenUtbetaling) {
+            return true
+        }
+
+        // I alle andre tilfeller må forbehandlingen ha et infobrev/forhåndsvarsel for å kunne ferdigstilles
+        return false
     }
 
     fun tilBeregnet(beregnetEtteroppgjoerResultatDto: BeregnetEtteroppgjoerResultatDto): EtteroppgjoerForbehandling {
@@ -77,9 +106,20 @@ data class EtteroppgjoerForbehandling(
     }
 
     fun tilFerdigstilt(): EtteroppgjoerForbehandling {
-        if (status != EtteroppgjoerForbehandlingStatus.BEREGNET) {
+        val kanFerdigstille =
+            when {
+                skyldesOpphoerDoedsfallIEtteroppgjoersaar() -> erUnderBehandling()
+                else -> status == EtteroppgjoerForbehandlingStatus.BEREGNET
+            }
+
+        if (!kanFerdigstille) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
         }
+
+        if (brevId == null && !kanFerdigstillesUtenBrev()) {
+            throw InternfeilException("Kan ikke ferdigstille forbehandling uten brev, forbehandlingId=$id")
+        }
+
         return copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
     }
 
@@ -152,6 +192,18 @@ data class EtteroppgjoerForbehandling(
                         endringErTilUgunstForBruker == JaNei.JA
                 },
         )
+
+    fun oppdaterOmOpphoerSkyldesDoedsfall(
+        opphoerSkyldesDoedsfall: JaNei,
+        opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
+    ): EtteroppgjoerForbehandling =
+        copy(
+            opphoerSkyldesDoedsfall = opphoerSkyldesDoedsfall,
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar =
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar?.takeIf {
+                    opphoerSkyldesDoedsfall == JaNei.JA
+                },
+        )
 }
 
 class EtteroppgjoerForbehandlingStatusException(
@@ -162,7 +214,7 @@ class EtteroppgjoerForbehandlingStatusException(
     )
 
 data class DetaljertForbehandlingDto(
-    val behandling: EtteroppgjoerForbehandling,
+    val forbehandling: EtteroppgjoerForbehandling,
     val opplysninger: EtteroppgjoerOpplysninger,
     val faktiskInntekt: FaktiskInntektDto?,
     val beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,

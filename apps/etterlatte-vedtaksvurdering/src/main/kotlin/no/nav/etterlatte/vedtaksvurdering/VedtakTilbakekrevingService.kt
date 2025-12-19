@@ -1,6 +1,8 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -13,8 +15,18 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
+enum class TilbakekrevingVedtakToggles(
+    private val toggle: String,
+) : FeatureToggle {
+    TILLAT_DOBBEL_ATTESTERING("tillat-dobbel-attestering"),
+    ;
+
+    override fun key(): String = toggle
+}
+
 class VedtakTilbakekrevingService(
     private val repository: VedtaksvurderingRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -78,7 +90,14 @@ class VedtakTilbakekrevingService(
             krevIkkeNull(repository.hentVedtak(tilbakekrevingId)) {
                 "Vedtak for tilbakekreving $tilbakekrevingId finnes ikke"
             }
-        verifiserGyldigVedtakStatus(tilbakekrevingId, listOf(VedtakStatus.FATTET_VEDTAK))
+        val gyldigeVedtakStatuser =
+            if (featureToggleService.isEnabled(TilbakekrevingVedtakToggles.TILLAT_DOBBEL_ATTESTERING, false)) {
+                listOf(VedtakStatus.FATTET_VEDTAK, VedtakStatus.ATTESTERT)
+            } else {
+                listOf(VedtakStatus.FATTET_VEDTAK)
+            }
+
+        verifiserGyldigVedtakStatus(tilbakekrevingId, gyldigeVedtakStatuser)
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
         // Behandling sender ut hendelse om attestert vedtak selv for å unngå at brev blir sendt selv om

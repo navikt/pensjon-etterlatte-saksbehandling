@@ -48,7 +48,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
                     oppgaveService
                         .hentOppgaverForReferanse(
                             etteroppgjoer.sisteFerdigstilteForbehandling.toString(),
-                        ).any { it.type == OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT }
+                        ).any { it.type == OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING }
 
                 if (oppgaveFinnesAllerede) {
                     logger.info(
@@ -62,7 +62,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
                     oppgaveService.opprettOppgave(
                         referanse = etteroppgjoer.sisteFerdigstilteForbehandling.toString(),
                         sakId = etteroppgjoer.sakId,
-                        type = OppgaveType.ETTEROPPGJOER_SVARFRIST_UTLOEPT,
+                        type = OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING,
                         merknad = "Svarfrist for etteroppgjør $etteroppgjoersAar er utløpt",
                         kilde = OppgaveKilde.HENDELSE,
                     )

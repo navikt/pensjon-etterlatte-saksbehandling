@@ -21,13 +21,16 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-interface BehandlingKlient : BehandlingTilgangsSjekk {
+interface BehandlingKlient :
+    BehandlingTilgangsSjekk,
+    SakTilgangsSjekk {
     suspend fun hentBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -300,4 +303,10 @@ class BehandlingKlientImpl(
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean = tilgangssjekker.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker)
+
+    override suspend fun harTilgangTilSak(
+        sakId: SakId,
+        skrivetilgang: Boolean,
+        bruker: Saksbehandler,
+    ): Boolean = tilgangssjekker.harTilgangTilSak(sakId, skrivetilgang, bruker)
 }

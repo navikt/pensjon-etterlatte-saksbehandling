@@ -109,6 +109,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = dato,
                 etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
+                opphoerSkyldesDoedsfall = null,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny.copy())
@@ -125,7 +127,7 @@ class EtteroppgjoerForbehandlingDaoTest(
     }
 
     @Test
-    fun `skal oppdatere svar fra bruker`() {
+    fun `skal oppdatere forbehandling med mottatt svar fra bruker`() {
         val forbehandlingId = UUID.randomUUID()
         val forbehandling = opprettForbehandling(forbehandlingId)
         forbehandling
@@ -139,6 +141,41 @@ class EtteroppgjoerForbehandlingDaoTest(
             this?.harMottattNyInformasjon shouldBe JaNei.JA
             this?.endringErTilUgunstForBruker shouldBe JaNei.JA
             this?.beskrivelseAvUgunst shouldBe "beskrivelse"
+        }
+
+        // skal tilbakestille svar hvis mottat ny informasjon endres til nei
+        forbehandling
+            .oppdaterBrukerHarSvart(JaNei.NEI, null, null)
+            .also { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)) {
+            this?.harMottattNyInformasjon shouldBe JaNei.NEI
+            this?.endringErTilUgunstForBruker shouldBe null
+            this?.beskrivelseAvUgunst shouldBe null
+        }
+    }
+
+    @Test
+    fun `skal oppdatere forbehandling med opphoer skyldes doedsfall og i etteroppgjoersAar`() {
+        val forbehandlingId = UUID.randomUUID()
+        val forbehandling = opprettForbehandling(forbehandlingId)
+        forbehandling
+            .oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall = JaNei.JA, opphoerSkyldesDoedsfallIEtteroppgjoersaar = JaNei.JA)
+            .also { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)) {
+            this?.opphoerSkyldesDoedsfall shouldBe JaNei.JA
+            this?.opphoerSkyldesDoedsfallIEtteroppgjoersaar shouldBe JaNei.JA
+        }
+
+        // skal tilbakestille svar hvis opphoer skyldes doedsfall endres til nei
+        forbehandling
+            .oppdaterOmOpphoerSkyldesDoedsfall(JaNei.NEI, null)
+            .also { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
+
+        with(etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)) {
+            this?.opphoerSkyldesDoedsfall shouldBe JaNei.NEI
+            this?.opphoerSkyldesDoedsfallIEtteroppgjoersaar shouldBe null
         }
     }
 
@@ -159,6 +196,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = null,
+                opphoerSkyldesDoedsfall = null,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
             )
         val datoBrevSendt = LocalDate.now().minusDays(1)
         etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
@@ -252,6 +291,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = null,
+                opphoerSkyldesDoedsfall = null,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningen)
@@ -277,6 +318,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = null,
+                opphoerSkyldesDoedsfall = null,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         val afp =
@@ -392,6 +435,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 aarsakTilAvbrytelseBeskrivelse = "test",
                 beskrivelseAvUgunst = "test",
                 etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
+                opphoerSkyldesDoedsfall = null,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
             )
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(

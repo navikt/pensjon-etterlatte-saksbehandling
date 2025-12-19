@@ -4,10 +4,11 @@ import {
   BeregnetEtteroppgjoerResultatDto,
   Etteroppgjoer,
   EtteroppgjoerForbehandling,
-  EtteroppgjoerDetaljertForbehandling,
+  DetaljertEtteroppgjoerForbehandling,
   FaktiskInntekt,
   IInformasjonFraBruker,
 } from '~shared/types/EtteroppgjoerForbehandling'
+import { JaNei } from '~shared/types/ISvar'
 
 export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Etteroppgjoer>> => {
   return apiClient.get(`/etteroppgjoer/${sakId}`)
@@ -19,6 +20,12 @@ export const opprettEtteroppgjoerForbehandlingIDev = async (
   return apiClient.post(`/etteroppgjoer/${sakId}/kundev-opprett-forbehandling`, {})
 }
 
+export const opprettEtteroppgjoerForbehandlingOppgave = async (
+  sakId: number
+): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+  return apiClient.post(`/etteroppgjoer/${sakId}/tilbakestill-og-opprett-forbehandlingsoppgave`, {})
+}
+
 export const opprettEtteroppgoerForbehandling = async (args: {
   sakId: number
   oppgaveId: string
@@ -27,9 +34,9 @@ export const opprettEtteroppgoerForbehandling = async (args: {
 }
 
 export const hentEtteroppgjoerForbehandling = async (
-  behandlingId: string
-): Promise<ApiResponse<EtteroppgjoerDetaljertForbehandling>> => {
-  return apiClient.get(`/etteroppgjoer/forbehandling/${behandlingId}`)
+  forbehandlingId: string
+): Promise<ApiResponse<DetaljertEtteroppgjoerForbehandling>> => {
+  return apiClient.get(`/etteroppgjoer/forbehandling/${forbehandlingId}`)
 }
 
 export const avbrytEtteroppgjoerForbehandling = async (args: {
@@ -62,6 +69,17 @@ export const lagreInformasjonFraBruker = async (args: {
 }) => {
   return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/informasjon-fra-bruker`, {
     ...args.endringFraBruker,
+  })
+}
+
+export const lagreOmOpphoerSkyldesDoedsfall = async (args: {
+  forbehandlingId: string
+  opphoerSkyldesDoedsfall: JaNei
+  opphoerSkyldesDoedsfallIEtteroppgjoersaar?: JaNei
+}) => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/opphoer-skyldes-doedsfall`, {
+    opphoerSkyldesDoedsfall: args.opphoerSkyldesDoedsfall,
+    opphoerSkyldesDoedsfallIEtteroppgjoersaar: args.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
   })
 }
 

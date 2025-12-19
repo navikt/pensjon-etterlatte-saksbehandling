@@ -25,6 +25,7 @@ import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevGrunnlag
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -121,11 +122,11 @@ class EtteroppgjoerRevurderingBrevService(
                 )
 
             val sisteIverksatteBehandling =
-                behandlingService.hentBehandling(detaljertForbehandling.behandling.sisteIverksatteBehandlingId)
+                behandlingService.hentBehandling(detaljertForbehandling.forbehandling.sisteIverksatteBehandlingId)
                     ?: throw InternfeilException("Fant ikke siste iverksatte behandling, kan ikke utlede brevinnhold")
 
             val grunnlag =
-                grunnlagService.hentOpplysningsgrunnlagForSak(detaljertForbehandling.behandling.sak.id)
+                grunnlagService.hentOpplysningsgrunnlagForSak(detaljertForbehandling.forbehandling.sak.id)
                     ?: throw InternfeilException("Fant ikke grunnlag med sakId=$sakId")
 
             val beregnetEtteroppgjoerResultat =
@@ -136,15 +137,9 @@ class EtteroppgjoerRevurderingBrevService(
                 detaljertForbehandling.faktiskInntekt
                     ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
-            val sak = detaljertForbehandling.behandling.sak
+            val sak = detaljertForbehandling.forbehandling.sak
 
-            val forhaandsvarsel =
-                hentForhaandsvarsel(detaljertForbehandling, behandlingId, brukerTokenInfo)
-                    .also {
-                        krev(it.brev.erDistribuert()) {
-                            "Finner ingen distribuerte forhåndsvarsel om etteroppgjør"
-                        }
-                    }
+            val forhaandsvarselBrev = hentForhaandsvarsel(detaljertForbehandling, behandlingId, brukerTokenInfo)
 
             BrevRequest(
                 sak = sak,
@@ -159,7 +154,7 @@ class EtteroppgjoerRevurderingBrevService(
                 brevFastInnholdData =
                     EtteroppgjoerBrevData.Vedtak(
                         bosattUtland = sisteIverksatteBehandling.erBosattUtland(),
-                        etteroppgjoersAar = detaljertForbehandling.behandling.aar,
+                        etteroppgjoersAar = detaljertForbehandling.forbehandling.aar,
                         avviksBeloep = Kroner(beregnetEtteroppgjoerResultat.differanse.toInt()),
                         utbetaltBeloep = Kroner(sisteUtbetaltBeloep),
                         resultatType = beregnetEtteroppgjoerResultat.resultatType,
@@ -170,13 +165,16 @@ class EtteroppgjoerRevurderingBrevService(
                     ),
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(
-                        etteroppgjoersAar = detaljertForbehandling.behandling.aar,
-                        forhaandsvarselSendtDato = forhaandsvarsel.varselbrevSendt,
+                        etteroppgjoersAar = detaljertForbehandling.forbehandling.aar,
+                        forhaandsvarselSendtDato = forhaandsvarselBrev?.varselbrevSendt,
                         mottattSvarDato = null, // TODO: legg til dato for mottatt journalpost
                     ),
                 brevVedleggData =
                     listOf(
-                        EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = detaljertForbehandling.behandling.aar, erVedtak = true),
+                        EtteroppgjoerBrevData.beregningsVedlegg(
+                            etteroppgjoersAar = detaljertForbehandling.forbehandling.aar,
+                            erVedtak = true,
+                        ),
                     ),
             )
         }
@@ -188,23 +186,30 @@ class EtteroppgjoerRevurderingBrevService(
         detaljertForbehandling: DetaljertForbehandlingDto,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Forhaandsvarsel {
-        val forbehandlingMedVarselbrev =
-            detaljertForbehandling.behandling.kopiertFra
+    ): Forhaandsvarsel? {
+        val forbehandling =
+            detaljertForbehandling.forbehandling.kopiertFra
                 ?.let { etteroppgjoerForbehandlingService.hentForbehandling(it) }
                 ?: throw InternfeilException("Mangler opprinnelig forbehandling for behandlingId=$behandlingId")
 
-        val brevId = (
-            forbehandlingMedVarselbrev.brevId
-                ?: throw InternfeilException("Mangler varselbrev for behandlingId=$behandlingId")
-        )
+        if (forbehandling.kanFerdigstillesUtenBrev()) {
+            return null
+        }
+
+        krevIkkeNull(forbehandling.brevId) {
+            "Finner ikke brevId for forbehandlingId=${forbehandling.id}"
+        }
 
         val forhaandsvarselBrev =
-            brevApiKlient.hentBrev(detaljertForbehandling.behandling.sak.id, brevId, brukerTokenInfo)
+            brevApiKlient.hentBrev(forbehandling.sak.id, forbehandling.brevId, brukerTokenInfo).also {
+                krev(it.erDistribuert()) {
+                    "Finner ingen distribuerte forhåndsvarsel om etteroppgjør"
+                }
+            }
 
         return Forhaandsvarsel(
             forhaandsvarselBrev,
-            forbehandlingMedVarselbrev.varselbrevSendt
+            forbehandling.varselbrevSendt
                 ?: throw InternfeilException("Mangler dato sendt på varselbrev for behandlingId=$behandlingId"),
         )
     }

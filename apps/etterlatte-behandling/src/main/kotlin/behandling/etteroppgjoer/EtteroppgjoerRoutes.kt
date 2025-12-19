@@ -12,24 +12,27 @@ import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlin
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OpphoerSkyldesDoedsfallRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.forbehandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
@@ -50,6 +53,9 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB("etteroppgjoer_svarfristutloept_jobb"),
     ETTEROPPGJOER_OPPRETT_FORBEHANDLING_JOBB("etteroppgjoer_opprett_forbehandling_jobb"),
     ETTEROPPGJOER_KAN_FERDIGSTILLE_FORBEHANDLING("etteroppgjoer_kan_ferdigstille_forbehandling"),
+    ETTEROPPGJOER_OPPHOER_SKYLDES_DOEDSFALL("etteroppgjoer-opphoer-skyldes-doedsfall"),
+    HENT_ENHETER_FRA_ENTRA_PROXY("hent_enheter_fra_entra_proxy"),
+    VIS_TILBAKESTILL_ETTEROPPGJOER("vis-tilbakestill-etteroppgjoer"),
     ;
 
     override fun key(): String = toggle
@@ -66,14 +72,12 @@ fun Route.etteroppgjoerRoutes(
         route("/{$SAKID_CALL_PARAMETER}") {
             get {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
-                kunSkrivetilgang {
-                    val etteroppgjoer =
-                        inTransaction {
-                            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
-                        } ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjoer for sak")
+                val etteroppgjoer =
+                    inTransaction {
+                        etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
+                    } ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjoer for sak")
 
-                    call.respond(etteroppgjoer)
-                }
+                call.respond(etteroppgjoer)
             }
 
             post("/kundev-opprett-forbehandling") {
@@ -96,7 +100,54 @@ fun Route.etteroppgjoerRoutes(
                         )
 
                         forbehandlingService.opprettOppgaveForOpprettForbehandling(
+                            sakId = sakId,
+                            opprettetManuelt = true,
+                        )
+                    }
+
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            post("tilbakestill-og-opprett-forbehandlingsoppgave") {
+                sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService)
+                kunSkrivetilgang {
+                    inTransaction {
+                        val etteroppgjoer =
+                            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
+                                ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjør for sak $sakId")
+
+                        if (etteroppgjoer.status == EtteroppgjoerStatus.FERDIGSTILT) {
+                            val forbehandling = forbehandlingService.hentForbehandling(etteroppgjoer.sisteFerdigstilteForbehandling!!)
+
+                            if (forbehandling.etteroppgjoerResultatType != EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
+                                throw IkkeTillattException(
+                                    code = "UTFALL_IKKE_TILLATT",
+                                    "Vi støtter ikke " +
+                                        "tilbakestilling med resultat ${forbehandling.etteroppgjoerResultatType}. " +
+                                        "Ta kontakt hvis forbehandlingen skal tilbakestilles.",
+                                )
+                            }
+                        }
+
+                        krev(etteroppgjoer.kanTilbakestillesMedNyForbehandling()) {
+                            "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke tilbakestille " +
+                                "og opprette ny forbehandling"
+                        }
+
+                        logger.info(
+                            "Tilbakestiller etteroppgjør med sakId ${etteroppgjoer.sakId}",
+                        )
+
+                        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                             sakId,
+                            etteroppgjoer.inntektsaar,
+                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                        )
+
+                        forbehandlingService.opprettOppgaveForOpprettForbehandling(
+                            sakId = sakId,
+                            opprettetManuelt = true,
                         )
                     }
 
@@ -120,13 +171,11 @@ fun Route.etteroppgjoerRoutes(
             route("/{$FORBEHANDLINGID_CALL_PARAMETER}") {
                 get {
                     sjekkEtteroppgjoerEnabled(featureToggleService)
-                    kunSkrivetilgang {
-                        val etteroppgjoer =
-                            inTransaction {
-                                forbehandlingService.hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
-                            }
-                        call.respond(etteroppgjoer)
-                    }
+                    val etteroppgjoer =
+                        inTransaction {
+                            forbehandlingService.hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
+                        }
+                    call.respond(etteroppgjoer)
                 }
 
                 post("beregn-faktisk-inntekt") {
@@ -202,18 +251,36 @@ fun Route.etteroppgjoerRoutes(
                 }
 
                 post("informasjon-fra-bruker") {
-                    val request = call.receive<InformasjonFraBrukerRequest>()
+                    kunSkrivetilgang {
+                        val request = call.receive<InformasjonFraBrukerRequest>()
 
-                    inTransaction {
-                        forbehandlingService.lagreInformasjonFraBruker(
-                            forbehandlingId = forbehandlingId,
-                            harMottattNyInformasjon = request.harMottattNyInformasjon,
-                            endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
-                            beskrivelseAvUgunst = request.beskrivelseAvUgunst,
-                        )
+                        inTransaction {
+                            forbehandlingService.lagreInformasjonFraBruker(
+                                forbehandlingId = forbehandlingId,
+                                harMottattNyInformasjon = request.harMottattNyInformasjon,
+                                endringErTilUgunstForBruker = request.endringErTilUgunstForBruker,
+                                beskrivelseAvUgunst = request.beskrivelseAvUgunst,
+                            )
+                        }
+
+                        call.respond(HttpStatusCode.OK)
                     }
+                }
 
-                    call.respond(HttpStatusCode.OK)
+                post("opphoer-skyldes-doedsfall") {
+                    kunSkrivetilgang {
+                        val request = call.receive<OpphoerSkyldesDoedsfallRequest>()
+
+                        inTransaction {
+                            forbehandlingService.lagreOmOpphoerSkyldesDoedsfall(
+                                forbehandlingId,
+                                opphoerSkyldesDoedsfall = request.opphoerSkyldesDoedsfall,
+                                opphoerSkyldesDoedsfallIEtteroppgjoersaar = request.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
+                            )
+                        }
+
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
             }
 
@@ -248,6 +315,13 @@ fun Route.etteroppgjoerRoutes(
             call.respond(forbehandlinger)
         }
 
+        route("/revurdering/{${BEHANDLINGID_CALL_PARAMETER}}/resultat") {
+            get {
+                val resultat = inTransaction { forbehandlingService.hentBeregnetResultatForRevurdering(behandlingId, brukerTokenInfo) }
+                call.respond(resultat)
+            }
+        }
+
         post("/les-skatteoppgjoer-hendelser") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
 
@@ -264,6 +338,16 @@ fun Route.etteroppgjoerRoutes(
 private fun sjekkEtteroppgjoerEnabled(featureToggleService: FeatureToggleService) {
     if (!featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER, false)) {
         throw IkkeTillattException("ETTEROPPGJOER_NOT_ENABLED", "Etteroppgjør er ikke skrudd på i miljøet.")
+    }
+}
+
+private fun sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService: FeatureToggleService) {
+    if (!featureToggleService.isEnabled(EtteroppgjoerToggles.VIS_TILBAKESTILL_ETTEROPPGJOER, false)) {
+        throw IkkeTillattException(
+            "VIS_TILBAKESTILL_ETTEROPPGJOER_NOT_ENABLED",
+            "Tilbakestilling av " +
+                "etteroppgjør er ikke tillatt for vedkommende i miljøet",
+        )
     }
 }
 

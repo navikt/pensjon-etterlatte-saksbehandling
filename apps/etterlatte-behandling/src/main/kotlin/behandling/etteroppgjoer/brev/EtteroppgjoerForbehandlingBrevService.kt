@@ -84,43 +84,27 @@ class EtteroppgjoerForbehandlingBrevService(
             etteroppgjoerForbehandlingService
                 .hentDetaljertForbehandling(forbehandlingId, brukerTokenInfo)
 
-        val forbehandling = detaljertForbehandling.behandling
-        val sakId = forbehandling.sak.id
         val brevId =
-            forbehandling.brevId ?: throw UgyldigForespoerselException(
+            detaljertForbehandling.forbehandling.brevId ?: throw UgyldigForespoerselException(
                 code = "MANGLER_BREVID",
                 detail = "Forbehandling $forbehandlingId mangler brevId og kan ikke ferdigstilles.",
             )
 
+        val sakId = detaljertForbehandling.forbehandling.sak.id
         val brev = brevKlient.hentBrev(sakId, brevId, brukerTokenInfo)
 
-        val sistBeregnetTidspunkt = detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
-        if (sistBeregnetTidspunkt > brev.statusEndret) {
-            throw IkkeTillattException(
-                code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                detail =
-                    "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder " +
-                        "om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
-            )
-        }
+        krevBrevKanFerdigstilles(detaljertForbehandling, sakId, brev, brukerTokenInfo)
 
-        val response = brevKlient.kanFerdigstilleBrev(brevId, sakId, brukerTokenInfo)
-        if (!response.kanFerdigstille && brev.status.ikkeFerdigstilt()) {
-            throw UgyldigForespoerselException(
-                code = "KAN_IKKE_FERDIGSTILLE_BREV",
-                detail = response.aarsak ?: "Ukjent feil",
-            )
-        }
+        // TODO: fjerne om litt, vi har et par forbehandlinger som ikke er ferdigstilt men varselbrev er sendt
+        val varselBrevSendt = if (brev.status.erDistribuert()) brev.statusEndret.toLocalDate() else LocalDate.now()
 
-        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandling, brukerTokenInfo)
+        val forbehandlingMedVarselbrevSendt = detaljertForbehandling.forbehandling.medVarselbrevSendt(varselBrevSendt)
+        etteroppgjoerForbehandlingService.ferdigstillForbehandling(forbehandlingMedVarselbrevSendt, brukerTokenInfo)
+
         brevKlient.ferdigstillJournalfoerStrukturertBrev(
             forbehandlingId,
             Brevkoder.OMS_EO_FORHAANDSVARSEL.brevtype,
             brukerTokenInfo,
-        )
-        etteroppgjoerForbehandlingService.lagreVarselbrevSendt(
-            forbehandlingId = forbehandlingId,
-            dato = LocalDate.now(),
         )
     }
 
@@ -175,7 +159,7 @@ class EtteroppgjoerForbehandlingBrevService(
             val pensjonsgivendeInntekt = detaljertForbehandling.opplysninger.skatt
 
             val sisteIverksatteBehandling =
-                behandlingService.hentBehandling(detaljertForbehandling.behandling.sisteIverksatteBehandlingId)
+                behandlingService.hentBehandling(detaljertForbehandling.forbehandling.sisteIverksatteBehandlingId)
                     ?: throw InternfeilException("Fant ikke siste iverksatte behandling, kan ikke utlede brevinnhold")
 
             val (redigerbar, innhold, vedlegg, sak) =
@@ -233,7 +217,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 EtteroppgjoerBrevData.ForhaandsvarselInnhold(
                     bosattUtland = bosattUtland,
                     norskInntekt = norskInntekt,
-                    etteroppgjoersAar = data.behandling.aar,
+                    etteroppgjoersAar = data.forbehandling.aar,
                     rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                     resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
                     avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
@@ -243,7 +227,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 EtteroppgjoerBrevData.Forhaandsvarsel(
                     bosattUtland = bosattUtland,
                     norskInntekt = norskInntekt,
-                    etteroppgjoersAar = data.behandling.aar,
+                    etteroppgjoersAar = data.forbehandling.aar,
                     rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                     resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
                     stoenad = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
@@ -253,10 +237,37 @@ class EtteroppgjoerForbehandlingBrevService(
                 ),
             vedlegg =
                 listOf(
-                    EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = data.behandling.aar, erVedtak = false),
+                    EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = data.forbehandling.aar, erVedtak = false),
                 ),
             sak = sisteIverksatteBehandling.sak,
         )
+    }
+
+    private suspend fun krevBrevKanFerdigstilles(
+        detaljertForbehandling: DetaljertForbehandlingDto,
+        sakId: SakId,
+        brev: Brev,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        if (brev.status.ikkeFerdigstilt()) {
+            val sistBeregnetTidspunkt = detaljertForbehandling.beregnetEtteroppgjoerResultat!!.tidspunkt
+            if (sistBeregnetTidspunkt > brev.statusEndret) {
+                throw IkkeTillattException(
+                    code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                    detail =
+                        "Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder " +
+                            "om det bør tilbakestilles for å få oppdaterte verdier fra behandlingen.",
+                )
+            }
+
+            val response = brevKlient.kanFerdigstilleBrev(brev.id, sakId, brukerTokenInfo)
+            if (!response.kanFerdigstille) {
+                throw UgyldigForespoerselException(
+                    code = "KAN_IKKE_FERDIGSTILLE_BREV",
+                    detail = response.aarsak ?: "Ukjent feil",
+                )
+            }
+        }
     }
 
     suspend fun slettVarselbrev(

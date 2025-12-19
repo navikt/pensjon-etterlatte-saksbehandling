@@ -10,6 +10,7 @@ import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
@@ -36,17 +37,15 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class DoedshendelseServiceTest {
+    private val featureToggleService: FeatureToggleService = DummyFeatureToggleService()
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val dao = mockk<DoedshendelseDao>()
 
-    private val toggle =
-        mockk<FeatureToggleService> {
-            every { isEnabled(any(), any()) } returns true
-        }
     private val service =
         DoedshendelseService(
-            pdlTjenesterKlient = pdlTjenesterKlient,
             doedshendelseDao = dao,
+            pdlTjenesterKlient = pdlTjenesterKlient,
+            featureToggleService = featureToggleService,
         )
 
     private val avdoed =

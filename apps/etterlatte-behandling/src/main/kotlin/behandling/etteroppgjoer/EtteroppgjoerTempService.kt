@@ -26,6 +26,7 @@ class EtteroppgjoerTempService(
     fun opprettOppgaveForOpprettForbehandling(
         sakId: SakId,
         merknad: String? = null,
+        opprettetManuelt: Boolean? = false,
     ) {
         // Samme oppgave brukes for oppretting og behandling av forbehandling.
         // En tom referanse betyr at oppgaven gjelder oppretting.
@@ -44,7 +45,15 @@ class EtteroppgjoerTempService(
             }
 
             eksisterendeOppgaver.isNotEmpty() -> {
-                logger.info("Det eksisterer allerede en oppgave for opprette forbehandling i sak=$sakId, hopper over opprettelse")
+                if(opprettetManuelt == true) {
+                    // Hvis oppgaven prøves å opprettes manuelt skal vi rapportere tilbake feil i saksbehandlingsløsningen
+                    throw InternfeilException("Det eksisterer allerede en oppgave for opprette forbehandling i " +
+                        "sak=$sakId, hopper over opprettelse")
+                }
+                else {
+                    logger.info("Det eksisterer allerede en oppgave for opprette forbehandling i sak=$sakId, " +
+                        "hopper over opprettelse")
+                }
                 return
             }
 
@@ -61,7 +70,8 @@ class EtteroppgjoerTempService(
     }
 
     /**
-     * Setter status tilbake til MOTTATT_SKATTEOPPGJOER i etteroppgjøret og avbryter forbehandlingen.
+     * Setter status tilbake til MOTTATT_SKATTEOPPGJOER i etteroppgjøret hvis det skal være ny forbehandling, eller
+     * VENTER_PAA_SVAR hvis det ikke skal være en ny forbehandling. Etteroppgjørbehandlingen avbrytes også.
      */
     fun tilbakestillEtteroppgjoerVedAvbruttRevurdering(
         behandling: Behandling,
@@ -106,7 +116,12 @@ class EtteroppgjoerTempService(
                 etteroppgjoerDao.oppdaterEtteroppgjoerStatus(
                     sakId = sakId,
                     inntektsaar = etteroppgjoer.inntektsaar,
-                    status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    status =
+                        if (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
+                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+                        } else {
+                            EtteroppgjoerStatus.VENTER_PAA_SVAR
+                        },
                 )
                 hendelserService.registrerOgSendEtteroppgjoerHendelse(
                     etteroppgjoerForbehandling = avbruttForbehandling,

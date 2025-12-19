@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
@@ -99,13 +100,61 @@ inline val RoutingContext.forbehandlingId: UUID
             "ForbehandlingId er ikke i path params",
         )
 
-val logger = LoggerFactory.getLogger("TilgangsSjekk")
+val logger: Logger = LoggerFactory.getLogger("TilgangsSjekk")
 
 suspend inline fun RoutingContext.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     skrivetilgang: Boolean = false,
     onSuccess: (id: UUID) -> Unit,
 ) = withUuidParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
+    withBehandlingId(behandlingId, behandlingTilgangsSjekk, skrivetilgang, onSuccess)
+}
+
+suspend inline fun RoutingContext.withSakId(
+    sakTilgangsSjekk: SakTilgangsSjekk,
+    skrivetilgang: Boolean = false,
+    onSuccess: (id: SakId) -> Unit,
+) {
+    val sakId =
+        try {
+            call.parameters[SAKID_CALL_PARAMETER]?.tilSakId()
+        } catch (_: Exception) {
+            throw UgyldigForespoerselException("SAKID_IKKE_TALL", "Kunne ikke lese ut sakId-parameter")
+        }
+    if (sakId == null) {
+        throw UgyldigForespoerselException("SAKID_MANGLER", "Mangler påkrevd sakId som parameter")
+    }
+    withSakId(sakId, sakTilgangsSjekk, skrivetilgang, onSuccess)
+}
+
+suspend inline fun RoutingContext.withSakId(
+    sakId: SakId,
+    sakTilgangsSjekk: SakTilgangsSjekk,
+    skrivetilgang: Boolean,
+    onSuccess: (id: SakId) -> Unit,
+) {
+    when (val token = brukerTokenInfo) {
+        is Saksbehandler -> {
+            val harTilgangTilSak =
+                sakTilgangsSjekk.harTilgangTilSak(sakId, skrivetilgang, token)
+            if (harTilgangTilSak) {
+                onSuccess(sakId)
+            } else {
+                logger.info("Har ikke tilgang til sak")
+                throw IkkeTilgangTilSakException()
+            }
+        }
+
+        is Systembruker -> onSuccess(sakId)
+    }
+}
+
+suspend inline fun RoutingContext.withBehandlingId(
+    behandlingId: UUID,
+    behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
+    skrivetilgang: Boolean,
+    onSuccess: (id: UUID) -> Unit,
+) {
     when (val bruker = brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilBehandling =
@@ -123,36 +172,6 @@ suspend inline fun RoutingContext.withBehandlingId(
         }
 
         else -> onSuccess(behandlingId)
-    }
-}
-
-suspend inline fun RoutingContext.withSakId(
-    sakTilgangsSjekk: SakTilgangsSjekk,
-    skrivetilgang: Boolean = false,
-    onSuccess: (id: SakId) -> Unit,
-) {
-    val sakId =
-        try {
-            call.parameters[SAKID_CALL_PARAMETER]?.tilSakId()
-        } catch (_: Exception) {
-            throw UgyldigForespoerselException("SAKID_IKKE_TALL", "Kunne ikke lese ut sakId-parameter")
-        }
-    if (sakId == null) {
-        throw UgyldigForespoerselException("SAKID_MANGLER", "Mangler påkrevd sakId som parameter")
-    }
-    when (val token = brukerTokenInfo) {
-        is Saksbehandler -> {
-            val harTilgangTilSak =
-                sakTilgangsSjekk.harTilgangTilSak(sakId, skrivetilgang, token)
-            if (harTilgangTilSak) {
-                onSuccess(sakId)
-            } else {
-                logger.info("Har ikke tilgang til sak")
-                throw IkkeTilgangTilSakException()
-            }
-        }
-
-        is Systembruker -> onSuccess(sakId)
     }
 }
 

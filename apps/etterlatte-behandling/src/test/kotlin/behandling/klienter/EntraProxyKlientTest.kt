@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.junit.jupiter.api.Test
 
-internal class AxsysKlientTest {
+internal class EntraProxyKlientTest {
     @Test
     fun `hent enheter skal returnere en liste av enheter`() {
         val testNavIdent = "ident1"
@@ -32,14 +32,17 @@ internal class AxsysKlientTest {
 
         val klient =
             mockHttpClient(
-                EnhetslisteResponse(saksbehandlerEnheter.map { Enheter(it.enhetsNummer, null, it.navn) }),
-                testNavIdent,
+                respons =
+                    saksbehandlerEnheter
+                        .map { EntraEnhet(enhetnummer = it.enhetsNummer.enhetNr, navn = it.navn) }
+                        .toSet(),
+                ident = testNavIdent,
             )
 
-        val axsys: AxsysKlient = AxsysKlientImpl(klient, "")
+        val entraProxyKlient: EntraProxyKlient = EntraProxyKlientImpl(klient, "")
 
         runBlocking {
-            val resultat = axsys.hentEnheterForIdent(testNavIdent)
+            val resultat = entraProxyKlient.hentEnheterForIdent(testNavIdent)
 
             resultat.size shouldBeExactly 3
 
@@ -50,7 +53,7 @@ internal class AxsysKlientTest {
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
     private fun mockHttpClient(
-        respons: EnhetslisteResponse,
+        respons: Set<EntraEnhet>,
         ident: String,
     ): HttpClient {
         val httpClient =
@@ -58,7 +61,7 @@ internal class AxsysKlientTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/api/v2/tilgang/$ident?inkluderAlleEnheter=false" ->
+                            "/api/v1/enhet/ansatt/$ident" ->
                                 respond(
                                     respons.toJson(),
                                     HttpStatusCode.OK,

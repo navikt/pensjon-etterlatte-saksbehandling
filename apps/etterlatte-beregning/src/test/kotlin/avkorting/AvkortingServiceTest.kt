@@ -254,7 +254,6 @@ internal class AvkortingServiceTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting
@@ -282,7 +281,6 @@ internal class AvkortingServiceTest {
                 avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
                     YearMonth.of(2024, 1),
-                    behandling.sak,
                     alleVedtak,
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
@@ -336,7 +334,6 @@ internal class AvkortingServiceTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
@@ -369,7 +366,6 @@ internal class AvkortingServiceTest {
                 avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
                     YearMonth.of(2024, 1),
-                    behandling.sak,
                     alleVedtak,
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
@@ -430,7 +426,6 @@ internal class AvkortingServiceTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting andThen lagretAvkorting
@@ -462,7 +457,6 @@ internal class AvkortingServiceTest {
                 avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
                     YearMonth.of(2024, 1),
-                    behandling.sak,
                     alleVedtak,
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
@@ -618,7 +612,6 @@ internal class AvkortingServiceTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(forrigeBehandling) } returns forrigeAvkorting
@@ -662,7 +655,6 @@ internal class AvkortingServiceTest {
                 avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
                     YearMonth.of(2024, 3),
-                    revurdering.sak,
                     alleVedtak,
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandling)

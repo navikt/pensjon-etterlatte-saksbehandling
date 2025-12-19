@@ -14,8 +14,8 @@ interface Props {
 }
 
 export function EtteroppgjoerForbehandlingStegLenke({ path, description, enabled, erSisteRoute }: Props) {
-  const match = useMatch('/etteroppgjoer/:etteroppgjoerId/:steg')
-  const { etteroppgjoerId, steg } = match?.params || {}
+  const match = useMatch('/etteroppgjoer/:forbehandlingId/:steg')
+  const { forbehandlingId, steg } = match?.params || {}
 
   return (
     <>
@@ -27,7 +27,7 @@ export function EtteroppgjoerForbehandlingStegLenke({ path, description, enabled
             <Label>{description}</Label>
           ) : (
             <Label>
-              <NavLink to={`/etteroppgjoer/${etteroppgjoerId}/${path}`} style={{ textDecoration: 'none' }}>
+              <NavLink to={`/etteroppgjoer/${forbehandlingId}/${path}`} style={{ textDecoration: 'none' }}>
                 {description}
               </NavLink>
             </Label>

@@ -5,12 +5,17 @@ import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
+import no.nav.etterlatte.grunnlagsendring.vergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
@@ -20,7 +25,6 @@ import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.sak.PersonManglerSak
 import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgang
@@ -51,6 +55,15 @@ fun Sak.erSpesialSak(): Boolean {
     return harAdressebeskyttelse || erEgenansatt || harSpesialEnhet
 }
 
+enum class TilgangToggles(
+    private val key: String,
+) : FeatureToggle {
+    VURDER_SKJERMING_OGSAA_MED_HENSYN_TIL_VERGER("vurder-skjerming-ogsaa-med-hensyn-til-verger"),
+    ;
+
+    override fun key(): String = key
+}
+
 class OppdaterTilgangService(
     private val skjermingKlient: SkjermingKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
@@ -59,6 +72,7 @@ class OppdaterTilgangService(
     private val sakSkrivDao: SakSkrivDao,
     private val sakTilgang: SakTilgang,
     private val sakLesDao: SakLesDao,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -70,9 +84,17 @@ class OppdaterTilgangService(
     fun haandtergraderingOgEgenAnsatt(
         sakId: SakId,
         persongalleri: Persongalleri,
+        grunnlag: Grunnlag?,
     ) {
         logger.info("Håndterer tilganger for sakid $sakId")
-        val sak = sakLesDao.hentSak(sakId) ?: throw PersonManglerSak()
+        val sak = sakLesDao.hentSak(sakId)
+        if (sak == null) {
+            logger.warn(
+                "Fant ikke sak $sakId som  skulle oppdatert tilgang. Det ligger muligens noe junky data i" +
+                    " grunnlagstabellen knyttet til en sak som aldri ble opprettet ferdig.",
+            )
+            return
+        }
         val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 
         val identerMedGradering =
@@ -104,7 +126,7 @@ class OppdaterTilgangService(
             }
         } else {
             sakTilgang.oppdaterAdressebeskyttelse(sakId, identerMedGradering.hentPrioritertGradering())
-            if (harRelevanteSkjermedePersoner(sak, persongalleri)) {
+            if (harRelevanteSkjermedePersoner(sak, persongalleri, grunnlag)) {
                 sakTilgang.oppdaterSkjerming(sakId, true)
                 val sakMedEnhet = SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)
                 sakSkrivDao.oppdaterEnhet(sakMedEnhet)
@@ -125,13 +147,19 @@ class OppdaterTilgangService(
     private fun harRelevanteSkjermedePersoner(
         sak: Sak,
         persongalleri: Persongalleri,
+        grunnlag: Grunnlag?,
     ): Boolean {
-        val relevanteIdenterForSkjerming =
+        val relevanteIPersongalleri =
             when (sak.sakType == SakType.BARNEPENSJON && persongalleri.soekerErOver18Aar()) {
                 true -> listOf(persongalleri.soeker)
                 false -> persongalleri.hentAlleIdentifikatorer()
             }
-
+        val relevanteIdenterForSkjerming =
+            if (featureToggleService.isEnabled(TilgangToggles.VURDER_SKJERMING_OGSAA_MED_HENSYN_TIL_VERGER, false)) {
+                (relevanteIPersongalleri + vergersFoedselsnummer(grunnlag)).distinct()
+            } else {
+                relevanteIPersongalleri
+            }
         return relevanteIdenterForSkjerming.any { fnr -> sjekkOmIdentErSkjermet(fnr) }
     }
 
@@ -175,4 +203,10 @@ class OppdaterTilgangService(
 
         return LocalDate.now() >= foedselsdatoSoeker.plusYears(18)
     }
+
+    fun vergersFoedselsnummer(grunnlag: Grunnlag?): List<String> =
+        grunnlag
+            ?.vergemaalellerfremtidsfullmakt(Saksrolle.SOEKER)
+            ?.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident?.value }
+            ?: emptyList()
 }

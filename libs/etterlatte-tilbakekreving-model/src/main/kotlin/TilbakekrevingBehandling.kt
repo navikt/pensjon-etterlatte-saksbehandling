@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
@@ -8,6 +9,7 @@ data class TilbakekrevingBehandling(
     val id: UUID,
     val status: TilbakekrevingStatus,
     val sak: Sak,
+    val omgjoeringAvId: UUID?,
     val opprettet: Tidspunkt,
     val aarsakForAvbrytelse: TilbakekrevingAvbruttAarsak?,
     val tilbakekreving: Tilbakekreving,
@@ -48,20 +50,30 @@ data class TilbakekrevingBehandling(
             aarsakForAvbrytelse = aarsakForAvbrytelse,
         )
 
+    fun skalOverstyreBehandletNettoTilBrutto(): Boolean {
+        if (sak.sakType != SakType.BARNEPENSJON) {
+            return false
+        }
+        return tilbakekreving.overstyrBehandletNettoTilBruttoMotTilbakekreving == JaNei.JA
+    }
+
     companion object {
         fun ny(
             kravgrunnlag: Kravgrunnlag,
             sak: Sak,
+            omgjoeringAvId: UUID?,
         ) = TilbakekrevingBehandling(
             id = UUID.randomUUID(),
             status = TilbakekrevingStatus.OPPRETTET,
             sak = sak,
+            omgjoeringAvId = omgjoeringAvId,
             opprettet = Tidspunkt.now(),
             tilbakekreving =
                 Tilbakekreving(
                     vurdering = null,
                     perioder = kravgrunnlag.perioder.tilTilbakekrevingPerioder(),
                     kravgrunnlag = kravgrunnlag,
+                    overstyrBehandletNettoTilBruttoMotTilbakekreving = null,
                 ),
             sendeBrev = true,
             aarsakForAvbrytelse = null,

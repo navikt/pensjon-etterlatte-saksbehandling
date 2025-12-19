@@ -24,11 +24,12 @@ enum class FilterVerdi(
 
 enum class EtteroppgjoerFilter(
     val harSanksjon: FilterVerdi,
-    val harInsitusjonsopphold: FilterVerdi,
+    val harInstitusjonsopphold: FilterVerdi,
     val harOpphoer: FilterVerdi,
     val harAdressebeskyttelseEllerSkjermet: FilterVerdi,
     val harAktivitetskrav: FilterVerdi,
     val harBosattUtland: FilterVerdi,
+    val harUtlandstilsnitt: FilterVerdi,
     val harOverstyrtBeregning: FilterVerdi,
 ) {
     ENKEL(
@@ -39,14 +40,26 @@ enum class EtteroppgjoerFilter(
         FilterVerdi.FALSE,
         FilterVerdi.FALSE,
         FilterVerdi.FALSE,
+        FilterVerdi.FALSE,
     ),
     MED_AKTIVITET_OG_SKJERMET(
         harSanksjon = FilterVerdi.FALSE,
-        harInsitusjonsopphold = FilterVerdi.FALSE,
+        harInstitusjonsopphold = FilterVerdi.FALSE,
         harOpphoer = FilterVerdi.FALSE,
         harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
         harAktivitetskrav = FilterVerdi.DONT_CARE,
         harBosattUtland = FilterVerdi.FALSE,
+        harUtlandstilsnitt = FilterVerdi.FALSE,
+        harOverstyrtBeregning = FilterVerdi.FALSE,
+    ),
+    MED_AKTIVITET_SKJERMET_OG_UTLANDSTILSNITT(
+        harSanksjon = FilterVerdi.FALSE,
+        harInstitusjonsopphold = FilterVerdi.FALSE,
+        harOpphoer = FilterVerdi.FALSE,
+        harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
+        harAktivitetskrav = FilterVerdi.DONT_CARE,
+        harBosattUtland = FilterVerdi.FALSE,
+        harUtlandstilsnitt = FilterVerdi.DONT_CARE,
         harOverstyrtBeregning = FilterVerdi.FALSE,
     ),
 }
@@ -90,7 +103,7 @@ class OpprettEtteroppgjoerJobService(
                 try {
                     inTransaction {
                         runBlocking {
-                            etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, inntektsaar) != null
+                            etteroppgjoerService.upsertNyttEtteroppgjoer(sakId, inntektsaar) != null
                         }
                     }
                 } catch (e: Exception) {

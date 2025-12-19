@@ -5,9 +5,11 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHende
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType.BEREGNET
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.EtteroppgjoerRad
 import no.nav.etterlatte.statistikk.database.EtteroppgjoerRepository
+import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerStatistikkService(
@@ -43,4 +45,9 @@ class EtteroppgjoerStatistikkService(
 
     fun hentNyesteBeregnedeResultat(forbehandlingId: UUID): EtteroppgjoerResultatType? =
         hentNyesteRad(forbehandlingId) { it.hendelse == BEREGNET }?.resultatType
+
+    fun hentRaderForMaaned(maaned: YearMonth): Map<SakId, EtteroppgjoerRad> {
+        val rader: List<EtteroppgjoerRad> = etteroppgjoerRepository.hentRaderForMaaned(maaned)
+        return rader.associateBy { it.sakId }
+    }
 }

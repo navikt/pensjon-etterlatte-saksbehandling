@@ -79,9 +79,9 @@ class EtteroppgjoerForbehandlingDao(
                         """
                         INSERT INTO etteroppgjoer_behandling(
                             id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst, varselbrev_sendt, etteroppgjoer_resultat_type,
-                            aarsak_til_avbrytelse, kommentar_til_avbrytelse, har_vedtak_av_type_opphoer
+                            aarsak_til_avbrytelse, kommentar_til_avbrytelse, har_vedtak_av_type_opphoer, opphoer_skyldes_doedsfall, opphoer_skyldes_doedsfall_i_etteroppgjoersaar
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id,
@@ -92,7 +92,9 @@ class EtteroppgjoerForbehandlingDao(
                             etteroppgjoer_resultat_type = excluded.etteroppgjoer_resultat_type,
                             aarsak_til_avbrytelse = excluded.aarsak_til_avbrytelse,
                             kommentar_til_avbrytelse = excluded.kommentar_til_avbrytelse,
-                            har_vedtak_av_type_opphoer = excluded.har_vedtak_av_type_opphoer
+                            har_vedtak_av_type_opphoer = excluded.har_vedtak_av_type_opphoer,
+                            opphoer_skyldes_doedsfall = excluded.opphoer_skyldes_doedsfall,
+                            opphoer_skyldes_doedsfall_i_etteroppgjoersaar = excluded.opphoer_skyldes_doedsfall_i_etteroppgjoersaar
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)
@@ -119,6 +121,8 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setString(16, forbehandling.aarsakTilAvbrytelse?.name)
                 statement.setString(17, forbehandling.aarsakTilAvbrytelseBeskrivelse.orEmpty())
                 statement.setNullableBoolean(18, forbehandling.harVedtakAvTypeOpphoer)
+                statement.setString(19, forbehandling.opphoerSkyldesDoedsfall?.name)
+                statement.setString(20, forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar?.name)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -316,6 +320,8 @@ class EtteroppgjoerForbehandlingDao(
             aarsakTilAvbrytelse = getString("aarsak_til_avbrytelse")?.let { enumValueOf<AarsakTilAvbryteForbehandling>(it) },
             aarsakTilAvbrytelseBeskrivelse = getString("kommentar_til_avbrytelse"),
             harVedtakAvTypeOpphoer = getBoolean("har_vedtak_av_type_opphoer"),
+            opphoerSkyldesDoedsfall = getString("opphoer_skyldes_doedsfall")?.let { enumValueOf<JaNei>(it) },
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar = getString("opphoer_skyldes_doedsfall_i_etteroppgjoersaar")?.let { enumValueOf<JaNei>(it) },
         )
 
     private fun ResultSet.toSummertePensjonsgivendeInntekter(): SummertePensjonsgivendeInntekter =

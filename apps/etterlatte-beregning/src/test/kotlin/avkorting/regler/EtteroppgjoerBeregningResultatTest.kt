@@ -7,11 +7,14 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.FaktiskInntekt
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegel
+import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegelMedDoedsfall
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import org.junit.jupiter.api.Test
@@ -27,6 +30,20 @@ class EtteroppgjoerBeregningResultatTest {
 
     @Test
     fun `skal etterbetale hvis differanse er mer en grense for etterbetaling`() {
+        val utbetaltStoenad =
+            listOf(
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 4),
+                    ytelseEtterAvkorting = 1000,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 5),
+                    YearMonth.of(2024, 12),
+                    ytelseEtterAvkorting = 1000,
+                ),
+            )
+
         val nyBruttoStoenad =
             listOf(
                 avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 1050),
@@ -34,7 +51,7 @@ class EtteroppgjoerBeregningResultatTest {
                 avkortetYtelse(fom = YearMonth.of(2024, 10), YearMonth.of(2024, 12), ytelse = 1050),
             )
 
-        val differanseGrunnlag = grunnlag(listOfUtbetaltStoenad(), nyBruttoStoenad)
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad)
         val resultat =
             beregneEtteroppgjoerRegel.anvend(
                 differanseGrunnlag,
@@ -47,10 +64,18 @@ class EtteroppgjoerBeregningResultatTest {
 
     @Test
     fun `tolererer implisitt lukkede perioder i beregningen av etteroppgjoeret`() {
-        val forventet =
+        val utbetaltStoenad =
             listOf(
-                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11365),
-                avkortetYtelse(fom = YearMonth.of(2024, 5), null, ytelse = 12456),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 4),
+                    ytelseEtterAvkorting = 11365,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 5),
+                    null,
+                    ytelseEtterAvkorting = 12456,
+                ),
             )
 
         val nyBruttoStoenad =
@@ -59,16 +84,24 @@ class EtteroppgjoerBeregningResultatTest {
                 avkortetYtelse(fom = YearMonth.of(2024, 5), null, ytelse = 12456),
             )
 
-        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad)
         assertDoesNotThrow { beregneEtteroppgjoerRegel.anvend(differanseGrunnlag, regelPeriode) }
     }
 
     @Test
     fun `akkurat utenfor grense for tilbakekreving gir tilbakekreving`() {
-        val forventet =
+        val utbetaltStoenad =
             listOf(
-                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11365),
-                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 4),
+                    ytelseEtterAvkorting = 11365,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 5),
+                    YearMonth.of(2024, 12),
+                    ytelseEtterAvkorting = 12456,
+                ),
             )
 
         val nyBruttoStoenad =
@@ -77,7 +110,7 @@ class EtteroppgjoerBeregningResultatTest {
                 avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
             )
 
-        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad)
 
         val resultat =
             beregneEtteroppgjoerRegel.anvend(
@@ -90,11 +123,60 @@ class EtteroppgjoerBeregningResultatTest {
     }
 
     @Test
-    fun `akkurat utenfor grense for etterbetaling gir etterbetaling`() {
-        val forventet =
+    fun `skal ikke tilbakekreve hvis etteroppgjoer med doedsfall`() {
+        val utbetaltStoenad =
             listOf(
-                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11340),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 4),
+                    ytelseEtterAvkorting = 11365,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 5),
+                    YearMonth.of(2024, 12),
+                    ytelseEtterAvkorting = 12456,
+                ),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 10990),
                 avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+            )
+
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad).copy(harDoedsfall = FaktumNode(true, "", ""))
+
+        val resultat =
+            beregneEtteroppgjoerRegel.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        val medDoedsfall =
+            beregneEtteroppgjoerRegelMedDoedsfall.anvend(
+                differanseGrunnlag,
+                regelPeriode,
+            )
+
+        resultat.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.TILBAKEKREVING.name
+        medDoedsfall.verdi.resultatType.name shouldBe EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING.name
+        medDoedsfall.verdi.opprinneligResultatType!!.name shouldBe resultat.verdi.resultatType.name
+    }
+
+    @Test
+    fun `akkurat utenfor grense for etterbetaling gir etterbetaling`() {
+        val utbetaltStoenad =
+            listOf(
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 4),
+                    ytelseEtterAvkorting = 11340,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 5),
+                    YearMonth.of(2024, 12),
+                    ytelseEtterAvkorting = 12456,
+                ),
             )
 
         val nyBruttoStoenad =
@@ -103,7 +185,7 @@ class EtteroppgjoerBeregningResultatTest {
                 avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
             )
 
-        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad)
 
         val resultat =
             beregneEtteroppgjoerRegel.anvend(
@@ -117,6 +199,20 @@ class EtteroppgjoerBeregningResultatTest {
 
     @Test
     fun `skal tilbakekreve hvis differanse er mer en grense for tilbakekreving`() {
+        val utbetaltStoenad =
+            listOf(
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 6),
+                    ytelseEtterAvkorting = 1000,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 7),
+                    YearMonth.of(2024, 12),
+                    ytelseEtterAvkorting = 1000,
+                ),
+            )
+
         val nyBruttoStoenad =
             listOf(
                 avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 800),
@@ -124,7 +220,7 @@ class EtteroppgjoerBeregningResultatTest {
                 avkortetYtelse(fom = YearMonth.of(2024, 10), YearMonth.of(2024, 12), ytelse = 800),
             )
 
-        val differanseGrunnlag = grunnlag(listOfUtbetaltStoenad(), nyBruttoStoenad)
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad)
         val resultat =
             beregneEtteroppgjoerRegel.anvend(
                 differanseGrunnlag,
@@ -136,8 +232,28 @@ class EtteroppgjoerBeregningResultatTest {
     }
 
     @Test
-    fun `ikke etteroppgjør hvis differanse er null`() {
-        val differanseGrunnlag = grunnlag(listOfUtbetaltStoenad(), listOfUtbetaltStoenad())
+    fun `ikke etteroppgjoer hvis differanse er null`() {
+        val utbetaltStoenad =
+            listOf(
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 6),
+                    ytelseEtterAvkorting = 1000,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 7),
+                    YearMonth.of(2024, 12),
+                    ytelseEtterAvkorting = 1000,
+                ),
+            )
+
+        val nyBruttoStoenad =
+            listOf(
+                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 6), ytelse = 1000),
+                avkortetYtelse(fom = YearMonth.of(2024, 7), YearMonth.of(2024, 12), ytelse = 1000),
+            )
+
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad)
         val resultat =
             beregneEtteroppgjoerRegel.anvend(
                 differanseGrunnlag,
@@ -149,11 +265,19 @@ class EtteroppgjoerBeregningResultatTest {
     }
 
     @Test
-    fun `ikke etteroppgjør hvis innenfor grense for etterbetaling`() {
-        val forventet =
+    fun `ikke etteroppgjoer hvis innenfor grense for etterbetaling`() {
+        val utbetaltStoenad =
             listOf(
-                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11390),
-                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 4),
+                    ytelseEtterAvkorting = 11390,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 5),
+                    YearMonth.of(2024, 12),
+                    ytelseEtterAvkorting = 12456,
+                ),
             )
 
         val nyBruttoStoenad =
@@ -162,7 +286,7 @@ class EtteroppgjoerBeregningResultatTest {
                 avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
             )
 
-        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad)
 
         val resultat =
             beregneEtteroppgjoerRegel.anvend(
@@ -175,11 +299,19 @@ class EtteroppgjoerBeregningResultatTest {
     }
 
     @Test
-    fun `ikke etteroppgjør hvis innenfor grense for tilbakekreving`() {
-        val forventet =
+    fun `ikke etteroppgjoer hvis innenfor grense for tilbakekreving`() {
+        val utbetaltStoenad =
             listOf(
-                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 11700),
-                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 4),
+                    ytelseEtterAvkorting = 11700,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 5),
+                    YearMonth.of(2024, 12),
+                    ytelseEtterAvkorting = 12456,
+                ),
             )
 
         val nyBruttoStoenad =
@@ -188,7 +320,7 @@ class EtteroppgjoerBeregningResultatTest {
                 avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 12456),
             )
 
-        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad)
 
         val resultat =
             beregneEtteroppgjoerRegel.anvend(
@@ -201,11 +333,19 @@ class EtteroppgjoerBeregningResultatTest {
     }
 
     @Test
-    fun `ikke etteroppgjør hvis ingen utbetaling og ingen endring`() {
-        val forventet =
+    fun `ikke etteroppgjoer hvis ingen utbetaling og ingen endring`() {
+        val utbetaltStoenad =
             listOf(
-                avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 4), ytelse = 0),
-                avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 0),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 1),
+                    YearMonth.of(2024, 4),
+                    ytelseEtterAvkorting = 0,
+                ),
+                VedtakEtteroppgjoerPeriode(
+                    YearMonth.of(2024, 5),
+                    YearMonth.of(2024, 12),
+                    ytelseEtterAvkorting = 0,
+                ),
             )
 
         val nyBruttoStoenad =
@@ -214,7 +354,7 @@ class EtteroppgjoerBeregningResultatTest {
                 avkortetYtelse(fom = YearMonth.of(2024, 5), YearMonth.of(2024, 12), ytelse = 0),
             )
 
-        val differanseGrunnlag = grunnlag(forventet, nyBruttoStoenad)
+        val differanseGrunnlag = grunnlag(utbetaltStoenad, nyBruttoStoenad)
 
         val resultat =
             beregneEtteroppgjoerRegel.anvend(
@@ -227,14 +367,13 @@ class EtteroppgjoerBeregningResultatTest {
     }
 
     private fun grunnlag(
-        utbetaltStoenad: List<AvkortetYtelse>,
+        utbetaltStoenad: List<VedtakEtteroppgjoerPeriode>,
         nyBruttoStoenad: List<AvkortetYtelse>,
     ): EtteroppgjoerDifferanseGrunnlag {
-        val aarsoppgjoer = aarsoppgjoer(aar = 2024, fom = YearMonth.of(2024, Month.JANUARY), avkortetYtelse = utbetaltStoenad)
         val nyttAarsoppgjoer = aarsoppgjoer(aar = 2024, fom = YearMonth.of(2024, Month.JANUARY), avkortetYtelse = nyBruttoStoenad)
 
         return EtteroppgjoerDifferanseGrunnlag(
-            utbetaltStoenad = FaktumNode(aarsoppgjoer, "", ""),
+            utbetaltStoenad = FaktumNode(utbetaltStoenad, "", ""),
             nyBruttoStoenad = FaktumNode(nyttAarsoppgjoer, "", ""),
             grunnlagForEtteroppgjoer =
                 FaktumNode(
@@ -253,14 +392,9 @@ class EtteroppgjoerBeregningResultatTest {
                     "",
                     "",
                 ),
+            harDoedsfall = FaktumNode(false, "", ""),
         )
     }
-
-    private fun listOfUtbetaltStoenad(): List<AvkortetYtelse> =
-        listOf(
-            avkortetYtelse(fom = YearMonth.of(2024, 1), YearMonth.of(2024, 6), ytelse = 1000),
-            avkortetYtelse(fom = YearMonth.of(2024, 7), YearMonth.of(2024, 12), ytelse = 1000),
-        )
 
     private fun avkortetYtelse(
         fom: YearMonth,

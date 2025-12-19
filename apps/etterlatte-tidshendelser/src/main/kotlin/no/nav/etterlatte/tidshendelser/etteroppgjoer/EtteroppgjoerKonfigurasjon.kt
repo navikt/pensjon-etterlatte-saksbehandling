@@ -6,6 +6,7 @@ import java.time.LocalDate
 enum class EtteroppgjoerFilter {
     ENKEL,
     MED_AKTIVITET_OG_SKJERMET,
+    MED_AKTIVITET_SKJERMET_OG_UTLANDSTILSNITT,
 }
 
 data class EtteroppgjoerKonfigurasjon(

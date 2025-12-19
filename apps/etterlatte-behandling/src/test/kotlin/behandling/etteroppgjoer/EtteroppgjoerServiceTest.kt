@@ -250,7 +250,7 @@ class EtteroppgjoerServiceTest {
                     etteroppgjoerResultatType = type,
                     status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
                 )
-            ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandlingMedresultat)
+            ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandlingMedresultat)
             verify {
                 ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedresultat.aar, EtteroppgjoerStatus.VENTER_PAA_SVAR)
             }
@@ -287,7 +287,7 @@ class EtteroppgjoerServiceTest {
                     etteroppgjoerResultatType = type,
                     status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
                 )
-            ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandlingMedResultat)
+            ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandlingMedResultat)
             verify {
                 ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedResultat.aar, EtteroppgjoerStatus.FERDIGSTILT)
             }
@@ -314,7 +314,7 @@ class EtteroppgjoerServiceTest {
                 ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
 
         assertThrows<InternfeilException> {
-            ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling)
+            ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling)
         }
     }
 
@@ -336,7 +336,7 @@ class EtteroppgjoerServiceTest {
             )
 
         assertThrows<IkkeTillattException> {
-            ctx.service.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling)
+            ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling)
         }
     }
 

@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInn
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OpphoerSkyldesDoedsfallRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
@@ -67,6 +68,7 @@ fun Route.etteroppgjoerRoutes(
     etteroppgjoerService: EtteroppgjoerService,
     skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
     featureToggleService: FeatureToggleService,
+    etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
 ) {
     route("/api/etteroppgjoer") {
         route("/{$SAKID_CALL_PARAMETER}") {
@@ -317,7 +319,8 @@ fun Route.etteroppgjoerRoutes(
 
         route("/revurdering/{${BEHANDLINGID_CALL_PARAMETER}}/resultat") {
             get {
-                val resultat = inTransaction { forbehandlingService.hentBeregnetResultatForRevurdering(behandlingId, brukerTokenInfo) }
+                val resultat =
+                    inTransaction { etteroppgjoerRevurderingService.hentBeregnetResultatForRevurdering(behandlingId, brukerTokenInfo) }
                 call.respond(resultat)
             }
         }

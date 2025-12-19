@@ -184,6 +184,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         etteroppgjoerService = applicationContext.etteroppgjoerService,
         skatteoppgjoerHendelserService = applicationContext.skatteoppgjoerHendelserService,
         featureToggleService = applicationContext.featureToggleService,
+        etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
     )
     behandlingRoutes(
         behandlingService = applicationContext.behandlingService,

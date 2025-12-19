@@ -214,7 +214,6 @@ class TilbakekrevingskomponentenKlient(
             return utenOverstyring.apply {
                 belopTilbakekreves = nettoTilbakekreving!!.medToDesimaler()
                 belopSkatt = BigDecimal.ZERO
-                // TODO: Gå opp om dette blir riktig mapping?
                 kodeResultat =
                     if (resultat == TilbakekrevingResultat.FULL_TILBAKEKREV) {
                         TilbakekrevingResultat.DELVIS_TILBAKEKREV.name

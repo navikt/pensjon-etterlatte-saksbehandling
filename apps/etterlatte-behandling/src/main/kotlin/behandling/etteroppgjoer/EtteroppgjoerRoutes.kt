@@ -89,7 +89,7 @@ fun Route.etteroppgjoerRoutes(
                 }
                 kunSkrivetilgang {
                     inTransaction {
-                        val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                        val etteroppgjoer = inTransaction { etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId) }
 
                         krev(etteroppgjoer.venterPaaSkatteoppgjoer()) {
                             "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling"

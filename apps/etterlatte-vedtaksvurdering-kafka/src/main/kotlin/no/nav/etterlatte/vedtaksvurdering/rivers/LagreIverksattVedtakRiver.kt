@@ -47,6 +47,7 @@ internal class LagreIverksattVedtakRiver(
             }
         } catch (e: Exception) {
             logger.error("Kunne ikke lagre iverksatt vedtak: $respons", e)
+            throw e
         }
     }
 }

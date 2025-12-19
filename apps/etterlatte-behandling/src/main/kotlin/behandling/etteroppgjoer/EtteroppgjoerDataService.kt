@@ -12,6 +12,8 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -30,6 +32,7 @@ class EtteroppgjoerDataService(
     val behandlingService: BehandlingService,
     val featureToggleService: FeatureToggleService,
     val vedtakKlient: VedtakKlient,
+    val beregningKlient: BeregningKlient,
 ) {
     fun hentSisteIverksatteBehandlingOgOpphoer(
         sakId: SakId,
@@ -41,6 +44,56 @@ class EtteroppgjoerDataService(
                 ?: throw InternfeilException("Fant ikke iverksatt behandling $sisteAvkortingOgOpphoer")
 
         return behandling to sisteAvkortingOgOpphoer.opphoerFom
+    }
+
+    fun hentAvkortingForForbehandling(
+        forbehandling: EtteroppgjoerForbehandling,
+        sisteIverksatteBehandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): EtteroppgjoerBeregnetAvkorting? {
+        val request =
+            EtteroppgjoerBeregnetAvkortingRequest(
+                forbehandling = forbehandling.id,
+                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+                aar = forbehandling.aar,
+                sakId = sisteIverksatteBehandling.sak.id,
+            )
+
+        logger.info("Henter avkorting for forbehandling: $request")
+        return try {
+            runBlocking {
+                beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
+                    request,
+                    brukerTokenInfo,
+                )
+            }
+        } catch (e: Exception) {
+            logger.warn("Kunne ikke hente tidligere avkorting for behandling med id=$sisteIverksatteBehandling", e)
+            null
+        }
+    }
+
+    suspend fun hentSisteIverksatteBehandlingMedAvkorting(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): SisteAvkortingOgOpphoer {
+        // TODO: Med periodisert vilkårsvurdering kan vi være smartere her
+        val iverksatteVedtak =
+            vedtakKlient
+                .hentIverksatteVedtak(sakId, brukerTokenInfo)
+                .sortedByDescending { it.datoFattet }
+
+        val sisteVedtakMedAvkorting = iverksatteVedtak.first { it.vedtakType != VedtakType.OPPHOER }
+        val opphoer =
+            iverksatteVedtak.firstOrNull {
+                it.vedtakType == VedtakType.OPPHOER &&
+                    it.datoAttestert!! > sisteVedtakMedAvkorting.datoAttestert!!
+            }
+
+        return SisteAvkortingOgOpphoer(
+            sisteBehandlingMedAvkorting = sisteVedtakMedAvkorting.behandlingId,
+            opphoerFom = opphoer?.virkningstidspunkt ?: sisteVedtakMedAvkorting.opphoerFraOgMed,
+        )
     }
 
     private fun hentSisteIverksatteVedtakIkkeOpphoer(
@@ -71,27 +124,4 @@ class EtteroppgjoerDataService(
                 SisteAvkortingOgOpphoer(sisteIverksatteVedtak.behandlingId, null)
             }
         }
-
-    suspend fun hentSisteIverksatteBehandlingMedAvkorting(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): SisteAvkortingOgOpphoer {
-        // TODO: Med periodisert vilkårsvurdering kan vi være smartere her
-        val iverksatteVedtak =
-            vedtakKlient
-                .hentIverksatteVedtak(sakId, brukerTokenInfo)
-                .sortedByDescending { it.datoFattet }
-
-        val sisteVedtakMedAvkorting = iverksatteVedtak.first { it.vedtakType != VedtakType.OPPHOER }
-        val opphoer =
-            iverksatteVedtak.firstOrNull {
-                it.vedtakType == VedtakType.OPPHOER &&
-                    it.datoAttestert!! > sisteVedtakMedAvkorting.datoAttestert!!
-            }
-
-        return SisteAvkortingOgOpphoer(
-            sisteBehandlingMedAvkorting = sisteVedtakMedAvkorting.behandlingId,
-            opphoerFom = opphoer?.virkningstidspunkt ?: sisteVedtakMedAvkorting.opphoerFraOgMed,
-        )
-    }
 }

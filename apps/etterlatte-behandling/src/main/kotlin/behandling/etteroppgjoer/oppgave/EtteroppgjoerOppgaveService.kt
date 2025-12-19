@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.oppgave
 
 import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -114,5 +115,18 @@ class EtteroppgjoerOppgaveService(
                 "Oppgaven tilknyttet forbehandlingId=$forbehandlingId er avsluttet og kan ikke behandles",
             )
         }
+    }
+
+    fun ferdigstillForbehandlingOppgave(
+        forbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
+
+        oppgaveService.ferdigstillOppgaveUnderBehandling(
+            forbehandling.id.toString(),
+            OppgaveType.ETTEROPPGJOER,
+            brukerTokenInfo,
+        )
     }
 }

@@ -61,7 +61,8 @@ class EtteroppgjoerForbehandlingServiceTest {
         val behandlingService: BehandlingService = mockk()
         val vedtakKlient: VedtakKlient = mockk()
         val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
-        val etteroppgjoerDataService: EtteroppgjoerDataService = EtteroppgjoerDataService(behandlingService, mockk(), vedtakKlient)
+        val etteroppgjoerDataService: EtteroppgjoerDataService =
+            EtteroppgjoerDataService(behandlingService, mockk(), vedtakKlient, beregningKlient)
 
         val service =
             EtteroppgjoerForbehandlingService(

@@ -3,14 +3,12 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
-import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.SisteAvkortingOgOpphoer
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -24,8 +22,6 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbe
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -78,7 +74,7 @@ class EtteroppgjoerForbehandlingService(
 
         val forbehandling = hentForbehandling(forbehandling.id)
 
-        sjekkAtInntekterErOppdatert(forbehandling)
+        sjekkAtViBrukerSisteInntekter(forbehandling)
 
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
@@ -96,12 +92,10 @@ class EtteroppgjoerForbehandlingService(
     ): EtteroppgjoerForbehandling {
         logger.info("Ferdigstiller forbehandling med id=${forbehandling.id}")
 
-        sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling, brukerTokenInfo)
-        sjekkAtInntekterErOppdatert(forbehandling)
+        sjekkAtViBrukerSisteIverksatteBehandling(forbehandling, brukerTokenInfo)
+        sjekkAtViBrukerSisteInntekter(forbehandling)
 
-        etteroppgjoerOppgaveService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
-
-        ferdigstillEtteroppgjoerOppgave(forbehandling, brukerTokenInfo)
+        etteroppgjoerOppgaveService.ferdigstillForbehandlingOppgave(forbehandling, brukerTokenInfo)
 
         haandterDoedsfallEtterEtteroppgjoersAar(forbehandling)
 
@@ -196,14 +190,6 @@ class EtteroppgjoerForbehandlingService(
                     "Fant ikke relatert behandling=${forbehandling.sisteIverksatteBehandlingId} for forbehandling=$forbehandlingId",
                 )
 
-        val avkorting =
-            try {
-                hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
-            } catch (e: Exception) {
-                logger.warn("Kunne ikke hente tidligere avkorting for behandling med id=$sisteIverksatteBehandling", e)
-                null
-            }
-
         val pensjonsgivendeInntekt =
             dao.hentPensjonsgivendeInntekt(forbehandlingId) ?: throw InternfeilException(
                 "Mangler pensjonsgivendeInntekt for behandlingId=$forbehandlingId",
@@ -228,6 +214,8 @@ class EtteroppgjoerForbehandlingService(
                     brukerTokenInfo,
                 )
             }
+
+        val avkorting = etteroppgjoerDataService.hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
 
         return DetaljertForbehandlingDto(
             forbehandling = forbehandling,
@@ -307,19 +295,6 @@ class EtteroppgjoerForbehandlingService(
         return nyForbehandling
     }
 
-    private fun registrerOgSendHendelseFerdigstilt(
-        ferdigstiltForbehandling: EtteroppgjoerForbehandling,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        hendelserService.registrerOgSendEtteroppgjoerHendelse(
-            etteroppgjoerForbehandling = ferdigstiltForbehandling,
-            etteroppgjoerResultat = hentBeregnetEtteroppgjoerResultat(ferdigstiltForbehandling, brukerTokenInfo),
-            hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
-            saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
-            utlandstilknytning = hentUtlandstilknytning(ferdigstiltForbehandling),
-        )
-    }
-
     fun hentBeregnetEtteroppgjoerResultat(
         forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
@@ -336,17 +311,6 @@ class EtteroppgjoerForbehandlingService(
                 )
             }
         return beregnetEtteroppgjoerResultat
-    }
-
-    private fun ferdigstillEtteroppgjoerOppgave(
-        forbehandling: EtteroppgjoerForbehandling,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        oppgaveService.ferdigstillOppgaveUnderBehandling(
-            forbehandling.id.toString(),
-            OppgaveType.ETTEROPPGJOER,
-            brukerTokenInfo,
-        )
     }
 
     fun opprettOppgaveForOpprettForbehandling(
@@ -546,6 +510,19 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
+    private fun registrerOgSendHendelseFerdigstilt(
+        ferdigstiltForbehandling: EtteroppgjoerForbehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        hendelserService.registrerOgSendEtteroppgjoerHendelse(
+            etteroppgjoerForbehandling = ferdigstiltForbehandling,
+            etteroppgjoerResultat = hentBeregnetEtteroppgjoerResultat(ferdigstiltForbehandling, brukerTokenInfo),
+            hendelseType = EtteroppgjoerHendelseType.FERDIGSTILT,
+            saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
+            utlandstilknytning = hentUtlandstilknytning(ferdigstiltForbehandling),
+        )
+    }
+
     private fun opprettOgLagreForbehandling(
         sak: Sak,
         inntektsaar: Int,
@@ -599,27 +576,6 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    private fun hentAvkortingForForbehandling(
-        forbehandling: EtteroppgjoerForbehandling,
-        sisteIverksatteBehandling: Behandling,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): EtteroppgjoerBeregnetAvkorting {
-        val request =
-            EtteroppgjoerBeregnetAvkortingRequest(
-                forbehandling = forbehandling.id,
-                sisteIverksatteBehandling = sisteIverksatteBehandling.id,
-                aar = forbehandling.aar,
-                sakId = sisteIverksatteBehandling.sak.id,
-            )
-        logger.info("Henter avkorting for forbehandling: $request")
-        return runBlocking {
-            beregningKlient.hentAvkortingForForbehandlingEtteroppgjoer(
-                request,
-                brukerTokenInfo,
-            )
-        }
-    }
-
     fun kopierOgLagreNyForbehandling(
         forbehandlingId: UUID,
         sakId: SakId,
@@ -648,7 +604,7 @@ class EtteroppgjoerForbehandlingService(
         return forbehandlingCopy
     }
 
-    private fun sjekkAtInntekterErOppdatert(forbehandling: EtteroppgjoerForbehandling) {
+    private fun sjekkAtViBrukerSisteInntekter(forbehandling: EtteroppgjoerForbehandling) {
         val sistePensjonsgivendeInntekt =
             runBlocking {
                 pensjonsgivendeInntektService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
@@ -689,7 +645,7 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun sjekkAtSisteIverksatteBehandlingErRiktig(
+    private fun sjekkAtViBrukerSisteIverksatteBehandling(
         forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ) {

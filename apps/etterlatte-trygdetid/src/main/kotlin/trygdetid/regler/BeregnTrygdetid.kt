@@ -150,8 +150,8 @@ val doedsdato: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, LocalDate> =
 val opptjeningsDatoer: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Opptjeningsdatoer> =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse("", ""),
+        beskrivelse = "Kombinerer fødselsdato og dødsdato til opptjeningsdatoer",
+        regelReferanse = RegelReferanse("KOMBINER_OPPTJENINGSDATOER", "1"),
     ) benytter foedselsdato og doedsdato med { foedsel, doed ->
         Opptjeningsdatoer(foedselsDato = foedsel, doedsDato = doed)
     }

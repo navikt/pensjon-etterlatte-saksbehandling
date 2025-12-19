@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -59,7 +60,8 @@ class EtteroppgjoerForbehandlingServiceTest {
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakKlient: VedtakKlient = mockk()
-        val etteroppgjoerTempService: EtteroppgjoerTempService = mockk()
+        val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
+        val etteroppgjoerDataService: EtteroppgjoerDataService = EtteroppgjoerDataService(behandlingService, mockk(), vedtakKlient)
 
         val service =
             EtteroppgjoerForbehandlingService(
@@ -73,7 +75,8 @@ class EtteroppgjoerForbehandlingServiceTest {
                 beregningKlient = beregningKlient,
                 behandlingService = behandlingService,
                 vedtakKlient = vedtakKlient,
-                etteroppgjoerTempService = etteroppgjoerTempService,
+                etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
+                etteroppgjoerDataService = etteroppgjoerDataService,
             )
 
         val behandling =
@@ -195,7 +198,8 @@ class EtteroppgjoerForbehandlingServiceTest {
         coEvery { ctx.behandlingService.hentBehandlingerForSak(sakId1) } returns
             listOf(behandling, revurdering, underBehandling)
 
-        val sisteIverksatteAvkortingOgOpphoer = runBlocking { ctx.service.hentSisteIverksatteBehandlingMedAvkorting(sakId1, mockk()) }
+        val sisteIverksatteAvkortingOgOpphoer =
+            runBlocking { ctx.etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(sakId1, mockk()) }
 
         sisteIverksatteAvkortingOgOpphoer.sisteBehandlingMedAvkorting shouldBe behandling.id
         sisteIverksatteAvkortingOgOpphoer.opphoerFom shouldBe null

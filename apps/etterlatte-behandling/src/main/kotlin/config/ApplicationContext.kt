@@ -37,6 +37,7 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
@@ -47,6 +48,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHen
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
@@ -438,9 +440,10 @@ internal class ApplicationContext(
         )
 
     private val etteroppgjoerHendelseService = EtteroppgjoerHendelseService(rapid, hendelseDao, etteroppgjoerForbehandlingDao)
+    private val etteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
 
     val etteroppgjoerTempService =
-        EtteroppgjoerTempService(oppgaveService, etteroppgjoerDao, etteroppgjoerForbehandlingDao, etteroppgjoerHendelseService)
+        EtteroppgjoerTempService(etteroppgjoerDao, etteroppgjoerForbehandlingDao, etteroppgjoerHendelseService)
 
     val behandlingService =
         BehandlingServiceImpl(
@@ -453,6 +456,7 @@ internal class ApplicationContext(
             grunnlagService = grunnlagService,
             beregningKlient = beregningKlient,
             etteroppgjoerTempService = etteroppgjoerTempService,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
     val generellBehandlingService =
         GenerellBehandlingService(
@@ -589,6 +593,8 @@ internal class ApplicationContext(
             sigrunKlient = sigrunKlient,
         )
 
+    val etteroppgjoerDataService = EtteroppgjoerDataService(behandlingService, featureToggleService, vedtakKlient)
+
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
     val inntektsjusteringSelvbetjeningService =
@@ -624,7 +630,8 @@ internal class ApplicationContext(
             beregningKlient = beregningKlient,
             behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
-            etteroppgjoerTempService = etteroppgjoerTempService,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
+            etteroppgjoerDataService = etteroppgjoerDataService,
         )
 
     val aarligInntektsjusteringJobbService =
@@ -742,6 +749,7 @@ internal class ApplicationContext(
             grunnlagService = grunnlagService,
             etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
             behandlingService = behandlingService,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
 
     val brevService =
@@ -839,8 +847,7 @@ internal class ApplicationContext(
             vilkaarsvurderingService,
             trygdetidKlient,
             beregningKlient,
-            vedtakKlient,
-            featureToggleService,
+            etteroppgjoerDataService,
         )
 
     val migreringService =

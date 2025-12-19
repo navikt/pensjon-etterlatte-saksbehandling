@@ -76,6 +76,7 @@ class ViderefoertOpphoerTest(
                 grunnlagService = mockk(),
                 beregningKlient = mockk(),
                 etteroppgjoerTempService = mockk(),
+                etteroppgjoerOppgaveService = mockk(),
             )
     }
 

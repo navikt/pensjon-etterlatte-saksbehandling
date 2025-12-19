@@ -4,10 +4,11 @@ import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.SisteAvkortingOgOpphoer
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
@@ -32,7 +33,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
-import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -40,7 +40,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -62,7 +61,8 @@ class EtteroppgjoerForbehandlingService(
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
-    private val etteroppgjoerTempService: EtteroppgjoerTempService,
+    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
+    private val etteroppgjoerDataService: EtteroppgjoerDataService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
@@ -76,7 +76,7 @@ class EtteroppgjoerForbehandlingService(
     ): EtteroppgjoerForbehandling {
         logger.info("Ferdigstiller forbehandling (tilknyttet revurdering) med id=${forbehandling.id}")
 
-        val forbehandling = dao.hentForbehandling(forbehandling.id) ?: throw FantIkkeForbehandling(forbehandling.id)
+        val forbehandling = hentForbehandling(forbehandling.id)
 
         sjekkAtInntekterErOppdatert(forbehandling)
 
@@ -98,7 +98,8 @@ class EtteroppgjoerForbehandlingService(
 
         sjekkAtSisteIverksatteBehandlingErRiktig(forbehandling, brukerTokenInfo)
         sjekkAtInntekterErOppdatert(forbehandling)
-        sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
+
+        etteroppgjoerOppgaveService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
 
         ferdigstillEtteroppgjoerOppgave(forbehandling, brukerTokenInfo)
 
@@ -106,7 +107,7 @@ class EtteroppgjoerForbehandlingService(
 
         return forbehandling.tilFerdigstilt().also {
             dao.lagreForbehandling(it)
-            etteroppgjoerService.oppdaterEtteroppgjoerVedFerdigstiltForbehandling(it)
+            etteroppgjoerService.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(it)
             registrerOgSendHendelseFerdigstilt(it, brukerTokenInfo)
         }
     }
@@ -138,7 +139,7 @@ class EtteroppgjoerForbehandlingService(
     ) {
         logger.info("Avbryter forbehandling med id=$forbehandlingId")
         val forbehandling = hentForbehandling(forbehandlingId)
-        sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
+        etteroppgjoerOppgaveService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandling.id, brukerTokenInfo)
 
         if (!forbehandling.erRedigerbar()) {
             throw IkkeTillattException(
@@ -184,21 +185,6 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
-    // TODO: denne kan løses i sql
-    fun hentSisteFerdigstillteForbehandling(sakId: SakId): EtteroppgjoerForbehandling {
-        val sisteFerdigstilteForbehandling =
-            dao
-                .hentForbehandlingerForSak(sakId)
-                .filter { it.erFerdigstilt() }
-                .maxByOrNull { it.opprettet }
-
-        return sisteFerdigstilteForbehandling
-            ?: throw IkkeFunnetException(
-                code = "IKKE_FUNNET",
-                detail = "Fant ingen ferdigstilte forbehandlinger på sak med id=${sakId.sakId}",
-            )
-    }
-
     fun hentDetaljertForbehandling(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -218,13 +204,11 @@ class EtteroppgjoerForbehandlingService(
                 null
             }
 
-        val pensjonsgivendeInntekt = dao.hentPensjonsgivendeInntekt(forbehandlingId)
-
-        if (pensjonsgivendeInntekt == null) {
-            throw InternfeilException(
+        val pensjonsgivendeInntekt =
+            dao.hentPensjonsgivendeInntekt(forbehandlingId) ?: throw InternfeilException(
                 "Mangler pensjonsgivendeInntekt for behandlingId=$forbehandlingId",
             )
-        }
+
         val summerteInntekter =
             try {
                 dao.hentSummerteInntekter(forbehandling.id)
@@ -262,7 +246,7 @@ class EtteroppgjoerForbehandlingService(
         forbehandlingId: UUID,
         brev: Brev,
     ) {
-        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        val forbehandling = hentForbehandling(forbehandlingId)
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
 
@@ -278,7 +262,7 @@ class EtteroppgjoerForbehandlingService(
         val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Kunne ikke hente sak=$sakId")
 
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        sjekkAtOppgaveErGyldigForForbehandling(oppgave, sakId)
+        etteroppgjoerOppgaveService.verifiserOppgaveForOppretteForbehandling(oppgave, sakId)
 
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar, oppgaveId)
 
@@ -336,7 +320,7 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    private fun hentBeregnetEtteroppgjoerResultat(
+    fun hentBeregnetEtteroppgjoerResultat(
         forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto? {
@@ -365,37 +349,11 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    private fun sjekkAtOppgaveErGyldigForForbehandling(
-        oppgave: OppgaveIntern,
-        sakId: SakId,
-    ) {
-        if (oppgave.sakId != sakId) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_IKKE_I_SAK",
-                "OppgaveId=${oppgave.id} matcher ikke sakId=$sakId",
-            )
-        }
-
-        if (oppgave.erAvsluttet()) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_AVSLUTTET",
-                "Oppgaven tilknyttet forbehandling er avsluttet og kan ikke behandles",
-            )
-        }
-
-        if (oppgave.type != OppgaveType.ETTEROPPGJOER) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_FEIL_TYPE",
-                "Oppgaven har feil oppgaveType=${oppgave.type} til å opprette forbehandling",
-            )
-        }
-    }
-
     fun opprettOppgaveForOpprettForbehandling(
         sakId: SakId,
         opprettetManuelt: Boolean,
     ) {
-        etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(
+        etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
             sakId = sakId,
             opprettetManuelt = opprettetManuelt,
         )
@@ -422,7 +380,7 @@ class EtteroppgjoerForbehandlingService(
 
         relevanteSaker.map { sakId ->
             try {
-                etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(sakId)
+                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
             } catch (e: Error) {
                 logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
             }
@@ -434,7 +392,7 @@ class EtteroppgjoerForbehandlingService(
         request: BeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetResultatOgBrevSomSkalSlettes {
-        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        val forbehandling = hentForbehandling(forbehandlingId)
 
         if (!forbehandling.erRedigerbar()) {
             throw ForbehandlingKanIkkeEndres()
@@ -501,7 +459,7 @@ class EtteroppgjoerForbehandlingService(
         endringErTilUgunstForBruker: JaNei?,
         beskrivelseAvUgunst: String?,
     ) {
-        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        val forbehandling = hentForbehandling(forbehandlingId)
         if (!forbehandling.erRedigerbar()) {
             throw ForbehandlingKanIkkeEndres()
         }
@@ -516,7 +474,7 @@ class EtteroppgjoerForbehandlingService(
         opphoerSkyldesDoedsfall: JaNei,
         opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
     ) {
-        val forbehandling = dao.hentForbehandling(forbehandlingId) ?: throw FantIkkeForbehandling(forbehandlingId)
+        val forbehandling = hentForbehandling(forbehandlingId)
         if (!forbehandling.erRedigerbar()) {
             throw ForbehandlingKanIkkeEndres()
         }
@@ -530,31 +488,6 @@ class EtteroppgjoerForbehandlingService(
             }
     }
 
-    fun sjekkAtOppgavenErTildeltSaksbehandler(
-        forbehandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        val oppgave =
-            oppgaveService
-                .hentOppgaverForReferanse(forbehandlingId.toString())
-                .firstOrNull { it.erIkkeAvsluttet() }
-                ?: throw InternfeilException("Fant ingen oppgaver under behandling for forbehandlingId=$forbehandlingId")
-
-        if (oppgave.saksbehandler?.ident != brukerTokenInfo.ident()) {
-            throw IkkeTillattException(
-                "IKKE_TILGANG_TIL_BEHANDLING",
-                "Saksbehandler ${brukerTokenInfo.ident()} er ikke tildelt oppgaveId=${oppgave.id}",
-            )
-        }
-
-        if (oppgave.erAvsluttet()) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_AVSLUTTET",
-                "Oppgaven tilknyttet forbehandlingId=$forbehandlingId er avsluttet og kan ikke behandles",
-            )
-        }
-    }
-
     private fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
         inntektsaar: Int,
@@ -566,6 +499,7 @@ class EtteroppgjoerForbehandlingService(
             throw IkkeTillattException("FEIL_SAKTYPE", "Kan ikke opprette forbehandling for sakType=${sak.sakType}")
         }
 
+        // Åpne behandlinger
         if (oppgaveService
                 .hentOppgaverForSak(sak.id)
                 .filter { it.kilde == OppgaveKilde.BEHANDLING && it.id != oppgaveId }
@@ -578,6 +512,7 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
+        // Siste iverksatte behandling
         if (behandlingService.hentSisteIverksatteBehandling(sak.id) == null) {
             logger.error("Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling")
             throw InternfeilException(
@@ -617,7 +552,7 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         val sisteAvkortingOgOpphoer =
-            runBlocking { hentSisteIverksatteBehandlingMedAvkorting(sak.id, brukerTokenInfo) }
+            runBlocking { etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(sak.id, brukerTokenInfo) }
 
         krevIkkeNull(sisteAvkortingOgOpphoer) {
             "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
@@ -639,29 +574,6 @@ class EtteroppgjoerForbehandlingService(
             ).also {
                 dao.lagreForbehandling(it)
             }
-    }
-
-    suspend fun hentSisteIverksatteBehandlingMedAvkorting(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): SisteAvkortingOgOpphoer {
-        // TODO: Med periodisert vilkårsvurdering kan vi være smartere her
-        val iverksatteVedtak =
-            vedtakKlient
-                .hentIverksatteVedtak(sakId, brukerTokenInfo)
-                .sortedByDescending { it.datoFattet }
-
-        val sisteVedtakMedAvkorting = iverksatteVedtak.first { it.vedtakType != VedtakType.OPPHOER }
-        val opphoer =
-            iverksatteVedtak.firstOrNull {
-                it.vedtakType == VedtakType.OPPHOER &&
-                    it.datoAttestert!! > sisteVedtakMedAvkorting.datoAttestert!!
-            }
-
-        return SisteAvkortingOgOpphoer(
-            sisteBehandlingMedAvkorting = sisteVedtakMedAvkorting.behandlingId,
-            opphoerFom = opphoer?.virkningstidspunkt ?: sisteVedtakMedAvkorting.opphoerFraOgMed,
-        )
     }
 
     private fun utledInnvilgetPeriode(
@@ -713,11 +625,10 @@ class EtteroppgjoerForbehandlingService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
-        val sisteIverksatteBehandling = runBlocking { hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo) }
+        val sisteIverksatteBehandling =
+            runBlocking { etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo) }
 
-        val forbehandling =
-            dao.hentForbehandling(forbehandlingId)
-                ?: throw NotFoundException("Fant ikke forbehandling med id $forbehandlingId")
+        val forbehandling = hentForbehandling(forbehandlingId)
 
         val forbehandlingCopy =
             forbehandling.copy(
@@ -782,7 +693,8 @@ class EtteroppgjoerForbehandlingService(
         forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val sisteIverksatteBehandling = runBlocking { hentSisteIverksatteBehandlingMedAvkorting(forbehandling.sak.id, brukerTokenInfo) }
+        val sisteIverksatteBehandling =
+            runBlocking { etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(forbehandling.sak.id, brukerTokenInfo) }
 
         // verifisere at vi bruker siste iverksatte behandling
         if (sisteIverksatteBehandling.sisteBehandlingMedAvkorting != forbehandling.sisteIverksatteBehandlingId) {
@@ -814,32 +726,7 @@ class EtteroppgjoerForbehandlingService(
             }
         }
     }
-
-    fun hentBeregnetResultatForRevurdering(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): BeregnetEtteroppgjoerResultatDto {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val forbehandlingId =
-            behandling?.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
-                "MANGLER_FORBEHANDLING_ID",
-                "Behandling med id=$behandlingId peker ikke på en gyldig forbehandling",
-            )
-        val forbehandling = hentForbehandling(forbehandlingId)
-        return hentBeregnetEtteroppgjoerResultat(forbehandling, brukerTokenInfo) ?: throw IkkeFunnetException(
-            "MANGLER_BEREGNET_RESULTAT",
-            "Forbehandling med id=$forbehandlingId til revurdering med id=$behandlingId har " +
-                "ikke et beregnet resultat for etteroppgjøret.",
-        )
-    }
 }
-
-private fun String.parseUuid(): UUID? =
-    try {
-        UUID.fromString(this)
-    } catch (_: IllegalArgumentException) {
-        null
-    }
 
 data class BeregnFaktiskInntektRequest(
     val loennsinntekt: Int,

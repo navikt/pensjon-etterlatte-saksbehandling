@@ -1,10 +1,12 @@
-package no.nav.etterlatte.kafka
+package no.nav.etterlatte.institusjonsopphold.kafka
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdKilde
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
-import no.nav.etterlatte.kafka.InstitusjonsoppholdKey.INSTITUSJONSOPPHOLD_TOPIC
+import no.nav.etterlatte.institusjonsopphold.kafka.InstitusjonsoppholdKey.INSTITUSJONSOPPHOLD_TOPIC
+import no.nav.etterlatte.institusjonsopphold.klienter.BehandlingKlient
+import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
+import no.nav.etterlatte.kafka.Kafkakonsument
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import org.apache.kafka.clients.consumer.KafkaConsumer

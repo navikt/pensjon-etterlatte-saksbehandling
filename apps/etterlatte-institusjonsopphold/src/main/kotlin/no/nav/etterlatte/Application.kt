@@ -3,7 +3,9 @@ package no.nav.etterlatte
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.Application
-import no.nav.etterlatte.kafka.KafkaConsumerInstitusjonsopphold
+import no.nav.etterlatte.institusjonsopphold.kafka.KafkaConsumerInstitusjonsopphold
+import no.nav.etterlatte.institusjonsopphold.klienter.BehandlingKlient
+import no.nav.etterlatte.institusjonsopphold.klienter.InstitusjonsoppholdKlient
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials

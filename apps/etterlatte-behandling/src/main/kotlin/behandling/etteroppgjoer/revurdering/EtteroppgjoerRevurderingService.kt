@@ -49,7 +49,7 @@ class EtteroppgjoerRevurderingService(
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+        val etteroppgjoer = inTransaction { etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId) }
         val sisteFerdigstilteForbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling
 
         krevIkkeNull(sisteFerdigstilteForbehandlingId) {

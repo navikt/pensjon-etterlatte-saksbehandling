@@ -3,8 +3,8 @@ package no.nav.etterlatte.behandling.domain
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.grunnlagsendring.UfoereHendelse
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
+import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdHendelseBeriket
+import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdsType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator

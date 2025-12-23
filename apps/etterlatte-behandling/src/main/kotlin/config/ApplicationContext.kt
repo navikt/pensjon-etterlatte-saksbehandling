@@ -6,6 +6,7 @@ import behandling.jobs.uttrekk.UttrekkLoependeYtelseEtter67JobService
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
+import institusjonsopphold.personer.InstitusjonsoppholdInternKlient
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
 import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
@@ -142,6 +143,9 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbetjeningService
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
+import no.nav.etterlatte.institusjonsopphold.personer.InstitusjonsoppholdPersonerDao
+import no.nav.etterlatte.institusjonsopphold.personer.InstitusjonsoppholdPersonerJobb
+import no.nav.etterlatte.institusjonsopphold.personer.InstitusjonsoppholdPersonerService
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
@@ -220,6 +224,14 @@ private fun navAnsattHttpClient(config: Config) =
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
         azureAppScope = config.getString("navansatt.azure.scope"),
+    )
+
+private fun institusjonsoppholdHttpClient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("institusjonsopphold.azure.scope"),
     )
 
 private fun featureToggleProperties(config: Config) =
@@ -865,6 +877,21 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
         )
 
+    val institusjonsoppholdPersonerDao: InstitusjonsoppholdPersonerDao =
+        InstitusjonsoppholdPersonerDao(autoClosingDatabase)
+
+    val institusjonsoppholdPersonerService: InstitusjonsoppholdPersonerService =
+        InstitusjonsoppholdPersonerService(
+            sakLesDao = sakLesDao,
+            institusjonsoppholdPersonerDao = institusjonsoppholdPersonerDao,
+            featureToggleService = featureToggleService,
+            institusjonsoppholdInternKlient =
+                InstitusjonsoppholdInternKlient(
+                    config,
+                    institusjonsoppholdHttpClient(config),
+                ),
+        )
+
     // Jobs
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
@@ -990,6 +1017,18 @@ internal class ApplicationContext(
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.HOURS),
             hendelserBatchSize = 1000,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            featureToggleService = featureToggleService,
+        )
+    }
+
+    val institusjonsoppholdPersonerJobb: InstitusjonsoppholdPersonerJobb by lazy {
+        InstitusjonsoppholdPersonerJobb(
+            institusjonsoppholdPersonerService = institusjonsoppholdPersonerService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(2, ChronoUnit.MINUTES),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
             featureToggleService = featureToggleService,

@@ -11,14 +11,12 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 
 fun Route.institusjonsoppholdRoute(institusjonsoppholdKlient: InstitusjonsoppholdKlient) {
-    route("api") {
-        route("personer/institusjonsopphold") {
-            post {
-                kunSystembruker {
-                    medBody<HentOppholdRequest> {
-                        val oppholdForPersoner = institusjonsoppholdKlient.hentOppholdForPersoner(it)
-                        call.respond(HttpStatusCode.OK, oppholdForPersoner)
-                    }
+    route("api/personer/institusjonsopphold") {
+        post {
+            kunSystembruker {
+                medBody<HentOppholdRequest> {
+                    val oppholdForPersoner = institusjonsoppholdKlient.hentOppholdForPersoner(it)
+                    call.respond(HttpStatusCode.OK, oppholdForPersoner)
                 }
             }
         }

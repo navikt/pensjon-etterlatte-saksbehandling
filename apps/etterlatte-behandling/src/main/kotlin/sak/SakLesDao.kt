@@ -208,6 +208,23 @@ class SakLesDao(
                     .toList(mapTilSak)
             }
         }
+
+    fun hentAllePersonerMedOmsSak(): List<Pair<String, Long>> =
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT fnr, id
+                        FROM sak
+                        WHERE sakType = ?
+                        """.trimIndent(),
+                    ).apply { setString(1, SakType.OMSTILLINGSSTOENAD.name) }
+                statement
+                    .executeQuery()
+                    .toList { Pair(getString("fnr"), getLong("id")) }
+            }
+        }
 }
 
 internal val mapTilSak: ResultSet.() -> Sak = {

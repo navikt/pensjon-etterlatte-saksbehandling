@@ -5,9 +5,9 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.institusjonsopphold.kafka.KafkaOppholdHendelse
-import no.nav.etterlatte.institusjonsopphold.model.Institusjonsopphold
+import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdEkstern
+import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -32,7 +32,7 @@ class BehandlingKlient(
                 "${oppholdHendelse.norskident.maskerFnr()} hendelseId: ${oppholdHendelse.hendelseId}",
         )
 
-        val opphold: Institusjonsopphold = institusjonsoppholdKlient.hentDataForHendelse(oppholdHendelse.oppholdId)
+        val opphold: InstitusjonsoppholdEkstern = institusjonsoppholdKlient.hentDataForHendelse(oppholdHendelse.oppholdId)
 
         postTilBehandling(
             oppholdHendelse =

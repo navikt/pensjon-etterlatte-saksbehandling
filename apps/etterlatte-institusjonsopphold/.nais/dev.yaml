@@ -8,6 +8,8 @@ metadata:
 spec:
   image: "{{image}}"
   port: 8080
+  ingresses:
+    - "https://etterlatte-institusjonsopphold.intern.dev.nav.no"
   liveness:
     initialDelay: 5
     path: /health/isalive
@@ -64,6 +66,7 @@ spec:
         - host: inst2-q2.dev-fss-pub.nais.io
     inbound:
       rules:
+      - application: etterlatte-behandling
       - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
         namespace: nais
         cluster: dev-gcp

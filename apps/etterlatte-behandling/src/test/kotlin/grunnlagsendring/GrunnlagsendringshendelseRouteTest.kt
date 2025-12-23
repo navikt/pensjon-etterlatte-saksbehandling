@@ -22,9 +22,9 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdKilde
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
+import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdHendelseBeriket
+import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdKilde
+import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdsType
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri

@@ -3,7 +3,7 @@ package no.nav.etterlatte.institusjonsopphold.model
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class Institusjonsopphold(
+data class InstitusjonsoppholdEkstern(
     val oppholdId: Long,
     val tssEksternId: String,
     val institusjonsnavn: String? = null,

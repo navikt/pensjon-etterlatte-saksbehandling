@@ -21,7 +21,7 @@ data class BrevbakerRequest internal constructor(
     companion object {
         fun fra(
             brevKode: Brevbakerkode,
-            brevData: BrevData,
+            brevData: Any,
             avsender: Avsender,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakId: SakId,

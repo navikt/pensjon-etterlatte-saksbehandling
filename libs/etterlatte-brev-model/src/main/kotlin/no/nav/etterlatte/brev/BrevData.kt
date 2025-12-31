@@ -7,7 +7,7 @@ import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
-import no.nav.etterlatte.brev.model.oms.VedtakBrevData
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -75,7 +75,7 @@ data class BrevRequest(
     JsonSubTypes.Type(value = TilbakekrevingBrevInnholdDataNy::class, name = "TILBAKEKREVING"),
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.Forhaandsvarsel::class, name = "OMS_EO_FORHAANDSVARSEL"),
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.Vedtak::class, name = "OMS_EO_VEDTAK"),
-    JsonSubTypes.Type(value = VedtakBrevData.Vedtak::class, name = "OMSTILLINGSSTOENAD_INNVILGELSE"),
+    JsonSubTypes.Type(value = OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak::class, name = "OMSTILLINGSSTOENAD_INNVILGELSE"),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder
@@ -92,7 +92,10 @@ abstract class BrevFastInnholdData : BrevData {
         name = "OMS_EO_FORHAANDSVARSEL_REDIGERBAR",
     ),
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.VedtakInnhold::class, name = "OMS_EO_VEDTAK_UTFALL"),
-    JsonSubTypes.Type(value = VedtakBrevData.VedtakInnhold::class, name = "OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL"),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadInnvilgelseVedtakBrevData.VedtakInnhold::class,
+        name = "OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL",
+    ),
 )
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder

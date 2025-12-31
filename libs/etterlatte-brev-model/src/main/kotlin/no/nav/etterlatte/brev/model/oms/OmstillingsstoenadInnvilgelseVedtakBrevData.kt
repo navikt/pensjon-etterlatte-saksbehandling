@@ -5,9 +5,12 @@ import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
+import no.nav.etterlatte.brev.BrevVedleggKey
+import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.HarVedlegg
 import no.nav.etterlatte.brev.Slate
+import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -22,7 +25,7 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.math.BigDecimal
 import java.time.LocalDate
 
-object VedtakBrevData {
+object OmstillingsstoenadInnvilgelseVedtakBrevData {
     data class Vedtak(
         val beregning: OmstillingsstoenadBeregning,
         val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
@@ -37,10 +40,10 @@ object VedtakBrevData {
         override val type: String = "OMSTILLINGSSTOENAD_INNVILGELSE"
 
         override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData {
-            TODO("Not yet implemented")
+            return this // TODO skal fjernes?
         }
 
-        override val brevKode: Brevkoder = Brevkoder.OMS_EO_FORHAANDSVARSEL
+        override val brevKode: Brevkoder = Brevkoder.OMS_INNVILGELSE
     }
 
     data class VedtakInnhold(
@@ -56,8 +59,15 @@ object VedtakBrevData {
     ) : BrevRedigerbarInnholdData() {
         override val type: String = "OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL"
 
-        override val brevKode: Brevkoder = Brevkoder.OMS_EO_FORHAANDSVARSEL
+        override val brevKode: Brevkoder = Brevkoder.OMS_INNVILGELSE
     }
+
+    fun beregningsvedleggInnhold(): BrevVedleggRedigerbarNy =
+        BrevVedleggRedigerbarNy(
+            data = null,
+            vedlegg = Vedlegg.OMS_BEREGNING,
+            vedleggId = BrevVedleggKey.OMS_BEREGNING,
+        )
 
     data class OmstillingsstoenadBeregning(
         override val innhold: List<Slate.Element>,
@@ -141,8 +151,8 @@ data class AvkortetBeregningsperiode(
     val institusjon: InstitusjonsoppholdBeregningsgrunnlag?,
     val erOverstyrtInnvilgaMaaneder: Boolean,
 ) {
-    fun tilOmstillingsstoenadBeregningsperiode(): VedtakBrevData.OmstillingsstoenadBeregningsperiode =
-        VedtakBrevData.OmstillingsstoenadBeregningsperiode(
+    fun tilOmstillingsstoenadBeregningsperiode(): OmstillingsstoenadInnvilgelseVedtakBrevData.OmstillingsstoenadBeregningsperiode =
+        OmstillingsstoenadInnvilgelseVedtakBrevData.OmstillingsstoenadBeregningsperiode(
             datoFOM = this.datoFOM,
             datoTOM = this.datoTOM,
             inntekt = this.inntekt,

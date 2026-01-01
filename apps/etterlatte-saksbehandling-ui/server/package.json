@@ -14,7 +14,7 @@
     "winston-transport": "~4.9.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.0",
+    "@eslint/js": "^9.39.2",
     "@eslint/eslintrc": "^3.3.1",
     "@types/chai": "~5.2.3",
     "@types/cors": "~2.8.19",

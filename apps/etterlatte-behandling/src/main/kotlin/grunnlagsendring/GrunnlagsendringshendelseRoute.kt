@@ -11,7 +11,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
+import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl

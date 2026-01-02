@@ -124,13 +124,19 @@ class TilbakekrevingService(
                         merknad = "Kravgrunnlag mottatt",
                     )
                 } else {
+                    val merknad =
+                        if (omgjoeringAvId != null) {
+                            "Omgjøring av tilbakekreving opprettet"
+                        } else {
+                            "Kravgrunnlag mottatt"
+                        }
                     logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
                     oppgaveService.opprettOppgave(
                         referanse = tilbakekreving.id.toString(),
                         sakId = tilbakekreving.sak.id,
                         kilde = OppgaveKilde.TILBAKEKREVING,
                         type = OppgaveType.TILBAKEKREVING,
-                        merknad = "Kravgrunnlag mottatt",
+                        merknad = merknad,
                     )
                 }
 

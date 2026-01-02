@@ -207,7 +207,7 @@ class SamordningVedtakRouteTest {
     @Nested
     inner class PensjonApi {
         private val virkFom = LocalDate.now()
-        private val fnr = "06076941937"
+        private val fnr = "26430489347"
 
         @BeforeEach
         fun before() {

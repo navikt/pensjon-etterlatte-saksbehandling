@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerBrevRequestData
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
@@ -40,6 +41,7 @@ class EtteroppgjoerForbehandlingBrevService(
     private val grunnlagService: GrunnlagService,
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
     private val behandlingService: BehandlingService,
+    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingBrevService::class.java)
 
@@ -64,7 +66,7 @@ class EtteroppgjoerForbehandlingBrevService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
-        etteroppgjoerForbehandlingService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandlingId, brukerTokenInfo)
+        etteroppgjoerOppgaveService.sjekkAtOppgavenErTildeltSaksbehandler(forbehandlingId, brukerTokenInfo)
 
         val brevRequest = utledBrevRequest(forbehandlingId, brukerTokenInfo)
 

@@ -8,6 +8,7 @@ export interface TilbakekrevingBehandling {
   opprettet: string
   sendeBrev: boolean
   tilbakekreving: Tilbakekreving
+  omgjoeringAvId?: string
 }
 
 export interface Tilbakekreving {

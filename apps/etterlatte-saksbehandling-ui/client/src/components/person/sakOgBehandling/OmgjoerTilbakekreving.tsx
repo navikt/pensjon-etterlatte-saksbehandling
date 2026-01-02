@@ -34,9 +34,11 @@ export function OmgjoerTilbakekreving({ tilbakekreving }: { tilbakekreving: Tilb
                 <Alert variant="success">
                   <VStack gap="2">
                     <BodyShort>Omgjøring av tilbakekrevingen er opprettet.</BodyShort>
-                    <Button size="small" as="a" href={lenkeTilTilbakekrevingMedId(tilbakekreving.id)}>
-                      Gå til tilbakekreving
-                    </Button>
+                    <div>
+                      <Button size="small" as="a" href={lenkeTilTilbakekrevingMedId(tilbakekreving.id)}>
+                        Gå til tilbakekreving
+                      </Button>
+                    </div>
                   </VStack>
                 </Alert>
               ),

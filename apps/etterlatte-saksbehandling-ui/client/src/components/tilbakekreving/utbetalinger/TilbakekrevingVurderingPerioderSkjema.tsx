@@ -24,6 +24,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { formaterMaanednavnAar } from '~utils/formatering/dato'
 import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
+import { OverstyrNettoBruttoTilbakekreving } from '~components/tilbakekreving/utbetalinger/OverstyrNettoBruttoTilbakekreving'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
@@ -301,6 +302,8 @@ export function TilbakekrevingVurderingPerioderSkjema({
               })}
             </Table.Body>
           </Table>
+
+          <OverstyrNettoBruttoTilbakekreving behandling={behandling} redigerbar={redigerbar} />
         </VStack>
         {redigerbar && (
           <VStack gap="5">

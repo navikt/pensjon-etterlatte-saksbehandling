@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -317,6 +318,7 @@ internal class BehandlingServiceImpl(
     private val grunnlagService: GrunnlagService,
     private val beregningKlient: BeregningKlient,
     private val etteroppgjoerTempService: EtteroppgjoerTempService,
+    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -448,7 +450,7 @@ internal class BehandlingServiceImpl(
             )
 
             if (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
-                etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(
+                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
                     behandling.sak.id,
                     "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring",
                 )

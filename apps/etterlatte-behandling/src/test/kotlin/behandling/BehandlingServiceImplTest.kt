@@ -17,6 +17,7 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
@@ -86,6 +87,7 @@ internal class BehandlingServiceImplTest {
     private val grunnlagService = mockk<GrunnlagService>()
     private val oppgaveServiceMock = mockk<OppgaveService>()
     private val etteroppgjoerTempService = mockk<EtteroppgjoerTempService>()
+    private val etteroppgjoerOppgaveService = mockk<EtteroppgjoerOppgaveService>()
 
     private val behandlingService =
         BehandlingServiceImpl(
@@ -98,6 +100,7 @@ internal class BehandlingServiceImplTest {
             grunnlagService = grunnlagService,
             beregningKlient = mockk(),
             etteroppgjoerTempService = etteroppgjoerTempService,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
 
     @AfterEach
@@ -498,7 +501,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any(), any()) } just runs
 
         every { etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(any(), any(), any()) } just runs
-        every { etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(any(), any()) } just runs
+        every { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any()) } just runs
 
         behandlingService.avbrytBehandling(
             revurdering.id,
@@ -516,7 +519,7 @@ internal class BehandlingServiceImplTest {
                 null,
             )
 
-            etteroppgjoerTempService.opprettOppgaveForOpprettForbehandling(
+            etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
                 revurdering.sak.id,
                 "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring",
             )

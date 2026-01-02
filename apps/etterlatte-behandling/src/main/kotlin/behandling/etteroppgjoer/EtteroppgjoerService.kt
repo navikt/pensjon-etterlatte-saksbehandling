@@ -82,12 +82,12 @@ class EtteroppgjoerService(
         dao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, status)
     }
 
-    fun oppdaterEtteroppgjoerVedFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
+    fun oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         if (!forbehandling.erFerdigstilt()) {
             throw IkkeTillattException("FORBEHADNLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")
         }
 
-        val nyEtteroppgjoerStatus = finnStatusPaaEtteroppgjoer(forbehandling)
+        val nyEtteroppgjoerStatus = finnStatusForForbehandling(forbehandling)
 
         oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, nyEtteroppgjoerStatus)
         oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)
@@ -191,7 +191,7 @@ class EtteroppgjoerService(
             .also { dao.lagreEtteroppgjoer(it) }
     }
 
-    private fun finnStatusPaaEtteroppgjoer(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerStatus {
+    private fun finnStatusForForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerStatus {
         if (forbehandling.skyldesOpphoerDoedsfallIEtteroppgjoersaar()) {
             return EtteroppgjoerStatus.FERDIGSTILT
         }

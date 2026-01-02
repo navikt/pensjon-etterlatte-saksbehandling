@@ -5,16 +5,14 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -22,12 +20,14 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.YearMonth
@@ -42,33 +42,37 @@ class EtteroppgjoerRevurderingService(
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val trygdetidKlient: TrygdetidKlient,
     private val beregningKlient: BeregningKlient,
-    private val vedtakKlient: VedtakKlient,
-    private val featureToggleService: FeatureToggleService,
+    private val etteroppgjoerDataService: EtteroppgjoerDataService,
 ) {
     fun opprettEtteroppgjoerRevurdering(
         sakId: SakId,
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val sisteFerdigstilteForbehandling =
-            inTransaction {
-                etteroppgjoerForbehandlingService
-                    .hentSisteFerdigstillteForbehandling(sakId)
-            }
+        val etteroppgjoer = inTransaction { etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId) }
+        val sisteFerdigstilteForbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling
+
+        krevIkkeNull(sisteFerdigstilteForbehandlingId) {
+            "Fant ikke sisteFerdigstilteForbehandling for sak $sakId"
+        }
 
         val (revurdering, sisteIverksatteBehandling) =
             inTransaction {
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
                 val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
 
-                kanOppretteEtteroppgjoerRevurdering(etteroppgjoer, sisteFerdigstilteForbehandling.id)
+                sjekkKanOppretteEtteroppgjoerRevurdering(etteroppgjoer, sisteFerdigstilteForbehandlingId)
 
-                val (sisteIverksatteBehandling, opphoerFom) = hentSisteIverksatteBehandlingOgOpphoer(sakId, brukerTokenInfo)
+                val (sisteIverksatteBehandling, opphoerFom) =
+                    etteroppgjoerDataService.hentSisteIverksatteBehandlingOgOpphoer(
+                        sakId,
+                        brukerTokenInfo,
+                    )
                 val revurdering =
                     opprettRevurdering(
                         sakId,
                         sisteIverksatteBehandling,
-                        sisteFerdigstilteForbehandling.id,
+                        sisteFerdigstilteForbehandlingId,
                         opprinnelse,
                         opphoerFom,
                         brukerTokenInfo,
@@ -82,7 +86,7 @@ class EtteroppgjoerRevurderingService(
 
                 etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                     sakId,
-                    sisteFerdigstilteForbehandling.aar,
+                    etteroppgjoer.inntektsaar,
                     EtteroppgjoerStatus.UNDER_REVURDERING,
                 )
 
@@ -109,12 +113,31 @@ class EtteroppgjoerRevurderingService(
 
         return inTransaction {
             kopierFaktiskInntekt(
-                fraForbehandlingId = sisteFerdigstilteForbehandling.id,
+                fraForbehandlingId = sisteFerdigstilteForbehandlingId,
                 tilForbehandlingId = UUID.fromString(revurdering.relatertBehandlingId),
                 brukerTokenInfo = brukerTokenInfo,
             )
             krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Revurdering finnes ikke etter oppretting" }
         }
+    }
+
+    fun hentBeregnetResultatForRevurdering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregnetEtteroppgjoerResultatDto {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val forbehandlingId =
+            behandling?.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
+                "MANGLER_FORBEHANDLING_ID",
+                "Behandling med id=$behandlingId peker ikke på en gyldig forbehandling",
+            )
+        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+        return etteroppgjoerForbehandlingService.hentBeregnetEtteroppgjoerResultat(forbehandling, brukerTokenInfo)
+            ?: throw IkkeFunnetException(
+                "MANGLER_BEREGNET_RESULTAT",
+                "Forbehandling med id=$forbehandlingId til revurdering med id=$behandlingId har " +
+                    "ikke et beregnet resultat for etteroppgjøret.",
+            )
     }
 
     private fun opprettRevurdering(
@@ -163,35 +186,6 @@ class EtteroppgjoerRevurderingService(
             ).oppdater()
     }
 
-    private fun hentSisteIverksatteVedtakIkkeOpphoer(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): SisteAvkortingOgOpphoer =
-        runBlocking {
-            if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_OPPHOER_SKYLDES_DOEDSFALL, false)) {
-                etteroppgjoerForbehandlingService.hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo)
-            } else {
-                val iverksatteVedtak =
-                    vedtakKlient
-                        .hentIverksatteVedtak(sakId, brukerTokenInfo)
-                        .sortedByDescending { it.datoFattet }
-
-                val sisteIverksatteVedtak =
-                    iverksatteVedtak.firstOrNull()
-                        ?: throw InternfeilException("Fant ingen iverksatte vedtak for sak $sakId")
-
-                if (sisteIverksatteVedtak.vedtakType == VedtakType.OPPHOER) {
-                    throw InternfeilException("Siste iverksatte vedtak er et opphør, dette er ikke støttet enda")
-                }
-
-                if (sisteIverksatteVedtak.opphoerFraOgMed != null) {
-                    throw InternfeilException("Siste iverksatte vedtak har opphør fra og med, dette er ikke støttet enda")
-                }
-
-                SisteAvkortingOgOpphoer(sisteIverksatteVedtak.behandlingId, null)
-            }
-        }
-
     private fun kopierFaktiskInntekt(
         fraForbehandlingId: UUID,
         tilForbehandlingId: UUID,
@@ -217,7 +211,7 @@ class EtteroppgjoerRevurderingService(
         }
     }
 
-    private fun kanOppretteEtteroppgjoerRevurdering(
+    private fun sjekkKanOppretteEtteroppgjoerRevurdering(
         etteroppgjoer: Etteroppgjoer,
         forventetForbehandlingId: UUID,
     ) {
@@ -235,17 +229,12 @@ class EtteroppgjoerRevurderingService(
         }
     }
 
-    private fun hentSisteIverksatteBehandlingOgOpphoer(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<Behandling, YearMonth?> {
-        val sisteAvkortingOgOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
-        val behandling =
-            behandlingService.hentBehandling(sisteAvkortingOgOpphoer.sisteBehandlingMedAvkorting)
-                ?: throw InternfeilException("Fant ikke iverksatt behandling $sisteAvkortingOgOpphoer")
-
-        return behandling to sisteAvkortingOgOpphoer.opphoerFom
-    }
+    private fun String.parseUuid(): UUID? =
+        try {
+            UUID.fromString(this)
+        } catch (_: IllegalArgumentException) {
+            null
+        }
 }
 
 data class SisteAvkortingOgOpphoer(

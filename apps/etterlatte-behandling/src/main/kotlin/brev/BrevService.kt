@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.VedtaksbrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -12,7 +13,9 @@ import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -33,6 +36,7 @@ class BrevService(
     private val tilbakekrevingBrevService: TilbakekrevingBrevService,
     private val etteroppgjoerForbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     private val etteroppgjoerRevurderingBrevService: EtteroppgjoerRevurderingBrevService,
+    private val vedtaksbrevService: VedtaksbrevService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -59,6 +63,8 @@ class BrevService(
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+                } else if (isInnvilgelseFoerstegangsbehandling(behandlingId, SakType.OMSTILLINGSSTOENAD)) {
+                    vedtaksbrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
                 } else {
                     videresendInterneFeil {
                         brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
@@ -75,6 +81,15 @@ class BrevService(
     private fun isRevurderingEtteroppgjoerVedtak(behandlingId: UUID): Boolean {
         val behandling = behandlingService.hentBehandling(behandlingId)
         return behandling?.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER
+    }
+
+    private fun isInnvilgelseFoerstegangsbehandling(
+        behandlingId: UUID,
+        sakType: SakType,
+    ): Boolean {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        return behandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
+            behandling.sak.sakType == sakType
     }
 
     suspend fun genererPdf(

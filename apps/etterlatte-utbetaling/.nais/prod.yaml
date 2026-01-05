@@ -129,6 +129,8 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-vedtaksvurdering
+        - application: logging
+          namespace: nais-system
       external:
         - host: mpls04.adeo.no
           ports:

@@ -88,6 +88,8 @@ spec:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:

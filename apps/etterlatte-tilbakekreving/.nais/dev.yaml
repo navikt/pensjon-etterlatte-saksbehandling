@@ -79,6 +79,8 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: logging
+          namespace: nais-system
       external:
         - host: b27apvl222.preprod.local
           ports:

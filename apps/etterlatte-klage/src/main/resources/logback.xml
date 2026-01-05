@@ -1,13 +1,11 @@
 <configuration>
-    <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>team-logs.nais-system:5170</destination>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
-            <includeContext>false</includeContext>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <appender name="default-json" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
                 <valueMasker class="no.nav.etterlatte.libs.common.person.logg.FnrMasker"/>
@@ -16,14 +14,11 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="default-json" />
+        <appender-ref ref="STDOUT_JSON"/>
     </root>
-
-    <logger name="team-logs-logger" level="INFO" additivity="false">
-        <appender-ref ref="team-logs" />
-    </logger>
 
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="no.nav.etterlatte" level="DEBUG"/>
+    <include resource="logback-secure.xml" />
 </configuration>

@@ -11,10 +11,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerKonfigurasjon
 import java.time.Duration
 import java.time.YearMonth

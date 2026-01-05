@@ -1,9 +1,9 @@
 package no.nav.etterlatte.tidshendelser
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerDao
-import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerFilter
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith

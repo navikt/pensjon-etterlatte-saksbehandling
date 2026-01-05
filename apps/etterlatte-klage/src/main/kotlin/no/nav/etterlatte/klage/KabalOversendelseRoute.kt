@@ -28,7 +28,12 @@ fun Route.kabalOvesendelseRoute(kabalOversendelseService: KabalOversendelseServi
 
         route("temp-test") {
             post {
-                sikkerLogg.info("temp-test ${Parent(listOf("Ole","Dole","Doffen"))}")
+                try {
+                    doit()
+                } catch (err: Throwable) {
+                    sikkerLogg.error("Feilet", err)
+                    logger.error("Feilet, vanlig logger", err)
+                }
                 logger.info("Normal")
                 call.respond(HttpStatusCode.OK)
             }
@@ -36,6 +41,6 @@ fun Route.kabalOvesendelseRoute(kabalOversendelseService: KabalOversendelseServi
     }
 }
 
-private data class Parent(
-    val children: List<String>,
-)
+private fun doit() {
+    if (1 == 1) throw RuntimeException("fds")
+}

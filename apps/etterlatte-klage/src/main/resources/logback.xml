@@ -5,13 +5,6 @@
             <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
             <includeContext>false</includeContext>
         </encoder>
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>TEAM_LOGS</marker>
-            </evaluator>
-            <OnMatch>ACCEPT</OnMatch>
-            <OnMismatch>DENY</OnMismatch>
-        </filter>
     </appender>
 
     <appender name="default-json" class="ch.qos.logback.core.ConsoleAppender">
@@ -20,18 +13,10 @@
                 <valueMasker class="no.nav.etterlatte.libs.common.person.logg.FnrMasker"/>
             </jsonGeneratorDecorator>
         </encoder>
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>TEAM_LOGS</marker>
-            </evaluator>
-            <OnMatch>DENY</OnMatch>
-            <OnMismatch>ACCEPT</OnMismatch>
-        </filter>
     </appender>
 
     <root level="INFO">
         <appender-ref ref="default-json" />
-        <appender-ref ref="team-logs" />
     </root>
 
     <logger name="team-logs-logger" level="INFO" additivity="false">

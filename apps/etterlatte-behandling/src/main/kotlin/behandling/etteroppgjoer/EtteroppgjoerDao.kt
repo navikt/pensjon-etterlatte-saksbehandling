@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.FilterVerdi
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.FilterVerdi
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId

@@ -9,6 +9,10 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.behandling.KlageOversendelseDto
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+private val sikkerlogger: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 fun Route.kabalOvesendelseRoute(kabalOversendelseService: KabalOversendelseService) {
     route("api") {
@@ -22,5 +26,17 @@ fun Route.kabalOvesendelseRoute(kabalOversendelseService: KabalOversendelseServi
                 }
             }
         }
+
+        route("temp-test") {
+            post {
+                sikkerlogger.info("temp-test ${Parent(listOf("Ole","Dole","Doffen"))}")
+                sikkerLogg.info("Gammel logger")
+                call.respond(HttpStatusCode.OK)
+            }
+        }
     }
 }
+
+private data class Parent(
+    val children: List<String>,
+)

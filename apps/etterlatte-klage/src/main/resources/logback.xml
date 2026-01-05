@@ -6,7 +6,7 @@
     </appender>
 
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" >
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
                 <valueMasker class="no.nav.etterlatte.libs.common.person.logg.FnrMasker"/>
             </jsonGeneratorDecorator>

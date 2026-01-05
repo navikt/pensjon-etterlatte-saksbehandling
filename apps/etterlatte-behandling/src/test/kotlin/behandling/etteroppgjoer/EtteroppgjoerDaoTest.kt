@@ -14,10 +14,9 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerFilter
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.FilterVerdi
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -226,7 +225,7 @@ class EtteroppgjoerDaoTest(
                 beskrivelseAvUgunst = null,
                 varselbrevSendt = LocalDate.now().minusMonths(1),
                 opphoerSkyldesDoedsfall = null,
-                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
             )
         etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
 

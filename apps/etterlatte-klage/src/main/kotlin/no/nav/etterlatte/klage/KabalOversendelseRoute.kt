@@ -13,7 +13,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MarkerFactory
 
-private val sikkerlogger: Logger = LoggerFactory.getLogger("sikkerLogg")
+private val sikkerlogger: Logger = LoggerFactory.getLogger("team-logs-logger")
 private val logger: Logger = LoggerFactory.getLogger(ApplicationContext::class.java)
 private val teamLogsMarker = MarkerFactory.getMarker("TEAM_LOGS")
 

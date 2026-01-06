@@ -166,7 +166,7 @@ class TilbakekrevingskomponentenKlient(
             payload = tilbakekrevingObjectMapper.writeValueAsString(response),
             type = TilbakekrevingHendelseType.KRAVGRUNNLAG_OMGJOERING_MOTTATT,
         )
-        if (response.detaljertkravgrunnlag != null) {
+        if (response.detaljertkravgrunnlag == null) {
             return null
         }
         val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(response.detaljertkravgrunnlag)

@@ -1,3 +1,5 @@
+package no.nav.etterlatte.brev
+
 import no.nav.etterlatte.behandling.behandlinginfo.Etterbetaling
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import java.time.LocalDate

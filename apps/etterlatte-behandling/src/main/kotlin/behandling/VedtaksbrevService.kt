@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import Etterbetaling
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
@@ -10,6 +9,7 @@ import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevRequest
+import no.nav.etterlatte.brev.Etterbetaling
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -242,13 +242,18 @@ fun TrygdetidDto.fromDto(
     navnAvdoed = navnAvdoed,
     trygdetidsperioder =
         when (beregningsMetodeAnvendt) {
-            BeregningsMetode.NASJONAL -> trygdetidGrunnlag.filter { it.bosted == LandNormalisert.NORGE.isoCode }
+            BeregningsMetode.NASJONAL -> {
+                trygdetidGrunnlag.filter { it.bosted == LandNormalisert.NORGE.isoCode }
+            }
+
             BeregningsMetode.PRORATA -> {
                 // Kun ta med de som er avtaleland (Norge er alltid avtaleland)
                 trygdetidGrunnlag.filter { it.prorata || it.bosted == LandNormalisert.NORGE.isoCode }
             }
 
-            else -> throw IllegalArgumentException("$beregningsMetodeAnvendt er ikke en gyldig beregningsmetode")
+            else -> {
+                throw IllegalArgumentException("$beregningsMetodeAnvendt er ikke en gyldig beregningsmetode")
+            }
         }.map { grunnlag ->
             OmstillingsstoenadInnvilgelseVedtakBrevData.Trygdetidsperiode(
                 datoFOM = grunnlag.periodeFra,
@@ -261,16 +266,23 @@ fun TrygdetidDto.fromDto(
         },
     beregnetTrygdetidAar =
         when (beregningsMetodeAnvendt) {
-            BeregningsMetode.NASJONAL ->
+            BeregningsMetode.NASJONAL -> {
                 beregnetTrygdetid?.resultat?.samletTrygdetidNorge
                     ?: throw ManglerMedTrygdetidVeBrukIBrev()
+            }
 
-            BeregningsMetode.PRORATA ->
+            BeregningsMetode.PRORATA -> {
                 beregnetTrygdetid?.resultat?.samletTrygdetidTeoretisk
                     ?: throw ManglerMedTrygdetidVeBrukIBrev()
+            }
 
-            BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
-            else -> throw ManglerMedTrygdetidVeBrukIBrev()
+            BeregningsMetode.BEST -> {
+                throw UgyldigBeregningsMetode()
+            }
+
+            else -> {
+                throw ManglerMedTrygdetidVeBrukIBrev()
+            }
         },
     prorataBroek = beregnetTrygdetid?.resultat?.prorataBroek,
     mindreEnnFireFemtedelerAvOpptjeningstiden =
@@ -367,7 +379,9 @@ fun utledBeregningsperioderOpphoer(
                 }
             }
 
-            else -> opphoer.atDay(1)
+            else -> {
+                opphoer.atDay(1)
+            }
         }
     return BeregningsperioderFlereAarOpphoer(
         sisteBeregningsperiode = sisteBeregningsperiode,

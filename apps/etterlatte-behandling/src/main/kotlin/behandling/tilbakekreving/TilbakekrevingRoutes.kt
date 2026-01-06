@@ -73,7 +73,7 @@ internal fun Route.tilbakekrevingRoutes(
             post("/omgjoer") {
                 kunSaksbehandlerMedSkrivetilgang {
                     if (featureToggleService.isEnabled(TilbakekrevingToggles.OMGJOER, false)) {
-                        val kravgrunnlagForOmgjoering = service.hentKravgrunnlagForOmgjoering(tilbakekrevingId)
+                        val kravgrunnlagForOmgjoering = service.hentKravgrunnlagForOmgjoering(tilbakekrevingId, it)
                         val omgjoering = service.opprettTilbakekreving(kravgrunnlagForOmgjoering, tilbakekrevingId, it)
                         call.respond(omgjoering)
                     } else {

@@ -7,6 +7,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import institusjonsopphold.personer.InstitusjonsoppholdInternKlient
+import institusjonsopphold.personer.InstitusjonsoppholdInternKlientImpl
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
 import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
@@ -355,6 +356,11 @@ internal class ApplicationContext(
         ),
     val arbeidOgInntektKlient: ArbeidOgInntektKlient = ArbeidOgInntektKlient(httpClient(), config.getString("arbeidOgInntekt.url")),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
+    val institusjonsoppholdInternKlient: InstitusjonsoppholdInternKlient =
+        InstitusjonsoppholdInternKlientImpl(
+            config.getString("institusjonsopphold.resource.url"),
+            institusjonsoppholdHttpClient(config),
+        ),
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
@@ -885,11 +891,7 @@ internal class ApplicationContext(
             sakLesDao = sakLesDao,
             institusjonsoppholdPersonerDao = institusjonsoppholdPersonerDao,
             featureToggleService = featureToggleService,
-            institusjonsoppholdInternKlient =
-                InstitusjonsoppholdInternKlient(
-                    config,
-                    institusjonsoppholdHttpClient(config),
-                ),
+            institusjonsoppholdInternKlient = institusjonsoppholdInternKlient,
         )
 
     // Jobs

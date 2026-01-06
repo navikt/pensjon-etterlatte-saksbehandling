@@ -209,7 +209,7 @@ class SakLesDao(
             }
         }
 
-    fun hentAllePersonerMedOmsSak(): List<Pair<String, Long>> =
+    fun hentAllePersonerMedSak(): List<Pair<String, Long>> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement =
@@ -217,9 +217,8 @@ class SakLesDao(
                         """
                         SELECT fnr, id
                         FROM sak
-                        WHERE sakType = ?
                         """.trimIndent(),
-                    ).apply { setString(1, SakType.OMSTILLINGSSTOENAD.name) }
+                    )
                 statement
                     .executeQuery()
                     .toList { Pair(getString("fnr"), getLong("id")) }

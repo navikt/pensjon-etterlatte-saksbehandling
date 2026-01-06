@@ -68,18 +68,3 @@ enum class InstitusjonsoppholdPersonerToggles(
 
     override fun key(): String = key
 }
-
-/*
-start date
-
-hvis toggle og tabell
-hent alle oms -> tabell
-
-så lenge rader i tabell: ikke ferdig:
--> hent batch fra InstHenter
-    oppdater tabell
-
-
-
-hvis ferdig: logg at den er ferdig
- */

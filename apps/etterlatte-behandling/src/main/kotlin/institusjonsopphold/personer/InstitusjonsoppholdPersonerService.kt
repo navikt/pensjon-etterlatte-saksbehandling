@@ -24,7 +24,7 @@ class InstitusjonsoppholdPersonerService(
     private fun run() {
         val skalSetteOpp = skalSetteOpp()
         if (skalSetteOpp) {
-            settOppKjoeringTabellForOmsSaker()
+            settOppKjoeringTabell()
         }
 
         if (skalKjoere()) {
@@ -38,7 +38,7 @@ class InstitusjonsoppholdPersonerService(
                 counter++
             }
             if (erFerdig) {
-                logger.info("Ferdig med å hente institusjonsopphold for alle OMS-saker!")
+                logger.info("Ferdig med å hente institusjonsopphold for alle saker!")
             }
         }
     }
@@ -70,15 +70,15 @@ class InstitusjonsoppholdPersonerService(
             personIdenter.size
         }
 
-    private fun settOppKjoeringTabellForOmsSaker() {
+    private fun settOppKjoeringTabell() {
         inTransaction {
-            val fnrListe = sakLesDao.hentAllePersonerMedOmsSak()
+            val fnrListe = sakLesDao.hentAllePersonerMedSak()
             krev(fnrListe.size == fnrListe.map { it.first }.distinct().size) { "Har flere saker per person!?" }
             fnrListe
                 .forEach {
                     institusjonsoppholdPersonerDao.lagreKjoering(it)
                 }.also {
-                    logger.info("Satte opp for kjøring med ${fnrListe.size} OMS-saker")
+                    logger.info("Satte opp for kjøring med ${fnrListe.size} saker")
                 }
         }
     }

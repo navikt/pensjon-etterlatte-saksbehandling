@@ -18,7 +18,6 @@
     "@navikt/ds-css": "~7.36.0",
     "@navikt/ds-react": "~7.36.0",
     "@navikt/ds-tokens": "~7.36.0",
-    "@navikt/navspa": "^6.0.1",
     "@reduxjs/toolkit": "^2.11.2",
     "date-fns": "^4.1.0",
     "error-stack-parser": "^2.1.4",

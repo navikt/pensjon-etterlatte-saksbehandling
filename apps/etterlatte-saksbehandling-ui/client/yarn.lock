@@ -418,13 +418,6 @@
   resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.36.0.tgz#ad3ab2a9f2179c5a4703738de33233af54336dc2"
   integrity sha512-qGLDJfnqQJoSHz03lsxqXkbl4MqN/d9W532TKyGcXswsYSeTEj425weFUvPwTh2w29dM4ncGmomijZAUjFYH/w==
 
-"@navikt/navspa@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@navikt/navspa/-/navspa-6.0.1.tgz#f3536207976359e4849f7db7aa9ffa6cfc7fe516"
-  integrity sha512-EtTqUNxuykKFDKzd1MAI4DFjTLH/vY3ZtPOvMKZgZuRaf2N/1vNU4lPRk4y+HencyA4E5Qkdmd0I5FqA208Ofg==
-  dependencies:
-    loadjs "^4.2.0"
-
 "@npmcli/fs@^3.1.0":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@npmcli/fs/-/fs-3.1.1.tgz#59cdaa5adca95d135fc00f2bb53f5771575ce726"
@@ -2356,11 +2349,6 @@ license-checker-rseidelsohn@^4.4.2:
     spdx-expression-parse "^3.0.1"
     spdx-satisfies "^5.0.1"
     treeify "^1.1.0"
-
-loadjs@^4.2.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/loadjs/-/loadjs-4.3.0.tgz#38c578cbb2e08835aa4407bd4ac6507dd1f7ed10"
-  integrity sha512-vNX4ZZLJBeDEOBvdr2v/F+0aN5oMuPu7JTqrMwp+DtgK+AryOlpy6Xtm2/HpNr+azEa828oQjOtWsB6iDtSfSQ==
 
 locate-path@^6.0.0:
   version "6.0.0"

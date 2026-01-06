@@ -107,6 +107,8 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-vedtaksvurdering
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen.prod-fss-pub.nais.io

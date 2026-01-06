@@ -1,13 +1,8 @@
 package no.nav.etterlatte.tidshendelser.etteroppgjoer
 
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDate
-
-enum class EtteroppgjoerFilter {
-    ENKEL,
-    MED_AKTIVITET_OG_SKJERMET,
-    MED_AKTIVITET_SKJERMET_OG_UTLANDSTILSNITT,
-}
 
 data class EtteroppgjoerKonfigurasjon(
     val inntektsaar: Int,

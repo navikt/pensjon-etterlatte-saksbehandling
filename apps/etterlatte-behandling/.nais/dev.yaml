@@ -189,6 +189,8 @@ spec:
           cluster: dev-gcp
         - application: kodeverk-api
           namespace: team-rocket
+        - application: logging
+          namespace: nais-system
       external:
         - host: kodeverk-api.nav.no # må gå mot prod i dev se https://nav-it.slack.com/archives/C06FK6V74JE/p1723795352459339?thread_ts=1723788766.141209&cid=C06FK6V74JE
         - host: skjermede-personer-pip.intern.dev.nav.no

@@ -64,5 +64,7 @@ spec:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-utbetaling
         - application: etterlatte-brev-api
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

@@ -63,6 +63,8 @@ spec:
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-behandling
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:

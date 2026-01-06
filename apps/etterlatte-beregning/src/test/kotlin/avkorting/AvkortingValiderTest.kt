@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Month
+import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -301,12 +302,13 @@ class AvkortingValiderTest {
 
         @Test
         fun `Revurdering nytt år`() {
+            val aar = Year.now().value
             val avkorting =
                 Avkorting(
                     aarsoppgjoer =
                         listOf(
                             aarsoppgjoer(
-                                aar = 2025,
+                                aar = aar,
                                 inntektsavkorting = emptyList(),
                             ),
                         ),
@@ -316,11 +318,11 @@ class AvkortingValiderTest {
                 inntektDto(
                     fratrekkInnAar = 0,
                     fratrekkInnAarUtland = 0,
-                    fom = YearMonth.of(2025, 1),
+                    fom = YearMonth.of(aar, 1),
                 )
             validerInntekter(
                 behandling = behandling(BehandlingType.REVURDERING),
-                beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2025, 1))),
+                beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(aar, 1))),
                 eksisterendeAvkorting = avkorting,
                 nyeGrunnlag = listOf(utenFratrekk),
                 true,
@@ -331,7 +333,7 @@ class AvkortingValiderTest {
                     inntektDto(
                         fratrekkInnAar = 1,
                         fratrekkInnAarUtland = 0,
-                        fom = YearMonth.of(2025, 1),
+                        fom = YearMonth.of(aar, 1),
                     )
                 validerInntekter(
                     behandling(BehandlingType.REVURDERING),
@@ -347,7 +349,7 @@ class AvkortingValiderTest {
                     inntektDto(
                         fratrekkInnAar = 0,
                         fratrekkInnAarUtland = 1,
-                        fom = YearMonth.of(2025, 1),
+                        fom = YearMonth.of(aar, 1),
                     )
                 validerInntekter(
                     behandling(BehandlingType.REVURDERING),

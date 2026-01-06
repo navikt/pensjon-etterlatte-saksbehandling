@@ -92,6 +92,8 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: logging
+          namespace: nais-system
       external:
         - host: mpls04.adeo.no
           ports:

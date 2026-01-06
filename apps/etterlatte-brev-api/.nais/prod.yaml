@@ -146,6 +146,8 @@ spec:
           namespace: nais-system
         - application: pensjon-brevbaker
           namespace: pensjonsbrev
+        - application: logging
+          namespace: nais-system
       external:
         - host: norg2.prod-fss-pub.nais.io
         - host: saf.prod-fss-pub.nais.io

@@ -64,6 +64,8 @@ spec:
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: inst2-q2.dev-fss-pub.nais.io
+        - application: logging
+          namespace: nais-system
     inbound:
       rules:
       - application: etterlatte-behandling

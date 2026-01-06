@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Box, Detail, Heading, Label } from '@navikt/ds-react'
+import { Alert, Box, Detail, Heading, Label, Link } from '@navikt/ds-react'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { useAppDispatch } from '~store/Store'
@@ -19,6 +19,7 @@ import { useAttesterbarBehandlingOppgave } from '~shared/hooks/useAttesterbarBeh
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
+import { lenkeTilTilbakekrevingMedId } from '~components/person/sakOgBehandling/TilbakekrevingListe'
 
 export function TilbakekrevingSidemeny() {
   const dispatch = useAppDispatch()
@@ -87,6 +88,14 @@ export function TilbakekrevingSidemeny() {
           <Label size="small">Sakid:</Label>
           <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
         </div>
+
+        {tilbakekreving.omgjoeringAvId && (
+          <Box marginBlock="4">
+            <Label size="small">Tilbakekrevingen er en omgjøring</Label>
+
+            <Link href={lenkeTilTilbakekrevingMedId(tilbakekreving.omgjoeringAvId)}>Åpne forrige tilbakekreving</Link>
+          </Box>
+        )}
 
         <SettPaaVent oppgave={oppgave} />
       </SidebarPanel>

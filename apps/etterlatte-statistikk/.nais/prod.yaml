@@ -78,5 +78,7 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

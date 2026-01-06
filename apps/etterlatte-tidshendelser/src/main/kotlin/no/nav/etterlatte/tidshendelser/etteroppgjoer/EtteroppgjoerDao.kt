@@ -2,6 +2,7 @@ package no.nav.etterlatte.tidshendelser.etteroppgjoer
 
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent

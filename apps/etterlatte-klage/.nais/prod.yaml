@@ -62,6 +62,8 @@ spec:
         - application: kabal-api
           namespace: klage
           cluster: prod-gcp
+        - application: logging
+          namespace: nais-system
 
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

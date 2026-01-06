@@ -13,57 +13,6 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 
-enum class FilterVerdi(
-    val filterEn: Boolean,
-    val filterTo: Boolean,
-) {
-    FALSE(false, false),
-    TRUE(true, true),
-    DONT_CARE(false, true),
-}
-
-enum class EtteroppgjoerFilter(
-    val harSanksjon: FilterVerdi,
-    val harInstitusjonsopphold: FilterVerdi,
-    val harOpphoer: FilterVerdi,
-    val harAdressebeskyttelseEllerSkjermet: FilterVerdi,
-    val harAktivitetskrav: FilterVerdi,
-    val harBosattUtland: FilterVerdi,
-    val harUtlandstilsnitt: FilterVerdi,
-    val harOverstyrtBeregning: FilterVerdi,
-) {
-    ENKEL(
-        FilterVerdi.FALSE,
-        FilterVerdi.FALSE,
-        FilterVerdi.FALSE,
-        FilterVerdi.FALSE,
-        FilterVerdi.FALSE,
-        FilterVerdi.FALSE,
-        FilterVerdi.FALSE,
-        FilterVerdi.FALSE,
-    ),
-    MED_AKTIVITET_OG_SKJERMET(
-        harSanksjon = FilterVerdi.FALSE,
-        harInstitusjonsopphold = FilterVerdi.FALSE,
-        harOpphoer = FilterVerdi.FALSE,
-        harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
-        harAktivitetskrav = FilterVerdi.DONT_CARE,
-        harBosattUtland = FilterVerdi.FALSE,
-        harUtlandstilsnitt = FilterVerdi.FALSE,
-        harOverstyrtBeregning = FilterVerdi.FALSE,
-    ),
-    MED_AKTIVITET_SKJERMET_OG_UTLANDSTILSNITT(
-        harSanksjon = FilterVerdi.FALSE,
-        harInstitusjonsopphold = FilterVerdi.FALSE,
-        harOpphoer = FilterVerdi.FALSE,
-        harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
-        harAktivitetskrav = FilterVerdi.DONT_CARE,
-        harBosattUtland = FilterVerdi.FALSE,
-        harUtlandstilsnitt = FilterVerdi.DONT_CARE,
-        harOverstyrtBeregning = FilterVerdi.FALSE,
-    ),
-}
-
 @OptIn(DelicateCoroutinesApi::class)
 class OpprettEtteroppgjoerJobService(
     private val etteroppgjoerService: EtteroppgjoerService,

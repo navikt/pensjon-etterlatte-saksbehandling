@@ -53,5 +53,7 @@ spec:
     outbound:
       rules:
         - application: etterlatte-trygdetid
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

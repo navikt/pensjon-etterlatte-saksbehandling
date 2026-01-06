@@ -65,6 +65,9 @@ spec:
     - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
       external:
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "pensjon-parallelle-sannheter.intern.nav.no"

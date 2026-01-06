@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -72,18 +73,19 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
 
     @Test
     fun `run skal opprette etteroppgjoer for aar hvor saken har utbetalinger`() {
-        val currentYear = YearMonth.now().year
+        val etteroppgjoerAar = ETTEROPPGJOER_AAR
+        val aarEtterEtteroppgjoerAar = etteroppgjoerAar + 1
         val sak = opprettSak()
         val behandlingId = opprettBehandling(sak)
 
         coEvery {
-            vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear - 1, any())
+            vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(etteroppgjoerAar, any())
         } returns listOf(sak.id)
         coEvery {
-            vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear - 1, any())
+            vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(etteroppgjoerAar, any())
         } returns listOf(sak.id)
         coEvery {
-            vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(currentYear, any())
+            vedtakKlientMock.hentSakerMedUtbetalingForInntektsaar(aarEtterEtteroppgjoerAar, any())
         } returns emptyList()
         coEvery {
             vedtakKlientMock.hentIverksatteVedtak(sak.id, any())
@@ -109,15 +111,15 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
 
         inTransaction {
             val etteroppgjoerForForrigeAar =
-                applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear - 1)!!
+                applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, etteroppgjoerAar)!!
             with(etteroppgjoerForForrigeAar) {
                 sakId shouldBe sak.id
                 status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
-                inntektsaar shouldBe currentYear - 1
+                inntektsaar shouldBe etteroppgjoerAar
             }
 
             val etteroppgjoerForIAar =
-                applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear)
+                applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, aarEtterEtteroppgjoerAar)
             etteroppgjoerForIAar shouldBe null
         }
     }

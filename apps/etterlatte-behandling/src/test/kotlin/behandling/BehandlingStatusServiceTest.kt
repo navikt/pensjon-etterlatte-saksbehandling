@@ -14,6 +14,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
@@ -67,6 +68,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -254,7 +256,7 @@ internal class BehandlingStatusServiceTest {
                 sakId = sakId,
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 status = BehandlingStatus.ATTESTERT,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.of(ETTEROPPGJOER_AAR, Month.MARCH)),
             )
         val behandlingId = behandling.id
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")

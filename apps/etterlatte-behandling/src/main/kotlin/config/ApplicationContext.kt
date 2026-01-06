@@ -777,14 +777,15 @@ internal class ApplicationContext(
 
     val brevService =
         BrevService(
-            behandlingMedBrevService,
-            behandlingService,
-            brevApiKlient,
-            vedtakKlient,
-            tilbakekrevingBrevService,
-            etteroppgjoerForbehandlingBrevService,
-            etteroppgjoerRevurderingBrevService,
+            behandlingMedBrevService = behandlingMedBrevService,
+            behandlingService = behandlingService,
+            brevApiKlient = brevApiKlient,
+            vedtakKlient = vedtakKlient,
+            tilbakekrevingBrevService = tilbakekrevingBrevService,
+            etteroppgjoerForbehandlingBrevService = etteroppgjoerForbehandlingBrevService,
+            etteroppgjoerRevurderingBrevService = etteroppgjoerRevurderingBrevService,
             vedtaksbrevService = vedtaksbrevService,
+            featureToggleService = featureToggleService,
         )
 
     val tilbakekrevingService =

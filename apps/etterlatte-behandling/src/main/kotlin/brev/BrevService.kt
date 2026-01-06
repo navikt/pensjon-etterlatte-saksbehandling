@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -37,6 +38,7 @@ class BrevService(
     private val etteroppgjoerForbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     private val etteroppgjoerRevurderingBrevService: EtteroppgjoerRevurderingBrevService,
     private val vedtaksbrevService: VedtaksbrevService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -54,16 +56,20 @@ class BrevService(
 
         val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
         return when (behandlingMedBrevType) {
-            BehandlingMedBrevType.TILBAKEKREVING ->
+            BehandlingMedBrevType.TILBAKEKREVING -> {
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+            }
 
-            BehandlingMedBrevType.ETTEROPPGJOER ->
+            BehandlingMedBrevType.ETTEROPPGJOER -> {
                 etteroppgjoerForbehandlingBrevService.opprettVarselBrev(behandlingId, bruker)
+            }
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
-                } else if (isInnvilgelseFoerstegangsbehandling(behandlingId, SakType.OMSTILLINGSSTOENAD)) {
+                } else if (isInnvilgelseFoerstegangsbehandling(behandlingId, SakType.OMSTILLINGSSTOENAD) &&
+                    brukNyBrevFlytForOmsInnvilgelseForstegangsbehandling()
+                ) {
                     vedtaksbrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
                 } else {
                     videresendInterneFeil {
@@ -71,10 +77,12 @@ class BrevService(
                     }
                 }
             }
-            else ->
+
+            else -> {
                 videresendInterneFeil {
                     brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
                 }
+            }
         }
     }
 
@@ -125,11 +133,13 @@ class BrevService(
             }
 
         return when (behandlingMedBrevType) {
-            BehandlingMedBrevType.TILBAKEKREVING ->
+            BehandlingMedBrevType.TILBAKEKREVING -> {
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
+            }
 
-            BehandlingMedBrevType.ETTEROPPGJOER ->
+            BehandlingMedBrevType.ETTEROPPGJOER -> {
                 etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, bruker)
+            }
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -141,10 +151,11 @@ class BrevService(
                 }
             }
 
-            else ->
+            else -> {
                 videresendInterneFeil {
                     brevApiKlient.genererPdf(brevID, behandlingId, bruker)
                 }
+            }
         }
     }
 
@@ -171,16 +182,18 @@ class BrevService(
         }
 
         when (behandlingMedBrevType) {
-            BehandlingMedBrevType.TILBAKEKREVING ->
+            BehandlingMedBrevType.TILBAKEKREVING -> {
                 videresendInterneFeil {
                     tilbakekrevingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
                 }
+            }
 
-            BehandlingMedBrevType.ETTEROPPGJOER ->
+            BehandlingMedBrevType.ETTEROPPGJOER -> {
                 etteroppgjoerForbehandlingBrevService.ferdigstillForbehandlingMedBrev(
                     behandlingId,
                     brukerTokenInfo,
                 )
+            }
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -192,10 +205,11 @@ class BrevService(
                 }
             }
 
-            else ->
+            else -> {
                 videresendInterneFeil {
                     brevApiKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
                 }
+            }
         }
     }
 
@@ -214,15 +228,17 @@ class BrevService(
         }
         val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
         return when (behandlingMedBrevType) {
-            BehandlingMedBrevType.TILBAKEKREVING ->
+            BehandlingMedBrevType.TILBAKEKREVING -> {
                 tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+            }
 
-            BehandlingMedBrevType.ETTEROPPGJOER ->
+            BehandlingMedBrevType.ETTEROPPGJOER -> {
                 etteroppgjoerForbehandlingBrevService.tilbakestillVarselBrev(
                     brevId = brevID,
                     forbehandlingId = behandlingId,
                     brukerTokenInfo = bruker,
                 )
+            }
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -234,10 +250,11 @@ class BrevService(
                 }
             }
 
-            else ->
+            else -> {
                 videresendInterneFeil {
                     brevApiKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
                 }
+            }
         }
     }
 
@@ -293,7 +310,9 @@ class BrevService(
                 }
 
                 // Ukjent feilmelding, bare kast original feilmelding videre
-                else -> throw responseException
+                else -> {
+                    throw responseException
+                }
             }
         }
     }
@@ -304,11 +323,13 @@ class BrevService(
     ): Brev? {
         val vedtaksbehandlingType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
         return when (vedtaksbehandlingType) {
-            BehandlingMedBrevType.TILBAKEKREVING ->
+            BehandlingMedBrevType.TILBAKEKREVING -> {
                 tilbakekrevingBrevService.hentVedtaksbrev(behandlingId, bruker)
+            }
 
-            BehandlingMedBrevType.ETTEROPPGJOER ->
+            BehandlingMedBrevType.ETTEROPPGJOER -> {
                 etteroppgjoerForbehandlingBrevService.hentVarselBrev(behandlingId, bruker)
+            }
 
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
@@ -320,12 +341,19 @@ class BrevService(
                 }
             }
 
-            else ->
+            else -> {
                 videresendInterneFeil {
                     brevApiKlient.hentVedtaksbrev(behandlingId, bruker)
                 }
+            }
         }
     }
+
+    private fun brukNyBrevFlytForOmsInnvilgelseForstegangsbehandling(): Boolean =
+        featureToggleService.isEnabled(
+            BehandlingBrevflytFeatureToggle.NY_BREV_FLYT_OMS_INNVILGELSE_FORSTEGANGSBEHANDLING,
+            false,
+        )
 }
 
 class KanIkkeOppretteVedtaksbrev(

@@ -114,6 +114,8 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-vedtaksvurdering
+        - application: logging
+          namespace: nais-system
       external:
         - host: b27apvl222.preprod.local
           ports:

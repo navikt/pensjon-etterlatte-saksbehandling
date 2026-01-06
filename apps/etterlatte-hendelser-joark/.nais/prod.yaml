@@ -65,6 +65,8 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
+        - application: logging
+          namespace: nais-system
       external:
         - host: saf.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io

@@ -59,6 +59,8 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: ey-pdfgen
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io

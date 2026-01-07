@@ -4,12 +4,6 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import java.time.LocalDate
 
-data class BeregningsperioderFlereAarOpphoer(
-    val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
-    val sisteBeregningsperiodeNesteAar: OmstillingsstoenadBeregningsperiode?,
-    val forventetOpphoerDato: LocalDate?,
-)
-
 fun utledBeregningsperioderOpphoer(
     behandling: DetaljertBehandling,
     beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
@@ -41,7 +35,9 @@ fun utledBeregningsperioderOpphoer(
                 }
             }
 
-            else -> opphoer.atDay(1)
+            else -> {
+                opphoer.atDay(1)
+            }
         }
     return BeregningsperioderFlereAarOpphoer(
         sisteBeregningsperiode = sisteBeregningsperiode,

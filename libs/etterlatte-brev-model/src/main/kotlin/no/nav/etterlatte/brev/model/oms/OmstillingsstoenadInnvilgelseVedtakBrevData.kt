@@ -11,6 +11,8 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.HarVedlegg
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.Vedlegg
+import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
+import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -30,7 +32,7 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
         val beregning: OmstillingsstoenadBeregning,
         val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
         val omsRettUtenTidsbegrensning: Boolean,
-        val etterbetaling: OmstillingsstoenadEtterbetaling?,
+        val etterbetaling: no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling?,
         val harUtbetaling: Boolean,
         val bosattUtland: Boolean,
         val erSluttbehandling: Boolean,
@@ -68,18 +70,6 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
             vedlegg = Vedlegg.OMS_BEREGNING,
             vedleggId = BrevVedleggKey.OMS_BEREGNING,
         )
-
-    data class OmstillingsstoenadBeregning(
-        override val innhold: List<Slate.Element>,
-        val virkningsdato: LocalDate,
-        val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
-        val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
-        val sisteBeregningsperiodeNesteAar: OmstillingsstoenadBeregningsperiode?,
-        val trygdetid: TrygdetidMedBeregningsmetode,
-        val oppphoersdato: LocalDate?,
-        val opphoerNesteAar: Boolean,
-        val erYrkesskade: Boolean,
-    ) : HarVedlegg
 
     data class OmstillingsstoenadBeregningsperiode(
         val datoFOM: LocalDate,
@@ -133,45 +123,6 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
     )
 }
 
-data class AvkortetBeregningsperiode(
-    val datoFOM: LocalDate,
-    val datoTOM: LocalDate?,
-    val grunnbeloep: Kroner,
-    val inntekt: Kroner,
-    val oppgittInntekt: Kroner,
-    val fratrekkInnAar: Kroner,
-    val innvilgaMaaneder: Int,
-    val ytelseFoerAvkorting: Kroner,
-    val restanse: Kroner,
-    val trygdetid: Int,
-    val utbetaltBeloep: Kroner,
-    val beregningsMetodeAnvendt: BeregningsMetode,
-    val beregningsMetodeFraGrunnlag: BeregningsMetode,
-    val sanksjon: SanksjonertYtelse?,
-    val institusjon: InstitusjonsoppholdBeregningsgrunnlag?,
-    val erOverstyrtInnvilgaMaaneder: Boolean,
-) {
-    fun tilOmstillingsstoenadBeregningsperiode(): OmstillingsstoenadInnvilgelseVedtakBrevData.OmstillingsstoenadBeregningsperiode =
-        OmstillingsstoenadInnvilgelseVedtakBrevData.OmstillingsstoenadBeregningsperiode(
-            datoFOM = this.datoFOM,
-            datoTOM = this.datoTOM,
-            inntekt = this.inntekt,
-            oppgittInntekt = this.oppgittInntekt,
-            fratrekkInnAar = this.fratrekkInnAar,
-            innvilgaMaaneder = this.innvilgaMaaneder,
-            grunnbeloep = this.grunnbeloep,
-            ytelseFoerAvkorting = this.ytelseFoerAvkorting,
-            restanse = this.restanse,
-            utbetaltBeloep = this.utbetaltBeloep,
-            trygdetid = this.trygdetid,
-            beregningsMetodeAnvendt = this.beregningsMetodeAnvendt,
-            beregningsMetodeFraGrunnlag = this.beregningsMetodeFraGrunnlag,
-            sanksjon = this.sanksjon != null,
-            institusjon = this.institusjon != null && this.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
-            erOverstyrtInnvilgaMaaneder = this.erOverstyrtInnvilgaMaaneder,
-        )
-}
-
 fun BeregningOgAvkortingPeriodeDto.toAvkortetBeregningsperiode(): AvkortetBeregningsperiode =
     AvkortetBeregningsperiode(
         datoFOM = periode.fom.atDay(1),
@@ -204,10 +155,3 @@ fun BeregningOgAvkortingPeriodeDto.toAvkortetBeregningsperiode(): AvkortetBeregn
         institusjon = institusjonsopphold,
         erOverstyrtInnvilgaMaaneder = erOverstyrtInnvilgaMaaneder,
     )
-
-data class Avkortingsinfo(
-    val virkningsdato: LocalDate,
-    val beregningsperioder: List<AvkortetBeregningsperiode>,
-    val endringIUtbetalingVedVirk: Boolean,
-    val erInnvilgelsesaar: Boolean,
-)

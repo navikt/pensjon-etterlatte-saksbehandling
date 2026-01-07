@@ -67,9 +67,7 @@ class BrevService(
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
-                } else if (isInnvilgelseFoerstegangsbehandling(behandlingId, SakType.OMSTILLINGSSTOENAD) &&
-                    brukNyBrevFlytForOmsInnvilgelseForstegangsbehandling()
-                ) {
+                } else if (erInnvilgelseOmsForstegangsOgNyBrevflytErAktivert(behandlingId)) {
                     vedtaksbrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
                 } else {
                     videresendInterneFeil {
@@ -86,18 +84,16 @@ class BrevService(
         }
     }
 
+    private fun erInnvilgelseOmsForstegangsOgNyBrevflytErAktivert(behandlingId: UUID): Boolean {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        return behandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
+            behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD &&
+            brukNyBrevFlytForOmsInnvilgelseForstegangsbehandling()
+    }
+
     private fun isRevurderingEtteroppgjoerVedtak(behandlingId: UUID): Boolean {
         val behandling = behandlingService.hentBehandling(behandlingId)
         return behandling?.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER
-    }
-
-    private fun isInnvilgelseFoerstegangsbehandling(
-        behandlingId: UUID,
-        sakType: SakType,
-    ): Boolean {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        return behandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
-            behandling.sak.sakType == sakType
     }
 
     suspend fun genererPdf(

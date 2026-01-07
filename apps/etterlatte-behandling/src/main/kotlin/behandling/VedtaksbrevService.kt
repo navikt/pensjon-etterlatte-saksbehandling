@@ -10,16 +10,17 @@ import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevRequest
-import no.nav.etterlatte.brev.Etterbetaling
+import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.oms.Avkortingsinfo
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
+import no.nav.etterlatte.brev.model.oms.omsBeregning
 import no.nav.etterlatte.brev.model.oms.toAvkortetBeregningsperiode
+import no.nav.etterlatte.brev.model.oms.utledBeregningsperioderOpphoer
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -27,7 +28,6 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -35,13 +35,11 @@ import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -116,7 +114,7 @@ class VedtaksbrevService(
             val avkortetBeregningsperioder = avkortingsinfo.beregningsperioder
             val beregningsperioder = avkortetBeregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
 
-            val etterbetaling = behandlingInfoService.hentEtterbetaling(behandlingId)
+            val etterbetaling = behandlingInfoService.hentEtterbetaling(behandlingId)?.toEtterbetalingDTO()
             val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
             val erTidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true
@@ -153,6 +151,7 @@ class VedtaksbrevService(
                     OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak(
                         beregning =
                             omsBeregning(
+                                vedleggInnhold = emptyList(), // TODO
                                 behandling = behandling,
                                 trygdetid = trygdetid.single(),
                                 avkortingsinfo = avkortingsinfo,
@@ -168,7 +167,7 @@ class VedtaksbrevService(
                         etterbetaling =
                             etterbetaling
                                 ?.let { dto ->
-                                    Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
+                                    no.nav.etterlatte.brev.model.Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
                                         dto,
                                         beregningsperioder,
                                     )
@@ -194,6 +193,7 @@ class VedtaksbrevService(
                         harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                         beregning =
                             omsBeregning(
+                                vedleggInnhold = emptyList(), // TODO
                                 behandling = behandling,
                                 trygdetid = trygdetid.single(),
                                 avkortingsinfo = avkortingsinfo,
@@ -206,35 +206,6 @@ class VedtaksbrevService(
                     ),
             )
         }
-
-    fun omsBeregning(
-        behandling: DetaljertBehandling,
-        trygdetid: TrygdetidDto,
-        avkortingsinfo: Avkortingsinfo,
-        landKodeverk: List<LandDto>,
-    ): OmstillingsstoenadInnvilgelseVedtakBrevData.OmstillingsstoenadBeregning {
-        val avkortetBeregningsperioder = avkortingsinfo.beregningsperioder
-        val beregningsperioder = avkortetBeregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
-        val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
-        return OmstillingsstoenadInnvilgelseVedtakBrevData.OmstillingsstoenadBeregning(
-            innhold = emptyList(),
-            virkningsdato = avkortingsinfo.virkningsdato,
-            beregningsperioder = beregningsperioder,
-            sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode,
-            sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-            trygdetid =
-                trygdetid.fromDto(
-                    beregningsMetodeFraGrunnlag = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                    beregningsMetodeAnvendt = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeAnvendt,
-                    navnAvdoed = null,
-                    landKodeverk = landKodeverk,
-                ),
-            oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-            opphoerNesteAar =
-                beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
-            erYrkesskade = erYrkesskade(trygdetid),
-        )
-    }
 
     fun hentKlageForBehandling(
         relatertBehandlingId: String?,
@@ -263,68 +234,6 @@ fun innvilgetMindreEnnFireMndEtterDoedsfall(
     innvilgelsesDato: LocalDate = LocalDate.now(),
     doedsdatoEllerOpphoertPleieforhold: LocalDate,
 ): Boolean = innvilgelsesDato.isBefore(doedsdatoEllerOpphoertPleieforhold.plusMonths(4))
-
-fun TrygdetidDto.fromDto(
-    beregningsMetodeAnvendt: BeregningsMetode,
-    beregningsMetodeFraGrunnlag: BeregningsMetode,
-    navnAvdoed: String?,
-    landKodeverk: List<LandDto>,
-) = OmstillingsstoenadInnvilgelseVedtakBrevData.TrygdetidMedBeregningsmetode(
-    navnAvdoed = navnAvdoed,
-    trygdetidsperioder =
-        when (beregningsMetodeAnvendt) {
-            BeregningsMetode.NASJONAL -> {
-                trygdetidGrunnlag.filter { it.bosted == LandNormalisert.NORGE.isoCode }
-            }
-
-            BeregningsMetode.PRORATA -> {
-                // Kun ta med de som er avtaleland (Norge er alltid avtaleland)
-                trygdetidGrunnlag.filter { it.prorata || it.bosted == LandNormalisert.NORGE.isoCode }
-            }
-
-            else -> {
-                throw IllegalArgumentException("$beregningsMetodeAnvendt er ikke en gyldig beregningsmetode")
-            }
-        }.map { grunnlag ->
-            OmstillingsstoenadInnvilgelseVedtakBrevData.Trygdetidsperiode(
-                datoFOM = grunnlag.periodeFra,
-                datoTOM = grunnlag.periodeTil,
-                landkode = grunnlag.bosted,
-                land = landKodeverk.hentLandFraLandkode(grunnlag.bosted),
-                opptjeningsperiode = grunnlag.beregnet,
-                type = TrygdetidType.valueOf(grunnlag.type),
-            )
-        },
-    beregnetTrygdetidAar =
-        when (beregningsMetodeAnvendt) {
-            BeregningsMetode.NASJONAL -> {
-                beregnetTrygdetid?.resultat?.samletTrygdetidNorge
-                    ?: throw ManglerMedTrygdetidVeBrukIBrev()
-            }
-
-            BeregningsMetode.PRORATA -> {
-                beregnetTrygdetid?.resultat?.samletTrygdetidTeoretisk
-                    ?: throw ManglerMedTrygdetidVeBrukIBrev()
-            }
-
-            BeregningsMetode.BEST -> {
-                throw UgyldigBeregningsMetode()
-            }
-
-            else -> {
-                throw ManglerMedTrygdetidVeBrukIBrev()
-            }
-        },
-    prorataBroek = beregnetTrygdetid?.resultat?.prorataBroek,
-    mindreEnnFireFemtedelerAvOpptjeningstiden =
-        beregnetTrygdetid
-            ?.resultat
-            ?.fremtidigTrygdetidNorge
-            ?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
-    beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag,
-    beregningsMetodeAnvendt = beregningsMetodeAnvendt,
-    ident = this.ident,
-)
 
 // Brukes der mangler med trygdetid ikke skal kunne skje men felt likevel er nullable
 class ManglerMedTrygdetidVeBrukIBrev :
@@ -379,52 +288,8 @@ class UgyldigBeregningsMetode :
                 "siden best velger mellom nasjonal eller prorata når det beregnes.",
     )
 
-fun utledBeregningsperioderOpphoer(
-    behandling: DetaljertBehandling,
-    beregningsperioder: List<OmstillingsstoenadInnvilgelseVedtakBrevData.OmstillingsstoenadBeregningsperiode>,
-): BeregningsperioderFlereAarOpphoer {
-    val sisteBeregningsperiode =
-        beregningsperioder
-            .filter {
-                it.datoFOM.year == beregningsperioder.first().datoFOM.year
-            }.maxBy { it.datoFOM }
-    val sisteBeregningsperiodeNesteAar =
-        beregningsperioder
-            .filter {
-                it.datoFOM.year == beregningsperioder.first().datoFOM.year + 1
-            }.maxByOrNull { it.datoFOM }
-
-    // Hvis antall innvilga måneder er overstyrt under beregning skal "forventa" opphørsdato vises selv uten opphørFom
-    val forventaOpphoersDato =
-        when (val opphoer = behandling.opphoerFraOgMed) {
-            null -> {
-                if (sisteBeregningsperiode.erOverstyrtInnvilgaMaaneder) {
-                    val foersteFom = beregningsperioder.first().datoFOM
-                    foersteFom.plusMonths(sisteBeregningsperiode.innvilgaMaaneder.toLong())
-                } else if (sisteBeregningsperiodeNesteAar != null && sisteBeregningsperiodeNesteAar.erOverstyrtInnvilgaMaaneder) {
-                    LocalDate
-                        .of(sisteBeregningsperiodeNesteAar.datoFOM.year, 1, 1)
-                        .plusMonths(sisteBeregningsperiodeNesteAar.innvilgaMaaneder.toLong())
-                } else {
-                    null
-                }
-            }
-
-            else -> {
-                opphoer.atDay(1)
-            }
-        }
-    return BeregningsperioderFlereAarOpphoer(
-        sisteBeregningsperiode = sisteBeregningsperiode,
-        sisteBeregningsperiodeNesteAar = sisteBeregningsperiodeNesteAar,
-        forventetOpphoerDato = forventaOpphoersDato,
-    )
-}
-
 data class BeregningsperioderFlereAarOpphoer(
     val sisteBeregningsperiode: OmstillingsstoenadInnvilgelseVedtakBrevData.OmstillingsstoenadBeregningsperiode,
     val sisteBeregningsperiodeNesteAar: OmstillingsstoenadInnvilgelseVedtakBrevData.OmstillingsstoenadBeregningsperiode?,
     val forventetOpphoerDato: LocalDate?,
 )
-
-fun erYrkesskade(tr: TrygdetidDto): Boolean = tr.beregnetTrygdetid?.resultat?.yrkesskade ?: false

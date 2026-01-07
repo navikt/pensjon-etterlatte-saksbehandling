@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
+import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
@@ -20,7 +21,10 @@ import no.nav.etterlatte.brev.model.oms.Avkortingsinfo
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.toAvkortetBeregningsperiode
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -39,6 +43,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
@@ -53,7 +58,10 @@ class VedtaksbrevService(
     private val trygdetidKlient: TrygdetidKlient,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val sakService: SakService,
+    private val klageService: KlageService,
 ) {
+    private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
+
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         sakId: SakId,
@@ -129,6 +137,7 @@ class VedtaksbrevService(
                 } else {
                     avdoede.single().doedsdato
                 }
+            val klage = hentKlageForBehandling(behandling.relatertBehandlingId, behandling)
 
             BrevRequest(
                 sak = sak,
@@ -166,7 +175,7 @@ class VedtaksbrevService(
                                 },
                         erSluttbehandling = behandling.erSluttbehandling,
                         tidligereFamiliepleier = erTidligereFamiliepleier,
-                        datoVedtakOmgjoering = LocalDate.now(), // TODO klage?.datoVedtakOmgjoering(),
+                        datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
                     ),
                 brevRedigerbarInnholdData =
                     OmstillingsstoenadInnvilgelseVedtakBrevData.VedtakInnhold(
@@ -179,7 +188,7 @@ class VedtaksbrevService(
                                 ),
                         etterbetaling = etterbetaling != null,
                         tidligereFamiliepleier = erTidligereFamiliepleier,
-                        datoVedtakOmgjoering = LocalDate.now(), // TODO // klage?.datoVedtakOmgjoering(),
+                        datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
                         avdoed = if (erTidligereFamiliepleier) null else avdoede.single(),
                         erSluttbehandling = behandling.erSluttbehandling,
                         harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
@@ -226,6 +235,28 @@ class VedtaksbrevService(
             erYrkesskade = erYrkesskade(trygdetid),
         )
     }
+
+    fun hentKlageForBehandling(
+        relatertBehandlingId: String?,
+        behandling: DetaljertBehandling?,
+    ): Klage? =
+        if (behandling?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING && relatertBehandlingId != null) {
+            try {
+                val klageId = UUID.fromString(relatertBehandlingId)
+                klageService.hentKlage(klageId)
+            } catch (e: Exception) {
+                logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
+                logger.info(
+                    "Kunne ikke finne klage med id=$relatertBehandlingId, denne førstegangsbehandlingen med id=${behandling.id} gjelder ikke omgjøring på grunn av klage",
+                )
+                null
+            }
+        } else if (behandling?.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+            val klageId = UUID.fromString(relatertBehandlingId)
+            klageService.hentKlage(klageId)
+        } else {
+            null
+        }
 }
 
 fun innvilgetMindreEnnFireMndEtterDoedsfall(

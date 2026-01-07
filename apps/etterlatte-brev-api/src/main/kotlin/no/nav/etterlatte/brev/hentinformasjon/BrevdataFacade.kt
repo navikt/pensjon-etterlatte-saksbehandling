@@ -164,7 +164,7 @@ class BrevdataFacade(
             VedtakType.OPPHOER,
             VedtakType.AVSLAG,
             VedtakType.ENDRING,
-            ->
+            -> {
                 (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
                     ForenkletVedtak(
                         vedtak.id,
@@ -186,8 +186,9 @@ class BrevdataFacade(
                             },
                     )
                 }
+            }
 
-            VedtakType.TILBAKEKREVING ->
+            VedtakType.TILBAKEKREVING -> {
                 ForenkletVedtak(
                     vedtak.id,
                     vedtak.status,
@@ -201,8 +202,9 @@ class BrevdataFacade(
                             (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
                         ),
                 )
+            }
 
-            VedtakType.AVVIST_KLAGE ->
+            VedtakType.AVVIST_KLAGE -> {
                 ForenkletVedtak(
                     vedtak.id,
                     vedtak.status,
@@ -216,8 +218,11 @@ class BrevdataFacade(
                             (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
                         ),
                 )
+            }
 
-            null -> null
+            null -> {
+                null
+            }
         }
 
     suspend fun hentKlageForBehandling(
@@ -230,6 +235,7 @@ class BrevdataFacade(
                 val klageId = UUID.fromString(relatertBehandlingId)
                 behandlingService.hentKlage(klageId, bruker)
             } catch (e: Exception) {
+                logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
                 logger.info(
                     "Kunne ikke finne klage med id=$relatertBehandlingId, denne førstegangsbehandlingen med id=${behandling.id} gjelder ikke omgjøring på grunn av klage",
                 )

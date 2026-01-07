@@ -21,13 +21,6 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
-fun Klage.datoVedtakOmgjoering(): LocalDate? =
-    this.formkrav
-        ?.formkrav
-        ?.vedtaketKlagenGjelder
-        ?.datoAttestert
-        ?.toLocalDate()
-
 data class BarnepensjonInnvilgelseForeldreloes(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,

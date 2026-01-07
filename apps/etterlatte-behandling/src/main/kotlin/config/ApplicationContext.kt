@@ -773,6 +773,7 @@ internal class ApplicationContext(
             trygdetidKlient = trygdetidKlient,
             vilkaarsvurderingService = vilkaarsvurderingService,
             sakService = sakService,
+            klageService = klageService,
         )
 
     val brevService =

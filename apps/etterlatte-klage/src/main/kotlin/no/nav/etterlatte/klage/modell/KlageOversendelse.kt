@@ -13,12 +13,14 @@ import no.nav.klage.kodeverk.hjemmel.Hjemmel
 import no.nav.klage.kodeverk.ytelse.Ytelse
 import java.time.LocalDate
 
+// vi lytter kun på KLAGE saker, men må legge inn andre typer så kafka ikke tryner
 enum class KabalSakType {
     KLAGE,
     ANKE,
     ANKE_I_TRYGDERETTEN,
     OMGJOERINGSKRAV,
     BEHANDLING_ETTER_TRYGDERETTEN_OPPHEVET,
+    BEGJAERING_OM_GJENOPPTAK,
 }
 
 enum class KabalKlagerType {

@@ -418,13 +418,6 @@
   resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.36.0.tgz#ad3ab2a9f2179c5a4703738de33233af54336dc2"
   integrity sha512-qGLDJfnqQJoSHz03lsxqXkbl4MqN/d9W532TKyGcXswsYSeTEj425weFUvPwTh2w29dM4ncGmomijZAUjFYH/w==
 
-"@navikt/navspa@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@navikt/navspa/-/navspa-6.0.1.tgz#f3536207976359e4849f7db7aa9ffa6cfc7fe516"
-  integrity sha512-EtTqUNxuykKFDKzd1MAI4DFjTLH/vY3ZtPOvMKZgZuRaf2N/1vNU4lPRk4y+HencyA4E5Qkdmd0I5FqA208Ofg==
-  dependencies:
-    loadjs "^4.2.0"
-
 "@npmcli/fs@^3.1.0":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@npmcli/fs/-/fs-3.1.1.tgz#59cdaa5adca95d135fc00f2bb53f5771575ce726"
@@ -657,25 +650,12 @@
     picocolors "^1.1.1"
     redent "^3.0.0"
 
-"@testing-library/react-hooks@^8.0.1":
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/@testing-library/react-hooks/-/react-hooks-8.0.1.tgz#0924bbd5b55e0c0c0502d1754657ada66947ca12"
-  integrity sha512-Aqhl2IVmLt8IovEVarNDFuJDVWVvhnr9/GCU6UUnrYXwgDFF9h2L2o2P9KBni1AST5sT6riAyoukFLyjQUgD/g==
-  dependencies:
-    "@babel/runtime" "^7.12.5"
-    react-error-boundary "^3.1.0"
-
 "@testing-library/react@^16.3.1":
   version "16.3.1"
   resolved "https://registry.yarnpkg.com/@testing-library/react/-/react-16.3.1.tgz#60a9f1f6a930399d9e41b506a8bf68dbf4831fe8"
   integrity sha512-gr4KtAWqIOQoucWYD/f6ki+j5chXfcPc74Col/6poTyqTmn7zRmodWahWRCp8tYd+GMqBonw6hstNzqjbs6gjw==
   dependencies:
     "@babel/runtime" "^7.12.5"
-
-"@testing-library/user-event@^14.6.1":
-  version "14.6.1"
-  resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-14.6.1.tgz#13e09a32d7a8b7060fe38304788ebf4197cd2149"
-  integrity sha512-vq7fv0rnt+QTXgPxr5Hjc210p6YKq2kmdziLgnsZGgLJ9e6VAShx1pACLuRjd/AS/sr7phAR58OIIpf0LlmQNw==
 
 "@types/chai@^5.2.2":
   version "5.2.2"
@@ -728,13 +708,6 @@
   version "19.2.3"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-19.2.3.tgz#c1e305d15a52a3e508d54dca770d202cb63abf2c"
   integrity sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==
-
-"@types/react-tabs@^5.0.5":
-  version "5.0.5"
-  resolved "https://registry.yarnpkg.com/@types/react-tabs/-/react-tabs-5.0.5.tgz#f50a9527adbaf8d146da7f787d1fbdfeff31dd56"
-  integrity sha512-3CZTmjR7nNrZnYbnxp/DtK5e82mhM22dN47aYObmYLcp9fC1XjIEF0mLzGKFl1fR6/R8X7DyGh9hO6lON6LVkQ==
-  dependencies:
-    react-tabs "*"
 
 "@types/react@*", "@types/react@^19.2.7":
   version "19.2.7"
@@ -1180,7 +1153,7 @@ chalk@4.1.2, chalk@^4.0.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-clsx@^2.0.0, clsx@^2.1.0:
+clsx@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/clsx/-/clsx-2.1.1.tgz#eed397c9fd8bd882bfb18deab7102049a2f32999"
   integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
@@ -2357,11 +2330,6 @@ license-checker-rseidelsohn@^4.4.2:
     spdx-satisfies "^5.0.1"
     treeify "^1.1.0"
 
-loadjs@^4.2.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/loadjs/-/loadjs-4.3.0.tgz#38c578cbb2e08835aa4407bd4ac6507dd1f7ed10"
-  integrity sha512-vNX4ZZLJBeDEOBvdr2v/F+0aN5oMuPu7JTqrMwp+DtgK+AryOlpy6Xtm2/HpNr+azEa828oQjOtWsB6iDtSfSQ==
-
 locate-path@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/locate-path/-/locate-path-6.0.0.tgz#55321eb309febbc59c4801d931a72452a681d286"
@@ -2686,7 +2654,7 @@ prettier@^3.7.4:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.7.4.tgz#d2f8335d4b1cec47e1c8098645411b0c9dff9c0f"
   integrity sha512-v6UNi1+3hSlVvv8fSaoUbggEM5VErKmmpGA7Pl3HF8V6uKY7rvClBOJlH6yNwQtfTueNkGVpOv/mtWL9L4bgRA==
 
-prop-types@^15.5.0, prop-types@^15.8.1:
+prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -2715,13 +2683,6 @@ react-dom@^19.2.3:
   integrity sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==
   dependencies:
     scheduler "^0.27.0"
-
-react-error-boundary@^3.1.0:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-3.1.4.tgz#255db92b23197108757a888b01e5b729919abde0"
-  integrity sha512-uM9uPzZJTF6wRQORmSrvOIgt4lJ9MC1sNgEOj2XGsDTRE4kmpWxg7ENK9EWNKJRMAOY9z0MuF4yIfl6gp4sotA==
-  dependencies:
-    "@babel/runtime" "^7.12.5"
 
 react-hook-form@^7.69.0:
   version "7.69.0"
@@ -2755,14 +2716,6 @@ react-router@7.11.0:
   dependencies:
     cookie "^1.0.1"
     set-cookie-parser "^2.6.0"
-
-react-tabs@*:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/react-tabs/-/react-tabs-6.1.0.tgz#a1fc9d9b8db4c6e7bb327a1b6783bc51a1c457a1"
-  integrity sha512-6QtbTRDKM+jA/MZTTefvigNxo0zz+gnBTVFw2CFVvq+f2BuH0nF0vDLNClL045nuTAdOoK/IL1vTP0ZLX0DAyQ==
-  dependencies:
-    clsx "^2.0.0"
-    prop-types "^15.5.0"
 
 react@^19.2.3:
   version "19.2.3"

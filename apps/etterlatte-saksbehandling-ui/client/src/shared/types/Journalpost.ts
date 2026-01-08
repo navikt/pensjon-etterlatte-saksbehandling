@@ -16,6 +16,7 @@ export interface Journalpost {
   sak?: JournalpostSak
   datoOpprettet: string
   utsendingsinfo?: object
+  relevanteDatoer: RelevantDato[]
 }
 
 export interface SideInfo {
@@ -145,4 +146,19 @@ export enum Tema {
   EYB = 'EYB',
   EYO = 'EYO',
   PEN = 'PEN',
+}
+
+export interface RelevantDato {
+  datotype: Datotype
+  dato: string
+}
+
+export enum Datotype {
+  DATO_SENDT_PRINT = 'Dato sendt til print',
+  DATO_EKSPEDERT = 'Dato sendt til bruker',
+  DATO_JOURNALFOERT = 'Dato journalført',
+  DATO_REGISTRERT = 'Dato registrert',
+  DATO_AVS_RETUR = 'Dato sendt på nytt',
+  DATO_DOKUMENT = 'Dato på hoveddokumentet',
+  DATO_LEST = 'Dato åpnet på nav.no',
 }

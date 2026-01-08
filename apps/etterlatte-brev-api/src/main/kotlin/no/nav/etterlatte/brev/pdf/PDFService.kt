@@ -68,7 +68,13 @@ class PDFService(
             multiPart
                 .first { it is PartData.FileItem }
                 .let { it as PartData.FileItem }
-                .provider()
+                .also { fileItem ->
+                    logger.info(
+                        "Headers for filen er ${fileItem.headers.entries().joinToString { (headername, value) ->
+                            "$headername: ${value.joinToString { it }}"
+                        }}",
+                    )
+                }.provider()
                 .toByteArray()
         logger.info("mottok en fil med ${fil.size} bytes")
         val request =

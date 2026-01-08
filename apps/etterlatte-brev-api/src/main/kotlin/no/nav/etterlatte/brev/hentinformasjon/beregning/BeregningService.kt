@@ -1,10 +1,10 @@
 package no.nav.etterlatte.brev.hentinformasjon.beregning
 
-import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
+import no.nav.etterlatte.brev.model.oms.toAvkortetBeregningsperiode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
@@ -14,10 +14,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.regler.ANTALL_DESIMALER_INNTENKT
-import no.nav.etterlatte.regler.roundingModeInntekt
 import no.nav.pensjon.brevbaker.api.model.Kroner
-import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -146,41 +143,8 @@ class BeregningService(
         if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
 
         val beregningOgAvkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
-
         val beregningsperioder =
-            beregningOgAvkorting.perioder.map {
-                AvkortetBeregningsperiode(
-                    datoFOM = it.periode.fom.atDay(1),
-                    datoTOM = it.periode.tom?.atEndOfMonth(),
-                    grunnbeloep = Kroner(it.grunnbelop),
-                    // (vises i brev) maanedsinntekt regel burde eksponert dette, krever omskrivning av regler som vi må bli enige om
-                    inntekt =
-                        Kroner(
-                            BigDecimal(it.oppgittInntekt - it.fratrekkInnAar)
-                                .setScale(
-                                    ANTALL_DESIMALER_INNTENKT,
-                                    roundingModeInntekt,
-                                ).toInt(),
-                        ),
-                    oppgittInntekt = Kroner(it.oppgittInntekt),
-                    fratrekkInnAar = Kroner(it.fratrekkInnAar),
-                    innvilgaMaaneder = it.innvilgaMaaneder,
-                    ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
-                    restanse = Kroner(it.restanse),
-                    utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
-                    trygdetid = it.trygdetid,
-                    beregningsMetodeAnvendt =
-                        it.beregningsMetode
-                            ?: throw InternfeilException("OMS Brevdata krever anvendt beregningsmetode"),
-                    beregningsMetodeFraGrunnlag =
-                        it.beregningsMetodeFraGrunnlag
-                            ?: throw InternfeilException("OMS Brevdata krever valgt beregningsmetode fra beregningsgrunnlag"),
-                    // ved manuelt overstyrt beregning har vi ikke grunnlag
-                    sanksjon = it.sanksjon,
-                    institusjon = it.institusjonsopphold,
-                    erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
-                )
-            }
+            beregningOgAvkorting.perioder.map { it.toAvkortetBeregningsperiode() }
 
         return Avkortingsinfo(
             virkningsdato = virkningstidspunkt.atDay(1),
@@ -195,11 +159,12 @@ private fun hentBenyttetTrygdetidOgProratabroek(
     beregningsperiode: no.nav.etterlatte.libs.common.beregning.Beregningsperiode,
 ): Pair<Int, IntBroek?> =
     when (beregningsperiode.beregningsMetode) {
-        BeregningsMetode.NASJONAL ->
+        BeregningsMetode.NASJONAL -> {
             Pair(
                 beregningsperiode.samletNorskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
                 null,
             )
+        }
 
         BeregningsMetode.PRORATA -> {
             Pair(
@@ -208,8 +173,13 @@ private fun hentBenyttetTrygdetidOgProratabroek(
             )
         }
 
-        BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
-        null -> beregningsperiode.trygdetid to null
+        BeregningsMetode.BEST -> {
+            throw UgyldigBeregningsMetode()
+        }
+
+        null -> {
+            beregningsperiode.trygdetid to null
+        }
     }
 
 class SamletTeoretiskTrygdetidMangler :

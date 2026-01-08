@@ -768,7 +768,6 @@ internal class ApplicationContext(
             brevKlient = brevKlient,
             behandlingService = behandlingService,
             beregningKlient = beregningKlient,
-            brevApiKlient = brevApiKlient,
             behandlingInfoService = behandlingInfoService,
             trygdetidKlient = trygdetidKlient,
             vilkaarsvurderingService = vilkaarsvurderingService,

@@ -68,7 +68,7 @@ class BrevService(
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
                 } else if (erInnvilgelseOmsForstegangsOgNyBrevflytErAktivert(behandlingId)) {
-                    vedtaksbrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+                    vedtaksbrevService.opprettVedtaksbrev(behandlingId, bruker)
                 } else {
                     videresendInterneFeil {
                         brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)

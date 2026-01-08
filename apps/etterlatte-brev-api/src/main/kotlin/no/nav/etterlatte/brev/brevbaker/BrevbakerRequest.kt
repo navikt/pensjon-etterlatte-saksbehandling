@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.Brevbakerkode
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker

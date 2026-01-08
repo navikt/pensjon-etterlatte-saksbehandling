@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -230,6 +231,7 @@ class AktivitetspliktOppgaveService(
     fun lagreBrevdata(
         oppgaveId: UUID,
         data: AktivitetspliktInformasjonBrevdataRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): AktivitetspliktInformasjonBrevdata {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         /*
@@ -267,7 +269,7 @@ class AktivitetspliktOppgaveService(
                 }
                 // Hvis brevdata er endret må vi oppdatere brevet
             } else if (!oppdatertData.harLikeUtfall(eksisterendeData)) {
-                val brevParametre = mapOgValiderBrevParametre(oppgave, oppdatertData)
+                val brevParametre = mapOgValiderBrevParametre(oppgave, oppdatertData, brukerTokenInfo)
                 runBlocking {
                     brevApiKlient.oppdaterSpesifiktBrev(
                         sakId = sak.id,

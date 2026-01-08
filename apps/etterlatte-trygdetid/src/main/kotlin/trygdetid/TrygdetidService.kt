@@ -394,7 +394,9 @@ class TrygdetidServiceImpl(
                 }
             }
 
-            else -> throw InternfeilException("Kan kun hente inn trygdetider for førstegangsbehandling")
+            else -> {
+                throw InternfeilException("Kan kun hente inn trygdetider for førstegangsbehandling")
+            }
         }
 
         return avdoede
@@ -701,6 +703,7 @@ class TrygdetidServiceImpl(
                             yrkesskade = forrigeTrygdetid.yrkesskade,
                             overstyrtNorskPoengaar = forrigeTrygdetid.overstyrtNorskPoengaar,
                             kopiertGrunnlagFraBehandling = forrigeTrygdetid.behandlingId,
+                            begrunnelse = forrigeTrygdetid.begrunnelse,
                         )
 
                     trygdetidRepository.opprettTrygdetid(kopiertTrygdetid)

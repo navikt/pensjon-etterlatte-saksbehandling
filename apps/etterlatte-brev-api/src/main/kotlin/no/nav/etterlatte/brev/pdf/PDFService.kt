@@ -63,21 +63,19 @@ class PDFService(
         multiPart: List<PartData>,
         bruker: BrukerTokenInfo,
     ): Result<Brev> {
-        val request =
-            multiPart
-                .first { it is PartData.FormItem }
-                .let { it as PartData.FormItem }
-                .value
-                .let { objectMapper.readValue<BrevFraOpplastningRequest>(it) }
-
         val fil: ByteArray =
             multiPart
                 .first { it is PartData.FileItem }
                 .let { it as PartData.FileItem }
                 .provider()
                 .toByteArray()
-
         logger.info("mottok en fil med ${fil.size} bytes")
+        val request =
+            multiPart
+                .first { it is PartData.FormItem }
+                .let { it as PartData.FormItem }
+                .value
+                .let { objectMapper.readValue<BrevFraOpplastningRequest>(it) }
 
         if (filErForStor(fil)) {
             logger.warn("Filopplastinga er avvist fordi fila er for stor $request")

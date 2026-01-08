@@ -45,6 +45,7 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
@@ -143,6 +144,10 @@ class BeregningKlientTest :
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
+
+    override suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo): Grunnbeloep {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun inntektsjusteringAvkortingInfoSjekk(
         sakId: SakId,

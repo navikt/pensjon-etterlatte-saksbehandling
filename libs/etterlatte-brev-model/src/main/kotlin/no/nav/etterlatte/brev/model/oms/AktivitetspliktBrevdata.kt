@@ -7,6 +7,7 @@ data class AktivitetspliktInformasjon4MndBrevdata(
     val utbetaling: Boolean,
     val redusertEtterInntekt: Boolean,
     val nasjonalEllerUtland: NasjonalEllerUtland,
+    val halvtGrunnbeloep: Int,
 ) : BrevDataRedigerbar
 
 data class AktivitetspliktInformasjon10mndBrevdata(
@@ -14,11 +15,13 @@ data class AktivitetspliktInformasjon10mndBrevdata(
     val utbetaling: Boolean,
     val redusertEtterInntekt: Boolean,
     val nasjonalEllerUtland: NasjonalEllerUtland,
+    val halvtGrunnbeloep: Int,
 ) : BrevDataRedigerbar
 
 data class AktivitetspliktInformasjon6MndBrevdata(
     val redusertEtterInntekt: Boolean,
     val nasjonalEllerUtland: NasjonalEllerUtland,
+    val halvtGrunnbeloep: Int,
 ) : BrevDataRedigerbar
 
 enum class Aktivitetsgrad { IKKE_I_AKTIVITET, UNDER_50_PROSENT, OVER_50_PROSENT, AKKURAT_100_PROSENT }

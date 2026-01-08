@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveKanIkkeEndres
@@ -59,6 +60,7 @@ class AktivitetspliktOppgaveServiceTest {
     private val aktivitetspliktBrevDao: AktivitetspliktBrevDao = mockk()
     private val brevApiKlient: BrevApiKlient = mockk()
     private val behandlingService: BehandlingService = mockk()
+    private val brukerTokenInfo: BrukerTokenInfo = mockk(relaxed = true)
     private val service =
         AktivitetspliktOppgaveService(
             aktivitetspliktService = aktivitetspliktService,
@@ -67,6 +69,7 @@ class AktivitetspliktOppgaveServiceTest {
             aktivitetspliktBrevDao,
             brevApiKlient,
             behandlingService = behandlingService,
+            beregningKlient = mockk(relaxed = true),
         )
 
     private val sak =
@@ -808,7 +811,7 @@ class AktivitetspliktOppgaveServiceTest {
             )
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
         assertThrows<OppgaveErAvsluttet> {
-            service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
+            service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest, brukerTokenInfo)
         }
     }
 
@@ -840,7 +843,7 @@ class AktivitetspliktOppgaveServiceTest {
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
 
-        service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
+        service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest, brukerTokenInfo)
 
         coVerify(exactly = 1) { brevApiKlient.slettBrev(any(), any(), any()) }
         verify(exactly = 1) { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
@@ -874,7 +877,7 @@ class AktivitetspliktOppgaveServiceTest {
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
 
-        service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
+        service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest, brukerTokenInfo)
 
         coVerify(exactly = 0) { brevApiKlient.slettBrev(any(), any(), any()) }
         verify(exactly = 0) { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
@@ -908,7 +911,7 @@ class AktivitetspliktOppgaveServiceTest {
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(true)
 
-        service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
+        service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest, brukerTokenInfo)
 
         coVerify(exactly = 0) { brevApiKlient.slettBrev(any(), any(), any()) }
         verify(exactly = 0) { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }

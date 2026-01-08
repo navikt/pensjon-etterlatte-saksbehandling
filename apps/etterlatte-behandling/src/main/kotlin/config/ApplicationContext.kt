@@ -863,6 +863,7 @@ internal class ApplicationContext(
             aktivitetspliktBrevDao = aktivitetspliktBrevDao,
             brevApiKlient = brevApiKlient,
             behandlingService = behandlingService,
+            beregningKlient = beregningKlient,
         )
 
     // Jobs

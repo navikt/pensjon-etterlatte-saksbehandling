@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonMottattSoeknad
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnhentingAvOpplysninger
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 
@@ -31,11 +32,12 @@ sealed class BrevParametre {
         val utbetaling: Boolean,
         val redusertEtterInntekt: Boolean,
         val nasjonalEllerUtland: NasjonalEllerUtland,
+        val halvtGrunnbeloep: Int,
         override val spraak: Spraak,
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            AktivitetspliktInformasjon4MndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
+            AktivitetspliktInformasjon4MndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland, halvtGrunnbeloep)
     }
 
     @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND")
@@ -45,10 +47,11 @@ sealed class BrevParametre {
         val utbetaling: Boolean,
         val redusertEtterInntekt: Boolean,
         val nasjonalEllerUtland: NasjonalEllerUtland,
+        val halvtGrunnbeloep: Int,
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            AktivitetspliktInformasjon10mndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
+            AktivitetspliktInformasjon10mndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland, halvtGrunnbeloep)
     }
 
     // Denne brukes kun til varig unntak som har egen manuel flyt
@@ -57,10 +60,11 @@ sealed class BrevParametre {
         override val spraak: Spraak,
         val redusertEtterInntekt: Boolean,
         val nasjonalEllerUtland: NasjonalEllerUtland,
+        val halvtGrunnbeloep: Int,
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            AktivitetspliktInformasjon6MndBrevdata(redusertEtterInntekt, nasjonalEllerUtland)
+            AktivitetspliktInformasjon6MndBrevdata(redusertEtterInntekt, nasjonalEllerUtland, halvtGrunnbeloep)
     }
 
     @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD")

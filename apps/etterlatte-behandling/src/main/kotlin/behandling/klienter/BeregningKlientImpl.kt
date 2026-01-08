@@ -8,6 +8,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
@@ -45,6 +46,8 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
+
+    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo): Grunnbeloep
 
     suspend fun inntektsjusteringAvkortingInfoSjekk(
         sakId: SakId,
@@ -410,6 +413,29 @@ class BeregningKlientImpl(
                 status = re.response.status.value,
                 code = "FEIL_HENT_SANKSJONER",
                 detail = details,
+            )
+        }
+    }
+
+    override suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo): Grunnbeloep {
+        try {
+            logger.info("Henter gjeldende grunnbeløp")
+
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/beregning/grunnbeloep"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (re: ResponseException) {
+            logger.error("Henting av grunnbeløp feilet", re)
+
+            throw ForespoerselException(
+                status = re.response.status.value,
+                code = "FEIL_HENT_GRUNNBELOEP",
+                detail = "Henting av grunnbeløp feilet",
             )
         }
     }

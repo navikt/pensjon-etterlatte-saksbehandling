@@ -96,7 +96,7 @@ class JobbScheduler(
         AO_BP21(JobbType.AO_BP21, 20, 1),
         AO_BP20(JobbType.AO_BP20, 20, 1),
         AO_OMS67(JobbType.AO_OMS67, 20, 1),
-        OP_BP_FYLT_18(JobbType.OP_BP_FYLT_18, 21, 2),
+        OP_BP_FYLT_18(JobbType.OP_BP_FYLT_18, 21, 1),
     }
 
     enum class PeriodiskeUkentligeJobber(

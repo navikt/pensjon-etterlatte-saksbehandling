@@ -13,6 +13,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import kotlinx.coroutines.delay
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -342,6 +343,7 @@ fun Route.brevRoute(
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
+                    delay(5000)
                     val partDataList: ArrayList<PartData> = ArrayList()
                     call.receiveMultipart().forEachPart { part ->
                         partDataList.add(part)

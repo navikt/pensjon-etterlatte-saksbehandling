@@ -63,6 +63,7 @@ class PDFService(
         multiPart: List<PartData>,
         bruker: BrukerTokenInfo,
     ): Result<Brev> {
+        logger.info("Mottok ${multiPart.size} multiparts, med felter ${multiPart.joinToString { it.name.toString() }}")
         val fil: ByteArray =
             multiPart
                 .first { it is PartData.FileItem }

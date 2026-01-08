@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.pdf
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.content.PartData
-import io.ktor.http.content.streamProvider
+import io.ktor.util.cio.toByteArray
 import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.Brevkoder
@@ -74,8 +74,10 @@ class PDFService(
             multiPart
                 .first { it is PartData.FileItem }
                 .let { it as PartData.FileItem }
-                .streamProvider()
-                .readBytes()
+                .provider()
+                .toByteArray()
+
+        logger.info("mottok en fil med ${fil.size} bytes")
 
         if (filErForStor(fil)) {
             logger.warn("Filopplastinga er avvist fordi fila er for stor $request")

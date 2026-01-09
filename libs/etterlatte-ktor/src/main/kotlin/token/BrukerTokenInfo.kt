@@ -84,7 +84,7 @@ data class HardkodaSystembruker private constructor(
         val statistikk = HardkodaSystembruker(Systembrukere.STATISTIKK)
         val tilgang = HardkodaSystembruker(Systembrukere.TILGANG)
         val etteroppgjoer = HardkodaSystembruker(Systembrukere.ETTEROPPGJOER)
-        val institusjonsopphold = HardkodaSystembruker(Systembrukere.ETTEROPPGJOER)
+        val institusjonsopphold = HardkodaSystembruker(Systembrukere.INSTITUSJONSOPPHOLD)
     }
 
     enum class Systembrukere(

@@ -70,8 +70,11 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSamm
 
 function P1Lenke() {
   return (
-    <Box marginBlock="4 4">
-      <Link href="" target="_blank">
+    <Box marginBlock="4 4" marginInline="4 auto">
+      <Link
+        href="https://cdn.sanity.io/files/gx9wf39f/soknadsveiviser-p/cebcd0569ddfd47eccd3b9252a55183535665ac5.pdf"
+        target="_blank"
+      >
         Lenke til P1 skjema
       </Link>
     </Box>
@@ -84,7 +87,7 @@ function erBehandlingUtland(behandling: IBehandlingReducer) {
     behandling.utlandstilknytning?.type === UtlandstilknytningType.UTLANDSTILSNITT
   const enhetErUtland = UTLANDSENHETER.includes(behandling.sakEnhetId)
 
-  return harUtlandstilknyting && enhetErUtland
+  return harUtlandstilknyting || enhetErUtland
 }
 
 export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingReducer }) => {

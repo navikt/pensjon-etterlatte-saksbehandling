@@ -24,6 +24,7 @@ import no.nav.etterlatte.brev.virusskanning.VirusScanRequest
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.brev.virusskanning.filErForStor
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -57,7 +58,6 @@ class PDFService(
         brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
     ): Pdf = pdfGenerator.genererPdf(id, bruker, avsenderRequest, brevKodeMapping, brevDataMapping)
 
-    // TODO Vurder å erstatte bruk av streamProvider() siden den nå er deprecated
     suspend fun lagreOpplastaPDF(
         sakId: SakId,
         multiPart: List<PartData>,
@@ -68,15 +68,13 @@ class PDFService(
             multiPart
                 .first { it is PartData.FileItem }
                 .let { it as PartData.FileItem }
-                .also { fileItem ->
-                    logger.info(
-                        "Headers for filen er ${fileItem.headers.entries().joinToString { (headername, value) ->
-                            "$headername: ${value.joinToString { it }}"
-                        }}",
-                    )
-                }.provider()
+                .provider()
                 .toByteArray()
-        logger.info("mottok en fil med ${fil.size} bytes")
+
+        if (fil.isEmpty()) {
+            throw UgyldigForespoerselException("MOTTOK_TOM_FIL", "Filen ble ikke lastet opp riktig. Prøv å laste opp filen på nytt.")
+        }
+
         val request =
             multiPart
                 .first { it is PartData.FormItem }

@@ -21,7 +21,7 @@ import Spinner from '~shared/Spinner'
 import { useVedtak } from '~components/vedtak/useVedtak'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
-import { Tabs } from '@navikt/ds-react'
+import { Box, Link, Tabs } from '@navikt/ds-react'
 import { ClockDashedIcon, DocPencilIcon, FileTextIcon } from '@navikt/aksel-icons'
 import { Sjekkliste } from '~components/behandling/sjekkliste/Sjekkliste'
 import { useSelectorBehandlingSidemenyFane } from '~components/behandling/sidemeny/useSelectorBehandlingSidemeny'
@@ -40,6 +40,7 @@ import { OppgaveEndring } from './OppgaveEndring'
 import { NotatPanel } from '~components/behandling/sidemeny/NotatPanel'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { ClickEvent, trackClick } from '~utils/analytics'
+import { UTLANDSENHETER } from '~shared/types/Enhet'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -66,6 +67,25 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSamm
   fattetLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_FATTET),
   attestertLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_ATTESTERT),
 })
+
+function P1Lenke() {
+  return (
+    <Box marginBlock="4 4">
+      <Link href="" target="_blank">
+        Lenke til P1 skjema
+      </Link>
+    </Box>
+  )
+}
+
+function erBehandlingUtland(behandling: IBehandlingReducer) {
+  const harUtlandstilknyting =
+    behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND ||
+    behandling.utlandstilknytning?.type === UtlandstilknytningType.UTLANDSTILSNITT
+  const enhetErUtland = UTLANDSENHETER.includes(behandling.sakEnhetId)
+
+  return harUtlandstilknyting && enhetErUtland
+}
 
 export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const { lastPage } = useContext(BehandlingRouteContext)
@@ -186,6 +206,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
           {soeker?.foedselsnummer && (
             <>
+              {erBehandlingUtland(behandling) && <P1Lenke />}
               <NotatPanel sakId={behandling.sakId} fnr={soeker?.foedselsnummer} />
               <DokumentlisteLiten fnr={soeker.foedselsnummer} />
             </>

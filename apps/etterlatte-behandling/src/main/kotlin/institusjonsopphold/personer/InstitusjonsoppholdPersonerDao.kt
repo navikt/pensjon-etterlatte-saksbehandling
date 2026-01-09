@@ -19,7 +19,7 @@ class InstitusjonsoppholdPersonerDao(
                     """.trimIndent(),
                 ).apply {
                     setString(1, fnr)
-                    setString(3, "NY")
+                    setString(2, "NY")
                 }.executeUpdate()
             }
         }

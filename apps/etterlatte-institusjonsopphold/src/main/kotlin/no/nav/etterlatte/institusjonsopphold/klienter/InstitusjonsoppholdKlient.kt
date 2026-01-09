@@ -31,7 +31,10 @@ class InstitusjonsoppholdKlient(
                 }.body()
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw RuntimeException(
                         "Feil oppsto ved henting av institusjonsopphold (id=$oppholdId)",
@@ -54,7 +57,10 @@ class InstitusjonsoppholdKlient(
             toInternalDto(oppholdListe)
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw RuntimeException(
                         "Feil oppsto ved henting av institusjonsopphold",
@@ -87,5 +93,5 @@ class InstitusjonsoppholdKlient(
 }
 
 data class HentOppholdRequest(
-    val personIdenter: List<String>,
+    val personidenter: List<String>,
 )

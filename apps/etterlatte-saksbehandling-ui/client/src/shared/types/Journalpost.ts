@@ -157,7 +157,7 @@ export enum Datotype {
   DATO_SENDT_PRINT = 'Dato sendt til print',
   DATO_EKSPEDERT = 'Dato sendt til bruker',
   DATO_JOURNALFOERT = 'Dato journalført',
-  DATO_REGISTRERT = 'Dato registrert',
+  DATO_REGISTRERT = 'Dato mottatt',
   DATO_AVS_RETUR = 'Dato sendt på nytt',
   DATO_DOKUMENT = 'Dato på hoveddokumentet',
   DATO_LEST = 'Dato åpnet på nav.no',

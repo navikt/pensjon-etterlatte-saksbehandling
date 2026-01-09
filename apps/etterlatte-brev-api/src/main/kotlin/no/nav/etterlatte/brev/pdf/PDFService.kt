@@ -1,8 +1,5 @@
 package no.nav.etterlatte.brev.pdf
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.http.content.PartData
-import io.ktor.http.content.streamProvider
 import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.Brevkoder
@@ -24,7 +21,7 @@ import no.nav.etterlatte.brev.virusskanning.VirusScanRequest
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.brev.virusskanning.filErForStor
 import no.nav.etterlatte.libs.common.Enhetsnummer
-import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -57,26 +54,15 @@ class PDFService(
         brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
     ): Pdf = pdfGenerator.genererPdf(id, bruker, avsenderRequest, brevKodeMapping, brevDataMapping)
 
-    // TODO Vurder å erstatte bruk av streamProvider() siden den nå er deprecated
     suspend fun lagreOpplastaPDF(
         sakId: SakId,
-        multiPart: List<PartData>,
+        fil: ByteArray,
+        request: BrevFraOpplastningRequest,
         bruker: BrukerTokenInfo,
     ): Result<Brev> {
-        val request =
-            multiPart
-                .first { it is PartData.FormItem }
-                .let { it as PartData.FormItem }
-                .value
-                .let { objectMapper.readValue<BrevFraOpplastningRequest>(it) }
-
-        val fil: ByteArray =
-            multiPart
-                .first { it is PartData.FileItem }
-                .let { it as PartData.FileItem }
-                .streamProvider()
-                .readBytes()
-
+        if (fil.isEmpty()) {
+            throw UgyldigForespoerselException("MOTTOK_TOM_FIL", "Filen ble ikke lastet opp riktig. Prøv å laste opp filen på nytt.")
+        }
         if (filErForStor(fil)) {
             logger.warn("Filopplastinga er avvist fordi fila er for stor $request")
             return Result.failure(IllegalArgumentException("Fila ${request.innhold.tittel} er større enn hva vi takler"))

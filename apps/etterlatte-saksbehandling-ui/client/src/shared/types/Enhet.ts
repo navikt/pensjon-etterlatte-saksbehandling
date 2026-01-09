@@ -7,3 +7,5 @@ export const ENHETER: Record<string, string> = {
   '4883': 'Egne ansatte - 4883',
   '2103': 'Vikafossen - 2103',
 }
+
+export const UTLANDSENHETER = ['4862', '0001']

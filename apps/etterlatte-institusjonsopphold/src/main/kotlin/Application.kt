@@ -1,5 +1,6 @@
+package no.nav.etterlatte
+
 import io.ktor.server.application.Application
-import no.nav.etterlatte.ApplicationContext
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer

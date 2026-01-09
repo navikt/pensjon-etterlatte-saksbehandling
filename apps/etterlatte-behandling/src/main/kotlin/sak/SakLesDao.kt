@@ -209,19 +209,13 @@ class SakLesDao(
             }
         }
 
-    fun hentAllePersonerMedSak(): List<Pair<String, Long>> =
+    fun hentAllePersonerMedSak(): List<String> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT fnr, id
-                        FROM sak
-                        """.trimIndent(),
-                    )
+                val statement = prepareStatement("SELECT DISTINCT(fnr) FROM sak")
                 statement
                     .executeQuery()
-                    .toList { Pair(getString("fnr"), getLong("id")) }
+                    .toList { getString("fnr") }
             }
         }
 }

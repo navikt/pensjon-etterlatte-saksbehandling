@@ -8,18 +8,17 @@ import no.nav.etterlatte.libs.database.toList
 class InstitusjonsoppholdPersonerDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun lagreKjoering(fnrOgSakId: Pair<String, Long>) {
+    fun lagreKjoering(fnr: String) {
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
-                    INSERT INTO institusjonsopphold_personer (person_ident, sak_id, status) 
-                    VALUES (?, ?, ?)
+                    INSERT INTO institusjonsopphold_personer (person_ident, status) 
+                    VALUES (?, ?)
                     ON CONFLICT DO NOTHING
                     """.trimIndent(),
                 ).apply {
-                    setString(1, fnrOgSakId.first)
-                    setLong(2, fnrOgSakId.second)
+                    setString(1, fnr)
                     setString(3, "NY")
                 }.executeUpdate()
             }

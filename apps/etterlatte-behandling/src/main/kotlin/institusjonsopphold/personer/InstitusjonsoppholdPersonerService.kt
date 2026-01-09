@@ -73,7 +73,6 @@ class InstitusjonsoppholdPersonerService(
     private fun settOppKjoeringTabell() {
         inTransaction {
             val fnrListe = sakLesDao.hentAllePersonerMedSak()
-            krev(fnrListe.size == fnrListe.map { it.first }.distinct().size) { "Har flere saker per person!?" }
             fnrListe
                 .forEach {
                     institusjonsoppholdPersonerDao.lagreKjoering(it)

@@ -1,7 +1,6 @@
 
 create TABLE institusjonsopphold_personer(
     person_ident TEXT,
-    sak_id BIGINT,
     status TEXT,
     PRIMARY KEY (person_ident)
 );

@@ -198,6 +198,7 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-trygdetid
         - application: etterlatte-tilbakekreving
+        - application: etterlatte-institusjonsopphold
         - application: etterlatte-klage
         - application: logging
           namespace: nais-system

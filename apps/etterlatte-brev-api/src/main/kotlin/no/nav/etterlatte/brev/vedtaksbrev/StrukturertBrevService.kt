@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.ManueltBrevData
@@ -30,7 +31,6 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -280,9 +280,12 @@ class StrukturertBrevService(
         )
     }
 
-    private fun utledBrevRedigerbartInnholdData(brevRequest: BrevRequest): BrevDataRedigerbarNy? =
+    private fun utledBrevRedigerbartInnholdData(brevRequest: BrevRequest): Any? =
         brevRequest.brevRedigerbarInnholdData?.let {
-            BrevDataRedigerbarNy(data = it)
+            when (brevRequest.brevFastInnholdData.brevKode) {
+                Brevkoder.OMS_INNVILGELSE -> it
+                else -> BrevDataRedigerbarNy(data = it)
+            }
         }
 
     private fun utledBrevInnholdData(

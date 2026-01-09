@@ -28,7 +28,6 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseForeldreloes
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOmregnetNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoer
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurdering
-import no.nav.etterlatte.brev.model.bp.datoVedtakOmgjoering
 import no.nav.etterlatte.brev.model.klage.AvvistKlageFerdigData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjusteringVedtak
@@ -97,7 +96,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
             return when (kode) {
-                BP_REVURDERING ->
+                BP_REVURDERING -> {
                     barnepensjonRevurdering(
                         bruker,
                         innholdMedVedlegg,
@@ -110,10 +109,11 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         klage,
                     )
+                }
 
                 BP_INNVILGELSE,
                 BP_INNVILGELSE_FORELDRELOES,
-                ->
+                -> {
                     barnepensjonInnvilgelse(
                         bruker,
                         innholdMedVedlegg,
@@ -126,15 +126,17 @@ class BrevDataMapperFerdigstillingVedtak(
                         systemkilde,
                         klage,
                     )
+                }
 
-                BP_AVSLAG ->
+                BP_AVSLAG -> {
                     barnepensjonAvslag(
                         innholdMedVedlegg,
                         soekerUnder18,
                         utlandstilknytningType,
                     )
+                }
 
-                BP_OPPHOER ->
+                BP_OPPHOER -> {
                     barnepensjonOpphoer(
                         bruker,
                         innholdMedVedlegg,
@@ -142,8 +144,9 @@ class BrevDataMapperFerdigstillingVedtak(
                         utlandstilknytningType,
                         virkningstidspunkt?.atDay(1),
                     )
+                }
 
-                OMS_INNVILGELSE ->
+                OMS_INNVILGELSE -> {
                     omstillingsstoenadInnvilgelse(
                         bruker,
                         innholdMedVedlegg,
@@ -155,8 +158,9 @@ class BrevDataMapperFerdigstillingVedtak(
                         utlandstilknytningType,
                         klage,
                     )
+                }
 
-                OMS_REVURDERING ->
+                OMS_REVURDERING -> {
                     omstillingsstoenadRevurdering(
                         bruker,
                         innholdMedVedlegg,
@@ -168,14 +172,16 @@ class BrevDataMapperFerdigstillingVedtak(
                         klage,
                         utlandstilknytningType,
                     )
+                }
 
-                OMS_AVSLAG ->
+                OMS_AVSLAG -> {
                     omstillingsstoenadAvslag(
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
                     )
+                }
 
-                OMS_INNTEKTSJUSTERING_VEDTAK ->
+                OMS_INNTEKTSJUSTERING_VEDTAK -> {
                     omstillingsstoenadInntektsjusteringVedtak(
                         bruker,
                         innholdMedVedlegg,
@@ -185,8 +191,9 @@ class BrevDataMapperFerdigstillingVedtak(
                         vedtakType!!,
                         virkningstidspunkt!!,
                     )
+                }
 
-                OMS_OPPHOER ->
+                OMS_OPPHOER -> {
                     omstillingsstoenadOpphoer(
                         bruker,
                         innholdMedVedlegg,
@@ -194,17 +201,23 @@ class BrevDataMapperFerdigstillingVedtak(
                         virkningstidspunkt?.atDay(1),
                         utlandstilknytningType,
                     )
+                }
 
-                TILBAKEKREVING -> throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
+                TILBAKEKREVING -> {
+                    throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
+                }
 
-                AVVIST_KLAGE ->
+                AVVIST_KLAGE -> {
                     AvvistKlageFerdigData.fra(
                         innholdMedVedlegg,
                         klage,
                         utlandstilknytningType,
                     )
+                }
 
-                else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
+                else -> {
+                    throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
+                }
             }
         }
     }

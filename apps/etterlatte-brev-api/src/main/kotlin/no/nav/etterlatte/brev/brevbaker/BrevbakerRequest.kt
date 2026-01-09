@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.Brevbakerkode
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
@@ -21,7 +20,7 @@ data class BrevbakerRequest internal constructor(
     companion object {
         fun fra(
             brevKode: Brevbakerkode,
-            brevData: BrevData,
+            brevData: Any,
             avsender: Avsender,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakId: SakId,

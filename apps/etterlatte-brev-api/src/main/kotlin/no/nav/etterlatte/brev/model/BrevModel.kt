@@ -9,8 +9,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.sql.Timestamp
-import java.time.LocalDate
 import java.util.UUID
 
 fun mottakerFraAdresse(
@@ -91,8 +89,3 @@ data class OpprettNyttBrev(
 ) {
     val status: Status = Status.OPPRETTET
 }
-
-data class EtterbetalingDTO(
-    val datoFom: LocalDate,
-    val datoTom: LocalDate,
-)

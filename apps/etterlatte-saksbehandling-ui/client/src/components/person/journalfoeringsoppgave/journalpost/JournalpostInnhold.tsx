@@ -43,8 +43,12 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
         />
         {journalpost.relevanteDatoer
           .sort((a) => (a.datotype == Datotype.DATO_SENDT_PRINT ? -1 : 1))
-          .map((dato, index) => (
-            <Info label={datotypeLabel(dato.datotype, journalpost)} tekst={formaterDato(dato.dato)} key={index} />
+          .map((dato) => (
+            <Info
+              label={datotypeLabel(dato.datotype, journalpost)}
+              tekst={formaterDato(dato.dato)}
+              key={dato.datotype}
+            />
           ))}
       </HStack>
     </VStack>

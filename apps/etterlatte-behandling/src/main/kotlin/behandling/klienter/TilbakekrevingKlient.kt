@@ -9,7 +9,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tilbakekreving.HentOmgjoeringKravgrunnlagRequest
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.ktor.PingResult
@@ -28,6 +30,12 @@ interface TilbakekrevingKlient : Pingable {
         brukerTokenInfo: BrukerTokenInfo,
         sakId: SakId,
         kravgrunnlagId: Long,
+    ): Kravgrunnlag?
+
+    suspend fun hentKravgrunnlagOmgjoering(
+        kravgrunnlagId: Long,
+        sak: Sak,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Kravgrunnlag?
 }
 
@@ -72,6 +80,35 @@ class TilbakekrevingKlientImpl(
         if (!response.status.isSuccess()) {
             throw TilbakekrevingKlientException(
                 "Henting av kravgrunnlag tilknyttet tilbakekreving for sak $sakId feilet",
+            )
+        }
+
+        return response.body<Kravgrunnlag>()
+    }
+
+    override suspend fun hentKravgrunnlagOmgjoering(
+        kravgrunnlagId: Long,
+        sak: Sak,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Kravgrunnlag? {
+        val response =
+            client.post("$url/api/tilbakekreving/${sak.id.sakId}/omgjoering") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    HentOmgjoeringKravgrunnlagRequest(
+                        saksbehandler = brukerTokenInfo.ident(),
+                        enhet = sak.enhet,
+                        kravgrunnlagId = kravgrunnlagId,
+                    ),
+                )
+            }
+        if (response.status == HttpStatusCode.NoContent) {
+            return null
+        }
+        if (!response.status.isSuccess()) {
+            throw TilbakekrevingKlientException(
+                "Henting av kravgrunnlag for omgjøring av tilbakekreving for sak ${sak.id.sakId} og " +
+                    "kravgrunnlagId=$kravgrunnlagId feilet",
             )
         }
 

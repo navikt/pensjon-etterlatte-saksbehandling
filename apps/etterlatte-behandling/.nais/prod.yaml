@@ -118,6 +118,8 @@ spec:
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
       value: api://prod-gcp.etterlatte.etterlatte-tilbakekreving/.default
+    - name: ETTERLATTE_INSTITUSJONSOPPHOLD_URL
+      value: http://etterlatte-institusjonsopphold
     - name: AZURE_SCOPE_ETTERLATTE_INSTITUSJONSOPPHOLD
       value: api://prod-gcp.etterlatte.etterlatte-institusjonsopphold/.default
     - name: AZUREAD_ATTESTANT_GROUPID

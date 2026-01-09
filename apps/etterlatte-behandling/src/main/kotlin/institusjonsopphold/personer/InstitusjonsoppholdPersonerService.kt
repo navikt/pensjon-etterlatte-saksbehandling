@@ -6,7 +6,6 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.sak.SakLesDao
 
@@ -72,7 +71,7 @@ class InstitusjonsoppholdPersonerService(
 
     private fun settOppKjoeringTabell() {
         inTransaction {
-            val fnrListe = sakLesDao.hentAllePersonerMedSak()
+            val fnrListe = sakLesDao.hentAllePersonerMedBehandlingMedStatusIkkeAvbruttEllerAvslag()
             fnrListe
                 .forEach {
                     institusjonsoppholdPersonerDao.lagreKjoering(it)

@@ -209,12 +209,17 @@ class SakLesDao(
             }
         }
 
-    fun hentAllePersonerMedSak(): List<String> =
+    fun hentAllePersonerMedBehandlingMedStatusIkkeAvbruttEllerAvslag(): List<String> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
-                val statement = prepareStatement("SELECT DISTINCT(fnr) FROM sak")
-                statement
-                    .executeQuery()
+                prepareStatement(
+                    """
+                    SELECT DISTINCT(fnr)
+                    FROM sak
+                    JOIN behandling ON behandling.sak_id = sak.id
+                    WHERE behandling.status NOT IN ('AVSLAG','AVBRUTT');
+                    """.trimIndent(),
+                ).executeQuery()
                     .toList { getString("fnr") }
             }
         }

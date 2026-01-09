@@ -76,6 +76,10 @@ export function EtteroppgjoerForbehandlingBrev() {
     }
   }, [forbehandling.brevId, tilbakestilt])
 
+  const erVarselbrev =
+    beregnetEtteroppgjoerResultat?.resultatType === 'ETTERBETALING' ||
+    beregnetEtteroppgjoerResultat?.resultatType === 'TILBAKEKREVING'
+
   return (
     <HStack height="100%" minHeight="100%" wrap={false}>
       <Modal
@@ -126,7 +130,7 @@ export function EtteroppgjoerForbehandlingBrev() {
       <Box minWidth="30rem" maxWidth="40rem" borderColor="border-subtle" borderWidth="0 1 0 0">
         <VStack gap="4" margin="16">
           <Heading level="1" size="large">
-            Forhåndsvarsel
+            {erVarselbrev ? 'Forhåndsvarsel' : 'Informasjonsbrev'}
           </Heading>
 
           {kanRedigeres && (

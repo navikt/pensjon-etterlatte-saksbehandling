@@ -687,11 +687,17 @@ class TrygdetidServiceImpl(
                 "trygdetider med id ${forrigeTrygdetider.joinToString { it.id.toString() }}",
         )
 
-        val opprettetTrygdetider =
+        // kopiere trygdetid fra forrige behandling til ny behandling
+        // vi ønsker ikke kopiere trygdetid for ident som allerede ligger på ny behandling, derfor filtrerer vi de ut
+        val forrigeTrydetiderIkkeKopiert =
             forrigeTrygdetider
                 .filter { forrigeTrygdetid ->
                     eksisterendeTrygdetider.none { it.ident == forrigeTrygdetid.ident }
-                }.map { forrigeTrygdetid ->
+                }
+
+        val opprettetTrygdetider =
+            forrigeTrydetiderIkkeKopiert
+                .map { forrigeTrygdetid ->
                     val kopiertTrygdetid =
                         Trygdetid(
                             sakId = behandling.sak,

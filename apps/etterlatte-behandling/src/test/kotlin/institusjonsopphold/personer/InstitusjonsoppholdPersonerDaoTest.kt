@@ -43,7 +43,7 @@ class InstitusjonsoppholdPersonerDaoTest(
 
     @Test
     fun skalOppretteKjoeringTabell() {
-        dao.lagreKjoering("123" to 42L)
+        dao.lagreKjoering("123")
 
         val ubehandledePersoner = dao.hentUbehandledePersoner(10)
         ubehandledePersoner.first() shouldBe "123"
@@ -51,8 +51,8 @@ class InstitusjonsoppholdPersonerDaoTest(
 
     @Test
     fun skalOppdatereStatus() {
-        dao.lagreKjoering("123" to 1L)
-        dao.lagreKjoering("456" to 2L)
+        dao.lagreKjoering("123")
+        dao.lagreKjoering("456")
 
         dao.markerSomFerdig(listOf("123"))
 

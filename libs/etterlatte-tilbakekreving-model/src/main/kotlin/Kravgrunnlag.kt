@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.UUID30
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -72,4 +73,10 @@ data class KravOgVedtakstatus(
     val vedtakId: VedtakId,
     val status: KravgrunnlagStatus,
     val referanse: UUID30,
+)
+
+data class HentOmgjoeringKravgrunnlagRequest(
+    val saksbehandler: String,
+    val enhet: Enhetsnummer,
+    val kravgrunnlagId: Long,
 )

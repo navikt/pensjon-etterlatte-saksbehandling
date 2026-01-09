@@ -34,8 +34,7 @@ export const ViderefoereOpphoer = ({
     <SoeknadVurdering tittel="Opphør fra og med" hjemler={[]} status={statusIkon(viderefoertOpphoer)}>
       <VStack gap="4" marginBlock="3" marginInline="0" maxWidth="41rem">
         <BodyShort>
-          Er opphørsdato tidligere enn dagens dato, eller skal saken opphøre i nær fremtid fordi vilkårene ikke lenger
-          er oppfylt?
+          Er opphørsdato tidligere enn dagens dato, eller skal saken opphøre innen 3 måneder fra saken er attestert?
         </BodyShort>
         <BodyShort>
           Hvis brukers pensjon skal opphøre før behandlingsdatoen, så velg den måneden pensjonen skal opphøre fra. Legg

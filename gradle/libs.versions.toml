@@ -11,8 +11,8 @@ navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.21.3"
 tjenestespesifikasjoner-version = "1.1436e29"
-rapidsandrivers-version = "2025081112301754908236.47b364d7b14c" # OBS! tbdlibs brukes av denne. De bør stemme overens
-tbdlibs-version = "2025.08.16-09.21-71db7cad" # OBS! rapidsandrivers bruker denne. De bør stemme overens
+rapidsandrivers-version = "2025110410541762250064.d7e58c3fad81" # OBS! tbdlibs brukes av denne. De bør stemme overens
+tbdlibs-version = "2025.12.17-10.36-a2cc649b" # OBS! rapidsandrivers bruker denne. De bør stemme overens
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.3" }
@@ -31,7 +31,7 @@ kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "4.1.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.12.1" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.6.0" }
 
-klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.9.24" }
+klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.12.17" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.1.0" }
 

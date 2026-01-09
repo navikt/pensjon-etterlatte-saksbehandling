@@ -12,6 +12,7 @@ import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { formaterMaanednavnAar } from '~utils/formatering/dato'
 import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
+import { OverstyrNettoBruttoTilbakekreving } from '~components/tilbakekreving/utbetalinger/OverstyrNettoBruttoTilbakekreving'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const navigate = useNavigate()
@@ -74,6 +75,8 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
           })}
         </Table.Body>
       </Table>
+
+      <OverstyrNettoBruttoTilbakekreving behandling={behandling} redigerbar={false} />
       <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <HStack justify="center">
           <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>

@@ -66,4 +66,4 @@ spec:
         - host: inst2.prod-fss-pub.nais.io
     inbound:
       rules:
-        - appliction: etterlatte-behandling
+        - application: etterlatte-behandling

@@ -29,8 +29,8 @@ class InstitusjonsoppholdPersonerService(
         if (skalKjoere()) {
             var erFerdig = false
             var counter = 0
-            while (counter < 30 && !erFerdig) {
-                val antallBehandlet = kjoerBolk(20)
+            while (counter < 300 && !erFerdig) {
+                val antallBehandlet = kjoerBolk(50)
                 if (antallBehandlet == 0) {
                     erFerdig = true
                 }

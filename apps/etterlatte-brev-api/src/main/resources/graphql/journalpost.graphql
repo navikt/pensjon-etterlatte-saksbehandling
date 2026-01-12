@@ -33,9 +33,5 @@ query(
         }
         kanal
         datoOpprettet
-        relevanteDatoer {
-            dato
-            datotype
-        }
     }
 }

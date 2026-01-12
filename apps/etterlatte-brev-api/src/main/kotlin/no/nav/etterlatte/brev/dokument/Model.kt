@@ -132,7 +132,6 @@ data class Journalpost(
     val bruker: Bruker?,
     val sak: JournalpostSak?,
     val datoOpprettet: String,
-    val relevanteDatoer: List<RelevantDato>,
 )
 
 /**
@@ -220,19 +219,4 @@ data class Utsendingsinfo(
     data class DigitalpostSendt(
         val adresse: String?,
     )
-}
-
-data class RelevantDato(
-    val dato: String,
-    val datotype: Datotype,
-)
-
-enum class Datotype {
-    DATO_SENDT_PRINT,
-    DATO_EKSPEDERT,
-    DATO_JOURNALFOERT,
-    DATO_REGISTRERT,
-    DATO_AVS_RETUR,
-    DATO_DOKUMENT,
-    DATO_LEST,
 }

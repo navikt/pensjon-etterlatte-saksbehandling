@@ -44,10 +44,6 @@ query(
             }
             kanal
             datoOpprettet
-            relevanteDatoer {
-                dato
-                datotype
-            }
         }
         sideInfo {
             sluttpeker

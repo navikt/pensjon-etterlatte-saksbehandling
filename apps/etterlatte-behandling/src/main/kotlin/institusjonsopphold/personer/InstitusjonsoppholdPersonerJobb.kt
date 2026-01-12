@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
+import java.lang.Thread.sleep
 import java.time.Duration
 import java.util.Timer
 import javax.sql.DataSource
@@ -50,7 +51,12 @@ data class InstitusjonsoppholdPersonerJobb(
             if (erLeader()) {
                 if (lock.tryAcquire()) {
                     logger.info("Starter henting av institusjonsopphold $jobbNavn")
-                    institusjonsoppholdPersonerService.setupKontekstAndRun(jobContext)
+                    try {
+                        institusjonsoppholdPersonerService.setupKontekstAndRun(jobContext)
+                    } catch (e: Exception) {
+                        logger.error("Feilet i henting av institusjonsopphold $jobbNavn", e)
+                        sleep(5000)
+                    }
                     lock.release()
                     logger.info("Ferdig med henting av institusjonsopphold $jobbNavn")
                 }

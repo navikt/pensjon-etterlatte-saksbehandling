@@ -55,9 +55,10 @@ data class InstitusjonsoppholdPersonerJobb(
                         institusjonsoppholdPersonerService.setupKontekstAndRun(jobContext)
                     } catch (e: Exception) {
                         logger.error("Feilet i henting av institusjonsopphold $jobbNavn", e)
-                        sleep(5000)
+                        sleep(10000)
+                    } finally {
+                        lock.release()
                     }
-                    lock.release()
                     logger.info("Ferdig med henting av institusjonsopphold $jobbNavn")
                 }
             }

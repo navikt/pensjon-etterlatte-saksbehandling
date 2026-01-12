@@ -1,6 +1,5 @@
 package institusjonsopphold.personer
 
-import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -35,5 +34,5 @@ class InstitusjonsoppholdInternKlientTest : InstitusjonsoppholdInternKlient {
 }
 
 data class HentOppholdRequest(
-    val personIdenter: List<String>,
+    val personidenter: List<String>,
 )

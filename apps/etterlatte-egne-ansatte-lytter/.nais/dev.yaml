@@ -25,8 +25,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   strategy:
     type: Recreate
   kafka:

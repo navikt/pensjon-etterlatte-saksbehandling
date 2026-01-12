@@ -33,8 +33,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   kafka:
     pool: nav-dev
   azure:

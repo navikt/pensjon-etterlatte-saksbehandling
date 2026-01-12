@@ -29,8 +29,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   resources:
     requests:
       cpu: 25m

@@ -208,6 +208,21 @@ class SakLesDao(
                     .toList(mapTilSak)
             }
         }
+
+    fun hentAllePersonerMedBehandlingMedStatusIkkeAvbruttEllerAvslag(): List<String> =
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    SELECT DISTINCT(fnr)
+                    FROM sak
+                    JOIN behandling ON behandling.sak_id = sak.id
+                    WHERE behandling.status NOT IN ('AVSLAG','AVBRUTT');
+                    """.trimIndent(),
+                ).executeQuery()
+                    .toList { getString("fnr") }
+            }
+        }
 }
 
 internal val mapTilSak: ResultSet.() -> Sak = {

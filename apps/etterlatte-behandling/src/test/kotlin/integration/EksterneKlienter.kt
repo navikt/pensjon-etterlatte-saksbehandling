@@ -45,6 +45,7 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
@@ -83,6 +84,7 @@ import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
@@ -144,6 +146,10 @@ class BeregningKlientTest :
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
+
+    override suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo): Grunnbeloep {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun inntektsjusteringAvkortingInfoSjekk(
         sakId: SakId,
@@ -370,6 +376,14 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
         sakId: SakId,
         kravgrunnlagId: Long,
     ): Kravgrunnlag {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hentKravgrunnlagOmgjoering(
+        kravgrunnlagId: Long,
+        sak: Sak,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Kravgrunnlag? {
         TODO("Not yet implemented")
     }
 

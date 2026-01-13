@@ -156,8 +156,14 @@ class EtteroppgjoerRevurderingService(
             )
 
         val persongalleri =
-            grunnlagService.hentPersongalleri(sakId)
+            grunnlagService.hentPersongalleri(sisteIverksatteBehandling.id)
                 ?: throw InternfeilException("Fant ikke persongalleri for sak $sakId")
+
+        if (forbehandling.sak.ident != persongalleri.soeker) {
+            throw InternfeilException(
+                "Siste grunnlag i sak $sakId er ikke oppdatert med nåværende ident i sak. Saken må revurderes med ny ident før etteroppgjøret kan gjennomføres.",
+            )
+        }
 
         val virkningstidspunkt =
             Virkningstidspunkt(

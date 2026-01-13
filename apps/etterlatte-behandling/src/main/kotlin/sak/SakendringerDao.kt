@@ -50,6 +50,9 @@ class SakendringerDao(
         }
 
         val sakEtter = krevIkkeNull(hentKomplettSak(sakId)) { "Fant ikke sak med sakId $sakId. Må ha en sak etter endring" }
+        if (sakEtter == sakFoer) {
+            return
+        }
 
         lagreSaksendring(
             Saksendring.create(

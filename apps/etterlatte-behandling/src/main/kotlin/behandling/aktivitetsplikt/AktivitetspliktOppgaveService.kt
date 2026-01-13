@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
@@ -17,6 +18,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -63,6 +65,7 @@ class AktivitetspliktOppgaveService(
     private val aktivitetspliktBrevDao: AktivitetspliktBrevDao,
     private val brevApiKlient: BrevApiKlient,
     private val behandlingService: BehandlingService,
+    private val beregningKlient: BeregningKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -183,7 +186,9 @@ class AktivitetspliktOppgaveService(
         val vurderingType =
             when (oppgave.type) {
                 OppgaveType.AKTIVITETSPLIKT -> VurderingType.SEKS_MAANEDER
+
                 OppgaveType.AKTIVITETSPLIKT_12MND -> VurderingType.TOLV_MAANEDER
+
                 else -> throw UgyldigForespoerselException(
                     "OPPGAVE_ER_IKKE_AKTIVITETSPLIKT",
                     "Oppgaven har ikke typen aktivitetsplikt",
@@ -226,6 +231,7 @@ class AktivitetspliktOppgaveService(
     fun lagreBrevdata(
         oppgaveId: UUID,
         data: AktivitetspliktInformasjonBrevdataRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): AktivitetspliktInformasjonBrevdata {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         /*
@@ -263,7 +269,7 @@ class AktivitetspliktOppgaveService(
                 }
                 // Hvis brevdata er endret må vi oppdatere brevet
             } else if (!oppdatertData.harLikeUtfall(eksisterendeData)) {
-                val brevParametre = mapOgValiderBrevParametre(oppgave, oppdatertData)
+                val brevParametre = mapOgValiderBrevParametre(oppgave, oppdatertData, brukerTokenInfo)
                 runBlocking {
                     brevApiKlient.oppdaterSpesifiktBrev(
                         sakId = sak.id,
@@ -280,6 +286,7 @@ class AktivitetspliktOppgaveService(
     private fun mapOgValiderBrevParametre(
         oppgave: OppgaveIntern,
         brevdata: AktivitetspliktInformasjonBrevdata,
+        brukerTokenInfo: BrukerTokenInfo,
     ): BrevParametre {
         val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgave.id)
 
@@ -308,27 +315,36 @@ class AktivitetspliktOppgaveService(
         val spraak = krevIkkeNull(brevdata.spraak) { "Mangler spraak for oppgave ${oppgave.id}" }
         val nasjonalEllerUtlandMapped = mapNasjonalEllerUtland(nasjonalEllerUtland.type)
 
+        val grunnbeloep = runBlocking { beregningKlient.hentGrunnbeloep(brukerTokenInfo) }
+        val halvtGrunnbeloep = grunnbeloep.grunnbeloep / 2
+
         val brevparametere =
             when (oppgave.type) {
-                OppgaveType.AKTIVITETSPLIKT ->
+                OppgaveType.AKTIVITETSPLIKT -> {
                     BrevParametre.AktivitetspliktInformasjon4Mnd(
                         aktivitetsgrad = aktivitetsgrad,
                         utbetaling = utbetaling,
                         redusertEtterInntekt = redusertEtterInntekt,
                         nasjonalEllerUtland = nasjonalEllerUtlandMapped,
                         spraak = spraak,
+                        halvtGrunnbeloep = halvtGrunnbeloep,
                     )
+                }
 
-                OppgaveType.AKTIVITETSPLIKT_12MND ->
+                OppgaveType.AKTIVITETSPLIKT_12MND -> {
                     BrevParametre.AktivitetspliktInformasjon10Mnd(
                         aktivitetsgrad = aktivitetsgrad,
                         utbetaling = utbetaling,
                         redusertEtterInntekt = redusertEtterInntekt,
                         nasjonalEllerUtland = nasjonalEllerUtlandMapped,
                         spraak = spraak,
+                        halvtGrunnbeloep = halvtGrunnbeloep,
                     )
+                }
 
-                else -> throw FeilOppgavetype("Prøver å lage aktivitetsplikt med oppgavetype: ${oppgave.type} id: ${oppgave.id}")
+                else -> {
+                    throw FeilOppgavetype("Prøver å lage aktivitetsplikt med oppgavetype: ${oppgave.type} id: ${oppgave.id}")
+                }
             }
         return brevparametere
     }
@@ -354,7 +370,9 @@ class AktivitetspliktOppgaveService(
         val harNyVurdering =
             when (oppgave.type) {
                 OppgaveType.AKTIVITETSPLIKT_12MND -> aktiviteterIOppgave.any { it.vurdertFra12Mnd }
+
                 OppgaveType.AKTIVITETSPLIKT -> aktiviteterIOppgave.isNotEmpty()
+
                 else -> throw UgyldigForespoerselException(
                     "FEIL_OPPGAVETYPE",
                     "Kan ikke opprette brev for aktivitetsplikt med oppgavetype ${oppgave.type}",
@@ -379,7 +397,7 @@ class AktivitetspliktOppgaveService(
         }
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
-            val brevparametereAktivitetspliktVurdering = mapOgValiderBrevParametre(oppgave, brevData)
+            val brevparametereAktivitetspliktVurdering = mapOgValiderBrevParametre(oppgave, brevData, brukerTokenInfo)
             val opprettetBrev =
                 runBlocking {
                     brevApiKlient.opprettSpesifiktBrev(

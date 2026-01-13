@@ -84,7 +84,7 @@ class TilbakekrevingService(
             val nyTilbakekreving = TilbakekrevingBehandling.ny(kravgrunnlag, sak, omgjoeringAvId)
             val oppdatertMedVurderingerOmgjoering =
                 if (omgjoeringAvId != null) {
-                    val opprinneligVurdering = hentTilbakekreving(omgjoeringAvId).tilbakekreving.vurdering
+                    val opprinneligVurdering = tilbakekrevingDao.hentTilbakekreving(omgjoeringAvId).tilbakekreving.vurdering
                     nyTilbakekreving.oppdaterVurdering(opprinneligVurdering)
                 } else {
                     nyTilbakekreving

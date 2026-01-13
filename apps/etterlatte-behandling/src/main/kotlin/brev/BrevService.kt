@@ -140,6 +140,8 @@ class BrevService(
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
+                } else if (erInnvilgelseOmsForstegangsOgNyBrevflytErAktivert(behandlingId)) {
+                    vedtaksbrevService.genererPdf(brevID, behandlingId, bruker, skalLagrePdf)
                 } else {
                     videresendInterneFeil {
                         brevApiKlient.genererPdf(brevID, behandlingId, bruker)
@@ -194,6 +196,8 @@ class BrevService(
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                } else if (erInnvilgelseOmsForstegangsOgNyBrevflytErAktivert(behandlingId)) {
+                    vedtaksbrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
                 } else {
                     videresendInterneFeil {
                         brevApiKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
@@ -239,6 +243,8 @@ class BrevService(
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+                } else if (erInnvilgelseOmsForstegangsOgNyBrevflytErAktivert(behandlingId)) {
+                    vedtaksbrevService.tilbakestillVedtaksbrev(brevID, behandlingId, bruker)
                 } else {
                     videresendInterneFeil {
                         brevApiKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
@@ -330,6 +336,8 @@ class BrevService(
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.hentVedtaksbrev(behandlingId, bruker)
+                } else if (erInnvilgelseOmsForstegangsOgNyBrevflytErAktivert(behandlingId)) {
+                    vedtaksbrevService.hentVedtaksbrev(behandlingId, bruker)
                 } else {
                     videresendInterneFeil {
                         brevApiKlient.hentVedtaksbrev(behandlingId, bruker)

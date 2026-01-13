@@ -8,7 +8,9 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.BrevKlient
+import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
@@ -16,7 +18,9 @@ import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Etterbetaling
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.omsBeregning
 import no.nav.etterlatte.brev.model.oms.toAvkortetBeregningsperiode
@@ -66,6 +70,44 @@ class VedtaksbrevService(
             bruker,
         )
     }
+
+    suspend fun genererPdf(
+        brevID: BrevID,
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+        skalLagres: Boolean,
+    ): Pdf {
+        val brevRequest = retryOgPakkUt { utledBrevRequest(bruker, behandlingId, skalLagres) }
+
+        return brevKlient.genererPdf(brevID, behandlingId, brevRequest, bruker)
+    }
+
+    suspend fun tilbakestillVedtaksbrev(
+        brevID: BrevID,
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): BrevPayload {
+        val brevRequest = retryOgPakkUt { utledBrevRequest(bruker, behandlingId) }
+
+        return brevKlient.tilbakestillStrukturertBrev(
+            brevID,
+            behandlingId,
+            brevRequest,
+            bruker,
+        )
+    }
+
+    suspend fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        brevKlient.ferdigstillStrukturertBrev(behandlingId, Brevtype.VEDTAK, brukerTokenInfo)
+    }
+
+    suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Brev? = brevKlient.hentVedtaksbrev(behandlingId, bruker)
 
     private suspend fun utledBrevRequest(
         brukerTokenInfo: BrukerTokenInfo,

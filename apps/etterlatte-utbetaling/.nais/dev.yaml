@@ -27,8 +27,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   leaderElection: true
   gcp:
     sqlInstances:

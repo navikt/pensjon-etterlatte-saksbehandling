@@ -28,8 +28,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   gcp:
     sqlInstances:
       - type: POSTGRES_14

@@ -13,7 +13,7 @@ const TemaTag = ({ journalpost }: { journalpost: Journalpost }) => {
 }
 
 const datotypeLabel = (datotype: Datotype, journalpost: Journalpost) => {
-  if (datotype !== Datotype.DATO_JOURNALFOERT) return teksterDatotype[datotype]
+  if (datotype !== Datotype.DATO_JOURNALFOERT) return teksterDatotype[datotype] ?? datotype
 
   switch (journalpost.journalposttype) {
     case Journalposttype.I:
@@ -41,7 +41,6 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
         />
         {journalpost.relevanteDatoer
           .sort((a) => (a.datotype == Datotype.DATO_SENDT_PRINT ? -1 : 1))
-          .filter((dato) => Object.values(Datotype).includes(dato.datotype))
           .map((dato) => (
             <Info
               label={datotypeLabel(dato.datotype, journalpost)}

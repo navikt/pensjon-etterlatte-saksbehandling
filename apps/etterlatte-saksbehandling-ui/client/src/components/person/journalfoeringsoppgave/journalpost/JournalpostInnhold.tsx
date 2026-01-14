@@ -39,7 +39,7 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
           label="Registrert dato"
           tekst={journalpost.datoOpprettet ? formaterDato(journalpost.datoOpprettet) : 'Mangler opprettelsesdato'}
         />
-        {journalpost.relevanteDatoer
+        {[...journalpost.relevanteDatoer]
           .sort((a) => (a.datotype == Datotype.DATO_SENDT_PRINT ? -1 : 1))
           .map((dato) => (
             <Info

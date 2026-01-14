@@ -30,8 +30,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   resources:
     limits:
       memory: 640Mi

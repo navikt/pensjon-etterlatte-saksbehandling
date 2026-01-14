@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -145,8 +146,14 @@ internal class BrevdistribuererTest {
 
         every { db.hentBrev(any()) } returns brev
 
-        assertThrows<FeilStatusForDistribusjon> {
-            brevdistribuerer.distribuer(brev.id, bruker = bruker)
+        if (status != Status.DISTRIBUERT) {
+            assertThrows<FeilStatusForDistribusjon> {
+                brevdistribuerer.distribuer(brev.id, bruker = bruker)
+            }
+        } else {
+            assertDoesNotThrow {
+                brevdistribuerer.distribuer(brev.id, bruker = bruker)
+            }
         }
 
         verify {

@@ -752,6 +752,7 @@ internal class ApplicationContext(
             etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
             beregningKlient = beregningKlient,
             brevApiKlient = brevApiKlient,
+            etteroppgjoerService = etteroppgjoerService,
         )
 
     private val uttrekkLoependeYtelseEtter67JobService =

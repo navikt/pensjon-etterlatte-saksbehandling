@@ -24,6 +24,11 @@ class Brevdistribuerer(
 
         val brev = db.hentBrev(brevId)
 
+        if (brev.status == Status.DISTRIBUERT) {
+            logger.info("Fikk forespørsel om å distribuere brev som allerede er distribuert $brevId. Gjør ingen ting.")
+            return brev.mottakere.mapNotNull { it.bestillingId }
+        }
+
         if (brev.status != Status.JOURNALFOERT) {
             throw FeilStatusForDistribusjon(brev.id, brev.status)
         } else if (brev.mottakere.isEmpty()) {

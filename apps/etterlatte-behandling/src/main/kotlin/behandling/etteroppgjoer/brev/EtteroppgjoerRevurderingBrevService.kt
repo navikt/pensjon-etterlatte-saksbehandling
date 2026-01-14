@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.brev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -41,6 +42,7 @@ class EtteroppgjoerRevurderingBrevService(
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
     private val beregningKlient: BeregningKlient,
     private val brevApiKlient: BrevApiKlient,
+    private val etteroppgjoerService: EtteroppgjoerService,
 ) {
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
@@ -141,6 +143,8 @@ class EtteroppgjoerRevurderingBrevService(
 
             val forhaandsvarselBrev = hentForhaandsvarsel(detaljertForbehandling, behandlingId, brukerTokenInfo)
 
+            val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+
             BrevRequest(
                 sak = sak,
                 innsender = grunnlag.mapInnsender(),
@@ -162,6 +166,7 @@ class EtteroppgjoerRevurderingBrevService(
                         faktiskStoenad = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
                         grunnlag = EtteroppgjoerBrevGrunnlag.fra(faktiskInntekt, detaljertForbehandling.opplysninger.skatt.summertInntekt),
                         rettsgebyrBeloep = Kroner(beregnetEtteroppgjoerResultat.grense.rettsgebyr),
+                        harOpphoer = etteroppgjoer.harOpphoer,
                     ),
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(

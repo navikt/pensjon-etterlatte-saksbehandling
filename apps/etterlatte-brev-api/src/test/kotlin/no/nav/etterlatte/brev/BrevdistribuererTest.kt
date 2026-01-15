@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -37,14 +38,19 @@ import kotlin.random.Random
 internal class BrevdistribuererTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
+    private val featureToggleService =
+        mockk<FeatureToggleService> {
+            every { isEnabled(any(), any(), any()) } returnsArgument 1
+        }
 
-    private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
+    private val brevdistribuerer = Brevdistribuerer(db, distribusjonService, featureToggleService)
 
     private val bruker = simpleSaksbehandler("Z123456")
 
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
+        every { featureToggleService.isEnabled(any(), any(), any()) } returnsArgument 1
     }
 
     @AfterEach

@@ -58,7 +58,7 @@ class Brevdistribuerer(
         } else if (brev.mottakere.isEmpty()) {
             throw DistribusjonError("Det må finnes minst 1 mottaker for å kunne distribuere brevet (brevId: $brevId)")
         } else if (brev.mottakere.size > maksAntallMottakere) {
-            throw DistribusjonError("Distribusjon av brev med flere enn 2 mottakere er ikke støttet (brevId: $brevId)")
+            throw DistribusjonError("Distribusjon av brev med flere enn $maksAntallMottakere mottakere er ikke støttet (brevId: $brevId)")
         }
 
         return brev.mottakere

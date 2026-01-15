@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -74,13 +75,13 @@ class VedtakBehandlingService(
         if (vedtak != null) {
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) =
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider, etteroppgjoerResultat) =
             hentDataForVedtak(behandlingId, brukerTokenInfo)
 
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
-        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering)
+        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering, etteroppgjoerResultat)
 
         return if (vedtak != null) {
             logger.info("Oppdaterer vedtak for behandling med behandlingId=$behandlingId")
@@ -102,7 +103,7 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) =
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider, etteroppgjoerResultat) =
             hentDataForVedtak(
                 behandlingId,
                 brukerTokenInfo,
@@ -111,7 +112,7 @@ class VedtakBehandlingService(
         verifiserEtteroppgjoerIngenEndring(behandling, beregningOgAvkorting, brukerTokenInfo)
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
-        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering)
+        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering, etteroppgjoerResultat)
 
         oppdaterVedtak(
             behandling = behandling,
@@ -590,8 +591,14 @@ class VedtakBehandlingService(
         virkningstidspunkt: YearMonth,
         behandling: DetaljertBehandling,
     ) = when (vedtakType) {
-        VedtakType.OPPHOER -> virkningstidspunkt
-        VedtakType.AVSLAG -> behandling.opphoerFraOgMed
+        VedtakType.OPPHOER -> {
+            virkningstidspunkt
+        }
+
+        VedtakType.AVSLAG -> {
+            behandling.opphoerFraOgMed
+        }
+
         else -> {
             if (virkningstidspunkt == behandling.opphoerFraOgMed) {
                 throw VirkningstidspunktOgOpphoerFomPaaSammeDatoException()
@@ -607,6 +614,7 @@ class VedtakBehandlingService(
         behandlingType: BehandlingType,
         revurderingaarsak: Revurderingaarsak?,
         vilkaarsvurdering: VilkaarsvurderingDto?,
+        etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
     ): VedtakType =
         when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
@@ -618,7 +626,18 @@ class VedtakBehandlingService(
 
             BehandlingType.REVURDERING -> {
                 when (vilkaarsvurderingUtfallNonNull(vilkaarsvurdering?.resultat?.utfall)) {
-                    VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.ENDRING
+                    VilkaarsvurderingUtfall.OPPFYLT -> {
+                        val resultatIngenEndring =
+                            etteroppgjoerResultat?.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING ||
+                                etteroppgjoerResultat?.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+
+                        if (revurderingaarsak == Revurderingaarsak.ETTEROPPGJOER && resultatIngenEndring) {
+                            VedtakType.INGEN_ENDRING
+                        } else {
+                            VedtakType.ENDRING
+                        }
+                    }
+
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
                         if (revurderingaarsak == Revurderingaarsak.NY_SOEKNAD) {
                             VedtakType.AVSLAG
@@ -688,7 +707,10 @@ class VedtakBehandlingService(
                 VedtakType.TILBAKEKREVING,
                 VedtakType.AVSLAG,
                 VedtakType.AVVIST_KLAGE,
-                -> emptyList()
+                VedtakType.INGEN_ENDRING,
+                -> {
+                    emptyList()
+                }
             }
 
         val perioderMedOpphoer =
@@ -731,18 +753,27 @@ class VedtakBehandlingService(
             val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
             val trygdetider = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
+            val etteroppgjoerResultat =
+                if (behandling.revurderingsaarsak == Revurderingaarsak.ETTEROPPGJOER) {
+                    behandlingKlient.hentBeregnetEtteroppgjoerResultat(behandling.id, brukerTokenInfo)
+                } else {
+                    null
+                }
+
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
                     when (vilkaarsvurdering?.resultat?.utfall) {
-                        VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
+                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
                             VedtakData(
                                 behandling,
                                 vilkaarsvurdering,
                                 null,
                                 sak,
                                 trygdetider,
+                                etteroppgjoerResultat,
                             )
+                        }
 
                         VilkaarsvurderingUtfall.OPPFYLT -> {
                             val beregningOgAvkorting =
@@ -751,10 +782,12 @@ class VedtakBehandlingService(
                                     brukerTokenInfo,
                                     sak.sakType,
                                 )
-                            VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider)
+                            VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider, etteroppgjoerResultat)
                         }
 
-                        null -> throw InternfeilException("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
+                        null -> {
+                            throw InternfeilException("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
+                        }
                     }
                 }
             }

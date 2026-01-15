@@ -9,6 +9,7 @@ enum class VedtakType(
     ENDRING(true),
     TILBAKEKREVING(false),
     AVVIST_KLAGE(false),
+    INGEN_ENDRING(true),
     ;
 
     fun tilLesbarString() =
@@ -19,5 +20,6 @@ enum class VedtakType(
             ENDRING -> "Endring"
             TILBAKEKREVING -> "Tilbakekreving"
             AVVIST_KLAGE -> "Avvist klage"
+            INGEN_ENDRING -> "Ingen endring"
         }
 }

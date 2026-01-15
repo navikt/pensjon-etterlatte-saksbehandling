@@ -42,7 +42,6 @@ class InstitusjonsoppholdOppgaverService(
     private fun kjoer() {
         val oppholdListe = institusjonsoppholdOppgaverDao.hentUbehandledeOpphold()
 
-        // TODO finnes alle inst-hendelser i DB også som grunnl.en.hendelse?
         oppholdListe.forEach { oppholdId ->
             val (personIdent, _) = institusjonsoppholdPersonerDao.hentInstitusjonsopphold(oppholdId)
             inTransaction {

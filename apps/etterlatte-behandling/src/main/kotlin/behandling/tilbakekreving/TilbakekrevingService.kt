@@ -62,6 +62,7 @@ class TilbakekrevingService(
     fun opprettTilbakekreving(
         kravgrunnlag: Kravgrunnlag,
         omgjoeringAvId: UUID?,
+        saksbehandler: Saksbehandler?,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")
@@ -80,10 +81,17 @@ class TilbakekrevingService(
                     )
                 }
 
+            val nyTilbakekreving = TilbakekrevingBehandling.ny(kravgrunnlag, sak, omgjoeringAvId)
+            val oppdatertMedVurderingerOmgjoering =
+                if (omgjoeringAvId != null) {
+                    val opprinneligVurdering = tilbakekrevingDao.hentTilbakekreving(omgjoeringAvId).tilbakekreving.vurdering
+                    nyTilbakekreving.oppdaterVurdering(opprinneligVurdering)
+                } else {
+                    nyTilbakekreving
+                }
+
             val tilbakekreving =
-                tilbakekrevingDao.lagreTilbakekreving(
-                    TilbakekrevingBehandling.ny(kravgrunnlag, sak, omgjoeringAvId),
-                )
+                tilbakekrevingDao.lagreTilbakekreving(oppdatertMedVurderingerOmgjoering)
 
             varsleOmUkjenteKlasseTyper(kravgrunnlag, tilbakekreving.id)
 
@@ -107,22 +115,33 @@ class TilbakekrevingService(
                 }
             }
 
-            if (oppgaveFraBehandlingMedFeilutbetaling != null) {
-                logger.info("Kobler nytt kravgrunnlag med eksisterende oppgave ${oppgaveFraBehandlingMedFeilutbetaling.id}")
-                oppgaveService.oppdaterReferanseOgMerknad(
-                    oppgaveId = oppgaveFraBehandlingMedFeilutbetaling.id,
-                    referanse = tilbakekreving.id.toString(),
-                    merknad = "Kravgrunnlag mottatt",
-                )
-            } else {
-                logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
-                oppgaveService.opprettOppgave(
-                    referanse = tilbakekreving.id.toString(),
-                    sakId = tilbakekreving.sak.id,
-                    kilde = OppgaveKilde.TILBAKEKREVING,
-                    type = OppgaveType.TILBAKEKREVING,
-                    merknad = "Kravgrunnlag mottatt",
-                )
+            val oppgaveForTilbakekreving =
+                if (oppgaveFraBehandlingMedFeilutbetaling != null) {
+                    logger.info("Kobler nytt kravgrunnlag med eksisterende oppgave ${oppgaveFraBehandlingMedFeilutbetaling.id}")
+                    oppgaveService.oppdaterReferanseOgMerknad(
+                        oppgaveId = oppgaveFraBehandlingMedFeilutbetaling.id,
+                        referanse = tilbakekreving.id.toString(),
+                        merknad = "Kravgrunnlag mottatt",
+                    )
+                } else {
+                    val merknad =
+                        if (omgjoeringAvId != null) {
+                            "Omgjøring av tilbakekreving opprettet"
+                        } else {
+                            "Kravgrunnlag mottatt"
+                        }
+                    logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
+                    oppgaveService.opprettOppgave(
+                        referanse = tilbakekreving.id.toString(),
+                        sakId = tilbakekreving.sak.id,
+                        kilde = OppgaveKilde.TILBAKEKREVING,
+                        type = OppgaveType.TILBAKEKREVING,
+                        merknad = merknad,
+                    )
+                }
+
+            if (saksbehandler != null) {
+                oppgaveService.tildelSaksbehandler(oppgaveForTilbakekreving.id, saksbehandler.ident)
             }
 
             lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.OPPRETTET)
@@ -206,15 +225,7 @@ class TilbakekrevingService(
             sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
             sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
-            tilbakekrevingDao.lagreTilbakekreving(
-                tilbakekreving.copy(
-                    status = TilbakekrevingStatus.UNDER_ARBEID,
-                    tilbakekreving =
-                        tilbakekreving.tilbakekreving.copy(
-                            vurdering = vurdering,
-                        ),
-                ),
-            )
+            tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.oppdaterVurdering(vurdering))
         }
 
     fun lagrePerioder(
@@ -714,7 +725,10 @@ class TilbakekrevingService(
         }
     }
 
-    fun hentKravgrunnlagForOmgjoering(tilbakekrevingId: UUID): Kravgrunnlag {
+    suspend fun hentKravgrunnlagForOmgjoering(
+        tilbakekrevingId: UUID,
+        saksbehandler: Saksbehandler,
+    ): Kravgrunnlag {
         val tilbakekrevingSomSkalOmgjoeres =
             inTransaction {
                 tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
@@ -725,7 +739,11 @@ class TilbakekrevingService(
                 "Kan ikke omgjøre en tilbakekreving som er under behandling",
             )
         }
-        return tilbakekrevingSomSkalOmgjoeres.tilbakekreving.kravgrunnlag
+        return tilbakekrevingKlient.hentKravgrunnlagOmgjoering(
+            tilbakekrevingSomSkalOmgjoeres.tilbakekreving.kravgrunnlag.kravgrunnlagId.value,
+            tilbakekrevingSomSkalOmgjoeres.sak,
+            saksbehandler,
+        ) ?: throw InternfeilException("Fikk ikke noe kravgrunnlag for omgjøring tilbake fra tilbakekrevingskomponenten")
     }
 
     fun lagreOverstyrNettoBrutto(

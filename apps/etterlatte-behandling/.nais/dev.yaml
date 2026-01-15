@@ -41,8 +41,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   azure:
     application:
       enabled: true
@@ -109,6 +107,10 @@ spec:
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
       value: api://dev-gcp.etterlatte.etterlatte-tilbakekreving/.default
+    - name: ETTERLATTE_INSTITUSJONSOPPHOLD_URL
+      value: http://etterlatte-institusjonsopphold
+    - name: AZURE_SCOPE_ETTERLATTE_INSTITUSJONSOPPHOLD
+      value: api://dev-gcp.etterlatte.etterlatte-institusjonsopphold/.default
     - name: ETTERLATTE_BREV_API_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-brev-api
     - name: AZUREAD_ATTESTANT_GROUPID
@@ -180,6 +182,7 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-trygdetid
         - application: etterlatte-tilbakekreving
+        - application: etterlatte-institusjonsopphold
         - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom
         - application: digdir-krr-proxy
@@ -187,6 +190,8 @@ spec:
           cluster: dev-gcp
         - application: kodeverk-api
           namespace: team-rocket
+        - application: logging
+          namespace: nais-system
       external:
         - host: kodeverk-api.nav.no # må gå mot prod i dev se https://nav-it.slack.com/archives/C06FK6V74JE/p1723795352459339?thread_ts=1723788766.141209&cid=C06FK6V74JE
         - host: skjermede-personer-pip.intern.dev.nav.no

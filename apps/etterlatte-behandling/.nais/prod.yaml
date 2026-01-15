@@ -45,8 +45,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   azure:
     application:
       enabled: true
@@ -118,6 +116,10 @@ spec:
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
       value: api://prod-gcp.etterlatte.etterlatte-tilbakekreving/.default
+    - name: ETTERLATTE_INSTITUSJONSOPPHOLD_URL
+      value: http://etterlatte-institusjonsopphold
+    - name: AZURE_SCOPE_ETTERLATTE_INSTITUSJONSOPPHOLD
+      value: api://prod-gcp.etterlatte.etterlatte-institusjonsopphold/.default
     - name: AZUREAD_ATTESTANT_GROUPID
       value: 11053fd7-e674-4552-9a88-f9fcedfa70b3
     - name: AZUREAD_ATTESTANT_GJENNY_GROUPID
@@ -194,7 +196,10 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-trygdetid
         - application: etterlatte-tilbakekreving
+        - application: etterlatte-institusjonsopphold
         - application: etterlatte-klage
+        - application: logging
+          namespace: nais-system
       external:
         - host: skjermede-personer-pip.intern.nav.no
         - host: norg2.prod-fss-pub.nais.io

@@ -47,6 +47,8 @@ export const formaterVedtakType = (type: VedtakType): string => {
       return 'Tilbakekreving'
     case VedtakType.AVVIST_KLAGE:
       return 'Avvist klage'
+    case VedtakType.INGEN_ENDRING:
+      return 'Ingen endring'
   }
 }
 

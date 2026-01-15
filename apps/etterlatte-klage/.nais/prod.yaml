@@ -16,8 +16,6 @@ spec:
     path: /health/isready
   strategy:
     type: Recreate
-  secureLogs:
-    enabled: true
   kafka:
     pool: nav-prod
   azure:
@@ -62,6 +60,8 @@ spec:
         - application: kabal-api
           namespace: klage
           cluster: prod-gcp
+        - application: logging
+          namespace: nais-system
 
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

@@ -453,8 +453,10 @@ class BehandlingKlientImpl(
     override suspend fun hentBeregnetEtteroppgjoerResultat(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BeregnetEtteroppgjoerResultatDto =
-        downstreamResourceClient
+    ): BeregnetEtteroppgjoerResultatDto {
+        logger.info("Henter beregnet etteroppgjoer resultat for behandlingId=$behandlingId")
+
+        return downstreamResourceClient
             .get(
                 Resource(
                     clientId = clientId,
@@ -462,4 +464,5 @@ class BehandlingKlientImpl(
                 ),
                 brukerTokenInfo,
             ).mapBoth(success = { deserialize(it.response.toString()) }, failure = { throw it })
+    }
 }

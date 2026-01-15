@@ -30,8 +30,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   resources:
     limits:
       memory: 640Mi
@@ -240,5 +238,7 @@ spec:
       rules:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
+        - application: logging
+          namespace: nais-system
       external:
         - host: tp-api-q1.dev-fss-pub.nais.io

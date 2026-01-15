@@ -201,7 +201,7 @@ class BehandlingStatusServiceImpl(
 
         val merknad =
             when (brukerTokenInfo) {
-                is Saksbehandler ->
+                is Saksbehandler -> {
                     when (behandling.revurderingsaarsak()) {
                         Revurderingaarsak.ETTEROPPGJOER -> {
                             val etteroppgjoersAar =
@@ -217,19 +217,26 @@ class BehandlingStatusServiceImpl(
                             )
                         }
 
-                        else -> genererMerknad(vedtak = vedtak, merknad = "Behandlet av ${brukerTokenInfo.ident}")
+                        else -> {
+                            genererMerknad(vedtak = vedtak, merknad = "Behandlet av ${brukerTokenInfo.ident}")
+                        }
                     }
+                }
 
-                is Systembruker ->
+                is Systembruker -> {
                     when (behandling.revurderingsaarsak()) {
-                        Revurderingaarsak.INNTEKTSENDRING ->
+                        Revurderingaarsak.INNTEKTSENDRING -> {
                             genererMerknad(
                                 prefix = "Inntektsendring",
                                 merknad = "Automatisk behandlet",
                             )
+                        }
 
-                        else -> genererMerknad(vedtak = vedtak, merknad = "Behandlet av systemet")
+                        else -> {
+                            genererMerknad(vedtak = vedtak, merknad = "Behandlet av systemet")
+                        }
                     }
+                }
             }
 
         oppgaveService.tilAttestering(
@@ -248,11 +255,19 @@ class BehandlingStatusServiceImpl(
         vedtak: VedtakEndringDTO,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        if (vedtak.vedtakType == VedtakType.AVSLAG) {
-            lagreNyBehandlingStatus(behandling.tilAvslag())
-            haandterUtland(behandling)
-        } else {
-            lagreNyBehandlingStatus(behandling.tilAttestert())
+        when (vedtak.vedtakType) {
+            VedtakType.AVSLAG -> {
+                lagreNyBehandlingStatus(behandling.tilAvslag())
+                haandterUtland(behandling)
+            }
+
+            VedtakType.INGEN_ENDRING -> {
+                lagreNyBehandlingStatus(behandling.tilAttestertIngenEndring())
+            }
+
+            else -> {
+                lagreNyBehandlingStatus(behandling.tilAttestert())
+            }
         }
 
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.ATTESTERT)

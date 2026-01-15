@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
@@ -13,6 +14,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import io.ktor.utils.io.readRemaining
+import kotlinx.io.readByteArray
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -21,10 +24,13 @@ import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetB
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.pdf.BrevFraOpplastningRequest
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
@@ -342,21 +348,45 @@ fun Route.brevRoute(
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
-                    val partDataList: ArrayList<PartData> = ArrayList()
+                    var fileData: ByteArray? = null
+                    var fileRequest: BrevFraOpplastningRequest? = null
+
+                    // For at multipart skal leses riktig må vi konsumere dataene når vi mapper over hver
+                    // multipart. Hvis vi samler opp referanser til PartData.FileItem/FormItem vil vi kunne
+                    // mangle data når vi prøver å lese det ut senere
                     call.receiveMultipart().forEachPart { part ->
-                        partDataList.add(part)
+                        if (part is PartData.FileItem) {
+                            fileData = part.provider().readRemaining().readByteArray()
+                        } else if (part is PartData.FormItem) {
+                            fileRequest = objectMapper.readValue<BrevFraOpplastningRequest>(part.value)
+                        }
+                    }
+                    if (fileData == null || fileRequest == null) {
+                        throw UgyldigForespoerselException(
+                            "MANGLER_FIL_DATA",
+                            "Opplastingen var ufullstending, vi " +
+                                "mangler data. (filMangler=${fileData == null}, requestMangler=${fileRequest == null})",
+                        )
                     }
                     val brev =
-                        pdfService.lagreOpplastaPDF(sakId, partDataList.toList(), brukerTokenInfo)
+                        pdfService.lagreOpplastaPDF(sakId, fileData, fileRequest, brukerTokenInfo)
                     brev.onSuccess {
                         call.respond(brev)
                     }
-                    brev.onFailure {
-                        call.respond(HttpStatusCode.UnprocessableEntity)
+                    brev.onFailure { error ->
+                        throw ForespoerselException(
+                            status = HttpStatusCode.UnprocessableEntity.value,
+                            code = "UGYLDIG_FIL",
+                            detail = "Kunne ikke lagre opplastet fil. Se om den har riktig format",
+                            cause = error,
+                        )
                     }
                 } catch (e: Exception) {
-                    logger.error("Getting multipart error", e)
-                    call.respond(HttpStatusCode.BadRequest)
+                    throw UgyldigForespoerselException(
+                        "UGYLDIG_MULTIPART",
+                        "Kunne ikke lese inn opplastet fil fra multipart data",
+                        cause = e,
+                    )
                 }
             }
         }

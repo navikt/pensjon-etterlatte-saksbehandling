@@ -21,8 +21,6 @@ spec:
   azure:
     application:
       enabled: true
-  secureLogs:
-    enabled: true
   observability:
     autoInstrumentation:
       enabled: true
@@ -57,5 +55,7 @@ spec:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

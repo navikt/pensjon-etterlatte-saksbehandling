@@ -46,8 +46,6 @@ spec:
   azure:
     application:
       enabled: true
-  secureLogs:
-    enabled: true
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
@@ -62,6 +60,8 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:

@@ -60,9 +60,15 @@ class VedtaksvurderingRepository(
         tx.session {
             val innholdParams =
                 when (opprettVedtak.innhold) {
-                    is VedtakInnhold.Tilbakekreving -> mapOf("tilbakekreving" to opprettVedtak.innhold.tilbakekreving.toJson())
-                    is VedtakInnhold.Klage -> mapOf("klage" to opprettVedtak.innhold.klage.toJson())
-                    is VedtakInnhold.Behandling ->
+                    is VedtakInnhold.Tilbakekreving -> {
+                        mapOf("tilbakekreving" to opprettVedtak.innhold.tilbakekreving.toJson())
+                    }
+
+                    is VedtakInnhold.Klage -> {
+                        mapOf("klage" to opprettVedtak.innhold.klage.toJson())
+                    }
+
+                    is VedtakInnhold.Behandling -> {
                         opprettVedtak.innhold.let {
                             mapOf(
                                 "behandlingtype" to it.behandlingType.name,
@@ -75,6 +81,7 @@ class VedtaksvurderingRepository(
                                 "opphoer_fom" to it.opphoerFraOgMed?.atDay(1),
                             )
                         }
+                    }
                 }
             queryOf(
                 statement = """
@@ -119,7 +126,7 @@ class VedtaksvurderingRepository(
         tx.session {
             val paramMap =
                 when (oppdatertVedtak.innhold) {
-                    is VedtakInnhold.Behandling ->
+                    is VedtakInnhold.Behandling -> {
                         mapOf(
                             "datovirkfom" to oppdatertVedtak.innhold.virkningstidspunkt.atDay(1),
                             "beregningsresultat" to oppdatertVedtak.innhold.beregning?.toJson(),
@@ -128,16 +135,19 @@ class VedtaksvurderingRepository(
                             "revurderinginfo" to oppdatertVedtak.innhold.revurderingInfo?.toJson(),
                             "opphoer_fom" to oppdatertVedtak.innhold.opphoerFraOgMed?.atDay(1),
                         )
+                    }
 
-                    is VedtakInnhold.Tilbakekreving ->
+                    is VedtakInnhold.Tilbakekreving -> {
                         mapOf(
                             "tilbakekreving" to oppdatertVedtak.innhold.tilbakekreving.toJson(),
                         )
+                    }
 
-                    is VedtakInnhold.Klage ->
+                    is VedtakInnhold.Klage -> {
                         mapOf(
                             "klage" to oppdatertVedtak.innhold.klage.toJson(),
                         )
+                    }
                 } +
                     mapOf(
                         "behandlingid" to oppdatertVedtak.behandlingId,
@@ -585,7 +595,8 @@ class VedtaksvurderingRepository(
                     VedtakType.AVSLAG,
                     VedtakType.ENDRING,
                     VedtakType.INNVILGELSE,
-                    ->
+                    VedtakType.INGEN_ENDRING,
+                    -> {
                         VedtakInnhold.Behandling(
                             behandlingType = BehandlingType.valueOf(string("behandlingtype")),
                             virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
@@ -597,16 +608,19 @@ class VedtaksvurderingRepository(
                             revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
                             opphoerFraOgMed = sqlDateOrNull("opphoer_fom")?.toLocalDate()?.let { YearMonth.from(it) },
                         )
+                    }
 
-                    VedtakType.TILBAKEKREVING ->
+                    VedtakType.TILBAKEKREVING -> {
                         VedtakInnhold.Tilbakekreving(
                             tilbakekreving = string("tilbakekreving").let { objectMapper.readValue(it) },
                         )
+                    }
 
-                    VedtakType.AVVIST_KLAGE ->
+                    VedtakType.AVVIST_KLAGE -> {
                         VedtakInnhold.Klage(
                             klage = string("klage").let { objectMapper.readValue(it) },
                         )
+                    }
                 },
         )
 

@@ -30,8 +30,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   gcp:
     sqlInstances:
       - type: POSTGRES_14
@@ -137,6 +135,8 @@ spec:
           namespace: nais-system
         - application: pensjon-brevbaker
           namespace: pensjonsbrev
+        - application: logging
+          namespace: nais-system
       external:
         - host: norg2.dev-fss-pub.nais.io
         - host: saf-q2.dev-fss-pub.nais.io

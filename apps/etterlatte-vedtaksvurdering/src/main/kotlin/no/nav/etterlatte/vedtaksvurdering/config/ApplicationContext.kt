@@ -94,6 +94,7 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             samordningsKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
+            featureToggleService = featureToggleService,
         )
 
     val vedtakTilbakekrevingService =

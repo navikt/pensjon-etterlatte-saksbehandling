@@ -10,7 +10,7 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
+import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle

@@ -104,6 +104,12 @@ data class ManuellRevurdering(
         return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
     }
 
+    override fun tilAttestertIngenEndring(): Revurdering =
+        hvisTilstandEr(
+            listOf(BehandlingStatus.FATTET_VEDTAK),
+            BehandlingStatus.ATTESTERT_INGEN_ENDRING,
+        ) { endreTilStatus(it) }
+
     override fun tilTrygdetidOppdatert(): Revurdering =
         hvisTilstandEr(
             listOf(

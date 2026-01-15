@@ -27,8 +27,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   azure:
     application:
       enabled: true
@@ -64,5 +62,7 @@ spec:
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-behandling
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

@@ -48,6 +48,15 @@ data class TilbakekrevingBehandling(
 
     fun underBehandlingEllerFattetVedtak() = underBehandling() || status == TilbakekrevingStatus.FATTET_VEDTAK
 
+    fun oppdaterVurdering(vurdering: TilbakekrevingVurdering?): TilbakekrevingBehandling =
+        this.copy(
+            status = TilbakekrevingStatus.UNDER_ARBEID,
+            tilbakekreving =
+                this.tilbakekreving.copy(
+                    vurdering = vurdering,
+                ),
+        )
+
     fun avbryt(aarsakForAvbrytelse: TilbakekrevingAvbruttAarsak): TilbakekrevingBehandling =
         this.copy(
             status = TilbakekrevingStatus.AVBRUTT,

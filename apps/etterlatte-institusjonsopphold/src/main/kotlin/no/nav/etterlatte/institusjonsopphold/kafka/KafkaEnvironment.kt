@@ -1,9 +1,12 @@
-package no.nav.etterlatte.kafka
+package no.nav.etterlatte.institusjonsopphold.kafka
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.kafka.InstitusjonsoppholdKey.INSTITUSJONSOPPHOLD_GROUP_ID
+import no.nav.etterlatte.institusjonsopphold.kafka.InstitusjonsoppholdKey.INSTITUSJONSOPPHOLD_GROUP_ID
+import no.nav.etterlatte.kafka.Avrokonstanter
+import no.nav.etterlatte.kafka.Kafkakonfigurasjon
 import org.apache.kafka.common.IsolationLevel
+import org.apache.kafka.common.serialization.Deserializer
 import java.util.Locale
 
 class KafkaEnvironment :
@@ -14,7 +17,7 @@ class KafkaEnvironment :
         schemaRegistryUrlConfigKey = Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG,
         isolationLevelConfig = IsolationLevel.READ_COMMITTED.toString().lowercase(Locale.getDefault()),
     ) {
-    class JsonDeserializer : org.apache.kafka.common.serialization.Deserializer<KafkaOppholdHendelse> {
+    class JsonDeserializer : Deserializer<KafkaOppholdHendelse> {
         private val mapper = jacksonObjectMapper()
 
         override fun deserialize(

@@ -8,8 +8,10 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.tilbakekreving.HentOmgjoeringKravgrunnlagRequest
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
 import org.slf4j.LoggerFactory
 
@@ -43,6 +45,25 @@ fun Route.tilbakekrevingRoutes(tilbakekrevingService: TilbakekrevingService) {
                 when (oppdatertKravgrunnlag) {
                     null -> call.respond(HttpStatusCode.NoContent)
                     else -> call.respond(oppdatertKravgrunnlag)
+                }
+            }
+        }
+
+        post("/omgjoering") {
+            kunSystembruker {
+                medBody<HentOmgjoeringKravgrunnlagRequest> { request ->
+                    logger.info("Henter kravgrunnlag for omgjøring av kravgrunnlag i sak $sakId med id ${request.kravgrunnlagId}")
+                    val kravgrunnlagForOmgjoering =
+                        tilbakekrevingService.hentKravgrunnlagOmgjoering(
+                            kravgrunnlagId = request.kravgrunnlagId,
+                            sakId = sakId,
+                            saksbehandler = request.saksbehandler,
+                            enhet = request.enhet,
+                        )
+                    when (kravgrunnlagForOmgjoering) {
+                        null -> call.respond(HttpStatusCode.NoContent)
+                        else -> call.respond(kravgrunnlagForOmgjoering)
+                    }
                 }
             }
         }

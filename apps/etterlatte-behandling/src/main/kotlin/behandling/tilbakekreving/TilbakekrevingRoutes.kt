@@ -88,8 +88,8 @@ internal fun Route.tilbakekrevingRoutes(
             post("/omgjoer") {
                 kunSaksbehandlerMedSkrivetilgang {
                     if (featureToggleService.isEnabled(TilbakekrevingToggles.OMGJOER, false)) {
-                        val kravgrunnlagForOmgjoering = service.hentKravgrunnlagForOmgjoering(tilbakekrevingId)
-                        val omgjoering = service.opprettTilbakekreving(kravgrunnlagForOmgjoering, tilbakekrevingId)
+                        val kravgrunnlagForOmgjoering = service.hentKravgrunnlagForOmgjoering(tilbakekrevingId, it)
+                        val omgjoering = service.opprettTilbakekreving(kravgrunnlagForOmgjoering, tilbakekrevingId, it)
                         call.respond(omgjoering)
                     } else {
                         throw IkkeTillattException(
@@ -135,7 +135,7 @@ internal fun Route.tilbakekrevingRoutes(
             kunSystembruker {
                 medBody<Kravgrunnlag> {
                     try {
-                        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag = it, omgjoeringAvId = null)
+                        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag = it, omgjoeringAvId = null, saksbehandler = null)
                         call.respond(HttpStatusCode.OK, tilbakekreving)
                     } catch (e: TilbakekrevingHarMangelException) {
                         throw IkkeFunnetException(

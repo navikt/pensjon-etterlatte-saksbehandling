@@ -17,8 +17,6 @@ spec:
     initialDelay: 5
     path: /health/isready
   leaderElection: true
-  secureLogs:
-    enabled: true
   prometheus:
     enabled: true
     path: /metrics
@@ -103,6 +101,8 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-vedtaksvurdering
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io

@@ -27,8 +27,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   gcp:
     sqlInstances:
       - type: POSTGRES_14
@@ -79,6 +77,8 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: logging
+          namespace: nais-system
       external:
         - host: b27apvl222.preprod.local
           ports:

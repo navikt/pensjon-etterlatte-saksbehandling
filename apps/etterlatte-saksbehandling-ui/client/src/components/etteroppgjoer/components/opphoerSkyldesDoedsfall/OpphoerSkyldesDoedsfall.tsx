@@ -145,7 +145,11 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
           <VStack gap="4">
             <VStack gap="2">
               <Label>Om opphør skyldes dødsfall</Label>
-              <BodyShort>{forbehandling.opphoerSkyldesDoedsfall === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
+              <BodyShort>
+                {forbehandling.opphoerSkyldesDoedsfall === JaNei.JA && 'Ja'}
+                {forbehandling.opphoerSkyldesDoedsfall === JaNei.NEI && 'Nei'}
+                {!forbehandling.opphoerSkyldesDoedsfall && 'Ikke tatt stilling til'}
+              </BodyShort>
             </VStack>
             {forbehandling.opphoerSkyldesDoedsfall === JaNei.JA && (
               <VStack gap="2">
@@ -153,7 +157,9 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
                 <BodyShort>
                   {forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar && (
                     <BodyShort>
-                      {forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA ? 'Ja' : 'Nei'}
+                      {forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA && 'Ja'}
+                      {forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.NEI && 'Nei'}
+                      {!forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar && 'Ikke tatt stilling til'}
                     </BodyShort>
                   )}
                 </BodyShort>

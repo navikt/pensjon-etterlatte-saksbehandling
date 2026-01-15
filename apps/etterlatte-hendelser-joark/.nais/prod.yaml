@@ -21,8 +21,6 @@ spec:
   azure:
     application:
       enabled: true
-  secureLogs:
-    enabled: true
   observability:
     autoInstrumentation:
       enabled: true
@@ -65,6 +63,8 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
+        - application: logging
+          namespace: nais-system
       external:
         - host: saf.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io

@@ -47,8 +47,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   kafka:
     pool: nav-prod
   azure:
@@ -92,3 +90,5 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: logging
+          namespace: nais-system

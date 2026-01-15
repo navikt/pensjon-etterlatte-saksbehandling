@@ -29,8 +29,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   resources:
     requests:
       cpu: 25m
@@ -59,6 +57,11 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: inst2.prod-fss-pub.nais.io
+    inbound:
+      rules:
+        - application: etterlatte-behandling

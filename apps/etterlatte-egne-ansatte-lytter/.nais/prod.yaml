@@ -25,8 +25,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   strategy:
     type: Recreate
   kafka:
@@ -58,5 +56,7 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: logging
+          namespace: nais-system
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

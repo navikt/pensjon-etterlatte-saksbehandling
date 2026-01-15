@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -44,6 +45,11 @@ import java.time.LocalDate
 import javax.xml.datatype.DatatypeFactory
 import javax.xml.datatype.XMLGregorianCalendar
 
+/**
+ * Se https://confluence.adeo.no/spaces/OKSY/pages/178067795/Detaljer+om+de+enkelte+ID-koder
+ * for mer dokumentasjon om de forskjellige feltenne og kodene som brukes opp mot
+ * tilbakekrevingskomponenten.
+ */
 class TilbakekrevingskomponentenKlient(
     private val url: String,
     private val httpClient: HttpClient,
@@ -128,6 +134,42 @@ class TilbakekrevingskomponentenKlient(
         }
         val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(response.detaljertkravgrunnlag)
 
+        return kravgrunnlag
+    }
+
+    fun hentKravgrunnlagOmgjoering(
+        sakId: SakId,
+        kravgrunnlagId: Long,
+        saksbehandler: String,
+        enhet: Enhetsnummer,
+    ): Kravgrunnlag? {
+        logger.info("Henter kravgrunnlag for omgjøring av tilbakekreving på sak $sakId med kravgrunnlagId $kravgrunnlagId")
+        val request = toHentOmgjoeringAvKravgrunnlagRequest(kravgrunnlagId, saksbehandler, enhet)
+        val requestAsJson = tilbakekrevingObjectMapper.writeValueAsString(request)
+        hendelseRepository.lagreTilbakekrevingHendelse(
+            sakId = sakId,
+            payload = requestAsJson,
+            type = TilbakekrevingHendelseType.KRAVGRUNNLAG_OMGJOERING_FORESPOERSEL_SENDT,
+        )
+
+        val response =
+            runBlocking {
+                val httpResponse =
+                    httpClient.post("$url/tilbakekreving/kravgrunnlag") {
+                        contentType(ContentType.Application.Json)
+                        setBody(requestAsJson)
+                    }
+                httpResponse.body<KravgrunnlagHentDetaljResponse>()
+            }
+        hendelseRepository.lagreTilbakekrevingHendelse(
+            sakId = sakId,
+            payload = tilbakekrevingObjectMapper.writeValueAsString(response),
+            type = TilbakekrevingHendelseType.KRAVGRUNNLAG_OMGJOERING_MOTTATT,
+        )
+        if (response.detaljertkravgrunnlag == null) {
+            return null
+        }
+        val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(response.detaljertkravgrunnlag)
         return kravgrunnlag
     }
 
@@ -246,18 +288,42 @@ class TilbakekrevingskomponentenKlient(
             hentkravgrunnlag =
                 HentKravgrunnlagDetaljDto().apply {
                     // Hent kravgrunnlag for danning av nytt tilbakekrevingsvedtak
-                    kodeAksjon = "4"
+                    kodeAksjon = HentKravgrunnlagKodeAksjon.HENT.value
                     this.kravgrunnlagId = kravgrunnlagId.toBigInteger()
                     saksbehId = INTERN_SAKSBEHANDLER
                     enhetAnsvarlig = ANSVARLIG_ENHET
                 }
         }
 
+    private fun toHentOmgjoeringAvKravgrunnlagRequest(
+        kravgrunnlagId: Long,
+        saksbehandler: String,
+        enhet: Enhetsnummer,
+    ): KravgrunnlagHentDetaljRequest =
+        KravgrunnlagHentDetaljRequest().apply {
+            this.hentkravgrunnlag =
+                HentKravgrunnlagDetaljDto().apply {
+                    this.kodeAksjon = HentKravgrunnlagKodeAksjon.HENT_OMGJOERING.value
+                    this.kravgrunnlagId = kravgrunnlagId.toBigInteger()
+                    this.saksbehId = saksbehandler
+                    this.enhetAnsvarlig = enhet.enhetNr
+                }
+        }
+
+    enum class HentKravgrunnlagKodeAksjon(
+        val value: String,
+    ) {
+        HENT("4"),
+        HENT_OMGJOERING("5"),
+    }
+
     private fun kontrollerResponse(response: TilbakekrevingsvedtakResponse) =
         when (val alvorlighetsgrad = Alvorlighetsgrad.fromString(response.mmel.alvorlighetsgrad)) {
             Alvorlighetsgrad.OK,
             Alvorlighetsgrad.OK_MED_VARSEL,
-            -> Unit
+            -> {
+                Unit
+            }
 
             Alvorlighetsgrad.ALVORLIG_FEIL,
             Alvorlighetsgrad.SQL_FEIL,

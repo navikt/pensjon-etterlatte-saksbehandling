@@ -2,13 +2,15 @@ package no.nav.etterlatte.libs.common.vedtak
 
 enum class VedtakType(
     val vanligBehandling: Boolean,
+    val tilgjengeligEksternt: Boolean,
 ) {
-    INNVILGELSE(true),
-    OPPHOER(true),
-    AVSLAG(true),
-    ENDRING(true),
-    TILBAKEKREVING(false),
-    AVVIST_KLAGE(false),
+    INNVILGELSE(true, true),
+    OPPHOER(true, true),
+    AVSLAG(true, true),
+    ENDRING(true, true),
+    TILBAKEKREVING(false, false),
+    AVVIST_KLAGE(false, false),
+    INGEN_ENDRING(true, false),
     ;
 
     fun tilLesbarString() =
@@ -19,5 +21,6 @@ enum class VedtakType(
             ENDRING -> "Endring"
             TILBAKEKREVING -> "Tilbakekreving"
             AVVIST_KLAGE -> "Avvist klage"
+            INGEN_ENDRING -> "Ingen endring"
         }
 }

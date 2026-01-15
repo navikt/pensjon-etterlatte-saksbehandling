@@ -14,6 +14,7 @@ enum class BehandlingStatus {
     SAMORDNET,
     IVERKSATT,
     AVBRUTT,
+    ATTESTERT_INGEN_ENDRING,
     ;
 
     fun kanAvbrytes(): Boolean = this !in iverksattEllerAttestert() && this != AVBRUTT
@@ -41,6 +42,7 @@ enum class BehandlingStatus {
                 TIL_SAMORDNING,
                 ATTESTERT,
                 AVSLAG,
+                ATTESTERT_INGEN_ENDRING,
             )
 
         fun kanEndres() = underBehandling() - FATTET_VEDTAK
@@ -55,6 +57,7 @@ enum class BehandlingStatus {
                 OPPRETTET,
                 VILKAARSVURDERT,
                 AVSLAG,
+                ATTESTERT_INGEN_ENDRING,
             )
     }
 }

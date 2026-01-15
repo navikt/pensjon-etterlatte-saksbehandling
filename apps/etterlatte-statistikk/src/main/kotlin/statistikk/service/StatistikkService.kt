@@ -96,7 +96,7 @@ class StatistikkService(
                     VedtakType.INNVILGELSE,
                     VedtakType.ENDRING,
                     VedtakType.OPPHOER,
-                    ->
+                    -> {
                         stoenadRepository
                             .lagreStoenadsrad(
                                 vedtakTilStoenadsrad(
@@ -108,11 +108,15 @@ class StatistikkService(
                             ).also {
                                 hentSisteAktivitetspliktDto(vedtak)
                             }
+                    }
 
                     VedtakType.TILBAKEKREVING,
                     VedtakType.AVVIST_KLAGE,
                     VedtakType.AVSLAG,
-                    -> null
+                    VedtakType.INGEN_ENDRING,
+                    -> {
+                        null
+                    }
                 }
             return sakRad to stoenadRad
         }
@@ -287,9 +291,13 @@ class StatistikkService(
     ): SakRad {
         val sisteResultat =
             when (etteroppgjoerRad.hendelse) {
-                EtteroppgjoerHendelseType.FERDIGSTILT ->
+                EtteroppgjoerHendelseType.FERDIGSTILT -> {
                     etteroppgjoerService.hentNyesteBeregnedeResultat(etteroppgjoerRad.forbehandlingId)
-                else -> null
+                }
+
+                else -> {
+                    null
+                }
             }
         val foersteMaanedIEtteroppgjoer = etteroppgjoerRad.maanederYtelse.min()
         val sisteMaanedIEtteroppgjoeor = etteroppgjoerRad.maanederYtelse.max()
@@ -371,13 +379,16 @@ class StatistikkService(
                 VedtakKafkaHendelseHendelseType.FATTET,
                 VedtakKafkaHendelseHendelseType.ATTESTERT,
                 VedtakKafkaHendelseHendelseType.IVERKSATT,
-                ->
+                -> {
                     Pair(
                         hentBeregningForBehandling(statistikkBehandling.id),
                         hentAvkortingForBehandling(vedtak),
                     )
+                }
 
-                else -> Pair(null, null)
+                else -> {
+                    Pair(null, null)
+                }
             }
 
         val foersteUtbetaling =
@@ -580,12 +591,15 @@ class StatistikkService(
         ansvarligEnhet = statistikkKlage.klage.sak.enhet,
         ansvarligBeslutter =
             when (val utfall = statistikkKlage.klage.utfall) {
-                null ->
+                null -> {
                     statistikkKlage.klage.formkrav
                         ?.saksbehandler
                         ?.ident
+                }
 
-                else -> utfall.saksbehandler.ident
+                else -> {
+                    utfall.saksbehandler.ident
+                }
             },
         aktorId = statistikkKlage.klage.sak.ident,
         tekniskTid = tekniskTid.toTidspunkt(),
@@ -733,9 +747,18 @@ class StatistikkService(
             return hentResultatFraEtteroppgjoerStatistikk(behandling)
         }
         return when (vedtak.type) {
-            VedtakType.INNVILGELSE -> BehandlingResultat.INNVILGELSE
-            VedtakType.OPPHOER -> BehandlingResultat.OPPHOER
-            VedtakType.AVSLAG -> BehandlingResultat.AVSLAG
+            VedtakType.INNVILGELSE -> {
+                BehandlingResultat.INNVILGELSE
+            }
+
+            VedtakType.OPPHOER -> {
+                BehandlingResultat.OPPHOER
+            }
+
+            VedtakType.AVSLAG -> {
+                BehandlingResultat.AVSLAG
+            }
+
             VedtakType.ENDRING -> {
                 when (
                     (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.any {
@@ -749,7 +772,10 @@ class StatistikkService(
 
             VedtakType.TILBAKEKREVING,
             VedtakType.AVVIST_KLAGE,
-            -> throw InternfeilException("Skal ikke mappe vedtak")
+            VedtakType.INGEN_ENDRING,
+            -> {
+                throw InternfeilException("Skal ikke mappe vedtak")
+            }
         }
     }
 
@@ -784,17 +810,19 @@ internal fun hentBehandlingMetode(
     revurderingAarsak: Revurderingaarsak?,
 ): BehandlingMetode =
     when (prosesstype) {
-        Prosesstype.MANUELL ->
+        Prosesstype.MANUELL -> {
             if (attestasjon != null) {
                 BehandlingMetode.TOTRINN
             } else {
                 BehandlingMetode.MANUELL
             }
+        }
 
-        Prosesstype.AUTOMATISK ->
+        Prosesstype.AUTOMATISK -> {
             if (revurderingAarsak == Revurderingaarsak.REGULERING) {
                 BehandlingMetode.AUTOMATISK_REGULERING
             } else {
                 BehandlingMetode.AUTOMATISK
             }
+        }
     }

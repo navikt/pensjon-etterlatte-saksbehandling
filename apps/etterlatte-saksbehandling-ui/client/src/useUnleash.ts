@@ -26,7 +26,6 @@ export const enum FeatureToggle {
   oppgave_til_journalpost = 'oppgave-til-journalpost',
   etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
   ny_simuleringsvisning = 'ny-simuleringsvisning',
-  etteroppgjoer_opphoer_skyldes_doedsfall = 'etteroppgjoer-opphoer-skyldes-doedsfall',
   vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
   omgjoer_tilbakekreving = 'omgjoer-tilbakekreving',
 }
@@ -111,11 +110,6 @@ const ny_simuleringsvisning: Toggle = {
   enabled: false,
 }
 
-const etteroppgjoer_opphoer_skyldes_doedsfall: Toggle = {
-  togglename: FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall,
-  enabled: false,
-}
-
 const vis_tilbakestill_etteroppgjoer: Toggle = {
   togglename: FeatureToggle.vis_tilbakestill_etteroppgjoer,
   enabled: false,
@@ -146,7 +140,6 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.oppgave_til_journalpost]: oppgave_til_journalpost,
   [FeatureToggle.etteroppgjoer_dev_opprett_forbehandling]: etteroppgjoer_dev_opprett_forbehandling,
   [FeatureToggle.ny_simuleringsvisning]: ny_simuleringsvisning,
-  [FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall]: etteroppgjoer_opphoer_skyldes_doedsfall,
   [FeatureToggle.vis_tilbakestill_etteroppgjoer]: vis_tilbakestill_etteroppgjoer,
   [FeatureToggle.omgjoer_tilbakekreving]: omgjoer_tilbakekreving,
 }

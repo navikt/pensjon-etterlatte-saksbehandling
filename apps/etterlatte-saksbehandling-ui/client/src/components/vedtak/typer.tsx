@@ -17,6 +17,7 @@ export enum VedtakType {
   ENDRING = 'ENDRING',
   TILBAKEKREVING = 'TILBAKEKREVING',
   AVVIST_KLAGE = 'AVVIST_KLAGE',
+  INGEN_ENDRING = 'INGEN_ENDRING',
 }
 
 export interface Samordningsvedtak {

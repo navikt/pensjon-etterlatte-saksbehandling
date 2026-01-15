@@ -55,6 +55,8 @@ export const Oversikt = ({
         return 'Avslag'
       case IBehandlingStatus.AVBRUTT:
         return 'Avbrutt'
+      case IBehandlingStatus.ATTESTERT_INGEN_ENDRING:
+        return 'Attestert ingen endring'
       case IBehandlingStatus.OPPRETTET:
       case IBehandlingStatus.VILKAARSVURDERT:
       case IBehandlingStatus.BEREGNET:

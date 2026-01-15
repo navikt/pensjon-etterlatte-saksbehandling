@@ -15,7 +15,9 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
+import net.bytebuddy.implementation.FixedValue.argument
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -86,6 +88,7 @@ internal class VedtakBehandlingServiceTest(
     private val behandlingKlientMock = mockk<BehandlingKlient>()
     private val samordningsKlientMock = mockk<SamordningsKlient>()
     private val trygdetidKlientMock = mockk<TrygdetidKlient>()
+    private val featureToggleServiceMock = mockk<FeatureToggleService>(relaxed = true)
     private lateinit var service: VedtakBehandlingService
 
     @BeforeAll
@@ -101,6 +104,7 @@ internal class VedtakBehandlingServiceTest(
                 behandlingKlient = behandlingKlientMock,
                 samordningsKlient = samordningsKlientMock,
                 trygdetidKlient = trygdetidKlientMock,
+                featureToggleService = featureToggleServiceMock,
             )
     }
 

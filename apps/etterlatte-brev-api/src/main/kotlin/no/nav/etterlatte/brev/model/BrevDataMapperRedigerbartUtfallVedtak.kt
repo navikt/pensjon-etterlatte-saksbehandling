@@ -134,7 +134,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         when (sakType) {
             SakType.BARNEPENSJON -> {
                 when (vedtakType) {
-                    VedtakType.INNVILGELSE ->
+                    VedtakType.INNVILGELSE -> {
                         barnepensjonInnvilgelse(
                             brukerTokenInfo,
                             behandlingId,
@@ -144,28 +144,45 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             loependeIPesys,
                             avdoede,
                         )
+                    }
 
-                    VedtakType.ENDRING ->
+                    VedtakType.ENDRING -> {
                         barnepensjonEndring(
                             brukerTokenInfo,
                             behandlingId,
                             virkningstidspunkt,
                             utlandstilknytningType,
                         )
+                    }
 
-                    VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, behandlingId)
-                    VedtakType.AVSLAG -> barnepensjonAvslag(avdoede, brukerTokenInfo, behandlingId)
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
+                    VedtakType.OPPHOER -> {
+                        barnepensjonOpphoer(brukerTokenInfo, behandlingId)
+                    }
+
+                    VedtakType.AVSLAG -> {
+                        barnepensjonAvslag(avdoede, brukerTokenInfo, behandlingId)
+                    }
+
+                    VedtakType.AVVIST_KLAGE -> {
+                        AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
+                    }
+
                     null,
-                    -> ManueltBrevData()
+                    -> {
+                        ManueltBrevData()
+                    }
 
-                    VedtakType.TILBAKEKREVING -> throw InternfeilException("Brevdata for $vedtakType skal ikke utledes her")
+                    VedtakType.INGEN_ENDRING,
+                    VedtakType.TILBAKEKREVING,
+                    -> {
+                        throw InternfeilException("Brevdata for $vedtakType skal ikke utledes her")
+                    }
                 }
             }
 
             SakType.OMSTILLINGSSTOENAD -> {
                 when (vedtakType) {
-                    VedtakType.INNVILGELSE ->
+                    VedtakType.INNVILGELSE -> {
                         omstillingsstoenadInnvilgelse(
                             brukerTokenInfo,
                             behandlingId,
@@ -175,6 +192,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             vedtakType,
                             klage,
                         )
+                    }
 
                     VedtakType.ENDRING -> {
                         if (revurderingaarsak != null && revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
@@ -197,13 +215,28 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                         }
                     }
 
-                    VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, behandlingId)
-                    VedtakType.AVSLAG -> omstillingsstoenadAvslag(brukerTokenInfo, behandlingId, avdoede)
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
-                    null,
-                    -> ManueltBrevData()
+                    VedtakType.OPPHOER -> {
+                        omstillingsstoenadOpphoer(brukerTokenInfo, behandlingId)
+                    }
 
-                    VedtakType.TILBAKEKREVING -> throw InternfeilException("Brevdata for $vedtakType skal ikke utledes her")
+                    VedtakType.AVSLAG -> {
+                        omstillingsstoenadAvslag(brukerTokenInfo, behandlingId, avdoede)
+                    }
+
+                    VedtakType.AVVIST_KLAGE -> {
+                        AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
+                    }
+
+                    null,
+                    -> {
+                        ManueltBrevData()
+                    }
+
+                    VedtakType.INGEN_ENDRING,
+                    VedtakType.TILBAKEKREVING,
+                    -> {
+                        throw InternfeilException("Brevdata for $vedtakType skal ikke utledes her")
+                    }
                 }
             }
         }

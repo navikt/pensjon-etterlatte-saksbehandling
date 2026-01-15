@@ -70,6 +70,7 @@ export enum IBehandlingStatus {
   IVERKSATT = 'IVERKSATT',
   AVBRUTT = 'AVBRUTT',
   AVSLAG = 'AVSLAG',
+  ATTESTERT_INGEN_ENDRING = 'ATTESTERT_INGEN_ENDRING',
 }
 
 export enum UtlandstilknytningType {

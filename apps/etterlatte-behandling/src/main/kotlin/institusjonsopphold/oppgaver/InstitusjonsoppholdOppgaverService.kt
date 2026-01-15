@@ -40,11 +40,14 @@ class InstitusjonsoppholdOppgaverService(
     }
 
     private fun kjoer() {
-        val oppholdListe = institusjonsoppholdOppgaverDao.hentUbehandledeOpphold()
+        val oppholdListe =
+            inTransaction {
+                institusjonsoppholdOppgaverDao.hentUbehandledeOpphold()
+            }
 
         oppholdListe.forEach { oppholdId ->
-            val (personIdent, _) = institusjonsoppholdPersonerDao.hentInstitusjonsopphold(oppholdId)
             inTransaction {
+                val personIdent = institusjonsoppholdPersonerDao.personIdentForInstitusjonsopphold(oppholdId)
                 val oppholdFraInst2: Institusjonsopphold =
                     runBlocking {
                         krevIkkeNull(

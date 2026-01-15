@@ -84,30 +84,19 @@ class InstitusjonsoppholdPersonerDao(
             }
         }
 
-    fun hentInstitusjonsopphold(oppholdId: Long): Pair<String, Institusjonsopphold> =
+    fun personIdentForInstitusjonsopphold(oppholdId: Long): String =
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
-                    SELECT * FROM institusjonsopphold_hentet
+                    SELECT person_ident FROM institusjonsopphold_hentet
                     WHERE opphold_id = ?
                     """.trimIndent(),
                 ).apply {
                     setLong(1, oppholdId)
                 }.executeQuery()
                     .single {
-                        Pair(
-                            getString("person_ident"),
-                            Institusjonsopphold(
-                                oppholdId = getLong("opphold_id"),
-                                institusjonstype = getString("institusjonstype"),
-                                startdato = getDate("startdato").toLocalDate(),
-                                faktiskSluttdato = getDate("faktisk_sluttdato")?.toLocalDate(),
-                                forventetSluttdato = getDate("forventet_sluttdato")?.toLocalDate(),
-                                institusjonsnavn = "",
-                                organisasjonsnummer = "",
-                            ),
-                        )
+                        getString("person_ident")
                     }
             }
         }

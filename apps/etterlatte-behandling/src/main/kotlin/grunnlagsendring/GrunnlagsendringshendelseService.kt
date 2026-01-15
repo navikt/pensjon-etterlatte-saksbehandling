@@ -147,7 +147,10 @@ class GrunnlagsendringshendelseService(
             opprettHendelseForEndretFolkeregisterident(hendelse)
         }
 
-    fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> =
+    fun opprettInstitusjonsOppholdhendelse(
+        oppholdsHendelse: InstitusjonsoppholdHendelseBeriket,
+        kommentar: String? = null,
+    ): List<Grunnlagsendringshendelse> =
         opprettHendelseAvTypeForPersonMedSamsvar(
             fnr = oppholdsHendelse.norskident,
             type = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
@@ -205,6 +208,7 @@ class GrunnlagsendringshendelseService(
         fnr: String,
         type: GrunnlagsendringsType,
         samsvar: SamsvarMellomKildeOgGrunnlag,
+        kommentar: String? = null,
     ): List<Grunnlagsendringshendelse> {
         val personMedSakerOgRoller =
             grunnlagService.hentSakerOgRoller(Folkeregisteridentifikator.of(fnr)).sakiderOgRoller
@@ -235,6 +239,7 @@ class GrunnlagsendringshendelseService(
                                 hendelseGjelderRolle = sakIdOgRolle.rolle,
                                 gjelderPerson = fnr,
                                 samsvarMellomKildeOgGrunnlag = samsvar,
+                                kommentar = kommentar,
                             ),
                         ).let { hendelse ->
                             logger.info("Oppretter oppgave for grunnlagsendringshendelse med id=$hendelseId")
@@ -247,6 +252,7 @@ class GrunnlagsendringshendelseService(
                                         when (type) {
                                             // Bør behandles fortløpende hvis evnt reduksjon skal motregnes mot etterbetaling av uføretrygd.
                                             GrunnlagsendringsType.UFOERETRYGD -> now().plus(1, ChronoUnit.DAYS)
+
                                             else -> null
                                         },
                                     kilde = OppgaveKilde.HENDELSE,

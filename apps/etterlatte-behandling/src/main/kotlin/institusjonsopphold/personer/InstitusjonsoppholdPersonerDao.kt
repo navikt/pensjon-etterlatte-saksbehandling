@@ -3,6 +3,7 @@ package no.nav.etterlatte.institusjonsopphold.personer
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.institusjonsopphold.model.Institusjonsopphold
 import no.nav.etterlatte.libs.database.setNullableDate
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.toList
 
 class InstitusjonsoppholdPersonerDao(
@@ -78,6 +79,34 @@ class InstitusjonsoppholdPersonerDao(
                             forventetSluttdato = getDate("forventet_sluttdato")?.toLocalDate(),
                             institusjonsnavn = "",
                             organisasjonsnummer = "",
+                        )
+                    }
+            }
+        }
+
+    fun hentInstitusjonsopphold(oppholdId: Long): Pair<String, Institusjonsopphold> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT * FROM institusjonsopphold_hentet
+                    WHERE opphold_id = ?
+                    """.trimIndent(),
+                ).apply {
+                    setLong(1, oppholdId)
+                }.executeQuery()
+                    .single {
+                        Pair(
+                            getString("person_ident"),
+                            Institusjonsopphold(
+                                oppholdId = getLong("opphold_id"),
+                                institusjonstype = getString("institusjonstype"),
+                                startdato = getDate("startdato").toLocalDate(),
+                                faktiskSluttdato = getDate("faktisk_sluttdato")?.toLocalDate(),
+                                forventetSluttdato = getDate("forventet_sluttdato")?.toLocalDate(),
+                                institusjonsnavn = "",
+                                organisasjonsnummer = "",
+                            ),
                         )
                     }
             }

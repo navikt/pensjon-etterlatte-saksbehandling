@@ -2,6 +2,8 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -53,8 +55,19 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    // TODO: fjerne etter testing
+    enum class EtteroppgjoerIngenEndringToggle(
+        private val key: String,
+    ) : FeatureToggle {
+        STOETTE_INGEN_ENDRING("etteroppgjoer-stoette-ingen-endring"),
+        ;
+
+        override fun key() = key
+    }
 
     fun sjekkOmVedtakErLoependePaaDato(
         sakId: SakId,
@@ -109,7 +122,10 @@ class VedtakBehandlingService(
                 brukerTokenInfo,
             )
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
-        verifiserEtteroppgjoerIngenEndring(behandling, beregningOgAvkorting, brukerTokenInfo)
+
+        if (!featureToggleService.isEnabled(EtteroppgjoerIngenEndringToggle.STOETTE_INGEN_ENDRING, false)) {
+            verifiserEtteroppgjoerIngenEndring(behandling, beregningOgAvkorting, brukerTokenInfo)
+        }
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering, etteroppgjoerResultat)

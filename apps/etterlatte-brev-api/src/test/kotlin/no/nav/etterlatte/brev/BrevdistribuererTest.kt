@@ -38,7 +38,10 @@ import kotlin.random.Random
 internal class BrevdistribuererTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
-    private val featureToggleService = mockk<FeatureToggleService>()
+    private val featureToggleService =
+        mockk<FeatureToggleService> {
+            every { isEnabled(any(), any(), any()) } returnsArgument 1
+        }
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService, featureToggleService)
 
@@ -47,6 +50,7 @@ internal class BrevdistribuererTest {
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
+        every { featureToggleService.isEnabled(any(), any(), any()) } returnsArgument 1
     }
 
     @AfterEach

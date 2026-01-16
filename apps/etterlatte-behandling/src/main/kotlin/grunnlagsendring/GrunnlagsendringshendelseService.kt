@@ -160,6 +160,7 @@ class GrunnlagsendringshendelseService(
                     oppholdstype = oppholdsHendelse.institusjonsoppholdsType,
                     oppholdBeriket = oppholdsHendelse,
                 ),
+            kommentar = kommentar,
         )
 
     fun opprettUfoerehendelse(hendelse: UfoereHendelse): List<Grunnlagsendringshendelse> =

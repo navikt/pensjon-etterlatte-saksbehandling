@@ -159,12 +159,11 @@ private fun hentBenyttetTrygdetidOgProratabroek(
     beregningsperiode: no.nav.etterlatte.libs.common.beregning.Beregningsperiode,
 ): Pair<Int, IntBroek?> =
     when (beregningsperiode.beregningsMetode) {
-        BeregningsMetode.NASJONAL -> {
+        BeregningsMetode.NASJONAL ->
             Pair(
                 beregningsperiode.samletNorskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
                 null,
             )
-        }
 
         BeregningsMetode.PRORATA -> {
             Pair(
@@ -173,13 +172,8 @@ private fun hentBenyttetTrygdetidOgProratabroek(
             )
         }
 
-        BeregningsMetode.BEST -> {
-            throw UgyldigBeregningsMetode()
-        }
-
-        null -> {
-            beregningsperiode.trygdetid to null
-        }
+        BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
+        null -> beregningsperiode.trygdetid to null
     }
 
 class SamletTeoretiskTrygdetidMangler :

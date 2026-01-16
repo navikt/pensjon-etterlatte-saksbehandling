@@ -15,7 +15,7 @@ object VedtakOgBeregningSammenligner {
         beregning: BeregningOgAvkorting,
         vedtak: Vedtak,
     ) {
-        if (vedtak.type in setOf(VedtakType.AVSLAG, VedtakType.AVVIST_KLAGE)) {
+        if (vedtak.type in setOf(VedtakType.AVSLAG, VedtakType.AVVIST_KLAGE, VedtakType.INGEN_ENDRING)) {
             return
         }
         when (vedtak.innhold) {

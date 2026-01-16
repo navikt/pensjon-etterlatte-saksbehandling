@@ -94,23 +94,25 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
   }
 }
 
-export function behandlingStatusTilLesbartnavn(status: IBehandlingStatus) {
-  switch (status) {
-    case IBehandlingStatus.FATTET_VEDTAK:
-      return 'Til attestering'
-    case IBehandlingStatus.ATTESTERT:
-      return 'Attestert'
-    case IBehandlingStatus.TIL_SAMORDNING:
-      return 'Til samordning'
-    case IBehandlingStatus.SAMORDNET:
-      return 'Samordnet'
-    case IBehandlingStatus.AVSLAG:
-      return 'Avslag'
-    case IBehandlingStatus.IVERKSATT:
-      return 'Iverksatt'
-    default:
-      return status
-  }
+const alleBehandlingStatuser: Record<IBehandlingStatus, string> = {
+  [IBehandlingStatus.OPPRETTET]: 'Opprettet',
+  [IBehandlingStatus.VILKAARSVURDERT]: 'Vilkårsvurdert',
+  [IBehandlingStatus.TRYGDETID_OPPDATERT]: 'Trygdetid oppdatert',
+  [IBehandlingStatus.BEREGNET]: 'Beregnet',
+  [IBehandlingStatus.AVKORTET]: 'Avkortet',
+  [IBehandlingStatus.RETURNERT]: 'Returnert',
+  [IBehandlingStatus.AVBRUTT]: 'Avbrutt',
+  [IBehandlingStatus.FATTET_VEDTAK]: 'Til attestering',
+  [IBehandlingStatus.ATTESTERT]: 'Attestert',
+  [IBehandlingStatus.TIL_SAMORDNING]: 'Til samordning',
+  [IBehandlingStatus.SAMORDNET]: 'Samordnet',
+  [IBehandlingStatus.AVSLAG]: 'Avslag',
+  [IBehandlingStatus.IVERKSATT]: 'Iverksatt',
+  [IBehandlingStatus.ATTESTERT_INGEN_ENDRING]: 'Attestert ingen endring',
+} as const
+
+export function behandlingStatusTilLesbartnavn(status: IBehandlingStatus): string {
+  return alleBehandlingStatuser[status] ?? status
 }
 
 export const generellBehandlingsStatusTilLesbartNavn = (status: Status) => {

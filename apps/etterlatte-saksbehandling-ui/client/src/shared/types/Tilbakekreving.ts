@@ -206,6 +206,11 @@ export const klasseKodeBpSkat = (beloep: TilbakekrevingBeloep) => beloep.klasseK
 export const harPerioderMedBarnepensjonSkattetrekk = (behandling: TilbakekrevingBehandling) =>
   !!behandling.tilbakekreving.perioder.find((p) => p.tilbakekrevingsbeloep.find((b) => b.klasseKode === 'BPSKSKAT'))
 
+export const harPerioderMedOverstyringAvNettoBrutto = (behandling: TilbakekrevingBehandling): boolean =>
+  behandling.tilbakekreving.perioder.some((periode) =>
+    periode.tilbakekrevingsbeloep.some((beloep) => beloep.overstyrBehandletNettoTilBrutto === JaNei.JA)
+  )
+
 export const tekstKlasseKode: Record<string, string> = {
   'BARNEPENSJON-OPTP': 'Barnepensjon',
   'BARNEPEFØR2024-OPTP': 'Barnepensjon før 2024',

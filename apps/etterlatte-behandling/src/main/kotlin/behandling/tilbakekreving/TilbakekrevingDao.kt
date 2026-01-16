@@ -101,7 +101,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id, t.overstyr_netto_brutto
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ? 
                     ORDER BY t.opprettet DESC LIMIT 1
@@ -119,7 +119,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id, t.overstyr_netto_brutto
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),

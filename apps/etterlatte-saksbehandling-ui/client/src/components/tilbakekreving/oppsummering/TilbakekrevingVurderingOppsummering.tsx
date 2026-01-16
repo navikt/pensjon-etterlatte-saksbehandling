@@ -9,7 +9,7 @@ import React from 'react'
 import { Alert, BodyLong, BodyShort, Box, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import { JaNei } from '~shared/types/ISvar'
-import { formaterMaanedAar } from '~utils/formatering/dato'
+import { formaterMaanednavnAar } from '~utils/formatering/dato'
 
 export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling: TilbakekrevingBehandling }) {
   function sumKlasseTypeYtelse(callback: (beloep: TilbakekrevingBeloep) => number | null) {
@@ -109,7 +109,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
               <BodyShort>Perioder det gjelder:</BodyShort>
               <ul>
                 {perioderMedOverstyringOgSkattetrekk.map((periode) => (
-                  <li key={periode.maaned.toString()}>{formaterMaanedAar(periode.maaned)}</li>
+                  <li key={periode.maaned.toString()}>{formaterMaanednavnAar(periode.maaned)}</li>
                 ))}
               </ul>
             </VStack>

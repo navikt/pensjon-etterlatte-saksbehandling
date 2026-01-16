@@ -46,37 +46,49 @@ class InstitusjonsoppholdOppgaverService(
             }
 
         oppholdListe.forEach { oppholdId ->
+            val personIdent =
+                inTransaction {
+                    institusjonsoppholdPersonerDao.personIdentForInstitusjonsopphold(oppholdId)
+                }
+            val oppholdFraInst2: Institusjonsopphold =
+                runBlocking {
+                    krevIkkeNull(
+                        institusjonsoppholdInternKlient.hentInstitusjonsopphold(listOf(personIdent)).data[personIdent],
+                    ) { "Fant ikke oppholdet!" }
+                        .single { it.oppholdId == oppholdId }
+                }
+
+            opprettGrunnlagsendringshendelse(oppholdFraInst2, personIdent)
+
             inTransaction {
-                val personIdent = institusjonsoppholdPersonerDao.personIdentForInstitusjonsopphold(oppholdId)
-                val oppholdFraInst2: Institusjonsopphold =
-                    runBlocking {
-                        krevIkkeNull(
-                            institusjonsoppholdInternKlient.hentInstitusjonsopphold(listOf(personIdent)).data[personIdent],
-                        ) { "Fant ikke oppholdet!" }
-                            .single { it.oppholdId == oppholdId }
-                    }
-                grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(
-                    oppholdsHendelse =
-                        InstitusjonsoppholdHendelseBeriket(
-                            hendelseId = 0L,
-                            oppholdId = oppholdFraInst2.oppholdId,
-                            norskident = personIdent,
-                            institusjonsoppholdsType = InstitusjonsoppholdsType.OPPDATERING,
-                            institusjonsoppholdKilde = InstitusjonsoppholdKilde.INST,
-                            institusjonsType = oppholdFraInst2.institusjonstype,
-                            startdato = oppholdFraInst2.startdato,
-                            faktiskSluttdato = oppholdFraInst2.faktiskSluttdato,
-                            forventetSluttdato = oppholdFraInst2.forventetSluttdato,
-                            institusjonsnavn = oppholdFraInst2.institusjonsnavn,
-                            organisasjonsnummer = oppholdFraInst2.organisasjonsnummer,
-                        ),
-                    kommentar =
-                        "OBS! Dette er et institusjonsopphold innhentet i ettertid fra INST2, siden vi hadde " +
-                            "en periode hvor vi ignorerte hendelsene fra INST2",
-                )
                 institusjonsoppholdOppgaverDao.markerSomFerdig(oppholdId)
             }
         }
+    }
+
+    private fun opprettGrunnlagsendringshendelse(
+        oppholdFraInst2: Institusjonsopphold,
+        personIdent: String,
+    ) {
+        grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(
+            oppholdsHendelse =
+                InstitusjonsoppholdHendelseBeriket(
+                    hendelseId = 0L,
+                    oppholdId = oppholdFraInst2.oppholdId,
+                    norskident = personIdent,
+                    institusjonsoppholdsType = InstitusjonsoppholdsType.OPPDATERING,
+                    institusjonsoppholdKilde = InstitusjonsoppholdKilde.INST,
+                    institusjonsType = oppholdFraInst2.institusjonstype,
+                    startdato = oppholdFraInst2.startdato,
+                    faktiskSluttdato = oppholdFraInst2.faktiskSluttdato,
+                    forventetSluttdato = oppholdFraInst2.forventetSluttdato,
+                    institusjonsnavn = oppholdFraInst2.institusjonsnavn,
+                    organisasjonsnummer = oppholdFraInst2.organisasjonsnummer,
+                ),
+            kommentar =
+                "OBS! Dette er et institusjonsopphold innhentet i ettertid fra INST2, siden vi hadde " +
+                    "en periode hvor vi ignorerte hendelsene fra INST2",
+        )
     }
 
     private fun settOppKjoeringTabell() {

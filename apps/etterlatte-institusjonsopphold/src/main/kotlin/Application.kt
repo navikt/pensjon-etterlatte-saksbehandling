@@ -1,9 +1,8 @@
 package no.nav.etterlatte
 
 import io.ktor.server.application.Application
-import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.kafka.startLytting
-import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
 import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import org.slf4j.LoggerFactory
 
@@ -17,12 +16,10 @@ class Server(
     private val logger = LoggerFactory.getLogger(Application::class.java)
 
     private val engine =
-        initEmbeddedServer(
+        initEmbeddedServerUtenRest(
             httpPort = 8080,
             applicationConfig = applicationContext.defaultConfig,
-        ) {
-            institusjonsoppholdRoute(applicationContext.institusjonsoppholdKlient)
-        }
+        )
 
     fun runServer() {
         startLytting(

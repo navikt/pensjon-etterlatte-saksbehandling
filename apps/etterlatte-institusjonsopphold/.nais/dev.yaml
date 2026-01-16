@@ -66,7 +66,6 @@ spec:
         - host: inst2-q2.dev-fss-pub.nais.io
     inbound:
       rules:
-      - application: etterlatte-behandling
       - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
         namespace: nais
         cluster: dev-gcp

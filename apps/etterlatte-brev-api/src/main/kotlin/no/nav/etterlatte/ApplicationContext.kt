@@ -165,7 +165,7 @@ internal class ApplicationContext {
 
     val brevbakerService = BrevbakerService(brevbaker)
 
-    val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
+    val brevdistribuerer = Brevdistribuerer(db, distribusjonService, featureToggleService)
 
     val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
 
@@ -225,6 +225,7 @@ internal class ApplicationContext {
             oppgaveService,
             brevdataFacade,
             adresseService,
+            featureToggleService,
         )
 
     val safService =

@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -164,7 +165,7 @@ class BrevdataFacade(
             VedtakType.OPPHOER,
             VedtakType.AVSLAG,
             VedtakType.ENDRING,
-            ->
+            -> {
                 (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
                     ForenkletVedtak(
                         vedtak.id,
@@ -186,8 +187,9 @@ class BrevdataFacade(
                             },
                     )
                 }
+            }
 
-            VedtakType.TILBAKEKREVING ->
+            VedtakType.TILBAKEKREVING -> {
                 ForenkletVedtak(
                     vedtak.id,
                     vedtak.status,
@@ -201,8 +203,9 @@ class BrevdataFacade(
                             (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
                         ),
                 )
+            }
 
-            VedtakType.AVVIST_KLAGE ->
+            VedtakType.AVVIST_KLAGE -> {
                 ForenkletVedtak(
                     vedtak.id,
                     vedtak.status,
@@ -216,8 +219,15 @@ class BrevdataFacade(
                             (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
                         ),
                 )
+            }
 
-            null -> null
+            VedtakType.INGEN_ENDRING -> {
+                throw InternfeilException("VedtakType INGEN_ENDRING kun tilgjengelig i ny brevflyt")
+            }
+
+            null -> {
+                null
+            }
         }
 
     suspend fun hentKlageForBehandling(

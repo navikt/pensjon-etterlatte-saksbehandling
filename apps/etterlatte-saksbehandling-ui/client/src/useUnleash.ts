@@ -25,7 +25,6 @@ export const enum FeatureToggle {
   bytt_til_annen_sak = 'bytt-til-annen-sak',
   oppgave_til_journalpost = 'oppgave-til-journalpost',
   etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
-  ny_simuleringsvisning = 'ny-simuleringsvisning',
   vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
   omgjoer_tilbakekreving = 'omgjoer-tilbakekreving',
 }
@@ -105,11 +104,6 @@ const bytt_til_annen_sak: Toggle = {
   enabled: false,
 }
 
-const ny_simuleringsvisning: Toggle = {
-  togglename: FeatureToggle.ny_simuleringsvisning,
-  enabled: false,
-}
-
 const vis_tilbakestill_etteroppgjoer: Toggle = {
   togglename: FeatureToggle.vis_tilbakestill_etteroppgjoer,
   enabled: false,
@@ -139,7 +133,6 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.bytt_til_annen_sak]: bytt_til_annen_sak,
   [FeatureToggle.oppgave_til_journalpost]: oppgave_til_journalpost,
   [FeatureToggle.etteroppgjoer_dev_opprett_forbehandling]: etteroppgjoer_dev_opprett_forbehandling,
-  [FeatureToggle.ny_simuleringsvisning]: ny_simuleringsvisning,
   [FeatureToggle.vis_tilbakestill_etteroppgjoer]: vis_tilbakestill_etteroppgjoer,
   [FeatureToggle.omgjoer_tilbakekreving]: omgjoer_tilbakekreving,
 }

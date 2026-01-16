@@ -11,7 +11,7 @@ class VedtakService(
     suspend fun hentVedtak(fnr: Folkeregisteridentifikator): VedtakTilPerson {
         val vedtak = vedtaksvurderingKlient.hentVedtak(fnr)
         return VedtakTilPerson(
-            vedtak = vedtak.filter { it.type.vanligBehandling }.map { it.fromDto() },
+            vedtak = vedtak.filter { it.type.tilgjengeligEksternt }.map { it.fromDto() },
         )
     }
 }

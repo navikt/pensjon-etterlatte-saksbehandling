@@ -6,15 +6,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVKORTET
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVSLAG
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.RETURNERT
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.TRYGDETID_OPPDATERT
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.VILKAARSVURDERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -83,7 +74,10 @@ sealed class Behandling {
 
     fun mottattDato(): LocalDateTime? =
         when (this) {
-            is Foerstegangsbehandling -> this.soeknadMottattDato
+            is Foerstegangsbehandling -> {
+                this.soeknadMottattDato
+            }
+
             else -> {
                 when (revurderingsaarsak()) {
                     Revurderingaarsak.INNTEKTSENDRING -> this.soeknadMottattDato
@@ -183,31 +177,36 @@ sealed class Behandling {
     }
 
     fun erAvslagNySoeknad(): Boolean =
-        this is Revurdering && this.revurderingsaarsak == Revurderingaarsak.NY_SOEKNAD && this.status == AVSLAG
+        this is Revurdering && this.revurderingsaarsak == Revurderingaarsak.NY_SOEKNAD && this.status == BehandlingStatus.AVSLAG
 
-    open fun tilOpprettet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
+    open fun tilOpprettet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.OPPRETTET)
 
-    open fun tilVilkaarsvurdert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(VILKAARSVURDERT)
+    open fun tilVilkaarsvurdert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.VILKAARSVURDERT)
 
-    open fun tilTrygdetidOppdatert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(TRYGDETID_OPPDATERT)
+    open fun tilTrygdetidOppdatert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.TRYGDETID_OPPDATERT)
 
-    open fun tilBeregnet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BEREGNET)
+    open fun tilBeregnet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.BEREGNET)
 
-    open fun tilAvkortet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(AVKORTET)
+    open fun tilAvkortet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.AVKORTET)
 
-    open fun tilFattetVedtak(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(FATTET_VEDTAK)
+    open fun tilFattetVedtak(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.FATTET_VEDTAK)
 
-    open fun tilAttestert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(ATTESTERT)
+    open fun tilAttestert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.ATTESTERT)
 
-    open fun tilAvslag(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(AVSLAG)
+    open fun tilAvslag(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.AVSLAG)
 
-    open fun tilReturnert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(RETURNERT)
+    open fun tilReturnert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.RETURNERT)
 
-    open fun tilTilSamordning(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
+    open fun tilTilSamordning(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.TIL_SAMORDNING)
 
-    open fun tilSamordnet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
+    open fun tilSamordnet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.SAMORDNET)
 
-    open fun tilIverksatt(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
+    open fun tilIverksatt(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.IVERKSATT)
+
+    open fun tilAttestertIngenEndring(): Behandling =
+        throw BehandlingStoetterIkkeStatusEndringException(
+            BehandlingStatus.ATTESTERT_INGEN_ENDRING,
+        )
 
     class BehandlingStoetterIkkeStatusEndringException(
         behandlingStatus: BehandlingStatus,

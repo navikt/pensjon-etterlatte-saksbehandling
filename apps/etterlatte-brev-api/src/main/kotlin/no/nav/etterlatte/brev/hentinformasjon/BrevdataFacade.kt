@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -218,6 +219,10 @@ class BrevdataFacade(
                             (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
                         ),
                 )
+            }
+
+            VedtakType.INGEN_ENDRING -> {
+                throw InternfeilException("VedtakType INGEN_ENDRING kun tilgjengelig i ny brevflyt")
             }
 
             null -> {

@@ -389,8 +389,10 @@ internal class BehandlingServiceImpl(
 
     override fun hentSisteIverksatteBehandling(sakId: SakId): Behandling? =
         hentBehandlingerForSakId(sakId)
-            .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) && !it.erAvslagNySoeknad() }
-            .maxByOrNull { it.sistEndret }
+            .filter {
+                BehandlingStatus.iverksattEllerAttestert().contains(it.status) && !it.erAvslagNySoeknad() &&
+                    it.status != BehandlingStatus.ATTESTERT_INGEN_ENDRING
+            }.maxByOrNull { it.sistEndret }
 
     override fun avbrytBehandling(
         behandlingId: UUID,
@@ -461,14 +463,17 @@ internal class BehandlingServiceImpl(
     private fun haandterOmgjoeringEtterKlage(behandling: Behandling) {
         val erBehandlingOmgjoeringEtterKlage =
             when (behandling) {
-                is Revurdering -> behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
+                is Revurdering -> {
+                    behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
+                }
 
-                is Foerstegangsbehandling ->
+                is Foerstegangsbehandling -> {
                     behandling.relatertBehandlingId?.let { klageId ->
                         oppgaveService
                             .hentOppgaverForSak(behandling.sak.id, OppgaveType.KLAGE)
                             .any { it.id.toString() == klageId }
                     } ?: false
+                }
             }
 
         if (erBehandlingOmgjoeringEtterKlage) {
@@ -531,14 +536,20 @@ internal class BehandlingServiceImpl(
         }
 
         return when (behandling.type) {
-            BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling, overstyr)
-            BehandlingType.FØRSTEGANGSBEHANDLING ->
+            BehandlingType.REVURDERING -> {
+                erGyldigVirkningstidspunktRevurdering(request, behandling, overstyr)
+            }
+
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 erGyldigVirkningstidspunktFoerstegangsbehandling(
                     request,
                     behandling,
                 )
+            }
 
-            else -> throw Exception("BehandlingType ${behandling.type} er ikke støttet")
+            else -> {
+                throw Exception("BehandlingType ${behandling.type} er ikke støttet")
+            }
         }
     }
 
@@ -601,13 +612,15 @@ internal class BehandlingServiceImpl(
         val virkErEtterDoedsdato = virkningstidspunkt.isAfter(foersteDoedsdato)
         val virkErEtterMakstidspunktForSoeknad =
             when (behandling.sak.sakType) {
-                SakType.OMSTILLINGSSTOENAD ->
+                SakType.OMSTILLINGSSTOENAD -> {
                     // For omstillingsstønad vil virkningstidspunktet tidligst være mnd etter makstidspunkt
                     virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
+                }
 
-                SakType.BARNEPENSJON ->
+                SakType.BARNEPENSJON -> {
                     // For barnepensjon vil virkningstidspunktet tidligst være samme mnd som makstidspunkt
                     virkningstidspunkt.isAfter(makstidspunktFoerSoeknad) || virkningstidspunkt == makstidspunktFoerSoeknad
+                }
             }
         return virkErEtterDoedsdato && virkErEtterMakstidspunktForSoeknad
     }
@@ -720,7 +733,10 @@ internal class BehandlingServiceImpl(
                 "Behandling finnes ikke $behandlingId"
             }
             when (behandling!!.type) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+                }
+
                 BehandlingType.REVURDERING -> {
                     behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
                 }

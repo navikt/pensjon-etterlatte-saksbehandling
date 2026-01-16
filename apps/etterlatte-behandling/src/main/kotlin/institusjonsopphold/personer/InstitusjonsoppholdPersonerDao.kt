@@ -3,6 +3,7 @@ package no.nav.etterlatte.institusjonsopphold.personer
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.institusjonsopphold.model.Institusjonsopphold
 import no.nav.etterlatte.libs.database.setNullableDate
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.toList
 
 class InstitusjonsoppholdPersonerDao(
@@ -79,6 +80,23 @@ class InstitusjonsoppholdPersonerDao(
                             institusjonsnavn = "",
                             organisasjonsnummer = "",
                         )
+                    }
+            }
+        }
+
+    fun personIdentForInstitusjonsopphold(oppholdId: Long): String =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT person_ident FROM institusjonsopphold_hentet
+                    WHERE opphold_id = ?
+                    """.trimIndent(),
+                ).apply {
+                    setLong(1, oppholdId)
+                }.executeQuery()
+                    .single {
+                        getString("person_ident")
                     }
             }
         }

@@ -6,6 +6,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdToggles
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.sak.SakLesDao
 
@@ -81,7 +82,7 @@ class InstitusjonsoppholdPersonerService(
         }
     }
 
-    private fun skalKjoere(): Boolean = featureToggleService.isEnabled(InstitusjonsoppholdPersonerToggles.KjoerHentingFraInst2, false)
+    private fun skalKjoere(): Boolean = featureToggleService.isEnabled(InstitusjonsoppholdToggles.KjoerHentingFraInst2, false)
 
-    private fun skalSetteOpp(): Boolean = featureToggleService.isEnabled(InstitusjonsoppholdPersonerToggles.SettOppKjoering, false)
+    private fun skalSetteOpp(): Boolean = featureToggleService.isEnabled(InstitusjonsoppholdToggles.SettOppKjoering, false)
 }

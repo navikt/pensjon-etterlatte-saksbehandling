@@ -463,6 +463,7 @@ data class KlageBlankettPdfgenDTO(
             VedtakType.ENDRING -> "Revurdering"
             VedtakType.TILBAKEKREVING -> "Tilbakekreving"
             VedtakType.AVVIST_KLAGE -> "Avvist klage"
+            VedtakType.INGEN_ENDRING -> "Ingen endring"
         }
 }
 

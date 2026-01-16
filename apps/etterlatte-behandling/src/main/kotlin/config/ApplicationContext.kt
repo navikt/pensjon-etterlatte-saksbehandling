@@ -145,6 +145,9 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbetjeningService
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
+import no.nav.etterlatte.institusjonsopphold.oppgaver.InstitusjonsoppholdOppgaverDao
+import no.nav.etterlatte.institusjonsopphold.oppgaver.InstitusjonsoppholdOppgaverJobb
+import no.nav.etterlatte.institusjonsopphold.oppgaver.InstitusjonsoppholdOppgaverService
 import no.nav.etterlatte.institusjonsopphold.personer.InstitusjonsoppholdPersonerDao
 import no.nav.etterlatte.institusjonsopphold.personer.InstitusjonsoppholdPersonerJobb
 import no.nav.etterlatte.institusjonsopphold.personer.InstitusjonsoppholdPersonerService
@@ -904,6 +907,8 @@ internal class ApplicationContext(
 
     val institusjonsoppholdPersonerDao: InstitusjonsoppholdPersonerDao =
         InstitusjonsoppholdPersonerDao(autoClosingDatabase)
+    val institusjonsoppholdOppgaverDao: InstitusjonsoppholdOppgaverDao =
+        InstitusjonsoppholdOppgaverDao(autoClosingDatabase)
 
     val institusjonsoppholdPersonerService: InstitusjonsoppholdPersonerService =
         InstitusjonsoppholdPersonerService(
@@ -911,6 +916,15 @@ internal class ApplicationContext(
             institusjonsoppholdPersonerDao = institusjonsoppholdPersonerDao,
             featureToggleService = featureToggleService,
             institusjonsoppholdInternKlient = institusjonsoppholdInternKlient,
+        )
+
+    val institusjonsoppholdOppgaverService: InstitusjonsoppholdOppgaverService =
+        InstitusjonsoppholdOppgaverService(
+            institusjonsoppholdPersonerDao = institusjonsoppholdPersonerDao,
+            featureToggleService = featureToggleService,
+            institusjonsoppholdInternKlient = institusjonsoppholdInternKlient,
+            institusjonsoppholdOppgaverDao = institusjonsoppholdOppgaverDao,
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
         )
 
     // Jobs
@@ -1047,6 +1061,18 @@ internal class ApplicationContext(
     val institusjonsoppholdPersonerJobb: InstitusjonsoppholdPersonerJobb by lazy {
         InstitusjonsoppholdPersonerJobb(
             institusjonsoppholdPersonerService = institusjonsoppholdPersonerService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(2, ChronoUnit.MINUTES),
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+            featureToggleService = featureToggleService,
+        )
+    }
+
+    val institusjonsoppholdOppgaverJobb: InstitusjonsoppholdOppgaverJobb by lazy {
+        InstitusjonsoppholdOppgaverJobb(
+            institusjonsoppholdOppgaverService = institusjonsoppholdOppgaverService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(2, ChronoUnit.MINUTES),

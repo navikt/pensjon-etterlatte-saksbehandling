@@ -35,27 +35,51 @@ class BrevKodeMapperVedtak {
         return when (request.sakType) {
             SakType.BARNEPENSJON -> {
                 when (request.vedtakType) {
-                    VedtakType.INNVILGELSE ->
+                    VedtakType.INNVILGELSE -> {
                         if (request.erForeldreloes) Brevkoder.BP_INNVILGELSE_FORELDRELOES else Brevkoder.BP_INNVILGELSE
+                    }
 
-                    VedtakType.AVSLAG -> Brevkoder.BP_AVSLAG
-                    VedtakType.ENDRING -> Brevkoder.BP_REVURDERING
-                    VedtakType.OPPHOER -> Brevkoder.BP_OPPHOER
-                    VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
-                    null -> throw UgyldigForespoerselException(
-                        code = "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
-                        detail = "Skal ikke kunne komme hit med manglande vedtakstype. Gå igjennom steg fra beregning på nytt.",
-                        meta = mapOf("request" to request),
-                    )
+                    VedtakType.AVSLAG -> {
+                        Brevkoder.BP_AVSLAG
+                    }
 
-                    VedtakType.TILBAKEKREVING -> throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
+                    VedtakType.ENDRING -> {
+                        Brevkoder.BP_REVURDERING
+                    }
+
+                    VedtakType.OPPHOER -> {
+                        Brevkoder.BP_OPPHOER
+                    }
+
+                    VedtakType.AVVIST_KLAGE -> {
+                        Brevkoder.AVVIST_KLAGE
+                    }
+
+                    null -> {
+                        throw UgyldigForespoerselException(
+                            code = "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
+                            detail = "Skal ikke kunne komme hit med manglande vedtakstype. Gå igjennom steg fra beregning på nytt.",
+                            meta = mapOf("request" to request),
+                        )
+                    }
+
+                    VedtakType.INGEN_ENDRING,
+                    VedtakType.TILBAKEKREVING,
+                    -> {
+                        throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
+                    }
                 }
             }
 
             SakType.OMSTILLINGSSTOENAD -> {
                 when (request.vedtakType) {
-                    VedtakType.INNVILGELSE -> Brevkoder.OMS_INNVILGELSE
-                    VedtakType.AVSLAG -> Brevkoder.OMS_AVSLAG
+                    VedtakType.INNVILGELSE -> {
+                        Brevkoder.OMS_INNVILGELSE
+                    }
+
+                    VedtakType.AVSLAG -> {
+                        Brevkoder.OMS_AVSLAG
+                    }
 
                     VedtakType.ENDRING -> {
                         when (request.revurderingaarsak) {
@@ -64,15 +88,27 @@ class BrevKodeMapperVedtak {
                         }
                     }
 
-                    VedtakType.OPPHOER -> Brevkoder.OMS_OPPHOER
-                    VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
-                    null -> throw UgyldigForespoerselException(
-                        code = "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
-                        detail = "Skal ikke kunne komme hit med manglande vedtakstype. Gå igjennom steg fra beregning på nytt.",
-                        meta = mapOf("request" to request),
-                    )
+                    VedtakType.OPPHOER -> {
+                        Brevkoder.OMS_OPPHOER
+                    }
 
-                    VedtakType.TILBAKEKREVING -> throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
+                    VedtakType.AVVIST_KLAGE -> {
+                        Brevkoder.AVVIST_KLAGE
+                    }
+
+                    null -> {
+                        throw UgyldigForespoerselException(
+                            code = "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
+                            detail = "Skal ikke kunne komme hit med manglande vedtakstype. Gå igjennom steg fra beregning på nytt.",
+                            meta = mapOf("request" to request),
+                        )
+                    }
+
+                    VedtakType.INGEN_ENDRING,
+                    VedtakType.TILBAKEKREVING,
+                    -> {
+                        throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
+                    }
                 }
             }
         }

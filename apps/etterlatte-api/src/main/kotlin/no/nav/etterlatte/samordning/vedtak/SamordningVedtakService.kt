@@ -4,10 +4,12 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.vedtak.Vedtak
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -103,12 +105,23 @@ class SamordningVedtakService(
 
     private fun VedtakType.toSamordningsvedtakType(): SamordningVedtakType =
         when (this) {
-            VedtakType.INNVILGELSE -> SamordningVedtakType.START
-            VedtakType.OPPHOER -> SamordningVedtakType.OPPHOER
-            VedtakType.ENDRING -> SamordningVedtakType.ENDRING
-            VedtakType.AVSLAG -> throw IllegalArgumentException("Vedtak om avslag støttes ikke")
-            VedtakType.TILBAKEKREVING -> throw IllegalArgumentException("Ikke relevant")
-            VedtakType.AVVIST_KLAGE -> throw IllegalArgumentException("Skal ikke ha noe med samordning å gjøre")
+            VedtakType.INNVILGELSE -> {
+                SamordningVedtakType.START
+            }
+
+            VedtakType.OPPHOER -> {
+                SamordningVedtakType.OPPHOER
+            }
+
+            VedtakType.ENDRING -> {
+                SamordningVedtakType.ENDRING
+            }
+
+            VedtakType.AVSLAG, VedtakType.TILBAKEKREVING,
+            VedtakType.AVVIST_KLAGE, VedtakType.INGEN_ENDRING,
+            -> {
+                throw InternfeilException("Vedtak av type $this skal ikke ha noe med samordning å gjøre")
+            }
         }
 
     private fun Revurderingaarsak.toSamordningsvedtakAarsak(): String =

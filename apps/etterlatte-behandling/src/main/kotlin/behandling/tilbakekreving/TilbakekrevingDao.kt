@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAvbruttAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
@@ -57,7 +58,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id, t.overstyr_netto_brutto
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ?
                     """.trimIndent(),
@@ -100,7 +101,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id, t.overstyr_netto_brutto
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ? 
                     ORDER BY t.opprettet DESC LIMIT 1
@@ -118,7 +119,7 @@ class TilbakekrevingDao(
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id, t.overstyr_netto_brutto
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev, t.aarsak_for_avbrytelse, t.omgjoering_av_id
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),
@@ -180,16 +181,15 @@ class TilbakekrevingDao(
             prepareStatement(
                 """
                 INSERT INTO tilbakekreving(
-                    id, status, sak_id, opprettet, kravgrunnlag, vurdering, sende_brev, aarsak_for_avbrytelse, omgjoering_av_id, overstyr_netto_brutto
+                    id, status, sak_id, opprettet, kravgrunnlag, vurdering, sende_brev, aarsak_for_avbrytelse, omgjoering_av_id
                 ) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
                 ON CONFLICT (id) DO UPDATE SET
                     status = excluded.status,
                     kravgrunnlag = excluded.kravgrunnlag,
                     vurdering = excluded.vurdering,
                     sende_brev = excluded.sende_brev,
-                    aarsak_for_avbrytelse = excluded.aarsak_for_avbrytelse,
-                    overstyr_netto_brutto = excluded.overstyr_netto_brutto
+                    aarsak_for_avbrytelse = excluded.aarsak_for_avbrytelse
                 """.trimIndent(),
             )
         statement.setObject(1, tilbakekrevingBehandling.id)
@@ -203,7 +203,6 @@ class TilbakekrevingDao(
         statement.setBoolean(7, tilbakekrevingBehandling.sendeBrev)
         statement.setString(8, tilbakekrevingBehandling.aarsakForAvbrytelse?.name)
         statement.setObject(9, tilbakekrevingBehandling.omgjoeringAvId)
-        statement.setString(10, tilbakekrevingBehandling.tilbakekreving.overstyrBehandletNettoTilBruttoMotTilbakekreving?.name)
         statement.executeUpdate().also {
             krev(it == 1) {
                 "Kunne ikke lagre tilbaekreving behandling for sakid ${tilbakekrevingBehandling.sak.id}"
@@ -253,9 +252,10 @@ class TilbakekrevingDao(
                     resultat,
                     tilbakekrevingsprosent,
                     rentetillegg,
-                    tilbakekreving_id
+                    tilbakekreving_id,
+                    overstyr_netto_brutto
                 )
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 ON CONFLICT (id) DO UPDATE SET
                  beregnet_feilutbetaling = excluded.beregnet_feilutbetaling,
                  brutto_tilbakekreving = excluded.brutto_tilbakekreving,
@@ -264,7 +264,8 @@ class TilbakekrevingDao(
                  skyld = excluded.skyld,
                  resultat = excluded.resultat,
                  tilbakekrevingsprosent = excluded.tilbakekrevingsprosent,
-                 rentetillegg = excluded.rentetillegg
+                 rentetillegg = excluded.rentetillegg,
+                 overstyr_netto_brutto = excluded.overstyr_netto_brutto
                 """.trimIndent(),
             )
 
@@ -288,6 +289,7 @@ class TilbakekrevingDao(
             statement.setInt(14, beloep.tilbakekrevingsprosent)
             statement.setInt(15, beloep.rentetillegg)
             statement.setObject(16, tilbakekrevingBehandling.id)
+            statement.setString(17, beloep.overstyrBehandletNettoTilBrutto?.name?.takeIf { beloep.klasseType == "YTEL" })
             statement.addBatch()
         }
         tilbakekrevingBehandling.tilbakekreving.perioder.forEach { periode ->
@@ -317,10 +319,6 @@ class TilbakekrevingDao(
                     vurdering = getString("vurdering")?.let { objectMapper.readValue(it) },
                     perioder = emptyList(),
                     kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
-                    overstyrBehandletNettoTilBruttoMotTilbakekreving =
-                        getString(
-                            "overstyr_netto_brutto",
-                        )?.let { objectMapper.readValue(it) },
                 ),
             sendeBrev = getBoolean("sende_brev"),
             aarsakForAvbrytelse = getString("aarsak_for_avbrytelse")?.let { enumValueOf<TilbakekrevingAvbruttAarsak>(it) },
@@ -345,6 +343,7 @@ class TilbakekrevingDao(
                 resultat = getString("resultat")?.let { TilbakekrevingResultat.valueOf(it) },
                 tilbakekrevingsprosent = getIntOrNull("tilbakekrevingsprosent"),
                 rentetillegg = getIntOrNull("rentetillegg"),
+                overstyrBehandletNettoTilBrutto = getString("overstyr_netto_brutto")?.let { JaNei.valueOf(it) },
             ),
         )
 }

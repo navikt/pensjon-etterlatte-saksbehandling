@@ -22,15 +22,12 @@ import {
   OpphoerSkyldesDoedsfall,
   OpphoerSkyldesDoedsfallSkjema,
 } from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { JaNei } from '~shared/types/ISvar'
 
 export const EtteroppgjoerForbehandlingOversikt = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const { beregnetEtteroppgjoerResultat, forbehandling } = useEtteroppgjoerForbehandling()
-
-  const opphoerSkyldesDoedsfallErSkrudPaa = useFeaturetoggle(FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall)
 
   const erRedigerbar =
     kanRedigereEtteroppgjoerForbehandling(forbehandling.status) &&
@@ -59,23 +56,14 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       </BodyShort>
       <Inntektsopplysninger />
 
-      {opphoerSkyldesDoedsfallErSkrudPaa ? (
-        <>
-          {!!forbehandling.harVedtakAvTypeOpphoer && (
-            <OpphoerSkyldesDoedsfall
-              erRedigerbar={erRedigerbar}
-              setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
-            />
-          )}
+      {!!forbehandling.harVedtakAvTypeOpphoer && (
+        <OpphoerSkyldesDoedsfall
+          erRedigerbar={erRedigerbar}
+          setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
+        />
+      )}
 
-          {!doedsfallIEtteroppgjoersaaret && (
-            <FastsettFaktiskInntekt
-              erRedigerbar={erRedigerbar}
-              setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-            />
-          )}
-        </>
-      ) : (
+      {!doedsfallIEtteroppgjoersaaret && (
         <FastsettFaktiskInntekt
           erRedigerbar={erRedigerbar}
           setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}

@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.outbox
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
@@ -40,7 +41,7 @@ class OutboxService(
                 ),
             )
 
-        if (vedtak.innhold is VedtakInnhold.Behandling) {
+        if (vedtak.type.tilgjengeligEksternt) {
             publiserEksternHendelse(
                 item.id,
                 Vedtakshendelse(
@@ -49,12 +50,17 @@ class OutboxService(
                     type = vedtak.typeToEksternApi(),
                     vedtakId = vedtak.id,
                     vedtaksdato = vedtak.attestasjon?.tidspunkt?.toLocalDate(),
-                    virkningFom = vedtak.innhold.virkningstidspunkt.atDay(1),
+                    virkningFom =
+                        (vedtak.innhold as? VedtakInnhold.Behandling)?.virkningstidspunkt?.atDay(1)
+                            ?: throw InternfeilException(
+                                "Har et vedtak som skal være internt tilgjengelig, " +
+                                    "med vedtaksinnhold som ikke er vanlig behandling. Id=${vedtak.id} i sak=${vedtak.sakId}",
+                            ),
                 ).toJson(),
             )
             logger.info(markers, "Publisert vedtakshendelse for vedtak=${vedtak.id}")
         } else {
-            logger.warn(markers, "Støtter ikke vedtakshendelse for vedtak=${vedtak.id}, skipper")
+            logger.info(markers, "Støtter ikke vedtakshendelse for vedtak=${vedtak.id}, skipper")
         }
     }
 }

@@ -1,0 +1,3 @@
+drop TABLE institusjonsopphold_oppgaver;
+drop TABLE institusjonsopphold_peronser;
+drop TABLE institusjonsopphold_hentet;

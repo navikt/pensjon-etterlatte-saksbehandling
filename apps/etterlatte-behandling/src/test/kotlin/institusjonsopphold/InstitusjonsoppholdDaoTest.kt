@@ -1,10 +1,8 @@
-package institusjonsopphold.institusjonsopphold
+package no.nav.etterlatte.institusjonsopphold
 
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.sakId1
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdBegrunnelse
-import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Assertions

@@ -53,12 +53,12 @@ data class InstitusjonsoppholdOppgaverJobb(
                     try {
                         institusjonsoppholdOppgaverService.setupKontekstAndRun(jobContext)
                     } catch (e: Exception) {
-                        logger.error("Feilet i henting av institusjonsopphold $jobbNavn", e)
+                        logger.error("Feilet i oppretting av hendelser for institusjonsopphold $jobbNavn", e)
                         sleep(10000)
                     } finally {
                         lock.release()
                     }
-                    logger.info("Ferdig med henting av institusjonsopphold $jobbNavn")
+                    logger.info("Ferdig med oppretting av hendelser for institusjonsopphold $jobbNavn")
                 }
             }
         }

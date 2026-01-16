@@ -15,7 +15,6 @@ import { SakType } from '~shared/types/sak'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { SimuleringGruppertPaaAar } from './SimuleringGruppertPaaAar'
 import { UtbetalingTable } from './UtbetalingTable'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -102,22 +101,11 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 }
 
 const SimuleringBeregning = ({ data }: { data: SimulertBeregning }) => {
-  const visGrupperteSimuleringer = useFeaturetoggle(FeatureToggle.ny_simuleringsvisning)
   return (
     <VStack gap="8">
       <UtbetalingTable tittel="Kommende utbetaling(er)" perioder={data.kommendeUtbetalinger} />
 
-      {visGrupperteSimuleringer ? (
-        <SimuleringGruppertPaaAar data={data} />
-      ) : (
-        <>
-          {data.etterbetaling.length > 0 && <UtbetalingTable tittel="Etterbetaling" perioder={data.etterbetaling} />}
-
-          {data.tilbakekreving.length > 0 && (
-            <UtbetalingTable tittel="Potensiell tilbakekreving" perioder={data.tilbakekreving} />
-          )}
-        </>
-      )}
+      <SimuleringGruppertPaaAar data={data} />
 
       <>
         Beregnet dato: {formaterDato(data.datoBeregnet)}

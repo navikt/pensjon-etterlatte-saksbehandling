@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlagsendring
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -27,6 +28,15 @@ class GrunnlagsendringsHendelseFilter(
         val behandlingerForSak = behandlingService.hentBehandlingerForSak(sakId)
         val harAapenBehandling = behandlingerForSak.any { it.status.aapenBehandling() }
         if (harAapenBehandling) {
+            return true
+        } else if (Kontekst.get().AppUser is Self &&
+            Kontekst
+                .get()
+                .AppUser
+                .name()
+                .contains("InstitusjonsoppholdOppgaverService")
+        ) {
+            // TODO Slett når jobben er ferdigkjørt
             return true
         } else {
             val appUser = Kontekst.get().AppUser

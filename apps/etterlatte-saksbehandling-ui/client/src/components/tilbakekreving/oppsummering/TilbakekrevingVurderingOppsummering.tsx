@@ -6,8 +6,10 @@ import {
   TilbakekrevingBeloep,
 } from '~shared/types/Tilbakekreving'
 import React from 'react'
-import { Alert, BodyLong, Box, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, BodyShort, Box, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
+import { JaNei } from '~shared/types/ISvar'
+import { formaterMaanedAar } from '~utils/formatering/dato'
 
 export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling: TilbakekrevingBehandling }) {
   function sumKlasseTypeYtelse(callback: (beloep: TilbakekrevingBeloep) => number | null) {
@@ -38,6 +40,12 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
   const sumFeilutbetalingInkludertTrekk = sumFeilutbetaling + fastSkattetrekkBp
   const sumBruttoTilbakekrevingInkludertTrekk = sumBruttoTilbakekreving + fastSkattetrekkBp
   const sumSkattInkludertTrekk = sumSkatt + fastSkattetrekkBp
+
+  const perioderMedOverstyringOgSkattetrekk = tilbakekreving.perioder.filter(
+    (periode) =>
+      periode.tilbakekrevingsbeloep.some((beloep) => beloep.klasseType == 'SKAT') &&
+      periode.tilbakekrevingsbeloep.some((beloep) => beloep.overstyrBehandletNettoTilBrutto === JaNei.JA)
+  )
 
   return (
     <VStack gap="8">
@@ -89,6 +97,25 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
           </Table.Row>
         </Table.Body>
       </Table>
+
+      {perioderMedOverstyringOgSkattetrekk.length > 0 && (
+        <Box marginBlock="10 0" maxWidth="45rem">
+          <Alert variant="error">
+            <VStack gap="4">
+              <BodyLong>
+                Det er lagt inn overstyring av netto tilbakekreving til brutto tilbakekreving i samme periode. Dette vil
+                sannsynligvis gi feil i beløpene i tilbakekrevingen.
+              </BodyLong>
+              <BodyShort>Perioder det gjelder:</BodyShort>
+              <ul>
+                {perioderMedOverstyringOgSkattetrekk.map((periode) => (
+                  <li key={periode.maaned.toString()}>{formaterMaanedAar(periode.maaned)}</li>
+                ))}
+              </ul>
+            </VStack>
+          </Alert>
+        </Box>
+      )}
 
       {harPerioderMedBarnepensjonSkattetrekk(behandling) && (
         <>

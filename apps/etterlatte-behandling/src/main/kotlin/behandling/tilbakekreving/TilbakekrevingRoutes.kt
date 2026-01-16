@@ -49,19 +49,6 @@ internal fun Route.tilbakekrevingRoutes(
                     call.respond(service.lagreVurdering(tilbakekrevingId, vurdering, it))
                 }
             }
-            put("/overstyr-netto-brutto") {
-                kunSaksbehandlerMedSkrivetilgang {
-                    if (featureToggleService.isEnabled(TilbakekrevingToggles.OVERSTYR_NETTO_BRUTTO, false)) {
-                        val request = call.receive<TilbakekrevingOverstyrNettoRequest>()
-                        call.respond(service.lagreOverstyrNettoBrutto(tilbakekrevingId, request, it))
-                    } else {
-                        throw IkkeTillattException(
-                            "OVERSTYRING_IKKE_ENABLED",
-                            "Det er ikke skrudd på å kunne overstyre netto til brutto i tilbakekrevinger.",
-                        )
-                    }
-                }
-            }
             put("/perioder") {
                 kunSaksbehandlerMedSkrivetilgang {
                     val request = call.receive<TilbakekrevingPerioderRequest>()

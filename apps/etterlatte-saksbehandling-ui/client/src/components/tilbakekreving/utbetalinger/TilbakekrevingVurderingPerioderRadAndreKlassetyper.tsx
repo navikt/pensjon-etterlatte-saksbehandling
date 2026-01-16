@@ -6,9 +6,11 @@ import { formaterMaanednavnAar } from '~utils/formatering/dato'
 export function TilbakekrevingVurderingPerioderRadAndreKlassetyper({
   periode,
   beloep,
+  ekstraKolonne,
 }: {
   periode: TilbakekrevingPeriode
   beloep: TilbakekrevingBeloep
+  ekstraKolonne?: boolean
 }) {
   return (
     <>
@@ -26,6 +28,7 @@ export function TilbakekrevingVurderingPerioderRadAndreKlassetyper({
         <Table.DataCell key="resultat"></Table.DataCell>
         <Table.DataCell key="tilbakekrevingsprosent"></Table.DataCell>
         <Table.DataCell key="rentetillegg"></Table.DataCell>
+        {!!ekstraKolonne && <Table.DataCell></Table.DataCell>}
       </Table.Row>
     </>
   )

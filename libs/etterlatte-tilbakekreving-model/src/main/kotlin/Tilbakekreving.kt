@@ -11,7 +11,6 @@ data class Tilbakekreving(
     val vurdering: TilbakekrevingVurdering?,
     val perioder: List<TilbakekrevingPeriode>,
     val kravgrunnlag: Kravgrunnlag,
-    val overstyrBehandletNettoTilBruttoMotTilbakekreving: JaNei?,
 )
 
 data class TilbakekrevingVurdering(
@@ -100,6 +99,7 @@ data class Tilbakekrevingsbelop(
     val resultat: TilbakekrevingResultat?,
     val tilbakekrevingsprosent: Int?,
     val rentetillegg: Int?,
+    val overstyrBehandletNettoTilBrutto: JaNei?,
 )
 
 fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPeriode> =
@@ -124,6 +124,7 @@ fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPe
                             resultat = null,
                             tilbakekrevingsprosent = null,
                             rentetillegg = null,
+                            overstyrBehandletNettoTilBrutto = null,
                         )
                     }.sortedWith(tilbakekrevingsbeloepComparator),
         )
@@ -184,7 +185,6 @@ data class TilbakekrevingVedtak(
     val kravgrunnlagId: String,
     val kontrollfelt: String,
     val perioder: List<TilbakekrevingPeriode>,
-    val overstyrBehandletNettoTilBruttoMotTilbakekreving: Boolean,
 )
 
 data class FattetVedtak(

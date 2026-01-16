@@ -64,6 +64,7 @@ export interface TilbakekrevingBeloep {
   resultat: TilbakekrevingResultat | null
   tilbakekrevingsprosent: number | null
   rentetillegg: number | null
+  overstyrBehandletNettoTilBrutto?: JaNei
 }
 
 export enum TilbakekrevingVarsel {

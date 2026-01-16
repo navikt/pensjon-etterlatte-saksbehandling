@@ -24,7 +24,9 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { formaterMaanednavnAar } from '~utils/formatering/dato'
 import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
-import { OverstyrNettoBruttoTilbakekreving } from '~components/tilbakekreving/utbetalinger/OverstyrNettoBruttoTilbakekreving'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { SakType } from '~shared/types/sak'
+import { JaNei } from '~shared/types/ISvar'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
@@ -35,6 +37,8 @@ export function TilbakekrevingVurderingPerioderSkjema({
 }) {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+
+  const overstyringEnabled = useFeaturetoggle(FeatureToggle.overstyr_netto_brutto_tilbakekreving)
   const [lagrePerioderStatus, lagrePerioderRequest] = useApiCall(lagreTilbakekrevingsperioder)
   const [oppdaterKravgrunnlagStatus, oppdaterKravgrunnlagRequest] = useApiCall(oppdaterTilbakekrevingKravgrunnlag)
   const {
@@ -95,6 +99,12 @@ export function TilbakekrevingVurderingPerioderSkjema({
       }
     )
   }
+  const harPerioderMedVurdertOverstyring = behandling.tilbakekreving.perioder.some((periode) =>
+    periode.tilbakekrevingsbeloep.some((beloep) => !!beloep.overstyrBehandletNettoTilBrutto)
+  )
+
+  const kanOverstyre =
+    (behandling.sak.sakType === SakType.BARNEPENSJON && overstyringEnabled) || harPerioderMedVurdertOverstyring
 
   return (
     <>
@@ -135,6 +145,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
                 <Table.HeaderCell>Resultat</Table.HeaderCell>
                 <Table.HeaderCell>Tilbakekrevingsprosent</Table.HeaderCell>
                 <Table.HeaderCell>Rentetillegg</Table.HeaderCell>
+                {kanOverstyre && <Table.HeaderCell>Overstyr netto til brutto</Table.HeaderCell>}
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -286,6 +297,21 @@ export function TilbakekrevingVurderingPerioderSkjema({
                             hideLabel={true}
                           />
                         </Table.DataCell>
+                        {kanOverstyre && (
+                          <Table.DataCell>
+                            <Select
+                              {...register(
+                                `values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.overstyrBehandletNettoTilBrutto`
+                              )}
+                              label="Overstyr netto til brutto"
+                              hideLabel
+                            >
+                              <option value="">Ikke valgt</option>
+                              <option value={JaNei.JA}>Ja, overstyr netto til brutto</option>
+                              <option value={JaNei.NEI}>Nei, ikke overstyr netto til brutto</option>
+                            </Select>
+                          </Table.DataCell>
+                        )}
                       </Table.Row>
                     )
                   } else {
@@ -295,6 +321,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
                         key={`beloepRad-${indexPeriode}-${indexBeloep}`}
                         periode={periode}
                         beloep={beloep}
+                        ekstraKolonne={kanOverstyre}
                       />
                     )
                   }
@@ -302,8 +329,6 @@ export function TilbakekrevingVurderingPerioderSkjema({
               })}
             </Table.Body>
           </Table>
-
-          <OverstyrNettoBruttoTilbakekreving behandling={behandling} redigerbar={redigerbar} />
         </VStack>
         {redigerbar && (
           <VStack gap="5">

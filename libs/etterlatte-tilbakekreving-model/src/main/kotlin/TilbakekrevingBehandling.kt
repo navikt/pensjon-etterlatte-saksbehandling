@@ -1,8 +1,5 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
@@ -63,34 +60,6 @@ data class TilbakekrevingBehandling(
             aarsakForAvbrytelse = aarsakForAvbrytelse,
         )
 
-    fun skalOverstyreBehandletNettoTilBrutto(): Boolean {
-        if (sak.sakType != SakType.BARNEPENSJON) {
-            return false
-        }
-        return tilbakekreving.overstyrBehandletNettoTilBruttoMotTilbakekreving == JaNei.JA
-    }
-
-    fun oppdaterOverstyringNettoBrutto(overstyrNettoBrutto: JaNei?): TilbakekrevingBehandling {
-        if (sak.sakType != SakType.BARNEPENSJON) {
-            throw UgyldigForespoerselException(
-                "OVERSTYRING_KUN_FOR_BARNEPENSJON",
-                "Man kan kun overstyre netto brutto for barnepensjonssaker.",
-            )
-        }
-        if (!this.status.kanEndres()) {
-            throw IkkeTillattException(
-                "TILBAKEKREVING_KAN_IKKE_ENDRES",
-                "Tilbakekrevingen har status $status og kan ikke endres.",
-            )
-        }
-        return this.copy(
-            tilbakekreving =
-                this.tilbakekreving.copy(
-                    overstyrBehandletNettoTilBruttoMotTilbakekreving = overstyrNettoBrutto,
-                ),
-        )
-    }
-
     companion object {
         fun ny(
             kravgrunnlag: Kravgrunnlag,
@@ -107,7 +76,6 @@ data class TilbakekrevingBehandling(
                     vurdering = null,
                     perioder = kravgrunnlag.perioder.tilTilbakekrevingPerioder(),
                     kravgrunnlag = kravgrunnlag,
-                    overstyrBehandletNettoTilBruttoMotTilbakekreving = null,
                 ),
             sendeBrev = true,
             aarsakForAvbrytelse = null,

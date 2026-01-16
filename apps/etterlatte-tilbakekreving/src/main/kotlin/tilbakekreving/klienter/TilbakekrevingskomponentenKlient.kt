@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
@@ -219,7 +220,6 @@ class TilbakekrevingskomponentenKlient(
                                             add(
                                                 it.toTilbakekrevingsbelopYtelse(
                                                     vedtak.aarsak,
-                                                    vedtak.overstyrBehandletNettoTilBruttoMotTilbakekreving,
                                                 ),
                                             )
                                         }
@@ -236,10 +236,7 @@ class TilbakekrevingskomponentenKlient(
                 }
         }
 
-    private fun Tilbakekrevingsbelop.toTilbakekrevingsbelopYtelse(
-        aarsak: TilbakekrevingAarsak,
-        overstyrBehandletNettoTilBrutto: Boolean,
-    ): TilbakekrevingsbelopDto {
+    private fun Tilbakekrevingsbelop.toTilbakekrevingsbelopYtelse(aarsak: TilbakekrevingAarsak): TilbakekrevingsbelopDto {
         val utenOverstyring =
             TilbakekrevingsbelopDto().apply {
                 kodeKlasse = klasseKode
@@ -251,7 +248,7 @@ class TilbakekrevingskomponentenKlient(
                 kodeAarsak = mapFraTilbakekrevingAarsak(aarsak)
                 kodeSkyld = krevIkkeNull(skyld?.name) { "Skyldkode mangler" }
             }
-        if (overstyrBehandletNettoTilBrutto) {
+        if (this.overstyrBehandletNettoTilBrutto == JaNei.JA) {
             logger.info("Overstyrer opprinnelig tilbakekrevingsbeløp, med å sette beløp tilbakekreves = netto, og skattebeløp til 0")
             return utenOverstyring.apply {
                 belopTilbakekreves = nettoTilbakekreving!!.medToDesimaler()

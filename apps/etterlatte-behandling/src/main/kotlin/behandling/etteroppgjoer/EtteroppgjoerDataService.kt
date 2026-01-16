@@ -90,27 +90,6 @@ class EtteroppgjoerDataService(
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteAvkortingOgOpphoer =
         runBlocking {
-            if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_OPPHOER_SKYLDES_DOEDSFALL, false)) {
-                hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo)
-            } else {
-                val iverksatteVedtak =
-                    vedtakKlient
-                        .hentIverksatteVedtak(sakId, brukerTokenInfo)
-                        .sortedByDescending { it.datoFattet }
-
-                val sisteIverksatteVedtak =
-                    iverksatteVedtak.firstOrNull()
-                        ?: throw InternfeilException("Fant ingen iverksatte vedtak for sak $sakId")
-
-                if (sisteIverksatteVedtak.vedtakType == VedtakType.OPPHOER) {
-                    throw InternfeilException("Siste iverksatte vedtak er et opphør, dette er ikke støttet enda")
-                }
-
-                if (sisteIverksatteVedtak.opphoerFraOgMed != null) {
-                    throw InternfeilException("Siste iverksatte vedtak har opphør fra og med, dette er ikke støttet enda")
-                }
-
-                SisteAvkortingOgOpphoer(sisteIverksatteVedtak.behandlingId, null)
-            }
+            hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo)
         }
 }

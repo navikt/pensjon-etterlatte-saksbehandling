@@ -24,14 +24,11 @@ import {
   OpphoerSkyldesDoedsfall,
   OpphoerSkyldesDoedsfallSkjema,
 } from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const etteroppgjoerForbehandling = useEtteroppgjoerForbehandling()
-
-  const opphoerSkyldesDoedsfallErSkrudPaa = useFeaturetoggle(FeatureToggle.etteroppgjoer_opphoer_skyldes_doedsfall)
 
   const erRedigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -80,11 +77,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
   const navigerTilNesteSteg = () => {
     if (harIngenSkjemaErrors) {
-      if (
-        opphoerSkyldesDoedsfallErSkrudPaa &&
-        !!forbehandling.harVedtakAvTypeOpphoer &&
-        !forbehandling.opphoerSkyldesDoedsfall
-      ) {
+      if (!!forbehandling.harVedtakAvTypeOpphoer && !forbehandling.opphoerSkyldesDoedsfall) {
         setValideringFeilmelding('Du må ta stilling til om opphør skyldes dødsfall')
         return
       } else if (revurderingStammerFraSvarfristUtloept) {
@@ -131,23 +124,14 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         </>
       )}
 
-      {opphoerSkyldesDoedsfallErSkrudPaa ? (
-        <>
-          {!!forbehandling.harVedtakAvTypeOpphoer && (
-            <OpphoerSkyldesDoedsfall
-              erRedigerbar={kanRedigereFaktiskInntekt}
-              setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
-            />
-          )}
+      {!!forbehandling.harVedtakAvTypeOpphoer && (
+        <OpphoerSkyldesDoedsfall
+          erRedigerbar={kanRedigereFaktiskInntekt}
+          setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
+        />
+      )}
 
-          {!doedsfallIEtteroppgjoersaaret && (
-            <FastsettFaktiskInntekt
-              erRedigerbar={kanRedigereFaktiskInntekt}
-              setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
-            />
-          )}
-        </>
-      ) : (
+      {!doedsfallIEtteroppgjoersaaret && (
         <FastsettFaktiskInntekt
           erRedigerbar={kanRedigereFaktiskInntekt}
           setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}

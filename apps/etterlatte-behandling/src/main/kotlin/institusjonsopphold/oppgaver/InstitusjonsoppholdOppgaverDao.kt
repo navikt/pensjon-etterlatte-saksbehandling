@@ -11,9 +11,9 @@ class InstitusjonsoppholdOppgaverDao(
             with(it) {
                 prepareStatement(
                     """
-                       INSERT INTO institusjonsopphold_oppgaver (opphold_id, status) 
-                       VALUES (?, ?)
-                    x   ON CONFLICT DO NOTHING
+                    INSERT INTO institusjonsopphold_oppgaver (opphold_id, status) 
+                    VALUES (?, ?)
+                    ON CONFLICT DO NOTHING
                     """.trimIndent(),
                 ).apply {
                     setLong(1, oppholdId)

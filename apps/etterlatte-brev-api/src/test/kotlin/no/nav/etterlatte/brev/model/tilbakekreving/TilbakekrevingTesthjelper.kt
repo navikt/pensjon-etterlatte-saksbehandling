@@ -33,7 +33,6 @@ fun tilbakekreving(
     vurdering = vurdering,
     perioder = perioder,
     kravgrunnlag = kravgrunnlag(),
-    overstyrBehandletNettoTilBruttoMotTilbakekreving = null,
 )
 
 fun tilbakekrevingvurdering() =
@@ -134,6 +133,7 @@ fun tilbakekrevingperiode(
                 resultat = resultat,
                 tilbakekrevingsprosent = 0,
                 rentetillegg = renteTilleg,
+                overstyrBehandletNettoTilBrutto = null,
             ),
             Tilbakekrevingsbelop(
                 id = UUID.randomUUID(),
@@ -150,6 +150,7 @@ fun tilbakekrevingperiode(
                 resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
                 tilbakekrevingsprosent = 0,
                 rentetillegg = 0,
+                overstyrBehandletNettoTilBrutto = null,
             ),
         ),
 )

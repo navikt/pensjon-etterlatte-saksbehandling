@@ -27,6 +27,7 @@ export const enum FeatureToggle {
   etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
   vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
   omgjoer_tilbakekreving = 'omgjoer-tilbakekreving',
+  overstyr_netto_brutto_tilbakekreving = 'overstyr-netto-brutto-tilbakekreving',
 }
 
 export interface Toggle {
@@ -36,6 +37,11 @@ export interface Toggle {
 
 const trygdetid_fra_pesys: Toggle = {
   togglename: FeatureToggle.trygdetid_fra_pesys,
+  enabled: false,
+}
+
+const overstyr_netto_brutto_tilbakekreving: Toggle = {
+  togglename: FeatureToggle.overstyr_netto_brutto_tilbakekreving,
   enabled: false,
 }
 
@@ -135,6 +141,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.etteroppgjoer_dev_opprett_forbehandling]: etteroppgjoer_dev_opprett_forbehandling,
   [FeatureToggle.vis_tilbakestill_etteroppgjoer]: vis_tilbakestill_etteroppgjoer,
   [FeatureToggle.omgjoer_tilbakekreving]: omgjoer_tilbakekreving,
+  [FeatureToggle.overstyr_netto_brutto_tilbakekreving]: overstyr_netto_brutto_tilbakekreving,
 }
 
 export const Unleashcontext = createContext<{

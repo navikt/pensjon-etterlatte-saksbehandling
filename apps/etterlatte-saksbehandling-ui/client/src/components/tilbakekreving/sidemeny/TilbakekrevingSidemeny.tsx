@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Box, Detail, Heading, Label, Link } from '@navikt/ds-react'
+import { Alert, Box, Detail, Heading, Label, Link, VStack } from '@navikt/ds-react'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { useAppDispatch } from '~store/Store'
@@ -90,11 +90,11 @@ export function TilbakekrevingSidemeny() {
         </div>
 
         {tilbakekreving.omgjoeringAvId && (
-          <Box marginBlock="4">
-            <Label size="small">Tilbakekrevingen er en omgjøring</Label>
+          <VStack gap="2" marginBlock="4">
+            <Label size="medium">Tilbakekrevingen er en omgjøring</Label>
 
             <Link href={lenkeTilTilbakekrevingMedId(tilbakekreving.omgjoeringAvId)}>Åpne forrige tilbakekreving</Link>
-          </Box>
+          </VStack>
         )}
 
         <SettPaaVent oppgave={oppgave} />

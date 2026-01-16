@@ -12,10 +12,20 @@ import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { formaterMaanednavnAar } from '~utils/formatering/dato'
 import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
+import { JaNei } from '~shared/types/ISvar'
+
+const tekstOverstyring: Record<JaNei | 'ikke_vurdert', string> = {
+  JA: 'Ja, netto overstyres',
+  NEI: 'Nei, sendes som behandlet',
+  ikke_vurdert: 'Ikke vurdert',
+}
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const navigate = useNavigate()
   const [perioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
+  const harPerioderMedVurdertOverstyring = behandling.tilbakekreving.perioder.some((periode) =>
+    periode.tilbakekrevingsbeloep.some((beloep) => !!beloep.overstyrBehandletNettoTilBrutto)
+  )
 
   return (
     <Box paddingBlock="8" paddingInline="16 8">
@@ -35,6 +45,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
             <Table.HeaderCell>Resultat</Table.HeaderCell>
             <Table.HeaderCell>Tilbakekrevingsprosent</Table.HeaderCell>
             <Table.HeaderCell>Rentetillegg</Table.HeaderCell>
+            {harPerioderMedVurdertOverstyring && <Table.HeaderCell>Overstyr netto til brutto</Table.HeaderCell>}
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -58,6 +69,11 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
                     <Table.DataCell key="resultat">{teksterTilbakekrevingResultat[beloep.resultat!!]}</Table.DataCell>
                     <Table.DataCell key="tilbakekrevingsprosent">{beloep.tilbakekrevingsprosent} %</Table.DataCell>
                     <Table.DataCell key="rentetillegg">{beloep.rentetillegg} kr</Table.DataCell>
+                    {harPerioderMedVurdertOverstyring && (
+                      <Table.DataCell>
+                        {tekstOverstyring[beloep.overstyrBehandletNettoTilBrutto ?? 'ikke_vurdert']}
+                      </Table.DataCell>
+                    )}
                   </Table.Row>
                 )
               } else {
@@ -67,6 +83,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
                     key={`beloepRad-${indexPeriode}-${beloep.originalIndex}`}
                     periode={periode}
                     beloep={beloep}
+                    ekstraKolonne={harPerioderMedVurdertOverstyring}
                   />
                 )
               }
@@ -74,6 +91,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
           })}
         </Table.Body>
       </Table>
+
       <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <HStack justify="center">
           <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>

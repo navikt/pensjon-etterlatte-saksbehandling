@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
@@ -20,7 +19,6 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -141,13 +139,9 @@ class EtteroppgjoerRevurderingService(
             )
         }
 
-        etteroppgjoerService.hentEtteroppgjoerForInntektsaar(behandling.sak.id, ETTEROPPGJOER_AAR)
-            ?: throw IkkeTillattException(
-                "ETTEROPPGJOER_IKKE_AKTIVT",
-                "Fant ikke aktivt etteroppgjoer for sak ${behandling.sak.id} og kan ikke omgjøre",
-            )
+        etteroppgjoerService.hentAktivtEtteroppgjoerForSak(behandling.sak.id)
 
-        val forbehandling = hentForbehandlingFraRevurdering(behandling)
+        val forbehandling = hentForbehandlingForBehandling(behandling)
         if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
             throw IkkeTillattException(
                 "FORBEHANDLING_IKKE_AVBRUTT",
@@ -155,28 +149,18 @@ class EtteroppgjoerRevurderingService(
             )
         }
 
-        val nyForbehandling =
-            forbehandling.copy(
-                id = UUID.randomUUID(),
-                status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
-                harMottattNyInformasjon = null,
-                endringErTilUgunstForBruker = null,
-                beskrivelseAvUgunst = null,
-            )
-
-        etteroppgjoerForbehandlingService.lagreForbehandling(nyForbehandling)
-        etteroppgjoerService.oppdaterSisteFerdigstiltForbehandlingId(nyForbehandling.sak.id, forbehandling.aar, nyForbehandling.id)
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
             forbehandling.sak.id,
             forbehandling.aar,
             EtteroppgjoerStatus.UNDER_REVURDERING,
         )
+
         opprettEtteroppgjoerRevurdering(forbehandling.sak.id, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
     }
 
-    private fun hentForbehandlingFraRevurdering(behandling: Behandling): EtteroppgjoerForbehandling {
+    private fun hentForbehandlingForBehandling(behandling: Behandling): EtteroppgjoerForbehandling {
         val forbehandlingId =
-            behandling?.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
+            behandling.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
                 "MANGLER_FORBEHANDLING_ID",
                 "Behandling med id=${behandling.id} peker ikke på en gyldig etteroppgjør forbehandling",
             )
@@ -190,7 +174,7 @@ class EtteroppgjoerRevurderingService(
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
-        val forbehandling = hentForbehandlingFraRevurdering(behandling)
+        val forbehandling = hentForbehandlingForBehandling(behandling)
         return etteroppgjoerForbehandlingService.hentBeregnetEtteroppgjoerResultat(forbehandling, brukerTokenInfo)
             ?: throw IkkeFunnetException(
                 "MANGLER_BEREGNET_RESULTAT",

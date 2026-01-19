@@ -17,15 +17,14 @@ import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi } from '~shared/api/revurdering'
 import Spinner from '~shared/Spinner'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OppfoelgingsOppgaveModal'
-import { EtteroppgjoerOpprettRevurderingModal } from '~components/oppgavebenk/oppgaveModal/EtteroppgjoerOpprettRevurderingModal'
+import { EtteroppgjoerOpprettRevurderingModal } from '~components/oppgavebenk/oppgaveModal/etteroppgjoer/EtteroppgjoerOpprettRevurderingModal'
 import { OpprettEtteroppgjoerForbehandlingModal } from '~components/oppgavebenk/oppgaveModal/OpprettEtteroppgjoerForbehandlingModal'
 import { KlageBehandleSvarFraKa } from '~components/oppgavebenk/oppgaveModal/KlageBehandleSvarFraKa'
-import { omgjoerEtteroppgjoerRevurdering as omgjoerEtteroppgjoerRevurderingApi } from '~shared/api/etteroppgjoer'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { EtteroppgjoerOmgjoerRevurderingModal } from '~components/oppgavebenk/oppgaveModal/etteroppgjoer/EtteroppgjoerOmgjoerRevurderingModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -43,8 +42,6 @@ export const HandlingerForOppgave = ({
     opprettManuellInntektsjusteringApi
   )
 
-  const [omgjoerEtteroppgjoerStatus, omgjoerEtteroppgjoerRevurdering] = useApiCall(omgjoerEtteroppgjoerRevurderingApi)
-
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
 
@@ -59,17 +56,6 @@ export const HandlingerForOppgave = ({
         oppgaveId: oppgave.id,
       },
       (revurdering: string) => navigate(`/behandling/${revurdering}/`)
-    )
-  }
-
-  const omgjoerEoRevurdering = () => {
-    omgjoerEtteroppgjoerRevurdering(
-      {
-        behandlingId: oppgave.referanse!!,
-      },
-      (revurdering: IDetaljertBehandling) => {
-        navigate(`/behandling/${revurdering.id}/`)
-      }
     )
   }
 
@@ -131,13 +117,7 @@ export const HandlingerForOppgave = ({
                 Gå til revurdering
               </Button>
 
-              {oppgave.status === Oppgavestatus.AVBRUTT && (
-                <HStack gap="4">
-                  <Button size="small" onClick={omgjoerEoRevurdering} loading={isPending(omgjoerEtteroppgjoerStatus)}>
-                    Omgjør
-                  </Button>
-                </HStack>
-              )}
+              {oppgave.status === Oppgavestatus.AVBRUTT && <EtteroppgjoerOmgjoerRevurderingModal oppgave={oppgave} />}
             </HStack>
           )}
           {erInnloggetSaksbehandlerOppgave && !referanse && (

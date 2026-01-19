@@ -128,7 +128,7 @@ class EtteroppgjoerRevurderingService(
     fun omgjoerEtteroppgjoerRevurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): Behandling {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
@@ -155,7 +155,7 @@ class EtteroppgjoerRevurderingService(
             EtteroppgjoerStatus.UNDER_REVURDERING,
         )
 
-        opprettEtteroppgjoerRevurdering(forbehandling.sak.id, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
+        return opprettEtteroppgjoerRevurdering(forbehandling.sak.id, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
     }
 
     private fun hentForbehandlingForBehandling(behandling: Behandling): EtteroppgjoerForbehandling {

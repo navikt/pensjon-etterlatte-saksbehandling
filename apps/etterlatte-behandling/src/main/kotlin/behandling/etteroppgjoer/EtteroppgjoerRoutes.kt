@@ -326,10 +326,11 @@ fun Route.etteroppgjoerRoutes(
 
             post("/omgjoer") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
-                inTransaction {
-                    etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, brukerTokenInfo)
-                }
-                call.respond(HttpStatusCode.OK)
+                val behandling =
+                    inTransaction {
+                        etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, brukerTokenInfo)
+                    }
+                call.respond(behandling)
             }
         }
 

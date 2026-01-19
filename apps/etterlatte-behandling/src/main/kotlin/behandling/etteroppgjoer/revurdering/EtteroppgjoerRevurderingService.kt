@@ -117,7 +117,7 @@ class EtteroppgjoerRevurderingService(
             )
         }
 
-        return inTransaction {
+        return run {
             kopierFaktiskInntekt(
                 fraForbehandlingId = sisteFerdigstilteForbehandlingId,
                 tilForbehandlingId = UUID.fromString(revurdering.relatertBehandlingId),

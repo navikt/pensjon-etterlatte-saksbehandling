@@ -154,7 +154,7 @@ class EtteroppgjoerRevurderingService(
                 etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                     forbehandling.sak.id,
                     forbehandling.aar,
-                    EtteroppgjoerStatus.UNDER_REVURDERING,
+                    EtteroppgjoerStatus.OMGJOERING,
                 )
 
                 forbehandling

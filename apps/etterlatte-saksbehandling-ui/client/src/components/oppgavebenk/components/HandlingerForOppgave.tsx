@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi } from '~shared/api/revurdering'
 import Spinner from '~shared/Spinner'
-import { mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OppfoelgingsOppgaveModal'
@@ -43,7 +43,7 @@ export const HandlingerForOppgave = ({
     opprettManuellInntektsjusteringApi
   )
 
-  const [, omgjoerEtteroppgjoerRevurdering] = useApiCall(omgjoerEtteroppgjoerRevurderingApi)
+  const [omgjoerEtteroppgjoerStatus, omgjoerEtteroppgjoerRevurdering] = useApiCall(omgjoerEtteroppgjoerRevurderingApi)
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
@@ -132,9 +132,11 @@ export const HandlingerForOppgave = ({
               </Button>
 
               {oppgave.status === Oppgavestatus.AVBRUTT && (
-                <Button size="small" onClick={omgjoerEoRevurdering}>
-                  Omgjør
-                </Button>
+                <HStack gap="4">
+                  <Button size="small" onClick={omgjoerEoRevurdering} loading={isPending(omgjoerEtteroppgjoerStatus)}>
+                    Omgjør
+                  </Button>
+                </HStack>
               )}
             </HStack>
           )}

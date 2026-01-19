@@ -43,7 +43,7 @@ export const hentEtteroppgjoerForbehandling = async (
 export const omgjoerEtteroppgjoerRevurdering = async (args: {
   behandlingId: string
 }): Promise<ApiResponse<IDetaljertBehandling>> => {
-  return apiClient.post(`/etteroppgjoer/omgjoer-revurdering/${args.behandlingId}`, {})
+  return apiClient.post(`/etteroppgjoer/revurdering/${args.behandlingId}/omgjoer`, {})
 }
 
 export const avbrytEtteroppgjoerForbehandling = async (args: {

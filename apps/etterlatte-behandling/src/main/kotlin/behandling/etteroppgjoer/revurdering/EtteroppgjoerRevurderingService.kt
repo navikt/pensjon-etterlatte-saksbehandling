@@ -141,13 +141,12 @@ class EtteroppgjoerRevurderingService(
             )
         }
 
-        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(behandling.sak.id, ETTEROPPGJOER_AAR)
-        if (etteroppgjoer == null) {
-            throw IkkeTillattException(
+        etteroppgjoerService.hentEtteroppgjoerForInntektsaar(behandling.sak.id, ETTEROPPGJOER_AAR)
+            ?: throw IkkeTillattException(
                 "ETTEROPPGJOER_IKKE_AKTIVT",
                 "Fant ikke aktivt etteroppgjoer for sak ${behandling.sak.id} og kan ikke omgjøre",
             )
-        }
+
         val forbehandling = hentForbehandlingFraRevurdering(behandling)
         if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
             throw IkkeTillattException(
@@ -159,13 +158,14 @@ class EtteroppgjoerRevurderingService(
         val nyForbehandling =
             forbehandling.copy(
                 id = UUID.randomUUID(),
-                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
                 harMottattNyInformasjon = null,
                 endringErTilUgunstForBruker = null,
                 beskrivelseAvUgunst = null,
             )
 
         etteroppgjoerForbehandlingService.lagreForbehandling(nyForbehandling)
+        etteroppgjoerService.oppdaterSisteFerdigstiltForbehandlingId(nyForbehandling.sak.id, forbehandling.aar, nyForbehandling.id)
         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
             forbehandling.sak.id,
             forbehandling.aar,

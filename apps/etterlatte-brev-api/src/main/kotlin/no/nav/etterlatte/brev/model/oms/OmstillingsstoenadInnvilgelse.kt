@@ -72,7 +72,7 @@ data class OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
                 beregning =
                     omsBeregning(
-                        vedleggInnhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         behandling = behandling,
                         trygdetid = trygdetid,
                         avkortingsinfo = avkortingsinfo,
@@ -139,7 +139,6 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                 harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 beregning =
                     omsBeregning(
-                        vedleggInnhold = emptyList(),
                         behandling = behandling,
                         trygdetid = trygdetid,
                         avkortingsinfo = avkortingsinfo,

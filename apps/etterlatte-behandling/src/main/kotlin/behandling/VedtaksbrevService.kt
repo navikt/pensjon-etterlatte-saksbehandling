@@ -25,6 +25,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevD
 import no.nav.etterlatte.brev.model.oms.omsBeregning
 import no.nav.etterlatte.brev.model.oms.toAvkortetBeregningsperiode
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -55,6 +56,7 @@ class VedtaksbrevService(
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val sakService: SakService,
     private val klageService: KlageService,
+    private val kodeverkService: KodeverkService,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -116,6 +118,7 @@ class VedtaksbrevService(
     ): BrevRequest =
         coroutineScope {
             val vedtakDeferred = async { vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo) }
+            val alleLand = async { kodeverkService.hentAlleLand(brukerTokenInfo) }
 
             val vedtak =
                 vedtakDeferred.await()
@@ -185,11 +188,10 @@ class VedtaksbrevService(
                     OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak(
                         beregning =
                             omsBeregning(
-                                vedleggInnhold = emptyList(), // TODO
                                 behandling = behandling,
                                 trygdetid = trygdetid.single(),
                                 avkortingsinfo = avkortingsinfo,
-                                landKodeverk = emptyList(),
+                                landKodeverk = alleLand.await(),
                             ),
                         innvilgetMindreEnnFireMndEtterDoedsfall =
                             innvilgetMindreEnnFireMndEtterDoedsfall(
@@ -227,7 +229,6 @@ class VedtaksbrevService(
                         harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                         beregning =
                             omsBeregning(
-                                vedleggInnhold = emptyList(), // TODO
                                 behandling = behandling,
                                 trygdetid = trygdetid.single(),
                                 avkortingsinfo = avkortingsinfo,

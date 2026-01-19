@@ -20,17 +20,17 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 fun omsBeregning(
-    vedleggInnhold: List<Slate.Element>,
     behandling: DetaljertBehandling,
     trygdetid: TrygdetidDto,
     avkortingsinfo: Avkortingsinfo,
     landKodeverk: List<LandDto>,
+    innhold: List<Slate.Element> = emptyList(),
 ): OmstillingsstoenadBeregning {
     val beregningsperioder =
         avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
     val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
     return OmstillingsstoenadBeregning(
-        innhold = vedleggInnhold,
+        innhold = innhold,
         virkningsdato = avkortingsinfo.virkningsdato,
         beregningsperioder = beregningsperioder,
         sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode,

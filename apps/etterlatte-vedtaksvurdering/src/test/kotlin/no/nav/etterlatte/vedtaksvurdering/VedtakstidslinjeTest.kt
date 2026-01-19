@@ -950,7 +950,7 @@ internal class VedtakstidslinjeTest {
     }
 }
 
-private fun lagVedtak(
+internal fun lagVedtak(
     id: Long,
     virkningsDato: LocalDate,
     behandlingId: UUID = UUID.randomUUID(),

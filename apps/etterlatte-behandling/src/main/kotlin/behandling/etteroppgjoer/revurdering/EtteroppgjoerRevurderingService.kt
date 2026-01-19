@@ -63,7 +63,7 @@ class EtteroppgjoerRevurderingService(
         }
 
         val (revurdering, sisteIverksatteBehandling) =
-            inTransaction {
+            run {
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
                 val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
 

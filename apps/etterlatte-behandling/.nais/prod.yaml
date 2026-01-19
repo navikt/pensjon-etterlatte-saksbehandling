@@ -205,7 +205,6 @@ spec:
       external:
         - host: skjermede-personer-pip.intern.nav.no
         - host: norg2.prod-fss-pub.nais.io
-        - host: navansatt.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen.prod-fss-pub.nais.io

@@ -82,6 +82,14 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(etteroppgjoer)
             }
 
+            post("/omgjoer-revurdering/${BEHANDLINGID_CALL_PARAMETER}") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                inTransaction {
+                    etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, brukerTokenInfo)
+                }
+                call.respond(HttpStatusCode.OK)
+            }
+
             post("/kundev-opprett-forbehandling") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 if (appIsInGCP() && !isDev()) {

@@ -1,4 +1,4 @@
-import { Button } from '@navikt/ds-react'
+import { Button, HStack } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
@@ -24,6 +24,8 @@ import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/
 import { EtteroppgjoerOpprettRevurderingModal } from '~components/oppgavebenk/oppgaveModal/EtteroppgjoerOpprettRevurderingModal'
 import { OpprettEtteroppgjoerForbehandlingModal } from '~components/oppgavebenk/oppgaveModal/OpprettEtteroppgjoerForbehandlingModal'
 import { KlageBehandleSvarFraKa } from '~components/oppgavebenk/oppgaveModal/KlageBehandleSvarFraKa'
+import { omgjoerEtteroppgjoerRevurdering as omgjoerEtteroppgjoerRevurderingApi } from '~shared/api/etteroppgjoer'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -41,6 +43,8 @@ export const HandlingerForOppgave = ({
     opprettManuellInntektsjusteringApi
   )
 
+  const [, omgjoerEtteroppgjoerRevurdering] = useApiCall(omgjoerEtteroppgjoerRevurderingApi)
+
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
 
@@ -55,6 +59,17 @@ export const HandlingerForOppgave = ({
         oppgaveId: oppgave.id,
       },
       (revurdering: string) => navigate(`/behandling/${revurdering}/`)
+    )
+  }
+
+  const omgjoerEoRevurdering = () => {
+    omgjoerEtteroppgjoerRevurdering(
+      {
+        behandlingId: oppgave.referanse!!,
+      },
+      (revurdering: IDetaljertBehandling) => {
+        navigate(`/behandling/${revurdering.id}/`)
+      }
     )
   }
 
@@ -111,9 +126,17 @@ export const HandlingerForOppgave = ({
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && referanse && (
-            <Button size="small" href={`/behandling/${referanse}`} as="a">
-              Gå til revurdering
-            </Button>
+            <HStack gap="4">
+              <Button size="small" href={`/behandling/${referanse}`} as="a">
+                Gå til revurdering
+              </Button>
+
+              {oppgave.status === Oppgavestatus.AVBRUTT && (
+                <Button size="small" onClick={omgjoerEoRevurdering}>
+                  Omgjør
+                </Button>
+              )}
+            </HStack>
           )}
           {erInnloggetSaksbehandlerOppgave && !referanse && (
             <OpprettRevurderingModal

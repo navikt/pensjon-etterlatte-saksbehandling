@@ -9,6 +9,7 @@ import {
   IInformasjonFraBruker,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { JaNei } from '~shared/types/ISvar'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Etteroppgjoer>> => {
   return apiClient.get(`/etteroppgjoer/${sakId}`)
@@ -37,6 +38,12 @@ export const hentEtteroppgjoerForbehandling = async (
   forbehandlingId: string
 ): Promise<ApiResponse<DetaljertEtteroppgjoerForbehandling>> => {
   return apiClient.get(`/etteroppgjoer/forbehandling/${forbehandlingId}`)
+}
+
+export const omgjoerEtteroppgjoerRevurdering = async (args: {
+  behandlingId: string
+}): Promise<ApiResponse<IDetaljertBehandling>> => {
+  return apiClient.post(`/etteroppgjoer/omgjoer-revurdering/${args.behandlingId}`, {})
 }
 
 export const avbrytEtteroppgjoerForbehandling = async (args: {

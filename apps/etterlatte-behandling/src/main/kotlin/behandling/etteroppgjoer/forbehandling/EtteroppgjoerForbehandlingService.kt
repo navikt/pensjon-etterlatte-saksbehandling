@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -574,6 +575,10 @@ class EtteroppgjoerForbehandlingService(
                     YearMonth.of(inntektsaar, Month.DECEMBER),
                 ),
         )
+    }
+
+    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) {
+        dao.lagreForbehandling(forbehandling)
     }
 
     fun kopierOgLagreNyForbehandling(

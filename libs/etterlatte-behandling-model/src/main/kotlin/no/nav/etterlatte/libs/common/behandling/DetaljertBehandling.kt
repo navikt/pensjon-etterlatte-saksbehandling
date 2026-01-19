@@ -46,6 +46,7 @@ enum class BehandlingOpprinnelse {
     JOURNALFOERING,
     AUTOMATISK_JOBB,
     HENDELSE,
+    OMGJOERING,
 }
 
 fun DetaljertBehandling.virkningstidspunkt() =

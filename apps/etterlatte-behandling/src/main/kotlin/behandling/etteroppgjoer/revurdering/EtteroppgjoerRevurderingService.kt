@@ -4,11 +4,13 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
@@ -17,12 +19,16 @@ import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -121,21 +127,74 @@ class EtteroppgjoerRevurderingService(
         }
     }
 
+    fun omgjoerEtteroppgjoerRevurdering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val behandling =
+            behandlingService.hentBehandling(behandlingId)
+                ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
+        if (behandling.status != BehandlingStatus.AVBRUTT) {
+            throw IkkeTillattException(
+                "BEHANDLING_IKKE_AVBRUTT",
+                "Revurdering med id=${behandling.id} er ikke avbrutt og kan ikke omgjoeres",
+            )
+        }
+
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(behandling.sak.id, ETTEROPPGJOER_AAR)
+        if (etteroppgjoer == null) {
+            throw IkkeTillattException(
+                "ETTEROPPGJOER_IKKE_AKTIVT",
+                "Fant ikke aktivt etteroppgjoer for sak ${behandling.sak.id} og kan ikke omgjøre",
+            )
+        }
+        val forbehandling = hentForbehandlingFraRevurdering(behandling)
+        if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
+            throw IkkeTillattException(
+                "FORBEHANDLING_IKKE_AVBRUTT",
+                "Etteroppgjør forbehandling med id=${forbehandling.id} er ikke avbrutt og kan ikke omgjoeres",
+            )
+        }
+
+        val nyForbehandling =
+            forbehandling.copy(
+                id = UUID.randomUUID(),
+                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                harMottattNyInformasjon = null,
+                endringErTilUgunstForBruker = null,
+                beskrivelseAvUgunst = null,
+            )
+
+        etteroppgjoerForbehandlingService.lagreForbehandling(nyForbehandling)
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+            forbehandling.sak.id,
+            forbehandling.aar,
+            EtteroppgjoerStatus.UNDER_REVURDERING,
+        )
+        opprettEtteroppgjoerRevurdering(forbehandling.sak.id, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
+    }
+
+    private fun hentForbehandlingFraRevurdering(behandling: Behandling): EtteroppgjoerForbehandling {
+        val forbehandlingId =
+            behandling?.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
+                "MANGLER_FORBEHANDLING_ID",
+                "Behandling med id=${behandling.id} peker ikke på en gyldig etteroppgjør forbehandling",
+            )
+        return etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+    }
+
     fun hentBeregnetResultatForRevurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val forbehandlingId =
-            behandling?.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
-                "MANGLER_FORBEHANDLING_ID",
-                "Behandling med id=$behandlingId peker ikke på en gyldig forbehandling",
-            )
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+        val behandling =
+            behandlingService.hentBehandling(behandlingId)
+                ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
+        val forbehandling = hentForbehandlingFraRevurdering(behandling)
         return etteroppgjoerForbehandlingService.hentBeregnetEtteroppgjoerResultat(forbehandling, brukerTokenInfo)
             ?: throw IkkeFunnetException(
                 "MANGLER_BEREGNET_RESULTAT",
-                "Forbehandling med id=$forbehandlingId til revurdering med id=$behandlingId har " +
+                "Forbehandling med id=${forbehandling.id} til revurdering med id=$behandlingId har " +
                     "ikke et beregnet resultat for etteroppgjøret.",
             )
     }

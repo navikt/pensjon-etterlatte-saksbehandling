@@ -1,7 +1,10 @@
 package no.nav.etterlatte.institusjonsopphold.oppgaver
 
+import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.toList
+import java.util.UUID
 
 class InstitusjonsoppholdOppgaverDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
@@ -99,6 +102,30 @@ class InstitusjonsoppholdOppgaverDao(
                     """,
                 ).executeQuery()
                     .toList { getLong("opphold_id") }
+            }
+        }
+
+    fun hentHendelserForOppholdSomIkkeFinnesIInst2(): List<UUID> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                        SELECT
+                        DISTINCT ON (hendelse.samsvar_mellom_pdl_og_grunnlag -> 'oppholdBeriket' ->> 'oppholdId')
+                        hendelse.id hendelseId
+                        FROM grunnlagsendringshendelse hendelse
+                             WHERE
+                                 TYPE = 'INSTITUSJONSOPPHOLD'
+                                 AND NOT EXISTS (
+                                 SELECT 1 FROM institusjonsopphold_hentet
+                                          WHERE CAST(opphold_id AS text) = hendelse.samsvar_mellom_pdl_og_grunnlag -> 'oppholdBeriket' ->> 'oppholdId'
+                             )
+                        ORDER BY hendelse.samsvar_mellom_pdl_og_grunnlag -> 'oppholdBeriket' ->> 'oppholdId', hendelse.opprettet DESC
+                    """,
+                ).executeQuery()
+                    .toList {
+                        getUUID("hendelseId")
+                    }
             }
         }
 }

@@ -4,7 +4,9 @@ import institusjonsopphold.personer.InstitusjonsoppholdInternKlient
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdToggles
@@ -13,15 +15,22 @@ import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdHendelseBe
 import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdKilde
 import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdsType
 import no.nav.etterlatte.institusjonsopphold.personer.InstitusjonsoppholdPersonerDao
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.logger
+import no.nav.etterlatte.oppgave.OppgaveService
+import java.util.UUID
 
 class InstitusjonsoppholdOppgaverService(
     private val institusjonsoppholdOppgaverDao: InstitusjonsoppholdOppgaverDao,
     private val institusjonsoppholdPersonerDao: InstitusjonsoppholdPersonerDao,
     private val featureToggleService: FeatureToggleService,
+    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val institusjonsoppholdInternKlient: InstitusjonsoppholdInternKlient,
+    private val oppgaveService: OppgaveService,
 ) {
     fun setupKontekstAndRun(context: Context) {
         Kontekst.set(context)
@@ -36,6 +45,11 @@ class InstitusjonsoppholdOppgaverService(
         if (skalKjoere()) {
             kjoer()
             logger.info("Ferdig med å opprette oppgaver for institusjonsopphold")
+        }
+
+        if (skalLageOppgaverForAnnullerteOpphold()) {
+            kjoerAnnullerteOpphold()
+            logger.info("Ferdig med å opprette oppgaver for annullerte institusjonsopphold")
         }
     }
 
@@ -63,6 +77,28 @@ class InstitusjonsoppholdOppgaverService(
             inTransaction {
                 institusjonsoppholdOppgaverDao.markerSomFerdig(oppholdId)
             }
+        }
+    }
+
+    private fun kjoerAnnullerteOpphold() {
+        val oppholdListe: List<UUID> =
+            inTransaction {
+                institusjonsoppholdOppgaverDao.hentHendelserForOppholdSomIkkeFinnesIInst2()
+            }
+
+        oppholdListe.forEach { hendelseId ->
+            val hendelse = grunnlagsendringshendelseDao.hentGrunnlagsendringshendelse(hendelseId)
+            krev(hendelse != null && hendelse.samsvarMellomKildeOgGrunnlag is SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD) {
+                "Hendelse er ikke institusjonsopphold!"
+            }
+
+            oppgaveService.opprettOppgave(
+                hendelse.id.toString(),
+                hendelse.sakId,
+                OppgaveKilde.GENERELL_BEHANDLING,
+                OppgaveType.OPPFOELGING,
+                "Saken har institusjonsopphold som ikke lenger finnes i INST2",
+            )
         }
     }
 
@@ -104,6 +140,9 @@ class InstitusjonsoppholdOppgaverService(
     }
 
     private fun skalKjoere(): Boolean = featureToggleService.isEnabled(InstitusjonsoppholdToggles.LagOppgaverForOpphold, false)
+
+    private fun skalLageOppgaverForAnnullerteOpphold(): Boolean =
+        featureToggleService.isEnabled(InstitusjonsoppholdToggles.LagOppgaverForAnnullerteOpphold, false)
 
     private fun skalSetteOpp(): Boolean = featureToggleService.isEnabled(InstitusjonsoppholdToggles.SettOppOppgaverForOpphold, false)
 }

@@ -53,7 +53,7 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ oppgave }: Props) => {
               <Info label="Frist" tekst={formaterDato(oppgave.frist)} />
             </HStack>
 
-            <BodyShort>Omgjør behandling</BodyShort>
+            <BodyShort>Ønsker du å omgjøre denne behandlingen?</BodyShort>
 
             {mapResult(omgjoerEtteroppgjoerResult, {
               error: (error) => <ApiErrorAlert>Kunne ikke omgjøre behandling. {error.detail}</ApiErrorAlert>,
@@ -62,7 +62,7 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ oppgave }: Props) => {
             <HStack gap="4" justify="end">
               {erTildeltSaksbehandler && (
                 <Button size="small" onClick={omgjoerEoRevurdering} loading={isPending(omgjoerEtteroppgjoerResult)}>
-                  Omgjør
+                  Ja, omgjør
                 </Button>
               )}
             </HStack>

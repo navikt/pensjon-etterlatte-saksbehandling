@@ -6,8 +6,6 @@ import { OppgaveDTO } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterDato } from '~utils/formatering/dato'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
 import { omgjoerEtteroppgjoerRevurdering as omgjoerEtteroppgjoerRevurderingApi } from '~shared/api/etteroppgjoer'
@@ -48,11 +46,6 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ oppgave }: Props) => {
       >
         <Modal.Body>
           <VStack gap="4">
-            <HStack gap="4">
-              <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
-              <Info label="Frist" tekst={formaterDato(oppgave.frist)} />
-            </HStack>
-
             <BodyShort>Ønsker du å omgjøre denne behandlingen?</BodyShort>
 
             {mapResult(omgjoerEtteroppgjoerResult, {

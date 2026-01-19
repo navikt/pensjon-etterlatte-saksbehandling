@@ -129,33 +129,40 @@ class EtteroppgjoerRevurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
-        val behandling =
-            behandlingService.hentBehandling(behandlingId)
-                ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
-        if (behandling.status != BehandlingStatus.AVBRUTT) {
-            throw IkkeTillattException(
-                "BEHANDLING_IKKE_AVBRUTT",
-                "Revurdering med id=${behandling.id} er ikke avbrutt og kan ikke omgjoeres",
-            )
+        val forbehandling =
+            inTransaction {
+                val behandling =
+                    behandlingService.hentBehandling(behandlingId)
+                        ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
+                if (behandling.status != BehandlingStatus.AVBRUTT) {
+                    throw IkkeTillattException(
+                        "BEHANDLING_IKKE_AVBRUTT",
+                        "Revurdering med id=${behandling.id} er ikke avbrutt og kan ikke omgjoeres",
+                    )
+                }
+
+                etteroppgjoerService.hentAktivtEtteroppgjoerForSak(behandling.sak.id)
+
+                val forbehandling = hentForbehandlingForBehandling(behandling)
+                if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
+                    throw IkkeTillattException(
+                        "FORBEHANDLING_IKKE_AVBRUTT",
+                        "Etteroppgjør forbehandling med id=${forbehandling.id} er ikke avbrutt og kan ikke omgjoeres",
+                    )
+                }
+
+                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                    forbehandling.sak.id,
+                    forbehandling.aar,
+                    EtteroppgjoerStatus.UNDER_REVURDERING,
+                )
+
+                forbehandling
+            }
+
+        return inTransaction {
+            opprettEtteroppgjoerRevurdering(forbehandling.sak.id, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
         }
-
-        etteroppgjoerService.hentAktivtEtteroppgjoerForSak(behandling.sak.id)
-
-        val forbehandling = hentForbehandlingForBehandling(behandling)
-        if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
-            throw IkkeTillattException(
-                "FORBEHANDLING_IKKE_AVBRUTT",
-                "Etteroppgjør forbehandling med id=${forbehandling.id} er ikke avbrutt og kan ikke omgjoeres",
-            )
-        }
-
-        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-            forbehandling.sak.id,
-            forbehandling.aar,
-            EtteroppgjoerStatus.UNDER_REVURDERING,
-        )
-
-        return opprettEtteroppgjoerRevurdering(forbehandling.sak.id, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
     }
 
     private fun hentForbehandlingForBehandling(behandling: Behandling): EtteroppgjoerForbehandling {

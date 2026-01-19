@@ -326,10 +326,8 @@ fun Route.etteroppgjoerRoutes(
 
             post("/omgjoer") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
-                val behandling =
-                    inTransaction {
-                        etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, brukerTokenInfo)
-                    }
+                val behandling = etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, brukerTokenInfo)
+
                 call.respond(behandling)
             }
         }

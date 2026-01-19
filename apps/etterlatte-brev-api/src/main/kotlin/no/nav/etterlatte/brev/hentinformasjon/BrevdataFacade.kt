@@ -240,6 +240,7 @@ class BrevdataFacade(
                 val klageId = UUID.fromString(relatertBehandlingId)
                 behandlingService.hentKlage(klageId, bruker)
             } catch (e: Exception) {
+                logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
                 logger.info(
                     "Kunne ikke finne klage med id=$relatertBehandlingId, denne førstegangsbehandlingen med id=${behandling.id} gjelder ikke omgjøring på grunn av klage",
                 )

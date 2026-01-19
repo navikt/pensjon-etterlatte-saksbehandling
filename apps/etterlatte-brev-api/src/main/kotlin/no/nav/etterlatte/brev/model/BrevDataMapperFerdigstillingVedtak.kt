@@ -28,7 +28,6 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseForeldreloes
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOmregnetNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoer
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurdering
-import no.nav.etterlatte.brev.model.bp.datoVedtakOmgjoering
 import no.nav.etterlatte.brev.model.klage.AvvistKlageFerdigData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjusteringVedtak

@@ -317,20 +317,20 @@ fun Route.etteroppgjoerRoutes(
             call.respond(forbehandlinger)
         }
 
-        route("/revurdering/{${BEHANDLINGID_CALL_PARAMETER}}/resultat") {
-            get {
+        route("/revurdering/{${BEHANDLINGID_CALL_PARAMETER}}") {
+            get("/resultat") {
                 val resultat =
                     inTransaction { etteroppgjoerRevurderingService.hentBeregnetResultatForRevurdering(behandlingId, brukerTokenInfo) }
                 call.respond(resultat)
             }
-        }
 
-        post("/revurdering/${BEHANDLINGID_CALL_PARAMETER}/omgjoer") {
-            sjekkEtteroppgjoerEnabled(featureToggleService)
-            inTransaction {
-                etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, brukerTokenInfo)
+            post("omgjoer") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                inTransaction {
+                    etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, brukerTokenInfo)
+                }
+                call.respond(HttpStatusCode.OK)
             }
-            call.respond(HttpStatusCode.OK)
         }
 
         post("/les-skatteoppgjoer-hendelser") {

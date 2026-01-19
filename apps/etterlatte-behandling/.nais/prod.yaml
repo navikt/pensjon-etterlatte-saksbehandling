@@ -139,9 +139,9 @@ spec:
     - name: NORG2_URL
       value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1
     - name: NAVANSATT_URL
-      value: https://navansatt.prod-fss-pub.nais.io
+      value: http://navansatt.pensjon-saksbehandling/
     - name: ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE
-      value: api://prod-fss.pensjondeployer.navansatt/.default
+      value: api://prod-gcp.pensjon-saksbehandling.navansatt/.default
     - name: SKJERMING_URL
       value: https://skjermede-personer-pip.intern.nav.no
     - name: AZURE_SCOPE_SKJERMEDE_PIP
@@ -200,6 +200,8 @@ spec:
         - application: etterlatte-klage
         - application: logging
           namespace: nais-system
+        - application: navansatt
+          namespace: pensjon-saksbehandling
       external:
         - host: skjermede-personer-pip.intern.nav.no
         - host: norg2.prod-fss-pub.nais.io

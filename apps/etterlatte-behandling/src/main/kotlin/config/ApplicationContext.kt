@@ -795,6 +795,7 @@ internal class ApplicationContext(
             vilkaarsvurderingService = vilkaarsvurderingService,
             sakService = sakService,
             klageService = klageService,
+            kodeverkService = kodeverkService,
         )
 
     val brevService =

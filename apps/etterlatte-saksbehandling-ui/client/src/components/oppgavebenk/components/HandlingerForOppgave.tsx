@@ -24,7 +24,6 @@ import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/
 import { EtteroppgjoerOpprettRevurderingModal } from '~components/oppgavebenk/oppgaveModal/etteroppgjoer/EtteroppgjoerOpprettRevurderingModal'
 import { OpprettEtteroppgjoerForbehandlingModal } from '~components/oppgavebenk/oppgaveModal/OpprettEtteroppgjoerForbehandlingModal'
 import { KlageBehandleSvarFraKa } from '~components/oppgavebenk/oppgaveModal/KlageBehandleSvarFraKa'
-import { EtteroppgjoerOmgjoerRevurderingModal } from '~components/oppgavebenk/oppgaveModal/etteroppgjoer/EtteroppgjoerOmgjoerRevurderingModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -116,8 +115,6 @@ export const HandlingerForOppgave = ({
               <Button size="small" href={`/behandling/${referanse}`} as="a">
                 Gå til revurdering
               </Button>
-
-              {oppgave.status === Oppgavestatus.AVBRUTT && <EtteroppgjoerOmgjoerRevurderingModal oppgave={oppgave} />}
             </HStack>
           )}
           {erInnloggetSaksbehandlerOppgave && !referanse && (

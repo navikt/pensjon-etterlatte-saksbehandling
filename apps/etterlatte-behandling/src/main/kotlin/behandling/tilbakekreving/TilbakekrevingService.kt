@@ -639,7 +639,6 @@ class TilbakekrevingService(
                 .toString(),
         kontrollfelt = tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value,
         perioder = tilbakekreving.tilbakekreving.perioder,
-        overstyrBehandletNettoTilBruttoMotTilbakekreving = tilbakekreving.skalOverstyreBehandletNettoTilBrutto(),
     )
 
     private fun hjemmelFraVurdering(vurdering: TilbakekrevingVurdering): TilbakekrevingHjemmel =

@@ -1,7 +1,19 @@
-import { Box, Button, ErrorSummary, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import {
+  Alert,
+  BodyLong,
+  BodyShort,
+  Box,
+  Button,
+  ErrorSummary,
+  Heading,
+  HStack,
+  Label,
+  Radio,
+  VStack,
+} from '@navikt/ds-react'
 import { useNavigate } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
-import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
+import { harPerioderMedOverstyringAvNettoBrutto, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { TilbakekrevingVurderingOppsummering } from '~components/tilbakekreving/oppsummering/TilbakekrevingVurderingOppsummering'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { fattVedtak, lagreSkalSendeBrev, validerTilbakekreving } from '~shared/api/tilbakekreving'
@@ -90,6 +102,31 @@ export function TilbakekrevingOppsummering({
       </Box>
       <Box paddingBlock="8" paddingInline="16 8">
         <TilbakekrevingVurderingOppsummering behandling={behandling} />
+        {harPerioderMedOverstyringAvNettoBrutto(behandling) && (
+          <Box marginBlock="10 0" maxWidth="45rem">
+            <Alert variant="info">
+              <VStack gap="4">
+                <BodyLong>
+                  Det er lagt inn overstyring av netto tilbakekrevingsbeløp til brutto tilbakekreving av kun
+                  nettobeløpet. Det må lages en oppgave til NØP for å få postert skattebeløpet manuelt etter
+                  overstyringen.
+                </BodyLong>
+                <Label>Merknad</Label>
+                <BodyShort>Barnepensjon - se vedtak om netto tilbakekreving i Gjenny [dato]</BodyShort>
+                <BodyShort>Skatt kr [skattebeløp] må posteres manuelt.</BodyShort>
+
+                <Label>Tema</Label>
+                <BodyShort>Økonomi</BodyShort>
+                <Label>Gjelder</Label>
+                <BodyShort>Tilbakekreving</BodyShort>
+                <Label>Prioritet</Label>
+                <BodyShort>Høy</BodyShort>
+
+                <BodyShort>Oppgaven legges til 4819 (Nav økonomi pensjon)</BodyShort>
+              </VStack>
+            </Alert>
+          </Box>
+        )}
 
         <div style={{ marginTop: '3rem' }}>
           <VStack gap="6">

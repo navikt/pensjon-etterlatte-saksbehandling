@@ -1,4 +1,4 @@
-package no.nav.etterlatte.institusjonsopphold.personer
+package no.nav.etterlatte.institusjonsopphold.oppgaver
 
 import kotlinx.coroutines.sync.Semaphore
 import no.nav.etterlatte.Context
@@ -16,8 +16,8 @@ import java.time.Duration
 import java.util.Timer
 import javax.sql.DataSource
 
-data class InstitusjonsoppholdPersonerJobb(
-    private val institusjonsoppholdPersonerService: InstitusjonsoppholdPersonerService,
+data class InstitusjonsoppholdOppgaverJobb(
+    private val institusjonsoppholdOppgaverService: InstitusjonsoppholdOppgaverService,
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
@@ -32,7 +32,7 @@ data class InstitusjonsoppholdPersonerJobb(
 
     private var jobContext: Context =
         Context(
-            Self(institusjonsoppholdPersonerService::class.java.simpleName),
+            Self(institusjonsoppholdOppgaverService::class.java.simpleName),
             DatabaseContext(dataSource),
             sakTilgangDao,
             HardkodaSystembruker.institusjonsopphold,
@@ -49,16 +49,16 @@ data class InstitusjonsoppholdPersonerJobb(
         ) {
             if (erLeader()) {
                 if (lock.tryAcquire()) {
-                    logger.info("Starter henting av institusjonsopphold $jobbNavn")
+                    logger.info("Starter oppretting av grunnlagsendringshendelser for institusjonsopphold $jobbNavn")
                     try {
-                        institusjonsoppholdPersonerService.setupKontekstAndRun(jobContext)
+                        institusjonsoppholdOppgaverService.setupKontekstAndRun(jobContext)
                     } catch (e: Exception) {
-                        logger.error("Feilet i henting av institusjonsopphold $jobbNavn", e)
+                        logger.error("Feilet i oppretting av hendelser for institusjonsopphold $jobbNavn", e)
                         sleep(10000)
                     } finally {
                         lock.release()
                     }
-                    logger.info("Ferdig med henting av institusjonsopphold $jobbNavn")
+                    logger.info("Ferdig med oppretting av hendelser for institusjonsopphold $jobbNavn")
                 }
             }
         }

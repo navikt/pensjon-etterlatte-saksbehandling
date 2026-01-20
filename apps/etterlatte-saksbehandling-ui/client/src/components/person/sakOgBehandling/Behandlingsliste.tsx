@@ -18,7 +18,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { formaterDato } from '~utils/formatering/dato'
-import { formaterBehandlingstype, formaterEnumTilLesbarString } from '~utils/formatering/formatering'
+import { formaterBehandlingstype } from '~utils/formatering/formatering'
 
 type alleBehandlingsTyper = IBehandlingsammendrag | Generellbehandling
 
@@ -92,9 +92,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                       </HStack>
                     </Table.DataCell>
                     <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
-                    <Table.DataCell>
-                      {formaterEnumTilLesbarString(behandlingStatusTilLesbartnavn(behandling.status))}
-                    </Table.DataCell>
+                    <Table.DataCell>{behandlingStatusTilLesbartnavn(behandling.status)}</Table.DataCell>
                     <Table.DataCell>
                       {behandling.virkningstidspunkt ? formaterDato(behandling.virkningstidspunkt!!.dato) : ''}
                     </Table.DataCell>

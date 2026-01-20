@@ -54,7 +54,6 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB("etteroppgjoer_svarfristutloept_jobb"),
     ETTEROPPGJOER_OPPRETT_FORBEHANDLING_JOBB("etteroppgjoer_opprett_forbehandling_jobb"),
     ETTEROPPGJOER_KAN_FERDIGSTILLE_FORBEHANDLING("etteroppgjoer_kan_ferdigstille_forbehandling"),
-    ETTEROPPGJOER_OPPHOER_SKYLDES_DOEDSFALL("etteroppgjoer-opphoer-skyldes-doedsfall"),
     HENT_ENHETER_FRA_ENTRA_PROXY("hent_enheter_fra_entra_proxy"),
     VIS_TILBAKESTILL_ETTEROPPGJOER("vis-tilbakestill-etteroppgjoer"),
     ;

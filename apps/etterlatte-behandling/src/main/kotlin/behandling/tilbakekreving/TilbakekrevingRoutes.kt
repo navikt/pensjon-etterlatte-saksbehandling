@@ -12,6 +12,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
@@ -27,6 +28,7 @@ enum class TilbakekrevingToggles(
     private val toggle: String,
 ) : FeatureToggle {
     OMGJOER("omgjoer-tilbakekreving"),
+    OVERSTYR_NETTO_BRUTTO("overstyr-netto-brutto-tilbakekreving"),
     ;
 
     override fun key(): String = toggle
@@ -152,6 +154,10 @@ internal fun Route.tilbakekrevingRoutes(
         }
     }
 }
+
+data class TilbakekrevingOverstyrNettoRequest(
+    val overstyrNettoBrutto: JaNei?,
+)
 
 data class OppgaveStatusRequest(
     val paaVent: Boolean,

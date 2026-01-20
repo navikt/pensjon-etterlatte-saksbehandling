@@ -57,7 +57,7 @@ class EtteroppgjoerRevurderingService(
         val sisteFerdigstilteForbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling
 
         krevIkkeNull(sisteFerdigstilteForbehandlingId) {
-            "Fant ikke sisteFerdigstilteForbehandling for sak $sakId"
+            "Fant ikke sisteFerdigstilteForbehandling for sakId=$sakId"
         }
 
         val (revurdering, sisteIverksatteBehandling) =
@@ -129,7 +129,7 @@ class EtteroppgjoerRevurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
-        val forbehandling =
+        val sakId =
             inTransaction {
                 val behandling =
                     behandlingService.hentBehandling(behandlingId)
@@ -156,10 +156,10 @@ class EtteroppgjoerRevurderingService(
                     EtteroppgjoerStatus.OMGJOERING,
                 )
 
-                forbehandling
+                forbehandling.sak.id
             }
 
-        return opprettEtteroppgjoerRevurdering(forbehandling.sak.id, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
+        return opprettEtteroppgjoerRevurdering(sakId, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
     }
 
     private fun hentForbehandlingForBehandling(behandling: Behandling): EtteroppgjoerForbehandling {

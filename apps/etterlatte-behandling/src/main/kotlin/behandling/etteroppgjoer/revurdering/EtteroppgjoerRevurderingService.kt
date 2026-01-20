@@ -53,7 +53,7 @@ class EtteroppgjoerRevurderingService(
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+        val etteroppgjoer = inTransaction { etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId) }
         val sisteFerdigstilteForbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling
 
         krevIkkeNull(sisteFerdigstilteForbehandlingId) {
@@ -61,7 +61,7 @@ class EtteroppgjoerRevurderingService(
         }
 
         val (revurdering, sisteIverksatteBehandling) =
-            run {
+            inTransaction {
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
                 val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
 
@@ -115,13 +115,13 @@ class EtteroppgjoerRevurderingService(
             )
         }
 
-        return run {
+        return inTransaction {
             kopierFaktiskInntekt(
                 fraForbehandlingId = sisteFerdigstilteForbehandlingId,
                 tilForbehandlingId = UUID.fromString(revurdering.relatertBehandlingId),
                 brukerTokenInfo = brukerTokenInfo,
             )
-            krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Revurdering finnes ikke etter oppretting" }
+            krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Klarte ikke å finne revurdering etter opprettelse" }
         }
     }
 
@@ -159,9 +159,7 @@ class EtteroppgjoerRevurderingService(
                 forbehandling
             }
 
-        return inTransaction {
-            opprettEtteroppgjoerRevurdering(forbehandling.sak.id, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
-        }
+        return opprettEtteroppgjoerRevurdering(forbehandling.sak.id, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
     }
 
     private fun hentForbehandlingForBehandling(behandling: Behandling): EtteroppgjoerForbehandling {

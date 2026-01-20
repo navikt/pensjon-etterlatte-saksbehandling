@@ -87,13 +87,12 @@ internal fun Route.revurderingRoutes(
 
                     medBody<OpprettEtteroppgjoerRevurderingRequest> {
                         val revurdering =
-                            inTransaction {
-                                etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
-                                    sakId,
-                                    it.opprinnelse,
-                                    brukerTokenInfo,
-                                )
-                            }
+                            etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
+                                sakId,
+                                it.opprinnelse,
+                                brukerTokenInfo,
+                            )
+
                         call.respond(revurdering.id)
                     }
                 }

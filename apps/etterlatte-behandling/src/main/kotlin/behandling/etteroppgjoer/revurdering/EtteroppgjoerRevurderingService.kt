@@ -141,8 +141,7 @@ class EtteroppgjoerRevurderingService(
                     )
                 }
 
-                etteroppgjoerService.hentAktivtEtteroppgjoerForSak(behandling.sak.id)
-
+                val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(behandling.sak.id)
                 val forbehandling = hentForbehandlingForBehandling(behandling)
                 if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
                     throw IkkeTillattException(
@@ -152,8 +151,8 @@ class EtteroppgjoerRevurderingService(
                 }
 
                 etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                    forbehandling.sak.id,
-                    forbehandling.aar,
+                    etteroppgjoer.sakId,
+                    etteroppgjoer.inntektsaar,
                     EtteroppgjoerStatus.OMGJOERING,
                 )
 

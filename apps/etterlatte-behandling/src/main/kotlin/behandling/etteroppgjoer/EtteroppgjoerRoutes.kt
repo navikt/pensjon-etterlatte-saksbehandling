@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class EtteroppgjoerToggles(
@@ -324,10 +325,12 @@ fun Route.etteroppgjoerRoutes(
             }
 
             post("/omgjoer") {
-                sjekkEtteroppgjoerEnabled(featureToggleService)
-                val behandling = etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, brukerTokenInfo)
-
-                call.respond(behandling)
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    sjekkEtteroppgjoerEnabled(featureToggleService)
+                    val behandling =
+                        etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, saksbehandler)
+                    call.respond(behandling)
+                }
             }
         }
 

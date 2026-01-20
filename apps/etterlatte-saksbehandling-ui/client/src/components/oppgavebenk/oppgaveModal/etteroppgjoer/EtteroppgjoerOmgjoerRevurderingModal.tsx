@@ -54,9 +54,14 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ oppgave }: Props) => {
 
             <HStack gap="4" justify="end">
               {erTildeltSaksbehandler && (
-                <Button size="small" onClick={omgjoerEoRevurdering} loading={isPending(omgjoerEtteroppgjoerResult)}>
-                  Ja, omgjør
-                </Button>
+                <HStack gap="4">
+                  <Button size="small" onClick={() => setOpen(false)} variant="secondary">
+                    Nei
+                  </Button>
+                  <Button size="small" onClick={omgjoerEoRevurdering} loading={isPending(omgjoerEtteroppgjoerResult)}>
+                    Ja, omgjør
+                  </Button>
+                </HStack>
               )}
             </HStack>
           </VStack>

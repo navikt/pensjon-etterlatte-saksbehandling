@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.ktor.route
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Parameters
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -53,9 +54,7 @@ inline val RoutingContext.generellBehandlingId: UUID
 
 inline val RoutingContext.behandlingId: UUID
     get() =
-        call.parameters[BEHANDLINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
-            "BehandlingId er ikke i path params",
-        )
+        call.parameters.parseUuidParameter(BEHANDLINGID_CALL_PARAMETER)
 
 inline val RoutingContext.sakId: SakId
     get() =
@@ -70,15 +69,11 @@ inline val RoutingContext.sakId: SakId
 
 inline val RoutingContext.oppgaveId: UUID
     get() =
-        krevIkkeNull(call.parameters[OPPGAVEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
-            "OppgaveId er ikke i path params"
-        }
+        call.parameters.parseUuidParameter(OPPGAVEID_CALL_PARAMETER)
 
 inline val RoutingContext.klageId: UUID
     get() =
-        krevIkkeNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
-            "KlageId er ikke i path params"
-        }
+        call.parameters.parseUuidParameter(KLAGEID_CALL_PARAMETER)
 
 inline val RoutingContext.gosysOppgaveId: String
     get() =
@@ -87,18 +82,11 @@ inline val RoutingContext.gosysOppgaveId: String
         }
 
 inline val RoutingContext.tilbakekrevingId: UUID
-    get() =
-        call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
-            "TILBAKEKREVINGID_MANGLER",
-            "TilbakekrevingId er ikke i path params",
-        )
+    get() = call.parameters.parseUuidParameter(TILBAKEKREVINGID_CALL_PARAMETER)
 
 inline val RoutingContext.forbehandlingId: UUID
     get() =
-        call.parameters[FORBEHANDLINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
-            "FORBEHANDLINGID_MANGLER",
-            "ForbehandlingId er ikke i path params",
-        )
+        call.parameters.parseUuidParameter(FORBEHANDLINGID_CALL_PARAMETER)
 
 val logger: Logger = LoggerFactory.getLogger("TilgangsSjekk")
 
@@ -127,6 +115,20 @@ suspend inline fun RoutingContext.withSakId(
     withSakId(sakId, sakTilgangsSjekk, skrivetilgang, onSuccess)
 }
 
+fun Parameters.parseUuidParameter(parameter: String): UUID =
+    try {
+        this[parameter]?.let { UUID.fromString(it) }
+            ?: throw UgyldigForespoerselException("PARAMETER_MANGLER", "$parameter er ikke i path params.")
+    } catch (e: Exception) {
+        throw UgyldigForespoerselException(
+            "PARAMETER_UGYLDIG",
+            "$parameter er ikke en gyldig id. " +
+                "Hvis du har navigert til denne siden er det en kobling som er ødelagt i Gjenny. " +
+                "Beskriv hvilke steg du fulgte og meld sak i porten.",
+            cause = e,
+        )
+    }
+
 suspend inline fun RoutingContext.withSakId(
     sakId: SakId,
     sakTilgangsSjekk: SakTilgangsSjekk,
@@ -145,7 +147,9 @@ suspend inline fun RoutingContext.withSakId(
             }
         }
 
-        is Systembruker -> onSuccess(sakId)
+        is Systembruker -> {
+            onSuccess(sakId)
+        }
     }
 }
 
@@ -171,7 +175,9 @@ suspend inline fun RoutingContext.withBehandlingId(
             }
         }
 
-        else -> onSuccess(behandlingId)
+        else -> {
+            onSuccess(behandlingId)
+        }
     }
 }
 
@@ -198,7 +204,9 @@ suspend inline fun RoutingContext.withFoedselsnummer(
             }
         }
 
-        else -> onSuccess(foedselsnummer)
+        else -> {
+            onSuccess(foedselsnummer)
+        }
     }
 }
 

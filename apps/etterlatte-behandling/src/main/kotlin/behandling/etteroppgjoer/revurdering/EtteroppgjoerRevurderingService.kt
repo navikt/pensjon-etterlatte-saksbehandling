@@ -129,7 +129,7 @@ class EtteroppgjoerRevurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
-        val sakId =
+        val behandling =
             inTransaction {
                 val behandling =
                     behandlingService.hentBehandling(behandlingId)
@@ -156,10 +156,10 @@ class EtteroppgjoerRevurderingService(
                     EtteroppgjoerStatus.OMGJOERING,
                 )
 
-                forbehandling.sak.id
+                behandling
             }
 
-        return opprettEtteroppgjoerRevurdering(sakId, BehandlingOpprinnelse.OMGJOERING, brukerTokenInfo)
+        return opprettEtteroppgjoerRevurdering(behandling.sak.id, behandling.opprinnelse, brukerTokenInfo)
     }
 
     private fun hentForbehandlingForBehandling(behandling: Behandling): EtteroppgjoerForbehandling {

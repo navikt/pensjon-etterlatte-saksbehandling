@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.AvkortetYtelsePeriode
@@ -69,6 +70,8 @@ private fun Vedtak.toSamordningsvedtakDto(avkortetYtelsePerioder: List<AvkortetY
         beregning = innhold.beregning,
         perioder =
             avkortetYtelsePerioder
+                // Vi har allerede fjernet overlappende utbetalingsperioder i tidslinjen for vedtak
+                .filter { it.fom in innhold.utbetalingsperioder.map { it.periode.fom } }
                 .map { it.toSamordningVedtakPeriode(innhold.utbetalingsperioder) },
     )
 }

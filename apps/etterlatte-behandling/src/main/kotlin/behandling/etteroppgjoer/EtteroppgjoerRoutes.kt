@@ -46,15 +46,12 @@ enum class EtteroppgjoerToggles(
     private val toggle: String,
 ) : FeatureToggle {
     ETTEROPPGJOER("etteroppgjoer"),
-    ETTEROPPGJOER_STUB_INNTEKT("etteroppgjoer_stub_inntekt"),
     ETTEROPPGJOER_STUB_PGI("etteroppgjoer_stub_pgi"),
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
     ETTEROPPGJOER_PERIODISK_JOBB("etteroppgjoer_periodisk_jobb"),
     ETTEROPPGJOER_SKATTEHENDELSES_JOBB("etteroppgjoer_skattehendelses_jobb"),
     ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB("etteroppgjoer_svarfristutloept_jobb"),
-    ETTEROPPGJOER_OPPRETT_FORBEHANDLING_JOBB("etteroppgjoer_opprett_forbehandling_jobb"),
     ETTEROPPGJOER_KAN_FERDIGSTILLE_FORBEHANDLING("etteroppgjoer_kan_ferdigstille_forbehandling"),
-    HENT_ENHETER_FRA_ENTRA_PROXY("hent_enheter_fra_entra_proxy"),
     VIS_TILBAKESTILL_ETTEROPPGJOER("vis-tilbakestill-etteroppgjoer"),
     ;
 

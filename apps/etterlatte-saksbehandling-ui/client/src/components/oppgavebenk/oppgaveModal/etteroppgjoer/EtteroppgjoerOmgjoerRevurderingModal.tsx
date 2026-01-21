@@ -42,7 +42,7 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
         <Modal.Body>
           <VStack gap="4">
             <BodyShort>
-              I tilfelle hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du omgjøre revurderingen uten å
+              I tilfeller hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du omgjøre revurderingen uten å
               måtte behandle etteroppgjøret på nytt via ny forbehandling.
             </BodyShort>
 

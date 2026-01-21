@@ -13,7 +13,6 @@ export const enum FeatureToggle {
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',
   notater = 'notater',
   kopier_trygdetidsgrunnlag = 'kopier-trygdetidsgrunnlag',
-  kopier_vilkaar_avdoed = 'kopier-vilkaar-avdoed',
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
@@ -65,10 +64,7 @@ const kopier_trygdetidsgrunnlag: Toggle = {
   togglename: FeatureToggle.kopier_trygdetidsgrunnlag,
   enabled: false,
 }
-const kopier_vilkaar_avdoed: Toggle = {
-  togglename: FeatureToggle.kopier_vilkaar_avdoed,
-  enabled: false,
-}
+
 const opprette_generell_oppgave: Toggle = {
   togglename: FeatureToggle.opprette_generell_oppgave,
   enabled: false,
@@ -122,7 +118,6 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.tillate_tidlig_virkningstidspunkt]: tillate_tidlig_virkningstidspunkt,
   [FeatureToggle.notater]: notater,
   [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,
-  [FeatureToggle.kopier_vilkaar_avdoed]: kopier_vilkaar_avdoed,
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:

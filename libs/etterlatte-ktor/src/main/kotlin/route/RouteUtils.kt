@@ -119,7 +119,7 @@ fun Parameters.parseUuidParameter(parameter: String): UUID =
     try {
         this[parameter]?.let { UUID.fromString(it) }
             ?: throw UgyldigForespoerselException("PARAMETER_MANGLER", "$parameter er ikke i path params.")
-    } catch (e: Exception) {
+    } catch (e: IllegalArgumentException) {
         throw UgyldigForespoerselException(
             "PARAMETER_UGYLDIG",
             "$parameter er ikke en gyldig id. " +

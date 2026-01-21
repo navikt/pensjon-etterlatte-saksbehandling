@@ -9,11 +9,14 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.HentOmgjoeringKravgrunnlagRequest
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
+import no.nav.etterlatte.libs.common.tilbakekreving.TILBAKEKREVING_KOMPONENTEN_FEIL
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingskomponentenFeil
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ping
@@ -58,9 +61,26 @@ class TilbakekrevingKlientImpl(
                 )
             }
         if (!response.status.isSuccess()) {
-            throw TilbakekrevingKlientException(
+            val fallbackFeil = TilbakekrevingKlientException(
                 "Lagre tilbakekrevingsvedtak for tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId} feilet",
             )
+
+            try {
+                val parsetFeil = response.body<ExceptionResponse>()
+                if (parsetFeil.code == TILBAKEKREVING_KOMPONENTEN_FEIL) {
+                    throw TilbakekrevingskomponentenFeil(parsetFeil.detail)
+                } else {
+                    throw fallbackFeil
+                }
+            } catch (e: Exception) {
+                logger.warn(
+                    "Fikk feil som ikke kunne parses som ExceptionResponse i sending av vedtak " +
+                            "${tilbakekrevingVedtak.vedtakId} i sak ${tilbakekrevingVedtak.sakId} til " +
+                            "tilbakekrevingskomponenten. Dette burde ikke skje",
+                    e
+                )
+                throw fallbackFeil
+            }
         }
     }
 
@@ -108,7 +128,7 @@ class TilbakekrevingKlientImpl(
         if (!response.status.isSuccess()) {
             throw TilbakekrevingKlientException(
                 "Henting av kravgrunnlag for omgjøring av tilbakekreving for sak ${sak.id.sakId} og " +
-                    "kravgrunnlagId=$kravgrunnlagId feilet",
+                        "kravgrunnlagId=$kravgrunnlagId feilet",
             )
         }
 

@@ -31,7 +31,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVilkaar
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingskomponentenFeil
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
@@ -485,28 +487,16 @@ class TilbakekrevingService(
                         tilbakekrevingVedtak(oppdatertTilbakekreving, vedtak),
                     )
                 }
+            } catch (tilbakekrevingKlientVideresendtfeil: TilbakekrevingskomponentenFeil) {
+                ryddOppLaastTilbakekreving(tilbakekreving, saksbehandler)
+                logger.warn(
+                    "Tilbakekreving feilet mot tilbakekrevingskomponenten, videresender feil til " +
+                        "saksbehandler",
+                    tilbakekrevingKlientVideresendtfeil,
+                )
+                throw tilbakekrevingKlientVideresendtfeil
             } catch (tilbakekrevingKlientFeil: Exception) {
-                try {
-                    logger.info(
-                        "Fikk en feil mot tilbakekrevingskomponenten, så vi prøver å rydde opp " +
-                            "attesteringen i vedtaksvurdering.",
-                    )
-                    runBlocking {
-                        vedtakKlient.angreAttesteringTilbakekreving(
-                            tilbakekrevingId = tilbakekreving.id,
-                            brukerTokenInfo = saksbehandler,
-                            enhet = tilbakekreving.sak.enhet,
-                        )
-                    }
-                } catch (tilbakestillingFeil: Exception) {
-                    logger.error(
-                        "Kunne ikke tilbakestille vedtaksstatus for tilbakekreving=$tilbakekrevingId i sak " +
-                            "${tilbakekreving.sak.id}. Dette betyr at tilbakekrevingen er låst mellom statusen i " +
-                            "behandling (fattet vedtak) og  vedtaksvurdering (attestert) og må manuelt " +
-                            "tilbakestilles i vedtaksvurdering",
-                        tilbakestillingFeil,
-                    )
-                }
+                ryddOppLaastTilbakekreving(tilbakekreving, saksbehandler)
                 throw InternfeilException(
                     "Tilbakekrevingen ble ikke godkjent i tilbakekrevingskomponenten. Dobbeltsjekk om kravgrunnlaget er riktig behandlet.",
                     tilbakekrevingKlientFeil,
@@ -585,6 +575,52 @@ class TilbakekrevingService(
 
             oppdatertTilbakekreving
         }
+
+    private fun ryddOppLaastTilbakekreving(
+        tilbakekreving: TilbakekrevingBehandling,
+        saksbehandler: Saksbehandler,
+    ) {
+        try {
+            logger.info(
+                "Fikk en feil mot tilbakekrevingskomponenten, så vi prøver å rydde opp " +
+                    "attesteringen i vedtaksvurdering.",
+            )
+            runBlocking {
+                vedtakKlient.angreAttesteringTilbakekreving(
+                    tilbakekrevingId = tilbakekreving.id,
+                    brukerTokenInfo = saksbehandler,
+                    enhet = tilbakekreving.sak.enhet,
+                )
+            }
+        } catch (tilbakestillingFeil: Exception) {
+            logger.error(
+                "Kunne ikke tilbakestille vedtaksstatus for tilbakekreving=${tilbakekreving.id} i sak " +
+                    "${tilbakekreving.sak.id}. Dette betyr at tilbakekrevingen er låst mellom statusen i " +
+                    "behandling (fattet vedtak) og  vedtaksvurdering (attestert) og må manuelt " +
+                    "tilbakestilles i vedtaksvurdering",
+                tilbakestillingFeil,
+            )
+        }
+        try {
+            logger.info(
+                "Fikk en feil mot tilbakekrevingskomponentent, så tilbakestiller ferdigstilt brev " +
+                    "for tilbakekreving=${tilbakekreving.id} i sak ${tilbakekreving.sak.id}",
+            )
+            runBlocking {
+                brevApiKlient.fjernFerdigstillingTilbakekreving(
+                    tilbakekreving.id,
+                    tilbakekreving.sak.id,
+                    HardkodaSystembruker.tilbakekrevingTilbakestilling,
+                )
+            }
+        } catch (e: Exception) {
+            logger.error(
+                "Kunne ikke tilbakestille ferdigstilt brev for tilbakekreving=${tilbakekreving.id}. " +
+                    "Dette betyr at brevet for tilbakekrevingen er låst som ferdigstilt, og kan ikke oppdateres",
+                e,
+            )
+        }
+    }
 
     private fun lagreTilbakekrevingHendelse(
         tilbakekreving: TilbakekrevingBehandling,

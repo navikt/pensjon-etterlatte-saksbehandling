@@ -78,7 +78,12 @@ class BrevRepository(
 
     fun hentPdfMedData(id: BrevID): PdfMedData? =
         using(sessionOf(ds)) {
-            it.run(queryOf("SELECT brev_id, bytes, opprettet FROM pdf WHERE brev_id = ?", id).map(tilPdfMedData).asSingle)
+            it.run(
+                queryOf(
+                    "SELECT brev_id, bytes, opprettet FROM pdf WHERE brev_id = ?",
+                    id
+                ).map(tilPdfMedData).asSingle
+            )
         }
 
     fun hentBrevPayload(id: BrevID): Slate? =
@@ -91,7 +96,8 @@ class BrevRepository(
             it.run(queryOf("SELECT payload_vedlegg FROM innhold WHERE brev_id = ?", id).map(tilPayloadVedlegg).asSingle)
         }
 
-    fun hentBrevkoder(id: BrevID) = ds.hent(HENT_BREVKODER_QUERY, id) { it.stringOrNull("brevkoder")?.let { Brevkoder.valueOf(it) } }
+    fun hentBrevkoder(id: BrevID) =
+        ds.hent(HENT_BREVKODER_QUERY, id) { it.stringOrNull("brevkoder")?.let { Brevkoder.valueOf(it) } }
 
     fun hentBrevForBehandling(
         behandlingId: UUID,
@@ -517,6 +523,30 @@ class BrevRepository(
             ),
         ).asUpdate,
     )
+
+    fun fjernFerdigstiltStatus(id: BrevID) {
+        using(sessionOf(ds)) { session ->
+            session.transaction {
+                it.run(
+                    queryOf(
+                        """
+                    DELETE FROM hendelse WHERE brev_id = :brevId AND status_id = :statusId
+                """.trimIndent(), mapOf(
+                            "brevId" to id,
+                            "statusId" to Status.FERDIGSTILT.name,
+                        )
+                    ).asUpdate
+                )
+                it.run(
+                    queryOf(
+                        """
+                    DELETE FROM pdf WHERE brev_id = :brevId
+                """.trimIndent(), mapOf("brevId" to id)
+                    ).asUpdate
+                )
+            }
+        }
+    }
 
     private val tilBrev: Row.(mottakere: List<Mottaker>) -> Brev = { mottakere ->
         Brev(

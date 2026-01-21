@@ -26,7 +26,6 @@ import { hentMinimumsVirkningstidspunkt, Hjemmel } from '~components/behandling/
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapFailure } from '~shared/api/apiUtils'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -41,7 +40,6 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
   const dispatch = useAppDispatch()
   const [fastsettVirkStatus, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
   const avdoede = usePersonopplysninger()?.avdoede
-  const tidligVirkningstidspunktTillatt = useFeaturetoggle(FeatureToggle.tillate_tidlig_virkningstidspunkt)
 
   const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(
     behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
@@ -66,9 +64,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
     }
   }
 
-  const minimumVirkningstidspunkt = tidligVirkningstidspunktTillatt
-    ? subYears(new Date(), 3)
-    : hentMinimumsVirkningstidspunkt(foersteDoedsdato(), behandling.sakType)
+  const minimumVirkningstidspunkt = hentMinimumsVirkningstidspunkt(foersteDoedsdato(), behandling.sakType)
 
   const { monthpickerProps, inputProps } = useMonthpicker({
     fromDate: minimumVirkningstidspunkt,

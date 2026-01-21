@@ -37,11 +37,14 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
         aria-labelledby="modal-heading"
         width="medium"
         onClose={() => setOpen(false)}
-        header={{ heading: 'Omgjør behandling - revurdering' }}
+        header={{ heading: 'Omgjør revurdering - etteroppgjør' }}
       >
         <Modal.Body>
           <VStack gap="4">
-            <BodyShort>Ønsker du å omgjøre denne behandlingen?</BodyShort>
+            <BodyShort>
+              I tilfelle hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du omgjøre revurderingen uten å
+              måtte behandle etteroppgjøret på nytt via ny forbehandling.
+            </BodyShort>
 
             {mapResult(omgjoerEtteroppgjoerResult, {
               error: (error) => <ApiErrorAlert>Kunne ikke omgjøre behandling. {error.detail}</ApiErrorAlert>,

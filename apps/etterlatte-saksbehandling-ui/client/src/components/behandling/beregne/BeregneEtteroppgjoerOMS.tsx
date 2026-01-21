@@ -3,7 +3,7 @@ import React, { useContext, useEffect } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
 import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
-import { Box, Button, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -20,6 +20,8 @@ import { handlinger } from '~components/behandling/handlinger/typer'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
+import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
+import { EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
 
 export const BeregneEtteroppgjoerOMS = () => {
   const behandling = useBehandling()
@@ -38,6 +40,7 @@ export const BeregneEtteroppgjoerOMS = () => {
   const dispatch = useAppDispatch()
   const [beregningResult, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtakResult, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
+  const etteroppgjoerForbehandling = useEtteroppgjoerForbehandling()
 
   useEffect(() => {
     hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
@@ -63,22 +66,39 @@ export const BeregneEtteroppgjoerOMS = () => {
       ] as IBehandlingStatus[]
     ).includes(behandling.status)
 
+  const etteroppgjoerResultat = etteroppgjoerForbehandling?.beregnetEtteroppgjoerResultat?.resultatType
+  const erEtteroppgjoerMedIngenEndring = [
+    EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING,
+    EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING,
+  ].includes(etteroppgjoerResultat!!)
+
   return (
     <>
-      {mapResult(beregningResult, {
-        pending: <Spinner label="Henter beregning" />,
-        error: () => <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>,
-        success: (beregning) => (
-          <Box paddingInline="18" paddingBlock="4">
-            <VStack gap="10">
-              <OmstillingsstoenadSammendrag beregning={beregning} />
-              {/* TODO må vurdere om denne komponenten skal brukes eller om man skal klare å dra enkelt-deler ut */}
-              <Avkorting />
-            </VStack>
-            {erAvkortet() && <SimulerUtbetaling behandling={behandling} />}
-          </Box>
-        ),
-      })}
+      <Box paddingInline="16" paddingBlock="4 12">
+        {erEtteroppgjoerMedIngenEndring ? (
+          <>
+            <BodyShort>
+              Resultatet av etteroppgjøret er ingen endring, dermed vil det ikke fattes et endringsvedtak i eksisterende
+              ytelse. Ytelsen vil fortsette som siste iverksatte vedtak i saken.
+            </BodyShort>
+          </>
+        ) : (
+          mapResult(beregningResult, {
+            pending: <Spinner label="Henter beregning" />,
+            error: () => <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>,
+            success: (beregning) => (
+              <>
+                <VStack gap="10">
+                  <OmstillingsstoenadSammendrag beregning={beregning} />
+                  {/* TODO må vurdere om denne komponenten skal brukes eller om man skal klare å dra enkelt-deler ut */}
+                  <Avkorting />
+                </VStack>
+                {erAvkortet() && <SimulerUtbetaling behandling={behandling} />}
+              </>
+            ),
+          })
+        )}
+      </Box>
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         {redigerbar ? (

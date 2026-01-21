@@ -28,7 +28,8 @@ data class Etteroppgjoer(
 
     fun kanTilbakestillesMedNyForbehandling() = status in listOf(EtteroppgjoerStatus.VENTER_PAA_SVAR, EtteroppgjoerStatus.FERDIGSTILT)
 
-    fun kanOppretteRevurdering() = status in listOf(EtteroppgjoerStatus.VENTER_PAA_SVAR, EtteroppgjoerStatus.FERDIGSTILT)
+    fun kanOppretteRevurdering() =
+        status in listOf(EtteroppgjoerStatus.VENTER_PAA_SVAR, EtteroppgjoerStatus.FERDIGSTILT, EtteroppgjoerStatus.OMGJOERING)
 
     fun erFerdigstilt() = status == EtteroppgjoerStatus.FERDIGSTILT
 }
@@ -42,4 +43,5 @@ enum class EtteroppgjoerStatus {
     UNDER_REVURDERING,
 
     FERDIGSTILT,
+    OMGJOERING, // midlertidig status for omgjøring av revurdering
 }

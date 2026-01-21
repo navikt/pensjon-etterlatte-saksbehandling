@@ -90,8 +90,9 @@ internal fun Route.revurderingRoutes(
                             etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
                                 sakId,
                                 it.opprinnelse,
-                                brukerTokenInfo,
+                                saksbehandler,
                             )
+
                         call.respond(revurdering.id)
                     }
                 }

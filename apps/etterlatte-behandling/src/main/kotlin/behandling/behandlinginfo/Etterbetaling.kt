@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
+import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDate
@@ -39,6 +40,8 @@ data class Etterbetaling(
             )
         }
     }
+
+    fun toEtterbetalingDTO(): EtterbetalingDTO = EtterbetalingDTO(fom.atDay(1), tom.atEndOfMonth())
 }
 
 sealed class EtterbetalingException {

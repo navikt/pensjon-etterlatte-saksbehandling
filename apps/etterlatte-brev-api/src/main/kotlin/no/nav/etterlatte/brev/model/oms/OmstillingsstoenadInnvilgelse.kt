@@ -11,13 +11,9 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
-import no.nav.etterlatte.brev.model.bp.datoVedtakOmgjoering
-import no.nav.etterlatte.brev.model.erYrkesskade
-import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
@@ -76,7 +72,7 @@ data class OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
                 beregning =
                     omsBeregning(
-                        vedleggInnhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         behandling = behandling,
                         trygdetid = trygdetid,
                         avkortingsinfo = avkortingsinfo,
@@ -143,7 +139,6 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                 harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 beregning =
                     omsBeregning(
-                        vedleggInnhold = emptyList(),
                         behandling = behandling,
                         trygdetid = trygdetid,
                         avkortingsinfo = avkortingsinfo,
@@ -151,34 +146,4 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                     ),
             )
     }
-}
-
-fun omsBeregning(
-    vedleggInnhold: List<Slate.Element>,
-    behandling: DetaljertBehandling,
-    trygdetid: TrygdetidDto,
-    avkortingsinfo: Avkortingsinfo,
-    landKodeverk: List<LandDto>,
-): OmstillingsstoenadBeregning {
-    val beregningsperioder =
-        avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
-    val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
-    return OmstillingsstoenadBeregning(
-        innhold = vedleggInnhold,
-        virkningsdato = avkortingsinfo.virkningsdato,
-        beregningsperioder = beregningsperioder,
-        sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode,
-        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-        trygdetid =
-            trygdetid.fromDto(
-                beregningsMetodeFraGrunnlag = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                beregningsMetodeAnvendt = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeAnvendt,
-                navnAvdoed = null,
-                landKodeverk = landKodeverk,
-            ),
-        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-        opphoerNesteAar =
-            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
-        erYrkesskade = trygdetid.erYrkesskade(),
-    )
 }

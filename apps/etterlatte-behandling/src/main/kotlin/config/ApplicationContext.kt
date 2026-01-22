@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
+import no.nav.etterlatte.behandling.VedtaksbrevService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktBrevDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
@@ -774,15 +775,40 @@ internal class ApplicationContext(
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
 
+    val vilkaarsvurderingService =
+        VilkaarsvurderingService(
+            vilkaarsvurderingDao,
+            behandlingService,
+            grunnlagService,
+            behandlingsStatusService,
+        )
+
+    private val vedtaksbrevService =
+        VedtaksbrevService(
+            grunnlagService = grunnlagService,
+            vedtakKlient = vedtakKlient,
+            brevKlient = brevKlient,
+            behandlingService = behandlingService,
+            beregningKlient = beregningKlient,
+            behandlingInfoService = behandlingInfoService,
+            trygdetidKlient = trygdetidKlient,
+            vilkaarsvurderingService = vilkaarsvurderingService,
+            sakService = sakService,
+            klageService = klageService,
+            kodeverkService = kodeverkService,
+        )
+
     val brevService =
         BrevService(
-            behandlingMedBrevService,
-            behandlingService,
-            brevApiKlient,
-            vedtakKlient,
-            tilbakekrevingBrevService,
-            etteroppgjoerForbehandlingBrevService,
-            etteroppgjoerRevurderingBrevService,
+            behandlingMedBrevService = behandlingMedBrevService,
+            behandlingService = behandlingService,
+            brevApiKlient = brevApiKlient,
+            vedtakKlient = vedtakKlient,
+            tilbakekrevingBrevService = tilbakekrevingBrevService,
+            etteroppgjoerForbehandlingBrevService = etteroppgjoerForbehandlingBrevService,
+            etteroppgjoerRevurderingBrevService = etteroppgjoerRevurderingBrevService,
+            vedtaksbrevService = vedtaksbrevService,
+            featureToggleService = featureToggleService,
         )
 
     val tilbakekrevingService =
@@ -832,14 +858,6 @@ internal class ApplicationContext(
             saksbehandlerService,
             saksbehandlerInfoDao,
             pdlTjenesterKlient,
-        )
-
-    val vilkaarsvurderingService =
-        VilkaarsvurderingService(
-            vilkaarsvurderingDao,
-            behandlingService,
-            grunnlagService,
-            behandlingsStatusService,
         )
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
 

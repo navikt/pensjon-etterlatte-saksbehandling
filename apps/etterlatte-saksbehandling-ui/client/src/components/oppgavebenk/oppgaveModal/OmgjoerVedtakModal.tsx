@@ -6,7 +6,7 @@ import { opprettOmgjoeringFoerstegangsbehandling, opprettOmgjoeringKlage } from 
 import { hentKlage } from '~shared/api/klage'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Klage, Omgjoering, VedtaketKlagenGjelder } from '~shared/types/Klage'
+import { harOmgjoering, Klage, Omgjoering, VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { formaterVedtakType } from '~utils/formatering/formatering'
 import { formaterKanskjeStringDato } from '~utils/formatering/dato'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
@@ -20,7 +20,7 @@ function hentOmgjoering(klage: Klage): Omgjoering | null {
     }
   }
 
-  if (klage.utfall?.utfall === 'DELVIS_OMGJOERING' || klage.utfall?.utfall === 'OMGJOERING') {
+  if (harOmgjoering(klage.utfall)) {
     return klage.utfall.omgjoering
   }
   return null

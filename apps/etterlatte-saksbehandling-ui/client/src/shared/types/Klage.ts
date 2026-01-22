@@ -157,6 +157,12 @@ export const teksterKlageutfall: Record<Utfall | 'UKJENT', string> = {
   UKJENT: 'Ukjent',
 } as const
 
+export function harOmgjoering(
+  klageUtfall: KlageUtfall | undefined
+): klageUtfall is Extract<KlageUtfall, { omgjoering: Omgjoering }> {
+  return !!klageUtfall && 'omgjoering' in klageUtfall
+}
+
 export type KlageUtfall =
   | {
       utfall: 'OMGJOERING'

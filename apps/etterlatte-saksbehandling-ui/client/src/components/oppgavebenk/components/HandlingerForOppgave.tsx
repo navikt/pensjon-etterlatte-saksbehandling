@@ -24,6 +24,7 @@ import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/
 import { EtteroppgjoerOpprettRevurderingModal } from '~components/oppgavebenk/oppgaveModal/etteroppgjoer/EtteroppgjoerOpprettRevurderingModal'
 import { OpprettEtteroppgjoerForbehandlingModal } from '~components/oppgavebenk/oppgaveModal/OpprettEtteroppgjoerForbehandlingModal'
 import { KlageBehandleSvarFraKa } from '~components/oppgavebenk/oppgaveModal/KlageBehandleSvarFraKa'
+import { AvsluttTilbakekrevingOppgaveUtenKravgrunnlag } from '~components/oppgavebenk/components/AvsluttTilbakekrevingOppgaveUtenKravgrunnlag'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -73,13 +74,22 @@ export const HandlingerForOppgave = ({
   if (kilde === OppgaveKilde.TILBAKEKREVING) {
     switch (type) {
       case Oppgavetype.TILBAKEKREVING:
+        const erKobletTilEnReellTilbakekreving = oppgave.referanse !== oppgave.sakId.toString()
         return (
-          erInnloggetSaksbehandlerOppgave &&
-          oppgave.merknad !== 'Venter på kravgrunnlag' && (
-            <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
-              Gå til tilbakekreving
-            </Button>
-          )
+          <>
+            {erInnloggetSaksbehandlerOppgave && erKobletTilEnReellTilbakekreving && (
+              <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
+                Gå til tilbakekreving
+              </Button>
+            )}
+            {erInnloggetSaksbehandlerOppgave && !erKobletTilEnReellTilbakekreving && (
+              <AvsluttTilbakekrevingOppgaveUtenKravgrunnlag
+                oppgave={oppgave}
+                oppdaterStatus={oppdaterStatus}
+                oppdaterMerknad={oppdaterMerknad}
+              />
+            )}
+          </>
         )
     }
   }

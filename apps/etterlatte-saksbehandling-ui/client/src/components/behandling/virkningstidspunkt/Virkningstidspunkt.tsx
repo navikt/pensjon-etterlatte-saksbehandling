@@ -26,7 +26,6 @@ import { hentMinimumsVirkningstidspunkt, Hjemmel } from '~components/behandling/
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapFailure } from '~shared/api/apiUtils'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -41,7 +40,6 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
   const dispatch = useAppDispatch()
   const [fastsettVirkStatus, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
   const avdoede = usePersonopplysninger()?.avdoede
-  const tidligVirkningstidspunktTillatt = useFeaturetoggle(FeatureToggle.tillate_tidlig_virkningstidspunkt)
 
   const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(
     behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
@@ -53,17 +51,6 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
   const [overstyr, setOverstyr] = useState(false)
 
   const [errorTekst, setErrorTekst] = useState<string>('')
-
-  function getSoeknadMottattDato() {
-    return erBosattUtland
-      ? subYears(new Date(), 20)
-      : behandling.soeknadMottattDato
-        ? new Date(behandling.soeknadMottattDato)
-        : new Date(2024, 0, 1)
-    // For saker migrert fra Pesys har vi ikke tatt med søknad mottatt-dato
-    // Disse kan ha tidligste virkningstidspunkt i Gjenny 1.1.24, altså da etterlattereformen tredde i kraft
-    // Denne siste fallbacken er altså tenkt for disse sakene
-  }
 
   function foersteDoedsdato(): Date | undefined {
     const mappetAvdoede = avdoede?.map((it) => it.opplysning.doedsdato!!)
@@ -77,9 +64,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
     }
   }
 
-  const minimumVirkningstidspunkt = tidligVirkningstidspunktTillatt
-    ? subYears(new Date(), 3)
-    : hentMinimumsVirkningstidspunkt(foersteDoedsdato(), getSoeknadMottattDato(), behandling.sakType)
+  const minimumVirkningstidspunkt = hentMinimumsVirkningstidspunkt(foersteDoedsdato(), behandling.sakType)
 
   const { monthpickerProps, inputProps } = useMonthpicker({
     fromDate: minimumVirkningstidspunkt,

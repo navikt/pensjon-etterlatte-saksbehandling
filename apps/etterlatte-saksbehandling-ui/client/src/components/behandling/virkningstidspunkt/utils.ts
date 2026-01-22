@@ -1,4 +1,4 @@
-import { addMonths, isBefore, subYears } from 'date-fns'
+import { addMonths, isBefore } from 'date-fns'
 import { SakType } from '~shared/types/sak'
 
 export interface Hjemmel {
@@ -6,19 +6,13 @@ export interface Hjemmel {
   tittel: string
 }
 
-export function hentMinimumsVirkningstidspunkt(
-  avdoedDoedsdato: Date | undefined,
-  soeknadMottattDato: Date,
-  sakType: SakType
-): Date {
+export function hentMinimumsVirkningstidspunkt(avdoedDoedsdato: Date | undefined, sakType: SakType): Date {
   const doedsdato = new Date(avdoedDoedsdato ?? '')
   const reformDato = new Date('01.01.2024')
 
-  //Pga bug i ds-react-month picker så må det være første i måneden.
-  const treAarFoerSoeknad = subYears(soeknadMottattDato, 3)
   const maanedEtterDoedsdato = addMonths(doedsdato, 1)
 
-  const minimumsVirkningstidspunkt = isBefore(doedsdato, treAarFoerSoeknad) ? treAarFoerSoeknad : maanedEtterDoedsdato
+  const minimumsVirkningstidspunkt = maanedEtterDoedsdato
 
   if (sakType === SakType.OMSTILLINGSSTOENAD) {
     return isBefore(reformDato, minimumsVirkningstidspunkt) ? minimumsVirkningstidspunkt : reformDato

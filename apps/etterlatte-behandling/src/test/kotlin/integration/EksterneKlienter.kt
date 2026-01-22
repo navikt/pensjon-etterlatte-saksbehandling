@@ -90,6 +90,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -232,6 +233,11 @@ class TrygdetidKlientTest : TrygdetidKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
+
+    override suspend fun hentTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<TrygdetidDto> = emptyList()
 }
 
 class VedtakKlientTest : VedtakKlient {

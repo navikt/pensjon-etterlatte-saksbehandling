@@ -9,7 +9,6 @@ import { logger } from '~utils/logger'
 
 export const enum FeatureToggle {
   sanksjon = 'sanksjon',
-  tillate_tidlig_virkningstidspunkt = 'tillate-tidlig-virkningstidspunkt',
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',
   notater = 'notater',
   kopier_trygdetidsgrunnlag = 'kopier-trygdetidsgrunnlag',
@@ -49,11 +48,6 @@ const oppgave_til_journalpost: Toggle = {
 }
 
 const sanksjon: Toggle = { togglename: FeatureToggle.sanksjon, enabled: false }
-
-const tillate_tidlig_virkningstidspunkt: Toggle = {
-  togglename: FeatureToggle.tillate_tidlig_virkningstidspunkt,
-  enabled: false,
-}
 
 const overstyr_beregning_knapp: Toggle = {
   togglename: FeatureToggle.overstyr_beregning_knapp,
@@ -115,7 +109,6 @@ const omgjoer_tilbakekreving: Toggle = {
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.sanksjon]: sanksjon,
-  [FeatureToggle.tillate_tidlig_virkningstidspunkt]: tillate_tidlig_virkningstidspunkt,
   [FeatureToggle.notater]: notater,
   [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,

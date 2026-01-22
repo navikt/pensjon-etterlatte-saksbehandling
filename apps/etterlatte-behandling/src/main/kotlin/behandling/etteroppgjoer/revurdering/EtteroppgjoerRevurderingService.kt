@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
@@ -17,12 +18,15 @@ import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -53,7 +57,7 @@ class EtteroppgjoerRevurderingService(
         val sisteFerdigstilteForbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling
 
         krevIkkeNull(sisteFerdigstilteForbehandlingId) {
-            "Fant ikke sisteFerdigstilteForbehandling for sak $sakId"
+            "Fant ikke sisteFerdigstilteForbehandling for sakId=$sakId"
         }
 
         val (revurdering, sisteIverksatteBehandling) =
@@ -117,25 +121,68 @@ class EtteroppgjoerRevurderingService(
                 tilForbehandlingId = UUID.fromString(revurdering.relatertBehandlingId),
                 brukerTokenInfo = brukerTokenInfo,
             )
-            krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Revurdering finnes ikke etter oppretting" }
+            krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Klarte ikke å finne revurdering etter opprettelse" }
         }
+    }
+
+    fun omgjoerEtteroppgjoerRevurdering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Behandling {
+        val behandling =
+            inTransaction {
+                val behandling =
+                    behandlingService.hentBehandling(behandlingId)
+                        ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
+                if (behandling.status != BehandlingStatus.AVBRUTT) {
+                    throw IkkeTillattException(
+                        "BEHANDLING_IKKE_AVBRUTT",
+                        "Revurdering med id=${behandling.id} er ikke avbrutt og kan ikke omgjoeres",
+                    )
+                }
+
+                val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(behandling.sak.id)
+                val forbehandling = hentForbehandlingForBehandling(behandling)
+                if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
+                    throw IkkeTillattException(
+                        "FORBEHANDLING_IKKE_AVBRUTT",
+                        "Etteroppgjør forbehandling med id=${forbehandling.id} er ikke avbrutt og kan ikke omgjoeres",
+                    )
+                }
+
+                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                    etteroppgjoer.sakId,
+                    etteroppgjoer.inntektsaar,
+                    EtteroppgjoerStatus.OMGJOERING,
+                )
+
+                behandling
+            }
+
+        return opprettEtteroppgjoerRevurdering(behandling.sak.id, behandling.opprinnelse, brukerTokenInfo)
+    }
+
+    private fun hentForbehandlingForBehandling(behandling: Behandling): EtteroppgjoerForbehandling {
+        val forbehandlingId =
+            behandling.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
+                "MANGLER_FORBEHANDLING_ID",
+                "Behandling med id=${behandling.id} peker ikke på en gyldig etteroppgjør forbehandling",
+            )
+        return etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
     }
 
     fun hentBeregnetResultatForRevurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val forbehandlingId =
-            behandling?.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
-                "MANGLER_FORBEHANDLING_ID",
-                "Behandling med id=$behandlingId peker ikke på en gyldig forbehandling",
-            )
-        val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forbehandlingId)
+        val behandling =
+            behandlingService.hentBehandling(behandlingId)
+                ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
+        val forbehandling = hentForbehandlingForBehandling(behandling)
         return etteroppgjoerForbehandlingService.hentBeregnetEtteroppgjoerResultat(forbehandling, brukerTokenInfo)
             ?: throw IkkeFunnetException(
                 "MANGLER_BEREGNET_RESULTAT",
-                "Forbehandling med id=$forbehandlingId til revurdering med id=$behandlingId har " +
+                "Forbehandling med id=${forbehandling.id} til revurdering med id=$behandlingId har " +
                     "ikke et beregnet resultat for etteroppgjøret.",
             )
     }

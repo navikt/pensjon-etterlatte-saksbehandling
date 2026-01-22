@@ -132,9 +132,9 @@ spec:
     - name: NORG2_URL
       value: https://norg2.dev-fss-pub.nais.io/norg2/api/v1
     - name: NAVANSATT_URL
-      value: https://navansatt.dev-fss-pub.nais.io
+      value: http://navansatt.pensjon-saksbehandling/
     - name: ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE
-      value: api://dev-fss.teampensjon.navansatt/.default
+      value: api://dev-gcp.pensjon-saksbehandling.navansatt/.default
     - name: SKJERMING_URL
       value: https://skjermede-personer-pip.intern.dev.nav.no
     - name: AZURE_SCOPE_SKJERMEDE_PIP
@@ -192,11 +192,12 @@ spec:
           namespace: team-rocket
         - application: logging
           namespace: nais-system
+        - application: navansatt
+          namespace: pensjon-saksbehandling
       external:
         - host: kodeverk-api.nav.no # må gå mot prod i dev se https://nav-it.slack.com/archives/C06FK6V74JE/p1723795352459339?thread_ts=1723788766.141209&cid=C06FK6V74JE
         - host: skjermede-personer-pip.intern.dev.nav.no
         - host: norg2.dev-fss-pub.nais.io
-        - host: navansatt.dev-fss-pub.nais.io
         - host: oppgave.dev-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io

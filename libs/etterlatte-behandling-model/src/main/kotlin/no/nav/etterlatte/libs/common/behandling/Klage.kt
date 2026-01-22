@@ -419,6 +419,13 @@ data class Klage private constructor(
                 aarsakTilAvbrytelse = aarsakTilAvbrytelse,
             )
     }
+
+    fun datoVedtakOmgjoering(): LocalDate? =
+        this.formkrav
+            ?.formkrav
+            ?.vedtaketKlagenGjelder
+            ?.datoAttestert
+            ?.toLocalDate()
 }
 
 /**

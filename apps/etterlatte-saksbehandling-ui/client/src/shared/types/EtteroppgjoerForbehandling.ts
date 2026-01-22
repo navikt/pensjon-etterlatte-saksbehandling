@@ -15,6 +15,7 @@ enum EtteroppgjoerStatus {
   UNDER_FORBEHANDLING = 'UNDER_FORBEHANDLING',
   UNDER_REVURDERING = 'UNDER_REVURDERING',
   FERDIGSTILT = 'FERDIGSTILT',
+  OMGJOERING = 'OMGJOERING',
 }
 
 export interface EtteroppgjoerForbehandling {

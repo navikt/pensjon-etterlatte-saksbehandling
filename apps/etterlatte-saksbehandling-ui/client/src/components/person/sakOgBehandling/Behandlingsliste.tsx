@@ -19,6 +19,7 @@ import { UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { formaterDato } from '~utils/formatering/dato'
 import { formaterBehandlingstype } from '~utils/formatering/formatering'
+import { EtteroppgjoerOmgjoerRevurderingModal } from '~components/oppgavebenk/oppgaveModal/etteroppgjoer/EtteroppgjoerOmgjoerRevurderingModal'
 
 type alleBehandlingsTyper = IBehandlingsammendrag | Generellbehandling
 
@@ -98,7 +99,14 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                     </Table.DataCell>
                     <VedtakKolonner behandlingId={behandling.id} />
                     <Table.DataCell>
-                      <Link href={`/behandling/${behandling.id}/`}>Se behandling</Link>
+                      <HStack gap="4">
+                        <Link href={`/behandling/${behandling.id}/`}>Se behandling</Link>
+                        {behandling.behandlingType === 'REVURDERING' &&
+                          behandling.aarsak === 'ETTEROPPGJOER' &&
+                          behandling.status === 'AVBRUTT' && (
+                            <EtteroppgjoerOmgjoerRevurderingModal behandlingId={behandling.id} />
+                          )}
+                      </HStack>
                     </Table.DataCell>
                   </Table.Row>
                 )

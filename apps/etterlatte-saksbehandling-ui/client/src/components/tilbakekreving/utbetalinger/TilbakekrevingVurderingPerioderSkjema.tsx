@@ -133,7 +133,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell style={{ minWidth: '6em' }}>Måned</Table.HeaderCell>
-                <Table.HeaderCell>Klasse</Table.HeaderCell>
+                <Table.HeaderCell>Beskrivelse</Table.HeaderCell>
                 <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
                 <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
                 <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>

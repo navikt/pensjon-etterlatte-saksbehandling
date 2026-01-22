@@ -61,26 +61,30 @@ class TilbakekrevingKlientImpl(
                 )
             }
         if (!response.status.isSuccess()) {
-            val fallbackFeil = TilbakekrevingKlientException(
-                "Lagre tilbakekrevingsvedtak for tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId} feilet",
-            )
+            val fallbackFeil =
+                TilbakekrevingKlientException(
+                    "Lagre tilbakekrevingsvedtak for tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId} feilet",
+                )
 
-            try {
-                val parsetFeil = response.body<ExceptionResponse>()
-                if (parsetFeil.code == TILBAKEKREVING_KOMPONENTEN_FEIL) {
-                    throw TilbakekrevingskomponentenFeil(parsetFeil.detail)
-                } else {
-                    throw fallbackFeil
-                }
-            } catch (e: Exception) {
-                logger.warn(
-                    "Fikk feil som ikke kunne parses som ExceptionResponse i sending av vedtak " +
+            val exceptionViSkalKaste =
+                try {
+                    val parsetFeil = response.body<ExceptionResponse>()
+                    if (parsetFeil.code == TILBAKEKREVING_KOMPONENTEN_FEIL) {
+                        // Vi har en spesifikk feil fra tilbakekrevingskomponenten som vi vil sende videre til saksbehandler
+                        TilbakekrevingskomponentenFeil(parsetFeil.detail)
+                    } else {
+                        fallbackFeil
+                    }
+                } catch (e: Exception) {
+                    logger.warn(
+                        "Fikk feil som ikke kunne parses som ExceptionResponse i sending av vedtak " +
                             "${tilbakekrevingVedtak.vedtakId} i sak ${tilbakekrevingVedtak.sakId} til " +
                             "tilbakekrevingskomponenten. Dette burde ikke skje",
-                    e
-                )
-                throw fallbackFeil
-            }
+                        e,
+                    )
+                    throw fallbackFeil
+                }
+            throw exceptionViSkalKaste
         }
     }
 
@@ -128,7 +132,7 @@ class TilbakekrevingKlientImpl(
         if (!response.status.isSuccess()) {
             throw TilbakekrevingKlientException(
                 "Henting av kravgrunnlag for omgjøring av tilbakekreving for sak ${sak.id.sakId} og " +
-                        "kravgrunnlagId=$kravgrunnlagId feilet",
+                    "kravgrunnlagId=$kravgrunnlagId feilet",
             )
         }
 

@@ -10,6 +10,7 @@ import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OpphoerSkyldesDoedsfallRequest
@@ -22,6 +23,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -119,28 +121,12 @@ fun Route.etteroppgjoerRoutes(
                             etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
                                 ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjør for sak $sakId")
 
-                        if (etteroppgjoer.status == EtteroppgjoerStatus.FERDIGSTILT) {
-                            val forbehandling = forbehandlingService.hentForbehandling(etteroppgjoer.sisteFerdigstilteForbehandling!!)
+                        val forbehandling = forbehandlingService.hentForbehandling(etteroppgjoer.sisteFerdigstilteForbehandling!!)
 
-                            if (forbehandling.etteroppgjoerResultatType != EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
-                                throw IkkeTillattException(
-                                    code = "UTFALL_IKKE_TILLATT",
-                                    "Vi støtter ikke " +
-                                        "tilbakestilling med resultat ${forbehandling.etteroppgjoerResultatType}. " +
-                                        "Ta kontakt hvis forbehandlingen skal tilbakestilles.",
-                                )
-                            }
-                        }
+                        haandterIngenEndringUtenUtbetaling(forbehandling, etteroppgjoer)
+                        etteroppgjoer.kanTilbakestillesMedNyForbehandling(forbehandling)
 
-                        krev(etteroppgjoer.kanTilbakestillesMedNyForbehandling()) {
-                            "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke tilbakestille " +
-                                "og opprette ny forbehandling"
-                        }
-
-                        logger.info(
-                            "Tilbakestiller etteroppgjør med sakId ${etteroppgjoer.sakId}",
-                        )
-
+                        logger.info("Tilbakestiller etteroppgjør med sakId ${etteroppgjoer.sakId}")
                         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                             sakId,
                             etteroppgjoer.inntektsaar,
@@ -360,6 +346,22 @@ private fun sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService: Fea
             "Tilbakestilling av " +
                 "etteroppgjør er ikke tillatt for vedkommende i miljøet",
         )
+    }
+}
+
+private fun haandterIngenEndringUtenUtbetaling(
+    forbehandling: EtteroppgjoerForbehandling,
+    etteroppgjoer: Etteroppgjoer,
+) {
+    if (etteroppgjoer.status == EtteroppgjoerStatus.FERDIGSTILT) {
+        if (forbehandling.etteroppgjoerResultatType != EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
+            throw IkkeTillattException(
+                code = "UTFALL_IKKE_TILLATT",
+                "Vi støtter ikke " +
+                    "tilbakestilling med resultat ${forbehandling.etteroppgjoerResultatType}. " +
+                    "Ta kontakt hvis forbehandlingen skal tilbakestilles.",
+            )
+        }
     }
 }
 

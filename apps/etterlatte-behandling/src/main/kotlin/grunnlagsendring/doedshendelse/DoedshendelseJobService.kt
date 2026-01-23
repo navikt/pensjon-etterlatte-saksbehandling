@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -108,12 +109,21 @@ class DoedshendelseJobService(
                     }
 
                     else -> {
-                        logger.error(
-                            "Kunne ikke identifisere kontrollpunkter dødshendelse id=${doedshendelse.id} for sak $sak. " +
-                                "Ukjent feil: msg: ${e.message}",
-                            e,
-                        )
-                        throw e
+                        if (isProd()) {
+                            logger.error(
+                                "Kunne ikke identifisere kontrollpunkter dødshendelse id=${doedshendelse.id} for sak $sak. " +
+                                    "Ukjent feil: msg: ${e.message}",
+                                e,
+                            )
+                            throw e
+                        } else {
+                            logger.warn(
+                                "Vi ignorerer en dødshendelese som ikke er i prod, siden vi fikk en feil i " +
+                                    "henting av data mot PDL. Dette skjer typisk i PDL når personer i dev har " +
+                                    "ufullstendige data.",
+                            )
+                            listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnullert)
+                        }
                     }
                 }
             }
@@ -250,7 +260,9 @@ class DoedshendelseJobService(
                     deodshendelserProducer.sendBrevRequestBP(sak, borIUtlandet, !under18aar)
                 }
 
-                SakType.OMSTILLINGSSTOENAD -> deodshendelserProducer.sendBrevRequestOMS(sak, borIUtlandet)
+                SakType.OMSTILLINGSSTOENAD -> {
+                    deodshendelserProducer.sendBrevRequestOMS(sak, borIUtlandet)
+                }
             }
             return true
         }

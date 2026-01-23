@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -266,6 +265,10 @@ class EtteroppgjoerForbehandlingService(
                 "Kunne ikke hente og lagre ned summerte inntekter fra Skatteetaten for forbehandlingen i sakId=$sakId",
                 e,
             )
+            throw InternfeilException(
+                "Kunne ikke hente PGI fra skatt. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = $sakId",
+                e,
+            )
         }
         try {
             val summerteInntekter =
@@ -274,6 +277,10 @@ class EtteroppgjoerForbehandlingService(
         } catch (e: Exception) {
             logger.error(
                 "Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=$sakId",
+                e,
+            )
+            throw InternfeilException(
+                "Kunne ikke inntekter fra A-ordningen. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = $sakId",
                 e,
             )
         }

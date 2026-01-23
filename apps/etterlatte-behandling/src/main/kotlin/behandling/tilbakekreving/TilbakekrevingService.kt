@@ -498,7 +498,7 @@ class TilbakekrevingService(
             } catch (tilbakekrevingKlientFeil: Exception) {
                 ryddOppLaastTilbakekreving(tilbakekreving, saksbehandler)
                 throw InternfeilException(
-                    "Tilbakekrevingen ble ikke godkjent i tilbakekrevingskomponenten. Dobbeltsjekk om kravgrunnlaget er riktig behandlet.",
+                    "Gjenny fikk en feil i sending av tilbakekrevingen til tilbakekrevingskomponenten. Prøv igjen senere.",
                     tilbakekrevingKlientFeil,
                 )
             }

@@ -16,7 +16,7 @@ export function TilbakekrevingUtbetalinger({
     <>
       <Box paddingInline="16" paddingBlock="16 4">
         <Heading level="1" size="large">
-          Utbetalinger
+          Tilbakekreving
         </Heading>
         {behandling.sak.sakType === SakType.BARNEPENSJON && (
           <Box marginBlock="10 0" maxWidth="45em">

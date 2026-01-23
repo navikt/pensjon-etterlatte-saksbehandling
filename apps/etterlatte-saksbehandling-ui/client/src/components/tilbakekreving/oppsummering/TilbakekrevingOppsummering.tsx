@@ -133,7 +133,7 @@ export function TilbakekrevingOppsummering({
             <ControlledRadioGruppe
               name="skalSendeBrev"
               control={control}
-              legend={<RadioGroupLegend label="Skal det sendes brev for tilbakekrevingen?" />}
+              legend={<RadioGroupLegend label="Skal det sendes vedtak for tilbakekrevingen?" />}
               size="small"
               readOnly={!redigerbar}
               radios={

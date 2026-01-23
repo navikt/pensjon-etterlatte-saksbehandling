@@ -244,7 +244,10 @@ class EtteroppgjoerForbehandlingDao(
         logger.info("Lagret inntekter for forbehandling $forbehandlingId")
     }
 
-    fun hentSummerteInntekterNonNull(forbehandlingId: UUID) = krevIkkeNull(hentSummerteInntekter(forbehandlingId)) { "Må ha en verdi" }
+    fun hentSummerteInntekterNonNull(forbehandlingId: UUID) =
+        krevIkkeNull(hentSummerteInntekter(forbehandlingId)) {
+            "Fant ikke summerte inntekter for forbehandling med id=$forbehandlingId"
+        }
 
     fun hentSummerteInntekter(forbehandlingId: UUID): SummerteInntekterAOrdningen? =
         connectionAutoclosing.hentConnection { connection ->
@@ -321,7 +324,10 @@ class EtteroppgjoerForbehandlingDao(
             aarsakTilAvbrytelseBeskrivelse = getString("kommentar_til_avbrytelse"),
             harVedtakAvTypeOpphoer = getBoolean("har_vedtak_av_type_opphoer"),
             opphoerSkyldesDoedsfall = getString("opphoer_skyldes_doedsfall")?.let { enumValueOf<JaNei>(it) },
-            opphoerSkyldesDoedsfallIEtteroppgjoersaar = getString("opphoer_skyldes_doedsfall_i_etteroppgjoersaar")?.let { enumValueOf<JaNei>(it) },
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar =
+                getString(
+                    "opphoer_skyldes_doedsfall_i_etteroppgjoersaar",
+                )?.let { enumValueOf<JaNei>(it) },
         )
 
     private fun ResultSet.toSummertePensjonsgivendeInntekter(): SummertePensjonsgivendeInntekter =

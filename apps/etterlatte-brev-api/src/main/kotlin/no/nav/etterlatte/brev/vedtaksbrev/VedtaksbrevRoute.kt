@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.vedtaksbrev
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -13,7 +12,6 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.VedtakTilJournalfoering
-import no.nav.etterlatte.brev.brevId
 import no.nav.etterlatte.brev.model.GenererOgFerdigstillVedtaksbrev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -130,6 +128,17 @@ fun Route.vedtaksbrevRoute(
                 }.also { (_, varighet) ->
                     logger.info("Ferdigstilling av vedtaksbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.OK)
+                }
+            }
+        }
+
+        route("tilbakekreving/fjern-ferdigstilt") {
+            post {
+                kunSystembruker {
+                    withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
+                        service.fjernFerdigstiltTilbakekrevingbrev(behandlingId)
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
             }
         }

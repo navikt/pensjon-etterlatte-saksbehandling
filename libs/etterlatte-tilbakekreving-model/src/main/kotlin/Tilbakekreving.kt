@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -192,3 +193,7 @@ data class FattetVedtak(
     val enhet: Enhetsnummer,
     val dato: LocalDate,
 )
+
+const val TILBAKEKREVING_KOMPONENTEN_FEIL = "FEIL_MOT_TILBAKEKREVINGKOMPONENTEN"
+
+class TilbakekrevingskomponentenFeil(melding: String) : UgyldigForespoerselException(TILBAKEKREVING_KOMPONENTEN_FEIL, melding)

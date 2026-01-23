@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingskomponentenFeil
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseType
@@ -322,12 +323,14 @@ class TilbakekrevingskomponentenKlient(
                 Unit
             }
 
-            Alvorlighetsgrad.ALVORLIG_FEIL,
-            Alvorlighetsgrad.SQL_FEIL,
-            -> {
+            Alvorlighetsgrad.ALVORLIG_FEIL -> {
+                val err = "Tilbakekreving ikke godkjent i tilbakekrevingskomponenten: ${response.mmel.beskrMelding}"
+                sikkerLogg.error(err, kv("response", response.toJson()))
+                throw TilbakekrevingskomponentenFeil(err)
+            }
+            Alvorlighetsgrad.SQL_FEIL -> {
                 val err = "Tilbakekrevingsvedtak feilet med alvorlighetsgrad $alvorlighetsgrad"
                 sikkerLogg.error(err, kv("response", response.toJson()))
-                response.mmel.beskrMelding
                 throw InternfeilException(err)
             }
         }

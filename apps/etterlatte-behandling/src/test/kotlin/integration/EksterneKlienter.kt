@@ -103,6 +103,7 @@ import no.nav.etterlatte.libs.ktor.ServiceStatus
 import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.soeker
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
@@ -516,6 +517,14 @@ class BrevApiKlientTest : BrevApiKlient {
         brevtype: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun fjernFerdigstillingTilbakekreving(
+        tilbakekrevingId: UUID,
+        sakId: SakId,
+        systembruker: Systembruker,
+    ) {
         TODO("Not yet implemented")
     }
 

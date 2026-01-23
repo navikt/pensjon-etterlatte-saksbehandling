@@ -67,11 +67,12 @@ data class HardkodaSystembruker private constructor(
     val omraade: Systembrukere,
 ) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to APP))) {
     companion object {
+
         /* Obs: Bruk bare disse fra kontekster hvor vi ikke har et BrukerTokenInfo-objekt allerede.
-        Send alltid med brukeren fra requesten der du kan. Disse er for rivers, automatiske jobber
-        og testdata-appene, hvor systemet på eget initiativ starter kjøring, og vi dermed ikke har en
-        eksisterende saksbehandler eller systembruker å hente tokenet fra
-         */
+                Send alltid med brukeren fra requesten der du kan. Disse er for rivers, automatiske jobber
+                og testdata-appene, hvor systemet på eget initiativ starter kjøring, og vi dermed ikke har en
+                eksisterende saksbehandler eller systembruker å hente tokenet fra
+                 */
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
         val aktivitetsplikt = HardkodaSystembruker(Systembrukere.AKTIVITETSPLIKT)
@@ -85,6 +86,7 @@ data class HardkodaSystembruker private constructor(
         val tilgang = HardkodaSystembruker(Systembrukere.TILGANG)
         val etteroppgjoer = HardkodaSystembruker(Systembrukere.ETTEROPPGJOER)
         val institusjonsopphold = HardkodaSystembruker(Systembrukere.INSTITUSJONSOPPHOLD)
+        val tilbakekrevingTilbakestilling = HardkodaSystembruker(Systembrukere.TILBAKEKREVING_TILBAKESTILLING)
     }
 
     enum class Systembrukere(
@@ -103,6 +105,7 @@ data class HardkodaSystembruker private constructor(
         UTTREKK("uttrekk"),
         ETTEROPPGJOER("etteroppgjoer"),
         INSTITUSJONSOPPHOLD("institusjonsopphold"),
+        TILBAKEKREVING_TILBAKESTILLING("tilbakekreving-tilbakestilling")
     }
 }
 

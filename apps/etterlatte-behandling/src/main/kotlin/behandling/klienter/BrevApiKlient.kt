@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.time.Duration
 import java.util.UUID
 
@@ -140,6 +141,16 @@ interface BrevApiKlient {
         brevtype: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevPayload
+
+    /**
+     * Denne metoden ligger sperret bak kun bruk av systembrukere. Dette for å sikre at det kun brukes når det er
+     * "korrekt", og ikke i andre tilfeller der man ikke burde fjerne ferdigstilling av brevet
+     */
+    suspend fun fjernFerdigstillingTilbakekreving(
+        tilbakekrevingId: UUID,
+        sakId: SakId,
+        systembruker: Systembruker,
+    )
 }
 
 class BrevApiKlientObo(
@@ -405,6 +416,19 @@ class BrevApiKlientObo(
                 ),
             brukerTokenInfo = brukerTokenInfo,
         )
+
+    override suspend fun fjernFerdigstillingTilbakekreving(
+        tilbakekrevingId: UUID,
+        sakId: SakId,
+        systembruker: Systembruker
+    ) {
+        post(
+            url = "$resourceUrl/api/brev/behandling/$tilbakekrevingId/tilbakekreving/fjern-ferdigstilt",
+            postBody = {  },
+            onSuccess = {  },
+            brukerTokenInfo = systembruker,
+        )
+    }
 
     private suspend fun <T> post(
         url: String,

@@ -71,6 +71,10 @@ class Vedtakstidslinje(
         if (sammenstilt.size == 1) {
             // Håndter special case
             val vedtak = sammenstilt.single()
+            if (vedtak.virkningstidspunkt == vedtak.opphoerFraOgMed) {
+                // Vi har ingen innvilget periode, hvis det eneste vedtaket vi har i tidslinjen er opphør fra start
+                return emptyList()
+            }
             return listOf(
                 InnvilgetPeriode(Periode(vedtak.virkningstidspunkt, vedtak.opphoerFraOgMed?.minusMonths(1)), vedtak = listOf(vedtak)),
             )
@@ -92,12 +96,18 @@ class Vedtakstidslinje(
             // Dette skjer når: nåværende vedtak har et opphør / er et opphør og neste vedtak har virk strengt etter opphør fom
             val naavaerendeVedtakOpphoererDato = naavaerendeVedtak.opphoer()
             if (naavaerendeVedtakOpphoererDato != null && naavaerendeVedtakOpphoererDato < nesteVedtak.virkningstidspunkt) {
-                innvilgedePerioder.add(
-                    InnvilgetPeriode(
-                        Periode(startPaaEksisterendePeriode!!.virkningstidspunkt, naavaerendeVedtakOpphoererDato.minusMonths(1)),
-                        vedtakMedIPerioden + naavaerendeVedtak,
-                    ),
-                )
+                // Legg kun til denne perioden hvis den er reell, dvs. perioden ikke har et opphør fra starten
+                if (startPaaEksisterendePeriode.virkningstidspunkt < naavaerendeVedtakOpphoererDato) {
+                    innvilgedePerioder.add(
+                        InnvilgetPeriode(
+                            Periode(
+                                startPaaEksisterendePeriode.virkningstidspunkt,
+                                naavaerendeVedtakOpphoererDato.minusMonths(1),
+                            ),
+                            vedtakMedIPerioden + naavaerendeVedtak,
+                        ),
+                    )
+                }
                 startPaaEksisterendePeriode = null
                 vedtakMedIPerioden.clear()
             } else {
@@ -110,20 +120,29 @@ class Vedtakstidslinje(
 
         when (val eksisterendePeriode = startPaaEksisterendePeriode) {
             // vi har ikke en eksisterende periode
-            null ->
-                innvilgedePerioder.add(
-                    InnvilgetPeriode(
-                        Periode(sammenstilt.last().virkningstidspunkt, opphoerSisteVedtak?.minusMonths(1)),
-                        vedtak = listOf(sammenstilt.last()),
-                    ),
-                )
-            else ->
-                innvilgedePerioder.add(
-                    InnvilgetPeriode(
-                        Periode(eksisterendePeriode.virkningstidspunkt, opphoerSisteVedtak?.minusMonths(1)),
-                        vedtak = vedtakMedIPerioden + sammenstilt.last(),
-                    ),
-                )
+            // Legg kun til perioden hvis den reell, dvs. at vi ikke har et opphør eller opphøret skjer _etter_ første virk
+            null -> {
+                if (opphoerSisteVedtak == null || sammenstilt.last().virkningstidspunkt < opphoerSisteVedtak) {
+                    innvilgedePerioder.add(
+                        InnvilgetPeriode(
+                            Periode(sammenstilt.last().virkningstidspunkt, opphoerSisteVedtak?.minusMonths(1)),
+                            vedtak = listOf(sammenstilt.last()),
+                        ),
+                    )
+                }
+            }
+
+            // Legg kun til perioden hvis den reell, dvs. at vi ikke har et opphør eller opphøret skjer _etter_ første virk
+            else -> {
+                if (opphoerSisteVedtak == null || eksisterendePeriode.virkningstidspunkt < opphoerSisteVedtak) {
+                    innvilgedePerioder.add(
+                        InnvilgetPeriode(
+                            Periode(eksisterendePeriode.virkningstidspunkt, opphoerSisteVedtak?.minusMonths(1)),
+                            vedtak = vedtakMedIPerioden + sammenstilt.last(),
+                        ),
+                    )
+                }
+            }
         }
 
         return innvilgedePerioder
@@ -171,6 +190,7 @@ class Vedtakstidslinje(
             innhold =
                 when (innhold) {
                     is VedtakInnhold.Behandling -> innhold.kopier(gyldighetsperiode)
+
                     is VedtakInnhold.Tilbakekreving, is VedtakInnhold.Klage -> throw UgyldigForespoerselException(
                         code = "VEDTAKSINNHOLD_IKKE_STOETTET",
                         detail = "Skal ikke benyttes på annet enn vedtak med behandlingsinnhold",

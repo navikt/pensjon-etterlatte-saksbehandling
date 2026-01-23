@@ -29,7 +29,7 @@ data class Etteroppgjoer(
     fun mottattSkatteoppgjoer() = status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
 
     fun kanTilbakestillesMedNyForbehandling(forbehandling: EtteroppgjoerForbehandling) {
-        if (status !in listOf(EtteroppgjoerStatus.FERDIGSTILT, EtteroppgjoerStatus.OMGJOERING)) {
+        if (status !in listOf(EtteroppgjoerStatus.FERDIGSTILT, EtteroppgjoerStatus.OMGJOERING, EtteroppgjoerStatus.VENTER_PAA_SVAR)) {
             throw IllegalStateException(
                 "Kan ikke tilbakestille etteroppgjoer med status $status",
             )

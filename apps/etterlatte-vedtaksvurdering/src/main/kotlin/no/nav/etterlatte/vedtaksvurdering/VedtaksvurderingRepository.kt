@@ -199,7 +199,8 @@ class VedtaksvurderingRepository(
             """,
                 params = mapOf("vedtakId" to vedtakId),
             ) {
-                it.toVedtak(emptyList())
+                val utbetalingsperioder = hentUtbetalingsPerioder(vedtakId, this)
+                it.toVedtak(utbetalingsperioder)
             }
         }
 

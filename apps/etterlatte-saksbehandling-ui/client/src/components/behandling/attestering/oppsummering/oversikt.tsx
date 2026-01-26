@@ -74,7 +74,8 @@ export const Oversikt = ({
             {formaterBehandlingstype(behandlingsInfo.type)}
 
             {(behandlingsInfo.nasjonalEllerUtland === UtlandstilknytningType.UTLANDSTILSNITT ||
-              behandlingsInfo.nasjonalEllerUtland === UtlandstilknytningType.BOSATT_UTLAND) && (
+              behandlingsInfo.nasjonalEllerUtland === UtlandstilknytningType.BOSATT_UTLAND ||
+              behandlingsInfo.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet === true) && (
               <EessiPensjonLenke
                 sakId={behandlingsInfo.sakId}
                 behandlingId={behandlingsInfo.behandlingId}

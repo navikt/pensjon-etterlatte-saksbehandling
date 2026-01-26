@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import grunnlagsendring.doedshendelse.BeroerteVedDoedshendelse
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -15,6 +16,10 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
+import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -25,8 +30,21 @@ class DoedshendelseService(
     private val doedshendelseDao: DoedshendelseDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val featureToggleService: FeatureToggleService,
+    private val gosysOppgaveKlient: GosysOppgaveKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    fun opprettTestOppgave(brukerTokenInfo: BrukerTokenInfo): GosysApiOppgave =
+        runBlocking {
+            gosysOppgaveKlient.finnOppgaveTyper(brukerTokenInfo)
+
+            val oppgave =
+                gosysOppgaveKlient.opprettOppgave(
+                    personident = "31488338237",
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            gosysOppgaveKlient.hentOppgave(oppgave.id, brukerTokenInfo)
+        }
 
     fun settHendelseTilFerdigOgOppdaterBrevId(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) =
         doedshendelseDao.oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert)
@@ -54,15 +72,24 @@ class DoedshendelseService(
         val barn = finnBeroerteBarn(avdoed)
         val samboere = finnSamboereForAvdoedMedFellesBarn(avdoed)
         val ektefeller = finnBeroerteEktefeller(avdoed, samboere)
-        val alleBeroerte = barn + ektefeller + samboere
+        val barnUtenIdent = avdoed.avdoedesBarnUtenIdent ?: emptyList()
+        val alleBeroerte =
+            BeroerteVedDoedshendelse(
+                barn + ektefeller + samboere,
+                barnUtenIdent,
+                emptyList(),
+            )
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
-            sikkerLogg.info("Fant ${alleBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value})")
+            sikkerLogg.info("Fant ${alleBeroerte.size()} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value})")
             inTransaction {
-                lagreDoedshendelser(alleBeroerte, avdoed, doedshendelse.endringstype)
+                lagreDoedshendelser(alleBeroerte, emptyList(), avdoed, doedshendelse.endringstype)
             }
         } else {
-            haandterEksisterendeHendelser(doedshendelse, gyldigeDoedshendelserForAvdoed, avdoed, alleBeroerte)
+            haandterEksisterendeHendelser(doedshendelse, gyldigeDoedshendelserForAvdoed, avdoed, emptyList()) // TODO
+        }
+        runBlocking {
+            gosysOppgaveKlient.opprettOppgave("", HardkodaSystembruker.doedshendelse)
         }
     }
 
@@ -93,7 +120,9 @@ class DoedshendelseService(
                 }
             }
 
-            Endringstype.OPPHOERT -> throw RuntimeException("Fikk opphør på dødshendelse, skal ikke skje ifølge PDL docs")
+            Endringstype.OPPHOERT -> {
+                throw RuntimeException("Fikk opphør på dødshendelse, skal ikke skje ifølge PDL docs")
+            }
         }
     }
 
@@ -108,36 +137,41 @@ class DoedshendelseService(
             beroerte
                 .map { PersonFnrMedRelasjon(it.fnr, it.relasjon) }
                 .filter { !eksisterendeBeroerte.contains(it.fnr) }
-        nyeBeroerte.forEach { person ->
-            doedshendelseDao.opprettDoedshendelse(
-                DoedshendelseInternal.nyHendelse(
-                    avdoedFnr = avdoed.foedselsnummer.verdi.value,
-                    avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                    beroertFnr = person.fnr,
-                    relasjon = person.relasjon,
-                    endringstype = endringstype,
-                ),
-            )
-        }
+        nyeBeroerte
+            .filter { it.fnr != null }
+            .forEach { person ->
+                doedshendelseDao.opprettDoedshendelse(
+                    DoedshendelseInternal.nyHendelse(
+                        avdoedFnr = avdoed.foedselsnummer.verdi.value,
+                        avdoedDoedsdato = avdoed.doedsdato!!.verdi,
+                        beroertFnr = person.fnr!!,
+                        relasjon = person.relasjon,
+                        endringstype = endringstype,
+                    ),
+                )
+            }
     }
 
     private fun lagreDoedshendelser(
-        beroerte: List<PersonFnrMedRelasjon>,
+        beroerte: BeroerteVedDoedshendelse, // TODO
+        gammel: List<PersonFnrMedRelasjon>,
         avdoed: PersonDoedshendelseDto,
         endringstype: Endringstype,
     ) {
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
-        beroerte.forEach { person ->
-            doedshendelseDao.opprettDoedshendelse(
-                DoedshendelseInternal.nyHendelse(
-                    avdoedFnr = avdoedFnr,
-                    avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                    beroertFnr = person.fnr,
-                    relasjon = person.relasjon,
-                    endringstype = endringstype,
-                ),
-            )
-        }
+        gammel
+            .filter { it.fnr != null }
+            .forEach { person ->
+                doedshendelseDao.opprettDoedshendelse(
+                    DoedshendelseInternal.nyHendelse(
+                        avdoedFnr = avdoedFnr,
+                        avdoedDoedsdato = avdoed.doedsdato!!.verdi,
+                        beroertFnr = person.fnr!!,
+                        relasjon = person.relasjon,
+                        endringstype = endringstype,
+                    ),
+                )
+            }
         doedshendelseDao.opprettDoedshendelse(
             DoedshendelseInternal.nyHendelse(
                 avdoedFnr = avdoedFnr,

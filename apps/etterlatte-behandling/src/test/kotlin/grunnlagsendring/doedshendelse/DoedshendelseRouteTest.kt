@@ -16,6 +16,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.GosysOppgaveKlientTest
 import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.attachMockContext
@@ -28,6 +29,7 @@ import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -47,6 +49,7 @@ internal class DoedshendelseRouteTest(
     private val featureToggleService: FeatureToggleService = DummyFeatureToggleService()
     private val mockOAuth2Server = MockOAuth2Server()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
+    private val gosysOppgaveKlient = spyk<GosysOppgaveKlientTest>()
     private val doedshendelseDao: DoedshendelseDao = DoedshendelseDao(ConnectionAutoclosingTest(dataSource))
 
     private val service =
@@ -54,6 +57,7 @@ internal class DoedshendelseRouteTest(
             doedshendelseDao = doedshendelseDao,
             pdlTjenesterKlient = pdlTjenesterKlient,
             featureToggleService = featureToggleService,
+            gosysOppgaveKlient = gosysOppgaveKlient,
         )
 
     @BeforeAll

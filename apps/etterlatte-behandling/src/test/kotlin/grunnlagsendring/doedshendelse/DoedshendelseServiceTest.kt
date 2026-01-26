@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.GosysOppgaveKlientTest
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.User
@@ -39,6 +40,7 @@ import java.util.UUID
 internal class DoedshendelseServiceTest {
     private val featureToggleService: FeatureToggleService = DummyFeatureToggleService()
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
+    private val gosysOppgaveKlient = mockk<GosysOppgaveKlientTest>()
     private val dao = mockk<DoedshendelseDao>()
 
     private val service =
@@ -46,6 +48,7 @@ internal class DoedshendelseServiceTest {
             doedshendelseDao = dao,
             pdlTjenesterKlient = pdlTjenesterKlient,
             featureToggleService = featureToggleService,
+            gosysOppgaveKlient = gosysOppgaveKlient,
         )
 
     private val avdoed =

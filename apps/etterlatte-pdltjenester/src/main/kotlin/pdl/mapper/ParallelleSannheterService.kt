@@ -421,6 +421,7 @@ class ParallelleSannheterService(
                     null,
                 ),
             avdoedesBarn = barnekull?.barn,
+            avdoedesBarnUtenIdent = barnekull?.barnUtenIdent,
         )
     }
 

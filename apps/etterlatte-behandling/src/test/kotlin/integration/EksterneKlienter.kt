@@ -599,6 +599,17 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 
+    override suspend fun opprettOppgave(
+        personident: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun finnOppgaveTyper(brukerTokenInfo: BrukerTokenInfo) {
+        TODO("Not yet implemented")
+    }
+
     private fun gosysApiOppgave(): GosysApiOppgave =
         GosysApiOppgave(
             1,

@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import org.apache.kafka.common.protocol.types.Field
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -47,6 +46,7 @@ data class GosysApiOppgave(
     val status: String,
     val fristFerdigstillelse: LocalDate? = null,
     val bruker: GosysOppgaveBruker?,
+    val personident: String? = null,
 )
 
 data class GosysEndreSaksbehandlerRequest(
@@ -105,6 +105,13 @@ interface GosysOppgaveKlient {
         request: EndreStatusRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave
+
+    suspend fun opprettOppgave(
+        personident: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave
+
+    suspend fun finnOppgaveTyper(brukerTokenInfo: BrukerTokenInfo)
 }
 
 class GosysOppgaveKlientImpl(
@@ -306,6 +313,88 @@ class GosysOppgaveKlientImpl(
             throw e
         }
     }
+
+    override suspend fun opprettOppgave(
+        personident: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        logger.info("Oppretter oppgave")
+        val body =
+            OpprettOppgaveRequest(
+                tema = "EYO", // TODO
+                beskrivelse = "Noe må gjøres",
+                personident = personident,
+                prioritet = "NORM",
+            )
+
+        try {
+            val response =
+                downstreamResourceClient
+                    .post(
+                        resource =
+                            Resource(
+                                clientId = clientId,
+                                url = "$resourceUrl/api/v1/oppgaver",
+                            ),
+                        postBody = body,
+                        brukerTokenInfo = brukerTokenInfo,
+                    ).mapBoth<Resource, Throwable, GosysApiOppgave>(
+                        success = { resource -> deserialize(resource.response.toString()) },
+                        failure = { errorResponse -> throw errorResponse },
+                    )
+            logger.info("Opprettet oppgave (id=${response.id}, status=${response.status}, tema=${response.tema})")
+            sikkerlogger().info("Opprettet oppgave med respons: \n$response")
+            return response
+        } catch (re: ResponseException) {
+            if (re.response.status == HttpStatusCode.Conflict) {
+                throw GosysKonfliktException(re.response.bodyAsText())
+            } else {
+                throw re
+            }
+        } catch (_: SocketTimeoutException) {
+            throw GosysTimeout()
+        } catch (e: Exception) {
+            logger.error("Ukjent feil oppsto ved oppretting av oppgave (se sikkerlogg for body)", e)
+            sikkerlogger().error("Ukjent feil oppsto ved oppretting av oppgave=: \n${body.toJson()}")
+            throw e
+        }
+    }
+
+    override suspend fun finnOppgaveTyper(brukerTokenInfo: BrukerTokenInfo) {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/v1/kodeverk/oppgavetype/EYO",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.toString() },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (_: SocketTimeoutException) {
+            throw GosysTimeout()
+        } catch (e: Exception) {
+            logger.error("Feil ved henting av oppgavetyper", e)
+            throw e
+        }
+    }
+}
+
+@Suppress("unused")
+data class OpprettOppgaveRequest(
+    val journalpostId: String? = null,
+    val tema: String,
+    val prioritet: String,
+    val beskrivelse: String,
+    val personident: String? = null,
+    val orgnr: String? = null,
+) {
+    // JFR = Journalføring
+    val oppgavetype: String = "JFR" // TODO
+    val aktivDato: String = LocalDate.now().toString()
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

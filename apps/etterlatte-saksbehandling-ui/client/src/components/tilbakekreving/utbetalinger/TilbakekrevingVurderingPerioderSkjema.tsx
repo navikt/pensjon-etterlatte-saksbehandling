@@ -301,7 +301,10 @@ export function TilbakekrevingVurderingPerioderSkjema({
                           <Table.DataCell>
                             <Select
                               {...register(
-                                `values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.overstyrBehandletNettoTilBrutto`
+                                `values.${indexPeriode}.tilbakekrevingsbeloep.${indexBeloep}.overstyrBehandletNettoTilBrutto`,
+                                {
+                                  setValueAs: (value) => (!!value ? value : undefined),
+                                }
                               )}
                               label="Overstyr netto til brutto"
                               hideLabel

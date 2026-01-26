@@ -166,7 +166,7 @@ class EtteroppgjoerRevurderingBrevService(
                         faktiskStoenad = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
                         grunnlag = EtteroppgjoerBrevGrunnlag.fra(faktiskInntekt, detaljertForbehandling.opplysninger.skatt.summertInntekt),
                         rettsgebyrBeloep = Kroner(beregnetEtteroppgjoerResultat.grense.rettsgebyr),
-                        harOpphoer = etteroppgjoer.harOpphoer,
+                        harOpphoer = detaljertForbehandling.forbehandling.harVedtakAvTypeOpphoer ?: etteroppgjoer.harOpphoer,
                     ),
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(

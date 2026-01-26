@@ -24,7 +24,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
+import java.time.Year
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.DAYS
 import java.util.UUID
 
@@ -827,6 +829,91 @@ internal class VedtakstidslinjeTest {
         }
 
         @Test
+        fun `innvilgede perioder håndterer opphør fra første virk`() {
+            val vedtakVirkJanuar =
+                lagStandardVedtakMedEnAapenUtbetalingsperiode(
+                    id = 1,
+                    virkningFom = YearMonth.of(2024, Month.JANUARY),
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    vedtakFattetDato = Tidspunkt.now().minus(3, DAYS),
+                )
+            val opphoerFraFoersteVirk =
+                lagVedtak(
+                    id = 2,
+                    virkningsDato = YearMonth.of(2024, Month.JANUARY).atDay(1),
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakStatus = VedtakStatus.IVERKSATT,
+                    datoAttestert = Tidspunkt.now(),
+                    vedtakType = VedtakType.OPPHOER,
+                    vedtakFattetDato = Tidspunkt.now().minus(1, DAYS),
+                    utbetalingsperioder =
+                        listOf(
+                            Utbetalingsperiode(
+                                id = 3,
+                                periode = Periode(fom = YearMonth.of(2024, Month.JANUARY), tom = null),
+                                beloep = null,
+                                type = UtbetalingsperiodeType.OPPHOER,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
+                            ),
+                        ),
+                    opphoerFraOgMed = YearMonth.of(2024, Month.JANUARY),
+                )
+
+            val tidslinje = Vedtakstidslinje(listOf(vedtakVirkJanuar, opphoerFraFoersteVirk))
+            val innvilgetPeriode = tidslinje.innvilgedePerioder()
+            innvilgetPeriode.size shouldBe 0
+        }
+
+        @Test
+        fun `innvilgede perioder håndterer en opphørt start og så en periode innvilget senere`() {
+            val vedtakVirkJanuar =
+                lagStandardVedtakMedEnAapenUtbetalingsperiode(
+                    id = 1,
+                    virkningFom = YearMonth.of(2024, Month.JANUARY),
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    vedtakFattetDato = Tidspunkt.now().minus(3, DAYS),
+                )
+            val opphoerFraFoersteVirk =
+                lagVedtak(
+                    id = 2,
+                    virkningsDato = YearMonth.of(2024, Month.JANUARY).atDay(1),
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakStatus = VedtakStatus.IVERKSATT,
+                    datoAttestert = Tidspunkt.now().minus(1, DAYS),
+                    vedtakType = VedtakType.OPPHOER,
+                    vedtakFattetDato = Tidspunkt.now().minus(1, DAYS),
+                    utbetalingsperioder =
+                        listOf(
+                            Utbetalingsperiode(
+                                id = 3,
+                                periode = Periode(fom = YearMonth.of(2024, Month.JANUARY), tom = null),
+                                beloep = null,
+                                type = UtbetalingsperiodeType.OPPHOER,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
+                            ),
+                        ),
+                    opphoerFraOgMed = YearMonth.of(2024, Month.JANUARY),
+                )
+
+            val revurderingInnvilgetFraMai =
+                lagVedtak(
+                    id = 3,
+                    virkningsDato = YearMonth.of(2024, Month.MAY).atDay(1),
+                    vedtakType = VedtakType.ENDRING,
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakFattetDato = Tidspunkt.now(),
+                    datoAttestert = Tidspunkt.now(),
+                    vedtakStatus = VedtakStatus.IVERKSATT,
+                )
+
+            val tidslinje = Vedtakstidslinje(listOf(vedtakVirkJanuar, opphoerFraFoersteVirk, revurderingInnvilgetFraMai))
+            val innvilgetPeriode = tidslinje.innvilgedePerioder()
+            innvilgetPeriode.size shouldBe 1
+            innvilgetPeriode[0].periode.fom shouldBe YearMonth.of(2024, Month.MAY)
+            innvilgetPeriode[0].periode.tom shouldBe null
+        }
+
+        @Test
         fun `Skal kunne ha et opphør og en ny revurdering med virk før opphør som bygger opp utbetalingslinjer med opphøret`() {
             val vedtakFomJanuar2024 =
                 lagVedtak(
@@ -1011,6 +1098,7 @@ private fun lagStandardVedtakMedEnAapenUtbetalingsperiode(
     vedtakStatus = VedtakStatus.IVERKSATT,
     behandlingType = behandlingType,
     vedtakFattetDato = vedtakFattetDato,
+    datoAttestert = vedtakFattetDato.plus(2, ChronoUnit.MINUTES),
     opphoerFraOgMed = opphoerFraOgMed,
     utbetalingsperioder =
         listOf(

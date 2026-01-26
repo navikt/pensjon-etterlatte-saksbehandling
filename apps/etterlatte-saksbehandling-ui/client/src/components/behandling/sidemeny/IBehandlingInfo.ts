@@ -1,6 +1,7 @@
 import {
   IBehandlingStatus,
   IBehandlingsType,
+  IBoddEllerArbeidetUtlandet,
   UtlandstilknytningType,
   Vedtaksloesning,
 } from '~shared/types/IDetaljertBehandling'
@@ -24,6 +25,7 @@ export interface IBehandlingInfo {
   underkjentLogg?: IHendelse[]
   fattetLogg?: IHendelse[]
   attestertLogg?: IHendelse[]
+  boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null
 }
 
 export enum BehandlingFane {

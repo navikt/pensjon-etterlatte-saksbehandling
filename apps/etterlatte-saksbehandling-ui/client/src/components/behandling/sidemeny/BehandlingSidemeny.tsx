@@ -66,6 +66,7 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSamm
   underkjentLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_UNDERKJENT),
   fattetLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_FATTET),
   attestertLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_ATTESTERT),
+  boddEllerArbeidetUtlandet: behandling.boddEllerArbeidetUtlandet,
 })
 
 function P1Lenke() {

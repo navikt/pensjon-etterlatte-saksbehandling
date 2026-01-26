@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
+import kotliquery.param
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
@@ -61,7 +62,6 @@ class KonsistensavstemmingService(
 
         val relevanteUtbetalinger =
             utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-                aktivFraOgMed = loependeYtelseFom,
                 opprettetFramTilOgMed = registrertFoerTom,
                 saktype = saktype,
             )
@@ -116,8 +116,11 @@ class KonsistensavstemmingService(
                 .mapNotNull { (sakid, utbetalingslinjerPerSak) ->
                     // 5
                     when (utbetalingslinjerPerSak.utbetalingslinjer.size) {
-                        0 -> null
-                        else ->
+                        0 -> {
+                            null
+                        }
+
+                        else -> {
                             OppdragForKonsistensavstemming(
                                 sakId = sakid,
                                 sakType = saktype,
@@ -139,6 +142,7 @@ class KonsistensavstemmingService(
                                         )
                                     },
                             )
+                        }
                     }
                 } // 5
 
@@ -203,15 +207,18 @@ fun gjeldendeLinjerForEnDato(
     utbetalingslinjer: List<Utbetalingslinje>,
     dato: LocalDate,
 ): List<Utbetalingslinje> {
-    val linjerSomErOpprettetOgIkkeAvsluttetPaaDato =
+    val linjerSomErOpprettetPaaEnData =
         utbetalingslinjer
             .filter {
                 it.opprettet <= Tidspunkt.ofNorskTidssone(dato, LocalTime.MIDNIGHT)
             } // 1
-            .filter { (it.periode.til ?: dato) >= dato } // 2
+    val linjerSomErOpprettetOgIkkeAvsluttetPaaDato =
+        linjerSomErOpprettetPaaEnData.filter { (it.periode.til ?: dato) >= dato } // 2
 
+    // Viktig at alle linjene er med i erstatter-rekkefølgen. Hvis vi mangler linjer her kan vi ikke
+    // finne tilbake til tidligste erstatter
     val utbetalingIdTilErstattendeUtbetalingMap =
-        linjerSomErOpprettetOgIkkeAvsluttetPaaDato
+        linjerSomErOpprettetPaaEnData
             .associateBy { it.erstatterId }
 
     return linjerSomErOpprettetOgIkkeAvsluttetPaaDato
@@ -228,6 +235,7 @@ fun gjeldendeLinjerForEnDato(
             if (tidligsteStartForEnErstatter == null) {
                 return@filter true
             }
+            // Hvis den tidligste starten på en erstatter er _etter_ datoen vi teller fra er denne linjen inkludert
             return@filter tidligsteStartForEnErstatter > dato
         }.filter { it.type != Utbetalingslinjetype.OPPHOER } // 4
 }

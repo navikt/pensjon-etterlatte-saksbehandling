@@ -62,6 +62,3 @@ spec:
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: inst2.prod-fss-pub.nais.io
-    inbound:
-      rules:
-        - application: etterlatte-behandling

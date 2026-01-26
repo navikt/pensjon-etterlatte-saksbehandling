@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
-import institusjonsopphold.personer.InstitusjonsoppholdInternKlientTest
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -125,7 +124,6 @@ abstract class BehandlingIntegrationTest {
                 inntektskomponentKlient = InntektskomponentKlientTest(),
                 grunnlagServiceOverride = grunnlagService,
                 sigrunKlient = SigrunKlienTest(),
-                institusjonsoppholdInternKlient = InstitusjonsoppholdInternKlientTest(),
             )
     }
 

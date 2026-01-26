@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -93,7 +94,9 @@ class DoedshendelseService(
                 }
             }
 
-            Endringstype.OPPHOERT -> throw RuntimeException("Fikk opphør på dødshendelse, skal ikke skje ifølge PDL docs")
+            Endringstype.OPPHOERT -> {
+                throw RuntimeException("Fikk opphør på dødshendelse, skal ikke skje ifølge PDL docs")
+            }
         }
     }
 
@@ -281,7 +284,7 @@ class DoedshendelseService(
                 OBS! Det er registrert en partner til avdøde ${avdoedFnr.value} uten ident.
                 Sivilstatus: ${sivilstand.sivilstatus}, historisk: ${sivilstand.historisk}, 
                 gyldigFraOgMed: ${sivilstand.gyldigFraOgMed}, bekreftelsesdato: ${sivilstand.bekreftelsesdato}.
-                "Sjekk manuelt om infobrev kan sendes ut til berørte likevel.",
+                Sivilstand-liste: ${avdoed.sivilstand?.toJson()}.
                 """.trimIndent(),
             )
         }

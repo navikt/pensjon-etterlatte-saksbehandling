@@ -12,6 +12,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 class OppdaterSkatteoppgjoerIkkeMottattJobService(
     private val featureToggleService: FeatureToggleService,
@@ -22,13 +23,23 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)
-        if (featureToggleService.isEnabled(EtteroppgjoerToggles.OPPDATER_SKATTEOPPGJOER_IKKE_MOTTATT, false)) {
-            logger.info("Oppdatere saker med skatteoppgjoer som ikke er mottatt")
-            runBlocking {
-                oppdaterSkatteoppgjoerIkkeMottatt()
-            }
-        } else {
-            logger.info("Periodisk jobber for oppdatere saker med skatteoppgjoer ikke mottatt er deaktivert")
+
+        if (!featureToggleService.isEnabled(EtteroppgjoerToggles.OPPDATER_SKATTEOPPGJOER_IKKE_MOTTATT, false)) {
+            logger.info("Periodisk jobb for å oppdatere saker med skatteoppgjør ikke mottatt er deaktivert")
+            return
+        }
+
+        val fristForMottattSkatteoppgjoer = LocalDate.of(LocalDate.now().year, 12, 1) // 1. desember i år
+        if (LocalDate.now().isBefore(fristForMottattSkatteoppgjoer)) {
+            logger.warn(
+                "Du forsøker å kjøre periodisk jobb for oppdatere saker med skatteoppgjoer ikke mottatt før siste frist for mottatt skatteoppgjør ( 1. desember ${LocalDate.now().year} ).",
+            )
+            return
+        }
+
+        logger.info("Oppdatere saker med skatteoppgjør som ikke er mottatt")
+        runBlocking {
+            oppdaterSkatteoppgjoerIkkeMottatt()
         }
     }
 

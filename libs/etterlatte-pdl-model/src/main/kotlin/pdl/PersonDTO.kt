@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.pdl
 
+import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
@@ -25,6 +26,7 @@ data class PersonDoedshendelseDto(
     var utland: OpplysningDTO<Utland>?,
     var familieRelasjon: OpplysningDTO<FamilieRelasjon>?,
     var avdoedesBarn: List<Person>?,
+    var avdoedesBarnUtenIdent: List<PersonUtenIdent>?,
 )
 
 data class PersonDTO(

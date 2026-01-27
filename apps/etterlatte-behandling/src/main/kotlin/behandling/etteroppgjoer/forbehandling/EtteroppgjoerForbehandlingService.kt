@@ -707,7 +707,7 @@ class EtteroppgjoerForbehandlingService(
                 e,
             )
 
-            if (!featureToggleService.isEnabled(EtteroppgjoerToggles.OPPDATER_SKATTEOPPGJOER_IKKE_MOTTATT, false)) {
+            if (!forbehandling.ikkeMottattSkatteoppgjoer) {
                 throw InternfeilException(
                     "Kunne ikke hente PGI fra skatt. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
                     e,
@@ -725,7 +725,7 @@ class EtteroppgjoerForbehandlingService(
                 e,
             )
 
-            if (!featureToggleService.isEnabled(EtteroppgjoerToggles.OPPDATER_SKATTEOPPGJOER_IKKE_MOTTATT, false)) {
+            if (!forbehandling.ikkeMottattSkatteoppgjoer) {
                 throw InternfeilException(
                     "Kunne ikke inntekter fra A-ordningen. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
                     e,

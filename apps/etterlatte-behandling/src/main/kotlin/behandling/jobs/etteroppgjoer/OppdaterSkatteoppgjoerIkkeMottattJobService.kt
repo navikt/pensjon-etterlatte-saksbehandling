@@ -29,14 +29,6 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
             return
         }
 
-        val fristForMottattSkatteoppgjoer = LocalDate.of(LocalDate.now().year, 12, 1) // 1. desember i år
-        if (LocalDate.now().isBefore(fristForMottattSkatteoppgjoer)) {
-            logger.warn(
-                "Du forsøker å kjøre periodisk jobb for oppdatere saker med skatteoppgjoer ikke mottatt før siste frist for mottatt skatteoppgjør ( 1. desember ${LocalDate.now().year} ).",
-            )
-            return
-        }
-
         logger.info("Oppdatere saker med skatteoppgjør som ikke er mottatt")
         runBlocking {
             oppdaterSkatteoppgjoerIkkeMottatt()

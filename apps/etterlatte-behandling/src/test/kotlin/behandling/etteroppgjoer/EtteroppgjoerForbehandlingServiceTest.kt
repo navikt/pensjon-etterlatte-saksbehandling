@@ -78,6 +78,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 vedtakKlient = vedtakKlient,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
                 etteroppgjoerDataService = etteroppgjoerDataService,
+                featureToggleService = mockk(),
             )
 
         val behandling =
@@ -244,7 +245,7 @@ class EtteroppgjoerForbehandlingServiceTest {
     @ParameterizedTest(name = "skal ikke opprette forbehandling for status={0}")
     @EnumSource(
         value = EtteroppgjoerStatus::class,
-        names = ["MOTTATT_SKATTEOPPGJOER"],
+        names = ["MOTTATT_SKATTEOPPGJOER", "MANGLER_SKATTEOPPGJOER"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `skal ikke opprette forbehandling hvis etteroppgjoer ikke har rett status status`(status: EtteroppgjoerStatus) {

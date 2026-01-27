@@ -633,6 +633,7 @@ internal class ApplicationContext(
             vedtakKlient = vedtakKlient,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             etteroppgjoerDataService = etteroppgjoerDataService,
+            featureToggleService = featureToggleService,
         )
 
     val aarligInntektsjusteringJobbService =

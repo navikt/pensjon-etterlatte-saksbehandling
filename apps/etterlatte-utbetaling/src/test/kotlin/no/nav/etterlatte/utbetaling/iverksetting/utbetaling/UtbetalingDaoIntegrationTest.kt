@@ -2,7 +2,6 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.DatabaseExtension
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
@@ -22,7 +21,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
@@ -395,7 +393,6 @@ internal class UtbetalingDaoIntegrationTest(
 
         val utbetalingerFraDao =
             utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-                aktivFraOgMed = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT).toTidspunkt(),
                 opprettetFramTilOgMed = Tidspunkt.now(),
                 saktype = Saktype.BARNEPENSJON,
             )
@@ -430,7 +427,7 @@ internal class UtbetalingDaoIntegrationTest(
             )
         val oppdrag2 = oppdrag(utbetaling2)
         val utbetalingId3 = UUID.randomUUID()
-        val utbetaling3 = // ikke aktiv
+        val utbetaling3 = // ikke aktiv men vi må hente periodene
             utbetaling(
                 id = utbetalingId3,
                 sakId = SakId(3L),
@@ -461,13 +458,12 @@ internal class UtbetalingDaoIntegrationTest(
 
         val utbetalingerFraDao =
             utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-                aktivFraOgMed = Tidspunkt.now(),
                 opprettetFramTilOgMed = Tidspunkt.now(),
                 saktype = Saktype.BARNEPENSJON,
             )
         assertTrue(utbetalingerFraDao.any { it.id == utbetalingId1 }) // aktiv
         assertFalse(utbetalingerFraDao.any { it.id == utbetalingId2 }) // ikke aktiv
-        assertFalse(utbetalingerFraDao.any { it.id == utbetalingId3 }) // ikke aktiv
+        assertTrue(utbetalingerFraDao.any { it.id == utbetalingId3 }) // ikke aktiv men vi må hente periodene
     }
 
     @AfterEach

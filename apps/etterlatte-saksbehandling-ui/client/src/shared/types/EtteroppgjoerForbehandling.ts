@@ -36,6 +36,7 @@ export interface EtteroppgjoerForbehandling {
   harVedtakAvTypeOpphoer?: boolean
   opphoerSkyldesDoedsfall?: JaNei
   opphoerSkyldesDoedsfallIEtteroppgjoersaar?: JaNei
+  mottattSkatteoppgjoer: boolean
 }
 
 export interface DetaljertEtteroppgjoerForbehandling {
@@ -81,7 +82,7 @@ export interface SummerteInntekterAOrdningen {
 }
 
 export interface EtteroppgjoerOpplysninger {
-  skatt: PensjonsgivendeInntektFraSkatteetatenSummert
+  skatt?: PensjonsgivendeInntektFraSkatteetatenSummert
   summerteInntekter?: SummerteInntekterAOrdningen
   tidligereAvkorting?: Avkorting
 }

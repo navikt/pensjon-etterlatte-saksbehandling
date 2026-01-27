@@ -38,7 +38,7 @@ data class EtteroppgjoerForbehandling(
     val harVedtakAvTypeOpphoer: Boolean? = null,
     val opphoerSkyldesDoedsfall: JaNei?,
     val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
-    val ikkeMottattSkatteoppgjoer: Boolean = false,
+    val mottattSkatteoppgjoer: Boolean = false,
 ) {
     companion object {
         fun opprett(
@@ -46,7 +46,7 @@ data class EtteroppgjoerForbehandling(
             innvilgetPeriode: Periode,
             sisteIverksatteBehandling: UUID,
             harVedtakAvTypeOpphoer: Boolean? = null,
-            ikkeMottattSkatteoppgjoer: Boolean? = null,
+            mottattSkatteoppgjoer: Boolean,
         ) = EtteroppgjoerForbehandling(
             id = UUID.randomUUID(),
             sak = sak,
@@ -64,7 +64,7 @@ data class EtteroppgjoerForbehandling(
             harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
             opphoerSkyldesDoedsfall = null,
             opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
-            ikkeMottattSkatteoppgjoer = ikkeMottattSkatteoppgjoer == true,
+            mottattSkatteoppgjoer = mottattSkatteoppgjoer,
         )
     }
 
@@ -225,7 +225,7 @@ data class DetaljertForbehandlingDto(
 )
 
 data class EtteroppgjoerOpplysninger(
-    val skatt: SummertePensjonsgivendeInntekter,
+    val skatt: SummertePensjonsgivendeInntekter?,
     val summerteInntekter: SummerteInntekterAOrdningen?,
     val tidligereAvkorting: AvkortingDto?,
 )

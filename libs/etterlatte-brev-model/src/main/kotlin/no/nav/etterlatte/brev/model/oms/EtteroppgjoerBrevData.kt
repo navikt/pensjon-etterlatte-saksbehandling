@@ -132,7 +132,7 @@ data class EtteroppgjoerBrevGrunnlag(
     companion object {
         fun fra(
             grunnlag: FaktiskInntektDto,
-            pensjonsgivendeInntektHeleAaret: Int,
+            pensjonsgivendeInntektHeleAaret: Int?,
         ): EtteroppgjoerBrevGrunnlag {
             krevIkkeNull(grunnlag.inntektInnvilgetPeriode) {
                 "Kan ikke vise beregningstabell uten summert faktisk inntekt"
@@ -147,7 +147,7 @@ data class EtteroppgjoerBrevGrunnlag(
                 afp = Kroner(grunnlag.afp),
                 utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
                 inntekt = Kroner(grunnlag.inntektInnvilgetPeriode!!),
-                pensjonsgivendeInntektHeleAaret = Kroner(pensjonsgivendeInntektHeleAaret),
+                pensjonsgivendeInntektHeleAaret = Kroner(pensjonsgivendeInntektHeleAaret ?: 0),
             )
         }
     }

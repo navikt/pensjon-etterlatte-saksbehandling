@@ -124,7 +124,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setNullableBoolean(18, forbehandling.harVedtakAvTypeOpphoer)
                 statement.setString(19, forbehandling.opphoerSkyldesDoedsfall?.name)
                 statement.setString(20, forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar?.name)
-                statement.setBoolean(21, forbehandling.ikkeMottattSkatteoppgjoer)
+                statement.setBoolean(21, forbehandling.mottattSkatteoppgjoer)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -330,7 +330,7 @@ class EtteroppgjoerForbehandlingDao(
                 getString(
                     "opphoer_skyldes_doedsfall_i_etteroppgjoersaar",
                 )?.let { enumValueOf<JaNei>(it) },
-            ikkeMottattSkatteoppgjoer = getBoolean("ikke_mottatt_skatteoppgjoer"),
+            mottattSkatteoppgjoer = getBoolean("mottatt_skatteoppgjoer"),
         )
 
     private fun ResultSet.toSummertePensjonsgivendeInntekter(): SummertePensjonsgivendeInntekter =

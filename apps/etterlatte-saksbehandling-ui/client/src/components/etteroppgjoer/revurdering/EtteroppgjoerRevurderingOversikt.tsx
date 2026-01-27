@@ -1,8 +1,7 @@
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import React, { useState } from 'react'
 import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'
-import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { formaterDato } from '~utils/formatering/dato'
+import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { TabellForBeregnetEtteroppgjoerResultat } from '~components/etteroppgjoer/components/resultatAvForbehandling/TabellForBeregnetEtteroppgjoerResultat'
@@ -97,10 +96,8 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       <Heading size="xlarge" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
-      <BodyShort>
-        <b>Skatteoppgjør mottatt:</b> {formaterDato(forbehandling.opprettet)}
-      </BodyShort>
-      <Inntektsopplysninger />
+
+      <Inntektsopplysninger forbehandling={forbehandling} />
 
       {behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && (
         <>

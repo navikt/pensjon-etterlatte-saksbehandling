@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
@@ -196,9 +195,12 @@ class EtteroppgjoerForbehandlingService(
                 )
 
         val pensjonsgivendeInntekt =
-            dao.hentPensjonsgivendeInntekt(forbehandlingId) ?: throw InternfeilException(
-                "Mangler pensjonsgivendeInntekt for behandlingId=$forbehandlingId",
-            )
+            try {
+                dao.hentPensjonsgivendeInntekt(forbehandlingId)
+            } catch (e: Exception) {
+                logger.error("Kunne ikke hente pgi", e)
+                null
+            }
 
         val summerteInntekter =
             try {
@@ -542,7 +544,7 @@ class EtteroppgjoerForbehandlingService(
                 innvilgetPeriode = innvilgetPeriode,
                 sisteIverksatteBehandling = sisteAvkortingOgOpphoer.sisteBehandlingMedAvkorting,
                 harVedtakAvTypeOpphoer = sisteAvkortingOgOpphoer.opphoerFom != null,
-                ikkeMottattSkatteoppgjoer = etteroppgjoer.status == EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
+                mottattSkatteoppgjoer = etteroppgjoer.status == EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
             )
     }
 
@@ -707,7 +709,7 @@ class EtteroppgjoerForbehandlingService(
                 e,
             )
 
-            if (!forbehandling.ikkeMottattSkatteoppgjoer) {
+            if (!forbehandling.mottattSkatteoppgjoer) {
                 throw InternfeilException(
                     "Kunne ikke hente PGI fra skatt. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
                     e,
@@ -725,7 +727,7 @@ class EtteroppgjoerForbehandlingService(
                 e,
             )
 
-            if (!forbehandling.ikkeMottattSkatteoppgjoer) {
+            if (!forbehandling.mottattSkatteoppgjoer) {
                 throw InternfeilException(
                     "Kunne ikke inntekter fra A-ordningen. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
                     e,

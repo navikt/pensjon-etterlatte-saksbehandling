@@ -84,8 +84,9 @@ object AvkortingRegelkjoring {
                     }.single()
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode ->
+            is RegelkjoeringResultat.UgyldigPeriode -> {
                 throw InternfeilException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+            }
         }
     }
 
@@ -136,7 +137,9 @@ object AvkortingRegelkjoring {
                     }.single()
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode -> throw InternfeilException("Ugyldig periode for regel for faktisk inntekt: $periode")
+            is RegelkjoeringResultat.UgyldigPeriode -> {
+                throw InternfeilException("Ugyldig periode for regel for faktisk inntekt: $periode")
+            }
         }
     }
 
@@ -150,6 +153,7 @@ object AvkortingRegelkjoring {
             avkortingGrunnlag.inntektInnvilgetPeriode.let {
                 when (it) {
                     is BenyttetInntektInnvilgetPeriode -> it.verdi
+
                     is IngenInntektInnvilgetPeriode -> throw InternfeilException(
                         "Kan ikke beregne avkorting uten inntekt innvilget periode",
                     )
@@ -217,8 +221,9 @@ object AvkortingRegelkjoring {
                 }
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode ->
+            is RegelkjoeringResultat.UgyldigPeriode -> {
                 throw InternfeilException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+            }
         }
     }
 
@@ -305,8 +310,9 @@ object AvkortingRegelkjoring {
                 }
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode ->
+            is RegelkjoeringResultat.UgyldigPeriode -> {
                 throw InternfeilException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+            }
         }
     }
 
@@ -322,7 +328,7 @@ object AvkortingRegelkjoring {
         }
 
         return PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-            sanksjonsperioder.map {
+            sanksjonsperioder.distinctBy { Triple(it.type, it.fom, it.tom) }.map {
                 GrunnlagMedPeriode(
                     data =
                         FaktumNode(
@@ -463,8 +469,9 @@ object AvkortingRegelkjoring {
                 )
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode ->
+            is RegelkjoeringResultat.UgyldigPeriode -> {
                 throw InternfeilException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+            }
         }
     }
 

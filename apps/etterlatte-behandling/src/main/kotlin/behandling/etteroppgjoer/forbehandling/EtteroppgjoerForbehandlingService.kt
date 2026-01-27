@@ -215,7 +215,12 @@ class EtteroppgjoerForbehandlingService(
                 )
             }
 
-        val avkorting = etteroppgjoerDataService.hentAvkortingForForbehandling(forbehandling, sisteIverksatteBehandling, brukerTokenInfo)
+        val avkorting =
+            etteroppgjoerDataService.hentAvkortingForForbehandling(
+                forbehandling,
+                sisteIverksatteBehandling,
+                brukerTokenInfo,
+            )
 
         return DetaljertForbehandlingDto(
             forbehandling = forbehandling,
@@ -565,6 +570,14 @@ class EtteroppgjoerForbehandlingService(
         innvilgedePerioder: List<InnvilgetPeriodeDto>,
         inntektsaar: Int,
     ): Periode {
+        if (innvilgedePerioder.isEmpty()) {
+            throw UgyldigForespoerselException(
+                "MANGLER_INNVILGET_PERIODE",
+                "Saken har ingen innvilget periode. Dobbeltsjekk at dette stemmer, hvis saken er opphørt fra første " +
+                    "virkiningstidspunkt er det ikke noe å behandle et etteroppgjør på. Hvis det ikke stemmer " +
+                    "må det meldes feil i porten.",
+            )
+        }
         val periode =
             krevIkkeNull(innvilgedePerioder.singleOrNull()) {
                 "Støtter ikke utledning av innvilget periode med 0 eller mer enn en periode: $innvilgedePerioder"
@@ -662,7 +675,12 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val sisteIverksatteBehandling =
-            runBlocking { etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(forbehandling.sak.id, brukerTokenInfo) }
+            runBlocking {
+                etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(
+                    forbehandling.sak.id,
+                    brukerTokenInfo,
+                )
+            }
 
         // verifisere at vi bruker siste iverksatte behandling
         if (sisteIverksatteBehandling.sisteBehandlingMedAvkorting != forbehandling.sisteIverksatteBehandlingId) {

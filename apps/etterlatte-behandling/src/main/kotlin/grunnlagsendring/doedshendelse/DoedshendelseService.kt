@@ -344,7 +344,7 @@ class DoedshendelseService(
                 """
                 OBS! Det er registrert en partner til avdøde ${avdoedFnr.value} uten ident.
                 Sivilstand-liste: ${avdoed.sivilstand?.toJson()}. 
-                Barn uten ident: ${avdoed.avdoedesBarnUtenIdent?.toJson()}.",
+                Barn uten ident: ${avdoed.avdoedesBarnUtenIdent?.toJson()}.
                 """.trimIndent(),
             )
         }

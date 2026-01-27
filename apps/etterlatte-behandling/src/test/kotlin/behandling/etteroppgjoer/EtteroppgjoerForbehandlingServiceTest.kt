@@ -225,6 +225,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                         sak(),
                         Periode(YearMonth.now().minusYears(1), null),
                         ctx.behandling.id,
+                        mottattSkatteoppgjoer = true,
                     ).copy(aar = 2024, status = status),
             ),
         )
@@ -337,6 +338,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                     sak = ctx.behandling.sak,
                     innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                     sisteIverksatteBehandling = ctx.behandling.id,
+                    mottattSkatteoppgjoer = true,
                 ).copy(brevId = 123L, varselbrevSendt = LocalDate.now())
 
         ctx.returnsForbehandling(forbehandling)

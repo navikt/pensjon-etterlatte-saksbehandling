@@ -1,0 +1,1 @@
+ALTER TABLE etteroppgjoer_behandling ADD COLUMN ikke_mottatt_skatteoppgjoer BOOLEAN;

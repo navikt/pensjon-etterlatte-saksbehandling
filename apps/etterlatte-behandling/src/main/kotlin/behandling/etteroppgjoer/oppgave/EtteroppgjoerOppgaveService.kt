@@ -66,32 +66,6 @@ class EtteroppgjoerOppgaveService(
         }
     }
 
-    fun verifiserOppgaveForOppretteForbehandling(
-        oppgave: OppgaveIntern,
-        sakId: SakId,
-    ) {
-        if (oppgave.sakId != sakId) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_IKKE_I_SAK",
-                "OppgaveId=${oppgave.id} matcher ikke sakId=$sakId",
-            )
-        }
-
-        if (oppgave.erAvsluttet()) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_AVSLUTTET",
-                "Oppgaven tilknyttet forbehandling er avsluttet og kan ikke behandles",
-            )
-        }
-
-        if (oppgave.type != OppgaveType.ETTEROPPGJOER) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_FEIL_TYPE",
-                "Oppgaven har feil oppgaveType=${oppgave.type} til å opprette forbehandling",
-            )
-        }
-    }
-
     fun sjekkAtOppgavenErTildeltSaksbehandler(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

@@ -56,6 +56,7 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB("etteroppgjoer_svarfristutloept_jobb"),
     ETTEROPPGJOER_KAN_FERDIGSTILLE_FORBEHANDLING("etteroppgjoer_kan_ferdigstille_forbehandling"),
     VIS_TILBAKESTILL_ETTEROPPGJOER("vis-tilbakestill-etteroppgjoer"),
+    OPPDATER_SKATTEOPPGJOER_IKKE_MOTTATT("etteroppgjoer-skatteoppgjoer-ikke-mottatt"),
     ;
 
     override fun key(): String = toggle

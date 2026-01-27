@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
-import kotliquery.param
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid

@@ -220,7 +220,6 @@ class UtbetalingDao(
      * opprettetFramTilOgMed og er aktive fra og med aktivFraOgMed
      */
     fun hentUtbetalingerForKonsistensavstemming(
-        aktivFraOgMed: Tidspunkt,
         opprettetFramTilOgMed: Tidspunkt,
         saktype: Saktype,
     ): List<UtbetalingForKonsistensavstemming> =
@@ -235,12 +234,11 @@ class UtbetalingDao(
                     FROM utbetaling u
                              INNER JOIN utbetalingslinje ul on u.id = ul.utbetaling_id
                     WHERE u.id in (SELECT utbetaling_id FROM utbetalingshendelse where status = 'GODKJENT')
-                    AND COALESCE(ul.periode_til, :loependeFom) >= :loependeFom AND ul.opprettet <= :opprettetTom
+                    AND ul.opprettet <= :opprettetTom
                     AND u.saktype = :saktype
                     """.trimIndent(),
                 paramMap =
                     mapOf(
-                        "loependeFom" to aktivFraOgMed.toTimestamp().param(),
                         "opprettetTom" to opprettetFramTilOgMed.toTimestamp().param(),
                         "saktype" to saktype.name.param(),
                     ),

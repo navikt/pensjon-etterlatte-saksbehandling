@@ -651,7 +651,7 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // verifisere at vi har siste summerte inntekter fra A-inntekt
-        dao.hentSummerteInntekterNonNull(forbehandling.id).let { summerteInntekter ->
+        dao.hentSummerteInntekter(forbehandling.id)?.let { summerteInntekter ->
             if (summerteInntekter.afp != sisteSummerteInntekter.afp) {
                 throw InternfeilException(
                     "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste AFP inntekt",

@@ -608,16 +608,12 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 
-    override suspend fun opprettOppgave(
+    override suspend fun opprettGenerellOppgave(
         personident: String,
+        sakType: SakType,
+        beskrivelse: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysApiOppgave {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun finnOppgaveTyper(brukerTokenInfo: BrukerTokenInfo) {
-        TODO("Not yet implemented")
-    }
+    ): GosysApiOppgave = gosysApiOppgave()
 
     private fun gosysApiOppgave(): GosysApiOppgave =
         GosysApiOppgave(

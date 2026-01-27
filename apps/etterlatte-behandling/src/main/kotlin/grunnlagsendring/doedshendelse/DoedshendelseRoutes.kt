@@ -27,10 +27,5 @@ internal fun Route.doedshendelseRoute(doedshendelseService: DoedshendelseService
                 }
             }
         }
-
-        post("/test") {
-            val oppgave = doedshendelseService.opprettTestOppgave(brukerTokenInfo)
-            call.respond(HttpStatusCode.Created, oppgave.toJson())
-        }
     }
 }

@@ -11,6 +11,7 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -106,12 +107,12 @@ interface GosysOppgaveKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave
 
-    suspend fun opprettOppgave(
+    suspend fun opprettGenerellOppgave(
         personident: String,
+        sakType: SakType,
+        beskrivelse: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave
-
-    suspend fun finnOppgaveTyper(brukerTokenInfo: BrukerTokenInfo)
 }
 
 class GosysOppgaveKlientImpl(
@@ -314,15 +315,18 @@ class GosysOppgaveKlientImpl(
         }
     }
 
-    override suspend fun opprettOppgave(
+    override suspend fun opprettGenerellOppgave(
         personident: String,
+        sakType: SakType,
+        beskrivelse: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
         logger.info("Oppretter oppgave")
         val body =
             OpprettOppgaveRequest(
-                tema = "EYO", // TODO
-                beskrivelse = "Noe må gjøres",
+                tema = sakType.tema,
+                oppgavetype = "GEN",
+                beskrivelse = beskrivelse,
                 personident = personident,
                 prioritet = "NORM",
             )
@@ -359,41 +363,18 @@ class GosysOppgaveKlientImpl(
             throw e
         }
     }
-
-    override suspend fun finnOppgaveTyper(brukerTokenInfo: BrukerTokenInfo) {
-        try {
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/api/v1/kodeverk/oppgavetype/EYO",
-                        ),
-                    brukerTokenInfo = brukerTokenInfo,
-                ).mapBoth(
-                    success = { resource -> resource.response.toString() },
-                    failure = { errorResponse -> throw errorResponse },
-                )
-        } catch (_: SocketTimeoutException) {
-            throw GosysTimeout()
-        } catch (e: Exception) {
-            logger.error("Feil ved henting av oppgavetyper", e)
-            throw e
-        }
-    }
 }
 
 @Suppress("unused")
 data class OpprettOppgaveRequest(
     val journalpostId: String? = null,
     val tema: String,
+    val oppgavetype: String,
     val prioritet: String,
     val beskrivelse: String,
     val personident: String? = null,
     val orgnr: String? = null,
 ) {
-    // JFR = Journalføring
-    val oppgavetype: String = "JFR" // TODO
     val aktivDato: String = LocalDate.now().toString()
 }
 

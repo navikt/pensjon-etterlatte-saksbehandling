@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
-import grunnlagsendring.doedshendelse.BeroerteVedDoedshendelse
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -8,6 +7,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseFeatureToggle
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
+import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -16,9 +16,8 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
-import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -31,20 +30,9 @@ class DoedshendelseService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val featureToggleService: FeatureToggleService,
     private val gosysOppgaveKlient: GosysOppgaveKlient,
+    private val ukjentBeroertDao: UkjentBeroertDao,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    fun opprettTestOppgave(brukerTokenInfo: BrukerTokenInfo): GosysApiOppgave =
-        runBlocking {
-            gosysOppgaveKlient.finnOppgaveTyper(brukerTokenInfo)
-
-            val oppgave =
-                gosysOppgaveKlient.opprettOppgave(
-                    personident = "31488338237",
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-            gosysOppgaveKlient.hentOppgave(oppgave.id, brukerTokenInfo)
-        }
 
     fun settHendelseTilFerdigOgOppdaterBrevId(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) =
         doedshendelseDao.oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert)
@@ -66,31 +54,72 @@ class DoedshendelseService(
         }
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
         val gyldigeDoedshendelserForAvdoed =
-            inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
+            doedshendelseDao
+                .hentDoedshendelserForPerson(avdoedFnr)
                 .filter { it.utfall !== Utfall.AVBRUTT }
 
-        val barn = finnBeroerteBarn(avdoed)
+        val barnMedIdent = finnBeroerteBarn(avdoed)
         val samboere = finnSamboereForAvdoedMedFellesBarn(avdoed)
         val ektefeller = finnBeroerteEktefeller(avdoed, samboere)
-        val barnUtenIdent = avdoed.avdoedesBarnUtenIdent ?: emptyList()
-        val alleBeroerte =
-            BeroerteVedDoedshendelse(
-                barn + ektefeller + samboere,
-                barnUtenIdent,
-                emptyList(),
-            )
+        val beroerteMedIdent: List<PersonFnrMedRelasjon> =
+            barnMedIdent + ektefeller.ektefellerMedIdent + samboere
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
-            sikkerLogg.info("Fant ${alleBeroerte.size()} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value})")
-            inTransaction {
-                lagreDoedshendelser(alleBeroerte, emptyList(), avdoed, doedshendelse.endringstype)
-            }
+            sikkerLogg.info("Fant ${beroerteMedIdent.size} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value})")
+            lagreDoedshendelser(beroerteMedIdent, avdoed, doedshendelse.endringstype)
         } else {
-            haandterEksisterendeHendelser(doedshendelse, gyldigeDoedshendelserForAvdoed, avdoed, emptyList()) // TODO
+            haandterEksisterendeHendelser(doedshendelse, gyldigeDoedshendelserForAvdoed, avdoed, beroerteMedIdent)
         }
-        runBlocking {
-            gosysOppgaveKlient.opprettOppgave("", HardkodaSystembruker.doedshendelse)
+
+        haandterRelasjonerUtenIdent(
+            avdoed,
+            avdoed.avdoedesBarnUtenIdent ?: emptyList(),
+            ektefeller.ektefellerUtenIdent,
+        )
+    }
+
+    private fun haandterRelasjonerUtenIdent(
+        avdoed: PersonDoedshendelseDto,
+        barnUtenIdent: List<PersonUtenIdent>,
+        ektefellerUtenIdent: List<Sivilstand>,
+    ) {
+        if (barnUtenIdent.size + ektefellerUtenIdent.size > 0) {
+            loggManglendeIdent(avdoed)
+
+            if (!harLagretUkjentBeroert(avdoed)) {
+                val msgBeroerte =
+                    listOfNotNull(
+                        "barn".takeIf { barnUtenIdent.isNotEmpty() },
+                        "ektefelle".takeIf { ektefellerUtenIdent.isNotEmpty() },
+                    ).joinToString(" og ")
+                val sakType =
+                    if (ektefellerUtenIdent.isNotEmpty()) {
+                        SakType.OMSTILLINGSSTOENAD
+                    } else {
+                        SakType.BARNEPENSJON
+                    }
+
+                runBlocking {
+                    gosysOppgaveKlient.opprettGenerellOppgave(
+                        personident = avdoed.foedselsnummer.verdi.value,
+                        sakType = sakType,
+                        beskrivelse =
+                            "Informasjonsbrev om rettigheter etter avdøde er ikke sendt ut på grunn av manglende " +
+                                "fødselsnummer til $msgBeroerte. Saksbehandler må vurdere om informasjonsbrev må sendes ut manuelt.",
+                        brukerTokenInfo = HardkodaSystembruker.doedshendelse,
+                    )
+                }
+            }
+
+            ukjentBeroertDao.lagreUkjentBeroert(
+                UkjentBeroert(avdoed.foedselsnummer.verdi.value, barnUtenIdent, ektefellerUtenIdent),
+            )
         }
+    }
+
+    private fun harLagretUkjentBeroert(avdoed: PersonDoedshendelseDto): Boolean {
+        val harUkjentBeroertAllerede = ukjentBeroertDao.hentUkjentBeroert(avdoed.foedselsnummer.verdi.value) != null
+        return harUkjentBeroertAllerede
     }
 
     private fun haandterEksisterendeHendelser(
@@ -138,13 +167,12 @@ class DoedshendelseService(
                 .map { PersonFnrMedRelasjon(it.fnr, it.relasjon) }
                 .filter { !eksisterendeBeroerte.contains(it.fnr) }
         nyeBeroerte
-            .filter { it.fnr != null }
             .forEach { person ->
                 doedshendelseDao.opprettDoedshendelse(
                     DoedshendelseInternal.nyHendelse(
                         avdoedFnr = avdoed.foedselsnummer.verdi.value,
                         avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                        beroertFnr = person.fnr!!,
+                        beroertFnr = person.fnr,
                         relasjon = person.relasjon,
                         endringstype = endringstype,
                     ),
@@ -153,20 +181,18 @@ class DoedshendelseService(
     }
 
     private fun lagreDoedshendelser(
-        beroerte: BeroerteVedDoedshendelse, // TODO
         gammel: List<PersonFnrMedRelasjon>,
         avdoed: PersonDoedshendelseDto,
         endringstype: Endringstype,
     ) {
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
         gammel
-            .filter { it.fnr != null }
             .forEach { person ->
                 doedshendelseDao.opprettDoedshendelse(
                     DoedshendelseInternal.nyHendelse(
                         avdoedFnr = avdoedFnr,
                         avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                        beroertFnr = person.fnr!!,
+                        beroertFnr = person.fnr,
                         relasjon = person.relasjon,
                         endringstype = endringstype,
                     ),
@@ -270,12 +296,28 @@ class DoedshendelseService(
     private fun finnBeroerteEktefeller(
         avdoed: PersonDoedshendelseDto,
         samboere: List<PersonFnrMedRelasjon>,
-    ): List<PersonFnrMedRelasjon> {
-        val avdoedesSivilstander = avdoed.sivilstand ?: emptyList()
+    ): BeroerteEktefeller {
+        val beroerteEktefeller = alleBeroerteEktefeller(avdoed)
 
+        val medFnr =
+            beroerteEktefeller
+                .filter { sivilstand -> sivilstand.relatertVedSiviltilstand != null }
+                .map { PersonFnrMedRelasjon(it.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
+                .filter { ektefelle -> samboere.none { samboer -> samboer.fnr == ektefelle.fnr } }
+                .distinct()
+
+        val utenFnr =
+            beroerteEktefeller
+                .filter { sivilstand -> sivilstand.relatertVedSiviltilstand == null }
+                .distinct()
+
+        return BeroerteEktefeller(medFnr, utenFnr)
+    }
+
+    private fun alleBeroerteEktefeller(avdoed: PersonDoedshendelseDto): List<Sivilstand> {
+        val avdoedesSivilstander = avdoed.sivilstand ?: emptyList()
         return avdoedesSivilstander
-            .asSequence()
-            .map { it -> it.verdi }
+            .map { it.verdi }
             .filter { sivilstand ->
                 sivilstand.sivilstatus in
                     listOf(
@@ -286,22 +328,10 @@ class DoedshendelseService(
                         Sivilstatus.SEPARERT_PARTNER,
                         Sivilstatus.SKILT_PARTNER,
                     )
-            }.filter { sivilstand ->
-                val potensiellEktefelle = sivilstand.relatertVedSiviltilstand?.value
-                if (potensiellEktefelle == null) {
-                    loggManglendeIdent(sivilstand, avdoed)
-                }
-                potensiellEktefelle != null
-            }.map { PersonFnrMedRelasjon(it.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
-            .filter { ektefelle -> samboere.none { samboer -> samboer.fnr == ektefelle.fnr } }
-            .distinct()
-            .toList()
+            }
     }
 
-    private fun loggManglendeIdent(
-        sivilstand: Sivilstand,
-        avdoed: PersonDoedshendelseDto,
-    ) {
+    private fun loggManglendeIdent(avdoed: PersonDoedshendelseDto) {
         val loggingAktivert =
             featureToggleService.isEnabled(GrunnlagsendringshendelseFeatureToggle.LOGG_MANGLENDE_EKTEFELLE_IDENT, false)
         if (loggingAktivert) {
@@ -313,9 +343,8 @@ class DoedshendelseService(
             sikkerLogg.error(
                 """
                 OBS! Det er registrert en partner til avdøde ${avdoedFnr.value} uten ident.
-                Sivilstatus: ${sivilstand.sivilstatus}, historisk: ${sivilstand.historisk}, 
-                gyldigFraOgMed: ${sivilstand.gyldigFraOgMed}, bekreftelsesdato: ${sivilstand.bekreftelsesdato}.
-                "Sjekk manuelt om infobrev kan sendes ut til berørte likevel.",
+                Sivilstand-liste: ${avdoed.sivilstand?.toJson()}. 
+                Barn uten ident: ${avdoed.avdoedesBarnUtenIdent?.toJson()}.",
                 """.trimIndent(),
             )
         }
@@ -329,3 +358,8 @@ private fun Person.under20PaaDato(dato: LocalDate): Boolean {
 
     return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < 20
 }
+
+private data class BeroerteEktefeller(
+    val ektefellerMedIdent: List<PersonFnrMedRelasjon>,
+    val ektefellerUtenIdent: List<Sivilstand>,
+)

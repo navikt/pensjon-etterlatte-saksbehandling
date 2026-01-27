@@ -51,6 +51,7 @@ internal class DoedshendelseRouteTest(
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val gosysOppgaveKlient = spyk<GosysOppgaveKlientTest>()
     private val doedshendelseDao: DoedshendelseDao = DoedshendelseDao(ConnectionAutoclosingTest(dataSource))
+    private val ukjentBeroertDao: UkjentBeroertDao = UkjentBeroertDao(ConnectionAutoclosingTest(dataSource))
 
     private val service =
         DoedshendelseService(
@@ -58,6 +59,7 @@ internal class DoedshendelseRouteTest(
             pdlTjenesterKlient = pdlTjenesterKlient,
             featureToggleService = featureToggleService,
             gosysOppgaveKlient = gosysOppgaveKlient,
+            ukjentBeroertDao = ukjentBeroertDao,
         )
 
     @BeforeAll

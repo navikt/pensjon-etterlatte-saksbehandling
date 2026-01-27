@@ -1,18 +1,26 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
-import no.nav.etterlatte.GosysOppgaveKlientTest
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Navn
+import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
+import no.nav.etterlatte.libs.common.behandling.RelatertPerson
+import no.nav.etterlatte.libs.common.behandling.RelativPersonrolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
@@ -29,6 +37,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.mockDoedshendelsePerson
 import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.personOpplysning
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,7 +49,8 @@ import java.util.UUID
 internal class DoedshendelseServiceTest {
     private val featureToggleService: FeatureToggleService = DummyFeatureToggleService()
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
-    private val gosysOppgaveKlient = mockk<GosysOppgaveKlientTest>()
+    private val gosysOppgaveKlient = mockk<GosysOppgaveKlient>()
+    private val ukjentBeroertDao = mockk<UkjentBeroertDao>()
     private val dao = mockk<DoedshendelseDao>()
 
     private val service =
@@ -49,6 +59,7 @@ internal class DoedshendelseServiceTest {
             pdlTjenesterKlient = pdlTjenesterKlient,
             featureToggleService = featureToggleService,
             gosysOppgaveKlient = gosysOppgaveKlient,
+            ukjentBeroertDao = ukjentBeroertDao,
         )
 
     private val avdoed =
@@ -339,6 +350,9 @@ internal class DoedshendelseServiceTest {
 
         every { dao.opprettDoedshendelse(any()) } just runs
         every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
+        every { ukjentBeroertDao.hentUkjentBeroert(any()) } returns null
+        every { ukjentBeroertDao.lagreUkjentBeroert(any()) } just runs
+        coEvery { gosysOppgaveKlient.opprettGenerellOppgave(any(), any(), any(), any()) } returns mockk()
 
         service.opprettDoedshendelseForBeroertePersoner(
             DoedshendelsePdl(
@@ -699,4 +713,76 @@ internal class DoedshendelseServiceTest {
             dao.opprettDoedshendelse(any())
         }
     }
+
+    @Test
+    fun `skal opprette oppgave i gosys hvis ukjente beroerte`() {
+        val avdoedFnr = avdoed.foedselsnummer.verdi.value
+        every {
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
+                avdoedFnr,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns
+            avdoed.copy(
+                sivilstand = listOf(sivilstandUtenIdent),
+                avdoedesBarnUtenIdent = listOf(personUtenIdent),
+            )
+
+        coEvery { gosysOppgaveKlient.opprettGenerellOppgave(any(), any(), any(), any()) } returns mockk()
+        every { dao.hentDoedshendelserForPerson(avdoedFnr) } returns emptyList()
+        every { dao.opprettDoedshendelse(any()) } just runs
+        every { ukjentBeroertDao.hentUkjentBeroert(any()) } returns null
+        every { ukjentBeroertDao.lagreUkjentBeroert(any()) } just runs
+
+        service.opprettDoedshendelseForBeroertePersoner(
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoedFnr,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            ),
+        )
+
+        val ukjentBeroertArg = slot<UkjentBeroert>()
+        verify(exactly = 1) {
+            ukjentBeroertDao.lagreUkjentBeroert(capture(ukjentBeroertArg))
+        }
+        coVerify(exactly = 1) {
+            gosysOppgaveKlient.opprettGenerellOppgave(
+                personident = avdoedFnr,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                beskrivelse = match { it.contains("barn og ektefelle.") },
+                brukerTokenInfo = any(),
+            )
+        }
+        val lagretBeroert = ukjentBeroertArg.captured
+        lagretBeroert.avdoedFnr shouldBe avdoedFnr
+        lagretBeroert.ektefellerUtenIdent shouldContainExactly listOf(sivilstandUtenIdent).map { it.verdi }
+        lagretBeroert.barnUtenIdent shouldContainExactly listOf(personUtenIdent)
+    }
 }
+
+val sivilstandUtenIdent =
+    OpplysningDTO(
+        verdi =
+            Sivilstand(
+                sivilstatus = Sivilstatus.GIFT,
+                relatertVedSiviltilstand = null,
+                gyldigFraOgMed = LocalDate.now().minusYears(20),
+                bekreftelsesdato = null,
+                kilde = "DOEDSMELDING_TEST",
+            ),
+        opplysningsid = "sivilstand",
+    )
+
+val personUtenIdent =
+    PersonUtenIdent(
+        RelativPersonrolle.BARN,
+        RelatertPerson(
+            LocalDate.now().minusYears(6).minusDays(23),
+            "M",
+            Navn("Truls", "T", "Teige"),
+            "NOR",
+        ),
+    )

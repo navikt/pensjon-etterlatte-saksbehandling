@@ -219,6 +219,10 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             val sak = opprettSakMedGrunnlag()
             val behandling = opprettBehandling(sak)
             coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
+            coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns
+                mockk {
+                    every { kanEndres() } returns true
+                }
 
             withTestApplication { client ->
                 val response =
@@ -340,6 +344,10 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
 
             coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+            coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns
+                mockk {
+                    every { kanEndres() } returns true
+                }
 
             withTestApplication { client ->
                 val response =

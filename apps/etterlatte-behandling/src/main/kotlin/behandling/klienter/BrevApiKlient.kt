@@ -151,6 +151,12 @@ interface BrevApiKlient {
         sakId: SakId,
         systembruker: Systembruker,
     )
+
+    suspend fun hentPdf(
+        sakId: SakId,
+        brevID: BrevID,
+        bruker: BrukerTokenInfo,
+    ): Pdf
 }
 
 class BrevApiKlientObo(
@@ -420,15 +426,26 @@ class BrevApiKlientObo(
     override suspend fun fjernFerdigstillingTilbakekreving(
         tilbakekrevingId: UUID,
         sakId: SakId,
-        systembruker: Systembruker
+        systembruker: Systembruker,
     ) {
         post(
             url = "$resourceUrl/api/brev/behandling/$tilbakekrevingId/tilbakekreving/fjern-ferdigstilt",
-            postBody = {  },
-            onSuccess = {  },
+            postBody = { },
+            onSuccess = { },
             brukerTokenInfo = systembruker,
         )
     }
+
+    override suspend fun hentPdf(
+        sakId: SakId,
+        brevID: BrevID,
+        bruker: BrukerTokenInfo,
+    ): Pdf =
+        get(
+            url = "$resourceUrl/api/brev/$brevID/pdf?sakId=$sakId",
+            onSuccess = { deserialize(it.toJson()) },
+            brukerTokenInfo = bruker,
+        )
 
     private suspend fun <T> post(
         url: String,

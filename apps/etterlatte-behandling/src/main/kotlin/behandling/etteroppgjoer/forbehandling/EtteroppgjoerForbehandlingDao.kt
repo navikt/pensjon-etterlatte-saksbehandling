@@ -94,7 +94,7 @@ class EtteroppgjoerForbehandlingDao(
                             kommentar_til_avbrytelse = excluded.kommentar_til_avbrytelse,
                             har_vedtak_av_type_opphoer = excluded.har_vedtak_av_type_opphoer,
                             opphoer_skyldes_doedsfall = excluded.opphoer_skyldes_doedsfall,
-                            opphoer_skyldes_doedsfall_i_etteroppgjoersaar = excluded.opphoer_skyldes_doedsfall_i_etteroppgjoersaar
+                            opphoer_skyldes_doedsfall_i_etteroppgjoersaar = excluded.opphoer_skyldes_doedsfall_i_etteroppgjoersaar,
                             ikke_mottatt_skatteoppgjoer = excluded.ikke_mottatt_skatteoppgjoer
                         """.trimIndent(),
                     )

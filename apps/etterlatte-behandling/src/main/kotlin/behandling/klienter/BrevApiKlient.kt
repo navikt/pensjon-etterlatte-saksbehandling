@@ -156,7 +156,7 @@ interface BrevApiKlient {
         sakId: SakId,
         brevID: BrevID,
         bruker: BrukerTokenInfo,
-    ): Pdf
+    ): Pdf?
 }
 
 class BrevApiKlientObo(
@@ -443,7 +443,16 @@ class BrevApiKlientObo(
     ): Pdf =
         get(
             url = "$resourceUrl/api/brev/$brevID/pdf?sakId=$sakId",
-            onSuccess = { deserialize(it.toJson()) },
+            onSuccess = { resource ->
+                when (val body = resource.response) {
+                    is ByteArray -> Pdf(body)
+
+                    else -> throw InternfeilException(
+                        "Kunne ikke lese ut Pdf-respons som et bytearray " +
+                            "i henting av brev med id=$brevID i sak=$sakId",
+                    )
+                }
+            },
             brukerTokenInfo = bruker,
         )
 

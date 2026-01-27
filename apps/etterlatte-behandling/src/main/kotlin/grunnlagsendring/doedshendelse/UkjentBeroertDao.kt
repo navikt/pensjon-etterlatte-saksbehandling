@@ -17,7 +17,7 @@ class UkjentBeroertDao(
                 prepareStatement(
                     """
                     SELECT avdoed_fnr, barn_uten_ident, ektefeller_uten_ident
-                    FROM ukjent_beroert_av_doedshendelse
+                    FROM doedshendelse_ukjente_beroerte
                     WHERE avdoed_fnr = ?
                     """.trimIndent(),
                 ).apply {
@@ -38,11 +38,11 @@ class UkjentBeroertDao(
             with(it) {
                 prepareStatement(
                     """
-                    INSERT INTO ukjent_beroert_av_doedshendelse(avdoed_fnr, barn_uten_ident, ektefeller_uten_ident) 
+                    INSERT INTO doedshendelse_ukjente_beroerte(avdoed_fnr, barn_uten_ident, ektefeller_uten_ident) 
                     VALUES (?, ?, ?)
-                    ON CONFLICT (avdoed_fnr) 
-                    DO UPDATE SET barn_uten_ident = excluded.barn_uten_ident
-                    DO UPDATE SET ektefeller_uten_ident = excluded.ektefeller_uten_ident
+                    ON CONFLICT (avdoed_fnr) DO UPDATE SET
+                        barn_uten_ident = excluded.barn_uten_ident, 
+                        ektefeller_uten_ident = excluded.ektefeller_uten_ident
                     """.trimIndent(),
                 ).apply {
                     setString(1, ukjentBeroert.avdoedFnr)

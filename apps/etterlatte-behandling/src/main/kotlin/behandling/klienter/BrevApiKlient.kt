@@ -2,13 +2,14 @@ package no.nav.etterlatte.behandling.klienter
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeoutConfig
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsBytes
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.BrevPayload
@@ -442,25 +443,27 @@ class BrevApiKlientObo(
         sakId: SakId,
         brevID: BrevID,
         bruker: BrukerTokenInfo,
-    ): Pdf =
-        get(
-            url = "$resourceUrl/api/brev/$brevID/pdf?sakId=$sakId",
-            onSuccess = { resource ->
-                when (val body = resource.response) {
-                    is ByteArray -> Pdf(body)
+    ): Pdf {
+        // Vi kan ikke gjenbruke standard get her, siden vi trenger å potensielt lese ut
+        // bytes fra responsen
+        val resourceResult =
+            downstreamResourceClient.get(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/$brevID/pdf?sakId=$sakId"),
+                brukerTokenInfo = bruker,
+            )
+        return resourceResult.get()?.let { resource ->
+            when (val body = resource.response) {
+                is ByteArray -> Pdf(body)
 
-                    else -> throw InternfeilException(
-                        "Kunne ikke lese ut Pdf-respons som et bytearray " +
-                            "i henting av brev med id=$brevID i sak=$sakId",
-                    )
-                }
-            },
-            brukerTokenInfo = bruker,
-            additionalHeaders =
-                mapOf(
-                    HttpHeaders.Accept to ContentType.Application.Pdf.toString(),
-                ),
-        )
+                is HttpResponse -> Pdf(body.bodyAsBytes())
+
+                else -> throw InternfeilException(
+                    "Kunne ikke lese ut Pdf-respons som et bytearray " +
+                        "i henting av brev med id=$brevID i sak=$sakId",
+                )
+            }
+        } ?: throw InternfeilException("Kunne ikke lese ut Pdf-respons")
+    }
 
     private suspend fun <T> post(
         url: String,

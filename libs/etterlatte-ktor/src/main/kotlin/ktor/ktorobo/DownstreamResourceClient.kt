@@ -160,10 +160,12 @@ class DownstreamResourceClient(
                                 logger.info("Mottok tom content type${response.contentType()}")
                             } else {
                                 logger.warn(
-                                    "Mottok uhåndtert content-type: ${response.contentType()} (rå content-type er ${response.headers[HttpHeaders.ContentType]}), lengde på innhold: ${response.contentLength()} ",
+                                    "Mottok uhåndtert content-type: ${response.contentType()} (rå content-type er" +
+                                        " ${response.headers[HttpHeaders.ContentType]}), " +
+                                        "lengde på innhold: ${response.contentLength()} ",
                                 )
                             }
-                            Ok(null)
+                            Ok(response)
                         }
                     }
 

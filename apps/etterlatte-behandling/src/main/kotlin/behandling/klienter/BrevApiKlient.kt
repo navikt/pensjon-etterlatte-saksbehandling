@@ -445,7 +445,8 @@ class BrevApiKlientObo(
         bruker: BrukerTokenInfo,
     ): Pdf {
         // Vi kan ikke gjenbruke standard get her, siden vi trenger å potensielt lese ut
-        // bytes fra responsen
+        // bytes fra responsen og det er suspend -- som brekker når vi sender inn en suspend
+        // som parameter til mapBoth på result
         val resourceResult =
             downstreamResourceClient.get(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/$brevID/pdf?sakId=$sakId"),
@@ -454,15 +455,13 @@ class BrevApiKlientObo(
         return resourceResult.get()?.let { resource ->
             when (val body = resource.response) {
                 is ByteArray -> Pdf(body)
-
                 is HttpResponse -> Pdf(body.bodyAsBytes())
-
-                else -> throw InternfeilException(
-                    "Kunne ikke lese ut Pdf-respons som et bytearray " +
-                        "i henting av brev med id=$brevID i sak=$sakId",
-                )
+                else -> null
             }
-        } ?: throw InternfeilException("Kunne ikke lese ut Pdf-respons")
+        } ?: throw InternfeilException(
+            "Kunne ikke lese ut Pdf-respons som et bytearray " +
+                "i henting av brev med id=$brevID i sak=$sakId",
+        )
     }
 
     private suspend fun <T> post(

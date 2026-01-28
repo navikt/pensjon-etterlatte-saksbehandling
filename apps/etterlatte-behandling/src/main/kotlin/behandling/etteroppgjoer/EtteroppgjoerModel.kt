@@ -47,12 +47,16 @@ data class Etteroppgjoer(
     fun kanOppretteRevurdering() =
         status in listOf(EtteroppgjoerStatus.VENTER_PAA_SVAR, EtteroppgjoerStatus.FERDIGSTILT, EtteroppgjoerStatus.OMGJOERING)
 
+    fun kanOppretteForbehandling() =
+        status in listOf(EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER)
+
     fun erFerdigstilt() = status == EtteroppgjoerStatus.FERDIGSTILT
 }
 
 enum class EtteroppgjoerStatus {
     VENTER_PAA_SKATTEOPPGJOER,
     MOTTATT_SKATTEOPPGJOER,
+    MANGLER_SKATTEOPPGJOER,
     VENTER_PAA_SVAR,
 
     UNDER_FORBEHANDLING,

@@ -78,6 +78,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 vedtakKlient = vedtakKlient,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
                 etteroppgjoerDataService = etteroppgjoerDataService,
+                featureToggleService = mockk(),
             )
 
         val behandling =
@@ -224,6 +225,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                         sak(),
                         Periode(YearMonth.now().minusYears(1), null),
                         ctx.behandling.id,
+                        mottattSkatteoppgjoer = true,
                     ).copy(aar = 2024, status = status),
             ),
         )
@@ -244,7 +246,7 @@ class EtteroppgjoerForbehandlingServiceTest {
     @ParameterizedTest(name = "skal ikke opprette forbehandling for status={0}")
     @EnumSource(
         value = EtteroppgjoerStatus::class,
-        names = ["MOTTATT_SKATTEOPPGJOER"],
+        names = ["MOTTATT_SKATTEOPPGJOER", "MANGLER_SKATTEOPPGJOER"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `skal ikke opprette forbehandling hvis etteroppgjoer ikke har rett status status`(status: EtteroppgjoerStatus) {
@@ -336,6 +338,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                     sak = ctx.behandling.sak,
                     innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                     sisteIverksatteBehandling = ctx.behandling.id,
+                    mottattSkatteoppgjoer = true,
                 ).copy(brevId = 123L, varselbrevSendt = LocalDate.now())
 
         ctx.returnsForbehandling(forbehandling)

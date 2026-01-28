@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -132,11 +133,13 @@ data class EtteroppgjoerBrevGrunnlag(
     companion object {
         fun fra(
             grunnlag: FaktiskInntektDto,
-            pensjonsgivendeInntektHeleAaret: Int,
+            pensjonsgivendeInntektHeleAaret: Int?,
         ): EtteroppgjoerBrevGrunnlag {
             krevIkkeNull(grunnlag.inntektInnvilgetPeriode) {
                 "Kan ikke vise beregningstabell uten summert faktisk inntekt"
             }
+
+            val pgi = pensjonsgivendeInntektHeleAaret ?: throw InternfeilException("Mangler pensjonsgivende inntekt for hele året")
 
             return EtteroppgjoerBrevGrunnlag(
                 fom = grunnlag.fom,
@@ -147,7 +150,7 @@ data class EtteroppgjoerBrevGrunnlag(
                 afp = Kroner(grunnlag.afp),
                 utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
                 inntekt = Kroner(grunnlag.inntektInnvilgetPeriode!!),
-                pensjonsgivendeInntektHeleAaret = Kroner(pensjonsgivendeInntektHeleAaret),
+                pensjonsgivendeInntektHeleAaret = Kroner(pgi),
             )
         }
     }

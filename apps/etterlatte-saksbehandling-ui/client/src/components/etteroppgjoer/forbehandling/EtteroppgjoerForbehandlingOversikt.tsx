@@ -1,6 +1,5 @@
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
-import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { formaterDato } from '~utils/formatering/dato'
+import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
 import { Link } from 'react-router-dom'
@@ -51,10 +50,8 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       <Heading size="xlarge" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
-      <BodyShort>
-        <b>Skatteoppgjør mottatt:</b> {formaterDato(forbehandling.opprettet)}
-      </BodyShort>
-      <Inntektsopplysninger />
+
+      <Inntektsopplysninger forbehandling={forbehandling} />
 
       {!!forbehandling.harVedtakAvTypeOpphoer && (
         <OpphoerSkyldesDoedsfall

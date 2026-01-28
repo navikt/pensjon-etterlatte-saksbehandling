@@ -65,6 +65,8 @@ import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJob
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJobService
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
@@ -633,6 +635,7 @@ internal class ApplicationContext(
             vedtakKlient = vedtakKlient,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             etteroppgjoerDataService = etteroppgjoerDataService,
+            featureToggleService = featureToggleService,
         )
 
     val aarligInntektsjusteringJobbService =
@@ -814,6 +817,13 @@ internal class ApplicationContext(
             featureToggleService,
         )
 
+    val oppdaterSkatteoppgjoerIkkeMottattJobService =
+        OppdaterSkatteoppgjoerIkkeMottattJobService(
+            featureToggleService,
+            etteroppgjoerOppgaveService,
+            etteroppgjoerService,
+        )
+
     val etteroppgjoerSvarfristUtloeptJobService =
         EtteroppgjoerSvarfristUtloeptJobService(
             etteroppgjoerService,
@@ -961,6 +971,17 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(10, ChronoUnit.MINUTES),
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
+        )
+    }
+
+    val oppdaterSkatteoppgjoerIkkeMottattJob: OppdaterSkatteoppgjoerIkkeMottattJob by lazy {
+        OppdaterSkatteoppgjoerIkkeMottattJob(
+            oppdaterSkatteoppgjoerIkkeMottattJobService = oppdaterSkatteoppgjoerIkkeMottattJobService,
+            { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(20, ChronoUnit.MINUTES),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

@@ -354,7 +354,7 @@ class AarligInntektsjusteringJobbServiceTest {
 
         every { etteroppgjoerForbehandlingService.hentEtteroppgjoerForbehandlinger(any()) } returns
             listOf(
-                EtteroppgjoerForbehandling.opprett(gyldigSak, mockk(relaxed = true), mockk()),
+                EtteroppgjoerForbehandling.opprett(gyldigSak, mockk(relaxed = true), mockk(), mottattSkatteoppgjoer = true),
             )
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()

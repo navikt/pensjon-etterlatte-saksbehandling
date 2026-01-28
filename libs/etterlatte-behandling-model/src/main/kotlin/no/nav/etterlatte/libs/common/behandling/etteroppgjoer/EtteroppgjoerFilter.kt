@@ -70,4 +70,14 @@ enum class EtteroppgjoerFilter(
         harUtlandstilsnitt = FilterVerdi.DONT_CARE,
         harOverstyrtBeregning = FilterVerdi.FALSE,
     ),
+    ALLE_SAKER(
+        harSanksjon = FilterVerdi.DONT_CARE,
+        harInstitusjonsopphold = FilterVerdi.DONT_CARE,
+        harOpphoer = FilterVerdi.DONT_CARE,
+        harAdressebeskyttelseEllerSkjermet = FilterVerdi.DONT_CARE,
+        harAktivitetskrav = FilterVerdi.DONT_CARE,
+        harBosattUtland = FilterVerdi.DONT_CARE,
+        harUtlandstilsnitt = FilterVerdi.DONT_CARE,
+        harOverstyrtBeregning = FilterVerdi.DONT_CARE,
+    ),
 }

@@ -60,9 +60,9 @@ class EtteroppgjoerService(
         antall: Int,
         etteroppgjoerFilter: EtteroppgjoerFilter,
         status: EtteroppgjoerStatus,
-        spesifikkeSaker: List<SakId>,
-        ekskluderteSaker: List<SakId>,
-        spesifikkeEnheter: List<String>,
+        spesifikkeSaker: List<SakId> = emptyList(),
+        ekskluderteSaker: List<SakId> = emptyList(),
+        spesifikkeEnheter: List<String> = emptyList(),
     ): List<SakId> =
         dao.hentEtteroppgjoerSakerIBulk(
             inntektsaar = inntektsaar,
@@ -198,8 +198,11 @@ class EtteroppgjoerService(
 
         return when (forbehandling.etteroppgjoerResultatType) {
             EtteroppgjoerResultatType.ETTERBETALING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+
             EtteroppgjoerResultatType.TILBAKEKREVING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+
             EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
+
             EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
 
             null -> throw InternfeilException(

@@ -458,7 +458,7 @@ class BrevApiKlientObo(
             brukerTokenInfo = bruker,
             additionalHeaders =
                 mapOf(
-                    HttpHeaders.Accept to ContentType.Application.Pdf.contentType,
+                    HttpHeaders.Accept to ContentType.Application.Pdf.toString(),
                 ),
         )
 

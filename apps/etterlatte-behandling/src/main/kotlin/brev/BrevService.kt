@@ -106,6 +106,7 @@ class BrevService(
         if (!brev.kanEndres()) {
             return videresendInterneFeil {
                 brevApiKlient.hentPdf(sakId, brevID, bruker)
+                    ?: throw InternfeilException("Kunne ikke lese ut lagret PDF, brevId=$brevID, sakId=$sakId")
             }
         }
 

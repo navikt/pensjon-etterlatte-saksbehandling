@@ -7,6 +7,8 @@ import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeoutConfig
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.BrevPayload
@@ -454,6 +456,10 @@ class BrevApiKlientObo(
                 }
             },
             brukerTokenInfo = bruker,
+            additionalHeaders =
+                mapOf(
+                    HttpHeaders.Accept to ContentType.Application.Pdf.contentType,
+                ),
         )
 
     private suspend fun <T> post(
@@ -479,10 +485,11 @@ class BrevApiKlientObo(
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
         timeoutConfig: (HttpTimeoutConfig.() -> Unit)? = null,
+        additionalHeaders: Map<String, String>? = null,
     ): T =
         downstreamResourceClient
             .get(
-                resource = Resource(clientId = clientId, url = url),
+                resource = Resource(clientId = clientId, url = url, additionalHeaders = additionalHeaders),
                 brukerTokenInfo = brukerTokenInfo,
                 timeoutConfig = timeoutConfig,
             ).mapBoth(

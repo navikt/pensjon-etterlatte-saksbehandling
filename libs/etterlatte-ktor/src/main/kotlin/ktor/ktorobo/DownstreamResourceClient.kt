@@ -18,6 +18,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsBytes
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentLength
@@ -159,7 +160,7 @@ class DownstreamResourceClient(
                                 logger.info("Mottok tom content type${response.contentType()}")
                             } else {
                                 logger.warn(
-                                    "Mottok uhåndtert content-type: ${response.contentType()} lengde på innhold: ${response.contentLength()} ",
+                                    "Mottok uhåndtert content-type: ${response.contentType()} (rå content-type er ${response.headers[HttpHeaders.ContentType]}), lengde på innhold: ${response.contentLength()} ",
                                 )
                             }
                             Ok(null)

@@ -85,7 +85,7 @@ export const BeregneEtteroppgjoerOMS = () => {
         ) : (
           mapResult(beregningResult, {
             pending: <Spinner label="Henter beregning" />,
-            error: () => <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>,
+            error: (error) => <ApiErrorAlert>Kunne ikke hente beregning. {error.detail}</ApiErrorAlert>,
             success: (beregning) => (
               <>
                 <VStack gap="10">

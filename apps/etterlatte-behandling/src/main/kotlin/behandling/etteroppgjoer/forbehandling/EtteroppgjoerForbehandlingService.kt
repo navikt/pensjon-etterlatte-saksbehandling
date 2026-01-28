@@ -612,43 +612,49 @@ class EtteroppgjoerForbehandlingService(
     }
 
     private fun sjekkAtViBrukerSisteInntekter(forbehandling: EtteroppgjoerForbehandling) {
-        val sistePensjonsgivendeInntekt =
-            runBlocking {
-                pensjonsgivendeInntektService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
-            }
-        val sisteSummerteInntekter =
-            runBlocking {
-                inntektskomponentService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
+        if (forbehandling.mottattSkatteoppgjoer) {
+            val sistePensjonsgivendeInntekt =
+                runBlocking {
+                    pensjonsgivendeInntektService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
+                }
+            val sisteSummerteInntekter =
+                runBlocking {
+                    inntektskomponentService.hentSummerteInntekter(forbehandling.sak.ident, forbehandling.aar)
+                }
+
+            // verifisere at vi har siste pensjonsgivende inntekt i databasen
+            dao.hentPensjonsgivendeInntekt(forbehandling.id).let { pgi ->
+                if (pgi?.loensinntekt != sistePensjonsgivendeInntekt.loensinntekt ||
+                    pgi.naeringsinntekt != sistePensjonsgivendeInntekt.naeringsinntekt
+                ) {
+                    throw InternfeilException(
+                        "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste Pensjonsgivende inntekt",
+                    )
+                }
             }
 
-        // verifisere at vi har siste pensjonsgivende inntekt i databasen
-        dao.hentPensjonsgivendeInntekt(forbehandling.id).let { pgi ->
-            if (pgi?.loensinntekt != sistePensjonsgivendeInntekt.loensinntekt ||
-                pgi.naeringsinntekt != sistePensjonsgivendeInntekt.naeringsinntekt
-            ) {
-                throw InternfeilException(
-                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste Pensjonsgivende inntekt",
-                )
+            // verifisere at vi har siste summerte inntekter fra A-inntekt
+            dao.hentSummerteInntekterNonNull(forbehandling.id).let { summerteInntekter ->
+                if (summerteInntekter.afp != sisteSummerteInntekter.afp) {
+                    throw InternfeilException(
+                        "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste AFP inntekt",
+                    )
+                }
+                if (summerteInntekter.loenn != sisteSummerteInntekter.loenn) {
+                    throw InternfeilException(
+                        "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste LOENN inntekt",
+                    )
+                }
+                if (summerteInntekter.oms != sisteSummerteInntekter.oms) {
+                    throw InternfeilException(
+                        "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste OMS inntekt",
+                    )
+                }
             }
-        }
-
-        // verifisere at vi har siste summerte inntekter fra A-inntekt
-        dao.hentSummerteInntekterNonNull(forbehandling.id).let { summerteInntekter ->
-            if (summerteInntekter.afp != sisteSummerteInntekter.afp) {
-                throw InternfeilException(
-                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste AFP inntekt",
-                )
-            }
-            if (summerteInntekter.loenn != sisteSummerteInntekter.loenn) {
-                throw InternfeilException(
-                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste LOENN inntekt",
-                )
-            }
-            if (summerteInntekter.oms != sisteSummerteInntekter.oms) {
-                throw InternfeilException(
-                    "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste OMS inntekt",
-                )
-            }
+        } else {
+            logger.info(
+                "Forbehandling=${forbehandling.id} har ikke mottatt skatteoppgjør, sjekker derfor ikke at vi har siste inntekter i sakId=${forbehandling.sak.id}",
+            )
         }
     }
 

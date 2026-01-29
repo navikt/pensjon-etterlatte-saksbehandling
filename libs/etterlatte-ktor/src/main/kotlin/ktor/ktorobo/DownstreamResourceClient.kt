@@ -158,14 +158,15 @@ class DownstreamResourceClient(
                         } else {
                             if (response.contentLength() == 0L) {
                                 logger.info("Mottok tom content type${response.contentType()}")
+                                Ok(null)
                             } else {
                                 logger.warn(
                                     "Mottok uhåndtert content-type: ${response.contentType()} (rå content-type er" +
                                         " ${response.headers[HttpHeaders.ContentType]}), " +
                                         "lengde på innhold: ${response.contentLength()} ",
                                 )
+                                Ok(response)
                             }
-                            Ok(response)
                         }
                     }
 

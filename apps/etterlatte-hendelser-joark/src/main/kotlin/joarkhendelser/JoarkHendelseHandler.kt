@@ -158,7 +158,8 @@ class JoarkHendelseHandler(
         try {
             if (journalpost.bruker == null) {
                 logger.warn("Bruker mangler på journalpost id=$journalpost")
-                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, temaNytt, ENHET_NAV_ID_OG_FORDELING)
+                val tildeltEnhetsnr = journalpost.journalfoerendeEnhet?.takeIf { it == ENHET_NAV_ID_OG_FORDELING }
+                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, temaNytt, tildeltEnhetsnr)
                 return
             }
 

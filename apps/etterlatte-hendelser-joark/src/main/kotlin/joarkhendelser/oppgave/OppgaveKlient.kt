@@ -84,7 +84,7 @@ data class OpprettOppgaveRequest private constructor(
         fun journalpostManglerBruker(
             journalpostId: String,
             tema: String,
-            enhet: String,
+            enhet: String?,
         ): OpprettOppgaveRequest =
             OpprettOppgaveRequest(
                 journalpostId = journalpostId,

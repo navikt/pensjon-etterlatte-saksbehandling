@@ -93,7 +93,7 @@ data class OpprettOppgaveRequest private constructor(
                 beskrivelse = "Journalpost $journalpostId mangler bruker",
                 personident = null,
                 orgnr = null,
-                tildeltEnhetsnr = null,
+                tildeltEnhetsnr = "4303",
             )
 
         fun journalpostSkalTilKabal(

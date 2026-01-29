@@ -55,18 +55,23 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun hentForbehandlingerForSak(sakId: SakId): List<EtteroppgjoerForbehandling> =
+    fun hentForbehandlingerForSak(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+    ): List<EtteroppgjoerForbehandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
                         SELECT *  
-                        FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
-                        WHERE t.sak_id = ?
+                        FROM etteroppgjoer_behandling e INNER JOIN sak s on e.sak_id = s.id
+                        WHERE e.sak_id = ?
+                        AND e.aar = ?
                         """.trimIndent(),
                     )
                 statement.setObject(1, sakId.sakId)
+                statement.setObject(2, etteroppgjoersAar)
                 statement.executeQuery().toList { toForbehandling() }
             }
         }

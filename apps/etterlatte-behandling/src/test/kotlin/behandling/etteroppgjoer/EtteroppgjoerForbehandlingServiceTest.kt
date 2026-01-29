@@ -78,7 +78,6 @@ class EtteroppgjoerForbehandlingServiceTest {
                 vedtakKlient = vedtakKlient,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
                 etteroppgjoerDataService = etteroppgjoerDataService,
-                featureToggleService = mockk(),
             )
 
         val behandling =

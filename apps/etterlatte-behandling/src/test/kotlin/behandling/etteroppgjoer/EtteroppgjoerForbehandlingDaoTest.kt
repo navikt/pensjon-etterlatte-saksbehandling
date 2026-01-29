@@ -61,6 +61,8 @@ class EtteroppgjoerForbehandlingDaoTest(
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var sak: Sak
 
+    private var etteroppgjoersAar = 2024
+
     @BeforeAll
     fun setup() {
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
@@ -97,11 +99,11 @@ class EtteroppgjoerForbehandlingDaoTest(
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                aar = 2024,
+                aar = etteroppgjoersAar,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
                 brevId = null,
-                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                innvilgetPeriode = Periode(YearMonth.of(etteroppgjoersAar, 1), YearMonth.of(etteroppgjoersAar, 12)),
                 kopiertFra = kopiertFra,
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,
@@ -185,11 +187,11 @@ class EtteroppgjoerForbehandlingDaoTest(
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                aar = 2024,
+                aar = etteroppgjoersAar,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
                 brevId = null,
-                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                innvilgetPeriode = Periode(YearMonth.of(etteroppgjoersAar, 1), YearMonth.of(etteroppgjoersAar, 12)),
                 kopiertFra = null,
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,
@@ -211,7 +213,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         opprettForbehandling(UUID.randomUUID())
         opprettForbehandling(UUID.randomUUID())
 
-        with(etteroppgjoerForbehandlingDao.hentForbehandlingerForSak(sak.id)) {
+        with(etteroppgjoerForbehandlingDao.hentForbehandlingerForSak(sak.id, etteroppgjoersAar)) {
             size shouldBe 2
             forEach {
                 it.aarsakTilAvbrytelse shouldBe AarsakTilAvbryteForbehandling.FEILREGISTRERT
@@ -250,7 +252,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                     data =
                         listOf(
                             inntektsinformasjonDto(
-                                maaned = YearMonth.of(2024, Month.JANUARY),
+                                maaned = YearMonth.of(etteroppgjoersAar, Month.JANUARY),
                                 inntektListe =
                                     listOf(
                                         inntektDto(BigDecimal.ONE),
@@ -258,10 +260,10 @@ class EtteroppgjoerForbehandlingDaoTest(
                             ),
                         ),
                 ),
-                2024,
+                etteroppgjoersAar,
             )
-        val loenn = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), 2024)
-        val oms = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), 2024)
+        val loenn = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), etteroppgjoersAar)
+        val oms = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), etteroppgjoersAar)
 
         val summerteInntekterAOrdningen =
             SummerteInntekterAOrdningen(
@@ -280,11 +282,11 @@ class EtteroppgjoerForbehandlingDaoTest(
             EtteroppgjoerForbehandling(
                 id = UUID.randomUUID(),
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                aar = 2024,
+                aar = etteroppgjoersAar,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
                 brevId = null,
-                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                innvilgetPeriode = Periode(YearMonth.of(etteroppgjoersAar, 1), YearMonth.of(etteroppgjoersAar, 12)),
                 kopiertFra = null,
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,
@@ -311,7 +313,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 opprettet = Tidspunkt.now(),
                 sak = sak,
                 brevId = null,
-                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                innvilgetPeriode = Periode(YearMonth.of(etteroppgjoersAar, 1), YearMonth.of(etteroppgjoersAar, 12)),
                 kopiertFra = null,
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,
@@ -329,7 +331,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                     data =
                         listOf(
                             inntektsinformasjonDto(
-                                maaned = YearMonth.of(2024, Month.JANUARY),
+                                maaned = YearMonth.of(etteroppgjoersAar, Month.JANUARY),
                                 inntektListe =
                                     listOf(
                                         inntektDto(BigDecimal.ONE),
@@ -339,8 +341,8 @@ class EtteroppgjoerForbehandlingDaoTest(
                 ),
                 2024,
             )
-        val loenn = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), 2024)
-        val oms = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), 2024)
+        val loenn = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), etteroppgjoersAar)
+        val oms = InntektskomponentBeregning.beregnInntekt(InntektBulkResponsDto("a", emptyList()), etteroppgjoersAar)
 
         val summerteInntekterAOrdningenEn =
             SummerteInntekterAOrdningen(
@@ -390,9 +392,9 @@ class EtteroppgjoerForbehandlingDaoTest(
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(
             forbehandlingId,
             SummerteInntekterAOrdningen(
-                afp = InntektSummert("A", tolvMndInntekter(2024, 5000.toBigDecimal())),
-                loenn = InntektSummert("B", tolvMndInntekter(2024, 6000.toBigDecimal())),
-                oms = InntektSummert("C", tolvMndInntekter(2024, 7000.toBigDecimal())),
+                afp = InntektSummert("A", tolvMndInntekter(etteroppgjoersAar, 5000.toBigDecimal())),
+                loenn = InntektSummert("B", tolvMndInntekter(etteroppgjoersAar, 6000.toBigDecimal())),
+                oms = InntektSummert("C", tolvMndInntekter(etteroppgjoersAar, 7000.toBigDecimal())),
                 tidspunktBeregnet = Tidspunkt.now(),
                 regelresultat =
                     mapOf(
@@ -425,7 +427,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                 opprettet = Tidspunkt.now(),
                 sak = sak,
                 brevId = null,
-                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                innvilgetPeriode = Periode(YearMonth.of(etteroppgjoersAar, 1), YearMonth.of(etteroppgjoersAar, 12)),
                 kopiertFra = UUID.randomUUID(),
                 sisteIverksatteBehandlingId = UUID.randomUUID(),
                 harMottattNyInformasjon = null,

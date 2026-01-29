@@ -23,26 +23,9 @@ data class Etteroppgjoer(
         status in
             listOf(
                 EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
             )
 
     fun mottattSkatteoppgjoer() = status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
-
-    fun kanTilbakestillesMedNyForbehandling(forbehandling: EtteroppgjoerForbehandling) {
-        if (status !in listOf(EtteroppgjoerStatus.FERDIGSTILT, EtteroppgjoerStatus.OMGJOERING, EtteroppgjoerStatus.VENTER_PAA_SVAR)) {
-            throw IllegalStateException(
-                "Kan ikke tilbakestille etteroppgjoer med status $status",
-            )
-        }
-
-        if (forbehandling.status !in
-            listOf(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, EtteroppgjoerForbehandlingStatus.AVBRUTT)
-        ) {
-            throw IllegalStateException(
-                "Kan ikke tilbakestille forbehandling med status $status, ta kontakt for manuell håndtering.",
-            )
-        }
-    }
 
     fun kanOppretteRevurdering() =
         status in listOf(EtteroppgjoerStatus.VENTER_PAA_SVAR, EtteroppgjoerStatus.FERDIGSTILT, EtteroppgjoerStatus.OMGJOERING)

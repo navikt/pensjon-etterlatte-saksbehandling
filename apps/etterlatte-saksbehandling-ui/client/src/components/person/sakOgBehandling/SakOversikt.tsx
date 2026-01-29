@@ -193,7 +193,7 @@ export const SakOversikt = ({
               {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                 <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
-                  <EtteroppgjoerForbehandlingTabell sakId={sak.id} hentNyeOppgaver={() => oppgaverFetch(sak.id)} />
+                  <EtteroppgjoerForbehandlingTabell sakId={sak.id} />
                   {etteroppgjoerForbehandlingKnappEnabled && (
                     <Box marginBlock="5">
                       {mapResult(opprettForbehandlingStatus, {

@@ -38,7 +38,7 @@ enum class KjenteSkjemaKoder(
 /**
  * Enhet for Nav id og fordeling
  */
-const val ENHET_NAV_ID_OG_FORDELING = "4833"
+const val ENHET_NAV_ID_OG_FORDELING = "4303"
 
 /**
  * Håndterer hendelser fra Joark og behandler de hendelsene som tilhører Team Etterlatte.

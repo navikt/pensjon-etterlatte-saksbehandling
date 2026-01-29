@@ -25,6 +25,7 @@ class OppgaveKlient(
     suspend fun opprettManuellJournalfoeringsoppgave(
         journalpostId: Long,
         tema: String,
+        enhet: String? = null,
     ) {
         logger.info("Oppretter manuell journalføringsoppgave")
 
@@ -32,7 +33,7 @@ class OppgaveKlient(
             httpClient
                 .post("$url/api/v1/oppgaver") {
                     contentType(ContentType.Application.Json)
-                    setBody(OpprettOppgaveRequest.journalpostManglerBruker(journalpostId.toString(), tema))
+                    setBody(OpprettOppgaveRequest.journalpostManglerBruker(journalpostId.toString(), tema, enhet))
                 }.body<JsonNode>()
 
         logger.info("Opprettet oppgave (id=${response["id"]}, status=${response["status"]}, tema=${response["tema"]})")
@@ -83,6 +84,7 @@ data class OpprettOppgaveRequest private constructor(
         fun journalpostManglerBruker(
             journalpostId: String,
             tema: String,
+            enhet: String,
         ): OpprettOppgaveRequest =
             OpprettOppgaveRequest(
                 journalpostId = journalpostId,
@@ -93,7 +95,7 @@ data class OpprettOppgaveRequest private constructor(
                 beskrivelse = "Journalpost $journalpostId mangler bruker",
                 personident = null,
                 orgnr = null,
-                tildeltEnhetsnr = "4303",
+                tildeltEnhetsnr = enhet,
             )
 
         fun journalpostSkalTilKabal(

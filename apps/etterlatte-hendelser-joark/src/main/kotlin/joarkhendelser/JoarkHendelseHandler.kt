@@ -36,6 +36,11 @@ enum class KjenteSkjemaKoder(
 }
 
 /**
+ * Enhet for Nav id og fordeling
+ */
+const val ENHET_NAV_ID_OG_FORDELING = "4833"
+
+/**
  * Håndterer hendelser fra Joark og behandler de hendelsene som tilhører Team Etterlatte.
  *
  * Skal kun behandle:
@@ -46,7 +51,6 @@ enum class KjenteSkjemaKoder(
  *
  * @see: https://confluence.adeo.no/display/BOA/Joarkhendelser
  **/
-
 class JoarkHendelseHandler(
     private val behandlingService: BehandlingService,
     private val safKlient: SafKlient,
@@ -154,7 +158,7 @@ class JoarkHendelseHandler(
         try {
             if (journalpost.bruker == null) {
                 logger.warn("Bruker mangler på journalpost id=$journalpost")
-                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, temaNytt)
+                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, temaNytt, ENHET_NAV_ID_OG_FORDELING)
                 return
             }
 
@@ -186,8 +190,9 @@ class JoarkHendelseHandler(
                     )
                 }
 
-                HendelseType.ENDELIG_JOURNALFOERT ->
+                HendelseType.ENDELIG_JOURNALFOERT -> {
                     behandleEndeligJournalfoert(ident.folkeregisterident.value, sakType, journalpost)
+                }
 
                 HendelseType.JOURNALPOST_UTGAATT -> {
                     logger.info("Journalpost $journalpostId har status=${journalpost.journalstatus}")
@@ -195,7 +200,9 @@ class JoarkHendelseHandler(
                     behandlingService.avbrytOppgaverTilknyttetJournalpost(journalpostId)
                 }
 
-                else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
+                else -> {
+                    throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
+                }
             }
         } catch (e: Exception) {
             logger.error("Feil ved behandling av hendelse=$hendelseId (se sikkerlogg for mer info)", e)

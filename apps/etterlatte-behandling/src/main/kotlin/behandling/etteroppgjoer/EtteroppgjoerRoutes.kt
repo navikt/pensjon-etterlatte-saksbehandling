@@ -23,7 +23,6 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -91,7 +90,7 @@ fun Route.etteroppgjoerRoutes(
                     inTransaction {
                         val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
 
-                        krev(etteroppgjoer.venterPaaSkatteoppgjoer()) {
+                        krev(etteroppgjoer.venterPaaSkatteoppgjoer() || etteroppgjoer.mottattSkatteoppgjoer()) {
                             "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling"
                         }
 
@@ -119,10 +118,20 @@ fun Route.etteroppgjoerRoutes(
                             etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
                                 ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjør for sak $sakId")
 
-                        val forbehandling = forbehandlingService.hentForbehandling(etteroppgjoer.sisteFerdigstilteForbehandling!!)
+                        if (etteroppgjoer.venterPaaSkatteoppgjoer()) {
+                            throw InternfeilException(
+                                "Kan ikke tilbakestille etteroppgjoer for sak $sakId, vi venter enda på skatteoppgjøret.",
+                            )
+                        }
 
-                        haandterIngenEndringUtenUtbetaling(forbehandling, etteroppgjoer)
-                        etteroppgjoer.kanTilbakestillesMedNyForbehandling(forbehandling)
+                        val forbehandlinger = forbehandlingService.hentForbehandlinger(sakId, etteroppgjoer.inntektsaar)
+                        if (forbehandlinger.isEmpty()) {
+                            throw InternfeilException(
+                                "Kan ikke tilbakestille etteroppgjoer for sak $sakId, fant ingen tidligere forbehandlinger. Ta kontakt for manuell håndtering.",
+                            )
+                        }
+
+                        forbehandlingService.sjekkHarAapneBehandlinger(etteroppgjoer.sakId, null)
 
                         logger.info("Tilbakestiller etteroppgjør med sakId ${etteroppgjoer.sakId}")
                         etteroppgjoerService.oppdaterEtteroppgjoerStatus(
@@ -297,7 +306,7 @@ fun Route.etteroppgjoerRoutes(
 
         get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
-            val forbehandlinger = inTransaction { forbehandlingService.hentEtteroppgjoerForbehandlinger(sakId) }
+            val forbehandlinger = inTransaction { forbehandlingService.hentForbehandlinger(sakId, ETTEROPPGJOER_AAR) }
             call.respond(forbehandlinger)
         }
 
@@ -344,22 +353,6 @@ private fun sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService: Fea
             "Tilbakestilling av " +
                 "etteroppgjør er ikke tillatt for vedkommende i miljøet",
         )
-    }
-}
-
-private fun haandterIngenEndringUtenUtbetaling(
-    forbehandling: EtteroppgjoerForbehandling,
-    etteroppgjoer: Etteroppgjoer,
-) {
-    if (etteroppgjoer.status == EtteroppgjoerStatus.FERDIGSTILT) {
-        if (forbehandling.etteroppgjoerResultatType != EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
-            throw IkkeTillattException(
-                code = "UTFALL_IKKE_TILLATT",
-                "Vi støtter ikke " +
-                    "tilbakestilling med resultat ${forbehandling.etteroppgjoerResultatType}. " +
-                    "Ta kontakt hvis forbehandlingen skal tilbakestilles.",
-            )
-        }
     }
 }
 

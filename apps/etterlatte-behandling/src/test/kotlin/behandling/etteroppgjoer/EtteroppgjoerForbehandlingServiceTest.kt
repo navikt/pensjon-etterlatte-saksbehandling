@@ -78,7 +78,6 @@ class EtteroppgjoerForbehandlingServiceTest {
                 vedtakKlient = vedtakKlient,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
                 etteroppgjoerDataService = etteroppgjoerDataService,
-                featureToggleService = mockk(),
             )
 
         val behandling =
@@ -134,7 +133,7 @@ class EtteroppgjoerForbehandlingServiceTest {
 
         fun returnsForbehandlinger(forbehandlinger: List<EtteroppgjoerForbehandling>) {
             coEvery {
-                dao.hentForbehandlingerForSak(any())
+                dao.hentForbehandlingerForSak(any(), any())
             } returns forbehandlinger
         }
 

@@ -6,6 +6,7 @@ import { JaNei } from '~shared/types/ISvar'
 export interface Etteroppgjoer {
   inntektsaar: number
   status: EtteroppgjoerStatus
+  sakId: number
 }
 
 enum EtteroppgjoerStatus {

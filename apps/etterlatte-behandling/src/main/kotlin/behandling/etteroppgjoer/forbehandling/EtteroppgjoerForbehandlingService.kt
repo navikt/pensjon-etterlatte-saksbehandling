@@ -62,7 +62,6 @@ class EtteroppgjoerForbehandlingService(
     private val vedtakKlient: VedtakKlient,
     private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     private val etteroppgjoerDataService: EtteroppgjoerDataService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
@@ -183,6 +182,11 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
+    fun hentForbehandlinger(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+    ): List<EtteroppgjoerForbehandling> = dao.hentForbehandlingerForSak(sakId, etteroppgjoersAar)
+
     fun hentDetaljertForbehandling(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -249,8 +253,6 @@ class EtteroppgjoerForbehandlingService(
         val forbehandling = hentForbehandling(forbehandlingId)
         dao.lagreForbehandling(forbehandling.medBrev(brev))
     }
-
-    fun hentEtteroppgjoerForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlingerForSak(sakId)
 
     fun opprettEtteroppgjoerForbehandling(
         sakId: SakId,
@@ -452,7 +454,7 @@ class EtteroppgjoerForbehandlingService(
             }
     }
 
-    private fun kanOppretteForbehandlingForEtteroppgjoer(
+    fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
         inntektsaar: Int,
         oppgaveId: UUID,
@@ -474,18 +476,7 @@ class EtteroppgjoerForbehandlingService(
             )
         }
 
-        // Åpne behandlinger
-        if (oppgaveService
-                .hentOppgaverForSak(sak.id)
-                .filter { it.kilde == OppgaveKilde.BEHANDLING && it.id != oppgaveId }
-                .any { it.erIkkeAvsluttet() }
-        ) {
-            logger.info("Kan ikke opprette forbehandling for sak=${sak.id} på grunn av allerede åpne behandlinger")
-            throw IkkeTillattException(
-                "ALLEREDE_AAPEN_BEHANDLING",
-                "Kan ikke opprette forbehandling for sak=${sak.id} på grunn av allerede åpne behandlinger",
-            )
-        }
+        sjekkHarAapneBehandlinger(sak.id, oppgaveId)
 
         // Siste iverksatte behandling
         if (behandlingService.hentSisteIverksatteBehandling(sak.id) == null) {
@@ -496,7 +487,7 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // Forbehandling
-        val forbehandlinger = hentEtteroppgjoerForbehandlinger(sak.id)
+        val forbehandlinger = hentForbehandlinger(sak.id, etteroppgjoer.inntektsaar)
         if (forbehandlinger.any { it.aar == inntektsaar && it.erUnderBehandling() }) {
             throw IkkeTillattException(
                 "FORBEHANDLING_FINNES_ALLEREDE",
@@ -579,8 +570,22 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    fun lagreForbehandling(forbehandling: EtteroppgjoerForbehandling) {
-        dao.lagreForbehandling(forbehandling)
+    fun sjekkHarAapneBehandlinger(
+        sakId: SakId,
+        oppgaveId: UUID?,
+    ) {
+        // Åpne behandlinger
+        if (oppgaveService
+                .hentOppgaverForSak(sakId)
+                .filter { it.kilde == OppgaveKilde.BEHANDLING && it.id != oppgaveId }
+                .any { it.erIkkeAvsluttet() }
+        ) {
+            logger.info("Kan ikke opprette forbehandling for sak=$sakId på grunn av allerede åpne behandlinger")
+            throw IkkeTillattException(
+                "ALLEREDE_AAPEN_BEHANDLING",
+                "Kan ikke opprette forbehandling for sak=$sakId på grunn av allerede åpne behandlinger",
+            )
+        }
     }
 
     fun kopierOgLagreNyForbehandling(

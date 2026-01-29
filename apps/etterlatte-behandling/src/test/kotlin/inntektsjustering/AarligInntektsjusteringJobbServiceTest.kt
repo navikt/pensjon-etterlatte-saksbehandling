@@ -25,7 +25,6 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -99,7 +98,7 @@ class AarligInntektsjusteringJobbServiceTest {
         clearAllMocks()
         every { featureToggleService.isEnabled(any(), any()) } returns true
 
-        coEvery { etteroppgjoerForbehandlingService.hentEtteroppgjoerForbehandlinger(any()) } returns emptyList()
+        coEvery { etteroppgjoerForbehandlingService.hentForbehandlinger(any(), any()) } returns emptyList()
 
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
         coEvery {
@@ -352,7 +351,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 saker = listOf(SakId(123L)),
             )
 
-        every { etteroppgjoerForbehandlingService.hentEtteroppgjoerForbehandlinger(any()) } returns
+        every { etteroppgjoerForbehandlingService.hentForbehandlinger(any(), any()) } returns
             listOf(
                 EtteroppgjoerForbehandling.opprett(gyldigSak, mockk(relaxed = true), mockk(), mottattSkatteoppgjoer = true),
             )

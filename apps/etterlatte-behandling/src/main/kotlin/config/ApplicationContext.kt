@@ -141,6 +141,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.UkjentBeroertDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbetjeningService
@@ -394,6 +395,7 @@ internal class ApplicationContext(
     private val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
     private val vilkaarsvurderingDao = VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao())
+    private val ukjentBeroertDao = UkjentBeroertDao(autoClosingDatabase)
 
     // Klient
     private val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
@@ -598,7 +600,8 @@ internal class ApplicationContext(
 
     val etteroppgjoerDataService = EtteroppgjoerDataService(behandlingService, featureToggleService, vedtakKlient, beregningKlient)
 
-    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
+    val doedshendelseService =
+        DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService, gosysOppgaveKlient, ukjentBeroertDao)
 
     val inntektsjusteringSelvbetjeningService =
         InntektsjusteringSelvbetjeningService(

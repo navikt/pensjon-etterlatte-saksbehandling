@@ -616,6 +616,13 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 
+    override suspend fun opprettGenerellOppgave(
+        personident: String,
+        sakType: SakType,
+        beskrivelse: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave = gosysApiOppgave()
+
     private fun gosysApiOppgave(): GosysApiOppgave =
         GosysApiOppgave(
             1,

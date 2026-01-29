@@ -105,7 +105,9 @@ class GrunnlagsendringshendelseService(
         }
 
     fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl) {
-        doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
+        inTransaction {
+            doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
+        }
     }
 
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> =

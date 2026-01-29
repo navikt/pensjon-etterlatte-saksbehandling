@@ -566,6 +566,7 @@ fun mockDoedshendelsePerson(
             utland = it.utland,
             familieRelasjon = it.familieRelasjon,
             avdoedesBarn = it.avdoedesBarn,
+            avdoedesBarnUtenIdent = emptyList(),
         )
     }
 

@@ -1,25 +1,29 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="etterlatte-behandling.dev-gcp" type="JetRunConfigurationType">
     <envs>
-      <env name="AZURE_SCOPE_ETTERLATTE_KLAGE" value="api://dev-gcp.etterlatte.etterlatte-klage/.default" />
-      <env name="AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING"
-           value="api://dev-gcp.etterlatte.etterlatte-tilbakekreving/.default"/>
-      <env name="AZURE_SCOPE_SKJERMEDE_PIP" value="api://dev-gcp.nom.skjermede-personer-pip/.default" />
-      <env name="AZUREAD_ATTESTANT_GROUPID" value="63f46f74-84a8-4d1c-87a8-78532ab3ae60" />
+      <env name="ARBEID_OG_INNTEKT_URL" value="https://arbeid-og-inntekt-q2.dev-fss-pub.nais.io" />
       <env name="AZUREAD_ATTESTANT_GJENNY_GROUPID" value="70cfce24-7865-4676-9fdc-b676e90bfc92" />
+      <env name="AZUREAD_ATTESTANT_GROUPID" value="63f46f74-84a8-4d1c-87a8-78532ab3ae60" />
       <env name="AZUREAD_EGEN_ANSATT_GROUPID" value="dbe4ad45-320b-4e9a-aaa1-73cca4ee124d" />
       <env name="AZUREAD_FORTROLIG_GROUPID" value="ea930b6b-9397-44d9-b9e6-f4cf527a632a" />
       <env name="AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID" value="ea7411eb-8b48-41a0-bc56-7b521fbf0c25" />
       <env name="AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID" value="753805ea-65a7-4855-bdc3-e6130348df9f" />
       <env name="AZUREAD_SAKSBEHANDLER_GROUPID" value="8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf" />
-      <env name="AZURE_SCOPE_ETTERLATTE_INSTITUSJONSOPPHOLD" value="api://dev-gcp.etterlatte.etterlatte-institusjonsopphold/.default" />
       <env name="AZUREAD_STRENGT_FORTROLIG_GROUPID" value="5ef775f2-61f8-4283-bf3d-8d03f428aa14" />
+      <env name="AZURE_SCOPE_ETTERLATTE_INSTITUSJONSOPPHOLD" value="api://dev-gcp.etterlatte.etterlatte-institusjonsopphold/.default" />
+      <env name="AZURE_SCOPE_ETTERLATTE_KLAGE" value="api://dev-gcp.etterlatte.etterlatte-klage/.default" />
+      <env name="AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING" value="api://dev-gcp.etterlatte.etterlatte-tilbakekreving/.default" />
+      <env name="AZURE_SCOPE_SKJERMEDE_PIP" value="api://dev-gcp.nom.skjermede-personer-pip/.default" />
       <env name="DB_DATABASE" value="postgres" />
       <env name="DB_HOST" value="localhost" />
       <env name="DB_PASSWORD" value="postgres" />
       <env name="DB_PORT" value="5439" />
       <env name="DB_USERNAME" value="postgres" />
       <env name="DEV" value="true" />
+      <env name="ENTRA_PROXY_SCOPE" value="api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default" />
+      <env name="ENTRA_PROXY_URL" value="https://entraproxy.intern.dev.nav.no" />
+      <env name="ETTERLATTE_BEREGNING_CLIENT_ID" value="b07cf335-11fb-4efa-bd46-11f51afd5052" />
+      <env name="ETTERLATTE_BEREGNING_URL" value="https://etterlatte-beregning.intern.dev.nav.no" />
       <env name="ETTERLATTE_BREV_API_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-brev-api" />
       <env name="ETTERLATTE_BREV_API_URL" value="https://etterlatte-brev-api.intern.dev.nav.no" />
       <env name="ETTERLATTE_INSTITUSJONSOPPHOLD_URL" value="https://etterlatte-institusjonsopphold.intern.dev.nav.no" />
@@ -27,40 +31,34 @@
       <env name="ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE" value="api://dev-fss.teampensjon.navansatt/.default" />
       <env name="ETTERLATTE_PDLTJENESTER_URL" value="https://etterlatte-pdltjenester.intern.dev.nav.no" />
       <env name="ETTERLATTE_TILBAKEKREVING_URL" value="https://etterlatte-tilbakekreving.intern.dev.nav.no" />
-      <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />
-      <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
-      <env name="ETTERLATTE_BEREGNING_CLIENT_ID" value="b07cf335-11fb-4efa-bd46-11f51afd5052" />
-      <env name="ETTERLATTE_BEREGNING_URL" value="https://etterlatte-beregning.intern.dev.nav.no" />
       <env name="ETTERLATTE_TRYGDETID_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-trygdetid" />
       <env name="ETTERLATTE_TRYGDETID_URL" value="https://etterlatte-trygdetid.intern.dev.nav.no" />
+      <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />
+      <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="HTTP_PORT" value="8090" />
+      <env name="INNTEKTSKOMPONENT_OUTBOUND_SCOPE" value="api://dev-fss.team-inntekt.inntektskomponenten/.default" />
+      <env name="INNTEKTSKOMPONENT_URL" value="https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q2" />
+      <env name="JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS" value="00-23" />
+      <env name="JOBB_METRIKKER_OPENING_HOURS" value="00-23" />
+      <env name="JOBB_SAKSBEHANDLER_OPENING_HOURS" value="00-23" />
+      <env name="KODEVERK_CLIENT_ID" value="dev-gcp.team-rocket.kodeverk-api" />
+      <env name="KODEVERK_URL" value="https://kodeverk-api.nav.no/api/v1/kodeverk" />
+      <env name="KRR_ENDPOINT_URL" value="https://digdir-krr-proxy.intern.dev.nav.no" />
+      <env name="KRR_SCOPE" value="api://dev-gcp.team-rocket.digdir-krr-proxy/.default" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-behandling" />
       <env name="NAVANSATT_URL" value="https://navansatt.dev-fss-pub.nais.io" />
       <env name="NORG2_URL" value="https://norg2.dev-fss-pub.nais.io/norg2/api/v1" />
       <env name="OPPGAVE_CLIENT_ID" value="dev-fss.oppgavehandtering.oppgave" />
-      <env name="OPPGAVE_URL" value="https://oppgave.dev.intern.nav.no" />
+      <env name="OPPGAVE_URL" value="https://oppgave.dev-fss-pub.nais.io" />
       <env name="PDL_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
       <env name="PDLTJENESTER_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
-      <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
+      <env name="PDL_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
       <env name="PEN_CLIENT_ID" value="ddd52335-cfe8-4ee9-9e68-416a5ab26efa" />
       <env name="PEN_URL" value="https://pensjon-pen-q2.dev-fss-pub.nais.io/api" />
-      <env name="KRR_ENDPOINT_URL" value="https://digdir-krr-proxy.intern.dev.nav.no" />
-      <env name="KRR_SCOPE" value="api://dev-gcp.team-rocket.digdir-krr-proxy/.default" />
-      <env name="ENTRA_PROXY_URL" value="https://entraproxy.intern.dev.nav.no" />
-      <env name="ENTRA_PROXY_SCOPE" value="api://dev-gcp.sikkerhetstjenesten.entra-proxy/.default" />
-      <env name="JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS" value="00-23" />
-      <env name="JOBB_SAKSBEHANDLER_OPENING_HOURS" value="00-23" />
-      <env name="JOBB_METRIKKER_OPENING_HOURS" value="00-23" />
-      <env name="KODEVERK_CLIENT_ID" value="dev-gcp.team-rocket.kodeverk-api" />
-      <env name="KODEVERK_URL" value="https://kodeverk-api.nav.no/api/v1/kodeverk" />
-      <env name="INNTEKTSKOMPONENT_URL"
-           value="https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q2" />
-      <env name="INNTEKTSKOMPONENT_OUTBOUND_SCOPE"
-           value="api://dev-fss.team-inntekt.inntektskomponenten/.default" />
-      <env name="SIGRUN_URL" value="https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/sigrun-ske" />
       <env name="SIGRUN_OUTBOUND_SCOPE" value="api://dev-fss.team-inntekt.sigrun-q4/.default" />
-      <env name="ARBEID_OG_INNTEKT_URL" value="https://arbeid-og-inntekt-q2.dev-fss-pub.nais.io" />
+      <env name="SIGRUN_URL" value="https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/sigrun-ske" />
+      <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-behandling.main" />
@@ -73,8 +71,7 @@
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
         <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
-        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false"
-               PATH="apps/etterlatte-behandling/.env.dev-gcp"/>
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-behandling/.env.dev-gcp" />
       </ENTRIES>
     </extension>
     <method v="2">

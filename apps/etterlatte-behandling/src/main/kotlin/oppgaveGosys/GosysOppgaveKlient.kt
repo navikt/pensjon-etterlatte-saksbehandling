@@ -10,7 +10,9 @@ import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -23,7 +25,6 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import org.apache.kafka.common.protocol.types.Field
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -47,6 +48,7 @@ data class GosysApiOppgave(
     val status: String,
     val fristFerdigstillelse: LocalDate? = null,
     val bruker: GosysOppgaveBruker?,
+    val personident: String? = null,
 )
 
 data class GosysEndreSaksbehandlerRequest(
@@ -103,6 +105,13 @@ interface GosysOppgaveKlient {
     suspend fun feilregistrer(
         id: String,
         request: EndreStatusRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave
+
+    suspend fun opprettGenerellOppgave(
+        personident: String,
+        sakType: SakType,
+        beskrivelse: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave
 }
@@ -306,6 +315,70 @@ class GosysOppgaveKlientImpl(
             throw e
         }
     }
+
+    override suspend fun opprettGenerellOppgave(
+        personident: String,
+        sakType: SakType,
+        beskrivelse: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        logger.info("Oppretter oppgave")
+        val body =
+            OpprettOppgaveRequest(
+                tema = sakType.tema,
+                oppgavetype = "GEN",
+                beskrivelse = beskrivelse,
+                personident = personident,
+                tildeltEnhetsnr = Enheter.UTLAND.enhetNr,
+                prioritet = "NORM",
+            )
+
+        try {
+            val response =
+                downstreamResourceClient
+                    .post(
+                        resource =
+                            Resource(
+                                clientId = clientId,
+                                url = "$resourceUrl/api/v1/oppgaver",
+                            ),
+                        postBody = body,
+                        brukerTokenInfo = brukerTokenInfo,
+                    ).mapBoth<Resource, Throwable, GosysApiOppgave>(
+                        success = { resource -> deserialize(resource.response.toString()) },
+                        failure = { errorResponse -> throw errorResponse },
+                    )
+            logger.info("Opprettet oppgave (id=${response.id}, status=${response.status}, tema=${response.tema})")
+            sikkerlogger().info("Opprettet oppgave med respons: \n$response")
+            return response
+        } catch (re: ResponseException) {
+            if (re.response.status == HttpStatusCode.Conflict) {
+                throw GosysKonfliktException(re.response.bodyAsText())
+            } else {
+                throw re
+            }
+        } catch (_: SocketTimeoutException) {
+            throw GosysTimeout()
+        } catch (e: Exception) {
+            logger.error("Ukjent feil oppsto ved oppretting av oppgave (se sikkerlogg for body)", e)
+            sikkerlogger().error("Ukjent feil oppsto ved oppretting av oppgave=: \n${body.toJson()}")
+            throw e
+        }
+    }
+}
+
+@Suppress("unused")
+data class OpprettOppgaveRequest(
+    val journalpostId: String? = null,
+    val tema: String,
+    val oppgavetype: String,
+    val prioritet: String,
+    val beskrivelse: String,
+    val personident: String? = null,
+    val orgnr: String? = null,
+    val tildeltEnhetsnr: Enhetsnummer? = null,
+) {
+    val aktivDato: String = LocalDate.now().toString()
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

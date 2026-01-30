@@ -601,7 +601,7 @@ internal class ApplicationContext(
     val etteroppgjoerDataService = EtteroppgjoerDataService(behandlingService, featureToggleService, vedtakKlient, beregningKlient)
 
     val doedshendelseService =
-        DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService, gosysOppgaveKlient, ukjentBeroertDao)
+        DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, gosysOppgaveKlient, ukjentBeroertDao)
 
     val inntektsjusteringSelvbetjeningService =
         InntektsjusteringSelvbetjeningService(

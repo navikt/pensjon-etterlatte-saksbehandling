@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseFeatureToggle
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -27,7 +26,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshen
 class DoedshendelseService(
     private val doedshendelseDao: DoedshendelseDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
-    private val featureToggleService: FeatureToggleService,
     private val gosysOppgaveKlient: GosysOppgaveKlient,
     private val ukjentBeroertDao: UkjentBeroertDao,
 ) {
@@ -82,17 +80,27 @@ class DoedshendelseService(
         barnUtenIdent: List<PersonUtenIdent>,
         ektefellerUtenIdent: List<Sivilstand>,
     ) {
-        if (barnUtenIdent.size + ektefellerUtenIdent.size > 0) {
-            loggManglendeIdent(avdoed)
+        val relevanteEktefeller =
+            ektefellerUtenIdent
+                .filter { erRelevantSivilstand(it, avdoed) }
+        if (ektefellerUtenIdent.isNotEmpty() && relevanteEktefeller.isEmpty()) {
+            sikkerLogg.info(
+                "Ektefelle-relasjoner funnet irrelevante for avdød ${avdoed.foedselsnummer.verdi.value}. " +
+                    ektefellerUtenIdent.toJson(),
+            )
+        }
+
+        if (barnUtenIdent.size + relevanteEktefeller.size > 0) {
+            val msgBeroerte =
+                listOfNotNull(
+                    "barn".takeIf { barnUtenIdent.isNotEmpty() },
+                    "ektefelle".takeIf { relevanteEktefeller.isNotEmpty() },
+                ).joinToString(" og ")
+            loggManglendeIdent(avdoed, msgBeroerte)
 
             if (!harLagretUkjentBeroert(avdoed)) {
-                val msgBeroerte =
-                    listOfNotNull(
-                        "barn".takeIf { barnUtenIdent.isNotEmpty() },
-                        "ektefelle".takeIf { ektefellerUtenIdent.isNotEmpty() },
-                    ).joinToString(" og ")
                 val sakType =
-                    if (ektefellerUtenIdent.isNotEmpty()) {
+                    if (relevanteEktefeller.isNotEmpty()) {
                         SakType.OMSTILLINGSSTOENAD
                     } else {
                         SakType.BARNEPENSJON
@@ -114,6 +122,22 @@ class DoedshendelseService(
                 UkjentBeroert(avdoed.foedselsnummer.verdi.value, barnUtenIdent, ektefellerUtenIdent),
             )
         }
+    }
+
+    private fun erRelevantSivilstand(
+        sivilstand: Sivilstand,
+        avdoed: PersonDoedshendelseDto,
+    ): Boolean {
+        if (sivilstand.sivilstatus in listOf(Sivilstatus.GIFT, Sivilstatus.REGISTRERT_PARTNER)) {
+            return true
+        }
+        if (avdoed.doedsdato != null &&
+            sivilstand.gyldigFraOgMed != null &&
+            sivilstand.gyldigFraOgMed!!.isBefore(avdoed.doedsdato!!.verdi.minusYears(6))
+        ) {
+            return false
+        }
+        return true
     }
 
     private fun harLagretUkjentBeroert(avdoed: PersonDoedshendelseDto): Boolean {
@@ -176,12 +200,12 @@ class DoedshendelseService(
     }
 
     private fun lagreDoedshendelser(
-        gammel: List<PersonFnrMedRelasjon>,
+        beroerte: List<PersonFnrMedRelasjon>,
         avdoed: PersonDoedshendelseDto,
         endringstype: Endringstype,
     ) {
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
-        gammel
+        beroerte
             .forEach { person ->
                 doedshendelseDao.opprettDoedshendelse(
                     DoedshendelseInternal.nyHendelse(
@@ -326,23 +350,18 @@ class DoedshendelseService(
             }
     }
 
-    private fun loggManglendeIdent(avdoed: PersonDoedshendelseDto) {
-        val loggingAktivert =
-            featureToggleService.isEnabled(GrunnlagsendringshendelseFeatureToggle.LOGG_MANGLENDE_EKTEFELLE_IDENT, false)
-        if (loggingAktivert) {
-            val avdoedFnr = avdoed.foedselsnummer.verdi
-            logger.error(
-                "OBS! Det er registrert en partner til avdøde $avdoedFnr uten ident. " +
-                    "Bør vurderes av saksbehandler. Se sikkerlogg",
-            )
-            sikkerLogg.error(
-                """
-                OBS! Det er registrert en partner til avdøde ${avdoedFnr.value} uten ident.
-                Sivilstand-liste: ${avdoed.sivilstand?.toJson()}. 
-                Barn uten ident: ${avdoed.avdoedesBarnUtenIdent?.toJson()}.
-                """.trimIndent(),
-            )
-        }
+    private fun loggManglendeIdent(
+        avdoed: PersonDoedshendelseDto,
+        msgBeroerte: String,
+    ) {
+        val avdoedFnr = avdoed.foedselsnummer.verdi
+        sikkerLogg.info(
+            """
+            OBS! Det er registrert $msgBeroerte til avdøde ${avdoedFnr.value} uten ident.
+            Sivilstand-liste: ${avdoed.sivilstand?.toJson()}. 
+            Barn uten ident: ${avdoed.avdoedesBarnUtenIdent?.toJson()}.
+            """.trimIndent(),
+        )
     }
 }
 

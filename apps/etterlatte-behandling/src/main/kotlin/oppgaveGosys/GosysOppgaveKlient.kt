@@ -10,6 +10,7 @@ import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
@@ -328,6 +329,7 @@ class GosysOppgaveKlientImpl(
                 oppgavetype = "GEN",
                 beskrivelse = beskrivelse,
                 personident = personident,
+                tildeltEnhetsnr = Enheter.UTLAND.enhetNr,
                 prioritet = "NORM",
             )
 
@@ -374,6 +376,7 @@ data class OpprettOppgaveRequest(
     val beskrivelse: String,
     val personident: String? = null,
     val orgnr: String? = null,
+    val tildeltEnhetsnr: Enhetsnummer? = null,
 ) {
     val aktivDato: String = LocalDate.now().toString()
 }

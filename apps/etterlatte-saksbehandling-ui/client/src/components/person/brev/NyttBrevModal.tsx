@@ -1,10 +1,21 @@
-import { Button, ErrorMessage, Heading, HStack, Modal, Radio, Select, TextField, VStack } from '@navikt/ds-react'
+import {
+  BodyShort,
+  Button,
+  ErrorMessage,
+  Heading,
+  HStack,
+  Modal,
+  Radio,
+  Select,
+  TextField,
+  VStack,
+} from '@navikt/ds-react'
 import { DocPencilIcon } from '@navikt/aksel-icons'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBrevAvSpesifikkTypeForSak } from '~shared/api/brev'
 import { Control, Controller, useForm } from 'react-hook-form'
-import { isPending, mapFailure } from '~shared/api/apiUtils'
+import { isPending, mapFailure, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
@@ -14,6 +25,8 @@ import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDa
 import { Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formatering/formatering'
 import { ClickEvent, trackClick } from '~utils/analytics'
+import { hentGjeldendeGrunnbeloep } from '~shared/api/beregning'
+import Spinner from '~shared/Spinner'
 
 const NasjonalEllerUtlandRadio = ({ control }: { control: Control<FilledFormData, any> }) => (
   <ControlledRadioGruppe
@@ -117,6 +130,13 @@ export const NyttBrevModal = ({
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
+  const [hentGjeldeneGrunnbeloepResult, hentGjeldendeGrunnbeloepFetch] = useApiCall(hentGjeldendeGrunnbeloep)
+
+  useEffect(() => {
+    hentGjeldendeGrunnbeloepFetch({})
+  }, [])
+
+  const grunnbeloep = mapSuccess(hentGjeldeneGrunnbeloepResult, (data) => data.grunnbeløp)
 
   const defaultData: FilledFormData = {
     type: FormType.TOMT_BREV,
@@ -135,7 +155,7 @@ export const NyttBrevModal = ({
   const skjemaet = watch()
 
   const opprettBrev = (formData: FilledFormData) => {
-    const brevParametre = mapFormdataToBrevParametre(formData, sakType)
+    const brevParametre = mapFormdataToBrevParametre(formData, sakType, grunnbeloep)
 
     trackClick(ClickEvent.OPPRETT_NYTT_BREV)
 
@@ -266,6 +286,17 @@ export const NyttBrevModal = ({
                 <>
                   <RedusertEtterInntektRadio control={control} />
                   <NasjonalEllerUtlandRadio control={control} />
+                  {mapResult(hentGjeldeneGrunnbeloepResult, {
+                    pending: <Spinner label="Henter gjeldende grunnbeløp" />,
+                    success: (data) => (
+                      <BodyShort>
+                        <strong>Gjeldende grunnbeløp:</strong> {data.grunnbeløp} kroner
+                      </BodyShort>
+                    ),
+                    error: (error) => (
+                      <ApiErrorAlert>Kunne ikke hente gjeldende grunnbeløp: {error.detail}</ApiErrorAlert>
+                    ),
+                  })}
                 </>
               )}
               {[
@@ -355,6 +386,7 @@ export type BrevParametre =
       spraak: Spraak
       redusertEtterInntekt: boolean
       nasjonalEllerUtland: NasjonalEllerUtland
+      halvtGrunnbeloep: number
     }
   | {
       type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD
@@ -440,7 +472,11 @@ enum FormType {
   BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
 }
 
-function mapFormdataToBrevParametre(formdata: FilledFormData, sakType: SakType): BrevParametre {
+function mapFormdataToBrevParametre(
+  formdata: FilledFormData,
+  sakType: SakType,
+  grunnbeloep: number | null
+): BrevParametre {
   switch (formdata.type) {
     case FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND:
       return {
@@ -457,6 +493,7 @@ function mapFormdataToBrevParametre(formdata: FilledFormData, sakType: SakType):
         spraak: formdata.spraak,
         redusertEtterInntekt: formdata.redusertEtterInntekt!! === JaNei.JA,
         nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
+        halvtGrunnbeloep: Math.floor(grunnbeloep!! / 2),
       }
     case FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD:
       return {

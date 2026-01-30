@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseFeatureToggle
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -132,21 +131,17 @@ class DoedshendelseService(
 
         when (doedshendelse.endringstype) {
             Endringstype.OPPRETTET, Endringstype.KORRIGERT -> {
-                inTransaction {
-                    aapneDoedshendelser
-                        .map { it.tilOppdatert(avdoed.doedsdato!!.verdi, doedshendelse.endringstype) }
-                        .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
+                aapneDoedshendelser
+                    .map { it.tilOppdatert(avdoed.doedsdato!!.verdi, doedshendelse.endringstype) }
+                    .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
 
-                    haandterNyeBerorte(doedshendelserForAvdoed, beroerte, avdoed, doedshendelse.endringstype)
-                }
+                haandterNyeBerorte(doedshendelserForAvdoed, beroerte, avdoed, doedshendelse.endringstype)
             }
 
             Endringstype.ANNULLERT -> {
-                inTransaction {
-                    aapneDoedshendelser
-                        .map { it.tilAnnulert() }
-                        .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
-                }
+                aapneDoedshendelser
+                    .map { it.tilAnnulert() }
+                    .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
             }
 
             Endringstype.OPPHOERT -> {

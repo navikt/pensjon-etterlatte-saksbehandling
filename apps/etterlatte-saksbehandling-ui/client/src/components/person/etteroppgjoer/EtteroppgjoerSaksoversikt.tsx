@@ -6,6 +6,8 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
 import { ArrowRightIcon, CheckmarkCircleIcon, CircleIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { TilbakestillOgOpprettNyForbehandling } from '~components/person/sakOgBehandling/TilbakestillOgOpprettNyForbehandling'
 
 const steg = [
   { index: 1, status: 'VENTER_PAA_SKATTEOPPGJOER', text: () => 'Venter på skatteoppgjøret' },
@@ -24,6 +26,7 @@ const getIcon = (current: number, target: number) => {
 
 const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBehandlinger> }): ReactNode => {
   const [hentEtteroppgjoerResponse, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoer)
+  const tilbakestillEtteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.vis_tilbakestill_etteroppgjoer)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
@@ -59,6 +62,12 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
           ))}
         </List>
       </Box>
+
+      {tilbakestillEtteroppgjoerEnabled && (
+        <Box padding="8" maxWidth="70rem">
+          <TilbakestillOgOpprettNyForbehandling sakId={etteroppgjoer.sakId} />
+        </Box>
+      )}
     </VStack>
   )
 }

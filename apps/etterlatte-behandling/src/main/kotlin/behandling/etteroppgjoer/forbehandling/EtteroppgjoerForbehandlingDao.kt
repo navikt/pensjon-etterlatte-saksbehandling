@@ -55,18 +55,23 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun hentForbehandlingerForSak(sakId: SakId): List<EtteroppgjoerForbehandling> =
+    fun hentForbehandlingerForSak(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+    ): List<EtteroppgjoerForbehandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
                         SELECT *  
-                        FROM etteroppgjoer_behandling t INNER JOIN sak s on t.sak_id = s.id
-                        WHERE t.sak_id = ?
+                        FROM etteroppgjoer_behandling e INNER JOIN sak s on e.sak_id = s.id
+                        WHERE e.sak_id = ?
+                        AND e.aar = ?
                         """.trimIndent(),
                     )
                 statement.setObject(1, sakId.sakId)
+                statement.setObject(2, etteroppgjoersAar)
                 statement.executeQuery().toList { toForbehandling() }
             }
         }
@@ -79,9 +84,9 @@ class EtteroppgjoerForbehandlingDao(
                         """
                         INSERT INTO etteroppgjoer_behandling(
                             id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst, varselbrev_sendt, etteroppgjoer_resultat_type,
-                            aarsak_til_avbrytelse, kommentar_til_avbrytelse, har_vedtak_av_type_opphoer, opphoer_skyldes_doedsfall, opphoer_skyldes_doedsfall_i_etteroppgjoersaar
+                            aarsak_til_avbrytelse, kommentar_til_avbrytelse, har_vedtak_av_type_opphoer, opphoer_skyldes_doedsfall, opphoer_skyldes_doedsfall_i_etteroppgjoersaar, mottatt_skatteoppgjoer
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id,
@@ -94,7 +99,8 @@ class EtteroppgjoerForbehandlingDao(
                             kommentar_til_avbrytelse = excluded.kommentar_til_avbrytelse,
                             har_vedtak_av_type_opphoer = excluded.har_vedtak_av_type_opphoer,
                             opphoer_skyldes_doedsfall = excluded.opphoer_skyldes_doedsfall,
-                            opphoer_skyldes_doedsfall_i_etteroppgjoersaar = excluded.opphoer_skyldes_doedsfall_i_etteroppgjoersaar
+                            opphoer_skyldes_doedsfall_i_etteroppgjoersaar = excluded.opphoer_skyldes_doedsfall_i_etteroppgjoersaar,
+                            mottatt_skatteoppgjoer = excluded.mottatt_skatteoppgjoer
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)
@@ -123,6 +129,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setNullableBoolean(18, forbehandling.harVedtakAvTypeOpphoer)
                 statement.setString(19, forbehandling.opphoerSkyldesDoedsfall?.name)
                 statement.setString(20, forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar?.name)
+                statement.setBoolean(21, forbehandling.mottattSkatteoppgjoer)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -328,6 +335,7 @@ class EtteroppgjoerForbehandlingDao(
                 getString(
                     "opphoer_skyldes_doedsfall_i_etteroppgjoersaar",
                 )?.let { enumValueOf<JaNei>(it) },
+            mottattSkatteoppgjoer = getBoolean("mottatt_skatteoppgjoer"),
         )
 
     private fun ResultSet.toSummertePensjonsgivendeInntekter(): SummertePensjonsgivendeInntekter =

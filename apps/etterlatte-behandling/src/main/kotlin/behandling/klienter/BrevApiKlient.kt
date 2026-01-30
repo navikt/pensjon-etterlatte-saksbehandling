@@ -2,11 +2,14 @@ package no.nav.etterlatte.behandling.klienter
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeoutConfig
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsBytes
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.BrevPayload
@@ -151,6 +154,12 @@ interface BrevApiKlient {
         sakId: SakId,
         systembruker: Systembruker,
     )
+
+    suspend fun hentPdf(
+        sakId: SakId,
+        brevID: BrevID,
+        bruker: BrukerTokenInfo,
+    ): Pdf?
 }
 
 class BrevApiKlientObo(
@@ -420,13 +429,38 @@ class BrevApiKlientObo(
     override suspend fun fjernFerdigstillingTilbakekreving(
         tilbakekrevingId: UUID,
         sakId: SakId,
-        systembruker: Systembruker
+        systembruker: Systembruker,
     ) {
         post(
             url = "$resourceUrl/api/brev/behandling/$tilbakekrevingId/tilbakekreving/fjern-ferdigstilt",
-            postBody = {  },
-            onSuccess = {  },
+            postBody = { },
+            onSuccess = { },
             brukerTokenInfo = systembruker,
+        )
+    }
+
+    override suspend fun hentPdf(
+        sakId: SakId,
+        brevID: BrevID,
+        bruker: BrukerTokenInfo,
+    ): Pdf {
+        // Vi kan ikke gjenbruke standard get her, siden vi trenger å potensielt lese ut
+        // bytes fra responsen og det er suspend -- som brekker når vi sender inn en suspend
+        // som parameter til mapBoth på result
+        val resourceResult =
+            downstreamResourceClient.get(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/$brevID/pdf?sakId=$sakId"),
+                brukerTokenInfo = bruker,
+            )
+        return resourceResult.get()?.let { resource ->
+            when (val body = resource.response) {
+                is ByteArray -> Pdf(body)
+                is HttpResponse -> Pdf(body.bodyAsBytes())
+                else -> null
+            }
+        } ?: throw InternfeilException(
+            "Kunne ikke lese ut Pdf-respons som et bytearray " +
+                "i henting av brev med id=$brevID i sak=$sakId",
         )
     }
 
@@ -453,10 +487,11 @@ class BrevApiKlientObo(
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
         timeoutConfig: (HttpTimeoutConfig.() -> Unit)? = null,
+        additionalHeaders: Map<String, String>? = null,
     ): T =
         downstreamResourceClient
             .get(
-                resource = Resource(clientId = clientId, url = url),
+                resource = Resource(clientId = clientId, url = url, additionalHeaders = additionalHeaders),
                 brukerTokenInfo = brukerTokenInfo,
                 timeoutConfig = timeoutConfig,
             ).mapBoth(

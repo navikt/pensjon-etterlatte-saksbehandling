@@ -1,37 +1,60 @@
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
-import { Alert, Box, Heading, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { OpplysningerFraSkatteetaten } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraSkatteetaten'
 import { BrukeroppgittInntektForInnvilgedePerioder } from '~components/etteroppgjoer/components/inntektsopplysninger/BrukeroppgittInntektForInnvilgedePerioder'
 import { OpplysningerFraAInntektSummert } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraAInntektSummert'
+import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { formaterDato } from '~utils/formatering/dato'
+import React from 'react'
 
-export const Inntektsopplysninger = () => {
+export const Inntektsopplysninger = ({ forbehandling }: { forbehandling: EtteroppgjoerForbehandling }) => {
   const { opplysninger } = useEtteroppgjoerForbehandling()
 
-  return (
-    <Box
-      paddingInline="6"
-      paddingBlock="4"
-      background="surface-action-subtle"
-      borderColor="border-action"
-      borderWidth="0 0 0 4"
-    >
-      <VStack gap="8">
-        <Heading size="large" level="2">
-          Inntektsopplysninger
-        </Heading>
-        <OpplysningerFraSkatteetaten inntektFraSkatteetatenSummert={opplysninger.skatt} />
+  const mottattSkatteOppgjoer = forbehandling.mottattSkatteoppgjoer
 
-        {opplysninger.summerteInntekter && (
-          <OpplysningerFraAInntektSummert inntekter={opplysninger.summerteInntekter} />
-        )}
-        {opplysninger.tidligereAvkorting ? (
-          <BrukeroppgittInntektForInnvilgedePerioder
-            avkortingGrunnlag={opplysninger.tidligereAvkorting.avkortingGrunnlag}
-          />
+  return (
+    <>
+      <Box maxWidth="60rem">
+        {mottattSkatteOppgjoer ? (
+          <BodyShort>
+            <b>Skatteoppgjør mottatt:</b> {formaterDato(forbehandling.opprettet)}
+          </BodyShort>
         ) : (
-          <Alert variant="error">Kunne ikke hente eksisterende avkorting i saken.</Alert>
+          <BodyShort>
+            <b>Ikke mottatt skatteoppgjoer:</b> Bruker har ikke skatteoppgjør for etteroppgjørsåret, dette kan være
+            fordi de ikke er kildeskattepliktig eller ikke har registrert kildeskatt i tide, eller de ikke hadde noen
+            utbetalinger i etteroppgjørsåret.
+          </BodyShort>
         )}
-      </VStack>
-    </Box>
+      </Box>
+
+      <Box
+        paddingInline="6"
+        paddingBlock="4"
+        background="surface-action-subtle"
+        borderColor="border-action"
+        borderWidth="0 0 0 4"
+      >
+        <VStack gap="8">
+          <Heading size="large" level="2">
+            Inntektsopplysninger
+          </Heading>
+
+          {opplysninger.skatt && <OpplysningerFraSkatteetaten inntektFraSkatteetatenSummert={opplysninger.skatt} />}
+
+          {opplysninger.summerteInntekter && (
+            <OpplysningerFraAInntektSummert inntekter={opplysninger.summerteInntekter} />
+          )}
+
+          {opplysninger.tidligereAvkorting ? (
+            <BrukeroppgittInntektForInnvilgedePerioder
+              avkortingGrunnlag={opplysninger.tidligereAvkorting.avkortingGrunnlag}
+            />
+          ) : (
+            <Alert variant="error">Kunne ikke hente eksisterende avkorting i saken.</Alert>
+          )}
+        </VStack>
+      </Box>
+    </>
   )
 }

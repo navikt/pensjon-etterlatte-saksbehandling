@@ -528,6 +528,14 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
+    override suspend fun hentPdf(
+        sakId: SakId,
+        brevID: BrevID,
+        bruker: BrukerTokenInfo,
+    ): Pdf {
+        TODO("Not yet implemented")
+    }
+
     private fun opprettetBrevDto(brevId: Long) =
         Brev(
             id = brevId,

@@ -74,7 +74,7 @@ internal val sjekklisteItemsRevurderingBP =
         "Barnet mottar uføretrygd fra Nav - pensjonen er avkortet",
         "Mottatt nye bankopplysninger - sendt oppgave til NØP",
         "Ved vergemål - sjekk at riktig verge er registrert, og at brev/vedtak blir sendt til riktig person",
-        "Bruker mottar AFP livsvarig. Registreres som inntekt (se tjenestepensjon i Pesys og A-ordningen)",
+        "Utbetalt bidragsforskudd som skal trekkes inn i etterbetaling - sendt oppgave til Bidrag",
     )
 
 internal val sjekklisteItemsRevurderingOMS =

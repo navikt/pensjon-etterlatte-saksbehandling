@@ -122,7 +122,7 @@ class SkatteoppgjoerHendelserService(
         hendelse: SkatteoppgjoerHendelse,
         sak: Sak,
     ) {
-        if (etteroppgjoer.venterPaaSkatteoppgjoer()) {
+        if (etteroppgjoer.venterPaaSkatteoppgjoer() || etteroppgjoer.mottattSkatteoppgjoer()) {
             logger.info(
                 "Vi har mottatt hendelse ${hendelse.hendelsetype} fra skatt med sekvensnummer=" +
                     "${hendelse.sekvensnummer} om tilgjengelig skatteoppgjør " +

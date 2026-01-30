@@ -191,3 +191,6 @@ export function tilBeregningsMetodeBeregningsgrunnlag(
     beregningsMetode: formdata.beregningsMetode,
   }
 }
+export interface Grunnbeloep {
+  grunnbeløp: number
+}

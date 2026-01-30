@@ -1,7 +1,9 @@
 package no.nav.etterlatte.brev
 
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -86,7 +88,7 @@ fun Route.brevRoute(service: BrevService) {
                             pdf
                         }
                     }
-                call.respond(pdf)
+                call.respondBytes(pdf, contentType = ContentType.Application.Pdf)
             }
         }
 

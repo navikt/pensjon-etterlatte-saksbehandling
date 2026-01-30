@@ -5,7 +5,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.HttpTimeoutConfig
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.accept
@@ -17,12 +16,15 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsBytes
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentLength
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.navConsumerId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory
 class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
     private val httpClient: HttpClient = defaultHttpClient,
+    private val options: Options = Options(),
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -135,25 +138,41 @@ class DownstreamResourceClient(
             onSuccess = { response ->
                 resource.addStatusCode(response.status)
                 when {
-                    response.status == HttpStatusCode.NoContent -> Ok(null)
+                    response.status == HttpStatusCode.NoContent -> {
+                        Ok(null)
+                    }
+
                     response.status.isSuccess() -> {
                         if (response.harContentType(ContentType.Application.Json)) {
                             Ok(response.body<JsonNode>())
                         } else if (response.harContentType(ContentType.Text.Plain)) {
                             Ok(response.body<String>())
+                        } else if (response.harContentType(ContentType.Application.Pdf)) {
+                            if ((response.contentLength() ?: options.maxPdfSizeBytes) > options.maxPdfSizeBytes) {
+                                throw InternfeilException(
+                                    "Pdf-respons for stor: mottok ${response.contentLength()}, men aksepterer maks ${options.maxPdfSizeBytes} bytes",
+                                )
+                            } else {
+                                Ok(response.bodyAsBytes())
+                            }
                         } else {
                             if (response.contentLength() == 0L) {
                                 logger.info("Mottok tom content type${response.contentType()}")
+                                Ok(null)
                             } else {
                                 logger.warn(
-                                    "Mottok uhåndtert content-type: ${response.contentType()} lengde på innhold: ${response.contentLength()} ",
+                                    "Mottok uhåndtert content-type: ${response.contentType()} (rå content-type er" +
+                                        " ${response.headers[HttpHeaders.ContentType]}), " +
+                                        "lengde på innhold: ${response.contentLength()} ",
                                 )
+                                Ok(response)
                             }
-                            Ok(null)
                         }
                     }
 
-                    else -> response.toResponseException()
+                    else -> {
+                        response.toResponseException()
+                    }
                 }
             },
             onFailure = { error -> error.toErr(resource.url) },
@@ -165,4 +184,10 @@ class DownstreamResourceClient(
      */
     private fun HttpMessage?.harContentType(contentType: ContentType): Boolean =
         this?.contentType()?.withoutParameters() == contentType.withoutParameters()
+
+    data class Options(
+        val maxPdfSizeBytes: Long = 20L * MEGABYTE,
+    )
 }
+
+const val MEGABYTE = 1024 * 1024

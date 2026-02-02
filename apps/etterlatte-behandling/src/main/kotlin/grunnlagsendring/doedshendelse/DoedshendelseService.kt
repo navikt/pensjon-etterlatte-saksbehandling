@@ -3,7 +3,6 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -133,7 +132,7 @@ class DoedshendelseService(
         }
         if (avdoed.doedsdato != null &&
             sivilstand.gyldigFraOgMed != null &&
-            sivilstand.gyldigFraOgMed!!.isBefore(avdoed.doedsdato!!.verdi.minusYears(6))
+            sivilstand.gyldigFraOgMed!!.isBefore(avdoed.doedsdato!!.verdi.minusYears(5))
         ) {
             return false
         }

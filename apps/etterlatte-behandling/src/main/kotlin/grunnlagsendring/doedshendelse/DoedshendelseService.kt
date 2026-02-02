@@ -127,16 +127,15 @@ class DoedshendelseService(
         sivilstand: Sivilstand,
         avdoed: PersonDoedshendelseDto,
     ): Boolean {
-        if (sivilstand.sivilstatus in listOf(Sivilstatus.GIFT, Sivilstatus.REGISTRERT_PARTNER)) {
-            return true
-        }
-        if (avdoed.doedsdato != null &&
-            sivilstand.gyldigFraOgMed != null &&
-            sivilstand.gyldigFraOgMed!!.isBefore(avdoed.doedsdato!!.verdi.minusYears(5))
-        ) {
-            return false
-        }
-        return true
+        val skiltMerEnn5AarFoerDoedsdato =
+            (
+                sivilstand.sivilstatus in listOf(Sivilstatus.SKILT, Sivilstatus.SKILT_PARTNER) &&
+                    avdoed.doedsdato != null &&
+                    sivilstand.gyldigFraOgMed != null &&
+                    sivilstand.gyldigFraOgMed!!.isBefore(avdoed.doedsdato!!.verdi.minusYears(5))
+            )
+
+        return !skiltMerEnn5AarFoerDoedsdato
     }
 
     private fun harLagretUkjentBeroert(avdoed: PersonDoedshendelseDto): Boolean {

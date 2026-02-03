@@ -33,7 +33,7 @@
     "slate-dom": "^0.119.0",
     "slate-history": "^0.113.1",
     "slate-react": "^0.120.0",
-    "styled-components": "^6.1.19"
+    "styled-components": "^6.3.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",

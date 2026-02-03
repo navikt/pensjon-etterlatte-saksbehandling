@@ -10,21 +10,22 @@ import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { TilbakestillOgOpprettNyForbehandling } from '~components/person/sakOgBehandling/TilbakestillOgOpprettNyForbehandling'
 
 const steg = [
-  { index: 1, status: ['VENTER_PAA_SKATTEOPPGJOER'], text: () => 'Venter på skatteoppgjøret' },
-  {
-    index: 2,
-    status: ['MOTTATT_SKATTEOPPGJOER', 'MANGLER_SKATTEOPPGJOER'],
-    text: (status: string) => (status === 'MANGLER_SKATTEOPPGJOER' ? 'Mangler skatteoppgjør' : 'Mottatt skatteoppgjør'),
-  },
-  { index: 3, status: ['UNDER_FORBEHANDLING'], text: () => 'Etteroppgjøret er under forbehandling' },
-  { index: 4, status: ['VENTER_PAA_SVAR'], text: () => 'Varselbrev sendt, venter på svar fra bruker' },
-  { index: 5, status: ['UNDER_REVURDERING'], text: () => 'Behandler mottatt svar fra bruker' },
-  { index: 6, status: ['FERDIGSTILT'], text: () => 'Etteroppgjøret er ferdigstilt' },
+  { index: 1, status: 'VENTER_PAA_SKATTEOPPGJOER', text: () => 'Venter på skatteoppgjøret' },
+  { index: 2, status: 'MOTTATT_SKATTEOPPGJOER', text: () => 'Mottatt skatteoppgjør' },
+  { index: 3, status: 'MANGLER_SKATTEOPPGJOER', text: () => 'Mangler skatteoppgjør' },
+  { index: 4, status: 'UNDER_FORBEHANDLING', text: () => 'Etteroppgjøret er under forbehandling' },
+  { index: 5, status: 'VENTER_PAA_SVAR', text: () => 'Varselbrev sendt, venter på svar fra bruker' },
+  { index: 6, status: 'UNDER_REVURDERING', text: () => 'Behandler mottatt svar fra bruker' },
+  { index: 7, status: 'FERDIGSTILT', text: () => 'Etteroppgjøret er ferdigstilt' },
 ]
 
-const getIcon = (current: number, target: number) => {
-  if (current > target) return <CheckmarkCircleIcon />
-  if (current === target) return <ArrowRightIcon />
+const getIcon = (currentStatus: string, stepStatus: string, stepIndex: number) => {
+  if (stepStatus === 'MANGLER_SKATTEOPPGJOER') {
+    return currentStatus === 'MANGLER_SKATTEOPPGJOER' ? <ArrowRightIcon /> : <CircleIcon />
+  }
+  const currentStep = steg.find((s) => s.status === currentStatus)?.index ?? 0
+  if (currentStep > stepIndex) return <CheckmarkCircleIcon />
+  if (currentStep === stepIndex) return <ArrowRightIcon />
   return <CircleIcon />
 }
 
@@ -47,7 +48,8 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
   }
 
   const etteroppgjoer = hentEtteroppgjoerResponse.data
-  const currentIndex = steg.find((s) => s.status === etteroppgjoer.status)?.index ?? 0
+  const currentStatus = etteroppgjoer.status
+  const currentIndex = steg.find((s) => s.status === currentStatus)?.index ?? 0
 
   return (
     <VStack gap="4">
@@ -58,7 +60,7 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
           {steg.map(({ status, text, index: stepIndex }) => (
             <List.Item
               key={status}
-              icon={getIcon(currentIndex, stepIndex)}
+              icon={getIcon(currentStatus, status, stepIndex)}
               style={{ color: currentIndex >= stepIndex ? 'black' : 'gray' }}
             >
               {text()}

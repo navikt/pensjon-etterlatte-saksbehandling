@@ -55,7 +55,7 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
               icon={getIcon(currentIndex, idx)}
               style={{ color: currentIndex >= idx ? 'black' : 'gray' }}
             >
-              {step.text(etteroppgjoer.status)}
+              {step.text()}
             </List.Item>
           ))}
         </List>

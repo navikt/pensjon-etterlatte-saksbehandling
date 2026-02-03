@@ -983,7 +983,7 @@ internal class ApplicationContext(
             oppdaterSkatteoppgjoerIkkeMottattJobService = oppdaterSkatteoppgjoerIkkeMottattJobService,
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.MINUTES),
+            interval = Duration.of(5, ChronoUnit.MINUTES),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

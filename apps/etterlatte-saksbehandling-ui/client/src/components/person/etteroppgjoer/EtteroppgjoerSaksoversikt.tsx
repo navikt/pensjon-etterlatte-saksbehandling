@@ -10,12 +10,16 @@ import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { TilbakestillOgOpprettNyForbehandling } from '~components/person/sakOgBehandling/TilbakestillOgOpprettNyForbehandling'
 
 const steg = [
-  { index: 1, status: 'VENTER_PAA_SKATTEOPPGJOER', text: () => 'Venter på skatteoppgjøret' },
-  { index: 2, status: 'MOTTATT_SKATTEOPPGJOER', text: () => 'Mottatt skatteoppgjør' },
-  { index: 3, status: 'UNDER_FORBEHANDLING', text: () => 'Etteroppgjøret er under forbehandling' },
-  { index: 4, status: 'VENTER_PAA_SVAR', text: () => 'Varselbrev sendt, venter på svar fra bruker' },
-  { index: 5, status: 'UNDER_REVURDERING', text: () => 'Behandler mottatt svar fra bruker' },
-  { index: 6, status: 'FERDIGSTILT', text: () => 'Etteroppgjøret er ferdigstilt' },
+  { index: 1, status: ['VENTER_PAA_SKATTEOPPGJOER'], text: () => 'Venter på skatteoppgjøret' },
+  {
+    index: 2,
+    status: ['MOTTATT_SKATTEOPPGJOER', 'MANGLER_SKATTEOPPGJOER'],
+    text: (status: string) => (status === 'MANGLER_SKATTEOPPGJOER' ? 'Mangler skatteoppgjør' : 'Mottatt skatteoppgjør'),
+  },
+  { index: 3, status: ['UNDER_FORBEHANDLING'], text: () => 'Etteroppgjøret er under forbehandling' },
+  { index: 4, status: ['VENTER_PAA_SVAR'], text: () => 'Varselbrev sendt, venter på svar fra bruker' },
+  { index: 5, status: ['UNDER_REVURDERING'], text: () => 'Behandler mottatt svar fra bruker' },
+  { index: 6, status: ['FERDIGSTILT'], text: () => 'Etteroppgjøret er ferdigstilt' },
 ]
 
 const getIcon = (current: number, target: number) => {

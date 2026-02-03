@@ -534,7 +534,7 @@ class EtteroppgjoerForbehandlingService(
                 innvilgetPeriode = innvilgetPeriode,
                 sisteIverksatteBehandling = sisteAvkortingOgOpphoer.sisteBehandlingMedAvkorting,
                 harVedtakAvTypeOpphoer = sisteAvkortingOgOpphoer.opphoerFom != null,
-                mottattSkatteoppgjoer = etteroppgjoer.status == EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
+                mottattSkatteoppgjoer = etteroppgjoer.status != EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
             )
     }
 

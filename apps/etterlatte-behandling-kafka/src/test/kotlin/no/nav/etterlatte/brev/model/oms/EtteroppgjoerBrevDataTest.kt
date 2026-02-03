@@ -1,12 +1,15 @@
 package no.nav.etterlatte.brev.model.oms
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.mockk
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertInstanceOf
 import java.time.Month
@@ -37,6 +40,7 @@ class EtteroppgjoerBrevDataTest {
                         inntekt = Kroner(4444),
                         pensjonsgivendeInntektHeleAaret = Kroner(5000),
                     ),
+                mottattSkatteoppgjoer = true,
             )
 
         val json = brevData.toJson()
@@ -50,5 +54,16 @@ class EtteroppgjoerBrevDataTest {
         val json = vedleggData.toJson()
         val gjenskapt = objectMapper.readValue<BrevVedleggRedigerbarNy>(json)
         assertInstanceOf<EtteroppgjoerBrevData.BeregningsVedleggInnhold>(gjenskapt.data)
+    }
+
+    @Test
+    fun `skal kaste feil hvis mottattSkatteoppgjoer er true men summertPgi er null`() {
+        assertThrows(InternfeilException::class.java) {
+            EtteroppgjoerBrevGrunnlag.fra(
+                grunnlag = mockk(relaxed = true),
+                mottattSkatteoppgjoer = true,
+                summertPensjonsgivendeInntekt = null,
+            )
+        }
     }
 }

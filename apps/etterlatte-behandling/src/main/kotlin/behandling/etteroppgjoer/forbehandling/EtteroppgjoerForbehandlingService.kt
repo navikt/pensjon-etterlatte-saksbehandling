@@ -14,7 +14,6 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -237,8 +236,8 @@ class EtteroppgjoerForbehandlingService(
             forbehandling = forbehandling,
             opplysninger =
                 EtteroppgjoerOpplysninger(
-                    skatt = pensjonsgivendeInntekt,
-                    summerteInntekter = summerteInntekter,
+                    summertPgi = pensjonsgivendeInntekt,
+                    summertAInntekt = summerteInntekter,
                     tidligereAvkorting = avkorting?.avkortingMedForventaInntekt,
                 ),
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
@@ -535,7 +534,7 @@ class EtteroppgjoerForbehandlingService(
                 innvilgetPeriode = innvilgetPeriode,
                 sisteIverksatteBehandling = sisteAvkortingOgOpphoer.sisteBehandlingMedAvkorting,
                 harVedtakAvTypeOpphoer = sisteAvkortingOgOpphoer.opphoerFom != null,
-                mottattSkatteoppgjoer = etteroppgjoer.status == EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
+                mottattSkatteoppgjoer = etteroppgjoer.status != EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
             )
     }
 

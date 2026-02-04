@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
@@ -29,7 +30,7 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
             return
         }
 
-        logger.info("Oppdatere saker med skatteoppgjør som ikke er mottatt")
+        logger.info("Periodisk jobb for å oppdatere saker med ikke mottatt skatteoppgjør og opprette forbehandlinger")
         runBlocking {
             oppdaterSkatteoppgjoerIkkeMottatt()
         }
@@ -37,20 +38,26 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
 
     fun oppdaterSkatteoppgjoerIkkeMottatt() {
         val relevanteSaker: List<SakId> =
-            etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
-                inntektsaar = ETTEROPPGJOER_AAR,
-                antall = 200,
-                etteroppgjoerFilter = EtteroppgjoerFilter.ALLE_SAKER,
-                status = EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-            )
+            inTransaction {
+                etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
+                    inntektsaar = ETTEROPPGJOER_AAR,
+                    antall = 200,
+                    etteroppgjoerFilter = EtteroppgjoerFilter.ALLE_SAKER,
+                    status = EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                )
+            }
 
         relevanteSaker.map { sakId ->
             try {
-                etteroppgjoerService.oppdaterEtteroppgjoerStatus(sakId, ETTEROPPGJOER_AAR, EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER)
-                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
+                inTransaction {
+                    etteroppgjoerService.oppdaterEtteroppgjoerStatus(sakId, ETTEROPPGJOER_AAR, EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER)
+                    etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
+                }
             } catch (e: Error) {
                 logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
             }
         }
+
+        logger.info("Opprettet ${relevanteSaker.size} oppgaver for opprettelse av forbehandling hvor vi ikke har mottatt skatteoppgjør")
     }
 }

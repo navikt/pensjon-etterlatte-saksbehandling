@@ -225,7 +225,7 @@ data class DetaljertForbehandlingDto(
 )
 
 data class EtteroppgjoerOpplysninger(
-    val skatt: SummertePensjonsgivendeInntekter?,
-    val summerteInntekter: SummerteInntekterAOrdningen?,
+    val summertPgi: SummertePensjonsgivendeInntekter?,
+    val summertAInntekt: SummerteInntekterAOrdningen?,
     val tidligereAvkorting: AvkortingDto?,
 )

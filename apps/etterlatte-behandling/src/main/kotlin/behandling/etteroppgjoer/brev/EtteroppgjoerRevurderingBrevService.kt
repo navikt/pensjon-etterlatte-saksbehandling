@@ -106,14 +106,9 @@ class EtteroppgjoerRevurderingBrevService(
     ): BrevRequest =
         coroutineScope {
             val vedtakDeferred = async { vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo) }
-
-            val vedtak =
-                vedtakDeferred.await()
-                    ?: throw InternfeilException("Fant ikke vedtak for behandlingId=$behandlingId")
-
+            val vedtak = vedtakDeferred.await() ?: throw InternfeilException("Fant ikke vedtak for behandlingId=$behandlingId")
             val behandling =
                 behandlingService.hentBehandling(behandlingId) ?: throw InternfeilException("Fant ikke behandlingId=$behandlingId")
-
             val avkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
             val sisteUtbetaltBeloep = avkorting.perioder.maxBy { it.periode.fom }.ytelseEtterAvkorting
 
@@ -140,10 +135,10 @@ class EtteroppgjoerRevurderingBrevService(
                     ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
             val sak = detaljertForbehandling.forbehandling.sak
-
             val forhaandsvarselBrev = hentForhaandsvarsel(detaljertForbehandling, behandlingId, brukerTokenInfo)
-
             val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+            val summertPensjonsgivendeInntekt = detaljertForbehandling.opplysninger.summertPgi?.summertInntekt
+            val mottattSkatteoppgjoer = detaljertForbehandling.forbehandling.mottattSkatteoppgjoer
 
             BrevRequest(
                 sak = sak,
@@ -164,9 +159,15 @@ class EtteroppgjoerRevurderingBrevService(
                         resultatType = beregnetEtteroppgjoerResultat.resultatType,
                         stoenad = Kroner(beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
                         faktiskStoenad = Kroner(beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
-                        grunnlag = EtteroppgjoerBrevGrunnlag.fra(faktiskInntekt, detaljertForbehandling.opplysninger.skatt?.summertInntekt),
+                        grunnlag =
+                            EtteroppgjoerBrevGrunnlag.fra(
+                                faktiskInntekt,
+                                summertPensjonsgivendeInntekt,
+                                mottattSkatteoppgjoer,
+                            ),
                         rettsgebyrBeloep = Kroner(beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                         harOpphoer = detaljertForbehandling.forbehandling.harVedtakAvTypeOpphoer ?: etteroppgjoer.harOpphoer,
+                        mottattSkatteoppgjoer = detaljertForbehandling.forbehandling.mottattSkatteoppgjoer,
                     ),
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(

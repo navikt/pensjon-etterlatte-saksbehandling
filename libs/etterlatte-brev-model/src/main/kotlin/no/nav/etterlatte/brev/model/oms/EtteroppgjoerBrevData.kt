@@ -40,6 +40,7 @@ object EtteroppgjoerBrevData {
         val faktiskStoenad: Kroner,
         val avviksBeloep: Kroner,
         val grunnlag: EtteroppgjoerBrevGrunnlag,
+        val mottattSkatteoppgjoer: Boolean,
     ) : BrevFastInnholdData() {
         override val type: String = "OMS_EO_FORHAANDSVARSEL"
 
@@ -90,6 +91,7 @@ object EtteroppgjoerBrevData {
         val grunnlag: EtteroppgjoerBrevGrunnlag,
         val rettsgebyrBeloep: Kroner,
         val harOpphoer: Boolean,
+        val mottattSkatteoppgjoer: Boolean,
     ) : BrevFastInnholdData() {
         override val type: String = "OMS_EO_VEDTAK"
 
@@ -128,18 +130,22 @@ data class EtteroppgjoerBrevGrunnlag(
     val afp: Kroner,
     val utlandsinntekt: Kroner,
     val inntekt: Kroner,
-    val pensjonsgivendeInntektHeleAaret: Kroner,
+    val pensjonsgivendeInntektHeleAaret: Kroner?,
 ) {
     companion object {
         fun fra(
             grunnlag: FaktiskInntektDto,
-            pensjonsgivendeInntektHeleAaret: Int?,
+            summertPensjonsgivendeInntekt: Int?,
+            mottattSkatteoppgjoer: Boolean,
         ): EtteroppgjoerBrevGrunnlag {
             krevIkkeNull(grunnlag.inntektInnvilgetPeriode) {
                 "Kan ikke vise beregningstabell uten summert faktisk inntekt"
             }
 
-            val pgi = pensjonsgivendeInntektHeleAaret ?: throw InternfeilException("Mangler pensjonsgivende inntekt for hele året")
+            if (mottattSkatteoppgjoer) {
+                summertPensjonsgivendeInntekt
+                    ?: throw InternfeilException("Mangler summertPensjonsgivendeInntekt for behandling som skal ha mottatt skatteoppgjoer")
+            }
 
             return EtteroppgjoerBrevGrunnlag(
                 fom = grunnlag.fom,
@@ -150,7 +156,7 @@ data class EtteroppgjoerBrevGrunnlag(
                 afp = Kroner(grunnlag.afp),
                 utlandsinntekt = Kroner(grunnlag.utlandsinntekt),
                 inntekt = Kroner(grunnlag.inntektInnvilgetPeriode!!),
-                pensjonsgivendeInntektHeleAaret = Kroner(pgi),
+                pensjonsgivendeInntektHeleAaret = summertPensjonsgivendeInntekt?.let { Kroner(it) },
             )
         }
     }

@@ -158,7 +158,7 @@ class EtteroppgjoerForbehandlingBrevService(
                 )
             }
 
-            val pensjonsgivendeInntekt = detaljertForbehandling.opplysninger.skatt
+            val pensjonsgivendeInntekt = detaljertForbehandling.opplysninger.summertPgi
 
             val sisteIverksatteBehandling =
                 behandlingService.hentBehandling(detaljertForbehandling.forbehandling.sisteIverksatteBehandlingId)
@@ -192,14 +192,14 @@ class EtteroppgjoerForbehandlingBrevService(
         }
 
     private fun brevRequestDataMapper(
-        data: DetaljertForbehandlingDto,
+        detaljertForbehandling: DetaljertForbehandlingDto,
         sisteIverksatteBehandling: Behandling,
         pensjonsgivendeInntekt: SummertePensjonsgivendeInntekter?,
     ): EtteroppgjoerBrevRequestData {
-        krevIkkeNull(data.beregnetEtteroppgjoerResultat) {
+        krevIkkeNull(detaljertForbehandling.beregnetEtteroppgjoerResultat) {
             "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
         }
-        if (data.beregnetEtteroppgjoerResultat.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
+        if (detaljertForbehandling.beregnetEtteroppgjoerResultat.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
             throw UgyldigForespoerselException(
                 "SKAL_IKKE_HA_BREV",
                 "Resultatet i etteroppgjøret er ingen endring og ingen utbetaling, så bruker skal ikke ha et varselbrev.",
@@ -208,38 +208,45 @@ class EtteroppgjoerForbehandlingBrevService(
 
         val bosattUtland = sisteIverksatteBehandling.erBosattUtland()
         val grunnlag =
-            data.faktiskInntekt
+            detaljertForbehandling.faktiskInntekt
                 ?: throw InternfeilException("Etteroppgjør mangler faktisk inntekt og kan ikke vises i brev")
 
         // TODO: usikker om dette blir rett, følge opp ifm testing
         val norskInntekt = pensjonsgivendeInntekt != null && pensjonsgivendeInntekt.summertInntekt > 0
+
+        val mottattSkatteoppgjoer = detaljertForbehandling.forbehandling.mottattSkatteoppgjoer
+        val summertPensjonsgivendeInntekt = detaljertForbehandling.opplysninger.summertPgi?.summertInntekt
 
         return EtteroppgjoerBrevRequestData(
             redigerbar =
                 EtteroppgjoerBrevData.ForhaandsvarselInnhold(
                     bosattUtland = bosattUtland,
                     norskInntekt = norskInntekt,
-                    etteroppgjoersAar = data.forbehandling.aar,
-                    rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
-                    resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
-                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                    etteroppgjoersAar = detaljertForbehandling.forbehandling.aar,
+                    rettsgebyrBeloep = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
+                    resultatType = detaljertForbehandling.beregnetEtteroppgjoerResultat.resultatType,
+                    avviksBeloep = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.differanse.toInt()),
                     sak = sisteIverksatteBehandling.sak,
                 ),
             innhold =
                 EtteroppgjoerBrevData.Forhaandsvarsel(
                     bosattUtland = bosattUtland,
                     norskInntekt = norskInntekt,
-                    etteroppgjoersAar = data.forbehandling.aar,
-                    rettsgebyrBeloep = Kroner(data.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
-                    resultatType = data.beregnetEtteroppgjoerResultat.resultatType,
-                    stoenad = Kroner(data.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
-                    faktiskStoenad = Kroner(data.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
-                    avviksBeloep = Kroner(data.beregnetEtteroppgjoerResultat.differanse.toInt()),
-                    grunnlag = EtteroppgjoerBrevGrunnlag.fra(grunnlag, data.opplysninger.skatt?.summertInntekt),
+                    etteroppgjoersAar = detaljertForbehandling.forbehandling.aar,
+                    rettsgebyrBeloep = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
+                    resultatType = detaljertForbehandling.beregnetEtteroppgjoerResultat.resultatType,
+                    stoenad = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
+                    faktiskStoenad = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
+                    avviksBeloep = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                    grunnlag = EtteroppgjoerBrevGrunnlag.fra(grunnlag, summertPensjonsgivendeInntekt, mottattSkatteoppgjoer),
+                    mottattSkatteoppgjoer = mottattSkatteoppgjoer,
                 ),
             vedlegg =
                 listOf(
-                    EtteroppgjoerBrevData.beregningsVedlegg(etteroppgjoersAar = data.forbehandling.aar, erVedtak = false),
+                    EtteroppgjoerBrevData.beregningsVedlegg(
+                        etteroppgjoersAar = detaljertForbehandling.forbehandling.aar,
+                        erVedtak = false,
+                    ),
                 ),
             sak = sisteIverksatteBehandling.sak,
         )

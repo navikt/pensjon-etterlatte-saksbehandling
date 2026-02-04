@@ -601,7 +601,7 @@ internal class ApplicationContext(
     val etteroppgjoerDataService = EtteroppgjoerDataService(behandlingService, featureToggleService, vedtakKlient, beregningKlient)
 
     val doedshendelseService =
-        DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService, gosysOppgaveKlient, ukjentBeroertDao)
+        DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, gosysOppgaveKlient, ukjentBeroertDao)
 
     val inntektsjusteringSelvbetjeningService =
         InntektsjusteringSelvbetjeningService(
@@ -982,8 +982,8 @@ internal class ApplicationContext(
         OppdaterSkatteoppgjoerIkkeMottattJob(
             oppdaterSkatteoppgjoerIkkeMottattJobService = oppdaterSkatteoppgjoerIkkeMottattJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(20, ChronoUnit.MINUTES),
+            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(5, ChronoUnit.MINUTES),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

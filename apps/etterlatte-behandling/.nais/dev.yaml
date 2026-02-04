@@ -189,7 +189,7 @@ spec:
           namespace: nais-system
         - application: navansatt
           namespace: pensjon-saksbehandling
-        - application: sigrun
+        - application: sigrun-q2
           namespace: team-inntekt
           cluster: dev-fss
       external:

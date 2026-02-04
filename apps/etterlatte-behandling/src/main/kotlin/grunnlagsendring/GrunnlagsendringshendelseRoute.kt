@@ -9,7 +9,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -169,13 +168,4 @@ enum class VedtaksType {
     INNV,
     ENDR,
     OPPH,
-}
-
-internal enum class GrunnlagsendringshendelseFeatureToggle(
-    private val key: String,
-) : FeatureToggle {
-    LOGG_MANGLENDE_EKTEFELLE_IDENT("logg-manglende-ektefelle-ident"),
-    ;
-
-    override fun key(): String = key
 }

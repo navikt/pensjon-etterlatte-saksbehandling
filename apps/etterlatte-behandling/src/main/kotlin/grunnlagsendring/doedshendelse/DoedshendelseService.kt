@@ -79,27 +79,18 @@ class DoedshendelseService(
         barnUtenIdent: List<PersonUtenIdent>,
         ektefellerUtenIdent: List<Sivilstand>,
     ) {
-        val relevanteEktefeller =
-            ektefellerUtenIdent
-                .filter { erRelevantSivilstand(it, avdoed) }
-        if (ektefellerUtenIdent.isNotEmpty() && relevanteEktefeller.isEmpty()) {
-            sikkerLogg.info(
-                "Ektefelle-relasjoner funnet irrelevante for avdød ${avdoed.foedselsnummer.verdi.value}. " +
-                    ektefellerUtenIdent.toJson(),
-            )
-        }
-
-        if (barnUtenIdent.size + relevanteEktefeller.size > 0) {
+        if (barnUtenIdent.size + ektefellerUtenIdent.size > 0) {
             val msgBeroerte =
                 listOfNotNull(
                     "barn".takeIf { barnUtenIdent.isNotEmpty() },
-                    "ektefelle".takeIf { relevanteEktefeller.isNotEmpty() },
+                    "ektefelle".takeIf { ektefellerUtenIdent.isNotEmpty() },
                 ).joinToString(" og ")
+
             loggManglendeIdent(avdoed, msgBeroerte)
 
             if (!harLagretUkjentBeroert(avdoed)) {
                 val sakType =
-                    if (relevanteEktefeller.isNotEmpty()) {
+                    if (ektefellerUtenIdent.isNotEmpty()) {
                         SakType.OMSTILLINGSSTOENAD
                     } else {
                         SakType.BARNEPENSJON
@@ -121,21 +112,6 @@ class DoedshendelseService(
                 UkjentBeroert(avdoed.foedselsnummer.verdi.value, barnUtenIdent, ektefellerUtenIdent),
             )
         }
-    }
-
-    private fun erRelevantSivilstand(
-        sivilstand: Sivilstand,
-        avdoed: PersonDoedshendelseDto,
-    ): Boolean {
-        val skiltMerEnn5AarFoerDoedsdato =
-            (
-                sivilstand.sivilstatus in listOf(Sivilstatus.SKILT, Sivilstatus.SKILT_PARTNER) &&
-                    avdoed.doedsdato != null &&
-                    sivilstand.gyldigFraOgMed != null &&
-                    sivilstand.gyldigFraOgMed!!.isBefore(avdoed.doedsdato!!.verdi.minusYears(5))
-            )
-
-        return !skiltMerEnn5AarFoerDoedsdato
     }
 
     private fun harLagretUkjentBeroert(avdoed: PersonDoedshendelseDto): Boolean {

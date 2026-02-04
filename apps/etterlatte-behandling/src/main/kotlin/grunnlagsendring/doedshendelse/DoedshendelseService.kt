@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import org.slf4j.LoggerFactory
@@ -328,14 +327,8 @@ class DoedshendelseService(
         avdoed: PersonDoedshendelseDto,
         msgBeroerte: String,
     ) {
-        val avdoedFnr = avdoed.foedselsnummer.verdi
-        sikkerLogg.info(
-            """
-            OBS! Det er registrert $msgBeroerte til avdøde ${avdoedFnr.value} uten ident.
-            Sivilstand-liste: ${avdoed.sivilstand?.toJson()}. 
-            Barn uten ident: ${avdoed.avdoedesBarnUtenIdent?.toJson()}.
-            """.trimIndent(),
-        )
+        val avdoedFnr = avdoed.foedselsnummer.verdi.value
+        sikkerLogg.info("Det er registrert $msgBeroerte til avdøde $avdoedFnr uten ident")
     }
 }
 

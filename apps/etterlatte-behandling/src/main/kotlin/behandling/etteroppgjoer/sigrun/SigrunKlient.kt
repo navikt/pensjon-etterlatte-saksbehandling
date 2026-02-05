@@ -5,6 +5,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -63,14 +64,16 @@ class SigrunKlientImpl(
         }
 
         return retry {
-            httpClient.get("$url/api/v1/pensjonsgivendeinntektforfolketrygden") {
+            httpClient.post("$url/api/v1/pensjonsgivendeinntektforfolketrygden") {
                 navConsumerId("etterlatte-behandling")
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
-                setBody(body)
-                headers.append("Nav-Personident", ident)
-                headers.append("inntektsaar", inntektsaar.toString())
-                headers.append("rettighetspakke", SigrunRettighetspakke.OMSTILLINGSSTOENAD.rettighetspakke)
+                setBody(
+                    PensjonsgivendeInntektRequest(
+                        inntektsaar = inntektsaar,
+                        personident = ident,
+                    ),
+                )
             }
         }.let {
             when (it) {
@@ -119,6 +122,7 @@ class SigrunKlientImpl(
                         throw InternfeilException("Feilet i JSON-parsing. Se sikkerlogg")
                     }
                 }
+
                 is RetryResult.Failure -> {
                     sikkerlogg.error("Kall mot Sigrun for henting av Hendelsesliste feilet.", it.samlaExceptions())
                     throw InternfeilException("Kall mot Sigrun for henting av Hendelsesliste feilet. Se sikkerlogg")
@@ -146,7 +150,10 @@ class SigrunKlientImpl(
             }
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content.body<HendelserSekvensnummerFraSkatt>().sekvensnummer
+                is RetryResult.Success -> {
+                    it.content.body<HendelserSekvensnummerFraSkatt>().sekvensnummer
+                }
+
                 is RetryResult.Failure -> {
                     sikkerlogg.error("Kall mot Sigrun for henting av sekvensnummer feilet", it.samlaExceptions())
                     throw InternfeilException("Kall mot Sigrun for henting av sekvensnummer feilet")
@@ -182,3 +189,11 @@ data class PensjonsgivendeInntektResponse(
     val pensjonsgivendeInntektAvNaeringsinntekt: Int?,
     val pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage: Int?,
 )
+
+data class PensjonsgivendeInntektRequest(
+    val inntektsaar: Int,
+    val personident: String,
+) {
+    @Suppress("unused")
+    val rettighetspakke = SigrunRettighetspakke.OMSTILLINGSSTOENAD.rettighetspakke
+}

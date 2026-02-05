@@ -56,8 +56,8 @@
       <env name="PDL_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
       <env name="PEN_CLIENT_ID" value="ddd52335-cfe8-4ee9-9e68-416a5ab26efa" />
       <env name="PEN_URL" value="https://pensjon-pen-q2.dev-fss-pub.nais.io/api" />
-      <env name="SIGRUN_OUTBOUND_SCOPE" value="api://dev-fss.team-inntekt.sigrun-q4/.default" />
-      <env name="SIGRUN_URL" value="https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/sigrun-ske" />
+      <env name="SIGRUN_OUTBOUND_SCOPE" value="api://dev-fss.team-inntekt.sigrun-q2/.default" />
+      <env name="SIGRUN_URL" value="https://sigrun-q2.dev-fss-pub.nais.io" />
       <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />

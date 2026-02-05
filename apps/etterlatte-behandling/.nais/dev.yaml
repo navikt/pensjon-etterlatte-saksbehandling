@@ -160,9 +160,9 @@ spec:
     - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
       value: api://dev-fss.team-inntekt.ikomp-q2/.default
     - name: SIGRUN_URL
-      value: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/sigrun-ske
+      value: https://sigrun-q2.dev-fss-pub.nais.io
     - name: SIGRUN_OUTBOUND_SCOPE
-      value: api://dev-fss.team-inntekt.sigrun-q4/.default
+      value: api://dev-fss.team-inntekt.sigrun-q2/.default
     - name: ARBEID_OG_INNTEKT_URL
       value: https://arbeid-og-inntekt-q2.dev-fss-pub.nais.io
 
@@ -189,6 +189,9 @@ spec:
           namespace: nais-system
         - application: navansatt
           namespace: pensjon-saksbehandling
+        - application: sigrun-q2
+          namespace: team-inntekt
+          cluster: dev-fss
       external:
         - host: kodeverk-api.nav.no # må gå mot prod i dev se https://nav-it.slack.com/archives/C06FK6V74JE/p1723795352459339?thread_ts=1723788766.141209&cid=C06FK6V74JE
         - host: skjermede-personer-pip.intern.dev.nav.no
@@ -196,7 +199,6 @@ spec:
         - host: oppgave.dev-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io
-        - host: team-inntekt-proxy.dev-fss-pub.nais.io
         - host: sigrun-q2.dev.adeo.no
         - host: arbeid-og-inntekt-q2.dev-fss-pub.nais.io
     inbound:

@@ -170,7 +170,7 @@ spec:
       value: https://arbeid-og-inntekt.prod-fss-pub.nais.io
 
     - name: SIGRUN_URL
-      value: https://team-inntekt-proxy.prod-fss-pub.nais.io/proxy/sigrun
+      value: https://sigrun.prod-fss-pub.nais.io
     - name: SIGRUN_OUTBOUND_SCOPE
       value: api://prod-fss.team-inntekt.sigrun/.default
 
@@ -197,13 +197,15 @@ spec:
           namespace: nais-system
         - application: navansatt
           namespace: pensjon-saksbehandling
+        - application: sigrun
+          namespace: team-inntekt
+          cluster: prod-fss
       external:
         - host: skjermede-personer-pip.intern.nav.no
         - host: norg2.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen.prod-fss-pub.nais.io
-        - host: team-inntekt-proxy.prod-fss-pub.nais.io
         - host: arbeid-og-inntekt.prod-fss-pub.nais.io
     inbound:
       rules:

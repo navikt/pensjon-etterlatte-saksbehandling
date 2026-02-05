@@ -8,7 +8,6 @@ import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
-import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.ManueltBrevData
@@ -280,12 +279,9 @@ class StrukturertBrevService(
         )
     }
 
-    private fun utledBrevRedigerbartInnholdData(brevRequest: BrevRequest): Any? =
+    private fun utledBrevRedigerbartInnholdData(brevRequest: BrevRequest): BrevDataRedigerbarNy? =
         brevRequest.brevRedigerbarInnholdData?.let {
-            when (brevRequest.brevFastInnholdData.brevKode) {
-                Brevkoder.OMS_INNVILGELSE -> it
-                else -> BrevDataRedigerbarNy(data = it)
-            }
+            BrevDataRedigerbarNy(data = it)
         }
 
     private fun utledBrevInnholdData(

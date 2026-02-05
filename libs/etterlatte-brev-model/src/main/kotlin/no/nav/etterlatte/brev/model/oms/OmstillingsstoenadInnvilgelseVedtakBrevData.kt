@@ -60,7 +60,7 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
     fun beregningsvedleggInnhold(): BrevVedleggRedigerbarNy =
         BrevVedleggRedigerbarNy(
             data = null,
-            vedlegg = Vedlegg.OMS_BEREGNING,
+            vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
             vedleggId = BrevVedleggKey.OMS_BEREGNING,
         )
 

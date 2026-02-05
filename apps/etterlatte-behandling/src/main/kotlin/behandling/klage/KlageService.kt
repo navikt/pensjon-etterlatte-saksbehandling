@@ -134,6 +134,14 @@ interface KlageService {
         klageId: UUID,
         saksbehandler: Saksbehandler,
     )
+
+    fun avsluttOmgjoeringsoppgave(
+        oppgaveId: UUID,
+        grunnForAvslutning: GrunnForAvslutning,
+        begrunnelse: String,
+        omgjoerendeBehandling: String?,
+        saksbehandler: Saksbehandler,
+    ): OppgaveIntern
 }
 
 class ManglerSaksbehandlerException(
@@ -278,13 +286,14 @@ class KlageServiceImpl(
 
         val utfallMedBrev =
             when (utfall) {
-                is KlageUtfallUtenBrev.Omgjoering ->
+                is KlageUtfallUtenBrev.Omgjoering -> {
                     KlageUtfallMedData.Omgjoering(
                         omgjoering = utfall.omgjoering,
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
+                }
 
-                is KlageUtfallUtenBrev.DelvisOmgjoering ->
+                is KlageUtfallUtenBrev.DelvisOmgjoering -> {
                     KlageUtfallMedData.DelvisOmgjoering(
                         omgjoering = utfall.omgjoering,
                         innstilling =
@@ -296,8 +305,9 @@ class KlageServiceImpl(
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
+                }
 
-                is KlageUtfallUtenBrev.StadfesteVedtak ->
+                is KlageUtfallUtenBrev.StadfesteVedtak -> {
                     KlageUtfallMedData.StadfesteVedtak(
                         innstilling =
                             InnstillingTilKabal(
@@ -308,6 +318,7 @@ class KlageServiceImpl(
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
+                }
 
                 is KlageUtfallUtenBrev.Avvist -> {
                     val (vedtak, brev) = opprettVedtakOgBrev(klage, saksbehandler)
@@ -318,11 +329,12 @@ class KlageServiceImpl(
                     )
                 }
 
-                is KlageUtfallUtenBrev.AvvistMedOmgjoering ->
+                is KlageUtfallUtenBrev.AvvistMedOmgjoering -> {
                     KlageUtfallMedData.AvvistMedOmgjoering(
                         omgjoering = utfall.omgjoering,
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
+                }
             }
 
         val klageMedOppdatertUtfall = klage.oppdaterUtfall(utfallMedBrev)
@@ -343,10 +355,84 @@ class KlageServiceImpl(
             })
 
         if (harOppgaveForOmgjoering) {
-            throw IkkeTillattException("OMGJOERING_ER_ALLEREDE_OPPRETTET", "Klagen har allerede en oppgave for omgjoering.")
+            throw IkkeTillattException(
+                "OMGJOERING_ER_ALLEREDE_OPPRETTET",
+                "Klagen har allerede en oppgave for omgjoering.",
+            )
         }
 
         lagOppgaveForOmgjoering(klage)
+    }
+
+    override fun avsluttOmgjoeringsoppgave(
+        oppgaveId: UUID,
+        grunnForAvslutning: GrunnForAvslutning,
+        begrunnelse: String,
+        omgjoerendeBehandling: String?,
+        saksbehandler: Saksbehandler,
+    ): OppgaveIntern {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        if (oppgave.erAvsluttet()) {
+            throw IkkeTillattException("OPPGAVE_ER_AVSLUTETT", "Oppgaven er allerede avsluttet og kan ikke avsluttes på nytt.")
+        }
+        if (oppgave.saksbehandler?.ident != saksbehandler.ident) {
+            throw IkkeTillattException(
+                "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
+                "Oppgaven er ikke tildelt deg, den må være din oppgave før du kan avslutte den.",
+            )
+        }
+        val omgjoerendeBehandlingId =
+            when (omgjoerendeBehandling) {
+                null -> {
+                    if (grunnForAvslutning == GrunnForAvslutning.OMGJORT_ALLEREDE) {
+                        throw UgyldigForespoerselException(
+                            "MANGLER_OMGJOERENDE_BEHANDLING",
+                            "Hvis vedtaket det er klaget på er omgjort må omgjørende behandling velges.",
+                        )
+                    } else {
+                        null
+                    }
+                }
+
+                "ANNEN_BEHANDLING" -> {
+                    null
+                }
+
+                else -> {
+                    try {
+                        UUID.fromString(omgjoerendeBehandling)
+                    } catch (e: Exception) {
+                        throw UgyldigForespoerselException(
+                            code = "UGYLDIG_OMGJOERENDE_BEHANDLING",
+                            detail =
+                                "Mottok $omgjoerendeBehandling som id for behandling " +
+                                    "som omgjorde klagen. Dette kunne ikke leses ut som en UUID",
+                            cause = e,
+                        )
+                    }
+                }
+            }
+
+        hendelseDao.klageHendelse(
+            klageId = UUID.fromString(oppgave.referanse),
+            sakId = oppgave.sakId,
+            hendelse = KlageHendelseType.OMGJOERING_AVSLUTTET,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = saksbehandler.ident,
+            kommentar =
+                listOfNotNull(
+                    grunnForAvslutning.toString(),
+                    omgjoerendeBehandlingId.takeIf { grunnForAvslutning == GrunnForAvslutning.OMGJORT_ALLEREDE },
+                ).joinToString(
+                    " - ",
+                ),
+            begrunnelse = begrunnelse,
+        )
+        return oppgaveService.ferdigstillOppgave(
+            oppgaveId,
+            saksbehandler,
+            "Omgjøringsoppgave avsluttet: ${grunnForAvslutning.lesbarBeskrivelse}",
+        )
     }
 
     override fun haandterKabalrespons(
@@ -363,10 +449,12 @@ class KlageServiceImpl(
             val merknad =
                 when (vedtaketKlagenGjelder) {
                     null -> "Klage på ukjent vedtak er ferdig behandlet hos KA. Resultat: ${kabalrespons.resultat}"
+
                     else -> "Klage på vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
                         vedtaketKlagenGjelder.datoAttestert?.format(
                             DateTimeFormatter.ISO_LOCAL_DATE,
-                        )} er ferdig behandlet hos KA. Resultat: ${kabalrespons.resultat}"
+                        )
+                    } er ferdig behandlet hos KA. Resultat: ${kabalrespons.resultat}"
                 }
 
             oppgaveService.opprettOppgave(
@@ -626,7 +714,10 @@ class KlageServiceImpl(
         saksbehandler: Saksbehandler,
     ): Pair<KlageVedtak, KlageVedtaksbrev> {
         return when (val utfall = klage.utfall) {
-            is KlageUtfallMedData.Avvist -> Pair(utfall.vedtak, utfall.brev)
+            is KlageUtfallMedData.Avvist -> {
+                Pair(utfall.vedtak, utfall.brev)
+            }
+
             else -> {
                 return runBlocking {
                     val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
@@ -810,13 +901,16 @@ class KlageServiceImpl(
 
     private fun KlageUtfallUtenBrev.erStoettet(): Boolean =
         when (this) {
-            is KlageUtfallUtenBrev.DelvisOmgjoering ->
+            is KlageUtfallUtenBrev.DelvisOmgjoering -> {
                 featureToggleService.isEnabled(
                     KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
                     false,
                 )
+            }
 
-            else -> true
+            else -> {
+                true
+            }
         }
 }
 

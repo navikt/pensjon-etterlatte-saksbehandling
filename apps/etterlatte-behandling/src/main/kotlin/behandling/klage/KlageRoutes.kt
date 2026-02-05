@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.klage
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -22,10 +23,12 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.klageId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import java.time.LocalDate
@@ -63,6 +66,26 @@ internal fun Route.klageRoutes(
                             )
                         }
                     call.respond(klage)
+                }
+            }
+        }
+
+        route("omgjoering/{$OPPGAVEID_CALL_PARAMETER}/avslutt") {
+            post {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<AvsluttOmgjoeringOppgaveDto> { request ->
+                        val oppdatertOppgave =
+                            inTransaction {
+                                klageService.avsluttOmgjoeringsoppgave(
+                                    oppgaveId = oppgaveId,
+                                    grunnForAvslutning = request.hvorforAvsluttes,
+                                    begrunnelse = request.begrunnelse,
+                                    omgjoerendeBehandling = request.omgjoerendeBehandling,
+                                    saksbehandler = saksbehandler,
+                                )
+                            }
+                        call.respond(oppdatertOppgave)
+                    }
                 }
             }
         }
@@ -232,6 +255,20 @@ internal fun Route.klageRoutes(
         }
     }
 }
+
+enum class GrunnForAvslutning(
+    val lesbarBeskrivelse: String,
+) {
+    OMGJORT_ALLEREDE("Allerede omgjort"),
+    OMGJOERINGSOPPGAVE_OPPRETTET_VED_FEIL("Oppgaven opprettet ved en feil"),
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class AvsluttOmgjoeringOppgaveDto(
+    val omgjoerendeBehandling: String?,
+    val begrunnelse: String,
+    val hvorforAvsluttes: GrunnForAvslutning,
+)
 
 data class OppdaterMottattDatoRequest(
     val mottattDato: String,

@@ -2,14 +2,13 @@ import { OppgaveDTO } from '~shared/types/oppgave'
 import { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { avsluttOmgjoeringsoppgave } from '~shared/api/klage'
-import { isSuccess, mapResult } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
 import { Alert, BodyShort, Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { hentBehandlingerISak } from '~shared/api/sak'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { isPending } from '@reduxjs/toolkit'
 
 interface AvsluttOmgjoeringSkjema {
   omgjoerendeBehandling?: string

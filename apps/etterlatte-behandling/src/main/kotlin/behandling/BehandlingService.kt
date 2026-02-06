@@ -298,6 +298,11 @@ interface BehandlingService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    fun hentBehandlingerForSak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<DetaljertBehandling>
 }
 
 data class SakMedBehandlingerOgOppgaver(
@@ -1049,6 +1054,14 @@ internal class BehandlingServiceImpl(
                 behandlingDao.lagreStatus(it)
                 registrerBehandlingHendelse(it, brukerTokenInfo.ident())
             }
+    }
+
+    override fun hentBehandlingerForSak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<DetaljertBehandling> {
+        val behandlingerISak = behandlingDao.hentBehandlingerForSak(sakId)
+        return behandlingerISak.mapNotNull { hentDetaljertBehandling(it.id, brukerTokenInfo) }
     }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =

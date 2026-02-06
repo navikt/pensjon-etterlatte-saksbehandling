@@ -25,11 +25,17 @@ export const enum FeatureToggle {
   vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
   omgjoer_tilbakekreving = 'omgjoer-tilbakekreving',
   overstyr_netto_brutto_tilbakekreving = 'overstyr-netto-brutto-tilbakekreving',
+  avslutte_omgjoeringsoppgave = 'avslutte-omgjoeringsoppgave',
 }
 
 export interface Toggle {
   togglename: FeatureToggle
   enabled: boolean
+}
+
+const avslutte_omgjoeringsoppgave: Toggle = {
+  togglename: FeatureToggle.avslutte_omgjoeringsoppgave,
+  enabled: false,
 }
 
 const trygdetid_fra_pesys: Toggle = {
@@ -125,6 +131,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.vis_tilbakestill_etteroppgjoer]: vis_tilbakestill_etteroppgjoer,
   [FeatureToggle.omgjoer_tilbakekreving]: omgjoer_tilbakekreving,
   [FeatureToggle.overstyr_netto_brutto_tilbakekreving]: overstyr_netto_brutto_tilbakekreving,
+  [FeatureToggle.avslutte_omgjoeringsoppgave]: avslutte_omgjoeringsoppgave,
 }
 
 export const Unleashcontext = createContext<{

@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Modal, VStack } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending, isPendingOrInitial, isSuccess, mapApiResult, mapResult, mapSuccess } from '~shared/api/apiUtils'
@@ -11,6 +11,8 @@ import { formaterVedtakType } from '~utils/formatering/formatering'
 import { formaterKanskjeStringDato } from '~utils/formatering/dato'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { VedtakType } from '~components/vedtak/typer'
+import { AvsluttOmgjoeringsoppgave } from '~components/oppgavebenk/oppgaveModal/AvsluttOmgjoeringsoppgave'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 function hentOmgjoering(klage: Klage): Omgjoering | null {
   if (klage.kabalResultat === 'MEDHOLD') {
@@ -63,6 +65,7 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
     opprettOmgjoeringFoerstegangsbehandling
   )
   const [klageResult, fetchKlage] = useApiCall(hentKlage)
+  const avslutteOmgjoeringsoppgaveEnabled = useFeaturetoggle(FeatureToggle.avslutte_omgjoeringsoppgave)
 
   if (!erOppgaveRedigerbar(oppgave?.status)) return null
 
@@ -135,18 +138,21 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
                 )
               }
               return (
-                <>
+                <VStack gap="4">
                   <BodyShort>
                     Vedtaket om {formaterVedtakType(vedtak.vedtakType!!)} attestert{' '}
                     {formaterKanskjeStringDato(vedtak.datoAttestert)} skal omgjøres.
                   </BodyShort>
+
+                  {avslutteOmgjoeringsoppgaveEnabled && <AvsluttOmgjoeringsoppgave oppgave={oppgave} />}
+
                   {!finnOmgjoeringsHandlingForKlage(klage) ||
                     (disabledOpprett && (
                       <Alert variant="warning">
                         Det er ikke støttet å omgjøre vedtak som ikke er behandlinger enda.
                       </Alert>
                     ))}
-                </>
+                </VStack>
               )
             }
           )}
@@ -198,7 +204,7 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
               disabledOpprett
             }
           >
-            Opprett revurdering
+            Opprett omgjøring
           </Button>
           <Button
             variant="tertiary"

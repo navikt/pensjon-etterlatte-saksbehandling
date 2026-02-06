@@ -3,6 +3,7 @@ import { ISak, ISaksendring, SakType } from '~shared/types/sak'
 import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 export interface Navkontor {
   navn: string
@@ -19,6 +20,10 @@ export const hentNavkontorForPerson = async (fnr: string): Promise<ApiResponse<N
 
 export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<SakMedBehandlingerOgKanskjeAnnenSak>> => {
   return apiClient.post(`/personer/behandlingerforsak`, { foedselsnummer: fnr })
+}
+
+export function hentBehandlingerISak(args: { sakId: number }): Promise<ApiResponse<IDetaljertBehandling[]>> {
+  return apiClient.get(`/sak/${args.sakId}/behandlinger`)
 }
 
 interface SisteIverksatteBehandling {

@@ -7,6 +7,8 @@ import {
   KlageUtfallUtenBrev,
   NyKlageRequest,
 } from '~shared/types/Klage'
+import { OppgaveDTO } from '~shared/types/oppgave'
+import { GrunnForAvslutning } from '~components/oppgavebenk/oppgaveModal/AvsluttOmgjoeringsoppgave'
 
 export function opprettNyKlage(nyKlageRequest: NyKlageRequest): Promise<ApiResponse<Klage>> {
   return apiClient.post(`/klage/opprett/${nyKlageRequest.sakId}`, { ...nyKlageRequest })
@@ -95,5 +97,16 @@ export function forhaandsvisBlankettKa(args: { klage: Klage }): Promise<ApiRespo
       type: 'KLAGE_BLANKETT',
       klage: args.klage,
     },
+  })
+}
+
+export function avsluttOmgjoeringsoppgave(args: {
+  oppgaveId: string
+  omgjoerendeBehandling?: string
+  begrunnelse: string
+  hvorforAvsluttes: GrunnForAvslutning
+}): Promise<ApiResponse<OppgaveDTO>> {
+  return apiClient.post(`/klage/omgjoering/${args.oppgaveId}/avslutt`, {
+    ...args,
   })
 }

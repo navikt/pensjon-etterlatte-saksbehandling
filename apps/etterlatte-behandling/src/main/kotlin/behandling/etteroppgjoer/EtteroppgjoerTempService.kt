@@ -9,11 +9,6 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.logger
-import no.nav.etterlatte.oppgave.OppgaveService
 import java.util.UUID
 
 // TODO: burde plasseres en annen plass, but for now pga overlappende avhengigheter i applicationContext...
@@ -40,10 +35,11 @@ class EtteroppgjoerTempService(
             etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sakId, forbehandling.aar)
                 ?: throw InternfeilException("Fant ikke etteroppgjoer for sakId=$sakId og inntektsaar=${forbehandling.aar}")
 
-        if (etteroppgjoer.status != EtteroppgjoerStatus.UNDER_REVURDERING) {
+        if (etteroppgjoer.status !in listOf(EtteroppgjoerStatus.UNDER_REVURDERING, EtteroppgjoerStatus.OMGJOERING)) {
             throw InternfeilException(
                 "Kan ikke tilbakestille etteroppgjoer for sakId=$sakId: " +
-                    "forventet etteroppgjoerStatus ${EtteroppgjoerStatus.UNDER_REVURDERING}, fant ${etteroppgjoer.status}",
+                    "forventet etteroppgjoerStatus ${EtteroppgjoerStatus.UNDER_REVURDERING} " +
+                    "eller ${EtteroppgjoerStatus.OMGJOERING}, fant ${etteroppgjoer.status}",
             )
         }
 

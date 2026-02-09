@@ -19,6 +19,8 @@ import { hentBehandlingstatus } from '~shared/api/behandling'
 import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInntekt'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { IkkeInnvilgetPeriode } from '../sanksjon/IkkeInnvilgetPeriode'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const Avkorting = () => {
   const dispatch = useAppDispatch()
@@ -27,6 +29,7 @@ export const Avkorting = () => {
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [, hentBehandlingstatusRequest] = useApiCall(hentBehandlingstatus)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const visIkkeInnvilgetPeriode = useFeaturetoggle(FeatureToggle.vis_ikke_innvilget_periode)
 
   const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
   if (!behandling) {
@@ -89,6 +92,9 @@ export const Avkorting = () => {
         })}
 
         <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
+
+        {visIkkeInnvilgetPeriode && <IkkeInnvilgetPeriode behandling={behandling} />}
+
         {avkorting && (
           <YtelseEtterAvkorting avkortetYtelse={avkortetYtelse} tidligereAvkortetYtelse={tidligereAvkortetYtelse} />
         )}

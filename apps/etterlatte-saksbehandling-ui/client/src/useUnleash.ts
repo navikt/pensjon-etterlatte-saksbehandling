@@ -190,6 +190,7 @@ export const useUnleash = () => {
 }
 
 let lastUpdate = -1
+const ET_MINUTT_MILLISEKUNDER = 60 * 1000
 
 export const useFeaturetoggle = (featureToggle: FeatureToggle): boolean => {
   const { updateToggle, logWithThrottle } = useContext(Unleashcontext)
@@ -197,7 +198,7 @@ export const useFeaturetoggle = (featureToggle: FeatureToggle): boolean => {
 
   useEffect(() => {
     if (toggle) {
-      if (lastUpdate + 60_0000 < Date.now()) {
+      if (lastUpdate + ET_MINUTT_MILLISEKUNDER < Date.now()) {
         updateToggle()
         lastUpdate = Date.now()
       }

@@ -260,7 +260,7 @@ enum class GrunnForAvslutning(
     val lesbarBeskrivelse: String,
 ) {
     OMGJORT_ALLEREDE("Allerede omgjort"),
-    OMGJOERINGSOPPGAVE_OPPRETTET_VED_FEIL("Oppgaven opprettet ved en feil"),
+    OMGJOERINGSOPPGAVE_OPPRETTET_VED_FEIL("Oppgaven er opprettet ved en feil"),
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

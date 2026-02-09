@@ -387,7 +387,7 @@ class KlageServiceImpl(
                     if (grunnForAvslutning == GrunnForAvslutning.OMGJORT_ALLEREDE) {
                         throw UgyldigForespoerselException(
                             "MANGLER_OMGJOERENDE_BEHANDLING",
-                            "Hvis vedtaket det er klaget på er omgjort må omgjørende behandling velges.",
+                            "Hvis vedtaket det er klaget på er omgjort må behandlingen som omgjøres velges.",
                         )
                     } else {
                         null

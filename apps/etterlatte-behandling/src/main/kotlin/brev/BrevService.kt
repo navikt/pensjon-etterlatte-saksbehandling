@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev
 
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.VedtaksbrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService

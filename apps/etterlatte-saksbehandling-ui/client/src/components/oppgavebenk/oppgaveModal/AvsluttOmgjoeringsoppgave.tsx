@@ -9,6 +9,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { hentBehandlingerISak } from '~shared/api/sak'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { formaterKanskjeStringDato } from '~utils/formatering/dato'
 
 interface AvsluttOmgjoeringSkjema {
   omgjoerendeBehandling?: string
@@ -101,7 +102,11 @@ export function AvsluttOmgjoeringsoppgave({ oppgave }: { oppgave: OppgaveDTO }) 
                       <>
                         {data.map((behandling) => (
                           <option key={behandling.id} value={behandling.id}>
-                            {[behandling.behandlingType, behandling.revurderingsaarsak, behandling.virkningstidspunkt]
+                            {[
+                              behandling.behandlingType,
+                              behandling.revurderingsaarsak,
+                              'virkningstidspunkt: ' + formaterKanskjeStringDato(behandling.virkningstidspunkt?.dato),
+                            ]
                               .filter((tekst) => !!tekst)
                               .join(' - ')}
                           </option>

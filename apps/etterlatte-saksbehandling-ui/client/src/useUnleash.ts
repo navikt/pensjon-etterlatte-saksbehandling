@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux'
 import { endreToggle, useUnleashReducer, useUnleashReducerToggle } from '~store/reducers/UnleashReducer'
 import { throttle } from 'lodash'
 import { logger } from '~utils/logger'
+import { isPending } from '~shared/api/apiUtils'
 
 export const enum FeatureToggle {
   sanksjon = 'sanksjon',
@@ -163,11 +164,14 @@ const logMissingFeatureToggle = (featureToggle: FeatureToggle) => {
 
 export const useUnleash = () => {
   const dispatch = useDispatch()
-  const [, fetchFeature] = useApiCall(hentFeatureToggles)
+  const [fetchResult, fetchFeature] = useApiCall(hentFeatureToggles)
   const unleashState = useUnleashReducer()
 
   const updateToggle = () => {
     const toggles = Object.keys(unleashState)
+    if (isPending(fetchResult)) {
+      return
+    }
     fetchFeature(
       toggles,
       (hentedeToggles) => {
@@ -185,13 +189,19 @@ export const useUnleash = () => {
   return { updateToggle: throttle(updateToggle, 1000), logWithThrottle: throttle(logMissingFeatureToggle, 1000) }
 }
 
+let lastUpdate = -1
+const ET_MINUTT_MILLISEKUNDER = 60 * 1000
+
 export const useFeaturetoggle = (featureToggle: FeatureToggle): boolean => {
   const { updateToggle, logWithThrottle } = useContext(Unleashcontext)
   const toggle = useUnleashReducerToggle(featureToggle)
 
   useEffect(() => {
     if (toggle) {
-      updateToggle()
+      if (lastUpdate + ET_MINUTT_MILLISEKUNDER < Date.now()) {
+        updateToggle()
+        lastUpdate = Date.now()
+      }
     } else {
       logWithThrottle(featureToggle)
     }

@@ -603,7 +603,7 @@
   resolved "https://registry.npmjs.org/@juggle/resize-observer/-/resize-observer-3.4.0.tgz"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^8.2.1", "@navikt/aksel-icons@^8.2.2":
+"@navikt/aksel-icons@^8.1.0":
   version "8.3.0"
   resolved "https://registry.npmjs.org/@navikt/aksel-icons/-/aksel-icons-8.3.0.tgz"
   integrity sha512-IDwQLQqOZiUH78g1nnvNl06m+1B4rDn1o0E747Xe9IuqQgX2qafr6HAe5g0WUxCe2y6O6uxAcOoHFZlyXqeIcg==
@@ -632,27 +632,27 @@
   resolved "https://registry.npmjs.org/@navikt/ds-css/-/ds-css-8.3.0.tgz"
   integrity sha512-yl0AZEjnRz2bTUl8MpD5GDdy3j/BzIBcAflOjznnSLc8QZ/80Z1QhUuvOzSxbCNj2stPO/nIEfCXzGIr+NG2rw==
 
-"@navikt/ds-css@~8.2.1":
-  version "8.2.2"
-  resolved "https://registry.npmjs.org/@navikt/ds-css/-/ds-css-8.2.2.tgz"
-  integrity sha512-3/N2aROdQJiht7aP1yvNW8lPvM1O7gjmR4mMYCfmSOeEedmTmKUIYLxtXDD610JgrKk/zpT6F5ZZB64lozuD6g==
+"@navikt/ds-css@~8.1.0":
+  version "8.1.0"
+  resolved "https://registry.npmjs.org/@navikt/ds-css/-/ds-css-8.1.0.tgz"
+  integrity sha512-dKQIBRMtjk1+hC4EMkl7W4psguBkz/NLGBa9YN/N6Jb7FbX9AkHbc9XGHKVS/dOc3sRX811M2tXE/k5nncDruA==
 
-"@navikt/ds-react@~8.2.1":
-  version "8.2.2"
-  resolved "https://registry.npmjs.org/@navikt/ds-react/-/ds-react-8.2.2.tgz"
-  integrity sha512-jnuXTt1oKFgBx6QxuDN8FyyY3iiQkjKX7qIisspI37erUrbUYJ66aqQjOsMQ41QlpZ4yeEzzknB7fv3SuMCq3Q==
+"@navikt/ds-react@~8.1.0":
+  version "8.1.0"
+  resolved "https://registry.npmjs.org/@navikt/ds-react/-/ds-react-8.1.0.tgz"
+  integrity sha512-F2+OC7cPELeLHvvAa7SkDn615lQ0i9725PUHRCXb4xGzwyrofYdxZDPQ8qIdIrZx/2n6ga/CvX789zJpFQ2d9A==
   dependencies:
     "@floating-ui/react" "0.27.8"
     "@floating-ui/react-dom" "^2.1.6"
-    "@navikt/aksel-icons" "^8.2.2"
-    "@navikt/ds-tokens" "^8.2.2"
+    "@navikt/aksel-icons" "^8.1.0"
+    "@navikt/ds-tokens" "^8.1.0"
     date-fns "^4.0.0"
     react-day-picker "9.7.0"
 
-"@navikt/ds-tokens@^8.2.2", "@navikt/ds-tokens@~8.2.1":
-  version "8.2.2"
-  resolved "https://registry.npmjs.org/@navikt/ds-tokens/-/ds-tokens-8.2.2.tgz"
-  integrity sha512-jBaAcO2tsAneux1dr6P2GHKw25PUpAEyulE63KK9Sl/Ml4gD/tLTFyB15+c9Ng8HoR7UV4ms0ewSgJ3JFO9DEQ==
+"@navikt/ds-tokens@^8.1.0", "@navikt/ds-tokens@~8.1.0":
+  version "8.1.0"
+  resolved "https://registry.npmjs.org/@navikt/ds-tokens/-/ds-tokens-8.1.0.tgz"
+  integrity sha512-F4yEJpXrx89S5zAIUIi8G84megfDyH7ZsG6qnlnjM9KcJJ2rUBB8dqBiik0dWzsmwYA4jq4Pbphp312M8pvd5Q==
 
 "@navikt/ds-tokens@^8.3.0":
   version "8.3.0"

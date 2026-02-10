@@ -43,12 +43,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
 
   return (
     <>
-      <Box
-        paddingInline="space-16 space-4"
-        paddingBlock="space-4"
-        borderWidth="1 0 0 0"
-        borderColor="neutral-subtle"
-      >
+      <Box paddingInline="space-16 space-4" paddingBlock="space-4" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <HStack justify="space-between">
           <VStack gap="space-1">
             <HStack align="center" gap="space-4">

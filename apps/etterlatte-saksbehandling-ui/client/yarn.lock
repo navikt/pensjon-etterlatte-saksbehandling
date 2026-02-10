@@ -603,37 +603,82 @@
   resolved "https://registry.npmjs.org/@juggle/resize-observer/-/resize-observer-3.4.0.tgz"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^8.2.1":
-  version "8.2.1"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-8.2.1.tgz#ff56d15c04add4a18c30978eb51e8bc47a824149"
-  integrity sha512-RlLY1A5yPkKb1odUcFJpJXTjxJGJUfihTBCJduFeu3d76+b06WHJxKUhMss5N10vdYPHQXWbVOAjsFt8FlmQJQ==
+"@navikt/aksel-icons@^8.2.1", "@navikt/aksel-icons@^8.2.2":
+  version "8.3.0"
+  resolved "https://registry.npmjs.org/@navikt/aksel-icons/-/aksel-icons-8.3.0.tgz"
+  integrity sha512-IDwQLQqOZiUH78g1nnvNl06m+1B4rDn1o0E747Xe9IuqQgX2qafr6HAe5g0WUxCe2y6O6uxAcOoHFZlyXqeIcg==
+
+"@navikt/aksel@^8.3.0":
+  version "8.3.0"
+  resolved "https://registry.npmjs.org/@navikt/aksel/-/aksel-8.3.0.tgz"
+  integrity sha512-uDZ72s9hlfOyWAIHXu3kfZp7LrCnVW/RpKyURC2gTr8PssJ88DIkrvg2RBPDO4UoU0MXsvF6eJ7IOvmTKhEHWw==
+  dependencies:
+    "@navikt/ds-css" "^8.3.0"
+    "@navikt/ds-tokens" "^8.3.0"
+    chalk "5.6.2"
+    cli-progress "3.12.0"
+    clipboardy "5.0.1"
+    commander "14.0.2"
+    enquirer "2.4.1"
+    fast-glob "3.3.3"
+    figlet "1.8.0"
+    is-git-clean "1.1.0"
+    jscodeshift "17.3.0"
+    jscodeshift-add-imports "1.0.11"
+    lodash "4.17.23"
+
+"@navikt/ds-css@^8.3.0":
+  version "8.3.0"
+  resolved "https://registry.npmjs.org/@navikt/ds-css/-/ds-css-8.3.0.tgz"
+  integrity sha512-yl0AZEjnRz2bTUl8MpD5GDdy3j/BzIBcAflOjznnSLc8QZ/80Z1QhUuvOzSxbCNj2stPO/nIEfCXzGIr+NG2rw==
 
 "@navikt/ds-css@~8.2.1":
-  version "8.2.1"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-8.2.1.tgz#cbb37873bc094e515e7db9e3ad157f822954dd6a"
-  integrity sha512-e2zTujh4JkwByL/BNED+F3icG2gtdegQIFRE4hDl6sNAEXeMOsaS6BTgQZHjhic2oa19Rqqxw4EORPFUMaPk/A==
+  version "8.2.2"
+  resolved "https://registry.npmjs.org/@navikt/ds-css/-/ds-css-8.2.2.tgz"
+  integrity sha512-3/N2aROdQJiht7aP1yvNW8lPvM1O7gjmR4mMYCfmSOeEedmTmKUIYLxtXDD610JgrKk/zpT6F5ZZB64lozuD6g==
 
 "@navikt/ds-react@~8.2.1":
-  version "8.2.1"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-8.2.1.tgz#99819d8033b9a41464399099fbfb49e348907e4a"
-  integrity sha512-VMIRK/1oY3NO6qXNmUCvr4ih60kXKaM7XARhxBNZI57v0bDY4pJcIvJAnMgYmm4Zv6Xp4c9loQsraE+qnzqrTQ==
+  version "8.2.2"
+  resolved "https://registry.npmjs.org/@navikt/ds-react/-/ds-react-8.2.2.tgz"
+  integrity sha512-jnuXTt1oKFgBx6QxuDN8FyyY3iiQkjKX7qIisspI37erUrbUYJ66aqQjOsMQ41QlpZ4yeEzzknB7fv3SuMCq3Q==
   dependencies:
     "@floating-ui/react" "0.27.8"
     "@floating-ui/react-dom" "^2.1.6"
-    "@navikt/aksel-icons" "^8.2.1"
-    "@navikt/ds-tokens" "^8.2.1"
+    "@navikt/aksel-icons" "^8.2.2"
+    "@navikt/ds-tokens" "^8.2.2"
     date-fns "^4.0.0"
     react-day-picker "9.7.0"
 
-"@navikt/ds-tokens@^8.2.1":
+"@navikt/ds-tokens@^8.2.2", "@navikt/ds-tokens@~8.2.1":
+  version "8.2.2"
+  resolved "https://registry.npmjs.org/@navikt/ds-tokens/-/ds-tokens-8.2.2.tgz"
+  integrity sha512-jBaAcO2tsAneux1dr6P2GHKw25PUpAEyulE63KK9Sl/Ml4gD/tLTFyB15+c9Ng8HoR7UV4ms0ewSgJ3JFO9DEQ==
+
+"@navikt/ds-tokens@^8.3.0":
   version "8.3.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-8.3.0.tgz#4b19cd79cb1fa5a60b87c3d44e932802564a52f7"
+  resolved "https://registry.npmjs.org/@navikt/ds-tokens/-/ds-tokens-8.3.0.tgz"
   integrity sha512-1Zy7L+FpLjE59Zfs997/X/lzyEup8DqcRwJdZ0HKw0v5YZJqa38Q6cI3DPgTq8Pc4/HUjoElUL9f4UQGMO9k5A==
 
-"@navikt/ds-tokens@~8.2.1":
-  version "8.2.1"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-8.2.1.tgz#9d86571e9194ca3d24e6eed06e19a4a8908860d4"
-  integrity sha512-xMhD1ABWvOQwB9okuDMskNIq1rfQ1FlpCZvJcKLXxRnxUt2k9MnCOLSvaOK/7ZsXvOOlSKj+Ir60lT2eKzY3Vg==
+"@nodelib/fs.scandir@2.1.5":
+  version "2.1.5"
+  resolved "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz"
+  integrity sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==
+  dependencies:
+    "@nodelib/fs.stat" "2.0.5"
+    run-parallel "^1.1.9"
+
+"@nodelib/fs.stat@^2.0.2", "@nodelib/fs.stat@2.0.5":
+  version "2.0.5"
+  resolved "https://registry.npmjs.org/@nodelib/fs.stat/-/fs.stat-2.0.5.tgz"
+  integrity sha512-RkhPPp2zrqDAQA/2jNhnztcPAlv64XdhIp7a7454A5ovI7Bukxgt7MX7udwAu3zg1DcpPU0rz3VV1SeaqvY4+A==
+
+"@nodelib/fs.walk@^1.2.3":
+  version "1.2.8"
+  resolved "https://registry.npmjs.org/@nodelib/fs.walk/-/fs.walk-1.2.8.tgz"
+  integrity sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==
+  dependencies:
+    "@nodelib/fs.scandir" "2.1.5"
+    fastq "^1.6.0"
 
 "@npmcli/fs@^3.1.0":
   version "3.1.1"
@@ -1334,7 +1379,6 @@ chalk@^4.0.0, chalk@^4.1.2, chalk@4.1.2:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-<<<<<<< HEAD
 chalk@5.6.2:
   version "5.6.2"
   resolved "https://registry.npmjs.org/chalk/-/chalk-5.6.2.tgz"
@@ -1366,8 +1410,6 @@ clone-deep@^4.0.1:
     kind-of "^6.0.2"
     shallow-clone "^3.0.0"
 
-=======
->>>>>>> 7878d510029b2ba101addd4c661dee2a5894dc49
 color-convert@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npmjs.org/color-convert/-/color-convert-2.0.1.tgz"

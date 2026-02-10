@@ -71,3 +71,10 @@ så vil det genereres secrets for den appen.
 Bygg og deploy kjøres via github workflows i roten på prosjektet
 og kjører bygg av både client og server folder. \
 Se Dockerfile for oppsett av container-image
+
+
+### Aksel
+Oppgradere aksel   
+
+CLI-verktøy https://aksel.nav.no/grunnleggende/kode/kommandolinje
+Migreringsguide https://aksel.nav.no/grunnleggende/migreringsguider/versjon-8

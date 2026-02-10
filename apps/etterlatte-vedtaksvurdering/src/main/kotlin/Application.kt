@@ -32,6 +32,7 @@ class Server(
                     listOf(
                         context.metrikkerJob,
                         context.outboxJob,
+                        context.ikkeInnvilgedePerioderJob,
                     ),
             ) {
                 vedtaksvurderingRoute(

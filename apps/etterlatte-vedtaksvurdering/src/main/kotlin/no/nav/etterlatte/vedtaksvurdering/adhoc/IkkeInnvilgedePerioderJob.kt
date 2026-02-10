@@ -43,23 +43,26 @@ class IkkeInnvilgedePerioderJob(
                 logger.info("$jobbNavn starter vurdering av alle saker som har fattede vedtak")
                 sakerMedFattedeVedtak()
                     .map { sakId ->
-                        logger.info("Behandler sak $sakId")
-                        val innvilgedePerioder: List<InnvilgetPeriode> =
-                            try {
-                                vedtaksvurderingService.hentInnvilgedePerioder(sakId)
-                            } catch (e: Exception) {
-                                logger.error("Feilet på sak $sakId", e)
-                                emptyList()
-                            }
-                        sakId to innvilgedePerioder
+                        sakId to hentInnvilgedePerioder(sakId)
+                    }.filter { (_, perioder) ->
+                        perioder.size > 1
                     }.forEach { (sakId, perioder) ->
-                        if (perioder.size > 1) {
-                            logger.info("Fant sak med hull: $sakId: ${perioderString(perioder)}")
-                        }
+                        logger.info("Fant sak med hull: $sakId: ${perioderString(perioder)}")
                     }
                 logger.info("$jobbNavn ferdig med å hente saker med hull i innvilgede perioder")
             }
         }
+    }
+
+    private fun hentInnvilgedePerioder(sakId: SakId): List<InnvilgetPeriode> {
+        val innvilgedePerioder: List<InnvilgetPeriode> =
+            try {
+                vedtaksvurderingService.hentInnvilgedePerioder(sakId)
+            } catch (e: Exception) {
+                logger.error("Feilet på sak $sakId", e)
+                emptyList()
+            }
+        return innvilgedePerioder
     }
 
     private fun sakerMedFattedeVedtak(): List<SakId> {

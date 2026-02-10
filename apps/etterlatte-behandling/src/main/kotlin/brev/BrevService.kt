@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -39,7 +38,6 @@ class BrevService(
     private val etteroppgjoerForbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     private val etteroppgjoerRevurderingBrevService: EtteroppgjoerRevurderingBrevService,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -94,8 +92,7 @@ class BrevService(
 
         return behandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
             behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD &&
-            vedtak?.type == VedtakType.INNVILGELSE &&
-            brukNyBrevFlytForOmsInnvilgelseForstegangsbehandling()
+            vedtak?.type == VedtakType.INNVILGELSE
     }
 
     private fun isRevurderingEtteroppgjoerVedtak(behandlingId: UUID): Boolean {
@@ -367,12 +364,6 @@ class BrevService(
             }
         }
     }
-
-    private fun brukNyBrevFlytForOmsInnvilgelseForstegangsbehandling(): Boolean =
-        featureToggleService.isEnabled(
-            BehandlingBrevflytFeatureToggle.NY_BREV_FLYT_OMS_INNVILGELSE_FORSTEGANGSBEHANDLING,
-            false,
-        )
 }
 
 class KanIkkeOppretteVedtaksbrev(

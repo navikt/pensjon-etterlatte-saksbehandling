@@ -41,14 +41,17 @@ class IkkeInnvilgedePerioderJob(
         ) {
             if (erLeader() && featureToggleService.isEnabled(skalTelleHull, false)) {
                 logger.info("$jobbNavn starter vurdering av alle saker som har fattede vedtak")
-                sakerMedFattedeVedtak()
-                    .map { sakId ->
-                        sakId to hentInnvilgedePerioder(sakId)
-                    }.filter { (_, perioder) ->
-                        perioder.size > 1
-                    }.forEach { (sakId, perioder) ->
-                        logger.info("Fant sak med hull: $sakId: ${perioderString(perioder)}")
+                val sakerMedFattedeVedtak = sakerMedFattedeVedtak()
+                val result: MutableMap<SakId, List<InnvilgetPeriode>> = mutableMapOf()
+                for (sak in sakerMedFattedeVedtak) {
+                    val perioder = hentInnvilgedePerioder(sak)
+                    if (perioder.size > 1) {
+                        result[sak] = perioder
                     }
+                }
+                result.forEach { sakId, perioder ->
+                    logger.info("Fant sak med hull: $sakId: ${perioderString(perioder)}")
+                }
                 logger.info("$jobbNavn ferdig med å hente saker med hull i innvilgede perioder")
             }
         }

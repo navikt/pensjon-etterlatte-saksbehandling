@@ -93,7 +93,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
     const lagreSanksjon: ISanksjonLagre = {
       id: redigerIkkeInnvilgetPeriode ? redigerIkkeInnvilgetPeriode : '',
       sakId: behandling.sakId,
-      type: data.type as SanksjonType,
+      type: SanksjonType.IKKE_INNVILGET_PERIODE,
       fom: formatISO(datoFom!, { representation: 'date' }),
       tom: datoTom ? formatISO(datoTom!, { representation: 'date' }) : undefined,
       beskrivelse: beskrivelse,
@@ -319,8 +319,6 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
                       required
                     />
                   </HStack>
-
-                  <input type="hidden" name="type" value={SanksjonType.IKKE_INNVILGET_PERIODE} />
 
                   <Textarea
                     {...register('beskrivelse', {

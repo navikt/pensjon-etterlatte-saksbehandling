@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilte
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.Month
 
 class OppdaterSkatteoppgjoerIkkeMottattJobService(
     private val featureToggleService: FeatureToggleService,
@@ -24,6 +25,12 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)
+
+        // Alle skal ha mottatt skatteoppgjør i Desember
+        if (LocalDate.now().month != Month.DECEMBER) {
+            logger.info("Periodisk jobb for å oppdatere saker med skatteoppgjør ikke mottatt kan kun kjøres i desember")
+            return
+        }
 
         if (!featureToggleService.isEnabled(EtteroppgjoerToggles.OPPDATER_SKATTEOPPGJOER_IKKE_MOTTATT, false)) {
             logger.info("Periodisk jobb for å oppdatere saker med skatteoppgjør ikke mottatt er deaktivert")

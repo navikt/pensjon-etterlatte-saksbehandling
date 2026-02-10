@@ -27,4 +27,5 @@ enum class SanksjonType {
     OPPHOER,
     STANS,
     UTESTENGING,
+    IKKE_INNVILGET_PERIODE,
 }

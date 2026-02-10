@@ -714,12 +714,11 @@ class EtteroppgjoerForbehandlingService(
                 runBlocking { pensjonsgivendeInntektService.hentSummerteInntekter(sak.ident, forbehandling.aar) }
             dao.lagrePensjonsgivendeInntekt(forbehandling.id, pensjonsgivendeInntekter)
         } catch (e: Exception) {
-            logger.error(
-                "Kunne ikke hente og lagre ned summerte inntekter fra Skatteetaten for forbehandlingen i sakId=${sak.id}",
+            logger.warn(
+                "Kunne ikke hente og lagre PGI fra Skatt for forbehandlingen i sakId=${sak.id}",
                 e,
             )
-
-            if (!forbehandling.mottattSkatteoppgjoer) {
+            if (forbehandling.mottattSkatteoppgjoer) {
                 throw InternfeilException(
                     "Kunne ikke hente PGI fra skatt. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
                     e,
@@ -732,12 +731,11 @@ class EtteroppgjoerForbehandlingService(
                 runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, forbehandling.aar) }
             dao.lagreSummerteInntekter(forbehandling.id, summerteInntekter)
         } catch (e: Exception) {
-            logger.error(
+            logger.warn(
                 "Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=${sak.id}",
                 e,
             )
-
-            if (!forbehandling.mottattSkatteoppgjoer) {
+            if (forbehandling.mottattSkatteoppgjoer) {
                 throw InternfeilException(
                     "Kunne ikke inntekter fra A-ordningen. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
                     e,

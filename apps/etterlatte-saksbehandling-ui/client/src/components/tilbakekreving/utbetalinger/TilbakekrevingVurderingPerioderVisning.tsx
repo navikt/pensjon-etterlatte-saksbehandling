@@ -92,7 +92,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
         </Table.Body>
       </Table>
 
-      <Box paddingBlock="space-12 space-0" borderWidth="1 0 0 0">
+      <Box paddingBlock="space-12 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         <HStack justify="center">
           <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>
             Neste

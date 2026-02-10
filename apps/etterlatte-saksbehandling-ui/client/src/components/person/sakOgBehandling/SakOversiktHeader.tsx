@@ -91,7 +91,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
         success: (data) =>
           !!data?.erFlyktning && (
             <>
-              <Box paddingBlock="space-2" borderWidth="1 0 0 0">
+              <Box paddingBlock="space-2" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
                 <Alert variant="info" size="small" inline>
                   Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
                   {formaterDato(data.virkningstidspunkt)}
@@ -104,7 +104,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
         success: (data) =>
           data.migrertYrkesskadefordel && (
             <>
-              <Box paddingBlock="space-2" borderWidth="1 0 0 0">
+              <Box paddingBlock="space-2" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
                 <Alert variant="info" size="small" inline>
                   Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
                 </Alert>

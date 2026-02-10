@@ -45,7 +45,7 @@ export const HaandterAvvikModal = ({
         </Modal.Header>
 
         <Modal.Body>
-          <Box borderWidth="1" padding="space-4">
+          <Box borderWidth="1" borderColor="border-neutral-subtle" padding="space-4">
             <Heading size="xsmall" spacing>
               Journalpostdetaljer
             </Heading>

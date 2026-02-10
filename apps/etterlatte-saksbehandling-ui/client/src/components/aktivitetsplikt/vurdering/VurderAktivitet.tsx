@@ -77,7 +77,7 @@ function NesteKnapp() {
   }, [vurdering.aktivitet])
 
   return (
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" marginBlock="space-4">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle" marginBlock="space-4">
       <VStack gap="space-6">
         {feilmeldingAktiviteter.length > 0 && <Alert variant="error">{feilmeldingAktiviteter}</Alert>}
         <HStack gap="space-4" justify="center">

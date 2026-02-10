@@ -204,7 +204,7 @@ export const Resultat = (props: Props) => {
         )}
       </Box>
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         {redigerbar && vilkaarsvurdering.isGrunnlagUtdatert && (
           <OppdatertGrunnlagAlert variant="warning">
             OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />

@@ -93,7 +93,7 @@ export function TilbakekrevingBrev({
           />
         )}
       </BrevContent>
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         <HStack justify="center">
           {kanAttesteres && (
             <SendTilAttesteringModal

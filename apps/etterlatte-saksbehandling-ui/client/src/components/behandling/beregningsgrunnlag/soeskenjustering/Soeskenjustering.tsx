@@ -183,7 +183,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
           />
         )}
       </FamilieforholdWrapper>
-      <Box borderWidth="1 0 0 0">
+      <Box borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         {visFeil && feil.length > 0 && redigerbar ? <FeilIPerioder feil={feil} /> : null}
         <form id="formsoeskenjustering">
           <UstiletListe>

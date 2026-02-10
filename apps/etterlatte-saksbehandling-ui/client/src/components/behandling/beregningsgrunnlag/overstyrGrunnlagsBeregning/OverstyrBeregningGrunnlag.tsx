@@ -108,7 +108,7 @@ const OverstyrBeregningGrunnlag = (props: {
         apiResult: opprettEllerEndreBeregningResult,
       })}
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button variant="primary" onClick={onSubmit} loading={isPending(opprettEllerEndreBeregningResult)}>

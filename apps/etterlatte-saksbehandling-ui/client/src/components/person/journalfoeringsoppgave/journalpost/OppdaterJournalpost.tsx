@@ -67,7 +67,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
 
       <br />
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         <Heading size="medium" spacing>
           Gjelder
         </Heading>

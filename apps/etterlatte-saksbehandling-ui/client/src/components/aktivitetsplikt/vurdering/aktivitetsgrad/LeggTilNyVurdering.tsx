@@ -28,7 +28,7 @@ export function LeggTilNyVurdering(props: { doedsdato?: Date }) {
   }
 
   return (
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
       <VStack gap="space-6">
         <Heading size="medium">
           {vurderingType === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER

@@ -41,7 +41,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
         />
       </Box>
 
-      <Box padding="space-4" borderWidth="1">
+      <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
         <Heading size="small" spacing>
           Biologisk forelder
           <BodyShort textColor="subtle">Legg til biologisk forelder hvis tilgjengelig</BodyShort>
@@ -79,7 +79,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
         </VStack>
       </Box>
 
-      <Box padding="space-4" borderWidth="1">
+      <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
         <Heading size="small" spacing>
           Avdød forelder
           <BodyShort textColor="subtle">Legg til avdød hvis tilgjengelig</BodyShort>
@@ -117,7 +117,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
         </VStack>
       </Box>
 
-      <Box padding="space-4" borderWidth="1">
+      <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
         <Heading size="small" spacing>
           Søsken
           <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>

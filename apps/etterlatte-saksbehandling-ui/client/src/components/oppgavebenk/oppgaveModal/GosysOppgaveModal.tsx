@@ -104,7 +104,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
               </div>
             )}
           </InfoGrid>
-          <Box padding="space-4" borderWidth="1">
+          <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
             <Label>Beskrivelse</Label>
             <BodyShort style={{ whiteSpace: 'pre-wrap' }}>{beskrivelse || <i>Mangler beskrivelse</i>}</BodyShort>
           </Box>

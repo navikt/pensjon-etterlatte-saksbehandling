@@ -293,7 +293,7 @@ function NesteEllerOpprettBrevValg({ gammelFlyt }: NesteEllerOpprettBrevValgProp
   }
 
   return (
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
       <HStack gap="space-4" justify="center">
         <Button
           variant="secondary"

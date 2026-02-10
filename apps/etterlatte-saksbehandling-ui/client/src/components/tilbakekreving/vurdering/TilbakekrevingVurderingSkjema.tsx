@@ -385,7 +385,7 @@ export function TilbakekrevingVurderingSkjema({
         </VStack>
       </Box>
 
-      <Box paddingBlock="space-12 space-0" borderWidth="1 0 0 0">
+      <Box paddingBlock="space-12 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         <HStack justify="center">
           {redigerbar ? (
             <Button

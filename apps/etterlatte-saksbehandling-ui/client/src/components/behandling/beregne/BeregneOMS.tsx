@@ -127,7 +127,7 @@ export const BeregneOMS = () => {
         wrapperComponent: { component: HStack, props: { justify: 'center' } },
       })}
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             {visAttesteringsmodal ? (

@@ -178,7 +178,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
       </BrevContent>
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button

@@ -38,7 +38,13 @@ export const BoddEllerArbeidetUtlandet = ({
           avtaleland det ikke er sendt krav til tidligere i annen sak til avdød. Se spørsmålstegn for mer informasjon.
         </BodyShort>
       </VStack>
-      <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
+      <Box
+        paddingInline="space-2 space-0"
+        minWidth="18.75rem"
+        width="10rem"
+        borderWidth="0 0 0 2"
+        borderColor="border-neutral-subtle"
+      >
         <BoddEllerArbeidetUtlandetVurdering redigerbar={redigerbar} behandlingId={behandling.id} />
       </Box>
     </SoeknadVurdering>

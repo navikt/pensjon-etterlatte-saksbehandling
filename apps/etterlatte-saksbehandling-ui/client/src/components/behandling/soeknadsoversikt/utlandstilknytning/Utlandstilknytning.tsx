@@ -25,7 +25,13 @@ export const Utlandstilknytning = ({
         bosatt utland-sak, om avdøde har bodd/arbeidet i EØS/avtale-land og gjenlevende bor i Norge er det en
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
       </Box>
-      <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
+      <Box
+        paddingInline="space-2 space-0"
+        minWidth="18.75rem"
+        width="10rem"
+        borderWidth="0 0 0 2"
+        borderColor="border-neutral-subtle"
+      >
         <UtlandstilknytningVurdering
           utlandstilknytning={behandling.utlandstilknytning}
           redigerbar={redigerbar}

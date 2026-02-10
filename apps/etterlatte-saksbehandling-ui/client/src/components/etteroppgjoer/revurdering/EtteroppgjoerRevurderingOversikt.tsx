@@ -159,7 +159,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         </VStack>
       </Box>
 
-      <Box borderWidth="1 0 0 0" paddingBlock="space-8 space-16">
+      <Box borderWidth="1 0 0 0" borderColor="border-neutral-subtle" paddingBlock="space-8 space-16">
         <HStack width="100%" justify="center">
           <VStack gap="space-4" align="center">
             {forbehandling.endringErTilUgunstForBruker === JaNei.JA ? (

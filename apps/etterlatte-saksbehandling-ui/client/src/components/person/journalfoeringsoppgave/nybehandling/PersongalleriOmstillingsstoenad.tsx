@@ -48,7 +48,7 @@ export default function PersongalleriOmstillingsstoenad() {
           />
         </Box>
       ))}
-      <Box padding="space-4" borderWidth="1">
+      <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
         <Heading size="small" spacing>
           Barn
           <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>

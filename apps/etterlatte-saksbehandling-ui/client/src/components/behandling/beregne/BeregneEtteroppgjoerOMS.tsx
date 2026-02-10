@@ -100,7 +100,7 @@ export const BeregneEtteroppgjoerOMS = () => {
         )}
       </Box>
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button loading={isPending(vedtakResult)} variant="primary" onClick={opprettEllerOppdaterVedtak}>

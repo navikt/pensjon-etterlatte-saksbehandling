@@ -93,7 +93,7 @@ export function BrevMottakerPanel({
   }
 
   return (
-    <Box padding="space-4" borderWidth="1">
+    <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
       {mapResult(soeker, {
         initial: kanRedigeres && mottaker.type === MottakerType.HOVED && (
           <Box marginBlock="space-0 space-2">
@@ -159,13 +159,23 @@ export function BrevMottakerPanel({
       {flereMottakere ? <MottakerInnholdKompakt mottaker={mottaker} /> : <MottakerInnhold mottaker={mottaker} />}
 
       {!!mottaker.bestillingId && (
-        <Box borderWidth="1 0 0 0" paddingBlock="space-4 space-0" marginBlock="space-4 space-0">
+        <Box
+          borderWidth="1 0 0 0"
+          borderColor="border-neutral-subtle"
+          paddingBlock="space-4 space-0"
+          marginBlock="space-4 space-0"
+        >
           <Info label="JournalpostID" tekst={mottaker.journalpostId} wide />
           <Info label="DistribusjonID" tekst={mottaker.bestillingId} wide />
         </Box>
       )}
 
-      <Box borderWidth="1 0 0 0" paddingBlock="space-4 space-0" marginBlock="space-4 space-0">
+      <Box
+        borderWidth="1 0 0 0"
+        borderColor="border-neutral-subtle"
+        paddingBlock="space-4 space-0"
+        marginBlock="space-4 space-0"
+      >
         <Heading size="xsmall" spacing>
           Distribusjonsmetode
         </Heading>

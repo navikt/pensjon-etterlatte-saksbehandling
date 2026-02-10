@@ -42,7 +42,13 @@ export const ViderefoereOpphoer = ({
           blir behandlet av det automatiske opphøret.
         </BodyShort>
       </VStack>
-      <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
+      <Box
+        paddingInline="space-2 space-0"
+        minWidth="18.75rem"
+        width="10rem"
+        borderWidth="0 0 0 2"
+        borderColor="border-neutral-subtle"
+      >
         {mapResult(hentVilkaartyperResult, {
           initial: <Alert variant="warning">Virkningstidspunkt må være satt for å sette opphør fra og med</Alert>,
           pending: <Spinner label="Henter vilkårstyper" visible />,

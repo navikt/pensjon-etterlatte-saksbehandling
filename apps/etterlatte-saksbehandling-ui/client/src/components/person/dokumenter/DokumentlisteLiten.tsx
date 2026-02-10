@@ -93,7 +93,12 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
         ),
       })}
 
-      <Box borderWidth="1 0 0 0" paddingBlock="space-4 space-0" marginBlock="space-4 space-0">
+      <Box
+        borderWidth="1 0 0 0"
+        borderColor="border-neutral-subtle"
+        paddingBlock="space-4 space-0"
+        marginBlock="space-4 space-0"
+      >
         <HStack justify="end">
           <PersonButtonLink
             fnr={fnr}

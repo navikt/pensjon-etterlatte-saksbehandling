@@ -11,7 +11,6 @@ import { isPending } from '~shared/api/apiUtils'
 export const enum FeatureToggle {
   sanksjon = 'sanksjon',
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',
-  notater = 'notater',
   kopier_trygdetidsgrunnlag = 'kopier-trygdetidsgrunnlag',
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
@@ -61,7 +60,7 @@ const overstyr_beregning_knapp: Toggle = {
   togglename: FeatureToggle.overstyr_beregning_knapp,
   enabled: false,
 }
-const notater: Toggle = { togglename: FeatureToggle.notater, enabled: false }
+
 const kopier_trygdetidsgrunnlag: Toggle = {
   togglename: FeatureToggle.kopier_trygdetidsgrunnlag,
   enabled: false,
@@ -122,7 +121,6 @@ const vis_ikke_innvilget_periode: Toggle = {
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.sanksjon]: sanksjon,
-  [FeatureToggle.notater]: notater,
   [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,

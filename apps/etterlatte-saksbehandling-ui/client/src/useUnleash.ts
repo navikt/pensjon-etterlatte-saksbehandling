@@ -9,7 +9,6 @@ import { logger } from '~utils/logger'
 import { isPending } from '~shared/api/apiUtils'
 
 export const enum FeatureToggle {
-  sanksjon = 'sanksjon',
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',
   kopier_trygdetidsgrunnlag = 'kopier-trygdetidsgrunnlag',
   opprette_generell_oppgave = 'opprette-generell-oppgave',
@@ -53,8 +52,6 @@ const oppgave_til_journalpost: Toggle = {
   togglename: FeatureToggle.oppgave_til_journalpost,
   enabled: false,
 }
-
-const sanksjon: Toggle = { togglename: FeatureToggle.sanksjon, enabled: false }
 
 const overstyr_beregning_knapp: Toggle = {
   togglename: FeatureToggle.overstyr_beregning_knapp,
@@ -120,7 +117,6 @@ const vis_ikke_innvilget_periode: Toggle = {
 
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
-  [FeatureToggle.sanksjon]: sanksjon,
   [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,

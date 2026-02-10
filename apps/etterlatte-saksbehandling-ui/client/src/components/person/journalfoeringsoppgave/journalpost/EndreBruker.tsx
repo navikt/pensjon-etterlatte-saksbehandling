@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { Bruker, BrukerIdType } from '~shared/types/Journalpost'
 import React, { useEffect, useState } from 'react'
 import { Alert, BodyShort, Box, Button, CopyButton, Heading, HStack, Label, TextField, VStack } from '@navikt/ds-react'
@@ -77,7 +83,6 @@ export const EndreBruker = ({
       <Heading size="small" spacing>
         Bruker
       </Heading>
-
       {rediger ? (
         <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
           <VStack gap="space-8">

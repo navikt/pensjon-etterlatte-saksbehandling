@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'

@@ -11,7 +11,6 @@ export default function AvbrytBehandleJournalfoeringOppgave() {
       <Button variant="tertiary" onClick={() => setIsOpen(true)}>
         Avbryt
       </Button>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" className="padding-modal">
         <Modal.Body style={{ textAlign: 'center' }}>
           <Heading level="1" spacing size="medium" id="modal-heading">
@@ -27,7 +26,7 @@ export default function AvbrytBehandleJournalfoeringOppgave() {
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett
             </Button>
-            <Button variant="danger" onClick={() => navigate('/')}>
+            <Button data-color="danger" variant="primary" onClick={() => navigate('/')}>
               Ja, avbryt
             </Button>
           </HStack>

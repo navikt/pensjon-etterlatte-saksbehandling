@@ -134,7 +134,6 @@ export const FilterRad = ({
 
         {children}
       </HStack>
-
       <HStack gap="space-4">
         <Button
           onClick={() => hentAlleOppgaver()}

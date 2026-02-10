@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { BodyShort, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { NyBehandlingSkjema } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'

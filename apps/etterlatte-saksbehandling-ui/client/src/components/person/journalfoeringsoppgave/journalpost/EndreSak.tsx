@@ -74,7 +74,8 @@ export const EndreSak = ({
               <Table.DataCell>{fagsak?.tema || '-'}</Table.DataCell>
               <Table.DataCell>
                 <Button
-                  variant="tertiary-neutral"
+                  data-color="neutral"
+                  variant="tertiary"
                   size="small"
                   icon={<XMarkIcon title="Fjern kobling til saken" />}
                   style={{ float: 'right' }}
@@ -93,7 +94,8 @@ export const EndreSak = ({
                 <Table.DataCell>{temaFraSakstype(gjennySak.sakType)}</Table.DataCell>
                 <Table.DataCell>
                   <Button
-                    variant="secondary-neutral"
+                    data-color="neutral"
+                    variant="secondary"
                     size="small"
                     icon={<TabsAddIcon aria-hidden />}
                     iconPosition="right"
@@ -112,7 +114,8 @@ export const EndreSak = ({
                   <Table.DataCell>{temaFraSakstype(alternativSak.sakType)}</Table.DataCell>
                   <Table.DataCell>
                     <Button
-                      variant="secondary-neutral"
+                      data-color="neutral"
+                      variant="secondary"
                       size="small"
                       icon={<TabsAddIcon aria-hidden />}
                       iconPosition="right"

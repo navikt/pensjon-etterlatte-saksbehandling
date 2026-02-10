@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapResult } from '~shared/api/apiUtils'
@@ -29,35 +35,37 @@ export const Sakshistorikk = ({ sakId }: { sakId: number }) => {
   return mapResult(hentSaksendringerStatus, {
     pending: <Spinner label="Henter historikk..." />,
     success: (sakshistorikk) => (
-      <List as="ul" size="small">
-        {sakshistorikk.sort(sorterNyligsteFoerstOgBakover).map((endring) => (
-          <List.Item
-            title={tekstEndringstype[endring.endringstype]}
-            icon={<Ikon endringstype={endring.endringstype} />}
-            key={endring.id}
-          >
-            <Box
-              maxWidth="18rem"
-              borderWidth="0 0 1 0"
-              borderColor="border-neutral-subtle"
-              paddingBlock="space-0 space-2"
+      <Box marginBlock="space-12" asChild>
+        <List data-aksel-migrated-v8 as="ul" size="small">
+          {sakshistorikk.sort(sorterNyligsteFoerstOgBakover).map((endring) => (
+            <List.Item
+              title={tekstEndringstype[endring.endringstype]}
+              icon={<Ikon endringstype={endring.endringstype} />}
+              key={endring.id}
             >
-              <BodyShort size="small">
-                <Endringstekst endring={endring} />
-              </BodyShort>
-              {endring.kommentar && (
-                <Box marginBlock="space-2 space-2">
-                  <BodyShort size="small">{endring.kommentar}</BodyShort>
-                </Box>
-              )}
-              <Detail textColor="subtle">{formaterDatoMedKlokkeslett(endring.tidspunkt)}</Detail>
-              <Detail textColor="subtle">
-                {endring.identtype == Identtype.SAKSBEHANDLER ? endring.ident : 'Gjenny (automatisk)'}
-              </Detail>
-            </Box>
-          </List.Item>
-        ))}
-      </List>
+              <Box
+                maxWidth="18rem"
+                borderWidth="0 0 1 0"
+                borderColor="border-neutral-subtle"
+                paddingBlock="space-0 space-2"
+              >
+                <BodyShort size="small">
+                  <Endringstekst endring={endring} />
+                </BodyShort>
+                {endring.kommentar && (
+                  <Box marginBlock="space-2 space-2">
+                    <BodyShort size="small">{endring.kommentar}</BodyShort>
+                  </Box>
+                )}
+                <Detail textColor="subtle">{formaterDatoMedKlokkeslett(endring.tidspunkt)}</Detail>
+                <Detail textColor="subtle">
+                  {endring.identtype == Identtype.SAKSBEHANDLER ? endring.ident : 'Gjenny (automatisk)'}
+                </Detail>
+              </Box>
+            </List.Item>
+          ))}
+        </List>
+      </Box>
     ),
   })
 }

@@ -23,7 +23,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
 
     if (!loependeVedtak) {
       return (
-        <Tag key="annen-type" variant="warning">
+        <Tag data-color="warning" key="annen-type" variant="outline">
           Ubehandlet
         </Tag>
       )
@@ -31,7 +31,12 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
 
     if (loependeVedtak?.vedtakType === VedtakType.AVSLAG) {
       return (
-        <Tag key={VedtakType.AVSLAG} variant="error" icon={<XMarkIcon aria-hidden color="#C30000" />}>
+        <Tag
+          data-color="danger"
+          key={VedtakType.AVSLAG}
+          variant="outline"
+          icon={<XMarkIcon aria-hidden color="#C30000" />}
+        >
           Avslått den {loependeVedtak.datoAttestert && formaterDato(loependeVedtak.datoAttestert)}
         </Tag>
       )
@@ -40,7 +45,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
     if (ytelseErOpphoert(loependeVedtak)) {
       const opphoerer = ytelseOpphoersdato(loependeVedtak)
       return (
-        <Tag key={VedtakType.OPPHOER} variant="alt2">
+        <Tag data-color="meta-lime" key={VedtakType.OPPHOER} variant="outline">
           Opphørt fra {opphoerer && formaterDato(opphoerer)}
         </Tag>
       )
@@ -48,14 +53,24 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
 
     if (ytelseErLoependeMedOpphoerFremITid(loependeVedtak)) {
       return (
-        <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
+        <Tag
+          data-color="success"
+          key={VedtakType.INNVILGELSE}
+          variant="outline"
+          icon={<RecordFillIcon aria-hidden color="#06893A" />}
+        >
           Løpende til {loependeVedtak.opphoerFraOgMed && formaterDato(loependeVedtak.opphoerFraOgMed)}
         </Tag>
       )
     }
 
     return (
-      <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
+      <Tag
+        data-color="success"
+        key={VedtakType.INNVILGELSE}
+        variant="outline"
+        icon={<RecordFillIcon aria-hidden color="#06893A" />}
+      >
         Løpende fra {innvilgelsesVedtak?.virkningstidspunkt && formaterDato(innvilgelsesVedtak.virkningstidspunkt)}
       </Tag>
     )
@@ -69,12 +84,18 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
     <HStack gap="space-4">
       {mapResult(vedtakISakResult, {
         pending: <Loader />,
-        error: <Tag variant="error">Kunne ikke hente status</Tag>,
+        error: (
+          <Tag data-color="danger" variant="outline">
+            Kunne ikke hente status
+          </Tag>
+        ),
         success: (vedtakISak) => {
           return !!vedtakISak?.length ? (
             visStatusPaaSisteVedtak(vedtakISak)
           ) : (
-            <Tag variant="neutral">Ingen vedtak på sak</Tag>
+            <Tag data-color="neutral" variant="outline">
+              Ingen vedtak på sak
+            </Tag>
           )
         },
       })}

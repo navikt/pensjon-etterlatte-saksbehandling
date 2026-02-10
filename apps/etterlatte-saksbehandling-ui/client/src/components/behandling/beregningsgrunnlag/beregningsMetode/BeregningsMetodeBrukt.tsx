@@ -183,7 +183,7 @@ export const BeregningsMetodeBrukt = ({
               <Table.DataCell>
                 {navn}{' '}
                 {kunEnJuridiskForelder && (
-                  <Tag variant="alt1" size="small">
+                  <Tag data-color="meta-purple" variant="outline" size="small">
                     {tagTekstForKunEnJuridiskForelder(behandling)}
                   </Tag>
                 )}

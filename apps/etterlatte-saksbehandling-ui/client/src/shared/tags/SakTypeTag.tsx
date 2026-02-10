@@ -15,13 +15,13 @@ export const SakTypeTag = ({
   switch (sakType) {
     case SakType.BARNEPENSJON:
       return (
-        <Tag variant="alt2-moderate" icon={<ChildHairEyesIcon aria-hidden />} size={size}>
+        <Tag data-color="meta-lime" variant="moderate" icon={<ChildHairEyesIcon aria-hidden />} size={size}>
           {kort ? 'BP' : 'Barnepensjon'}
         </Tag>
       )
     case SakType.OMSTILLINGSSTOENAD:
       return (
-        <Tag variant="alt1-moderate" icon={<PlantIcon aria-hidden />} size={size}>
+        <Tag data-color="meta-purple" variant="moderate" icon={<PlantIcon aria-hidden />} size={size}>
           {kort ? 'OMS' : 'Omstillingsstønad'}
         </Tag>
       )

@@ -47,10 +47,9 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
   return (
     !erFerdigBehandlet(behandling.status) && (
       <>
-        <Button variant="danger" onClick={() => setErAapen(true)}>
+        <Button data-color="danger" variant="primary" onClick={() => setErAapen(true)}>
           Avslutt revurdering
         </Button>
-
         {mapResult(sakResult, {
           pending: <Spinner label="Henter sak..." />,
           error: (error) => <ApiErrorAlert>{error.detail ?? 'Kunne ikke hente sak'}</ApiErrorAlert>,
@@ -86,7 +85,8 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
                     Nei, fortsett revurderingen
                   </Button>
                   <Button
-                    variant="danger"
+                    data-color="danger"
+                    variant="primary"
                     onClick={() => avsluttEtteroppgjoerRevurdering(ident)}
                     loading={isPending(avbrytBehandlingResult)}
                   >

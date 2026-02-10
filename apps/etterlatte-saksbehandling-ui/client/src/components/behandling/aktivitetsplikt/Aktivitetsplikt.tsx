@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { Alert, BodyLong, BodyShort, Box, Button, Detail, Heading, List, ReadMore, VStack } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
@@ -78,7 +84,6 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
         errorMessage: 'En feil oppsto ved henting av data',
         apiResult: hentetAktivitetspliktOppfoelgingStatus,
       })}
-
       <Box paddingInline="space-16" paddingBlock="space-16 space-4">
         <Heading spacing size="large" level="1">
           Oppfølging av aktivitet
@@ -87,7 +92,6 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
           <strong>Avdødeds dødsdato: </strong> {avdoedesDoedsdato ? formaterDato(avdoedesDoedsdato) : 'Fant ingen dato'}
         </BodyShort>
       </Box>
-
       <VStack gap="space-8" paddingInline="space-16" paddingBlock="space-8">
         <VStack maxWidth="42.5rem">
           <Heading level="1" spacing size="medium">
@@ -170,14 +174,16 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
           {behandling.behandlingType === IBehandlingsType.REVURDERING && (
             <BodyLong spacing>
               Kopier inn i vurderingen over det alternativet som gjelder:
-              <List>
-                <List.Item>Ja, har sendt oppgave om at bruker har omstillingsstønad og trenger oppfølging</List.Item>
-                <List.Item>
-                  Ja, har sendt oppgave om at bruker har omstillingsstønad, vi ser at hen er under oppfølging, og at de
-                  må informere oss hvis brukers situasjon endrer seg
-                </List.Item>
-                <List.Item>Nei, unødvendig å sende oppgave</List.Item>
-              </List>
+              <Box marginBlock="space-16" asChild>
+                <List data-aksel-migrated-v8>
+                  <List.Item>Ja, har sendt oppgave om at bruker har omstillingsstønad og trenger oppfølging</List.Item>
+                  <List.Item>
+                    Ja, har sendt oppgave om at bruker har omstillingsstønad, vi ser at hen er under oppfølging, og at
+                    de må informere oss hvis brukers situasjon endrer seg
+                  </List.Item>
+                  <List.Item>Nei, unødvendig å sende oppgave</List.Item>
+                </List>
+              </Box>
             </BodyLong>
           )}
           <div>
@@ -200,7 +206,6 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
           </Box>
         )}
       </VStack>
-
       <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
         <BehandlingHandlingKnapper>
           <Button variant="primary" onClick={() => erFerdigUtfylt()}>

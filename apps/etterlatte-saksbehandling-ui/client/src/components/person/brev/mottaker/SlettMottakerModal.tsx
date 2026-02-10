@@ -32,12 +32,12 @@ export function SlettMottakerModal({ brevId, sakId, mottakerId, fjernMottaker }:
   return (
     <>
       <Button
-        variant="danger"
+        data-color="danger"
+        variant="primary"
         onClick={() => setIsOpen(true)}
         icon={<TrashIcon title="Slett mottaker" />}
         size="small"
       />
-
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Slett mottaker">
         <Modal.Body>
           <VStack gap="space-4">
@@ -54,7 +54,7 @@ export function SlettMottakerModal({ brevId, sakId, mottakerId, fjernMottaker }:
               <Button variant="secondary" disabled={isPending(slettMottakerResult)} onClick={avbryt}>
                 Avbryt
               </Button>
-              <Button variant="danger" loading={isPending(slettMottakerResult)} onClick={slett}>
+              <Button data-color="danger" variant="primary" loading={isPending(slettMottakerResult)} onClick={slett}>
                 Slett
               </Button>
             </HStack>

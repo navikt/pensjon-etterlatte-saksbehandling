@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import React, { useState } from 'react'
 import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'

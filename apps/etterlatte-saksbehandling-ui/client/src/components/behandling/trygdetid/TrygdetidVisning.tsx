@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { Box, Button, Heading } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'

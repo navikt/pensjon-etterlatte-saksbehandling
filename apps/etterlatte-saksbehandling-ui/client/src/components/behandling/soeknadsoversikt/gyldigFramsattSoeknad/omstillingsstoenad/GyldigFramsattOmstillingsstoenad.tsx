@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'

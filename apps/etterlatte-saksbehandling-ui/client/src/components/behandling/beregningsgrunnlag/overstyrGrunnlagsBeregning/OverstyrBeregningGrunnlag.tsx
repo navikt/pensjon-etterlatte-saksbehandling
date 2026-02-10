@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { Beregning, OverstyrBeregning } from '~shared/types/Beregning'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '../../felles/utils'

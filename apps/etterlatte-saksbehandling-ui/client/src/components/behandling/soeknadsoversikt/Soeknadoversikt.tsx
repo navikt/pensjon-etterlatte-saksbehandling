@@ -1,3 +1,10 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+*/
+
 import { Box, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'

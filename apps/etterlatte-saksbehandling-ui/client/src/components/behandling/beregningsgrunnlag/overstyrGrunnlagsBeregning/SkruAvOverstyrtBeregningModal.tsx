@@ -54,7 +54,8 @@ export const SkruAvOverstyrtBeregningModal = ({ behandlingId, setOverstyrt }: Pr
         </Modal.Body>
         <Modal.Footer>
           <Button
-            variant="danger"
+            data-color="danger"
+            variant="primary"
             loading={isPending(deaktiverOverstyrtBeregningResult)}
             onClick={skruAvOverstyrtBeregning}
           >

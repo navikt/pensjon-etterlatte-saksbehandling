@@ -12,25 +12,25 @@ export const UtenlandstilknytningTypeTag = ({
   switch (utenlandstilknytningType) {
     case UtlandstilknytningType.NASJONAL:
       return (
-        <Tag variant="info-moderate" size={size}>
+        <Tag data-color="info" variant="moderate" size={size}>
           Nasjonal
         </Tag>
       )
     case UtlandstilknytningType.BOSATT_UTLAND:
       return (
-        <Tag variant="warning-moderate" size={size}>
+        <Tag data-color="warning" variant="moderate" size={size}>
           Bosatt utland
         </Tag>
       )
     case UtlandstilknytningType.UTLANDSTILSNITT:
       return (
-        <Tag variant="warning-filled" size={size}>
+        <Tag data-color="warning" variant="strong" size={size}>
           Utlandstilsnitt
         </Tag>
       )
     default:
       return (
-        <Tag variant="error-filled" size={size}>
+        <Tag data-color="danger" variant="strong" size={size}>
           Ingen tilknytning
         </Tag>
       )

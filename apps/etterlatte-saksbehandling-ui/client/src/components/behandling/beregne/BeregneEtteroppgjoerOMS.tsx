@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import React, { useContext, useEffect } from 'react'
 import { hentBeregning } from '~shared/api/beregning'

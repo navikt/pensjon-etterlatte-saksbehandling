@@ -1,3 +1,10 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+*/
+
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useParams } from 'react-router-dom'

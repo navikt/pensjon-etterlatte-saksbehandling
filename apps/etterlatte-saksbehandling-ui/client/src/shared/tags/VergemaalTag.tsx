@@ -4,7 +4,7 @@ import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 
 export const VergemaalTag = ({ vergemaal }: { vergemaal?: VergemaalEllerFremtidsfullmakt }) =>
   vergemaal && (
-    <Tag variant="warning-filled" size="small">
+    <Tag data-color="warning" variant="strong" size="small">
       Vergemål
     </Tag>
   )

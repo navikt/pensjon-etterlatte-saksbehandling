@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import React, { useMemo, useState } from 'react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'

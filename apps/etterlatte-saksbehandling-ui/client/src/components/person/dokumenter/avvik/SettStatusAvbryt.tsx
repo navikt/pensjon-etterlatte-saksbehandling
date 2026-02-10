@@ -34,13 +34,16 @@ export const SettStatusAvbryt = ({ journalpost }: { journalpost: Journalpost }) 
       <Alert variant="info">
         Du markerer nå journalposten med status <strong>AVBRUTT</strong>
       </Alert>
-
       {mapFailure(settStatusAvbrytResult, (error) => (
         <ApiErrorAlert>{error.detail}</ApiErrorAlert>
       ))}
-
       <HStack justify="end">
-        <Button variant="danger" onClick={avbrytJournalpost} loading={isPending(settStatusAvbrytResult)}>
+        <Button
+          data-color="danger"
+          variant="primary"
+          onClick={avbrytJournalpost}
+          loading={isPending(settStatusAvbrytResult)}
+        >
           Avbryt journalpost
         </Button>
       </HStack>

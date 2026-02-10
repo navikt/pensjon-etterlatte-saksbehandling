@@ -106,13 +106,18 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
           </BodyLong>
           <br />
           <div className="flex">
-            <Button size="small" variant="danger" onClick={() => setIsOpen(true)} icon={<XMarkIcon aria-hidden />}>
+            <Button
+              data-color="danger"
+              size="small"
+              variant="primary"
+              onClick={() => setIsOpen(true)}
+              icon={<XMarkIcon aria-hidden />}
+            >
               Annuller behandling
             </Button>
           </div>
         </ExpansionCard.Content>
       </ExpansionCard>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Header>
           <Heading level="1" spacing size="medium" id="modal-heading">
@@ -185,7 +190,7 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(status)}>
               Nei, fortsett behandling
             </Button>
-            <Button variant="danger" onClick={handleSubmit(annuller)} loading={isPending(status)}>
+            <Button data-color="danger" variant="primary" onClick={handleSubmit(annuller)} loading={isPending(status)}>
               Ja, annuller behandling
             </Button>
           </HStack>

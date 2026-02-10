@@ -263,8 +263,8 @@ const KravpakkeUtlandBehandling = (props: {
                             <Fragment key={landIsoKode}>
                               {redigerbar ? (
                                 <Chips.Removable
+                                  data-color="accent"
                                   style={{ cursor: 'pointer' }}
-                                  variant="action"
                                   onClick={() => {
                                     if (redigerbar) {
                                       setLandAlleredeValgt(false)
@@ -278,7 +278,7 @@ const KravpakkeUtlandBehandling = (props: {
                                   {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
                                 </Chips.Removable>
                               ) : (
-                                <Chips.Toggle variant="neutral">
+                                <Chips.Toggle data-color="neutral">
                                   {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
                                 </Chips.Toggle>
                               )}

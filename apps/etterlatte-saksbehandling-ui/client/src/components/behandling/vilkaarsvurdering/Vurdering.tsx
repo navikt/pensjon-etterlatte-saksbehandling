@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { BodyShort, Box, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat, vurderVilkaar } from '~shared/api/vilkaarsvurdering'

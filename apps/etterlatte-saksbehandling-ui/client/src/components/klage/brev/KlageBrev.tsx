@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
 import { BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'

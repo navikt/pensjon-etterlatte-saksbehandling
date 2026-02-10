@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
 import { Route, Routes, useParams } from 'react-router-dom'

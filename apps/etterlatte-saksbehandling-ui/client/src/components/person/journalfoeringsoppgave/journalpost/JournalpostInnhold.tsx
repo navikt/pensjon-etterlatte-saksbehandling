@@ -1,3 +1,10 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+*/
+
 import { Box, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
@@ -8,8 +15,18 @@ import { formaterDato } from '~utils/formatering/dato'
 import { formaterJournalpostSakstype, formaterJournalpostStatus } from '~utils/formatering/formatering'
 
 const TemaTag = ({ journalpost }: { journalpost: Journalpost }) => {
-  if (temaTilhoererGjenny(journalpost)) return <Tag variant="success">{journalpost.tema}</Tag>
-  else return <Tag variant="error">{journalpost.tema}</Tag>
+  if (temaTilhoererGjenny(journalpost))
+    return (
+      <Tag data-color="success" variant="outline">
+        {journalpost.tema}
+      </Tag>
+    )
+  else
+    return (
+      <Tag data-color="danger" variant="outline">
+        {journalpost.tema}
+      </Tag>
+    )
 }
 
 const datotypeLabel = (datotype: Datotype, journalpost: Journalpost) => {

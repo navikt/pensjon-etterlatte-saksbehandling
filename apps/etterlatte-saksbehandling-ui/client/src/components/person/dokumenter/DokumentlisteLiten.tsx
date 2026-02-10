@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { Alert, BodyShort, Box, Button, Detail, Heading, HStack, Link } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ArrowDownIcon, ExternalLinkIcon } from '@navikt/aksel-icons'

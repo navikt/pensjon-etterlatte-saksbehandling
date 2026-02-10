@@ -79,7 +79,12 @@ export function AvbrytAktivitetspliktOppgave() {
                 }}
               />
 
-              <Button variant="danger" onClick={avbryt} loading={isPending(avbrytAktivitetspliktoppgaveResult)}>
+              <Button
+                data-color="danger"
+                variant="primary"
+                onClick={avbryt}
+                loading={isPending(avbrytAktivitetspliktoppgaveResult)}
+              >
                 Avbryt oppgave
               </Button>
             </HStack>

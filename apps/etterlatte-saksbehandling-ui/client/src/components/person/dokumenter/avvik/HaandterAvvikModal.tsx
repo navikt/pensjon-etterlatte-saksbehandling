@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { CogRotationIcon } from '@navikt/aksel-icons'
 import { BodyShort, Box, Button, Heading, Modal, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { useState } from 'react'

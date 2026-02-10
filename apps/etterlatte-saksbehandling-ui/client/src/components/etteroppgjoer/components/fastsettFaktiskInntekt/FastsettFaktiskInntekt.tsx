@@ -25,11 +25,10 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntekt
       <Heading size="large">Fastsett faktisk inntekt</Heading>
       <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
       <div>
-        <Tag variant="neutral">
+        <Tag data-color="neutral" variant="outline">
           {maanedNavn(forbehandling.innvilgetPeriode.fom)} - {maanedNavn(forbehandling.innvilgetPeriode.tom)}
         </Tag>
       </div>
-
       {faktiskInntektSkjemaErAapen && erRedigerbar ? (
         <FaktiskInntektSkjema
           setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}

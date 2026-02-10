@@ -15,19 +15,19 @@ export const AdressebeskyttelseGraderingTag = ({
       return null
     case AdressebeskyttelseGradering.FORTROLIG:
       return (
-        <Tag variant="warning" size={size} icon={<HouseIcon aria-hidden />}>
+        <Tag data-color="warning" variant="outline" size={size} icon={<HouseIcon aria-hidden />}>
           Fortrolig adresse
         </Tag>
       )
     case AdressebeskyttelseGradering.STRENGT_FORTROLIG:
       return (
-        <Tag variant="error" size={size} icon={<HouseIcon aria-hidden />}>
+        <Tag data-color="danger" variant="outline" size={size} icon={<HouseIcon aria-hidden />}>
           Strengt fortrolig adresse
         </Tag>
       )
     case AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND:
       return (
-        <Tag variant="error" size={size} icon={<HouseIcon aria-hidden />}>
+        <Tag data-color="danger" variant="outline" size={size} icon={<HouseIcon aria-hidden />}>
           Strengt fortrolig utland adresse
         </Tag>
       )

@@ -38,11 +38,10 @@ export default function OppsummeringKlagebehandling() {
     <FormWrapper $column>
       <Heading size="medium" spacing>
         Opprett klage fra oppgave{' '}
-        <Tag variant="success" size="medium">
+        <Tag data-color="success" variant="outline" size="medium">
           {formaterSakstype(oppgave.sakType)}
         </Tag>
       </Heading>
-
       <VStack gap="space-4">
         <Info label="Klage framsatt dato" tekst={formaterDato(mottattDato)} />
       </VStack>

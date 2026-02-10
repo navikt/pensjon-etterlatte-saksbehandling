@@ -1,3 +1,10 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+*/
+
 import { Alert, Box, Button, Heading, HStack, Modal, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'

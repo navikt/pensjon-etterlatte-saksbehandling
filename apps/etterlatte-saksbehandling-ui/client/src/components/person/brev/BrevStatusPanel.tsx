@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { IBrev } from '~shared/types/Brev'
 import { BodyShort, Box, Heading, Label } from '@navikt/ds-react'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'

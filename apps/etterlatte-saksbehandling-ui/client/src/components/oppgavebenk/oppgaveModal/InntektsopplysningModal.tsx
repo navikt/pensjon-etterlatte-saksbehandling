@@ -1,6 +1,19 @@
 import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import React, { useEffect, useState } from 'react'
-import { Alert, BodyShort, Button, Heading, HStack, Label, Link, List, Modal, Textarea, VStack } from '@navikt/ds-react'
+import {
+  Alert,
+  BodyShort,
+  Button,
+  Heading,
+  HStack,
+  Label,
+  Link,
+  List,
+  Modal,
+  Textarea,
+  VStack,
+  Box,
+} from '@navikt/ds-react'
 import { CalendarIcon, EyeIcon, FilePlusIcon } from '@navikt/aksel-icons'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -47,7 +60,6 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
       <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
         Se oppgave
       </Button>
-
       <Modal
         open={open}
         aria-labelledby="modal-heading"
@@ -81,33 +93,35 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
                       <VStack gap="space-4">
                         <BodyShort>Mottatt inntektsopplysning for neste år</BodyShort>
                         <BodyShort size="small">For å behandle denne oppgaven, følg disse stegene:</BodyShort>
-                        <List as="ol">
-                          <List.Item>
-                            <Link
-                              href={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
-                              target="_blank"
-                              inlineText
-                            >
-                              Gå til dokumentoversikten (åpnes i ny fane)
-                            </Link>{' '}
-                            for å se inntektsopplysningen.
-                          </List.Item>
-                          <List.Item>
-                            Vurder om det skal opprettes en revurdering, eller om det er nok å sende informasjon til{' '}
-                            {!!oppgave.fnr ? (
-                              <PersonLink fnr={oppgave.fnr} target="_blank">
-                                bruker
-                              </PersonLink>
-                            ) : (
-                              'bruker'
-                            )}
-                            .
-                          </List.Item>
-                          <List.Item>
-                            Ved revurdering, opprett en revurdering og velg årsak “endring av inntekt”.
-                          </List.Item>
-                          <List.Item>Ferdigstill denne oppgaven.</List.Item>
-                        </List>
+                        <Box marginBlock="space-16" asChild>
+                          <List data-aksel-migrated-v8 as="ol">
+                            <List.Item>
+                              <Link
+                                href={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
+                                target="_blank"
+                                inlineText
+                              >
+                                Gå til dokumentoversikten (åpnes i ny fane)
+                              </Link>{' '}
+                              for å se inntektsopplysningen.
+                            </List.Item>
+                            <List.Item>
+                              Vurder om det skal opprettes en revurdering, eller om det er nok å sende informasjon til{' '}
+                              {!!oppgave.fnr ? (
+                                <PersonLink fnr={oppgave.fnr} target="_blank">
+                                  bruker
+                                </PersonLink>
+                              ) : (
+                                'bruker'
+                              )}
+                              .
+                            </List.Item>
+                            <List.Item>
+                              Ved revurdering, opprett en revurdering og velg årsak “endring av inntekt”.
+                            </List.Item>
+                            <List.Item>Ferdigstill denne oppgaven.</List.Item>
+                          </List>
+                        </Box>
 
                         <VStack gap="space-2" maxWidth="20rem">
                           <Heading size="small">Ferdigstill oppgave</Heading>

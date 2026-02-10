@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'

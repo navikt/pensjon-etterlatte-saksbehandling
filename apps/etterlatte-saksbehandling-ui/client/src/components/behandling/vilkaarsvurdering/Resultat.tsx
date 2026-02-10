@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import styled from 'styled-components'
 import { VilkaarsvurderingKnapper } from './VilkaarsvurderingKnapper'

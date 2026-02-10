@@ -43,7 +43,6 @@ export const OppdaterIdentModal = ({
       <Button onClick={() => setIsOpen(true)} icon={<ArrowsCirclepathIcon aria-hidden />}>
         Oppdater ident
       </Button>
-
       <Modal
         open={isOpen}
         onClose={() => setIsOpen(false)}
@@ -60,25 +59,33 @@ export const OppdaterIdentModal = ({
               <HStack gap="space-4" justify="space-evenly">
                 <div>
                   <Heading size="xsmall">Ident i sak</Heading>
-                  <Tag variant="error">{sak.ident}</Tag>
+                  <Tag data-color="danger" variant="outline">
+                    {sak.ident}
+                  </Tag>
                 </div>
 
                 {!!samsvar ? (
                   <>
                     <div>
                       <Heading size="xsmall">Ident i Grunnlag</Heading>
-                      <Tag variant="error">{samsvar.fraGrunnlag}</Tag>
+                      <Tag data-color="danger" variant="outline">
+                        {samsvar.fraGrunnlag}
+                      </Tag>
                     </div>
 
                     <div>
                       <Heading size="xsmall">Ident i PDL</Heading>
-                      <Tag variant="success">{samsvar.fraPdl}</Tag>
+                      <Tag data-color="success" variant="outline">
+                        {samsvar.fraPdl}
+                      </Tag>
                     </div>
                   </>
                 ) : (
                   <div>
                     <Heading size="xsmall">Gjeldende ident i PDL</Heading>
-                    <Tag variant="success">{person?.foedselsnummer}</Tag>
+                    <Tag data-color="success" variant="outline">
+                      {person?.foedselsnummer}
+                    </Tag>
                   </div>
                 )}
               </HStack>

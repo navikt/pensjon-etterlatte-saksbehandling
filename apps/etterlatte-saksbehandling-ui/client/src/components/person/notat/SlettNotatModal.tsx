@@ -21,10 +21,15 @@ export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNota
 
   return (
     <>
-      <Button variant="danger" size="small" icon={<TrashIcon aria-hidden />} onClick={() => setIsOpen(true)}>
+      <Button
+        data-color="danger"
+        variant="primary"
+        size="small"
+        icon={<TrashIcon aria-hidden />}
+        onClick={() => setIsOpen(true)}
+      >
         Slett
       </Button>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Body>
           <Heading size="xsmall">{notat.tittel}</Heading>
@@ -38,7 +43,13 @@ export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNota
               Lukk
             </Button>
 
-            <Button variant="danger" icon={<TrashIcon aria-hidden />} onClick={slett} loading={isPending(slettStatus)}>
+            <Button
+              data-color="danger"
+              variant="primary"
+              icon={<TrashIcon aria-hidden />}
+              onClick={slett}
+              loading={isPending(slettStatus)}
+            >
               Slett
             </Button>
           </HStack>

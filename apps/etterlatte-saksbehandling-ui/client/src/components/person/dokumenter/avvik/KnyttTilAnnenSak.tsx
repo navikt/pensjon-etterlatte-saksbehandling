@@ -180,9 +180,7 @@ export const KnyttTilAnnenSak = ({
           </>
         ),
       })}
-
       <br />
-
       {mapResult(annenSakStatus, {
         initial: (
           <HStack gap="space-4" align="end">

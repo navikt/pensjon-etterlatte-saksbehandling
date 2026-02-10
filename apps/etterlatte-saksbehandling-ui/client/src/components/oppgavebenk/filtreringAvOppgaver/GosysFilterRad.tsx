@@ -62,7 +62,6 @@ export const GosysFilterRad = ({ hentAlleOppgaver, filter, setFilter, filterFoed
           ))}
         </Select>
       </HStack>
-
       <HStack gap="space-4">
         <Button
           onClick={() => hentAlleOppgaver()}

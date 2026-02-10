@@ -33,7 +33,7 @@ export function LenkeTilInntektOversikt() {
         ),
         success: ({ url }) => (
           <HStack gap="space-2">
-            <Tag variant="alt3" size="small">
+            <Tag data-color="info" variant="outline" size="small">
               Ai
             </Tag>
             <Link href={url} target="_blank">

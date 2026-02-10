@@ -39,7 +39,8 @@ export const SlettBrev = ({ brev }: { brev: IBrev }) => {
   return (
     <>
       <Button
-        variant="danger"
+        data-color="danger"
+        variant="primary"
         icon={<TrashIcon aria-hidden />}
         onClick={() => setIsOpen(true)}
         title="Slett brev"
@@ -47,7 +48,6 @@ export const SlettBrev = ({ brev }: { brev: IBrev }) => {
       >
         Slett
       </Button>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Slett brev">
         <Modal.Body>
           <BodyShort spacing>Er du sikker på at du vil slette brevet? Handlingen kan ikke angres.</BodyShort>
@@ -56,7 +56,7 @@ export const SlettBrev = ({ brev }: { brev: IBrev }) => {
             <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(slettBrevStatus)}>
               Nei, avbryt
             </Button>
-            <Button variant="danger" onClick={slett} loading={isPending(slettBrevStatus)}>
+            <Button data-color="danger" variant="primary" onClick={slett} loading={isPending(slettBrevStatus)}>
               Ja, slett
             </Button>
           </HStack>

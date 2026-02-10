@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import React, { useState } from 'react'
 import { Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { PlusIcon } from '@navikt/aksel-icons'

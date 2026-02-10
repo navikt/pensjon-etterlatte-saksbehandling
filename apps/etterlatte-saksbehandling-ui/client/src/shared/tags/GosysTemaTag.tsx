@@ -4,12 +4,28 @@ import { Tag } from '@navikt/ds-react'
 export const GosysTemaTag = ({ tema }: { tema: GosysTema }) => {
   switch (tema) {
     case 'EYO':
-      return <Tag variant="alt2-moderate">Omstillingsstønad</Tag>
+      return (
+        <Tag data-color="meta-lime" variant="moderate">
+          Omstillingsstønad
+        </Tag>
+      )
     case 'EYB':
-      return <Tag variant="alt1-moderate">Barnepensjon</Tag>
+      return (
+        <Tag data-color="meta-purple" variant="moderate">
+          Barnepensjon
+        </Tag>
+      )
     case 'PEN':
-      return <Tag variant="info-filled">Pensjon</Tag>
+      return (
+        <Tag data-color="info" variant="strong">
+          Pensjon
+        </Tag>
+      )
     default:
-      return <Tag variant="error-filled">Ukjent tema</Tag>
+      return (
+        <Tag data-color="danger" variant="strong">
+          Ukjent tema
+        </Tag>
+      )
   }
 }

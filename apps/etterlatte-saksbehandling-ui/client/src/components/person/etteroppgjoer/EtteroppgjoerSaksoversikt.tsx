@@ -48,17 +48,19 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
     <VStack gap="space-4">
       <Box padding="space-8" maxWidth="70rem">
         <h1>Etteroppgjør for {etteroppgjoer.inntektsaar}</h1>
-        <List as="ul">
-          {steg.map((step, idx) => (
-            <List.Item
-              key={step.status.join(',')}
-              icon={getIcon(currentIndex, idx)}
-              style={{ color: currentIndex >= idx ? 'black' : 'gray' }}
-            >
-              {step.text()}
-            </List.Item>
-          ))}
-        </List>
+        <Box marginBlock="space-16" asChild>
+          <List data-aksel-migrated-v8 as="ul">
+            {steg.map((step, idx) => (
+              <List.Item
+                key={step.status.join(',')}
+                icon={getIcon(currentIndex, idx)}
+                style={{ color: currentIndex >= idx ? 'black' : 'gray' }}
+              >
+                {step.text()}
+              </List.Item>
+            ))}
+          </List>
+        </Box>
       </Box>
       {tilbakestillEtteroppgjoerEnabled && (
         <Box padding="space-8" maxWidth="70rem">

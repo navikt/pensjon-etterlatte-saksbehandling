@@ -184,10 +184,10 @@ export const AktivitetspliktTimeline = ({
     <VStack gap="space-4">
       <HStack justify="end">
         <ToggleGroup
+          data-color="neutral"
           defaultValue="3"
           onChange={(value) => setSluttdato(addYears(doedsdato, Number(value)))}
           size="small"
-          variant="neutral"
         >
           <ToggleGroup.Item value="1">1 år</ToggleGroup.Item>
           <ToggleGroup.Item value="2">2 år</ToggleGroup.Item>

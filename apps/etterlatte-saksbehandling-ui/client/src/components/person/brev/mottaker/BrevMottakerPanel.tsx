@@ -1,3 +1,11 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+*/
+
 import { AdresseType, Mottaker, MottakerType } from '~shared/types/Brev'
 import { Alert, BodyShort, Box, Button, Heading, HStack, Loader, Tag, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
@@ -120,14 +128,13 @@ export function BrevMottakerPanel({
             </Box>
           ),
       })}
-
       <HStack gap="space-2" justify="space-between">
         <Heading spacing level="2" size="medium">
           <HStack gap="space-2">
             {flereMottakere ? formaterMottakerType(mottaker.type) : 'Mottaker'}
 
             {mottaker.adresse.adresseType === AdresseType.UTENLANDSKPOSTADRESSE && (
-              <Tag variant="alt1" size="small">
+              <Tag data-color="meta-purple" variant="outline" size="small">
                 Utenlandsk adresse
               </Tag>
             )}
@@ -155,9 +162,7 @@ export function BrevMottakerPanel({
           </HStack>
         )}
       </HStack>
-
       {flereMottakere ? <MottakerInnholdKompakt mottaker={mottaker} /> : <MottakerInnhold mottaker={mottaker} />}
-
       {!!mottaker.bestillingId && (
         <Box
           borderWidth="1 0 0 0"
@@ -169,7 +174,6 @@ export function BrevMottakerPanel({
           <Info label="DistribusjonID" tekst={mottaker.bestillingId} wide />
         </Box>
       )}
-
       <Box
         borderWidth="1 0 0 0"
         borderColor="border-neutral-subtle"
@@ -192,11 +196,9 @@ export function BrevMottakerPanel({
               ),
             })}
       </Box>
-
       {mapFailure(settHovedmottakerResult, (error) => (
         <ApiErrorAlert>{error.detail}</ApiErrorAlert>
       ))}
-
       {mottaker.type === MottakerType.KOPI && (
         <HStack justify="center" marginBlock="space-4 space-0">
           <Button
@@ -233,7 +235,6 @@ const MottakerInnholdKompakt = ({ mottaker }: { mottaker: Mottaker }) => {
         {foedselsnummer && foedselsnummer.value}
         {!!orgnummer && orgnummer}
       </BodyShort>
-
       <BodyShort as="div">
         {!adresse?.adresselinje1 && !adresse?.adresselinje2 && !adresse?.adresselinje3 ? (
           <Alert variant="warning" size="small" inline>
@@ -293,7 +294,6 @@ const MottakerInnhold = ({ mottaker }: { mottaker: Mottaker }) => {
       />
       {foedselsnummer && <Info label="Fødselsnummer" tekst={foedselsnummer.value} wide />}
       {orgnummer && <Info label="Org.nr." tekst={orgnummer} wide />}
-
       <Info
         wide
         label="Adresse"
@@ -311,7 +311,6 @@ const MottakerInnhold = ({ mottaker }: { mottaker: Mottaker }) => {
           </>
         }
       />
-
       <Info
         wide
         label="Postnummer-/sted"
@@ -329,7 +328,6 @@ const MottakerInnhold = ({ mottaker }: { mottaker: Mottaker }) => {
           )
         }
       />
-
       <Info
         wide
         label="Land"

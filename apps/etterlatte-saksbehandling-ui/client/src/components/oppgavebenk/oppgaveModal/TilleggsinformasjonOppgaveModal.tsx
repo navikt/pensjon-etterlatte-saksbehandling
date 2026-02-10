@@ -71,7 +71,6 @@ export const TilleggsinformasjonOppgaveModal = ({
       <Button onClick={() => setIsOpen(true)} size="small" icon={<EyeIcon aria-hidden />}>
         Se oppgave
       </Button>
-
       <DokumentVisningModal
         open={isOpen}
         onClose={() => setIsOpen(false)}
@@ -120,7 +119,8 @@ export const TilleggsinformasjonOppgaveModal = ({
 
             {kanRedigeres && erTildeltSaksbehandler && (
               <Button
-                variant="danger"
+                data-color="danger"
+                variant="primary"
                 onClick={handleSubmit(avslutt)}
                 loading={isPending(ferdigstillOppgaveStatus)}
                 disabled={!fileURL}

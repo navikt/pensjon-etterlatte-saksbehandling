@@ -30,16 +30,40 @@ export const AktivitetspliktStatusTagOgGyldig = ({
 export const AktivitetspliktStatusTag = ({ status }: { status: StatusPaaAktivitetsplikt }): ReactNode => {
   switch (status.aktivitetspliktStatus) {
     case AktivitetspliktStatus.OPPFYLT:
-      return <Tag variant="success">Aktivitetsplikt oppfylt fra {formaterDatoMedFallback(status.dato, '-')}</Tag>
+      return (
+        <Tag data-color="success" variant="outline">
+          Aktivitetsplikt oppfylt fra {formaterDatoMedFallback(status.dato, '-')}
+        </Tag>
+      )
     case AktivitetspliktStatus.IKKE_OPPFYLT:
-      return <Tag variant="error">Aktivitetsplikt ikke oppfylt fra {formaterDatoMedFallback(status.dato, '-')}</Tag>
+      return (
+        <Tag data-color="danger" variant="outline">
+          Aktivitetsplikt ikke oppfylt fra {formaterDatoMedFallback(status.dato, '-')}
+        </Tag>
+      )
     case AktivitetspliktStatus.UNNTAK:
-      return <Tag variant="alt2">Unntak fra aktivitetskrav til {formaterDatoMedFallback(status.dato, '-')}</Tag>
+      return (
+        <Tag data-color="meta-lime" variant="outline">
+          Unntak fra aktivitetskrav til {formaterDatoMedFallback(status.dato, '-')}
+        </Tag>
+      )
     case AktivitetspliktStatus.VARIG_UNNTAK:
-      return <Tag variant="info">Varig unntak fra aktivitetsplikt</Tag>
+      return (
+        <Tag data-color="info" variant="outline">
+          Varig unntak fra aktivitetsplikt
+        </Tag>
+      )
     case AktivitetspliktStatus.IKKE_VURDERT:
-      return <Tag variant="neutral">Aktivitetskrav ikke vurdert</Tag>
+      return (
+        <Tag data-color="neutral" variant="outline">
+          Aktivitetskrav ikke vurdert
+        </Tag>
+      )
     default:
-      return <Tag variant="neutral">Ingen status på aktivitet</Tag>
+      return (
+        <Tag data-color="neutral" variant="outline">
+          Ingen status på aktivitet
+        </Tag>
+      )
   }
 }

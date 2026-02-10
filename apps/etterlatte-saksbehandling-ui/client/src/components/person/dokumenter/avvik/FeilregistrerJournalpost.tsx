@@ -34,14 +34,13 @@ export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journal
           Kan ikke feilregistrere sakstilknytning når journalposten ikke er tilknyttet en sak
         </Alert>
       )}
-
       {mapFailure(feilSakstilknytningStatus, (error) => (
         <ApiErrorAlert>{error.detail}</ApiErrorAlert>
       ))}
-
       <HStack justify="end">
         <Button
-          variant="danger"
+          data-color="danger"
+          variant="primary"
           onClick={feilregistrer}
           loading={isPending(feilSakstilknytningStatus)}
           disabled={!journalpost.sak || isSuccess(feilSakstilknytningStatus)}

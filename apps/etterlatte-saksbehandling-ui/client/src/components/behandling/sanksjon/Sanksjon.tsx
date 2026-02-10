@@ -268,7 +268,7 @@ export const Sanksjon = ({
                             </Table.DataCell>
                             {redigerbar && (
                               <Table.DataCell>
-                                <HStack gap="2">
+                                <HStack gap="space-8">
                                   <Button
                                     size="small"
                                     variant="tertiary"

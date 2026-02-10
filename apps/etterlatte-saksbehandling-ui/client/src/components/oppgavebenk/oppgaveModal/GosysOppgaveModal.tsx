@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { Alert, BodyShort, Box, Button, Dropdown, Heading, HStack, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'

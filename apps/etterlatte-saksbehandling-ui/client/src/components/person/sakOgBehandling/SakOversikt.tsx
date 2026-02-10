@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'

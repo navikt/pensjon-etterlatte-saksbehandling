@@ -21,7 +21,7 @@ export const BostedsadresseDataCell = ({
               {!!bostedsadresser[index].postnr ? bostedsadresser[index].postnr : ''}
             </>
             {bostedsadresser[index].aktiv && visAktiv && (
-              <Tag variant="success" size="small">
+              <Tag data-color="success" variant="outline" size="small">
                 Gjeldende
               </Tag>
             )}

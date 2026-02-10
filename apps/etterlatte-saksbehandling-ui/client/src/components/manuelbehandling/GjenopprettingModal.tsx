@@ -21,7 +21,8 @@ export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveS
   return (
     <>
       <Button
-        variant="danger"
+        data-color="danger"
+        variant="primary"
         onClick={() => {
           setIsOpen(true)
         }}
@@ -29,7 +30,6 @@ export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveS
       >
         Avslutt oppgave uten behandling
       </Button>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Header>
           <Heading level="1" spacing size="medium" id="modal-heading">
@@ -57,7 +57,12 @@ export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveS
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(ferdigstillOppgaveStatus)}>
               Nei
             </Button>
-            <Button variant="danger" onClick={avbryt} loading={isPending(ferdigstillOppgaveStatus)}>
+            <Button
+              data-color="danger"
+              variant="primary"
+              onClick={avbryt}
+              loading={isPending(ferdigstillOppgaveStatus)}
+            >
               Ja, lukke oppgave
             </Button>
           </HStack>

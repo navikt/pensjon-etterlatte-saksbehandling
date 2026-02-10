@@ -35,11 +35,10 @@ export default function OpprettKlagebehandling() {
     <FormWrapper $column>
       <Heading size="medium" spacing>
         Opprett klage fra oppgave{' '}
-        <Tag variant="success" size="medium">
+        <Tag data-color="success" variant="outline" size="medium">
           {formaterSakstype(sakType)}
         </Tag>
       </Heading>
-
       <DatoVelger
         value={nyKlageRequest?.mottattDato ? new Date(nyKlageRequest.mottattDato) : undefined}
         onChange={(mottattDato) =>
@@ -53,9 +52,7 @@ export default function OpprettKlagebehandling() {
         label="Klagedato"
         description="Datoen klagen er framsatt av klager"
       />
-
       {feilmelding.length > 0 && <ApiErrorAlert>{feilmelding}</ApiErrorAlert>}
-
       <HStack gap="space-4" justify="center">
         <Button variant="secondary" onClick={tilbake}>
           Tilbake

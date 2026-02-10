@@ -13,7 +13,7 @@ export const AlderTag = ({ foedselsdato }: { foedselsdato: Date }): ReactNode =>
 
   return (
     <AlderWrapper>
-      <Tag variant="info" size="small">
+      <Tag data-color="info" variant="outline" size="small">
         {utregnAlder(foedselsdato)} år
       </Tag>
     </AlderWrapper>

@@ -302,7 +302,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
       <Table.DataCell>
         {mapNavn(trygdetid.ident, personopplysninger)}{' '}
         {erEnesteJuridiskeForelder && (
-          <Tag variant="alt1" size="small">
+          <Tag data-color="meta-purple" variant="outline" size="small">
             {tagTekstForKunEnJuridiskForelder(behandling)}
           </Tag>
         )}

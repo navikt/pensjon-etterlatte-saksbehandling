@@ -171,7 +171,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       <Info
         label="Type"
         tekst={
-          <Tag variant="success" size="small">
+          <Tag data-color="success" variant="outline" size="small">
             {formaterSakstype(oppgave.sakType)}
           </Tag>
         }
@@ -179,7 +179,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       <Info
         label="Status"
         tekst={
-          <Tag size="small" variant="alt1">
+          <Tag data-color="meta-purple" size="small" variant="outline">
             {formaterOppgaveStatus(oppgave.status)}
           </Tag>
         }

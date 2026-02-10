@@ -59,10 +59,9 @@ export function AvsluttOmgjoeringsoppgave({ oppgave }: { oppgave: OppgaveDTO }) 
         Hvis vedtaket allikevel ikke skulle omgjøres, eller det allerede har blitt omgjort i en annen revurdering kan
         denne oppgaven avsluttes.
       </BodyShort>
-
       {visSkjema ? (
         <form onSubmit={handleSubmit(avsluttOmgjoering)}>
-          <VStack gap="4">
+          <VStack gap="space-16">
             <ControlledRadioGruppe
               name="hvorforAvsluttes"
               control={control}
@@ -132,7 +131,7 @@ export function AvsluttOmgjoeringsoppgave({ oppgave }: { oppgave: OppgaveDTO }) 
               ),
             })}
 
-            <HStack gap="4">
+            <HStack gap="space-16">
               <Button
                 variant="secondary"
                 size="small"

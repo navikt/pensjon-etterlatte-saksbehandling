@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { ISak } from '~shared/types/sak'
 import { Box, Heading, Table } from '@navikt/ds-react'
 import { formaterSakstype } from '~utils/formatering/formatering'

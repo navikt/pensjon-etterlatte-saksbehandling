@@ -1,3 +1,10 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+*/
+
 import React, { useEffect } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'

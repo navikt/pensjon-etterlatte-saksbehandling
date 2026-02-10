@@ -4,7 +4,7 @@ import { formaterDato } from '~utils/formatering/dato'
 
 export const DoedsdatoTag = ({ doedsdato }: { doedsdato?: Date }) =>
   doedsdato && (
-    <Tag variant="neutral-filled" size="small">
+    <Tag data-color="neutral" variant="strong" size="small">
       &#10013; {formaterDato(doedsdato)}
     </Tag>
   )

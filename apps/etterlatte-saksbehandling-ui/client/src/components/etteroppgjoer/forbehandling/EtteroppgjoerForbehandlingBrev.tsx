@@ -1,3 +1,10 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+*/
+
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import React, { useEffect, useState } from 'react'

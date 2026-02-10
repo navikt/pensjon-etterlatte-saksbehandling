@@ -70,11 +70,13 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
                     <Table.DataCell>{notat.tittel}</Table.DataCell>
                     <Table.DataCell>
                       {!!notat.journalpostId ? (
-                        <Tag variant="success">
+                        <Tag data-color="success" variant="outline">
                           <CheckmarkIcon aria-hidden /> Journalført
                         </Tag>
                       ) : (
-                        <Tag variant="neutral">Under arbeid</Tag>
+                        <Tag data-color="neutral" variant="outline">
+                          Under arbeid
+                        </Tag>
                       )}
                     </Table.DataCell>
                     <Table.DataCell>{formaterDatoMedKlokkeslett(notat.opprettet)}</Table.DataCell>
@@ -113,9 +115,7 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
           </Table>
         ),
       })}
-
       <br />
-
       {mapSuccess(sakResult, ({ sak }) => (
         <NyttNotatModal sakId={sak.id} leggTilNotat={(notat) => setNotater([...notater, notat])} />
       ))}

@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { Alert, BodyShort, Box, Button, Heading, HStack, Link, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { JaNei, JaNeiRec, mapBooleanToJaNei } from '~shared/types/ISvar'

@@ -1,3 +1,12 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+  - borderColor=border-neutral-subtle
+*/
+
 import { BodyShort, Box, HStack, Label, Table, Tag, Tooltip, VStack } from '@navikt/ds-react'
 import {
   ForventetInntektHjelpeTekst,
@@ -70,11 +79,11 @@ export const AvkortingInntektTabell = ({
             <Table.ExpandableRow key={index} content={<InntektDetaljer avkortingGrunnlag={avkortingGrunnlag} />}>
               <Table.DataCell key="InntektType">
                 {erEtteroppgjoersAar(avkortingGrunnlag) ? (
-                  <Tag variant="success">
+                  <Tag data-color="success" variant="outline">
                     {erForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
                   </Tag>
                 ) : (
-                  <Tag variant="alt3">
+                  <Tag data-color="info" variant="outline">
                     {erForventetInntekt(avkortingGrunnlag) ? 'Forventet inntekt' : 'Faktisk inntekt'}
                   </Tag>
                 )}
@@ -101,9 +110,13 @@ export const AvkortingInntektTabell = ({
               </Table.DataCell>
               <Table.DataCell key="Aar">
                 {erEtteroppgjoersAar(avkortingGrunnlag) ? (
-                  <Tag variant="success">{aarFraDatoString(avkortingGrunnlag.fom)}</Tag>
+                  <Tag data-color="success" variant="outline">
+                    {aarFraDatoString(avkortingGrunnlag.fom)}
+                  </Tag>
                 ) : (
-                  <Tag variant="alt3">{aarFraDatoString(avkortingGrunnlag.fom)}</Tag>
+                  <Tag data-color="info" variant="outline">
+                    {aarFraDatoString(avkortingGrunnlag.fom)}
+                  </Tag>
                 )}
               </Table.DataCell>
               <Table.DataCell key="Periode">

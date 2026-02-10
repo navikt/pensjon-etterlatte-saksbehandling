@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'

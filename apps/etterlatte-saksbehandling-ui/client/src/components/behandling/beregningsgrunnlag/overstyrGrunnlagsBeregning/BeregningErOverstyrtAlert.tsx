@@ -10,11 +10,13 @@ export const BeregningErOverstyrtAlert = () => {
           Denne saken har overstyrt beregning. Sjekk om du kan skru av overstyrt beregning. Husk at saken da må
           revurderes fra første virkningstidspunkt /konverteringstidspunkt.
           <BodyShort size="small">Saker som fortsatt trenger overstyrt beregning er:</BodyShort>
-          <List as="ul" size="small">
-            {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
-              <List.Item key={key}>{value}</List.Item>
-            ))}
-          </List>
+          <Box marginBlock="space-12" asChild>
+            <List data-aksel-migrated-v8 as="ul" size="small">
+              {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
+                <List.Item key={key}>{value}</List.Item>
+              ))}
+            </List>
+          </Box>
         </VStack>
       </Alert>
     </Box>

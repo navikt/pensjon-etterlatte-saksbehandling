@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { DokumentInfo } from '~shared/types/Journalpost'
 import { Alert, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'

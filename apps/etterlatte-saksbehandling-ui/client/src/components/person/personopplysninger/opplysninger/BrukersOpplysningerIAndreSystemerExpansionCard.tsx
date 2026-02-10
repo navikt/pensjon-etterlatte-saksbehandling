@@ -17,7 +17,7 @@ export const BrukersOpplysningerIAndreSystemerExpansionCard = ({ fnr }: { fnr: s
       <ExpansionCard.Content>
         <HStack gap="space-8">
           <HStack gap="space-2">
-            <Tag variant="alt3" size="small">
+            <Tag data-color="info" variant="outline" size="small">
               Go
             </Tag>
             <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${fnr}`} target="_blank">
@@ -25,7 +25,7 @@ export const BrukersOpplysningerIAndreSystemerExpansionCard = ({ fnr }: { fnr: s
             </Link>
           </HStack>
           <HStack gap="space-2">
-            <Tag variant="alt3" size="small">
+            <Tag data-color="info" variant="outline" size="small">
               Py
             </Tag>
             <Link href={`${configContext['psakUrl']}/brukeroversikt/fnr=${fnr}`} target="_blank">
@@ -33,7 +33,7 @@ export const BrukersOpplysningerIAndreSystemerExpansionCard = ({ fnr }: { fnr: s
             </Link>
           </HStack>
           <HStack gap="space-2">
-            <Tag variant="alt3" size="small">
+            <Tag data-color="info" variant="outline" size="small">
               Mo
             </Tag>
             <Link href={`${configContext['modiapersonoversiktUrl']}/person/${fnr}`} target="_blank">

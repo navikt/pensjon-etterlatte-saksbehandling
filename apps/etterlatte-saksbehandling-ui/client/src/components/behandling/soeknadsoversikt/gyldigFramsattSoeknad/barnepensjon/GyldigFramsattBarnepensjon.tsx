@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'

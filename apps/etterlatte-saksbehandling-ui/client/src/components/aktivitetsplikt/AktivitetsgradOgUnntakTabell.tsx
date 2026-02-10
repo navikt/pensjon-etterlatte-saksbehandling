@@ -21,12 +21,24 @@ function TagForAktivitetEllerUnntak(props: {
 }) {
   const { aktivitetEllerUnntak } = props
   if (erAktivitetsgrad(aktivitetEllerUnntak)) {
-    return <Tag variant="alt3">Aktivitetsgrad</Tag>
+    return (
+      <Tag data-color="info" variant="outline">
+        Aktivitetsgrad
+      </Tag>
+    )
   }
   if (aktivitetEllerUnntak.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT) {
-    return <Tag variant="alt1">Varig unntak</Tag>
+    return (
+      <Tag data-color="meta-purple" variant="outline">
+        Varig unntak
+      </Tag>
+    )
   }
-  return <Tag variant="alt2">Unntak</Tag>
+  return (
+    <Tag data-color="meta-lime" variant="outline">
+      Unntak
+    </Tag>
+  )
 }
 
 export function AktivitetsgradOgUnntakTabell({

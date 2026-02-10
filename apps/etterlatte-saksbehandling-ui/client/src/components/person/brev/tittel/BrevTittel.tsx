@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import React, { useState } from 'react'
 import { Alert, BodyShort, Box, Heading, HStack } from '@navikt/ds-react'
 import { BrevTittelModal } from '~components/person/brev/tittel/BrevTittelModal'

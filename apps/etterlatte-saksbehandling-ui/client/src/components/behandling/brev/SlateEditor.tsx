@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { createEditor } from 'slate'
 import { Editable, RenderLeafProps, Slate, useSlate, withReact } from 'slate-react'
 import { withHistory } from 'slate-history'

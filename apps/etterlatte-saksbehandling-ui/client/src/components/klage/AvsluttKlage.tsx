@@ -118,9 +118,10 @@ export default function AvsluttKlage() {
         />
         <HStack gap="space-4">
           <Button
+            data-color="danger"
             type="button"
             size="small"
-            variant="danger"
+            variant="primary"
             onClick={() => trigger().then((success) => success && setIsOpen(true))}
           >
             Avslutt sak
@@ -149,12 +150,12 @@ export default function AvsluttKlage() {
             errorMessage: 'Det oppsto en feil ved avslutning av saken',
           })}
         </Modal.Body>
-
         <Modal.Footer>
           <Button
+            data-color="danger"
             type="submit"
             form="avslutt-klage-form"
-            variant="danger"
+            variant="primary"
             loading={isPending(avsluttKlageStatus)}
             style={{ marginLeft: 'auto' }}
           >

@@ -5,63 +5,147 @@ import { Tag } from '@navikt/ds-react'
 export const OppgavetypeTag = ({ oppgavetype }: { oppgavetype: Oppgavetype }) => {
   switch (oppgavetype) {
     case Oppgavetype.FOERSTEGANGSBEHANDLING:
-      return <Tag variant="success">Førstegangsbehandling</Tag>
+      return (
+        <Tag data-color="success" variant="outline">
+          Førstegangsbehandling
+        </Tag>
+      )
 
     case Oppgavetype.REVURDERING:
-      return <Tag variant="warning">Revurdering</Tag>
+      return (
+        <Tag data-color="warning" variant="outline">
+          Revurdering
+        </Tag>
+      )
 
     case Oppgavetype.VURDER_KONSEKVENS:
-      return <Tag variant="alt1">Hendelse</Tag>
+      return (
+        <Tag data-color="meta-purple" variant="outline">
+          Hendelse
+        </Tag>
+      )
 
     case Oppgavetype.MANGLER_SOEKNAD:
-      return <Tag variant="neutral-moderate">Mangler søknad</Tag>
+      return (
+        <Tag data-color="neutral" variant="moderate">
+          Mangler søknad
+        </Tag>
+      )
 
     case Oppgavetype.KRAVPAKKE_UTLAND:
-      return <Tag variant="warning-moderate">Kravpakke utland</Tag>
+      return (
+        <Tag data-color="warning" variant="moderate">
+          Kravpakke utland
+        </Tag>
+      )
 
     case Oppgavetype.KLAGE:
-      return <Tag variant="error">Klage</Tag>
+      return (
+        <Tag data-color="danger" variant="outline">
+          Klage
+        </Tag>
+      )
 
     case Oppgavetype.KLAGE_SVAR_KABAL:
-      return <Tag variant="error">Klage svar KA</Tag>
+      return (
+        <Tag data-color="danger" variant="outline">
+          Klage svar KA
+        </Tag>
+      )
 
     case Oppgavetype.OMGJOERING:
-      return <Tag variant="alt1-moderate">Omgjøring</Tag>
+      return (
+        <Tag data-color="meta-purple" variant="moderate">
+          Omgjøring
+        </Tag>
+      )
 
     case Oppgavetype.TILBAKEKREVING:
-      return <Tag variant="info">Tilbakekreving</Tag>
+      return (
+        <Tag data-color="info" variant="outline">
+          Tilbakekreving
+        </Tag>
+      )
 
     case Oppgavetype.JOURNALFOERING:
-      return <Tag variant="alt2">Journalføring</Tag>
+      return (
+        <Tag data-color="meta-lime" variant="outline">
+          Journalføring
+        </Tag>
+      )
 
     case Oppgavetype.TILLEGGSINFORMASJON:
-      return <Tag variant="alt2">Tilleggsinformasjon</Tag>
+      return (
+        <Tag data-color="meta-lime" variant="outline">
+          Tilleggsinformasjon
+        </Tag>
+      )
 
     case Oppgavetype.OPPFOELGING:
-      return <Tag variant="alt3-filled">Oppfølging</Tag>
+      return (
+        <Tag data-color="info" variant="strong">
+          Oppfølging
+        </Tag>
+      )
 
     case Oppgavetype.ETTEROPPGJOER:
     case Oppgavetype.ETTEROPPGJOER_OPPRETT_REVURDERING:
-      return <Tag variant="alt1-filled">Etteroppgjør</Tag>
+      return (
+        <Tag data-color="meta-purple" variant="strong">
+          Etteroppgjør
+        </Tag>
+      )
 
     case Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG:
-      return <Tag variant="alt3-moderate">Gjenoppretting</Tag>
+      return (
+        <Tag data-color="info" variant="moderate">
+          Gjenoppretting
+        </Tag>
+      )
     case Oppgavetype.AKTIVITETSPLIKT:
     case Oppgavetype.AKTIVITETSPLIKT_12MND:
     case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
-      return <Tag variant="alt3-filled">Aktivitetsplikt</Tag>
+      return (
+        <Tag data-color="info" variant="strong">
+          Aktivitetsplikt
+        </Tag>
+      )
     case Oppgavetype.GENERELL_OPPGAVE:
-      return <Tag variant="info">Generell oppgave</Tag>
+      return (
+        <Tag data-color="info" variant="outline">
+          Generell oppgave
+        </Tag>
+      )
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
-      return <Tag variant="info">Årlig inntektsjustering</Tag>
+      return (
+        <Tag data-color="info" variant="outline">
+          Årlig inntektsjustering
+        </Tag>
+      )
     case Oppgavetype.INNTEKTSOPPLYSNING:
-      return <Tag variant="alt3">Inntektsopplysning</Tag>
+      return (
+        <Tag data-color="info" variant="outline">
+          Inntektsopplysning
+        </Tag>
+      )
     case Oppgavetype.MANUELL_UTSENDING_BREV:
-      return <Tag variant="info">Manuell brevutsending</Tag>
+      return (
+        <Tag data-color="info" variant="outline">
+          Manuell brevutsending
+        </Tag>
+      )
     case Oppgavetype.MELDT_INN_ENDRING:
-      return <Tag variant="alt1-moderate">Meldt inn endring</Tag>
+      return (
+        <Tag data-color="meta-purple" variant="moderate">
+          Meldt inn endring
+        </Tag>
+      )
     default:
-      return <Tag variant="error-filled">Ukjent oppgave</Tag>
+      return (
+        <Tag data-color="danger" variant="strong">
+          Ukjent oppgave
+        </Tag>
+      )
   }
 }

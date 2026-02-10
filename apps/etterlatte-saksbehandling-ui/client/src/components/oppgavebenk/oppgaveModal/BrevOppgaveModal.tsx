@@ -55,7 +55,6 @@ export const BrevOppgaveModal = ({
       <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setIsOpen(true)}>
         Se oppgave
       </Button>
-
       <Modal
         open={isOpen}
         aria-labelledby="modal-heading"
@@ -134,7 +133,12 @@ export const BrevOppgaveModal = ({
               ))}
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button variant="danger" onClick={handleSubmit(avslutt)} loading={isPending(ferdigstillOppgaveStatus)}>
+                <Button
+                  data-color="danger"
+                  variant="primary"
+                  onClick={handleSubmit(avslutt)}
+                  loading={isPending(ferdigstillOppgaveStatus)}
+                >
                   Avslutt oppgave
                 </Button>
               )}

@@ -43,7 +43,8 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
   return (
     <>
       <Button
-        variant="danger"
+        data-color="danger"
+        variant="primary"
         icon={<ArrowUndoIcon aria-hidden />}
         onClick={() => setIsOpen(true)}
         title="Marker som utgår"
@@ -51,7 +52,6 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
       >
         Utgår
       </Button>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Slett brev" header={{ heading: 'Brev utgår' }}>
         <Modal.Body>
           <VStack gap="space-4">
@@ -104,7 +104,13 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
               <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(brevUtgaarResult)}>
                 Nei, avbryt
               </Button>
-              <Button variant="danger" onClick={utgaar} loading={isPending(brevUtgaarResult)} disabled={!kommentar}>
+              <Button
+                data-color="danger"
+                variant="primary"
+                onClick={utgaar}
+                loading={isPending(brevUtgaarResult)}
+                disabled={!kommentar}
+              >
                 Ja, brevet utgår
               </Button>
             </HStack>

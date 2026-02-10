@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { ReactNode } from 'react'
 import { Box } from '@navikt/ds-react'
 

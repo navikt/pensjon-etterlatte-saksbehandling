@@ -5,20 +5,52 @@ import { Tag } from '@navikt/ds-react'
 export const OppgavestatusTag = ({ oppgavestatus }: { oppgavestatus: Oppgavestatus }) => {
   switch (oppgavestatus) {
     case Oppgavestatus.NY:
-      return <Tag variant="alt1">Ny</Tag>
+      return (
+        <Tag data-color="meta-purple" variant="outline">
+          Ny
+        </Tag>
+      )
     case Oppgavestatus.UNDER_BEHANDLING:
-      return <Tag variant="info">Under behandling</Tag>
+      return (
+        <Tag data-color="info" variant="outline">
+          Under behandling
+        </Tag>
+      )
     case Oppgavestatus.ATTESTERING:
-      return <Tag variant="info">Attestering</Tag>
+      return (
+        <Tag data-color="info" variant="outline">
+          Attestering
+        </Tag>
+      )
     case Oppgavestatus.UNDERKJENT:
-      return <Tag variant="warning">Underkjent</Tag>
+      return (
+        <Tag data-color="warning" variant="outline">
+          Underkjent
+        </Tag>
+      )
     case Oppgavestatus.PAA_VENT:
-      return <Tag variant="warning">På vent</Tag>
+      return (
+        <Tag data-color="warning" variant="outline">
+          På vent
+        </Tag>
+      )
     case Oppgavestatus.FERDIGSTILT:
-      return <Tag variant="success">Ferdigstilt</Tag>
+      return (
+        <Tag data-color="success" variant="outline">
+          Ferdigstilt
+        </Tag>
+      )
     case Oppgavestatus.FEILREGISTRERT:
-      return <Tag variant="error">Feilregistrert</Tag>
+      return (
+        <Tag data-color="danger" variant="outline">
+          Feilregistrert
+        </Tag>
+      )
     case Oppgavestatus.AVBRUTT:
-      return <Tag variant="error">Avbrutt</Tag>
+      return (
+        <Tag data-color="danger" variant="outline">
+          Avbrutt
+        </Tag>
+      )
   }
 }

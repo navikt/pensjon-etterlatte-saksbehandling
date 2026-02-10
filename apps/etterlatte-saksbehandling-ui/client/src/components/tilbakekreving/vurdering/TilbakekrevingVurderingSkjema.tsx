@@ -1,3 +1,9 @@
+/*
+TODO: Aksel Box migration:
+Could not migrate the following:
+  - borderColor=border-neutral-subtle
+*/
+
 import { Box, Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,

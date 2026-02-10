@@ -52,7 +52,6 @@ export const GeneriskOppgaveModal = ({
       <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
         Se oppgave
       </Button>
-
       <Modal
         open={open}
         aria-labelledby="modal-heading"
@@ -95,7 +94,12 @@ export const GeneriskOppgaveModal = ({
               </Button>
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button variant="danger" onClick={handleSubmit(avslutt)} loading={isPending(ferdigstillOppgaveStatus)}>
+                <Button
+                  data-color="danger"
+                  variant="primary"
+                  onClick={handleSubmit(avslutt)}
+                  loading={isPending(ferdigstillOppgaveStatus)}
+                >
                   Avslutt oppgave
                 </Button>
               )}

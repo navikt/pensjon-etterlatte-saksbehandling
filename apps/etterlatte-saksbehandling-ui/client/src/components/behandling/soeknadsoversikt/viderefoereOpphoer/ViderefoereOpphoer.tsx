@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { IDetaljertBehandling, ViderefoertOpphoer } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
 import { useEffect, useState } from 'react'
@@ -53,7 +47,7 @@ export const ViderefoereOpphoer = ({
         minWidth="18.75rem"
         width="10rem"
         borderWidth="0 0 0 2"
-        borderColor="border-neutral-subtle"
+        borderColor="neutral-subtle"
       >
         {mapResult(hentVilkaartyperResult, {
           initial: <Alert variant="warning">Virkningstidspunkt må være satt for å sette opphør fra og med</Alert>,

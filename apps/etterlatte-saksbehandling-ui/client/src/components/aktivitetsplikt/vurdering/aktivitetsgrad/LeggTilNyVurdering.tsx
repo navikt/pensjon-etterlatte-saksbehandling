@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import React, { useState } from 'react'
 import { Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { PlusIcon } from '@navikt/aksel-icons'
@@ -34,7 +28,7 @@ export function LeggTilNyVurdering(props: { doedsdato?: Date }) {
   }
 
   return (
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <VStack gap="space-6">
         <Heading size="medium">
           {vurderingType === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER

@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Box, Heading, VStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -74,7 +68,7 @@ export const AktivitetspliktVurdering = ({
 
   const typeVurdering6eller12MndVurdering = typeVurderingFraDoedsdato(doedsdato)
   return (
-    <Box maxWidth="120rem" paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+    <Box maxWidth="120rem" paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <VStack gap="space-6">
         <VStack gap="space-2">
           <Heading size="medium" level="2">

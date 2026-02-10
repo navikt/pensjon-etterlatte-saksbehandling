@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { CogRotationIcon } from '@navikt/aksel-icons'
 import { BodyShort, Box, Button, Heading, Modal, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { useState } from 'react'
@@ -51,7 +45,7 @@ export const HaandterAvvikModal = ({
         </Modal.Header>
 
         <Modal.Body>
-          <Box borderWidth="1" borderColor="border-neutral-subtle" padding="space-4">
+          <Box borderWidth="1" borderColor="neutral-subtle" padding="space-4">
             <Heading size="xsmall" spacing>
               Journalpostdetaljer
             </Heading>

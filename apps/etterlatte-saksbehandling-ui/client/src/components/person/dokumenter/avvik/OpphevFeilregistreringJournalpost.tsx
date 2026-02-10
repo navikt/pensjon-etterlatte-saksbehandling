@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Alert, Box, Button, HStack, Loader, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -36,7 +30,7 @@ export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost
     <VStack gap="space-4">
       <Alert variant="info">Du opphever nå status feilregistrert på journalposten</Alert>
 
-      <Box borderWidth="1" borderColor="border-neutral-subtle" padding="space-4">
+      <Box borderWidth="1" borderColor="neutral-subtle" padding="space-4">
         <VStack gap="space-4">
           <Info label="Sakstype" tekst={journalpost.sak?.sakstype || '-'} />
           <Info label="FagsakId" tekst={journalpost.sak?.fagsakId || '-'} />

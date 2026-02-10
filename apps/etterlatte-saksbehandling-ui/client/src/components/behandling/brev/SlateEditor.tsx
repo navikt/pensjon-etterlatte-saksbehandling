@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { createEditor } from 'slate'
 import { Editable, RenderLeafProps, Slate, useSlate, withReact } from 'slate-react'
 import { withHistory } from 'slate-history'
@@ -31,7 +25,7 @@ export default function SlateEditor({ value, onChange, readonly, editKey = '' }:
     <EditorBox borderWidth="1">
       <Slate editor={editor} onChange={(text) => onChange(text, editKey)} initialValue={value}>
         {!readonly && (
-          <Box paddingInline="space-4" paddingBlock="space-2" borderWidth="0 0 1 0" borderColor="border-neutral-subtle">
+          <Box paddingInline="space-4" paddingBlock="space-2" borderWidth="0 0 1 0" borderColor="neutral-subtle">
             <HStack gap="space-4">
               <BlockButton format="heading-two" icon="H2" />
               <BlockButton format="heading-three" icon="H3" />

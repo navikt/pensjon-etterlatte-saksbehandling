@@ -58,7 +58,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
 export const StegMenyBox = styled(Box)`
   padding: var(--ax-space-16) 0 var(--ax-space-16) var(--ax-space-16);
   border-left: 0.4rem solid var(--ax-border-accent);
-  border-bottom: 1px solid var(--ax-border-neutral-subtle);
+  border-bottom: 1px solid var(--ax-neutral-subtle);
   background: var(--ax-bg-neutral-soft);
 `
 

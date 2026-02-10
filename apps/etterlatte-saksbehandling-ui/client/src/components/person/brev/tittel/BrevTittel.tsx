@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import React, { useState } from 'react'
 import { Alert, BodyShort, Box, Heading, HStack } from '@navikt/ds-react'
 import { BrevTittelModal } from '~components/person/brev/tittel/BrevTittelModal'
@@ -20,7 +14,7 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres, manuel
   const [nyTittel, setNyTittel] = useState(tittel)
 
   return (
-    <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
+    <Box padding="space-4" borderWidth="1" borderColor="neutral-subtle">
       <HStack gap="space-4" justify="space-between">
         <Heading spacing level="2" size="medium">
           Tittel

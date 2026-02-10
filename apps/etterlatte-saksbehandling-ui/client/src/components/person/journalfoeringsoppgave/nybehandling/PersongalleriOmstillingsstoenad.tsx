@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { BodyShort, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { NyBehandlingSkjema } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
@@ -54,7 +48,7 @@ export default function PersongalleriOmstillingsstoenad() {
           />
         </Box>
       ))}
-      <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
+      <Box padding="space-4" borderWidth="1" borderColor="neutral-subtle">
         <Heading size="small" spacing>
           Barn
           <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>

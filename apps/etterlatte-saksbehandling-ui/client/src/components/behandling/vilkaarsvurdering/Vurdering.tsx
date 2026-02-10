@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { BodyShort, Box, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat, vurderVilkaar } from '~shared/api/vilkaarsvurdering'
@@ -153,7 +147,7 @@ export const Vurdering = ({
       minWidth="18.75rem"
       width="10rem"
       borderWidth="0 0 0 2"
-      borderColor="border-neutral-subtle"
+      borderColor="neutral-subtle"
     >
       <VurderingsboksWrapper
         tittel={overskrift()}

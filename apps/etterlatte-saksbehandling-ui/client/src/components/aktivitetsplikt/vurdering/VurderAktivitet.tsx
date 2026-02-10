@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Alert, Box, Button, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { Vurderinger } from '~components/aktivitetsplikt/vurdering/Vurderinger'
@@ -83,7 +77,7 @@ function NesteKnapp() {
   }, [vurdering.aktivitet])
 
   return (
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle" marginBlock="space-4">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle" marginBlock="space-4">
       <VStack gap="space-6">
         {feilmeldingAktiviteter.length > 0 && <Alert variant="error">{feilmeldingAktiviteter}</Alert>}
         <HStack gap="space-4" justify="center">

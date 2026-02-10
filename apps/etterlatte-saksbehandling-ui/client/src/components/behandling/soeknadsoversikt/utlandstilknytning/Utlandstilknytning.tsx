@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { IDetaljertBehandling, IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
 import { UtlandstilknytningVurdering } from './UtlandstilknytningVurdering'
@@ -36,7 +30,7 @@ export const Utlandstilknytning = ({
         minWidth="18.75rem"
         width="10rem"
         borderWidth="0 0 0 2"
-        borderColor="border-neutral-subtle"
+        borderColor="neutral-subtle"
       >
         <UtlandstilknytningVurdering
           utlandstilknytning={behandling.utlandstilknytning}

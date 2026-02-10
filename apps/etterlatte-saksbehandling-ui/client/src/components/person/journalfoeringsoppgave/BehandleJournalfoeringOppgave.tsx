@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
 import { Route, Routes, useParams } from 'react-router-dom'
@@ -129,7 +123,7 @@ export default function BehandleJournalfoeringOppgave() {
           })}
         </Box>
 
-        <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-neutral-subtle">
+        <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="neutral-subtle">
           <VelgJournalpost journalpostStatus={journalpostStatus} />
         </Box>
 

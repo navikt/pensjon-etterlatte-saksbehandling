@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Box, Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
@@ -243,7 +237,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
         errorMessage: 'Kunne ikke lagre beregningsgrunnlag',
       })}
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button

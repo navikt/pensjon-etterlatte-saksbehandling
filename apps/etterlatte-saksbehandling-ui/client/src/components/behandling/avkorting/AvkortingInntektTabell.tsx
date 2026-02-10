@@ -1,12 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-*/
-
 import { BodyShort, Box, HStack, Label, Table, Tag, Tooltip, VStack } from '@navikt/ds-react'
 import {
   ForventetInntektHjelpeTekst,
@@ -154,7 +145,7 @@ const ForventetInntektDetaljer = ({
 
   return (
     <div>
-      <Box borderWidth="0 0 1 0" borderColor="border-neutral-subtle" marginBlock="space-0 space-4">
+      <Box borderWidth="0 0 1 0" borderColor="neutral-subtle" marginBlock="space-0 space-4">
         <HStack gap="space-20">
           <VStack minWidth="15rem">
             <HStack gap="space-1">
@@ -177,7 +168,7 @@ const ForventetInntektDetaljer = ({
         </HStack>
       </Box>
 
-      <Box borderWidth="0 0 1 0" borderColor="border-neutral-subtle" marginBlock="space-0 space-4">
+      <Box borderWidth="0 0 1 0" borderColor="neutral-subtle" marginBlock="space-0 space-4">
         <HStack gap="space-20">
           <VStack minWidth="15rem">
             <HStack gap="space-1">
@@ -213,7 +204,7 @@ const ForventetInntektDetaljer = ({
 const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrunnlag: FaktiskInntektGrunnlag }) => {
   return (
     <div>
-      <Box borderWidth="0 0 1 0" borderColor="border-neutral-subtle" marginBlock="space-0 space-4">
+      <Box borderWidth="0 0 1 0" borderColor="neutral-subtle" marginBlock="space-0 space-4">
         <HStack gap="space-20">
           <VStack minWidth="15rem">
             <Label>Lønnsinntekt</Label>
@@ -228,7 +219,7 @@ const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrun
           </VStack>
         </HStack>
       </Box>
-      <Box borderWidth="0 0 1 0" borderColor="border-neutral-subtle" marginBlock="space-0 space-4">
+      <Box borderWidth="0 0 1 0" borderColor="neutral-subtle" marginBlock="space-0 space-4">
         <HStack gap="space-20">
           <VStack minWidth="15rem">
             <Label>AFP</Label>

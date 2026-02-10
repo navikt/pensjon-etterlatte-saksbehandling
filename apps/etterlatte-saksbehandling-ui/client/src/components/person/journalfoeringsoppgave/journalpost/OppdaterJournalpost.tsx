@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React, { useEffect, useState } from 'react'
@@ -73,7 +67,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
 
       <br />
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <Heading size="medium" spacing>
           Gjelder
         </Heading>

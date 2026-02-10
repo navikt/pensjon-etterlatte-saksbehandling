@@ -1,10 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-*/
-
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useParams } from 'react-router-dom'
@@ -72,7 +65,7 @@ export default function NyttBrev() {
                 manueltBrev={brev.spraak !== Spraak.NB}
               />
 
-              <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
+              <Box padding="space-4" borderWidth="1" borderColor="neutral-subtle">
                 <VStack gap="space-2" justify="space-between">
                   <Heading level="2" size="medium">
                     Språk / målform
@@ -84,7 +77,7 @@ export default function NyttBrev() {
 
               <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
             </VStack>
-            <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-neutral-subtle">
+            <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="neutral-subtle">
               {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (
                 <ForhaandsvisningBrev brev={brev} />
               ) : (

@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import React, { useEffect, useState } from 'react'
 import { Alert, Box, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
@@ -232,7 +226,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
       </HStack>
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <SjekklisteValideringErrorSummary />
 
         <BehandlingHandlingKnapper>
@@ -253,5 +247,5 @@ const SidebarBox = styled(Box)`
   max-height: fit-content;
   min-width: 40%;
   width: 40%;
-  border-right: 1px solid var(--ax-border-neutral-subtle);
+  border-right: 1px solid var(--ax-neutral-subtle);
 `

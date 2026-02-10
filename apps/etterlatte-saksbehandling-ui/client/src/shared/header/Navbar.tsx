@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { ReactNode } from 'react'
 import { Box } from '@navikt/ds-react'
 
@@ -13,7 +7,7 @@ export const Navbar = ({ children }: { children: ReactNode }) => (
     paddingBlock="space-2"
     paddingInline="space-4"
     borderWidth="0 0 1 0"
-    borderColor="border-neutral-subtle"
+    borderColor="neutral-subtle"
   >
     {children}
   </Box>

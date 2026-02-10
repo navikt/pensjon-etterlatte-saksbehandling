@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { DokumentInfo } from '~shared/types/Journalpost'
 import { Alert, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
@@ -65,7 +59,7 @@ const Dokument = ({
   return (
     <div key={dokument.dokumentInfoId}>
       {rediger ? (
-        <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
+        <Box padding="space-4" borderWidth="1" borderColor="neutral-subtle">
           <VStack gap="space-4">
             <TextField label="Dokumenttittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} />
 

@@ -1,10 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-*/
-
 import { Box, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
@@ -68,7 +61,7 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
       </HStack>
     </VStack>
 
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <VStack gap="space-4">
         <Info label="Bruker" tekst={journalpost.bruker?.id ? <KopierbarVerdi value={journalpost.bruker.id} /> : '-'} />
 
@@ -85,7 +78,7 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
     </Box>
 
     <br />
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <VStack gap="space-4">
         <Info label="SakID" tekst={journalpost.sak?.fagsakId || '-'} />
         <Info

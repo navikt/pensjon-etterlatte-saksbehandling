@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Alert, BodyShort, Box, Button, Heading, HStack, Link, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { JaNei, JaNeiRec, mapBooleanToJaNei } from '~shared/types/ISvar'
@@ -299,7 +293,7 @@ function NesteEllerOpprettBrevValg({ gammelFlyt }: NesteEllerOpprettBrevValgProp
   }
 
   return (
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <HStack gap="space-4" justify="center">
         <Button
           variant="secondary"

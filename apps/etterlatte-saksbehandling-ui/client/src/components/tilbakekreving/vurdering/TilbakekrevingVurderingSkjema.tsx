@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Box, Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
@@ -391,7 +385,7 @@ export function TilbakekrevingVurderingSkjema({
         </VStack>
       </Box>
 
-      <Box paddingBlock="space-12 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-12 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <HStack justify="center">
           {redigerbar ? (
             <Button

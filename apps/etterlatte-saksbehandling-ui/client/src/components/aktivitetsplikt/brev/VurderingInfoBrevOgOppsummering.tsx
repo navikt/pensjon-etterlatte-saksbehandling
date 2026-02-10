@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
@@ -34,7 +28,7 @@ export function VurderingInfoBrevOgOppsummering() {
 export function InfobrevKnapperad(props: { children?: React.ReactElement }) {
   const navigate = useNavigate()
   return (
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <HStack gap="space-4" justify="center">
         <Button
           variant="secondary"

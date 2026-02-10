@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Beregning, OverstyrBeregning } from '~shared/types/Beregning'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '../../felles/utils'
@@ -114,7 +108,7 @@ const OverstyrBeregningGrunnlag = (props: {
         apiResult: opprettEllerEndreBeregningResult,
       })}
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button variant="primary" onClick={onSubmit} loading={isPending(opprettEllerEndreBeregningResult)}>

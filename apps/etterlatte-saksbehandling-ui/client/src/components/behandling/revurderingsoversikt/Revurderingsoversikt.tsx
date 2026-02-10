@@ -1,10 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-*/
-
 import { BodyShort, Box, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -130,7 +123,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </BodyShort>
         )}
       </Box>
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 1 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 1 0" borderColor="neutral-subtle">
         <Familieforhold behandling={behandling} redigerbar={redigerbar} personopplysninger={personopplysninger} />
       </Box>
       <Box paddingBlock="space-8" paddingInline="space-16 space-8">
@@ -177,7 +170,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         )}
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Start disabled={behandling.virkningstidspunkt === null} />

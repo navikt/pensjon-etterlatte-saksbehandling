@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
@@ -133,7 +127,7 @@ export const BeregneOMS = () => {
         wrapperComponent: { component: HStack, props: { justify: 'center' } },
       })}
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             {visAttesteringsmodal ? (

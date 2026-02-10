@@ -1,10 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-*/
-
 import { Alert, Box, Button, Heading, HStack, Modal, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
@@ -98,7 +91,7 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
         </Modal.Header>
         <Modal.Body>
           <FormWrapper $column={true}>
-            <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
+            <Box padding="space-4" borderWidth="1" borderColor="neutral-subtle">
               <VStack gap="space-4" align="start">
                 {avdoedListe.fields?.map((field, index) => (
                   <HStack gap="space-2" key={field.id} align="end">
@@ -133,7 +126,7 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
               </VStack>
             </Box>
 
-            <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
+            <Box padding="space-4" borderWidth="1" borderColor="neutral-subtle">
               <VStack gap="space-4" align="start">
                 {gjenlevendeListe.fields?.map((field, index) => (
                   <HStack gap="space-2" key={field.id} align="end">

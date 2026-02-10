@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { AvsenderMottaker, AvsenderMottakerIdType } from '~shared/types/Journalpost'
 import { Alert, BodyShort, Box, Button, Heading, HStack, Label, Select, TextField, VStack } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
@@ -51,7 +45,7 @@ export const EndreAvsenderMottaker = ({
       </Heading>
 
       {rediger ? (
-        <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
+        <Box padding="space-4" borderWidth="1" borderColor="neutral-subtle">
           <VStack gap="space-8">
             <VStack gap="space-4">
               <TextField

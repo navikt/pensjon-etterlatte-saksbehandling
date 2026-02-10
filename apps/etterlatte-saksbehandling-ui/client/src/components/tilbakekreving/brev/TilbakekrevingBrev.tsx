@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { erUnderBehandling, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
@@ -99,7 +93,7 @@ export function TilbakekrevingBrev({
           />
         )}
       </BrevContent>
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <HStack justify="center">
           {kanAttesteres && (
             <SendTilAttesteringModal

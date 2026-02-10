@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import React, { useContext, useEffect } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
@@ -106,7 +100,7 @@ export const BeregneEtteroppgjoerOMS = () => {
         )}
       </Box>
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button loading={isPending(vedtakResult)} variant="primary" onClick={opprettEllerOppdaterVedtak}>

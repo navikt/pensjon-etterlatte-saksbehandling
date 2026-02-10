@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
@@ -98,7 +92,7 @@ export const SakOversikt = ({
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger, ekstraSak }) => (
           <HStack gap="space-4" wrap={false}>
-            <Box padding="space-8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-neutral-subtle">
+            <Box padding="space-8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="neutral-subtle">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
               {byttTilAnnenSakEnabled && ekstraSak && (
                 <ByttTilAnnenSak

@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapResult } from '~shared/api/apiUtils'
@@ -46,7 +40,7 @@ export const Sakshistorikk = ({ sakId }: { sakId: number }) => {
               <Box
                 maxWidth="18rem"
                 borderWidth="0 0 1 0"
-                borderColor="border-neutral-subtle"
+                borderColor="neutral-subtle"
                 paddingBlock="space-0 space-2"
               >
                 <BodyShort size="small">

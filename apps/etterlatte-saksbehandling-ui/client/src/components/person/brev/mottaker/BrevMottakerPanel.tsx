@@ -1,11 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-*/
-
 import { AdresseType, Mottaker, MottakerType } from '~shared/types/Brev'
 import { Alert, BodyShort, Box, Button, Heading, HStack, Loader, Tag, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
@@ -101,7 +93,7 @@ export function BrevMottakerPanel({
   }
 
   return (
-    <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
+    <Box padding="space-4" borderWidth="1" borderColor="neutral-subtle">
       {mapResult(soeker, {
         initial: kanRedigeres && mottaker.type === MottakerType.HOVED && (
           <Box marginBlock="space-0 space-2">
@@ -166,7 +158,7 @@ export function BrevMottakerPanel({
       {!!mottaker.bestillingId && (
         <Box
           borderWidth="1 0 0 0"
-          borderColor="border-neutral-subtle"
+          borderColor="neutral-subtle"
           paddingBlock="space-4 space-0"
           marginBlock="space-4 space-0"
         >
@@ -176,7 +168,7 @@ export function BrevMottakerPanel({
       )}
       <Box
         borderWidth="1 0 0 0"
-        borderColor="border-neutral-subtle"
+        borderColor="neutral-subtle"
         paddingBlock="space-4 space-0"
         marginBlock="space-4 space-0"
       >

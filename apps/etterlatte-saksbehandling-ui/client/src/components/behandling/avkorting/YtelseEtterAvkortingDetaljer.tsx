@@ -1,10 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-  - borderColor=border-neutral-subtle
-*/
-
 import React from 'react'
 import styled from 'styled-components'
 import { IAvkortetYtelse } from '~shared/types/IAvkorting'
@@ -16,7 +9,7 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
   const ytelse = props.ytelse
 
   return (
-    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <Wrapper>
         <ul>
           <Rad>
@@ -48,7 +41,7 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
             </Rad>
           )}
 
-          <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+          <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
             <Rad>
               {ytelse.sanksjon ? (
                 <Navn>Brutto stønad etter sanksjon</Navn>

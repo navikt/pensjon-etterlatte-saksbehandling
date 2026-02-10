@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { IDetaljertBehandling, ITidligereFamiliepleier } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
 import { useState } from 'react'
@@ -73,7 +67,7 @@ export const TidligereFamiliepleier = ({
         minWidth="18.75rem"
         width="10rem"
         borderWidth="0 0 0 2"
-        borderColor="border-neutral-subtle"
+        borderColor="neutral-subtle"
       >
         {vurdert && (
           <TidligereFamiliepleierVurdering

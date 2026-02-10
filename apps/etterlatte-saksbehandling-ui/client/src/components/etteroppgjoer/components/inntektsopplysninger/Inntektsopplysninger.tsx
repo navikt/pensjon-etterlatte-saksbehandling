@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { OpplysningerFraSkatteetaten } from '~components/etteroppgjoer/components/inntektsopplysninger/OpplysningerFraSkatteetaten'
@@ -34,7 +28,7 @@ export const Inntektsopplysninger = ({ forbehandling }: { forbehandling: Etterop
         )}
       </Box>
 
-      <Box paddingInline="space-6" paddingBlock="space-4" borderWidth="0 0 0 4" borderColor="border-neutral-subtle">
+      <Box paddingInline="space-6" paddingBlock="space-4" borderWidth="0 0 0 4" borderColor="neutral-subtle">
         <VStack gap="space-8">
           <Heading size="large" level="2">
             Inntektsopplysninger

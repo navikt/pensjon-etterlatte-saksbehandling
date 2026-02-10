@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import styled from 'styled-components'
 import { VilkaarsvurderingKnapper } from './VilkaarsvurderingKnapper'
@@ -210,7 +204,7 @@ export const Resultat = (props: Props) => {
         )}
       </Box>
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar && vilkaarsvurdering.isGrunnlagUtdatert && (
           <OppdatertGrunnlagAlert variant="warning">
             OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />

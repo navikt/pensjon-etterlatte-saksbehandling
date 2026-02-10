@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
@@ -111,7 +105,7 @@ export const OversiktKommerBarnetTilgode = ({
         minWidth="18.75rem"
         width="10rem"
         borderWidth="0 0 0 2"
-        borderColor="border-neutral-subtle"
+        borderColor="neutral-subtle"
       >
         <KommerBarnetTilGodeVurdering
           kommerBarnetTilgode={kommerBarnetTilgode}

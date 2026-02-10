@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Alert, BodyShort, Box, Button, Dropdown, Heading, HStack, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
@@ -110,7 +104,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
               </div>
             )}
           </InfoGrid>
-          <Box padding="space-4" borderWidth="1" borderColor="border-neutral-subtle">
+          <Box padding="space-4" borderWidth="1" borderColor="neutral-subtle">
             <Label>Beskrivelse</Label>
             <BodyShort style={{ whiteSpace: 'pre-wrap' }}>{beskrivelse || <i>Mangler beskrivelse</i>}</BodyShort>
           </Box>

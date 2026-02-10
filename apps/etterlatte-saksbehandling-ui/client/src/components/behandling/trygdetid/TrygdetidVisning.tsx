@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Box, Button, Heading } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -78,7 +72,7 @@ const TrygdetidVisning = (props: { behandling: IBehandlingReducer }) => {
         virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
       />
 
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {isFailureHandler({
           apiResult: oppdaterStatusResult,
           errorMessage: 'Kunne ikke oppdatere trygdetid status',

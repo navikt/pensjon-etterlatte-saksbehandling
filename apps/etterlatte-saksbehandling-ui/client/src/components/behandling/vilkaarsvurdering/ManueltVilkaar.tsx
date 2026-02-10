@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
@@ -53,7 +47,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
         paddingInline="space-16 space-4"
         paddingBlock="space-4"
         borderWidth="1 0 0 0"
-        borderColor="border-neutral-subtle"
+        borderColor="neutral-subtle"
       >
         <HStack justify="space-between">
           <VStack gap="space-1">

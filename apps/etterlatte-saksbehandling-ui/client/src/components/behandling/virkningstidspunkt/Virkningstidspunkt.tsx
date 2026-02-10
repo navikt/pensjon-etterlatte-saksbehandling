@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import {
   Alert,
   BodyShort,
@@ -146,7 +140,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
           minWidth="18.75rem"
           width="10rem"
           borderWidth="0 0 0 2"
-          borderColor="border-neutral-subtle"
+          borderColor="neutral-subtle"
         >
           <VurderingsboksWrapper
             tittel="Hva er virkningstidspunkt for behandlingen?"

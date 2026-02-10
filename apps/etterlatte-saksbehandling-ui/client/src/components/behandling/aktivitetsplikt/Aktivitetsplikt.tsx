@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { Alert, BodyLong, BodyShort, Box, Button, Detail, Heading, List, ReadMore, VStack } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
@@ -206,7 +200,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
           </Box>
         )}
       </VStack>
-      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="border-neutral-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <BehandlingHandlingKnapper>
           <Button variant="primary" onClick={() => erFerdigUtfylt()}>
             {handlinger.NESTE.navn}

@@ -1,9 +1,3 @@
-/*
-TODO: Aksel Box migration:
-Could not migrate the following:
-  - borderColor=border-neutral-subtle
-*/
-
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
@@ -98,7 +92,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
         </Alert>
       )}
 
-      <Box borderWidth="1 0 0 0" borderColor="border-neutral-subtle" paddingBlock="space-8 space-16">
+      <Box borderWidth="1 0 0 0" borderColor="neutral-subtle" paddingBlock="space-8 space-16">
         <HStack width="100%" justify="center">
           {ferdigstillUtenBrev ? (
             <FerdigstillEtteroppgjoerForbehandlingUtenBrev />

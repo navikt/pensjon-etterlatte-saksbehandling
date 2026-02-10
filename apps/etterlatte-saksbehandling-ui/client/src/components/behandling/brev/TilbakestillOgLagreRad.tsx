@@ -24,7 +24,7 @@ export const TilbakestillOgLagreRad = ({
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   return (
-    <Box padding="4">
+    <Box padding="space-4">
       <HStack justify="space-between">
         {tilbakestillSynlig && (
           <Button
@@ -37,7 +37,7 @@ export const TilbakestillOgLagreRad = ({
             Tilbakestill brev
           </Button>
         )}
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
           <Button
             icon={<FloppydiskIcon aria-hidden />}

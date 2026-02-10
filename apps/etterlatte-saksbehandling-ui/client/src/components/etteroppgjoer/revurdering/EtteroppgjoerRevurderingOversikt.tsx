@@ -92,7 +92,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
   }
 
   return (
-    <VStack gap="10" paddingInline="16" paddingBlock="16 4">
+    <VStack gap="space-8" paddingInline="space-16" paddingBlock="space-16 space-4">
       <Heading size="xlarge" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
@@ -143,7 +143,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
       )}
 
       <Box maxWidth="42.5rem">
-        <VStack gap="8">
+        <VStack gap="space-8">
           {/* TODO: prøve å se og merge disse 3 sammen */}
           {!!opphoerSkyldesDoedsfallSkjemaErrors && (
             <SammendragAvSkjemaFeil errors={opphoerSkyldesDoedsfallSkjemaErrors} />
@@ -159,9 +159,9 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
         </VStack>
       </Box>
 
-      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+      <Box borderWidth="1 0 0 0" paddingBlock="space-8 space-16">
         <HStack width="100%" justify="center">
-          <VStack gap="4" align="center">
+          <VStack gap="space-4" align="center">
             {forbehandling.endringErTilUgunstForBruker === JaNei.JA ? (
               <AvsluttEtteroppgjoerRevurderingModal
                 behandling={behandling}

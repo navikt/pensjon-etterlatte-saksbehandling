@@ -68,11 +68,11 @@ export const OversiktKommerBarnetTilgode = ({
       status={svarTilStatusIcon(kommerBarnetTilgode?.svar)}
     >
       <div>
-        <Box marginBlock="3" marginInline="0" maxWidth="41rem">
+        <Box marginBlock="space-2" marginInline="space-0" maxWidth="41rem">
           Undersøk om boforholdet er avklart og det er sannsynlig at pensjonen kommer barnet til gode.
         </Box>
 
-        <HStack gap="4">
+        <HStack gap="space-4">
           {bostedsadresse && (
             <AdresseKort label="Barnets adresse" adresse={bostedsadresse} kilde={bostedsadresse?.kilde} />
           )}
@@ -100,7 +100,7 @@ export const OversiktKommerBarnetTilgode = ({
         </HStack>
       </div>
 
-      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+      <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
         <KommerBarnetTilGodeVurdering
           kommerBarnetTilgode={kommerBarnetTilgode}
           redigerbar={redigerbar}

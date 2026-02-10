@@ -71,7 +71,7 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSamm
 
 function P1Lenke() {
   return (
-    <Box marginBlock="4 4" marginInline="4 auto">
+    <Box marginBlock="space-4 space-4" marginInline="space-4 auto">
       <Link
         href="https://cdn.sanity.io/files/gx9wf39f/soknadsveiviser-p/cebcd0569ddfd47eccd3b9252a55183535665ac5.pdf"
         target="_blank"

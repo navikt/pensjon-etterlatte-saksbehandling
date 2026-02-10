@@ -20,12 +20,12 @@ export function KlageFormkravVisning() {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-16" paddingBlock="space-16 space-4">
         <Heading level="1" size="large">
           Formkrav og klagefrist
         </Heading>
       </Box>
-      <Box paddingBlock="8" paddingInline="16 8">
+      <Box paddingBlock="space-8" paddingInline="space-16 space-8">
         <Heading size="small" spacing>
           Hvilket vedtak klages det på?
         </Heading>

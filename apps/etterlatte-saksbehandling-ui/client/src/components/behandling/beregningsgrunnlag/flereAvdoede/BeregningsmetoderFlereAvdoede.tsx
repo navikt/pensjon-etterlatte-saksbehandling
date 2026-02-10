@@ -16,8 +16,8 @@ export const BeregningsmetoderFlereAvdoede = ({ redigerbar, trygdetider, tidligs
   const behandling = useBehandling()
 
   return (
-    <VStack gap="4">
-      <HStack gap="2">
+    <VStack gap="space-4">
+      <HStack gap="space-2">
         <TagIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small" level="3">
           Trygdetid-metode brukt for flere avdøde

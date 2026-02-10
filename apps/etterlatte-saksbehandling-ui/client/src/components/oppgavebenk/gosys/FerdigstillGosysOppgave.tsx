@@ -40,7 +40,7 @@ export const FerdigstillGosysOppgave = ({
 
         <br />
 
-        <HStack gap="4" justify="end">
+        <HStack gap="space-4" justify="end">
           <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })}>
             Nei, avbryt
           </Button>

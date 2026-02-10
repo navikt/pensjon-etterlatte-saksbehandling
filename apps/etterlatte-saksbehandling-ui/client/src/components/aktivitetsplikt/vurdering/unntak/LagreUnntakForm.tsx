@@ -38,9 +38,9 @@ export const LagreUnntakForm = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(sendInn)}>
-        <VStack gap="4">
+        <VStack gap="space-4">
           <UnntakAktivitetsplikt vurderingType={vurderingType} erVarigUnntak={erVarigUnntak} />
-          <HStack gap="4">
+          <HStack gap="space-4">
             {!!onAvbryt && (
               <Button variant="secondary" onClick={onAvbryt}>
                 Avbryt
@@ -75,8 +75,8 @@ function UnntakAktivitetsplikt({
   const { register, control } = useFormContext()
   return (
     <Box maxWidth="40rem">
-      <VStack gap="4">
-        <HStack gap="4">
+      <VStack gap="space-4">
+        <HStack gap="space-4">
           <ControlledDatoVelger name="fom" label="Unntak fra og med" control={control} />
           <ControlledDatoVelger name="tom" label="Unntak til og med" required={false} control={control} />
         </HStack>

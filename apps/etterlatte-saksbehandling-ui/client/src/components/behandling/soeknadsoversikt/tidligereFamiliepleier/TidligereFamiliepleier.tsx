@@ -31,14 +31,15 @@ export const TidligereFamiliepleier = ({
       ]}
       status={statusIkon(behandling.tidligereFamiliepleier)}
     >
-      <VStack gap="4" marginBlock="3" marginInline="0" maxWidth="41rem">
+      <VStack gap="space-4" marginBlock="space-2" marginInline="space-0" maxWidth="41rem">
         <BodyShort>
           Tidligere familiepleier kan innvilges når det har vært nødvendig med tilsyn og pleie av en nærstående i minst
           fem år, og det ikke er mulig å forsørge seg selv etter at pleieforholdet er opphørt.
         </BodyShort>
 
         <ReadMore header="Les mer om hvilke vilkår som må oppfylles">
-          <List as="ul" title="For å ha rett til ytelsen må tidligere familiepleier">
+          <BodyShort>For å ha rett til ytelsen må tidligere familiepleier</BodyShort>
+          <List as="ul">
             <List.Item>være medlem i trygden og ha vært det i minst fem år</List.Item>
             <List.Item>være ugift og ha vært ugift i minst fem år under pleieforholdet</List.Item>
             <List.Item>
@@ -47,7 +48,8 @@ export const TidligereFamiliepleier = ({
             <List.Item>ikke hatt mulighet for å forsørge seg selv etter at pleieforholdet opphørte</List.Item>
             <List.Item>ikke ha tilstrekkelige midler til livsopphold</List.Item>
           </List>
-          <List as="ul" title="I tillegg er det et krav at">
+          <BodyShort>I tillegg er det et krav at</BodyShort>
+          <List as="ul">
             <List.Item>pleieforholdet må ha vart i minst fem år</List.Item>
             <List.Item>
               den som er pleid må ha mottatt pensjon fra folketrygden eller vært medlem i trygden i minst fem år frem
@@ -56,7 +58,7 @@ export const TidligereFamiliepleier = ({
           </List>
         </ReadMore>
       </VStack>
-      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+      <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
         {vurdert && (
           <TidligereFamiliepleierVurdering
             redigerbar={redigerbar}

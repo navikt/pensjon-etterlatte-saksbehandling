@@ -47,8 +47,8 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
     )
 
   return (
-    <Box padding="8">
-      <VStack gap="2">
+    <Box padding="space-8">
+      <VStack gap="space-2">
         <Heading size="medium">Dokumenter</Heading>
 
         <DokumentFilter filter={filter} setFilter={setFilter} />
@@ -101,14 +101,14 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
             {isPending(dokumenter) && (
               <Table.Row>
                 <Table.DataCell colSpan={100}>
-                  <Spinner margin="0" label="Henter dokumenter" />
+                  <Spinner margin="space-0" label="Henter dokumenter" />
                 </Table.DataCell>
               </Table.Row>
             )}
           </Table.Body>
         </Table>
 
-        <HStack justify="center" marginBlock="4">
+        <HStack justify="center" marginBlock="space-4">
           {sideInfo?.finnesNesteSide && (
             <Button variant="secondary" onClick={() => hent(sideInfo?.sluttpeker)} icon={<ArrowDownIcon aria-hidden />}>
               Last flere

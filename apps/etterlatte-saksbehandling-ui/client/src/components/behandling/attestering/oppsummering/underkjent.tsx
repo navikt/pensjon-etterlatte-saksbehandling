@@ -23,7 +23,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
 
   return (
     <SidebarPanel $border style={{ borderLeft: '5px solid #881d0c' }}>
-      <VStack gap="4">
+      <VStack gap="space-4">
         <div>
           <Heading size="small">{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
           <Heading size="xsmall">Underkjent</Heading>
@@ -31,7 +31,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
           {underkjentSiste && <Detail>{formaterDatoMedKlokkeslett(underkjentSiste.opprettet)}</Detail>}
         </div>
 
-        <HStack gap="4" justify="space-between">
+        <HStack gap="space-4" justify="space-between">
           <div>
             <Label size="small">Attestant</Label>
             <Detail>{attestant}</Detail>
@@ -50,7 +50,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
           </div>
         )}
 
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <Label size="small">Sakid:</Label>
           <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
         </HStack>

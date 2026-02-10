@@ -28,7 +28,7 @@ export const AttesteringMedUnderkjenning = (props: {
           <br />
           <>
             <Heading size="xsmall">Beslutning</Heading>
-            <HStack gap="4" justify="space-between">
+            <HStack gap="space-4" justify="space-between">
               <div>
                 <Label size="small">Saksbehandler</Label>
                 {utlandsBehandling.behandler?.saksbehandler ? (
@@ -53,7 +53,7 @@ export const AttesteringMedUnderkjenning = (props: {
               className="radioGroup"
               onChange={(event) => setBeslutning(event as BeslutningsTyper)}
             >
-              <HStack gap="4" wrap={false} justify="space-between">
+              <HStack gap="space-4" wrap={false} justify="space-between">
                 <Radio value={Beslutning.GODKJENN}>{Beslutning.GODKJENN}</Radio>
                 <Radio value={Beslutning.UNDERKJENN}>{Beslutning.UNDERKJENN}</Radio>
               </HStack>

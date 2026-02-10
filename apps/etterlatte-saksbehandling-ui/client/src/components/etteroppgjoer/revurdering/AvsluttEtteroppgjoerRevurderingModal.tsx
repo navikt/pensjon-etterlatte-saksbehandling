@@ -67,7 +67,7 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
                 </Heading>
               </Modal.Header>
               <Modal.Body>
-                <VStack gap="4">
+                <VStack gap="space-4">
                   <BodyShort>Du får oppgave om ny forbehandling når du avslutter revurderingen.</BodyShort>
 
                   {isFailureHandler({
@@ -77,7 +77,7 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
                 </VStack>
               </Modal.Body>
               <Modal.Footer>
-                <HStack gap="4" justify="end">
+                <HStack gap="space-4" justify="end">
                   <Button
                     variant="secondary"
                     onClick={() => setErAapen(false)}

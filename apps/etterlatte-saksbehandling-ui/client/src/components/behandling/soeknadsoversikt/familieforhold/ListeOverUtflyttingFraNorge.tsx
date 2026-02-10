@@ -10,7 +10,7 @@ interface Props {
 
 export const ListeOverUtflyttingFraNorge = ({ utflyttingFraNorge, alleLand }: Props) => {
   return !!utflyttingFraNorge ? (
-    <Box width="fit-content" paddingInline="6 0">
+    <Box width="fit-content" paddingInline="space-6 space-0">
       <ul>
         {utflyttingFraNorge.map((flytting, index) => (
           <li key={index}>

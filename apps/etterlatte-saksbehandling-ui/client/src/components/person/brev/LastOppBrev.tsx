@@ -101,7 +101,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
           </Heading>
         </Modal.Header>
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-4">
             {!valgtFil && (
               <>
                 <Alert variant="warning" inline>
@@ -146,7 +146,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
                 </ApiErrorAlert>
               )}
 
-              <HStack gap="4" justify="end">
+              <HStack gap="space-4" justify="end">
                 <Button variant="secondary" onClick={avbryt} disabled={isPending(lastOppStatus)}>
                   Avbryt
                 </Button>

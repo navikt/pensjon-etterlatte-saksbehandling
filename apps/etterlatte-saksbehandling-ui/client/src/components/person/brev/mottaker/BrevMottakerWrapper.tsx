@@ -34,7 +34,7 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       {!mottakere.length && <Alert variant="error">Brevet har ingen mottaker!</Alert>}
 
       {mottakere.map((mottaker) => (

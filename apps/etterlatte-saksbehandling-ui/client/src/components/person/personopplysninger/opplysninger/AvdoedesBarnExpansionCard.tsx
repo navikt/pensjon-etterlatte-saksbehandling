@@ -16,7 +16,7 @@ export const AvdoedesBarnExpansionCard = ({ avdoede }: { avdoede?: Familiemedlem
   return (
     <ExpansionCard aria-labelledby="Avdødes barn" size="small" defaultOpen>
       <ExpansionCard.Header>
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <ChildHairEyesIcon aria-hidden fontSize="1.5rem" />
           <ExpansionCard.Title size="small">Avdødes barn</ExpansionCard.Title>
         </HStack>
@@ -36,7 +36,7 @@ export const AvdoedesBarnExpansionCard = ({ avdoede }: { avdoede?: Familiemedlem
                 avdoedesBarn.map((barn, index) => (
                   <Table.Row key={index}>
                     <Table.DataCell>
-                      <HStack gap="2" justify="start" align="center" wrap={false}>
+                      <HStack gap="space-2" justify="start" align="center" wrap={false}>
                         <BodyShort>
                           {barn.fornavn} {barn.etternavn}
                         </BodyShort>

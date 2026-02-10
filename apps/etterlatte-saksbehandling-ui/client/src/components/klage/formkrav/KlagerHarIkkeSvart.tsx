@@ -44,7 +44,7 @@ export function KlagerHarIkkeSvart(props: { klage: Klage }) {
   }
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-2">
       <Heading level="3" size="small">
         Klager har ikke kommet med nødvendig informasjon
       </Heading>
@@ -65,13 +65,13 @@ export function KlagerHarIkkeSvart(props: { klage: Klage }) {
             </div>
           ) : (
             <form onSubmit={handleSubmit(lagreVurdering)}>
-              <VStack gap="4">
+              <VStack gap="space-4">
                 <Textarea
                   {...register('begrunnelse')}
                   label="Begrunnelse"
                   description="Beskriv når informasjonbrev ble sendt og når svarfristen utløpte."
                 />
-                <HStack gap="4">
+                <HStack gap="space-4">
                   <Button icon={<FileIcon />} type="submit" size="small" loading={isPending(klagerIkkeSvartResult)}>
                     Lagre vurdering
                   </Button>

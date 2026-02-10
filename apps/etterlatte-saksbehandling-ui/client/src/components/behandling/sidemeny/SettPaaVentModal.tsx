@@ -87,7 +87,7 @@ export const SettPaaVentModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
         <Modal.Body>
           <Box width="25rem">
             <form onSubmit={handleSubmit(settPaaEllerAvVent)}>
-              <VStack gap="4">
+              <VStack gap="space-4">
                 {oppgave.status !== Oppgavestatus.PAA_VENT && (
                   <Select
                     {...register('aarsak', {
@@ -134,7 +134,7 @@ export const SettPaaVentModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
                   apiResult: settOppgavePaaVentResult,
                   errorMessage: 'Feil under endring av vent på oppgave',
                 })}
-                <HStack gap="2" justify="end">
+                <HStack gap="space-2" justify="end">
                   <Button
                     type="button"
                     variant="secondary"

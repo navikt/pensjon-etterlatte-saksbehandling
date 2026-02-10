@@ -23,7 +23,7 @@ export default function AvbrytBehandleJournalfoeringOppgave() {
             Det du har gjort til nå vil bli slettet og du må starte oppgavebehandlingen på nytt.
           </BodyLong>
 
-          <HStack gap="4" justify="center">
+          <HStack gap="space-4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett
             </Button>

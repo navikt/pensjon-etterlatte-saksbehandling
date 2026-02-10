@@ -56,10 +56,10 @@ export const VurderInstitusjonsoppholdModalBody = ({ setOpen, sakId, hendelseId,
 
   return (
     <Modal.Body>
-      <VStack gap="8">
+      <VStack gap="space-8">
         <InstitusjonsoppholdReadMore />
 
-        <VStack gap="4">
+        <VStack gap="space-4">
           <ControlledRadioGruppe
             name="kanGiReduksjonAvYtelse"
             control={control}
@@ -84,7 +84,7 @@ export const VurderInstitusjonsoppholdModalBody = ({ setOpen, sakId, hendelseId,
           />
         </VStack>
 
-        <VStack gap="4">
+        <VStack gap="space-4">
           <ControlledRadioGruppe
             name="forventetVarighetMerEnn3Maaneder"
             control={control}
@@ -109,7 +109,7 @@ export const VurderInstitusjonsoppholdModalBody = ({ setOpen, sakId, hendelseId,
           />
         </VStack>
 
-        <HStack gap="2" justify="end">
+        <HStack gap="space-2" justify="end">
           <Button variant="secondary" type="button" onClick={lukkModal}>
             Avbryt
           </Button>

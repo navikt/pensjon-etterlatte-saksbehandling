@@ -34,7 +34,7 @@ export const AktivitetHendelseTimelinePinContent = ({
   }
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-2">
       <BodyShort>{aktivitetHendelse.beskrivelse}</BodyShort>
       <VStack>
         <BodyShort>
@@ -54,7 +54,7 @@ export const AktivitetHendelseTimelinePinContent = ({
         apiResult: slettAktivitetsHendelseForSakResult,
         errorMessage: 'Kunne ikke slette aktivitet hendelse',
       })}
-      <HStack gap="2">
+      <HStack gap="space-2">
         <Button
           variant="secondary"
           size="xsmall"

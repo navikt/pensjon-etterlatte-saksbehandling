@@ -53,7 +53,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
               <Table.DataCell>{NOK(beregningsperiode.grunnbelop)}</Table.DataCell>
               <Table.DataCell>{beregningsperiode.institusjonsopphold && 'Institusjonsopphold'}</Table.DataCell>
               <Table.DataCell>
-                <HStack gap="2" align="center" wrap={false}>
+                <HStack gap="space-2" align="center" wrap={false}>
                   {NOK(beregningsperiode.utbetaltBeloep)}{' '}
                   <HelpText title="Få mer informasjon om beregningsgrunnlaget">
                     <strong>Folketrygdloven § 17-6</strong> Full årlig omstillingsstønad utgjør 2,25 ganger grunnbeløpet

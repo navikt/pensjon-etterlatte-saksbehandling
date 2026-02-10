@@ -18,7 +18,7 @@ export function AktivitetspliktStegmeny() {
 
   return (
     <StegMenyBox>
-      <HStack gap="6" align="center">
+      <HStack gap="space-6" align="center">
         <AktivitetNavLenke path={AktivitetspliktSteg.VURDERING} description="Oppfølging av aktivitet" enabled={true} />
         <AktivitetNavLenke path={AktivitetspliktSteg.BREVVALG} description="Brevvalg" enabled={true} />
         <AktivitetNavLenke

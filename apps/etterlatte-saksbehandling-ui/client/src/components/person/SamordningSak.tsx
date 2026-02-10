@@ -22,7 +22,7 @@ export const SamordningSak = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
   }, [sakResult])
 
   return (
-    <Box padding="8">
+    <Box padding="space-8">
       <Heading size="medium">Samordningsmeldinger</Heading>
 
       {mapResult(samordningdataStatus, {

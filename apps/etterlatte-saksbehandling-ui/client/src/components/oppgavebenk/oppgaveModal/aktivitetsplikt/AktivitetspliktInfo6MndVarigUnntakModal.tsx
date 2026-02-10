@@ -61,11 +61,12 @@ export const AktivitetspliktInfo6MndVarigUnntakModal = ({
           header={{ heading: 'Utsendelse av brev ved 6 måneder ved varig unntak' }}
         >
           <Modal.Body>
-            <VStack gap="4">
+            <VStack gap="space-4">
               <div>
                 <Heading size="xsmall">Opprett informasjonsbrev til bruker</Heading>
                 <BodyLong>
-                  Den etterlatte skal informeres om stønaden sin og hvilke krav som stilles til dem i tiden fremover.{' '}
+                  Den etterlatte skal informeres om stønaden sin og hvilke krav som stilles til dem i tiden
+                  fremover.{' '}
                 </BodyLong>
               </div>
               <BodyLong>

@@ -113,7 +113,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
             <BodyLong spacing>Når varselbrevet er sendt kan du sette oppgaven på vent.</BodyLong>
           )}
           {erAktivitetspliktVarsel && (
-            <Box paddingBlock="4">
+            <Box paddingBlock="space-4">
               <ConfirmationPanel
                 label="Infobrevet er sendt for minst tre uker siden, slik at varselsbrevet kan sendes ut"
                 onChange={() => setBekreftetInfobrev((bekreftet) => !bekreftet)}
@@ -129,7 +129,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" justify="center">
+          <HStack gap="space-4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett redigering
             </Button>

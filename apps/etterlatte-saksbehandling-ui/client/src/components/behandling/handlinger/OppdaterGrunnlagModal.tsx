@@ -62,7 +62,7 @@ export default function OppdaterGrunnlagModal({
             til &quot;Opprettet&quot;. Hvis du har startet behandlingen allerede, må du gå gjennom stegene på nytt.
           </BodyLong>
 
-          <HStack gap="4" justify="center">
+          <HStack gap="space-4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(oppdatert)}>
               Nei, fortsett behandling
             </Button>

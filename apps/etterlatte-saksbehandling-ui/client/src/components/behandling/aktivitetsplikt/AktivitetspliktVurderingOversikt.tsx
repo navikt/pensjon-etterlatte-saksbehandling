@@ -8,8 +8,8 @@ export const AktivitetspliktVurderingOversikt = () => {
   const { vurdering, vurderingType } = useAktivitetspliktOppgaveVurdering()
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4" maxWidth="120rem">
-        <VStack gap="4">
+      <Box paddingInline="space-16" paddingBlock="space-16 space-4" maxWidth="120rem">
+        <VStack gap="space-4">
           <Heading level="1" size="large">
             Infobrev om aktivitetsplikt{' '}
             {vurderingType === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER ? 'ved 12 måneder' : 'ved 6 måneder'}

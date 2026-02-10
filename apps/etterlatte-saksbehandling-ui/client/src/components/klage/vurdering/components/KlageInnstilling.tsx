@@ -17,7 +17,7 @@ export const KlageInnstilling = ({
   const aktuelleHjemler = klage?.sak.sakType === SakType.BARNEPENSJON ? LOVHJEMLER_BP : LOVHJEMLER_OMS
 
   return (
-    <VStack gap="4" width="41.5rem">
+    <VStack gap="space-4" width="41.5rem">
       <Heading level="3" size="medium">
         Innstilling til KA
       </Heading>

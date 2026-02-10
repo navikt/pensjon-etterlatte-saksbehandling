@@ -19,7 +19,7 @@ export const Underkjenn = () => {
   const [returType, setReturType] = useState<aarsakTyper[number] | velg>('velg')
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Select
         label="Årsak til retur"
         value={returType || ''}

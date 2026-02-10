@@ -15,14 +15,14 @@ export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
     opprettEtteroppgjoerForbehandlingOppgave
   )
   return (
-    <Box marginBlock="5 0">
-      <VStack gap="4">
-        <Box background="surface-subtle" padding="5">
+    <Box marginBlock="space-4 space-0">
+      <VStack gap="space-4">
+        <Box padding="space-4">
           <InlineMessage status="warning">
             I tilfelle forbehandling, eller etteroppgjøret er ferdigstilt med feil informasjon, kan etteroppgjøret
             tilbakestilles og ny forbehandling opprettes.
           </InlineMessage>
-          <Box marginBlock="5 0">
+          <Box marginBlock="space-4 space-0">
             <Button
               loading={isPending(opprettForbehandlingOppgaveStatus)}
               variant="secondary"

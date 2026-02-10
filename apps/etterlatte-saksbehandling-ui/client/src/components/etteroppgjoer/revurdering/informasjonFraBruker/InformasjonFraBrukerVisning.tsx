@@ -6,19 +6,19 @@ export const InformasjonFraBrukerVisning = () => {
   const { forbehandling } = useEtteroppgjoerForbehandling()
 
   return !!forbehandling.harMottattNyInformasjon ? (
-    <VStack gap="4">
-      <VStack gap="2">
+    <VStack gap="space-4">
+      <VStack gap="space-2">
         <Label>Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?</Label>
         <BodyShort>{forbehandling.harMottattNyInformasjon === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
       </VStack>
       {!!forbehandling.endringErTilUgunstForBruker && (
-        <VStack gap="2">
+        <VStack gap="space-2">
           <Label>Er endringen til ugunst for bruker?</Label>
           <BodyShort>{forbehandling.endringErTilUgunstForBruker === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
         </VStack>
       )}
       {!!forbehandling.beskrivelseAvUgunst && (
-        <VStack gap="2" maxWidth="30rem">
+        <VStack gap="space-2" maxWidth="30rem">
           <Label>Beskriv hvorfor endringen er til ugunst for bruker</Label>
           <BodyShort>{forbehandling.beskrivelseAvUgunst}</BodyShort>
         </VStack>

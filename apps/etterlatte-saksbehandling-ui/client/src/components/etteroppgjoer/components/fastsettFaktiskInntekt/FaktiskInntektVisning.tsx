@@ -8,27 +8,27 @@ export const FaktiskInntektVisning = () => {
   const { faktiskInntekt } = useEtteroppgjoerForbehandling()
 
   return !!faktiskInntekt ? (
-    <VStack gap="4">
-      <VStack gap="2">
+    <VStack gap="space-4">
+      <VStack gap="space-2">
         <Label>Lønnsinntekt</Label>
         <BodyShort>{NOK(faktiskInntekt.loennsinntekt)}</BodyShort>
       </VStack>
-      <VStack gap="2">
+      <VStack gap="space-2">
         <Label>Avtalefestet pensjon</Label>
         <BodyShort>{NOK(faktiskInntekt.afp)}</BodyShort>
       </VStack>
-      <VStack gap="2">
+      <VStack gap="space-2">
         <Label>Næringsinntekt</Label>
         <BodyShort>{NOK(faktiskInntekt.naeringsinntekt)}</BodyShort>
       </VStack>
-      <VStack gap="2">
+      <VStack gap="space-2">
         <Label>Inntekt fra utland</Label>
         <BodyShort>{NOK(faktiskInntekt.utlandsinntekt)}</BodyShort>
       </VStack>
 
       <SumAvFaktiskInntekt faktiskInntekt={faktiskInntekt} />
 
-      <VStack gap="2" maxWidth="30rem">
+      <VStack gap="space-2" maxWidth="30rem">
         <Label>Spesifikasjon av inntekt</Label>
         <TekstMedMellomrom>{faktiskInntekt.spesifikasjon}</TekstMedMellomrom>
       </VStack>

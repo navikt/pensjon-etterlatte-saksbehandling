@@ -37,7 +37,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
       selected={erValgtHendelse}
       expandOnRowClick
       content={
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseBeskrivelse sakType={sak.sakType} hendelse={hendelse} />
 
           {hendelse.status === GrunnlagsendringStatus.TATT_MED_I_BEHANDLING ? (
@@ -57,7 +57,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
             )
           )}
 
-          <HStack gap="4">
+          <HStack gap="space-4">
             <ArkiverHendelseModal hendelse={hendelse} />
 
             {hendelse.status !== GrunnlagsendringStatus.TATT_MED_I_BEHANDLING &&

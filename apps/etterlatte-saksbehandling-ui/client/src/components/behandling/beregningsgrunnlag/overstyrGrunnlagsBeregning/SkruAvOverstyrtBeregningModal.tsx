@@ -41,7 +41,7 @@ export const SkruAvOverstyrtBeregningModal = ({ behandlingId, setOverstyrt }: Pr
         onClose={() => setOpen(false)}
       >
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-4">
             <BodyShort>
               Beregningsperioder vil bli permanent slettet. Virkningstidspunkt for revurdering MÅ settes tilbake til
               sakens første virkningstidspunkt.

@@ -23,7 +23,7 @@ export function EtteroppjoerForbehandlingStegmeny() {
 
   return (
     <StegMenyBox>
-      <HStack gap="6" align="center">
+      <HStack gap="space-6" align="center">
         <EtteroppgjoerForbehandlingStegLenke
           path={EtteroppjoerForbehandlingSteg.OVERSIKT}
           description="Oversikt"

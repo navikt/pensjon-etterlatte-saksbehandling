@@ -32,12 +32,12 @@ export const ViderefoereOpphoerVisning = ({
     })
 
   return (
-    <Box paddingBlock="0 8">
+    <Box paddingBlock="space-0 space-8">
       <Heading level="3" size="small">
         Er det nødvendig å fastsette til og med-dato?
       </Heading>
 
-      <VStack gap="5">
+      <VStack gap="space-4">
         <VurderingKilde kilde={viderefoertOpphoer.kilde} />
 
         <Box>
@@ -63,7 +63,7 @@ export const ViderefoereOpphoerVisning = ({
           </Box>
         )}
 
-        <HStack gap="3">
+        <HStack gap="space-2">
           {isFailure(slettViderefoertOpphoerResult) && (
             <Alert variant="error">Kunne ikke slette videreført opphør</Alert>
           )}

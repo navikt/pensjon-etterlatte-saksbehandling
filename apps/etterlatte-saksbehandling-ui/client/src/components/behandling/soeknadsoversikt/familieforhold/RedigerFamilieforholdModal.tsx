@@ -91,10 +91,10 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
         </Modal.Header>
         <Modal.Body>
           <FormWrapper $column={true}>
-            <Box padding="4" borderWidth="1" borderRadius="small">
-              <VStack gap="4" align="start">
+            <Box padding="space-4" borderWidth="1">
+              <VStack gap="space-4" align="start">
                 {avdoedListe.fields?.map((field, index) => (
-                  <HStack gap="2" key={field.id} align="end">
+                  <HStack gap="space-2" key={field.id} align="end">
                     <Box width="20rem">
                       <TextField
                         {...register(`avdoede.${index}.fnr`, {
@@ -126,10 +126,10 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
               </VStack>
             </Box>
 
-            <Box padding="4" borderWidth="1" borderRadius="small">
-              <VStack gap="4" align="start">
+            <Box padding="space-4" borderWidth="1">
+              <VStack gap="space-4" align="start">
                 {gjenlevendeListe.fields?.map((field, index) => (
-                  <HStack gap="2" key={field.id} align="end">
+                  <HStack gap="space-2" key={field.id} align="end">
                     <Box width="20rem">
                       <TextField
                         {...register(`gjenlevende.${index}.fnr`, {
@@ -172,7 +172,7 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" justify="end">
+          <HStack gap="space-4" justify="end">
             <Button variant="secondary" onClick={avbryt} disabled={isPending(status)}>
               Avbryt
             </Button>

@@ -68,7 +68,7 @@ export const Oversikt = ({
 
   return (
     <SidebarPanel $border>
-      <VStack gap="2">
+      <VStack gap="space-2">
         <div>
           <Heading size="small">
             {formaterBehandlingstype(behandlingsInfo.type)}
@@ -89,14 +89,14 @@ export const Oversikt = ({
           {behandlingsInfo.datoFattet && <Detail>{formaterDatoMedKlokkeslett(behandlingsInfo.datoFattet)}</Detail>}
         </div>
 
-        <Box paddingInline="2 0">
-          <HStack gap="2">
+        <Box paddingInline="space-2 space-0">
+          <HStack gap="space-2">
             <SakTypeTag sakType={behandlingsInfo.sakType} size="small" />
             <UtenlandstilknytningTypeTag utenlandstilknytningType={behandlingsInfo.nasjonalEllerUtland} size="small" />
           </HStack>
         </Box>
 
-        <VStack gap="4" justify="space-between">
+        <VStack gap="space-4" justify="space-between">
           {behandlingsInfo.status == IBehandlingStatus.FATTET_VEDTAK && behandlendeSaksbehandler ? (
             <>
               {mapApiResult(
@@ -107,7 +107,7 @@ export const Oversikt = ({
                 ),
                 (saksbehandlernavn) => (
                   <>
-                    <HStack gap="4" justify="space-between">
+                    <HStack gap="space-4" justify="space-between">
                       <div>
                         <Label size="small">Attestant</Label>
                         {!!oppgave?.saksbehandler ? (
@@ -157,7 +157,7 @@ export const Oversikt = ({
           </div>
         </VStack>
 
-        <HStack gap="4" justify="space-between">
+        <HStack gap="space-4" justify="space-between">
           <div>
             <Label size="small">Virkningstidspunkt</Label>
             <Detail>{behandlingsInfo.virkningsdato ? formaterDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}</Detail>
@@ -169,13 +169,13 @@ export const Oversikt = ({
         </HStack>
 
         {kommentarFraAttestant && (
-          <HStack gap="4" justify="space-between">
+          <HStack gap="space-4" justify="space-between">
             <Label size="small">Kommentar fra attestant</Label>
             <Detail>{kommentarFraAttestant}</Detail>
           </HStack>
         )}
 
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <Label size="small">Sakid:</Label>
           <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
         </HStack>

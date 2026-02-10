@@ -72,14 +72,14 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
   const stoetterDelvisOmgjoering = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering)
 
   return (
-    <VStack gap="4" width="30rem">
+    <VStack gap="space-4" width="30rem">
       <Heading level="2" size="medium" spacing>
         Første vurdering
       </Heading>
       <>
         {redigeres ? (
           <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
-            <VStack gap="4" width="41.5rem">
+            <VStack gap="space-4" width="41.5rem">
               <ControlledRadioGruppe
                 name="utfall"
                 control={control}

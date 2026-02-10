@@ -139,7 +139,7 @@ export function HarBrukerVarigUnntak(props: {
   return redigerbar && redigerer ? (
     <>
       <form onSubmit={handleSubmit(lagreVarigUnntak)}>
-        <VStack maxWidth="32.5rem" gap="4">
+        <VStack maxWidth="32.5rem" gap="space-4">
           <ControlledRadioGruppe
             control={control}
             name="harAktivitetsplikt"
@@ -163,7 +163,7 @@ export function HarBrukerVarigUnntak(props: {
           />
           {watch('harAktivitetsplikt') === JaNei.NEI && (
             <>
-              <Box maxWidth="60rem" paddingBlock="2 2">
+              <Box maxWidth="60rem" paddingBlock="space-2 space-2">
                 <Textarea
                   {...register('beskrivelse', {
                     required: {
@@ -176,7 +176,7 @@ export function HarBrukerVarigUnntak(props: {
                   error={errors.beskrivelse?.message}
                 />
               </Box>
-              <HStack gap="4">
+              <HStack gap="space-4">
                 <Button
                   variant="secondary"
                   size="small"
@@ -196,7 +196,7 @@ export function HarBrukerVarigUnntak(props: {
 
       {jaHarAktivitetsplikt &&
         (vurderingHarInnholdUnntattVarigUnntak(vurdering) ? (
-          <HStack gap="4">
+          <HStack gap="space-4">
             <Button
               variant="secondary"
               size="small"
@@ -219,7 +219,7 @@ export function HarBrukerVarigUnntak(props: {
         ))}
     </>
   ) : (
-    <VStack gap="4" maxWidth="32.5rem">
+    <VStack gap="space-4" maxWidth="32.5rem">
       <div>
         <Label size="medium">Har bruker aktivitetsplikt?</Label>
         {jaHarAktivitetsplikt ? (

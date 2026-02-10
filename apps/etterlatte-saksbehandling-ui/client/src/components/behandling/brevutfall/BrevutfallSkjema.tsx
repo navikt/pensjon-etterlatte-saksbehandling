@@ -143,9 +143,9 @@ export const BrevutfallSkjema = ({
 
   return (
     <form onSubmit={handleSubmit((data) => submitBrevutfall(data))}>
-      <VStack gap="8">
+      <VStack gap="space-8">
         {!behandlingErOpphoer && (
-          <VStack gap="4">
+          <VStack gap="space-4">
             <ControlledRadioGruppe
               name="harEtterbetaling"
               control={control}
@@ -164,7 +164,7 @@ export const BrevutfallSkjema = ({
             />
 
             {watch('harEtterbetaling') == ISvar.JA && (
-              <HStack gap="4">
+              <HStack gap="space-4">
                 <ControlledMaanedVelger
                   fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
                   toDate={new Date()}
@@ -188,12 +188,12 @@ export const BrevutfallSkjema = ({
             )}
 
             {behandling.sakType == SakType.BARNEPENSJON && (
-              <VStack gap="4">
+              <VStack gap="space-4">
                 <ControlledRadioGruppe
                   name="frivilligSkattetrekk"
                   control={control}
                   errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk utover 17%"
-                  legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk utover 17%?</HStack>}
+                  legend={<HStack gap="space-2">Har bruker meldt inn frivillig skattetrekk utover 17%?</HStack>}
                   radios={
                     <>
                       <Radio size="small" value={ISvar.JA}>
@@ -211,7 +211,7 @@ export const BrevutfallSkjema = ({
         )}
 
         {behandling.sakType == SakType.BARNEPENSJON && (
-          <VStack gap="4">
+          <VStack gap="space-4">
             <ControlledRadioGruppe
               name="aldersgruppe"
               control={control}
@@ -233,7 +233,7 @@ export const BrevutfallSkjema = ({
 
         {IBehandlingsType.REVURDERING == behandling.behandlingType && (
           <>
-            <VStack gap="4">
+            <VStack gap="space-4">
               <ControlledRadioGruppe
                 name="feilutbetalingValg"
                 control={control}
@@ -271,7 +271,7 @@ export const BrevutfallSkjema = ({
           </>
         )}
 
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button size="small" type="submit" loading={isPending(lagreBrevutfallResultat)}>
             Lagre valg
           </Button>

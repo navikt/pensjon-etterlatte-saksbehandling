@@ -13,8 +13,8 @@ export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
 
   return (
     <SidebarPanel $border>
-      <VStack gap="4">
-        <VStack gap="2">
+      <VStack gap="space-4">
+        <VStack gap="space-2">
           <Heading size="small">Etteroppgjør forbehandling</Heading>
           {forbehandlingErFerdigstilt && (
             <Heading size="xsmall" style={{ color: 'var(--a-green-400)' }}>
@@ -28,7 +28,7 @@ export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
             </Heading>
           )}
         </VStack>
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <Label size="small">Sakid:</Label>
           <KopierbarVerdi value={forbehandling.sak.id.toString()} />
         </HStack>

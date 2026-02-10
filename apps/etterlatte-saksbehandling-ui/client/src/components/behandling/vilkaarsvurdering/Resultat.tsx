@@ -100,7 +100,7 @@ export const Resultat = (props: Props) => {
   const nySoeknad = revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
 
   return (
-    <VStack gap="4" paddingInline="16 4" paddingBlock="16 0">
+    <VStack gap="space-4" paddingInline="space-16 space-4" paddingBlock="space-16 space-0">
       <Heading size="small" level="2">
         {erRevurdering
           ? 'Utfall etter revurdering'
@@ -108,9 +108,9 @@ export const Resultat = (props: Props) => {
       </Heading>
 
       {vilkaarsvurdering.resultat && (
-        <VStack gap="2">
+        <VStack gap="space-2">
           <Box>
-            <HStack gap="2" align="center">
+            <HStack gap="space-2" align="center">
               <StatusIcon status={status} />
               <BodyShort textColor="subtle">{resultatTekst()}</BodyShort>
             </HStack>
@@ -131,7 +131,7 @@ export const Resultat = (props: Props) => {
               <ResultatKommentar>{vilkaarsvurdering.resultat.kommentar}</ResultatKommentar>
             </Box>
           )}
-          <HStack gap="4">
+          <HStack gap="space-4">
             {redigerbar && (
               <Button
                 loading={isPending(slettVurderingStatus)}
@@ -156,7 +156,7 @@ export const Resultat = (props: Props) => {
 
       {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
         <VurderAlleVilkaarBox>
-          <VStack gap="4">
+          <VStack gap="space-4">
             <RadioGroup
               legend=""
               size="small"
@@ -195,7 +195,7 @@ export const Resultat = (props: Props) => {
         </VurderAlleVilkaarBox>
       )}
 
-      <Box paddingBlock="4 8" paddingInline="16 4">
+      <Box paddingBlock="space-4 space-8" paddingInline="space-16 space-4">
         {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
           <OppdatertGrunnlagAlert variant="warning">
             Virkningstidspunktet er endret siden vilkårene ble vurdert sist. Du må se over vurderingene og sjekke at de
@@ -204,7 +204,7 @@ export const Resultat = (props: Props) => {
         )}
       </Box>
 
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
         {redigerbar && vilkaarsvurdering.isGrunnlagUtdatert && (
           <OppdatertGrunnlagAlert variant="warning">
             OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />

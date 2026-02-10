@@ -16,8 +16,8 @@ interface Props {
 
 export const TabellOverAvdoede = ({ avdoede, alleLand }: Props) => {
   return (
-    <VStack gap="4">
-      <HStack gap="4" justify="start" align="center" wrap={false}>
+    <VStack gap="space-4">
+      <HStack gap="space-4" justify="start" align="center" wrap={false}>
         <PersonIcon fontSize="1.5rem" aria-hidden />
         <Heading size="small" level="3">
           Avdøde
@@ -39,7 +39,7 @@ export const TabellOverAvdoede = ({ avdoede, alleLand }: Props) => {
             avdoede.map((avdoed, index) => (
               <Table.Row key={index}>
                 <Table.DataCell>
-                  <HStack gap="2" justify="start" align="center" wrap={false}>
+                  <HStack gap="space-2" justify="start" align="center" wrap={false}>
                     <BodyShort>{formaterNavn(avdoed.opplysning)}</BodyShort>
                     <DoedsdatoTag doedsdato={avdoed.opplysning.doedsdato} />
                   </HStack>

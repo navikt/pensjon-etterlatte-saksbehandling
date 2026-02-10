@@ -1,15 +1,21 @@
 import { CheckmarkCircleIcon, ExclamationmarkTriangleIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
-import { AGreen500, ANavRed, AOrange600 } from '@navikt/ds-tokens/dist/tokens'
 
 export type StatusIconProps = 'warning' | 'success' | 'error'
 
 export const StatusIcon = (props: { status: StatusIconProps }) => {
   switch (props.status) {
     case 'success':
-      return <CheckmarkCircleIcon color={AGreen500} stroke={AGreen500} aria-hidden="true" />
+      return <CheckmarkCircleIcon color="var(--a-green-500)" stroke="var(--a-green-500)" aria-hidden="true" />
     case 'error':
-      return <XMarkOctagonIcon color={ANavRed} stroke={ANavRed} fill={ANavRed} aria-hidden="true" />
+      return (
+        <XMarkOctagonIcon
+          color="var(--a-nav-red)"
+          stroke="var(--a-nav-red)"
+          fill="var(--a-nav-red)"
+          aria-hidden="true"
+        />
+      )
     case 'warning':
-      return <ExclamationmarkTriangleIcon color={AOrange600} stroke={AOrange600} aria-hidden="true" />
+      return <ExclamationmarkTriangleIcon color="var(--a-orange-600)" stroke="var(--a-orange-600)" aria-hidden="true" />
   }
 }

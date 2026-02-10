@@ -36,7 +36,7 @@ export const AttesteringEllerUnderkjenning = ({
   return (
     <SidebarPanel>
       {oppgaveErTildeltInnloggetBruker ? (
-        <VStack gap="4">
+        <VStack gap="space-4">
           {oppgave?.status === Oppgavestatus.PAA_VENT ? (
             <Alert variant="warning" size="small" inline>
               Kan ikke attestere en oppgave som står på vent

@@ -96,7 +96,7 @@ const AdopsjonGrunnlag = () => {
           const forelder: IPdlPerson | undefined = foreldre[forelderPeriode.forelder]
           return (
             <VStack key={`${forelderPeriode.forelder}-${forelderPeriode.fraDato}`}>
-              <Box paddingInline="0 2">
+              <Box paddingInline="space-0 space-2">
                 {formaterKanskjeStringDato(forelderPeriode.fraDato)} -{' '}
                 {formaterKanskjeStringDato(forelderPeriode.tilDato)}
               </Box>

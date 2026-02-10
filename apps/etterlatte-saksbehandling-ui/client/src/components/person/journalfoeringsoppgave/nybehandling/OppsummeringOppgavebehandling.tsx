@@ -39,7 +39,7 @@ export default function OppsummeringOppgavebehandling() {
         Opprett behandling fra oppgave
       </Heading>
 
-      <VStack gap="4">
+      <VStack gap="space-4">
         <Info label="Saktype" tekst={formaterSakstype(nyBehandlingRequest.sakType!!)} />
 
         <Info label="Språk" tekst={formaterSpraak(spraak)} />
@@ -78,8 +78,8 @@ export default function OppsummeringOppgavebehandling() {
         </Alert>
       )}
 
-      <VStack gap="2">
-        <HStack gap="4" justify="center">
+      <VStack gap="space-2">
+        <HStack gap="space-4" justify="center">
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>

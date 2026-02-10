@@ -27,11 +27,11 @@ export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Alert variant="info">Du opphever nå status feilregistrert på journalposten</Alert>
 
-      <Box borderWidth="1" padding="4" borderRadius="medium" borderColor="border-subtle">
-        <VStack gap="4">
+      <Box borderWidth="1" padding="space-4">
+        <VStack gap="space-4">
           <Info label="Sakstype" tekst={journalpost.sak?.sakstype || '-'} />
           <Info label="FagsakId" tekst={journalpost.sak?.fagsakId || '-'} />
           <Info label="Fagsaksystem" tekst={journalpost.sak?.fagsaksystem || '-'} />

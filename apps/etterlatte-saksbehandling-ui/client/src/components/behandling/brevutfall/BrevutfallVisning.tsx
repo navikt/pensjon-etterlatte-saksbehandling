@@ -46,22 +46,22 @@ export const BrevutfallVisning = (props: {
   const { behandlingErOpphoer, redigerbar, brevutfallOgEtterbetaling, sakType, setVisSkjema } = props
 
   return (
-    <VStack gap="8">
+    <VStack gap="space-8">
       {!behandlingErOpphoer && (
         <>
-          <VStack gap="2">
-            <VStack gap="2">
+          <VStack gap="space-2">
+            <VStack gap="space-2">
               <Label>Skal det etterbetales?</Label>
               <BodyShort>{brevutfallOgEtterbetaling.etterbetaling ? 'Ja' : 'Nei'}</BodyShort>
             </VStack>
             {brevutfallOgEtterbetaling.etterbetaling && (
               <>
-                <HStack gap="8">
-                  <VStack gap="2">
+                <HStack gap="space-8">
+                  <VStack gap="space-2">
                     <Label>Fra og med</Label>
                     <BodyShort>{formaterMaanednavnAar(brevutfallOgEtterbetaling.etterbetaling.datoFom!!)}</BodyShort>
                   </VStack>
-                  <VStack gap="2">
+                  <VStack gap="space-2">
                     <Label>Til og med</Label>
                     <BodyShort>{formaterMaanednavnAar(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
                   </VStack>
@@ -70,7 +70,7 @@ export const BrevutfallVisning = (props: {
             )}
           </VStack>
           {sakType === SakType.BARNEPENSJON && hasValue(brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk) && (
-            <VStack gap="2">
+            <VStack gap="space-2">
               <Label>Har bruker meldt inn frivillig skattetrekk utover 17%?</Label>
               <BodyShort>{brevutfallOgEtterbetaling.brevutfall.frivilligSkattetrekk ? 'Ja' : 'Nei'}</BodyShort>
             </VStack>
@@ -79,14 +79,14 @@ export const BrevutfallVisning = (props: {
       )}
 
       {sakType === SakType.BARNEPENSJON && (
-        <VStack gap="2">
+        <VStack gap="space-2">
           <Label>Gjelder brevet under eller over 18 år?</Label>
           <BodyShort>{aldersgruppeToString(brevutfallOgEtterbetaling.brevutfall.aldersgruppe)}</BodyShort>
         </VStack>
       )}
 
       {brevutfallOgEtterbetaling.brevutfall.feilutbetaling && (
-        <VStack gap="2">
+        <VStack gap="space-2">
           <Label>Medfører revurderingen en feilutbetaling?</Label>
           <BodyShort>{feilutbetalingToString(brevutfallOgEtterbetaling.brevutfall.feilutbetaling.valg)}</BodyShort>
           <Label>Kommentar</Label>

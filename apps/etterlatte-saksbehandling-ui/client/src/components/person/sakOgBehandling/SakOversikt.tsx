@@ -36,7 +36,7 @@ export enum OppgaveValg {
 
 function ByttTilAnnenSak(props: { byttSak: () => void }) {
   return (
-    <Box marginBlock="8 0">
+    <Box marginBlock="space-8 space-0">
       <Alert variant="info">
         Bruker har en annen sak.
         <div>
@@ -91,8 +91,8 @@ export const SakOversikt = ({
         pending: <Spinner label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger, ekstraSak }) => (
-          <HStack gap="4" wrap={false}>
-            <Box padding="8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-subtle">
+          <HStack gap="space-4" wrap={false}>
+            <Box padding="space-8" minWidth="25rem" borderWidth="0 1 0 0">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
               {byttTilAnnenSakEnabled && ekstraSak && (
                 <ByttTilAnnenSak
@@ -103,9 +103,9 @@ export const SakOversikt = ({
                 />
               )}
             </Box>
-            <VStack gap="8">
+            <VStack gap="space-8">
               {harEndretFnr() && (
-                <Box paddingBlock="8 0">
+                <Box paddingBlock="space-8 space-0">
                   <Alert variant="info">
                     <Heading size="xsmall" spacing={true}>
                       Nytt identnummer på bruker
@@ -115,14 +115,14 @@ export const SakOversikt = ({
                         ? `Identitetsnummer du søkte på “${fnr}” er blitt ersattet med “${person!.foedselsnummer}”. Du må oppdatere til ny ident.`
                         : `Identitetsnummer er blitt ersattet med “${person!.foedselsnummer}” men sak har fortsatt ident ${sak.ident}. Du må oppdatere til ny ident.`}
                     </BodyShort>
-                    <Box paddingBlock="6 2">
+                    <Box paddingBlock="space-6 space-2">
                       <OppdaterIdentModal sak={sak} hendelse={null} />
                     </Box>
                   </Alert>
                 </Box>
               )}
-              <VStack gap="4">
-                <Box paddingBlock="8 0">
+              <VStack gap="space-4">
+                <Box paddingBlock="space-8 space-0">
                   <Heading size="medium">Oppgaver</Heading>
                 </Box>
                 <ToggleGroup
@@ -147,8 +147,8 @@ export const SakOversikt = ({
                 <OpprettOppfoelgingsoppgaveModal sak={sak} vedOpprettelse={() => oppgaverFetch(sak.id)} />
               </VStack>
 
-              <VStack gap="4">
-                <Box paddingBlock="8 0">
+              <VStack gap="space-4">
+                <Box paddingBlock="space-8 space-0">
                   <Heading size="medium">Gosys-oppgaver</Heading>
                 </Box>
 
@@ -166,7 +166,7 @@ export const SakOversikt = ({
                 })}
               </VStack>
 
-              <VStack gap="4" align="start">
+              <VStack gap="space-4" align="start">
                 <Heading size="medium">Behandlinger</Heading>
                 <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
                 {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
@@ -180,22 +180,22 @@ export const SakOversikt = ({
                 )}
               </VStack>
 
-              <VStack gap="4">
+              <VStack gap="space-4">
                 <Heading size="medium">Klager</Heading>
                 <KlageListe sakId={sak.id} />
               </VStack>
 
-              <VStack marginBlock="0" gap="4">
+              <VStack marginBlock="space-0" gap="space-4">
                 <Heading size="medium">Tilbakekrevinger</Heading>
                 <TilbakekrevingListe sakId={sak.id} />
               </VStack>
 
               {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
-                <VStack marginBlock="16" gap="4">
+                <VStack marginBlock="space-16" gap="space-4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
                   <EtteroppgjoerForbehandlingTabell sakId={sak.id} />
                   {etteroppgjoerForbehandlingKnappEnabled && (
-                    <Box marginBlock="5">
+                    <Box marginBlock="space-4">
                       {mapResult(opprettForbehandlingStatus, {
                         pending: <Spinner label="Oppretter etteroppgjør" />,
                         error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,

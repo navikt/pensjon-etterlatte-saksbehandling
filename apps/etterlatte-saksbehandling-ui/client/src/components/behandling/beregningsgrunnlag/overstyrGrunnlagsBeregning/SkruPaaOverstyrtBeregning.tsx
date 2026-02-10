@@ -46,8 +46,8 @@ export const SkruPaaOverstyrtBeregning = ({
   }
 
   return (
-    <VStack gap="4" maxWidth="20rem">
-      <HStack gap="2" align="center">
+    <VStack gap="space-4" maxWidth="20rem">
+      <HStack gap="space-2" align="center">
         <ArrowsCirclepathIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small">Skal beregning overstyres?</Heading>
       </HStack>

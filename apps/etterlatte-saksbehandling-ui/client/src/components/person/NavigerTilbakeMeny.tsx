@@ -6,7 +6,7 @@ import { Navbar } from '~shared/header/Navbar'
 export default function NavigerTilbakeMeny({ ...props }: NavLinkProps) {
   return (
     <Navbar>
-      <HStack gap="05" align="center">
+      <HStack gap="space-1" align="center">
         <ChevronLeftIcon aria-hidden />
         <Label>
           <NavLink {...props} />

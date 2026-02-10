@@ -55,10 +55,10 @@ export default function GenerellOppgave() {
   }
 
   return (
-    <VStack padding="8" gap="8" width="40rem">
+    <VStack padding="space-8" gap="space-8" width="40rem">
       {skalViseSide && (
         <form onSubmit={handleSubmit(opprett)}>
-          <VStack gap="4">
+          <VStack gap="space-4">
             <Heading size="large">Opprett generell oppgave</Heading>
 
             <TextField

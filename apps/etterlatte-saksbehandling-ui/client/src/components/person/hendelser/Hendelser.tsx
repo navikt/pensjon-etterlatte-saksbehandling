@@ -51,7 +51,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
     pending: <Loader />,
     error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
     success: ({ sak, behandlinger }) => (
-      <Box padding="8">
+      <Box padding="space-8">
         <Heading size="medium" spacing>
           Hendelser
         </Heading>

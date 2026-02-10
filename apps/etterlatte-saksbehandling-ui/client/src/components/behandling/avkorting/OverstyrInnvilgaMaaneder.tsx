@@ -17,12 +17,12 @@ interface Props {
 
 export default function OverstyrInnvilgaMaander({ register, watch, errors, index }: Props) {
   return (
-    <HStack marginBlock="4" gap="1" align="start" wrap={false}>
+    <HStack marginBlock="space-4" gap="space-1" align="start" wrap={false}>
       <VStack>
-        <Box marginBlock="2">
+        <Box marginBlock="space-2">
           <Heading size="small">Overstyrt innvilga måneder</Heading>
         </Box>
-        <HStack marginBlock="2" gap="4" align="start" wrap={false}>
+        <HStack marginBlock="space-2" gap="space-4" align="start" wrap={false}>
           <Box width="13rem">
             <TextField
               {...register(`inntekter.${index}.overstyrtInnvilgaMaaneder.antall`, {

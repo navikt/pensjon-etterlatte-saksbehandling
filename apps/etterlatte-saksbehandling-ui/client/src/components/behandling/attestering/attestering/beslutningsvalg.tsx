@@ -18,7 +18,7 @@ export const Beslutningsvalg = ({ beslutning, setBeslutning, disabled }: Props) 
       className="radioGroup"
       onChange={(event) => setBeslutning(IBeslutning[event as IBeslutning])}
     >
-      <HStack gap="4" wrap={false} justify="space-between">
+      <HStack gap="space-4" wrap={false} justify="space-between">
         <Radio value={IBeslutning.godkjenn.toString()}>Godkjenn</Radio>
         <Radio value={IBeslutning.underkjenn.toString()}>Underkjenn</Radio>
       </HStack>

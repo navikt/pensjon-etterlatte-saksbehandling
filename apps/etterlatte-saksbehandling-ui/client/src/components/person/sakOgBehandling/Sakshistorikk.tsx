@@ -36,12 +36,12 @@ export const Sakshistorikk = ({ sakId }: { sakId: number }) => {
             icon={<Ikon endringstype={endring.endringstype} />}
             key={endring.id}
           >
-            <Box maxWidth="18rem" borderWidth="0 0 1 0" paddingBlock="0 2" borderColor="border-subtle">
+            <Box maxWidth="18rem" borderWidth="0 0 1 0" paddingBlock="space-0 space-2">
               <BodyShort size="small">
                 <Endringstekst endring={endring} />
               </BodyShort>
               {endring.kommentar && (
-                <Box marginBlock="3 3">
+                <Box marginBlock="space-2 space-2">
                   <BodyShort size="small">{endring.kommentar}</BodyShort>
                 </Box>
               )}

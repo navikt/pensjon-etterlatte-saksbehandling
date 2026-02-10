@@ -59,8 +59,8 @@ export const Avkorting = () => {
   const tidligereAvkortetYtelse = [...(avkorting?.tidligereAvkortetYtelse ?? [])]
 
   return (
-    <Box paddingBlock="8 0">
-      <VStack gap="8">
+    <Box paddingBlock="space-8 space-0">
+      <VStack gap="space-8">
         <VStack maxWidth="70rem">
           <Heading spacing size="small" level="2">
             Inntektsavkorting

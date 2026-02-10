@@ -15,7 +15,7 @@ export function AktivitetspliktSidemeny() {
         <Heading size="small">Vurdering av aktivitet</Heading>
         <Heading size="xsmall">{formaterOppgaveStatus(oppgave.status)}</Heading>
 
-        <VStack gap="2">
+        <VStack gap="space-2">
           <div>
             <SakTypeTag sakType={oppgave.sakType} />
           </div>

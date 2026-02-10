@@ -65,15 +65,15 @@ export default function FerdigstillOppgave() {
         </Alert>
       )}
 
-      <VStack gap="2">
-        <HStack gap="4" justify="center">
+      <VStack gap="space-2">
+        <HStack gap="space-4" justify="center">
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>
 
           <FerdigstillOppgaveModal oppgave={oppgave} />
         </HStack>
-        <HStack gap="4" justify="center">
+        <HStack gap="space-4" justify="center">
           <AvbrytBehandleJournalfoeringOppgave />
         </HStack>
       </VStack>

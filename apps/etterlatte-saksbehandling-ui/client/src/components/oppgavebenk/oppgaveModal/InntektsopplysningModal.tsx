@@ -56,16 +56,16 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
         header={{ heading: 'Ny inntektsopplysning' }}
       >
         <Modal.Body>
-          <VStack gap="4">
-            <HStack gap="8">
-              <VStack gap="2">
-                <HStack gap="1" align="center">
+          <VStack gap="space-4">
+            <HStack gap="space-8">
+              <VStack gap="space-2">
+                <HStack gap="space-1" align="center">
                   <FilePlusIcon fontSize="1.5rem" /> <Label>Opprettet</Label>
                 </HStack>
                 <BodyShort>{formaterDato(oppgave.opprettet)}</BodyShort>
               </VStack>
-              <VStack gap="2">
-                <HStack gap="1" align="center">
+              <VStack gap="space-2">
+                <HStack gap="space-1" align="center">
                   <CalendarIcon fontSize="1.5rem" /> <Label>Frist</Label>
                 </HStack>
                 <BodyShort>{formaterDato(oppgave.frist)}</BodyShort>
@@ -78,12 +78,10 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
                   {mapResult(hentJournalpostResult, {
                     pending: <Spinner label="Henter journalpost" />,
                     success: (journalpost) => (
-                      <VStack gap="4">
-                        <List
-                          as="ol"
-                          title="Mottatt inntektsopplysning for neste år"
-                          description="For å behandle denne oppgaven, følg disse stegene:"
-                        >
+                      <VStack gap="space-4">
+                        <BodyShort>Mottatt inntektsopplysning for neste år</BodyShort>
+                        <BodyShort size="small">For å behandle denne oppgaven, følg disse stegene:</BodyShort>
+                        <List as="ol">
                           <List.Item>
                             <Link
                               href={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
@@ -111,7 +109,7 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
                           <List.Item>Ferdigstill denne oppgaven.</List.Item>
                         </List>
 
-                        <VStack gap="2" maxWidth="20rem">
+                        <VStack gap="space-2" maxWidth="20rem">
                           <Heading size="small">Ferdigstill oppgave</Heading>
                           <Textarea
                             label="Beskrivelse (valgfritt)"
@@ -126,7 +124,7 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
               ) : (
                 <Alert variant="warning">Du må tildele deg oppgaven for å endre den</Alert>
               ))}
-            <HStack gap="4" justify="space-between">
+            <HStack gap="space-4" justify="space-between">
               <Button variant="tertiary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillOppgaveResult)}>
                 Avbryt
               </Button>

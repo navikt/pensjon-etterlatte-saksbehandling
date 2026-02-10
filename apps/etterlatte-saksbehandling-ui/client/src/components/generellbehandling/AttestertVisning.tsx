@@ -13,10 +13,10 @@ export const AttestertVisning = (props: {
 
   return (
     <SidebarPanel $border style={{ borderLeft: '5px solid #007C2E' }}>
-      <VStack gap="4">
+      <VStack gap="space-4">
         <Heading size="small">{genbehandlingTypeTilLesbartNavn(utlandsBehandling.type)}</Heading>
 
-        <HStack gap="4" justify="space-between">
+        <HStack gap="space-4" justify="space-between">
           <div>
             <Label size="small">Attestant</Label>
             <Detail>{utlandsBehandling.attestant?.attestant}</Detail>
@@ -27,7 +27,7 @@ export const AttestertVisning = (props: {
           </div>
         </HStack>
 
-        <HStack gap="4" justify="space-between">
+        <HStack gap="space-4" justify="space-between">
           <div>
             <Label size="small">Attestert dato</Label>
             <Detail>
@@ -42,7 +42,7 @@ export const AttestertVisning = (props: {
           </div>
         </HStack>
 
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <Label size="small">Sakid:</Label>
           <KopierbarVerdi value={utlandsBehandling.sakId.toString()} />
         </HStack>

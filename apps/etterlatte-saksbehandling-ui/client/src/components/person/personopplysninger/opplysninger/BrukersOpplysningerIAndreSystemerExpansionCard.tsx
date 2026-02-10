@@ -9,14 +9,14 @@ export const BrukersOpplysningerIAndreSystemerExpansionCard = ({ fnr }: { fnr: s
   return (
     <ExpansionCard aria-labelledby="Brukers opplysninger i andre systemer" size="small" defaultOpen>
       <ExpansionCard.Header>
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <MonitorIcon aria-hidden fontSize="1.5rem" />
           <ExpansionCard.Title size="small">Brukers opplysninger i andre systemer</ExpansionCard.Title>
         </HStack>
       </ExpansionCard.Header>
       <ExpansionCard.Content>
-        <HStack gap="8">
-          <HStack gap="2">
+        <HStack gap="space-8">
+          <HStack gap="space-2">
             <Tag variant="alt3" size="small">
               Go
             </Tag>
@@ -24,7 +24,7 @@ export const BrukersOpplysningerIAndreSystemerExpansionCard = ({ fnr }: { fnr: s
               Oversikt i Gosys <ExternalLinkIcon aria-hidden />
             </Link>
           </HStack>
-          <HStack gap="2">
+          <HStack gap="space-2">
             <Tag variant="alt3" size="small">
               Py
             </Tag>
@@ -32,7 +32,7 @@ export const BrukersOpplysningerIAndreSystemerExpansionCard = ({ fnr }: { fnr: s
               Oversikt i Pesys <ExternalLinkIcon aria-hidden />
             </Link>
           </HStack>
-          <HStack gap="2">
+          <HStack gap="space-2">
             <Tag variant="alt3" size="small">
               Mo
             </Tag>

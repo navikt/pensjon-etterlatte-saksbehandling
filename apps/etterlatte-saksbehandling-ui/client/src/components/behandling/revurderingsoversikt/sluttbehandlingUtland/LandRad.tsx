@@ -17,7 +17,7 @@ export default function LandRad({
   label?: string
 }) {
   return (
-    <HStack gap="4" align="start">
+    <HStack gap="space-4" align="start">
       <Select
         readOnly={lesevisning}
         style={{ marginRight: '2rem', minWidth: '10rem', maxWidth: '12rem' }}

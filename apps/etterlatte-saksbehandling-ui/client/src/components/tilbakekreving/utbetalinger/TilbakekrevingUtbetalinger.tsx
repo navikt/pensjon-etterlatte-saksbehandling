@@ -14,14 +14,14 @@ export function TilbakekrevingUtbetalinger({
 }) {
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-16" paddingBlock="space-16 space-4">
         <Heading level="1" size="large">
           Tilbakekreving
         </Heading>
         {behandling.sak.sakType === SakType.BARNEPENSJON && (
-          <Box marginBlock="10 0" maxWidth="45em">
+          <Box marginBlock="space-8 space-0" maxWidth="45em">
             <Alert variant="info">
-              <VStack gap="5">
+              <VStack gap="space-4">
                 <BodyLong>
                   Skatteetaten har ikke utstedt skattekort for de som mottar barnepensjon. Det er derfor ikke mulig å
                   beregne netto tilbakekreving automatisk. Skatt overføres til Skatteetaten annenhver måned.

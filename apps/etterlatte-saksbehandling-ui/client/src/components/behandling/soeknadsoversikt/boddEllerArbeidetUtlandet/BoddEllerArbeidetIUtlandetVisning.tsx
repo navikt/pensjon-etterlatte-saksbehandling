@@ -8,13 +8,13 @@ const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: I
     <>
       {boddEllerArbeidetUtlandet && boddEllerArbeidetUtlandet.boddEllerArbeidetUtlandet ? (
         <>
-          <VStack gap="6" marginBlock="0 12">
+          <VStack gap="space-6" marginBlock="space-0 space-12">
             <Label as="p" size="small">
               {JaNeiRec[boddEllerArbeidetUtlandet.boddEllerArbeidetUtlandet ? JaNei.JA : JaNei.NEI]}
             </Label>
           </VStack>
 
-          <VStack gap="6" marginBlock="0 12">
+          <VStack gap="space-6" marginBlock="space-0 space-12">
             <Heading level="3" size="xsmall">
               Vurdering av utlandsopphold
             </Heading>
@@ -38,7 +38,7 @@ const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: I
             </div>
           </VStack>
 
-          <VStack gap="6" marginBlock="0 12">
+          <VStack gap="space-6" marginBlock="space-0 space-12">
             <Heading level="3" size="xsmall">
               Huk av hvis aktuelt
             </Heading>
@@ -57,7 +57,7 @@ const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: I
           </VStack>
         </>
       ) : (
-        <VStack gap="6" marginBlock="0 6">
+        <VStack gap="space-6" marginBlock="space-0 space-6">
           <BodyShort size="small">Nei</BodyShort>
 
           <BodyShort size="small">Ved avslag på helnasjonal sak vil ikke trygdetidsbildet vises</BodyShort>

@@ -45,7 +45,7 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
   const { control } = props
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Heading level="2" size="medium">
         Omgjøring
       </Heading>

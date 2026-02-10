@@ -19,13 +19,13 @@ export const Utlandstilknytning = ({
 }) => {
   return (
     <SoeknadVurdering tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utlandstilknytning)}>
-      <Box marginBlock="3" marginInline="0" maxWidth="41rem">
+      <Box marginBlock="space-2" marginInline="space-0" maxWidth="41rem">
         Svar for om saken skal behandles som følge av utlandstilknytning basert på om avdøde har bodd/arbeidet i
         EØS/avtale-land eller ikke, og om gjenlevende bor i Norge eller utlandet. Om søker bor i utlandet er det en
         bosatt utland-sak, om avdøde har bodd/arbeidet i EØS/avtale-land og gjenlevende bor i Norge er det en
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
       </Box>
-      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+      <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
         <UtlandstilknytningVurdering
           utlandstilknytning={behandling.utlandstilknytning}
           redigerbar={redigerbar}

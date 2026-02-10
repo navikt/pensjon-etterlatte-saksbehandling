@@ -111,7 +111,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="12 4">
+      <Box paddingInline="space-16" paddingBlock="space-12 space-4">
         <Heading spacing size="large" level="1">
           Revurdering
         </Heading>
@@ -123,10 +123,10 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </BodyShort>
         )}
       </Box>
-      <Box paddingBlock="4 0" borderWidth="1 0 1 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 1 0">
         <Familieforhold behandling={behandling} redigerbar={redigerbar} personopplysninger={personopplysninger} />
       </Box>
-      <Box paddingBlock="8" paddingInline="16 8">
+      <Box paddingBlock="space-8" paddingInline="space-16 space-8">
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         {!!behandling.begrunnelse && (
           <>
@@ -170,7 +170,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         )}
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Start disabled={behandling.virkningstidspunkt === null} />

@@ -42,7 +42,7 @@ export const AktivitetspliktPeriodeTimelinePeriodContent = ({
   }
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-2">
       <BodyShort weight="semibold">
         Fra {formaterDato(new Date(aktivitetPeriode.fom))}{' '}
         {aktivitetPeriode.tom && `til ${formaterDato(new Date(aktivitetPeriode.tom))}`}
@@ -68,7 +68,7 @@ export const AktivitetspliktPeriodeTimelinePeriodContent = ({
         apiResult: slettAktivitetPeriodeForSakResult,
         errorMessage: 'Kunne ikke slette aktivitet periode',
       })}
-      <HStack gap="2">
+      <HStack gap="space-2">
         <Button
           variant="secondary"
           size="xsmall"

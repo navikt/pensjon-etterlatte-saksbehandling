@@ -8,8 +8,8 @@ export const NesteOgTilbake = () => {
   const { next, back, lastPage, firstPage } = useContext(BehandlingRouteContext)
 
   return (
-    <VStack gap="4">
-      <HStack gap="4" justify="center">
+    <VStack gap="space-4">
+      <HStack gap="space-4" justify="center">
         {!firstPage && (
           <Button variant="secondary" onClick={back}>
             {handlinger.TILBAKE.navn}

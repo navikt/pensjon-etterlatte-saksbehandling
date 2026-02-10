@@ -237,7 +237,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
         errorMessage: 'Kunne ikke lagre beregningsgrunnlag',
       })}
 
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button

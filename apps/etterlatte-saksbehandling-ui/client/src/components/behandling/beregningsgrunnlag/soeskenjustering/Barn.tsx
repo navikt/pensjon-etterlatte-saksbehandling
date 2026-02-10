@@ -15,8 +15,8 @@ export const Barn = ({ person, doedsdato }: Props) => {
   const aktivAdresse = bostedsadresse.find((adresse) => adresse.aktiv)
 
   return (
-    <HStack gap="16">
-      <HStack gap="2">
+    <HStack gap="space-16">
+      <HStack gap="space-2">
         <ChildEyesIcon aria-hidden />
         <BodyShort>
           {person.fornavn} {person.etternavn}

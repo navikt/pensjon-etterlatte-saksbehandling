@@ -115,7 +115,7 @@ export const OppgaveFraJournalpostModal = ({
             ),
             success: (oppgaver) =>
               finnesGosysOppgave ? (
-                <VStack gap="2">
+                <VStack gap="space-2">
                   <Alert variant="warning">
                     Fant {oppgaver.length} oppgave(r) tilknyttet journalposten i Gosys.
                     <br />
@@ -131,13 +131,13 @@ export const OppgaveFraJournalpostModal = ({
 
                   {oppgaver.map((oppgave) => (
                     <div key={oppgave.id}>
-                      <VStack gap="4">
+                      <VStack gap="space-4">
                         <Info label="ID" tekst={oppgave.id} />
                         <Info label="Beskrivelse" tekst={oppgave.beskrivelse} />
                       </VStack>
                       <br />
 
-                      <HStack gap="4" justify="end">
+                      <HStack gap="space-4" justify="end">
                         {isSuccess(flyttOppgaveResult) ? (
                           <Alert size="small" variant="success">
                             <Link href={`/oppgave/${flyttOppgaveResult.data.id}`}>Gå til oppgave</Link>
@@ -190,7 +190,7 @@ export const OppgaveFraJournalpostModal = ({
             <ApiErrorAlert>{error.detail || 'Ukjent feil oppsto ved flytting av oppgave'}</ApiErrorAlert>
           ))}
 
-          <HStack gap="4" justify="end">
+          <HStack gap="space-4" justify="end">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
               Avbryt
             </Button>

@@ -64,8 +64,8 @@ export const BrevOppgaveModal = ({
         header={{ heading: 'Manuell utsending av brev' }}
       >
         <Modal.Body>
-          <VStack gap="4">
-            <HStack gap="4">
+          <VStack gap="space-4">
+            <HStack gap="space-4">
               <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
               <Info label="Frist" tekst={formaterDato(oppgave.frist)} />
             </HStack>
@@ -112,7 +112,7 @@ export const BrevOppgaveModal = ({
               error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
             })}
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-4" justify="end">
               <Button
                 variant="secondary"
                 onClick={() => setIsOpen(false)}

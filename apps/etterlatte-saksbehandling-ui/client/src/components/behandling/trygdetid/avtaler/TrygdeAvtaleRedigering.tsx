@@ -109,8 +109,8 @@ export function TrygdeAvtaleRedigering(props: {
   }
   return (
     <form onSubmit={handleSubmit(lagreOgOppdater)}>
-      <VStack gap="6">
-        <HStack gap="4" align="start">
+      <VStack gap="space-6">
+        <HStack gap="space-4" align="start">
           <Select
             {...register('avtaleKode', {
               required: {
@@ -159,7 +159,7 @@ export function TrygdeAvtaleRedigering(props: {
           </Select>
         </Box>
 
-        <VStack gap="2">
+        <VStack gap="space-2">
           <Heading size="xsmall">Er avdøde i personkretsen i denne avtalen?</Heading>
           <ControlledRadioGruppe
             control={control}
@@ -177,9 +177,9 @@ export function TrygdeAvtaleRedigering(props: {
           />
         </VStack>
 
-        <HGrid gap="8 4" columns="60% 40%">
-          <VStack gap="2">
-            <HStack gap="2">
+        <HGrid gap="space-8 space-4" columns="60% 40%">
+          <VStack gap="space-2">
+            <HStack gap="space-2">
               <Heading size="xsmall">Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?</Heading>
               <HelpText>
                 Poengår (år med arbeidsinntekt på mer enn 1 G) i andre EØS-land medregnes som poengår, forutsatt at det
@@ -224,8 +224,8 @@ export function TrygdeAvtaleRedigering(props: {
             />
           </Box>
 
-          <VStack gap="2">
-            <HStack gap="2">
+          <VStack gap="space-2">
+            <HStack gap="space-2">
               <Heading size="xsmall">Beregning etter artikkel 50 (EØS-forordning 883/2004)?</Heading>
               <HelpText>
                 Denne artikkelen skal anvendes hvis det foreligger pensjonsrett i minst to EØS-land i tillegg til Norge,
@@ -272,8 +272,8 @@ export function TrygdeAvtaleRedigering(props: {
             />
           </Box>
 
-          <VStack gap="2">
-            <HStack gap="2">
+          <VStack gap="space-2">
+            <HStack gap="space-2">
               <Heading size="xsmall">Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?</Heading>
               <HelpText>
                 Hvis forutgående medlemskap, og derav vilkår for å beregne framtidig trygdetid, er oppfylt etter
@@ -303,7 +303,7 @@ export function TrygdeAvtaleRedigering(props: {
               />
               {watch('nordiskTrygdeAvtale') === JaNei.JA && (
                 <Alert variant="info" size="small" inline>
-                  <VStack gap="3">
+                  <VStack gap="space-2">
                     <BodyLong size="small">
                       Fremtidig trygdetid skal avkortes. De automatiske beregningene av fremtidig trygdetid i Gjenny
                       støtter ikke dette. Du må derfor beregne fremtidig trygdetid manuelt og registrere en periode som
@@ -340,7 +340,7 @@ export function TrygdeAvtaleRedigering(props: {
           errorMessage: 'En feil har oppstått ved lagring av trygdeavtale for behandlingen',
         })}
 
-        <HStack gap="4">
+        <HStack gap="space-4">
           {trygdeavtale && (
             <Button size="small" type="button" variant="secondary" icon={<XMarkIcon aria-hidden />} onClick={avbryt}>
               Avbryt

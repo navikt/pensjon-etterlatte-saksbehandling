@@ -12,7 +12,7 @@ export function UtenBrevVisning() {
   const oppgaveKanFerdigstilles = !oppgaveErFerdigstilt && !!aktivtetspliktbrevdata && !aktivtetspliktbrevdata.brevId
 
   return (
-    <VStack gap="4" justify="center">
+    <VStack gap="space-4" justify="center">
       {oppgaveErFerdigstilt ? (
         <>
           <Alert variant="success">Oppgaven er ferdigstilt</Alert>

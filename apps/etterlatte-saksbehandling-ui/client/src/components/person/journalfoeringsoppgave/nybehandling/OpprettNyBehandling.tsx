@@ -123,7 +123,7 @@ export default function OpprettNyBehandling() {
   return (
     <FormWrapper $column>
       <FormProvider {...methods}>
-        <VStack gap="4">
+        <VStack gap="space-4">
           <Heading size="medium" spacing>
             Opprett behandling
           </Heading>
@@ -175,7 +175,7 @@ export default function OpprettNyBehandling() {
             control={control}
             errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
           />
-          <Box marginBlock="12 0">
+          <Box marginBlock="space-12 space-0">
             <Heading size="medium" spacing>
               Persongalleri
             </Heading>
@@ -185,8 +185,8 @@ export default function OpprettNyBehandling() {
           {valgtSakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
           {valgtSakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
-          <VStack gap="2">
-            <HStack gap="4" justify="center">
+          <VStack gap="space-2">
+            <HStack gap="space-4" justify="center">
               <Button variant="secondary" onClick={tilbake} type="button">
                 Tilbake
               </Button>

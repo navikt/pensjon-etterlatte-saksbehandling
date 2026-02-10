@@ -131,7 +131,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagTable = ({
                 </Table.DataCell>
                 <Table.DataCell>{opphold.data.egenReduksjon ?? '-'}</Table.DataCell>
                 <Table.DataCell>
-                  <HStack gap="2" wrap={false} justify="end">
+                  <HStack gap="space-2" wrap={false} justify="end">
                     <Button
                       type="button"
                       variant="secondary"

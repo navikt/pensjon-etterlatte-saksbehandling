@@ -21,7 +21,7 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntekt
   )
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Heading size="large">Fastsett faktisk inntekt</Heading>
       <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
       <div>
@@ -36,7 +36,7 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntekt
           setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
         />
       ) : (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <FaktiskInntektVisning />
           {erRedigerbar && (
             <div>

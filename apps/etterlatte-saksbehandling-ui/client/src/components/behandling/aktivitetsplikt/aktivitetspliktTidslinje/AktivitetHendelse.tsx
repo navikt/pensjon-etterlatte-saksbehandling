@@ -96,7 +96,7 @@ export const AktivitetHendelse = ({
 
   return (
     <form onSubmit={handleSubmit(lagreAktivitetHendelse)}>
-      <VStack gap="4" maxWidth="20rem">
+      <VStack gap="space-4" maxWidth="20rem">
         <Heading size="small">Legg til hendelse</Heading>
         <ControlledDatoVelger
           name="dato"
@@ -120,7 +120,7 @@ export const AktivitetHendelse = ({
           apiResult: opprettAktivitetHendelseForSakResult,
           errorMessage: 'Kunne ikke opprette/oppdatere aktivitet hendelse',
         })}
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button
             size="small"
             variant="secondary"

@@ -61,14 +61,14 @@ const OverstyrBeregningGrunnlag = (props: {
   }, [])
 
   return (
-    <VStack gap="12">
+    <VStack gap="space-12">
       <BeregningErOverstyrtAlert />
-      <VStack gap="4">
-        <HStack gap="2">
+      <VStack gap="space-4">
+        <HStack gap="space-2">
           <CalculatorIcon fontSize="1.5rem" aria-hidden />
           <Heading size="small">Beregningsgrunnlag for overstyrt beregning</Heading>
         </HStack>
-        <VStack gap="4" maxWidth="70rem">
+        <VStack gap="space-4" maxWidth="70rem">
           {mapResult(overstyrBeregningGrunnlagResult, {
             pending: <Spinner label="Henter overstyrt beregning grunnlag..." />,
             error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente grunnlag'}</ApiErrorAlert>,
@@ -108,7 +108,7 @@ const OverstyrBeregningGrunnlag = (props: {
         apiResult: opprettEllerEndreBeregningResult,
       })}
 
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button variant="primary" onClick={onSubmit} loading={isPending(opprettEllerEndreBeregningResult)}>

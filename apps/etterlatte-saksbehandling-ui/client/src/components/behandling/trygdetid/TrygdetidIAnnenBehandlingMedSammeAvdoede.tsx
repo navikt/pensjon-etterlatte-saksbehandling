@@ -76,7 +76,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
             {behandlingId && (
               <Box maxWidth="50rem">
                 <Alert variant="info">
-                  <HStack gap="6" align="center" justify="end" minWidth="45rem">
+                  <HStack gap="space-6" align="center" justify="end" minWidth="45rem">
                     <Heading size="small" level="2">
                       Det finnes en annen sak tilknyttet avdøde
                     </Heading>
@@ -88,7 +88,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
                     )}
                   </HStack>
                   {skalViseDetaljer && (
-                    <VStack gap="3">
+                    <VStack gap="space-2">
                       <BodyShort>
                         Det finnes en annen sak tilknyttet avdøde {avdoedesNavn()}, der trygdetiden allerede er fylt
                         inn. Ønsker du å benytte den samme trygdetiden i denne behandlingen? Dette overskriver det du
@@ -98,7 +98,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
                         Forhåndsvis trygdetiden
                         <ExternalLinkIcon aria-hidden />
                       </Link>
-                      <HStack gap="1">
+                      <HStack gap="space-1">
                         <Button
                           variant="secondary"
                           size="small"

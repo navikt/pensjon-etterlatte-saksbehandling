@@ -142,7 +142,7 @@ export const Vurdering = ({
   )
 
   return (
-    <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+    <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
       <VurderingsboksWrapper
         tittel={overskrift()}
         subtittelKomponent={

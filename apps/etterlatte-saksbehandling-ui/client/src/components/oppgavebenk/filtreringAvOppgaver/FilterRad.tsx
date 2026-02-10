@@ -50,8 +50,8 @@ export const FilterRad = ({
     .sort((a, b) => a.localeCompare(b))
 
   return (
-    <VStack gap="4">
-      <HStack gap="4" align="start" wrap={false}>
+    <VStack gap="space-4">
+      <HStack gap="space-4" align="start" wrap={false}>
         <TextField
           label="Sakid / Fnr."
           width="1rem"
@@ -135,7 +135,7 @@ export const FilterRad = ({
         {children}
       </HStack>
 
-      <HStack gap="4">
+      <HStack gap="space-4">
         <Button
           onClick={() => hentAlleOppgaver()}
           size="small"

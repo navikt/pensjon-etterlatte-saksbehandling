@@ -83,7 +83,7 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
                 oppgavebenken.
               </Alert>
             ) : (
-              <HStack gap="4" justify="center">
+              <HStack gap="space-4" justify="center">
                 <Button
                   variant="secondary"
                   onClick={() => setOpen(false)}

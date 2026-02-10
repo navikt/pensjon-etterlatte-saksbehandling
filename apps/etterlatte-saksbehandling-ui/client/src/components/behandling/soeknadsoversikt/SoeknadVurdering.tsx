@@ -13,14 +13,14 @@ interface Props {
 
 export const SoeknadVurdering = (props: Props) => {
   return (
-    <VStack gap="2" paddingBlock="12">
-      <HStack gap="6" align="center">
+    <VStack gap="space-2" paddingBlock="space-12">
+      <HStack gap="space-6" align="center">
         {props.status && <StatusIcon status={props.status} />}
         <Heading size="medium" level="2">
           {props.tittel}
         </Heading>
       </HStack>
-      <HStack gap="4">
+      <HStack gap="space-4">
         {props.hjemler.map((hjemmel, idx) => (
           <HjemmelLenke key={`hjemmel-${idx}`} {...hjemmel} />
         ))}

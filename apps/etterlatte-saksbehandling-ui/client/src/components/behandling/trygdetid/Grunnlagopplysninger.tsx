@@ -23,7 +23,7 @@ export const Grunnlagopplysninger = ({
 }) => {
   const visDifferanse = redigerbar ? trygdetid.opplysningerDifferanse?.differanse : false
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Heading size="medium">Grunnlagsopplysninger om avdød</Heading>
       {visDifferanse ? (
         <DifferanseVisning trygdetid={trygdetid} onOppdatert={onOppdatert} />
@@ -35,7 +35,7 @@ export const Grunnlagopplysninger = ({
 }
 
 const OpplysningerTabell = ({ opplysninger, fnr }: { opplysninger: IGrunnlagOpplysninger; fnr: string }) => (
-  <HStack gap="24">
+  <HStack gap="space-24">
     <Opplysningsgrunnlag label="Fødselsdato" opplysningsgrunnlag={opplysninger.avdoedFoedselsdato} />
     <Opplysningsgrunnlag label="16 år" opplysningsgrunnlag={opplysninger.avdoedFylteSeksten} />
     <Opplysningsgrunnlag label="Dødsdato" opplysningsgrunnlag={opplysninger.avdoedDoedsdato} />

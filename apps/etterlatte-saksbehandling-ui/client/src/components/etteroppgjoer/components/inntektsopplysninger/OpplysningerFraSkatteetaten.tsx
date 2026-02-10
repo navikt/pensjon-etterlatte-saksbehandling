@@ -12,7 +12,7 @@ export const OpplysningerFraSkatteetaten = ({
   const { forbehandling } = useEtteroppgjoerForbehandling()
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Heading size="small">Opplysninger fra Skatteetaten</Heading>
       <BodyShort>Pensjonsgivende inntekt for {forbehandling.aar}.</BodyShort>
 
@@ -29,7 +29,7 @@ export const OpplysningerFraSkatteetaten = ({
           <Table.Body>
             <Table.Row>
               <Table.DataCell>
-                <HStack gap="1">
+                <HStack gap="space-1">
                   Lønnsinntekt
                   <HelpText>Lønnsinntekt inkluderer også omstillingsstønad</HelpText>
                 </HStack>
@@ -38,7 +38,7 @@ export const OpplysningerFraSkatteetaten = ({
             </Table.Row>
             <Table.Row>
               <Table.DataCell>
-                <HStack gap="1">
+                <HStack gap="space-1">
                   Næringsinntekt
                   <HelpText>
                     Næringsinntekt inkluderer også næringsinntekt fra fiske, fangst og familiebarnehage

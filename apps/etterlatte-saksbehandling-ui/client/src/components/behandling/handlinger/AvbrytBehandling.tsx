@@ -30,7 +30,7 @@ export default function AvbrytBehandling() {
             Endringene dine er lagret og du kan fortsette der du slapp når du går tilbake til saken.
           </BodyLong>
 
-          <HStack gap="4" justify="center">
+          <HStack gap="space-4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett behandling
             </Button>

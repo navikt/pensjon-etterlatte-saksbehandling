@@ -74,7 +74,7 @@ export const BeregneEtteroppgjoerOMS = () => {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4 12">
+      <Box paddingInline="space-16" paddingBlock="space-4 space-12">
         {erEtteroppgjoerMedIngenEndring ? (
           <>
             <BodyShort>
@@ -88,7 +88,7 @@ export const BeregneEtteroppgjoerOMS = () => {
             error: (error) => <ApiErrorAlert>Kunne ikke hente beregning. {error.detail}</ApiErrorAlert>,
             success: (beregning) => (
               <>
-                <VStack gap="10">
+                <VStack gap="space-8">
                   <OmstillingsstoenadSammendrag beregning={beregning} />
                   {/* TODO må vurdere om denne komponenten skal brukes eller om man skal klare å dra enkelt-deler ut */}
                   <Avkorting />
@@ -100,7 +100,7 @@ export const BeregneEtteroppgjoerOMS = () => {
         )}
       </Box>
 
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button loading={isPending(vedtakResult)} variant="primary" onClick={opprettEllerOppdaterVedtak}>

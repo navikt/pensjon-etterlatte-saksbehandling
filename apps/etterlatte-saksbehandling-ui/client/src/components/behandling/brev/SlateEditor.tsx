@@ -22,17 +22,11 @@ export default function SlateEditor({ value, onChange, readonly, editKey = '' }:
   const [editor] = useState(() => withReact(withHistory(createEditor())))
 
   return (
-    <EditorBox borderColor="border-subtle" borderWidth="1">
+    <EditorBox borderWidth="1">
       <Slate editor={editor} onChange={(text) => onChange(text, editKey)} initialValue={value}>
         {!readonly && (
-          <Box
-            background="bg-subtle"
-            paddingInline="4"
-            paddingBlock="2"
-            borderWidth="0 0 1 0"
-            borderColor="border-subtle"
-          >
-            <HStack gap="4">
+          <Box paddingInline="space-4" paddingBlock="space-2" borderWidth="0 0 1 0">
+            <HStack gap="space-4">
               <BlockButton format="heading-two" icon="H2" />
               <BlockButton format="heading-three" icon="H3" />
               <BlockButton format="bulleted-list" icon={<BulletListIcon title="a11y-title" fontSize="1.5rem" />} />

@@ -20,14 +20,14 @@ export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
   }, [])
 
   return (
-    <VStack gap="4">
-      <HStack gap="2" align="center">
+    <VStack gap="space-4">
+      <HStack gap="space-2" align="center">
         <HospitalIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small" level="3">
           Hendelser registrert i inst2
         </Heading>
       </HStack>
-      <VStack gap="2">
+      <VStack gap="space-2">
         {mapResult(institusjonsHendelserResult, {
           pending: <Spinner label="Henter hendelser for institusjonsopphold..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente hendelser'}</ApiErrorAlert>,

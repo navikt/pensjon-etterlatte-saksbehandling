@@ -91,7 +91,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-16" paddingBlock="space-16 space-4">
         <Heading size="large" level="1">
           Vilkårsvurdering
         </Heading>
@@ -129,7 +129,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             </AlertWrapper>
           )}
 
-          <Box paddingInline="16" paddingBlock="16 4">
+          <Box paddingInline="space-16" paddingBlock="space-16 space-4">
             {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
               vilkaarsvurdering.resultat == null && (
                 <KopierVilkaarAvdoed behandlingId={behandling.id} vilkaar={vilkaarsvurdering.vilkaar} />

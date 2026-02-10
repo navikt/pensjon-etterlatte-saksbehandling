@@ -88,7 +88,7 @@ export const BeregneOMS = () => {
   return (
     <>
       {erOpphoer ? (
-        <Box paddingInline="18" paddingBlock="4">
+        <Box paddingInline="space-16" paddingBlock="space-4">
           <SimulerUtbetaling behandling={behandling} />
           <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
         </Box>
@@ -101,7 +101,7 @@ export const BeregneOMS = () => {
               <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
             ),
             (beregning) => (
-              <Box paddingInline="18" paddingBlock="4">
+              <Box paddingInline="space-16" paddingBlock="space-4">
                 <>
                   <OmstillingsstoenadSammendrag beregning={beregning} />
                   <Avkorting />
@@ -127,7 +127,7 @@ export const BeregneOMS = () => {
         wrapperComponent: { component: HStack, props: { justify: 'center' } },
       })}
 
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             {visAttesteringsmodal ? (

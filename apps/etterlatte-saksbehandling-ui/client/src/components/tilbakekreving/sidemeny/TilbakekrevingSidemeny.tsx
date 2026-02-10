@@ -66,7 +66,7 @@ export function TilbakekrevingSidemeny() {
         <div>
           <SakTypeTag sakType={tilbakekreving.sak.sakType} />
         </div>
-        <Box marginBlock="4">
+        <Box marginBlock="space-4">
           <Label size="small">Saksbehandler</Label>
           {mapApiResult(
             oppgaveResult,
@@ -90,7 +90,7 @@ export function TilbakekrevingSidemeny() {
         </div>
 
         {tilbakekreving.omgjoeringAvId && (
-          <VStack gap="2" marginBlock="4">
+          <VStack gap="space-2" marginBlock="space-4">
             <Label size="medium">Tilbakekrevingen er en omgjøring</Label>
 
             <Link href={lenkeTilTilbakekrevingMedId(tilbakekreving.omgjoeringAvId)}>Åpne forrige tilbakekreving</Link>

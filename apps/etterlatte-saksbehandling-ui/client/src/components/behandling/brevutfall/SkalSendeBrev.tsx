@@ -59,7 +59,7 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer; behandlin
             )}
           />
           {isFailure(skalSendeBrevStatus) && <Alert variant="error">{skalSendeBrevStatus.error.detail}</Alert>}
-          <HStack gap="4">
+          <HStack gap="space-4">
             <Button type="submit" loading={isPending(skalSendeBrevStatus)} variant="primary" size="small">
               Lagre
             </Button>

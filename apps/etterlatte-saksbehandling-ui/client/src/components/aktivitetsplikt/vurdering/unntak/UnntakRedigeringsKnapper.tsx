@@ -19,8 +19,8 @@ export const UnntakRedigeringsKnapper = ({
   slettUnntak: (unntak: IAktivitetspliktUnntak) => void
 }) => {
   return (
-    <VStack gap="6">
-      <VStack gap="2">
+    <VStack gap="space-6">
+      <VStack gap="space-2">
         <Label>Beskrivelse</Label>
         <BodyShort>{unntak.beskrivelse}</BodyShort>
       </VStack>
@@ -30,7 +30,7 @@ export const UnntakRedigeringsKnapper = ({
       )}
 
       {redigerbar && (
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button
             size="xsmall"
             variant="secondary"

@@ -9,8 +9,8 @@ const TidligereFamiliepleierVisning = (props: { tidligereFamiliepleier: ITidlige
   return (
     <>
       {tidligereFamiliepleier && tidligereFamiliepleier.svar ? (
-        <Box paddingBlock="0 4">
-          <VStack gap="4">
+        <Box paddingBlock="space-0 space-4">
+          <VStack gap="space-4">
             <BodyShort size="small">{JaNeiRec[tidligereFamiliepleier.svar ? JaNei.JA : JaNei.NEI]}</BodyShort>
             <div>
               <Label>Fødselsnummer for forpleiede</Label>

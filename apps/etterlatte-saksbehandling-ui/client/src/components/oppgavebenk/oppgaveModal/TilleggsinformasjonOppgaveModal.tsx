@@ -79,14 +79,14 @@ export const TilleggsinformasjonOppgaveModal = ({
         header={{ heading: 'Vurder tilleggsinformasjon' }}
       >
         <Modal.Body>
-          <HGrid gap="6" columns={{ md: 'auto 400px' }}>
+          <HGrid gap="space-6" columns={{ md: 'auto 400px' }}>
             {isPending(journalpostResult) || isPending(pdfResult) ? (
               <Spinner label="Henter journalført søknad..." />
             ) : (
               <PdfVisning fileUrl={fileURL} />
             )}
 
-            <VStack gap="4" justify="end">
+            <VStack gap="space-4" justify="end">
               <Alert variant="warning">{oppgave.merknad}</Alert>
 
               {kanRedigeres &&
@@ -113,7 +113,7 @@ export const TilleggsinformasjonOppgaveModal = ({
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" justify="end">
+          <HStack gap="space-4" justify="end">
             <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(ferdigstillOppgaveStatus)}>
               Lukk
             </Button>

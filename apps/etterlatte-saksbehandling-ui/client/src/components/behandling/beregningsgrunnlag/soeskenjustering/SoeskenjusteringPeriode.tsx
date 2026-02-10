@@ -123,7 +123,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
           return (
             soeskenFinnes && (
               <li key={item.id}>
-                <HStack gap="16">
+                <HStack gap="space-16">
                   <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={familieforhold!} />
                   <Controller
                     name={`soeskenMedIBeregning.${index}.data.${k}`}

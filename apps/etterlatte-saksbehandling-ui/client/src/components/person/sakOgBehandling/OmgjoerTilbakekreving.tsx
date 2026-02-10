@@ -27,12 +27,12 @@ export function OmgjoerTilbakekreving({ tilbakekreving }: { tilbakekreving: Tilb
       </Button>
       <Modal open={modalOpen} header={{ heading: 'Omgjør tilbakekreving' }} onClose={lukkModal}>
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-4">
             <BodyShort>En tilbakekreving kan omgjøres på grunn av feil i vedtaket.</BodyShort>
             {mapResult(opprettOmgjoeringResult, {
               success: (tilbakekreving) => (
                 <Alert variant="success">
-                  <VStack gap="2">
+                  <VStack gap="space-2">
                     <BodyShort>Omgjøring av tilbakekrevingen er opprettet.</BodyShort>
                     <div>
                       <Button size="small" as="a" href={lenkeTilTilbakekrevingMedId(tilbakekreving.id)}>

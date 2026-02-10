@@ -54,7 +54,7 @@ export const AktivitetspliktRevurderingModal = ({
       {visModal && (
         <Modal open={visModal} onClose={() => setVisModal(false)} header={{ heading: 'Vurdering av aktivitetsplikt' }}>
           <Modal.Body>
-            <VStack gap="4">
+            <VStack gap="space-4">
               <BodyLong>
                 Den etterlatte har ikke oppfylt aktivitetskravene for omstillingsstønad. Kontroller dette opp mot
                 forrige vurdering for den etterlatte eller den pågående åpne behandlingen.

@@ -18,7 +18,7 @@ export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; famili
   return (
     <>
       <VStack>
-        <HStack gap="2">
+        <HStack gap="space-2">
           <ChildEyesIcon aria-hidden />
           <BodyShort>
             {person.fornavn} {person.etternavn}

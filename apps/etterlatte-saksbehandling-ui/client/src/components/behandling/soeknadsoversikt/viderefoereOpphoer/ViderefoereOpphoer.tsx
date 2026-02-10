@@ -32,7 +32,7 @@ export const ViderefoereOpphoer = ({
 
   return (
     <SoeknadVurdering tittel="Opphør fra og med" hjemler={[]} status={statusIkon(viderefoertOpphoer)}>
-      <VStack gap="4" marginBlock="3" marginInline="0" maxWidth="41rem">
+      <VStack gap="space-4" marginBlock="space-2" marginInline="space-0" maxWidth="41rem">
         <BodyShort>
           Er opphørsdato tidligere enn dagens dato, eller skal saken opphøre innen 3 måneder fra saken er attestert?
         </BodyShort>
@@ -42,7 +42,7 @@ export const ViderefoereOpphoer = ({
           blir behandlet av det automatiske opphøret.
         </BodyShort>
       </VStack>
-      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+      <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
         {mapResult(hentVilkaartyperResult, {
           initial: <Alert variant="warning">Virkningstidspunkt må være satt for å sette opphør fra og med</Alert>,
           pending: <Spinner label="Henter vilkårstyper" visible />,

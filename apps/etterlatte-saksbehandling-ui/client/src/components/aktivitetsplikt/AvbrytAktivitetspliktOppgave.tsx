@@ -60,7 +60,7 @@ export function AvbrytAktivitetspliktOppgave() {
       {showAvsluttForm && (
         <Box>
           {kanRedigeres && erTildeltSaksbehandler ? (
-            <HStack gap="4">
+            <HStack gap="space-4">
               <Controller
                 name="merknad"
                 control={control}

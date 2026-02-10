@@ -44,17 +44,17 @@ export const GyldigFramsattOmstillingsstoenad = ({
       status={gyldigFremsattTilStatusIcon}
     >
       <div>
-        <Box marginBlock="3" marginInline="0" maxWidth="41rem">
+        <Box marginBlock="space-2" marginInline="space-0" maxWidth="41rem">
           Den som har rett til ytelsen må sette frem krav (verge hvis aktuelt). Om annet må fullmakt ligge i saken.
           Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet eller i det landet
           vedkommende sist var medlem.
         </Box>
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Info tekst={navn} undertekst={undertekst} label="Innsender" />
           <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
         </HStack>
       </div>
-      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+      <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
         <GyldigFramsattVurdering
           behandlingId={behandling.id}
           gyldigFramsatt={behandling.gyldighetsprøving}

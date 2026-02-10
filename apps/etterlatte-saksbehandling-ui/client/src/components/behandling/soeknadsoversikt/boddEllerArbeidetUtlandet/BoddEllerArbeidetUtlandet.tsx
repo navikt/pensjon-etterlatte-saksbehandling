@@ -19,7 +19,7 @@ export const BoddEllerArbeidetUtlandet = ({
 }) => {
   return (
     <SoeknadVurdering tittel="Utlandsopphold" hjemler={[]} status={statusIkon(behandling.boddEllerArbeidetUtlandet)}>
-      <VStack gap="6" marginBlock="3" marginInline="0" maxWidth="41rem">
+      <VStack gap="space-6" marginBlock="space-2" marginInline="space-0" maxWidth="41rem">
         <BodyShort>
           Hvis avdøde har bodd og/eller arbeidet i utlandet, kan dette ha innvirkning på rettighetene til og størrelsen
           på etterlatteytelser.
@@ -38,7 +38,7 @@ export const BoddEllerArbeidetUtlandet = ({
           avtaleland det ikke er sendt krav til tidligere i annen sak til avdød. Se spørsmålstegn for mer informasjon.
         </BodyShort>
       </VStack>
-      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+      <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
         <BoddEllerArbeidetUtlandetVurdering redigerbar={redigerbar} behandlingId={behandling.id} />
       </Box>
     </SoeknadVurdering>

@@ -102,9 +102,9 @@ export const AktivitetPeriode = ({
 
   return (
     <form onSubmit={handleSubmit(lagreAktivitetPeriode)}>
-      <VStack gap="4">
+      <VStack gap="space-4">
         <Heading size="small">Legg til aktivitet</Heading>
-        <HStack gap="4">
+        <HStack gap="space-4">
           <ControlledDatoVelger
             name="fom"
             label="Fra dato"
@@ -120,7 +120,7 @@ export const AktivitetPeriode = ({
             required={false}
           />
         </HStack>
-        <VStack gap="4">
+        <VStack gap="space-4">
           <Box maxWidth="fit-content">
             <Select
               {...register('type', {
@@ -157,7 +157,7 @@ export const AktivitetPeriode = ({
           apiResult: opprettAktivitetPeriodeForSakResult,
           errorMessage: 'Kunne ikke opprette/oppdatere aktivitet periode',
         })}
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button
             size="small"
             variant="secondary"

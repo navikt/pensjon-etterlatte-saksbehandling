@@ -17,7 +17,7 @@ export const OppgaveEndring = ({ oppgaveResult }: { oppgaveResult: Result<Oppgav
   }, [oppgaveResult])
 
   return mapSuccess(endringerResult, (endringer) => (
-    <Box padding="4">
+    <Box padding="space-4">
       <EndringListe>
         {endringer.map((endring, index) => (
           <EndringLinje key={`endringlinje-${index}`} endring={endring} />

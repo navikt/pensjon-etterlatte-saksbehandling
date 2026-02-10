@@ -114,7 +114,7 @@ export const OverstyrtBeregningsgrunnlagTable = ({ behandling }: { behandling: I
                       OverstyrtAarsak[overstyrBeregningsgrunnlagPeriode.data.aarsak]}
                   </Table.DataCell>
                   <Table.DataCell>
-                    <HStack gap="2" align="center" justify="end" wrap={false}>
+                    <HStack gap="space-2" align="center" justify="end" wrap={false}>
                       <Button
                         size="small"
                         variant="secondary"

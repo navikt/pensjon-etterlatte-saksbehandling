@@ -104,7 +104,7 @@ export const OverfoerOppgaveTilGjenny = ({
 
       {mapResult(flyttOppgaveResult, {
         initial: (
-          <HStack gap="4" justify="end">
+          <HStack gap="space-4" justify="end">
             <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })} disabled={loading}>
               Nei, avbryt
             </Button>
@@ -114,7 +114,7 @@ export const OverfoerOppgaveTilGjenny = ({
           </HStack>
         ),
         success: (oppgave) => (
-          <HStack gap="4" justify="end">
+          <HStack gap="space-4" justify="end">
             <Button variant="tertiary" onClick={() => window.location.reload()}>
               Avslutt
             </Button>

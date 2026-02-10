@@ -26,7 +26,7 @@ export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journal
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       {journalpost.sak ? (
         <Alert variant="info">Du markerer nå journalposten som feilregistrert</Alert>
       ) : (

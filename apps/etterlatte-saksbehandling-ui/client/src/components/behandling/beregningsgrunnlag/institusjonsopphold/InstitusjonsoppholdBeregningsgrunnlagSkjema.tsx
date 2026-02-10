@@ -111,8 +111,8 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
 
   return (
     <form onSubmit={handleSubmit(lagrePeriode)}>
-      <VStack gap="4">
-        <HStack gap="4" align="start">
+      <VStack gap="space-4">
+        <HStack gap="space-4" align="start">
           <ControlledMaanedVelger name="fom" label="Fra og med" control={control} required />
           <ControlledMaanedVelger name="tom" label="Til og med" control={control} />
           <Select
@@ -135,7 +135,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
                 shouldUnregister: true,
               })}
               label={
-                <HStack gap="2">
+                <HStack gap="space-2">
                   Reduksjonsbeløp
                   <HelpText>
                     Oppgi den prosentsatsen av G som ytelsen skal reduseres med for å få riktig beløp i beregningen.
@@ -149,7 +149,7 @@ export const InstitusjonsoppholdBeregningsgrunnlagSkjema = ({
         <Box maxWidth="15rem">
           <Textarea {...register('data.begrunnelse')} label="Begrunnelse (valgfritt)" />
         </Box>
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button size="small" icon={<FloppydiskIcon aria-hidden />} loading={isPending(lagreBeregningsGrunnlagResult)}>
             Lagre
           </Button>

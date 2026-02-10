@@ -98,8 +98,8 @@ export const FaktiskInntektSkjema = ({
 
   return (
     <form>
-      <VStack gap="4">
-        <VStack gap="4" width="fit-content">
+      <VStack gap="space-4">
+        <VStack gap="space-4" width="fit-content">
           <ControlledInntektTextField
             name="loennsinntekt"
             control={control}
@@ -132,7 +132,7 @@ export const FaktiskInntektSkjema = ({
           errorMessage: 'Kunne ikke hente oppdatert etteroppgjør',
         })}
 
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button
             onClick={handleSubmit(
               (data) => {

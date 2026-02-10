@@ -12,7 +12,7 @@ export const KlageOmgjoering = ({
   errors: FieldErrors<FormdataVurdering>
 }) => {
   return (
-    <VStack gap="4" width="41.5rem">
+    <VStack gap="space-4" width="41.5rem">
       <Heading level="3" size="medium">
         Omgjøring
       </Heading>

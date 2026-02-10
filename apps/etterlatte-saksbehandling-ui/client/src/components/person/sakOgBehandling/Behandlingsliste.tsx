@@ -62,7 +62,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
   allebehandlinger.sort((a, b) => (new Date(hentDato(a)) < new Date(hentDato(b)) ? 1 : -1))
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       {!!allebehandlinger?.length ? (
         <Table zebraStripes>
           <Table.Header>
@@ -84,7 +84,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                   <Table.Row key={behandling.id}>
                     <Table.DataCell>{formaterDato(behandling.behandlingOpprettet)}</Table.DataCell>
                     <Table.DataCell>
-                      <HStack gap="2" align="center">
+                      <HStack gap="space-2" align="center">
                         {formaterBehandlingstype(behandling.behandlingType)}
                         {(sak.utlandstilknytning?.type === UtlandstilknytningType.UTLANDSTILSNITT ||
                           sak.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND) && (
@@ -99,7 +99,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                     </Table.DataCell>
                     <VedtakKolonner behandlingId={behandling.id} />
                     <Table.DataCell>
-                      <HStack gap="4">
+                      <HStack gap="space-4">
                         <Link href={`/behandling/${behandling.id}/`}>Se behandling</Link>
                         {behandling.behandlingType === 'REVURDERING' &&
                           behandling.aarsak === 'ETTEROPPGJOER' &&
@@ -177,7 +177,7 @@ function GjenopprettKravpakkeBehandling(props: { sakId: number }) {
       </div>
       <Modal open={modalOpen} onClose={avbryt} header={{ heading: 'Gjenopprett kravpakke' }}>
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-4">
             <BodyShort>En avbrutt kravpakkebehandling kan opprettes på nytt.</BodyShort>
             {isFailureHandler({
               apiResult: opprettKravpakkeResult,

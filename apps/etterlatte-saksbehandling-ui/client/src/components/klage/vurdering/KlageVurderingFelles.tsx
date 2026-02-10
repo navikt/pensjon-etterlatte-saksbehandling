@@ -60,7 +60,7 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
 
   return (
     <Maksbredde>
-      <VStack gap="6">
+      <VStack gap="space-6">
         <Box>
           <Heading size="small" level="3">
             Innstilling til KA
@@ -82,7 +82,7 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
           </Heading>
           <TekstMedMellomrom>{innstilling.internKommentar || 'Ikke registrert'}</TekstMedMellomrom>
         </Box>
-        <HStack gap="2">
+        <HStack gap="space-2">
           <Button icon={<EyeIcon />} size="small" variant="secondary" onClick={visOversendelseModal}>
             Oversendelsesbrev til klager
           </Button>
@@ -127,7 +127,7 @@ export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: bool
 
   return (
     <Maksbredde>
-      <VStack gap="6">
+      <VStack gap="space-6">
         <Box>
           <Heading size="small" level="3">
             Omgjøring

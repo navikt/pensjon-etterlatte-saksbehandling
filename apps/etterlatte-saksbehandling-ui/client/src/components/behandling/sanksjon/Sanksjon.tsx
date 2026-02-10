@@ -174,7 +174,7 @@ export const Sanksjon = ({
         pending: <Spinner label="Henter sanksjoner" />,
         error: <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>,
         success: () => (
-          <VStack gap="4">
+          <VStack gap="space-4">
             <Heading size="small" level="2">
               Sanksjoner
             </Heading>
@@ -259,7 +259,7 @@ export const Sanksjon = ({
                           </Table.DataCell>
                           {redigerbar && (
                             <Table.DataCell>
-                              <HStack gap="2">
+                              <HStack gap="space-2">
                                 <Button
                                   size="small"
                                   variant="tertiary"
@@ -317,8 +317,8 @@ export const Sanksjon = ({
                 <Heading size="small" level="3" spacing>
                   Ny sanksjon
                 </Heading>
-                <VStack gap="4" align="start">
-                  <HStack gap="4">
+                <VStack gap="space-4" align="start">
+                  <HStack gap="space-4">
                     <ControlledMaanedVelger
                       label="Dato fra og med"
                       name="datoFom"
@@ -356,7 +356,7 @@ export const Sanksjon = ({
                     label="Beskrivelse"
                     error={errors.beskrivelse?.message}
                   />
-                  <HStack gap="4">
+                  <HStack gap="space-4">
                     <Button
                       size="small"
                       variant="secondary"

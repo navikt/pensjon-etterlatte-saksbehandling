@@ -7,7 +7,7 @@ import { LenkeTilInntektOversikt } from '~components/etteroppgjoer/components/in
 
 export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: SummerteInntekterAOrdningen }) {
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Heading size="small">Opplysninger fra A-ordningen</Heading>
       <BodyShort>
         Opplysningene er angitt som brutto inntekt og er summert per måned. For detaljer per måned, sjekk A-ordningen.

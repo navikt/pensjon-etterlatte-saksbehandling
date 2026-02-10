@@ -15,8 +15,8 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
     avkortingGrunnlag.inntektUtlandTom - avkortingGrunnlag.fratrekkInnAarUtland
 
   return (
-    <VStack gap="4">
-      <VStack gap="1">
+    <VStack gap="space-4">
+      <VStack gap="space-1">
         <Heading size="small">Siste brukeroppgitte inntekt for innvilgede perioder</Heading>
         <BodyShort>Brukeroppgitt inntekt er det brukeren forventer å tjene før skatt</BodyShort>
       </VStack>
@@ -27,7 +27,7 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
             <Table.HeaderCell />
             <Table.HeaderCell scope="col">Forventet inntekt</Table.HeaderCell>
             <Table.HeaderCell scope="col">
-              <HStack gap="1">
+              <HStack gap="space-1">
                 Innvilgede måneder
                 <HelpText>
                   Her vises antall måneder med innvilget stønad i gjeldende inntektsår. Antallet endres ikke selv om man
@@ -48,16 +48,16 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
                   <Table.ExpandableRow
                     key={i}
                     content={
-                      <HStack gap="6">
-                        <VStack gap="2">
+                      <HStack gap="space-6">
+                        <VStack gap="space-2">
                           <Label>Forventet inntekt Norge</Label>
                           <BodyShort>{NOK(inntektNorge(grunnlag))}</BodyShort>
                         </VStack>
-                        <VStack gap="2">
+                        <VStack gap="space-2">
                           <Label>Forventet inntekt utland</Label>
                           <BodyShort>{NOK(inntektUtland(grunnlag))}</BodyShort>
                         </VStack>
-                        <VStack gap="2">
+                        <VStack gap="space-2">
                           <Label>Kilde</Label>
                           <BodyShort>{grunnlag.kilde.ident}</BodyShort>
                           <Detail>Saksbehandler: {formaterDatoMedKlokkeslett(grunnlag.kilde.tidspunkt)}</Detail>

@@ -33,10 +33,10 @@ export const NotatHandlinger = ({
   }
 
   return toggleJournalfoer ? (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Alert variant="warning">Er du sikker på at du vil journalføre notatet? Handlingen kan ikke angres.</Alert>
 
-      <HStack gap="4" align="center" justify="end">
+      <HStack gap="space-4" align="center" justify="end">
         <Button variant="tertiary" onClick={() => setToggleJournalfoer(false)}>
           Nei, avbryt
         </Button>
@@ -51,7 +51,7 @@ export const NotatHandlinger = ({
         Lukk
       </Button>
 
-      <HStack gap="4" align="center">
+      <HStack gap="space-4" align="center">
         {!!sistLagret && (
           <Alert variant="success" size="small" inline>
             Sist lagret kl. {formaterTidspunktTimeMinutterSekunder(sistLagret)}

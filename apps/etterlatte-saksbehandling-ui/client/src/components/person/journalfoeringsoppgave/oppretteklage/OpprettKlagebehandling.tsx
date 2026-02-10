@@ -56,7 +56,7 @@ export default function OpprettKlagebehandling() {
 
       {feilmelding.length > 0 && <ApiErrorAlert>{feilmelding}</ApiErrorAlert>}
 
-      <HStack gap="4" justify="center">
+      <HStack gap="space-4" justify="center">
         <Button variant="secondary" onClick={tilbake}>
           Tilbake
         </Button>

@@ -29,11 +29,11 @@ export const EndreTittelJournalpost = ({
       </Heading>
 
       {rediger ? (
-        <Box background="bg-subtle" padding="4" borderColor="border-subtle" borderWidth="1" borderRadius="medium">
-          <VStack gap="4">
+        <Box padding="space-4" borderWidth="1">
+          <VStack gap="space-4">
             <TextField label="Tittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} hideLabel={true} />
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-4" justify="end">
               <Button variant="tertiary" onClick={avbryt} size="small">
                 Avbryt
               </Button>

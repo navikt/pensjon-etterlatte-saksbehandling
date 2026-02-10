@@ -45,7 +45,7 @@ export const HarSvartIModiaModal = ({ sakId }: { sakId: number }) => {
           </Heading>
         </Modal.Header>
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-4">
             <BodyShort>
               Hvis bruker har svart på etteroppgjøret i Modia kan du opprette revurdering for etteroppgjøret her.
             </BodyShort>
@@ -55,7 +55,7 @@ export const HarSvartIModiaModal = ({ sakId }: { sakId: number }) => {
               errorMessage: 'Feil under opprettelse av revurdering',
             })}
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-4" justify="end">
               <Button loading={isPending(opprettRevurderingResult)} onClick={opprettRevurdering}>
                 Opprett revurdering
               </Button>

@@ -63,8 +63,8 @@ export const SvarPaaEtteroppgjoer = () => {
       <>
         <StatusBar ident={oppgave.fnr} />
         <HStack height="100%" minHeight="100vh" wrap={false}>
-          <Box paddingInline="16" paddingBlock="16 4" width="100%">
-            <VStack gap="4" maxWidth="50rem">
+          <Box paddingInline="space-16" paddingBlock="space-16 space-4" width="100%">
+            <VStack gap="space-4" maxWidth="50rem">
               <Heading size="medium" spacing>
                 Behandling av svar på etteroppgjøret
               </Heading>
@@ -101,7 +101,7 @@ export const SvarPaaEtteroppgjoer = () => {
                 >
                   Avbryt
                 </Button>
-                <HStack gap="4">
+                <HStack gap="space-4">
                   <Button
                     loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
                     onClick={() => opprettRevurdering(oppgave)}

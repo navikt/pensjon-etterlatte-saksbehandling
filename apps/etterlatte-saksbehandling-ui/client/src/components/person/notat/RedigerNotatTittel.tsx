@@ -23,7 +23,7 @@ export const RedigerNotatTittel = ({ id, tittel }: { id: number; tittel: string 
   }, [nyTittel])
 
   return (
-    <HStack gap="4" align="center">
+    <HStack gap="space-4" align="center">
       <TextField label="Tittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} htmlSize={100} />
       {isSuccess(oppdaterTittelStatus) && (
         <Alert variant="success" size="small" inline>

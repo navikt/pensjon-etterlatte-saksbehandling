@@ -10,7 +10,7 @@ export const VergemaalExpansionCard = ({ vergemaal }: { vergemaal?: VergemaalEll
   return (
     <ExpansionCard aria-labelledby="Vergemål" size="small" defaultOpen>
       <ExpansionCard.Header>
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <PersonGroupIcon aria-hidden fontSize="1.5rem" />
           <ExpansionCard.Title size="small">Vergemål</ExpansionCard.Title>
         </HStack>

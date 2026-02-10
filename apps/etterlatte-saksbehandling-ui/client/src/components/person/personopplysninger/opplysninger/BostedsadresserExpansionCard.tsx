@@ -25,7 +25,7 @@ export const BostedsadresserExpansionCard = ({ bostedsadresser, erAvdoedesAddres
   return (
     <ExpansionCard aria-labelledby="Bostedsadresser" size="small" defaultOpen>
       <ExpansionCard.Header>
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <HouseIcon aria-hidden fontSize="1.5rem" />
           <ExpansionCard.Title size="small">
             {erAvdoedesAddresser ? 'Avdødes bostedsadresser' : 'Søkers bostedsadresser'}

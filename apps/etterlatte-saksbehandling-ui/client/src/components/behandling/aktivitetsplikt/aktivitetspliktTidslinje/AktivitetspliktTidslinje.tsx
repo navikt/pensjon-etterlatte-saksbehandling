@@ -51,7 +51,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
   }, [])
 
   return (
-    <VStack gap="8" minWidth="50rem">
+    <VStack gap="space-8" minWidth="50rem">
       <AktivitetspliktTimeline
         doedsdato={doedsdato}
         aktivitetHendelser={aktivitetHendelser}
@@ -87,7 +87,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
       )}
 
       {aktivitetspliktRedigeringModus.aktivitetspliktSkjemaAaVise === AktivitetspliktSkjemaAaVise.INGEN && (
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button
             size="small"
             variant="secondary"

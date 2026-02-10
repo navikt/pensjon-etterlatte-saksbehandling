@@ -144,7 +144,7 @@ export const Barnepensjonberegningssammendrag = ({
   const kunEnJuridiskForelder = beregningsperiode.kunEnJuridiskForelder
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       {erPaaNyttRegelverk ? (
         <SammendragNyttRegelverk
           soeker={soeker}

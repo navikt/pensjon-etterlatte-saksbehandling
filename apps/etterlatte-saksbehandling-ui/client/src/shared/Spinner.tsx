@@ -6,11 +6,11 @@ interface Props extends Omit<LoaderProps, 'title'> {
   margin?: HStackProps['margin']
 }
 
-const Spinner = ({ visible, label, margin = '12', ...rest }: Props) => {
+const Spinner = ({ visible, label, margin = 'space-12', ...rest }: Props) => {
   if (visible === false) return null
 
   return (
-    <HStack gap="4" align="center" justify="center" margin={margin}>
+    <HStack gap="space-4" align="center" justify="center" margin={margin}>
       <Loader {...rest} title={label} />
       {label && <BodyLong>{label}</BodyLong>}
     </HStack>

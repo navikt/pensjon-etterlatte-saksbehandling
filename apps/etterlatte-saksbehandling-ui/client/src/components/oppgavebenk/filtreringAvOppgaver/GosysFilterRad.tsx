@@ -26,7 +26,7 @@ export const GosysFilterRad = ({ hentAlleOppgaver, filter, setFilter, filterFoed
 
   return (
     <>
-      <HStack gap="4" align="start">
+      <HStack gap="space-4" align="start">
         <TextField
           label="Fødselsnummer"
           width="1rem"
@@ -63,7 +63,7 @@ export const GosysFilterRad = ({ hentAlleOppgaver, filter, setFilter, filterFoed
         </Select>
       </HStack>
 
-      <HStack gap="4">
+      <HStack gap="space-4">
         <Button
           onClick={() => hentAlleOppgaver()}
           size="small"

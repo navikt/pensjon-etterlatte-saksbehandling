@@ -41,14 +41,14 @@ export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInf
 
   return (
     <SidebarPanel $border style={{ borderLeft: '5px solid #007C2E' }}>
-      <VStack gap="4">
+      <VStack gap="space-4">
         <div>
           <Heading size="small">{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
           <Resultat vedtaksresultat={vedtaksResultat} />
         </div>
 
-        <HStack gap="4" justify="space-between">
-          <VStack gap="4">
+        <HStack gap="space-4" justify="space-between">
+          <VStack gap="space-4">
             <div>
               <Label size="small">Attestant</Label>
               <Detail>{behandlingsInfo.attesterendeSaksbehandler || '-'}</Detail>
@@ -59,7 +59,7 @@ export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInf
             </div>
           </VStack>
 
-          <VStack gap="4">
+          <VStack gap="space-4">
             <div>
               <Label size="small">Saksbehandler</Label>
               <Detail>{behandlingsInfo.behandlendeSaksbehandler}</Detail>
@@ -71,7 +71,7 @@ export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInf
           </VStack>
         </HStack>
 
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <Label size="small">Sakid:</Label>
           <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
         </HStack>

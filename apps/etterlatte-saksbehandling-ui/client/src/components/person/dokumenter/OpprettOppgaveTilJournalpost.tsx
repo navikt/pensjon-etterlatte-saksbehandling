@@ -50,7 +50,7 @@ export function OpprettOppgaveTilJournalpost({ sak }: { sak: ISak }) {
       >
         <form onSubmit={handleSubmit(sendInn)}>
           <Modal.Body>
-            <VStack gap="4">
+            <VStack gap="space-4">
               <TextField
                 {...register('journalpostId', {
                   required: {

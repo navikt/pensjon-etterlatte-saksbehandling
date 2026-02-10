@@ -69,7 +69,7 @@ export const PersonSoekModal = ({ velgPerson }: { velgPerson: (bruker: SoekPerso
         </Modal.Header>
 
         <Modal.Body>
-          <VStack gap="8">
+          <VStack gap="space-8">
             <TextField
               {...register('navn', {
                 required: { value: true, message: 'Navn er påkrevd i søket' },
@@ -124,7 +124,7 @@ export const PersonSoekModal = ({ velgPerson }: { velgPerson: (bruker: SoekPerso
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4">
+          <HStack gap="space-4">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
               Avbryt
             </Button>

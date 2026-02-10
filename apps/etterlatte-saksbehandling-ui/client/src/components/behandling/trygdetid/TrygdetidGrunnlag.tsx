@@ -81,10 +81,10 @@ export const TrygdetidGrunnlag = ({
   }
 
   return (
-    <Box paddingInline="0 8" paddingBlock="8">
+    <Box paddingInline="space-0 space-8" paddingBlock="space-8">
       <form onSubmit={handleSubmit((data) => onSubmit(data))}>
-        <VStack gap="2">
-          <HGrid gap="4" columns="15rem min-content 12rem">
+        <VStack gap="space-2">
+          <HGrid gap="space-4" columns="15rem min-content 12rem">
             <ControlledSingleSelectCombobox
               name="bosted"
               control={control}
@@ -136,7 +136,7 @@ export const TrygdetidGrunnlag = ({
             )}
           </HGrid>
 
-          <HStack gap="4">
+          <HStack gap="space-4">
             <Button
               size="small"
               loading={isPending(trygdetidgrunnlagStatus)}

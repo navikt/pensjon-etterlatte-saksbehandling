@@ -82,7 +82,7 @@ export const AvkortingInntekt = ({ redigerbar }: { redigerbar: boolean }) => {
   return (
     <VStack maxWidth="70rem">
       {avkorting && avkorting.avkortingGrunnlag.length > 0 && (
-        <VStack marginBlock="4">
+        <VStack marginBlock="space-4">
           {fyller67 && (
             <Alert variant="warning">
               Bruker fyller 67 år i beregnet periode og antall innvilgede måneder vil bli tilpasset deretter.
@@ -115,7 +115,7 @@ export const AvkortingInntekt = ({ redigerbar }: { redigerbar: boolean }) => {
               avbrytRedigering={avbrytRedigering}
             />
           ) : (
-            <HStack marginBlock="4 0">
+            <HStack marginBlock="space-4 space-0">
               <Button
                 size="small"
                 variant="secondary"

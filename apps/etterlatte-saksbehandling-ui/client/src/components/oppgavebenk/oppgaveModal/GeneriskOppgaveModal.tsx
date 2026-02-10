@@ -61,8 +61,8 @@ export const GeneriskOppgaveModal = ({
         header={{ heading }}
       >
         <Modal.Body>
-          <VStack gap="4">
-            <HStack gap="4">
+          <VStack gap="space-4">
+            <HStack gap="space-4">
               <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
               <Info label="Frist" tekst={formaterDato(oppgave.frist)} />
             </HStack>
@@ -89,7 +89,7 @@ export const GeneriskOppgaveModal = ({
                 <BodyShort>Du må tildele deg oppgaven for å endre den.</BodyShort>
               ))}
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-4" justify="end">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillOppgaveStatus)}>
                 Lukk
               </Button>

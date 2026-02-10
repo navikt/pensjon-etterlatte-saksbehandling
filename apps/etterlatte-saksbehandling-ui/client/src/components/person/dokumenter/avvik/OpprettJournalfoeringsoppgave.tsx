@@ -58,7 +58,7 @@ export const OpprettJournalfoeringsoppgave = ({
 
         <br />
 
-        <HStack gap="4" justify="end">
+        <HStack gap="space-4" justify="end">
           <Button variant="tertiary" onClick={() => window.location.reload()}>
             Avslutt
           </Button>

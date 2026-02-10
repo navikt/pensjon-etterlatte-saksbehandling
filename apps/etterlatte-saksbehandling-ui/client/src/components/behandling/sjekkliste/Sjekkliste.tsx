@@ -108,7 +108,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
           ))}
 
           <HMargin>
-            <VStack gap="4">
+            <VStack gap="space-4">
               <Heading size="small">Lenker</Heading>
               {soeker?.foedselsnummer ? (
                 <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker.foedselsnummer}`} target="_blank">
@@ -125,7 +125,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
             </VStack>
           </HMargin>
 
-          <VStack gap="4">
+          <VStack gap="space-4">
             <Textarea
               label="Kommentar"
               name="Kommentar"

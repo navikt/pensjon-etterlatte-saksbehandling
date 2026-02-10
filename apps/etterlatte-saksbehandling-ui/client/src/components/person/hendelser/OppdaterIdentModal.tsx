@@ -56,8 +56,8 @@ export const OppdaterIdentModal = ({
               Sak og tilhørende oppgaver oppdatert med bruker sin nyeste ident. Laster siden på nytt... <Loader />
             </Alert>
           ) : (
-            <VStack gap="4">
-              <HStack gap="4" justify="space-evenly">
+            <VStack gap="space-4">
+              <HStack gap="space-4" justify="space-evenly">
                 <div>
                   <Heading size="xsmall">Ident i sak</Heading>
                   <Tag variant="error">{sak.ident}</Tag>
@@ -93,7 +93,7 @@ export const OppdaterIdentModal = ({
                 <ApiErrorAlert>{error.detail}</ApiErrorAlert>
               ))}
 
-              <HStack gap="4" justify="center">
+              <HStack gap="space-4" justify="center">
                 <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(oppdaterIdentResult)}>
                   Nei, avbryt
                 </Button>

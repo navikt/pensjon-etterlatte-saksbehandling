@@ -36,7 +36,7 @@ export const GeneriskModal = ({
           {tittel}
         </Heading>
         {beskrivelse && <BodyShort spacing>{beskrivelse}</BodyShort>}
-        <HStack gap="4" justify="center">
+        <HStack gap="space-4" justify="center">
           <Button variant="primary" onClick={onYesClick} loading={!!loading}>
             {tekstKnappJa}
           </Button>

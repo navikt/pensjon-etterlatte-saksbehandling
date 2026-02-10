@@ -95,7 +95,7 @@ export const ViderefoereOpphoerSkjema = ({
 
   return (
     <form onSubmit={handleSubmit(lagreViderefoerOpphoer)}>
-      <VStack gap="5">
+      <VStack gap="space-4">
         <Box>
           <Heading level="3" size="small">
             Er det nødvendig å fastsette til og med-dato?
@@ -106,7 +106,7 @@ export const ViderefoereOpphoerSkjema = ({
             control={control}
             name="skalViderefoere"
             radios={
-              <HStack gap="5">
+              <HStack gap="space-4">
                 <Radio value={JaNei.JA}>Ja</Radio>
                 <Radio value={JaNei.NEI}>Nei</Radio>
               </HStack>
@@ -140,7 +140,7 @@ export const ViderefoereOpphoerSkjema = ({
 
         <Textarea label="Begrunnelse" placeholder="Valgfritt" {...register('begrunnelse')} />
 
-        <HStack gap="3">
+        <HStack gap="space-2">
           {isFailure(lagreViderefoertOpphoerResult) && (
             <Alert variant="error">Kunne ikke lagre videreført opphør</Alert>
           )}

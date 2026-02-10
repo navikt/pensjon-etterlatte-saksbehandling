@@ -70,7 +70,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
 
   return (
     <form>
-      <VStack gap="4">
+      <VStack gap="space-4">
         <Heading size="large">Opphør skyldes dødsfall</Heading>
         <BodyShort>
           Det er registrert et opphør på saken, du må derfor svare på om opphøret skyldes et dødsfall.
@@ -78,7 +78,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
         </BodyShort>
 
         {opphoerSkyldesDoedsfallSkjemaErAapen && erRedigerbar ? (
-          <VStack gap="4">
+          <VStack gap="space-4">
             <ControlledRadioGruppe
               name="opphoerSkyldesDoedsfall"
               control={control}
@@ -116,7 +116,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
               errorMessage: 'Kunne ikke hente oppdatert etteroppgjør',
             })}
 
-            <HStack gap="4">
+            <HStack gap="space-4">
               <Button
                 size="small"
                 onClick={handleSubmit(submitOmOpphoerSkyldesDoedsfall, setOpphoerSkyldesDoedsfallSkjemaErrors)}
@@ -142,8 +142,8 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
             </HStack>
           </VStack>
         ) : (
-          <VStack gap="4">
-            <VStack gap="2">
+          <VStack gap="space-4">
+            <VStack gap="space-2">
               <Label>Om opphør skyldes dødsfall</Label>
               <BodyShort>
                 {forbehandling.opphoerSkyldesDoedsfall === JaNei.JA && 'Ja'}
@@ -152,7 +152,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
               </BodyShort>
             </VStack>
             {forbehandling.opphoerSkyldesDoedsfall === JaNei.JA && (
-              <VStack gap="2">
+              <VStack gap="space-2">
                 <Label>Om dødsfallet skjedde i etteroppgjørsåret</Label>
                 <BodyShort>
                   {forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar && (

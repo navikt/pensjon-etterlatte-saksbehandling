@@ -57,7 +57,7 @@ export const Oppgavebenk = () => {
 
   return (
     <ProvideOppgavebenkContext>
-      <Box padding="8">
+      <Box padding="space-8">
         <VelgOppgaveliste oppgavelisteValg={oppgavelisteValg} setOppgavelisteValg={setOppgavelisteValg} />
         {rendreValgtOppgaveliste()}
       </Box>

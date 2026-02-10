@@ -49,7 +49,7 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
         pending: <PersonSkeleton />,
         error: (error) => <ApiErrorAlert>{error.detail ?? 'Kunne ikke hente person'}</ApiErrorAlert>,
         success: (person) => (
-          <HStack gap="2" align="center" justify="start">
+          <HStack gap="space-2" align="center" justify="start">
             <GenderIcon gender={gender(person.foedselsnummer)} />
             <Label>
               <PersonLink fnr={person.foedselsnummer}>{genererNavn(person)}</PersonLink>
@@ -128,7 +128,7 @@ const Alder = ({
 }
 
 const PersonSkeleton = () => (
-  <HStack gap="4" align="center">
+  <HStack gap="space-4" align="center">
     <Skeleton variant="circle" width="30px" height="30px" />
     <Skeleton variant="rounded" width="10rem" height="1rem" />
     <BodyShort>|</BodyShort>

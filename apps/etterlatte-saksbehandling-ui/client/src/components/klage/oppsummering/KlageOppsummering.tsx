@@ -48,13 +48,13 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
   const { utfall, sak } = klage
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-16" paddingBlock="space-16 space-4">
         <Heading level="1" size="large">
           Oppsummering
         </Heading>
       </Box>
 
-      <Box paddingBlock="8" paddingInline="16 8">
+      <Box paddingBlock="space-8" paddingInline="space-16 space-8">
         <Heading size="medium" level="2">
           Utfall
         </Heading>
@@ -84,7 +84,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
         <ApiErrorAlert>Kunne ikke fatte vedtak om avvist klage, på grunn av feil: {error.detail}.</ApiErrorAlert>
       ))}
 
-      <HStack gap="4" justify="center">
+      <HStack gap="space-4" justify="center">
         <Button variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'oppsummering'))}>
           Gå tilbake
         </Button>

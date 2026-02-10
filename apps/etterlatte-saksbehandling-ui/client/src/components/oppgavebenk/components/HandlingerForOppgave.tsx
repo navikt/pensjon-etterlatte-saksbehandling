@@ -121,7 +121,7 @@ export const HandlingerForOppgave = ({
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && referanse && (
-            <HStack gap="4">
+            <HStack gap="space-4">
               <Button size="small" href={`/behandling/${referanse}`} as="a">
                 Gå til revurdering
               </Button>
@@ -241,7 +241,7 @@ export const HandlingerForOppgave = ({
             Opprett revurdering
           </Button>
         ),
-        pending: <Spinner label="Oppretter ..." margin="0" />,
+        pending: <Spinner label="Oppretter ..." margin="space-0" />,
         error: (error) => <ApiErrorAlert>{error?.detail ?? 'Ukjent feil'}</ApiErrorAlert>,
       })
     case Oppgavetype.OPPFOELGING:

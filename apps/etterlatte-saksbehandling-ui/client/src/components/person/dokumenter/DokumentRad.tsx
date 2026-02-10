@@ -44,7 +44,7 @@ export const DokumentRad = ({
       </Table.DataCell>
       <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
       <Table.DataCell>
-        <HStack gap="4" justify="end">
+        <HStack gap="space-4" justify="end">
           {visUtsendingsinfo && <UtsendingsinfoModal journalpost={dokument} />}
 
           {kanRedigeres && (
@@ -68,7 +68,7 @@ export const DokumentRad = ({
                   <Dropdown.Menu.GroupedList.Heading>Velg dokument</Dropdown.Menu.GroupedList.Heading>
                   <Dropdown.Menu.Divider />
                   {dokument.dokumenter.map((dok, index) => (
-                    <HStack key={index} gap="4">
+                    <HStack key={index} gap="space-4">
                       <Dropdown.Menu.GroupedList.Item
                         key={dok.dokumentInfoId}
                         disabled={!dok.dokumentvarianter[0]?.saksbehandlerHarTilgang}
@@ -84,7 +84,7 @@ export const DokumentRad = ({
                       </Dropdown.Menu.GroupedList.Item>
 
                       {!dok.dokumentvarianter[0]?.saksbehandlerHarTilgang && (
-                        <Box padding="4">
+                        <Box padding="space-4">
                           <Alert variant="warning" size="small">
                             Ikke Tilgang
                           </Alert>

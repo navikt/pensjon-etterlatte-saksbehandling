@@ -27,7 +27,7 @@ export const NotatVisningModal = ({ notat }: { notat: Notat }) => {
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" align="center">
+          <HStack gap="space-4" align="center">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
               Lukk
             </Button>

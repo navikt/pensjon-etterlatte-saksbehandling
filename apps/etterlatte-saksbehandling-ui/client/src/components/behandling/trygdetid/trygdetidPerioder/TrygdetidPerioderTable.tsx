@@ -116,7 +116,7 @@ export const TrygdetidPerioderTable = ({
                 </Table.DataCell>
                 {redigerbar && (
                   <Table.DataCell>
-                    <HStack gap="2" align="center" wrap={false}>
+                    <HStack gap="space-2" align="center" wrap={false}>
                       <Button
                         size="small"
                         variant="secondary"

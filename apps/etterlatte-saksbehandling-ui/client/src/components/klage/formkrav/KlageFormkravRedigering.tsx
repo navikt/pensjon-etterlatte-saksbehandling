@@ -162,18 +162,18 @@ export function KlageFormkravRedigering() {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-16" paddingBlock="space-16 space-4">
         <Heading level="1" size="large">
           Vurder formkrav og klagefrist
         </Heading>
       </Box>
       <form onSubmit={handleSubmit(sendInnFormkrav)}>
-        <Box paddingBlock="8 0" paddingInline="16 8" maxWidth="42.5rem">
+        <Box paddingBlock="space-8 space-0" paddingInline="space-16 space-8" maxWidth="42.5rem">
           {/* Det er litt spesiell håndtering av akkurat hvilket vedtak klagen ligger på, relatert til hvordan React
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
             at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
             tolkes som id'en til det vedtaket. */}
-          <VStack gap="4">
+          <VStack gap="space-4">
             <Controller
               rules={{
                 required: true,
@@ -319,13 +319,13 @@ export function KlageFormkravRedigering() {
               />
             </Box>
             {redigerModus ? (
-              <HStack gap="4" justify="center">
+              <HStack gap="space-4" justify="center">
                 <Button type="submit" loading={isPending(lagreFormkravStatus)}>
                   Lagre vurdering av formkrav
                 </Button>
               </HStack>
             ) : (
-              <VStack gap="2">
+              <VStack gap="space-2">
                 <div>
                   <Button onClick={() => setRedigerModus(true)} variant="secondary">
                     Endre vurdering
@@ -343,8 +343,8 @@ export function KlageFormkravRedigering() {
           })}
         </Box>
       </form>
-      <Box paddingBlock="8" paddingInline="16 8" maxWidth="42.5rem">
-        <VStack gap="12">
+      <Box paddingBlock="space-8" paddingInline="space-16 space-8" maxWidth="42.5rem">
+        <VStack gap="space-12">
           {!kanVurdereUtfallUtenKontaktMedKlager(klage) && (
             <>
               <BeOmInfoFraKlager klage={klage} />

@@ -3,7 +3,7 @@ import { HelpText, HStack } from '@navikt/ds-react'
 
 export const FeilutbetalingHjelpeTekst = (): ReactNode => {
   return (
-    <HStack gap="2">
+    <HStack gap="space-2">
       Medfører revurderingen en feilutbetaling?
       <HelpText placement="top">
         Hvis ja: Vurder om det skal sendes varsel om eventuell tilbakekreving (TK) av feilutbetalingen (FU). Velger du

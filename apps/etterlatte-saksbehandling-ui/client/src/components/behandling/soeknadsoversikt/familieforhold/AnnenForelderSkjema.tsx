@@ -67,7 +67,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
   }
 
   return (
-    <Box paddingBlock="5 0" maxWidth="25rem">
+    <Box paddingBlock="space-4 space-0" maxWidth="25rem">
       <Heading size="small" level="3">
         Annen forelder
       </Heading>
@@ -80,7 +80,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
           ) : (
             <>
               {personopplysninger.annenForelder?.vurdering && (
-                <Box paddingBlock="2 4">
+                <Box paddingBlock="space-2 space-4">
                   <Heading size="xsmall" level="4">
                     Vurdering
                   </Heading>
@@ -88,7 +88,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
                 </Box>
               )}
               {personopplysninger.annenForelder?.begrunnelse && (
-                <Box paddingBlock="0 4">
+                <Box paddingBlock="space-0 space-4">
                   <Heading size="xsmall" level="4">
                     Begrunnelse
                   </Heading>
@@ -126,7 +126,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
       )}
       {redigerModus && (
         <form onSubmit={handleSubmit(onLagreAnnenForelder)}>
-          <VStack gap="2">
+          <VStack gap="space-2">
             <Box>
               <Checkbox
                 value={AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER}
@@ -152,7 +152,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
               error={errors.begrunnelse?.message}
             />
           </VStack>
-          <HStack gap="4" paddingBlock="2 0">
+          <HStack gap="space-4" paddingBlock="space-2 space-0">
             <Button size="small" icon={<FloppydiskIcon aria-hidden />} loading={isPending(redigerStatus)}>
               Lagre
             </Button>

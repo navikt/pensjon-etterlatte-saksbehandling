@@ -71,8 +71,8 @@ export const KlageBehandleSvarFraKa = ({ oppgave, oppdaterStatus }: Props) => {
         header={{ heading: 'Klage - Behandle svar fra KA' }}
       >
         <Modal.Body>
-          <VStack gap="4">
-            <HStack gap="4">
+          <VStack gap="space-4">
+            <HStack gap="space-4">
               <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
               <Info label="Frist" tekst={formaterDato(oppgave.frist)} />
             </HStack>
@@ -100,7 +100,7 @@ export const KlageBehandleSvarFraKa = ({ oppgave, oppdaterStatus }: Props) => {
               error: (error) => <ApiErrorAlert>Det oppstod en feil: {error.detail}</ApiErrorAlert>,
             })}
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-4" justify="end">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillStatus)}>
                 Lukk
               </Button>

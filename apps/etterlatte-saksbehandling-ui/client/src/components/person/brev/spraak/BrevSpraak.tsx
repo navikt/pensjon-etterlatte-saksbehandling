@@ -13,8 +13,8 @@ export default function BrevSpraak({ brev, kanRedigeres }: Props) {
   const [nyttSpraak, setNyttSpraak] = useState(brev.spraak)
 
   return (
-    <Box padding="4" borderWidth="1" borderRadius="small">
-      <HStack gap="4" justify="space-between">
+    <Box padding="space-4" borderWidth="1">
+      <HStack gap="space-4" justify="space-between">
         <Heading spacing level="2" size="medium">
           Språk / målform
         </Heading>

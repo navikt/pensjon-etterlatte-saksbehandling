@@ -19,7 +19,7 @@ export default function DokumentRad({
   label: string | undefined
 }) {
   return (
-    <HStack gap="4">
+    <HStack gap="space-4">
       <TextField
         readOnly={lesevisning}
         label="Dokument fra Rina"

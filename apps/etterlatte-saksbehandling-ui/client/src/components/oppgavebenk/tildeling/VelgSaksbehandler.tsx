@@ -156,7 +156,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
             success: (oppgaver) =>
               oppgaver.length > 1 && (
                 <Box>
-                  <VStack gap="4">
+                  <VStack gap="space-4">
                     <Alert variant="info" inline>
                       <BodyShort spacing>Det finnes andre oppgaver tilknyttet samme avdød.</BodyShort>
 
@@ -226,7 +226,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                       </Table.Body>
                     </Table>
 
-                    <HStack gap="4" justify="end">
+                    <HStack gap="space-4" justify="end">
                       <Button
                         variant="secondary"
                         onClick={lukkGrupperteOppgaver}
@@ -277,7 +277,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
               : 'Ikke tildelt'}
           </Button>
           <DropdownMeny onClose={() => setOpenDropdown(false)}>
-            <VStack gap="3">
+            <VStack gap="space-2">
               <>
                 <VelgSaksbehandlerCombobox
                   label="Velg saksbehandler"
@@ -327,7 +327,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
           </DropdownMeny>
         </Dropdown>
       ) : (
-        <SaksbehandlerNavnHStack gap="2" align="center">
+        <SaksbehandlerNavnHStack gap="space-2" align="center">
           <PersonIcon width="1.5rem" height="1.5rem" aria-hidden />
           <Label size="small" textColor="subtle">
             {saksbehandler ? saksbehandler.navn : 'Navn mangler'}

@@ -30,7 +30,7 @@ export function FerdigstillAktivitetspliktOppgaveModal() {
           <Heading size="large">Ferdigstill oppgave</Heading>
         </Modal.Header>
         <Modal.Body>
-          <VStack gap="6">
+          <VStack gap="space-6">
             <BodyShort>
               Når du ferdigstiller oppgaven blir den låst for endringer. Siden det er valgt at ingen brev skal sendes
               vil det ikke bli sendt ut noen infobrev.

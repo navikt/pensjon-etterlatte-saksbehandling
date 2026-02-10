@@ -45,8 +45,8 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
   const currentIndex = steg.findIndex((s) => s.status.includes(etteroppgjoer.status))
 
   return (
-    <VStack gap="4">
-      <Box padding="8" maxWidth="70rem">
+    <VStack gap="space-4">
+      <Box padding="space-8" maxWidth="70rem">
         <h1>Etteroppgjør for {etteroppgjoer.inntektsaar}</h1>
         <List as="ul">
           {steg.map((step, idx) => (
@@ -61,7 +61,7 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
         </List>
       </Box>
       {tilbakestillEtteroppgjoerEnabled && (
-        <Box padding="8" maxWidth="70rem">
+        <Box padding="space-8" maxWidth="70rem">
           <TilbakestillOgOpprettNyForbehandling sakId={etteroppgjoer.sakId} />
         </Box>
       )}

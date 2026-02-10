@@ -108,8 +108,8 @@ export function TilbakekrevingVurderingPerioderSkjema({
 
   return (
     <>
-      <Box paddingBlock="8" paddingInline="16 8">
-        <VStack gap="10">
+      <Box paddingBlock="space-8" paddingInline="space-16 space-8">
+        <VStack gap="space-8">
           <div>
             <Button
               variant="secondary"
@@ -334,7 +334,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
           </Table>
         </VStack>
         {redigerbar && (
-          <VStack gap="5">
+          <VStack gap="space-4">
             {mapResult(lagrePerioderStatus, {
               success: () => <Toast melding="Perioder lagret" position="bottom-center" />,
               error: (error) => (
@@ -348,7 +348,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
           </VStack>
         )}
       </Box>
-      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-12 space-0" borderWidth="1 0 0 0">
         <HStack justify="center">
           {redigerbar ? (
             <Button

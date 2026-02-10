@@ -7,7 +7,7 @@ import { Box } from '@navikt/ds-react'
 export const SakIkkeFunnet = ({ error, fnr }: { error: ApiError; fnr: string }) => {
   //TODO håndtere 401
   return (
-    <Box padding="8">
+    <Box padding="space-8">
       {error.status === 404 ? (
         <>
           <ApiWarningAlert>{error.detail}</ApiWarningAlert>

@@ -128,7 +128,7 @@ export const KnyttTilAnnenSak = ({
 
         <br />
 
-        <HStack gap="4" justify="end">
+        <HStack gap="space-4" justify="end">
           <Button variant="tertiary" onClick={() => window.location.reload()}>
             Avslutt
           </Button>
@@ -185,7 +185,7 @@ export const KnyttTilAnnenSak = ({
 
       {mapResult(annenSakStatus, {
         initial: (
-          <HStack gap="4" align="end">
+          <HStack gap="space-4" align="end">
             <TextField
               label="Hvilken sakid skal journalposten flyttes til?"
               value={sakid || ''}
@@ -229,7 +229,7 @@ export const KnyttTilAnnenSak = ({
               <Alert variant="error">{error.detail || 'Ukjent feil oppsto ved feilregistrering av journalpost'}</Alert>
             ))}
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-4" justify="end">
               <Button variant="secondary" onClick={lukkModal}>
                 Nei, avbryt
               </Button>

@@ -82,26 +82,26 @@ export const RedigerbarAktivitsgradKnapper = ({
   erBehandling: boolean
 }) => {
   return (
-    <VStack gap="6" maxWidth="50rem">
+    <VStack gap="space-6" maxWidth="50rem">
       <Heading size="small">
         {erBehandling
           ? 'Vurdering av aktivitetsplikten'
           : `Vurdering gjort for aktiviteten fra ${aktivitet.vurdertFra12Mnd ? '12 måneder' : '6 måneder'}`}
       </Heading>
-      <VStack gap="2">
+      <VStack gap="space-2">
         <Label>Beskrivelse</Label>
         <BodyShort>{aktivitet.beskrivelse}</BodyShort>
       </VStack>
 
       {aktivitet.skjoennsmessigVurdering && (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <Label>Vil bruker være selvforsørget etter stønaden utløper?</Label>
           <BodyShort>{teksterAktivitetspliktSkjoennsmessigVurdering[aktivitet.skjoennsmessigVurdering]}</BodyShort>
         </VStack>
       )}
 
       {erRedigerbar && (
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button
             size="xsmall"
             variant="secondary"

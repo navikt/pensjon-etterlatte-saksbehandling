@@ -52,7 +52,7 @@ export const SlettBrev = ({ brev }: { brev: IBrev }) => {
         <Modal.Body>
           <BodyShort spacing>Er du sikker på at du vil slette brevet? Handlingen kan ikke angres.</BodyShort>
 
-          <HStack gap="4" justify="center">
+          <HStack gap="space-4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(slettBrevStatus)}>
               Nei, avbryt
             </Button>

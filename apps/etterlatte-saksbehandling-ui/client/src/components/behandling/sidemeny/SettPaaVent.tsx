@@ -13,14 +13,14 @@ export const SettPaaVent = ({ oppgave }: Props) => {
   if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) return null
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       {oppgave?.status === 'PAA_VENT' && (
         <>
           <Alert variant="warning" size="small">
             <Heading size="xsmall" spacing>
               Oppgaven står på vent!
             </Heading>
-            <VStack gap="4">
+            <VStack gap="space-4">
               <Info label="Merknad" tekst={oppgave.merknad || 'Ingen'} />
               <Info label="Ny frist" tekst={formaterDato(oppgave.frist)} />
             </VStack>

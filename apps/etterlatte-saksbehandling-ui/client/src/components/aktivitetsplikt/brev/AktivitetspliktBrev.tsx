@@ -53,14 +53,14 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
         brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT
       return (
         <HStack height="100%" minHeight="100vh" wrap={false}>
-          <VStack gap="4" margin="4" minWidth="30rem">
+          <VStack gap="space-4" margin="space-4" minWidth="30rem">
             {endringerHarKommetEtterBrevOpprettelse(brev) && (
               <Alert variant="warning">
                 Vurdering av aktivitet eller valgene for infobrevet er oppdatert etter at brevet ble opprettet. Se nøye
                 over brevet for å se om innholdet stemmer med nåværende verdier.
               </Alert>
             )}
-            <Box marginInline="0 8">
+            <Box marginInline="space-0 space-8">
               <Heading size="large">Infobrev aktivitetsplikt</Heading>
             </Box>
 
@@ -77,11 +77,11 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
             <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
           </VStack>
 
-          <Box borderWidth="0 1" borderColor="border-subtle">
-            <VStack gap="4" width="50rem">
+          <Box borderWidth="0 1">
+            <VStack gap="space-4" width="50rem">
               {brevErFerdigstilt ? (
                 <>
-                  <Box maxHeight="955px" width="100%" height="100%" marginBlock="0 16">
+                  <Box maxHeight="955px" width="100%" height="100%" marginBlock="space-0 space-16">
                     <ForhaandsvisningBrev brev={brev} />
                   </Box>
                   <InfobrevKnapperad>

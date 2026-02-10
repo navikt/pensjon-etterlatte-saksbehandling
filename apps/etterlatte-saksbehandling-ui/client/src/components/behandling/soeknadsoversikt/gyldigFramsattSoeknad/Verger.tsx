@@ -73,7 +73,7 @@ export const Verger = ({ sakId, behandlingId }: Props) => {
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       {mapResult(soeker, {
         error: (error) => <ApiErrorAlert>Kunne ikke hente info om verge(r): {error.detail}</ApiErrorAlert>,
         success: (data) => successContents(data),

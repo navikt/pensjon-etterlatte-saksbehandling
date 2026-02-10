@@ -48,7 +48,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
   )
 
   return (
-    <VStack gap="8">
+    <VStack gap="space-8">
       <Table className="table" zebraStripes style={{ width: '50rem' }}>
         <Table.Header>
           <Table.Row>
@@ -99,9 +99,9 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
       </Table>
 
       {perioderMedOverstyringOgSkattetrekk.length > 0 && (
-        <Box marginBlock="10 0" maxWidth="45rem">
+        <Box marginBlock="space-8 space-0" maxWidth="45rem">
           <Alert variant="error">
-            <VStack gap="4">
+            <VStack gap="space-4">
               <BodyLong>
                 Det er lagt inn overstyring av netto tilbakekreving til brutto tilbakekreving i samme periode. Dette vil
                 sannsynligvis gi feil i beløpene i tilbakekrevingen.
@@ -119,9 +119,9 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
 
       {harPerioderMedBarnepensjonSkattetrekk(behandling) && (
         <>
-          <Box marginBlock="10 0" maxWidth="45em">
+          <Box marginBlock="space-8 space-0" maxWidth="45em">
             <Alert variant="info">
-              <VStack gap="5">
+              <VStack gap="space-4">
                 <BodyLong>
                   Oppsummeringen ovenfor gir en oversikt over beløpene som overføres til oppdrag og Nav Innkreving. Vi
                   sier brutto tilbakebetaling fordi skattebeløpet ikke har blitt sendt videre til Skatteetaten fra Nav.
@@ -148,7 +148,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
               <Table.Row key="Beloep">
                 <Table.DataCell></Table.DataCell>
                 <Table.DataCell>
-                  <HStack gap="1">
+                  <HStack gap="space-1">
                     {NOK(sumFeilutbetalingInkludertTrekk)}
                     <HelpText strategy="fixed">
                       {NOK(sumFeilutbetaling)} {' + '}
@@ -164,7 +164,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
                 <Table.DataCell></Table.DataCell>
                 <Table.DataCell></Table.DataCell>
                 <Table.DataCell>
-                  <HStack gap="1">
+                  <HStack gap="space-1">
                     {NOK(sumBruttoTilbakekrevingInkludertTrekk)}
                     <HelpText strategy="fixed">
                       {NOK(sumBruttoTilbakekreving)} {' + '}
@@ -178,7 +178,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
                 <Table.DataCell></Table.DataCell>
                 <Table.DataCell>-</Table.DataCell>
                 <Table.DataCell>
-                  <HStack gap="1">
+                  <HStack gap="space-1">
                     {NOK(sumSkattInkludertTrekk)}
                     <HelpText strategy="fixed">
                       Skattetrekket for barnepensjon som utgjør {NOK(fastSkattetrekkBp)}

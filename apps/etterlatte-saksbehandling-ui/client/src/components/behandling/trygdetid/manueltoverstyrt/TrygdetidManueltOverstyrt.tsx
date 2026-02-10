@@ -31,7 +31,7 @@ export const TrygdetidManueltOverstyrt = ({
   const [visSkjema, setVisSkjema] = useState(!trygdetidErSatt && redigerbar)
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Heading size="small" level="3">
         Manuelt overstyrt trygdetid
       </Heading>
@@ -76,16 +76,16 @@ const TrygdetidUkjentAvdoed = ({
   return (
     <>
       {ident == 'UKJENT_AVDOED' ? (
-        <Box maxWidth="40rem" marginBlock="8 0">
-          <VStack gap="3">
+        <Box maxWidth="40rem" marginBlock="space-8 space-0">
+          <VStack gap="space-2">
             <Alert variant="warning">
-              <VStack gap="4">
+              <VStack gap="space-4">
                 <BodyLong>
                   Trygdetiden er koblet til en ukjent avdød. Hvis avdøde i saken er kjent, og familieoversikten er
                   oppdatert, bør trygdetid opprettes på nytt. Dette for å unngå å bruke manuelt overstyrt trygdetid der
                   dette ikke er nødvendig.
                 </BodyLong>
-                <VStack gap="4">
+                <VStack gap="space-4">
                   {mapResult(opprettStatus, {
                     pending: <Spinner label="Oppretter trygdetid" />,
                     error: () => <ApiErrorAlert>En feil har oppstått ved opprettelse av trygdetid</ApiErrorAlert>,

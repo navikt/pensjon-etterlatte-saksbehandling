@@ -40,18 +40,18 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
         header={{ heading: 'Omgjør revurdering - etteroppgjør' }}
       >
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-4">
             <BodyShort>
-              I tilfeller hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du omgjøre revurderingen uten å
-              måtte behandle etteroppgjøret på nytt via ny forbehandling.
+              I tilfeller hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du omgjøre revurderingen uten
+              å måtte behandle etteroppgjøret på nytt via ny forbehandling.
             </BodyShort>
 
             {mapResult(omgjoerEtteroppgjoerResult, {
               error: (error) => <ApiErrorAlert>Kunne ikke omgjøre behandling. {error.detail}</ApiErrorAlert>,
             })}
 
-            <HStack gap="4" justify="end">
-              <HStack gap="4">
+            <HStack gap="space-4" justify="end">
+              <HStack gap="space-4">
                 <Button size="small" onClick={() => setOpen(false)} variant="secondary">
                   Nei
                 </Button>

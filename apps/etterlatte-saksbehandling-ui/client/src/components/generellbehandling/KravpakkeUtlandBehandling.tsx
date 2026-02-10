@@ -28,7 +28,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import { ExternalLinkIcon, PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
-import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
@@ -162,7 +161,7 @@ const KravpakkeUtlandBehandling = (props: {
     <HStack height="100%" minHeight="100vh" wrap={false}>
       <Box width="100%" style={{ whiteSpace: 'pre-wrap' }}>
         <div style={{ maxWidth: '55rem', margin: 'auto' }}>
-          <Box paddingInline="16" paddingBlock="16 4">
+          <Box paddingInline="space-16" paddingBlock="space-16 space-4">
             <Heading spacing size="large" level="1">
               Kravpakke til utland
             </Heading>
@@ -172,7 +171,7 @@ const KravpakkeUtlandBehandling = (props: {
               utfyllende informasjon.
             </p>
           </Box>
-          <Box padding="4" borderRadius="small">
+          <Box padding="space-4">
             <div>
               {utlandsBehandling.tilknyttetBehandling ? (
                 <div>
@@ -184,7 +183,7 @@ const KravpakkeUtlandBehandling = (props: {
                     success: (avdoed) => (
                       <>
                         <h3>Informasjon om avdøde</h3>
-                        <VStack gap="4">
+                        <VStack gap="space-4">
                           <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
                           <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
                         </VStack>
@@ -294,7 +293,7 @@ const KravpakkeUtlandBehandling = (props: {
 
               <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
                 Gå til RINA for å opprette kravpakke til utlandet
-                <ExternalLinkIcon fill={ABlue500} aria-hidden />
+                <ExternalLinkIcon fill="var(--a-blue-500)" aria-hidden />
               </LenkeMargin>
               <TextField
                 label="Saksnummer RINA"
@@ -470,7 +469,7 @@ const KravpakkeUtlandBehandling = (props: {
               apiResult: avbrytbehandlingStatus,
               errorMessage: 'Kunne ikke avbryte generell behandling utland',
             })}
-            <HStack gap="2" justify="end">
+            <HStack gap="space-2" justify="end">
               {redigerbar && (
                 <>
                   <Button onClick={() => avbrytBehandling()} loading={isPending(avbrytbehandlingStatus)}>

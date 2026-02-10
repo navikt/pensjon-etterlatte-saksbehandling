@@ -116,7 +116,7 @@ export default function AvsluttKlage() {
             )
           }}
         />
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button
             type="button"
             size="small"

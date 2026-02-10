@@ -84,7 +84,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }, [filter])
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <ToggleGroup
         defaultValue={GosysOppgaveValg.ALLE_OPPGAVER}
         onChange={(e) => setFilter(lagGosysFilterBasertPaaOppgaveValg(e as GosysOppgaveValg))}

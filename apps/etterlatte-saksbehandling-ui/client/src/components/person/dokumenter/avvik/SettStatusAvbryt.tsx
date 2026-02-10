@@ -30,7 +30,7 @@ export const SettStatusAvbryt = ({ journalpost }: { journalpost: Journalpost }) 
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Alert variant="info">
         Du markerer nå journalposten med status <strong>AVBRUTT</strong>
       </Alert>

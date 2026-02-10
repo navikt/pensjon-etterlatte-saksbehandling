@@ -14,7 +14,7 @@ import { ILand, sorterLand } from '~utils/kodeverk'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { Alert, BodyShort, Box, Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
-import { AWhite } from '@navikt/ds-tokens/dist/tokens'
+
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export default function SluttBehandlingOmgjoering({
@@ -30,7 +30,7 @@ export default function SluttBehandlingOmgjoering({
   }, [])
 
   return (
-    <Box marginBlock="10 0" maxWidth="1200px">
+    <Box marginBlock="space-8 space-0" maxWidth="1200px">
       {mapResult(sluttbehandlingStatus, {
         success: (sluttbehandlingUtland) => (
           <Sluttbehandling
@@ -165,8 +165,8 @@ function Sluttbehandling({
           {visLagretOk ? (
             <div style={{ minWidth: '148px', minHeight: '24px' }}>
               <CheckmarkCircleIcon
-                color={AWhite}
-                stroke={AWhite}
+                color="var(--a-white)"
+                stroke="var(--a-white)"
                 aria-hidden="true"
                 style={{ width: '1.8rem', height: '1.8rem', transform: 'translate(-40%, -10%)', position: 'absolute' }}
               />

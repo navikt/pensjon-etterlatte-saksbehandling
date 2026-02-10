@@ -63,7 +63,7 @@ export const Oppgaver = ({
   if (!paginerteOppgaver.length) return AlertIngenOppgaver
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-2">
       <PagineringsKontroller
         page={page}
         setPage={setPage}

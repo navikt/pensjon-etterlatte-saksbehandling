@@ -113,7 +113,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
 
   if (trygdetid?.id && trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
     return (
-      <VStack gap="12" maxWidth="69rem">
+      <VStack gap="space-12" maxWidth="69rem">
         <TrygdetidManueltOverstyrt
           trygdetidId={trygdetid.id}
           ident={trygdetid.ident}
@@ -132,8 +132,8 @@ export const EnkelPersonTrygdetid = (props: Props) => {
   return (
     <>
       {trygdetid && (
-        <VStack gap="12" maxWidth="69rem">
-          <VStack gap="4">
+        <VStack gap="space-12" maxWidth="69rem">
+          <VStack gap="space-4">
             {!skalViseTrygdeavtale(behandling) && <AvdoedesTrygdetidReadMore />}
             <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
           </VStack>

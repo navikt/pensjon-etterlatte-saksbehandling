@@ -181,7 +181,7 @@ export const AktivitetspliktTimeline = ({
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <HStack justify="end">
         <ToggleGroup
           defaultValue="3"

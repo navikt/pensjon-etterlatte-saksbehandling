@@ -70,18 +70,18 @@ export const AktivitetspliktSakoversikt = ({
   }
 
   if (isFailure(sakResult)) {
-    return <Box padding="8">{feilkodehaandtering(sakResult.error)}</Box>
+    return <Box padding="space-8">{feilkodehaandtering(sakResult.error)}</Box>
   }
 
   return (
-    <VStack gap="4">
-      <Box padding="8" maxWidth="70rem">
+    <VStack gap="space-4">
+      <Box padding="space-8" maxWidth="70rem">
         {mapResult(hentAktivitetspliktVurderingForSakResult, {
           pending: <Spinner label="Henter vurderinger..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente vurderinger'}</ApiErrorAlert>,
           success: (aktivitetspliktVurdering) => (
-            <VStack gap="8">
-              <VStack gap="4">
+            <VStack gap="space-8">
+              <VStack gap="space-4">
                 <Heading size="medium">Aktivitetsplikt</Heading>
 
                 <AktivitetspliktStatusTagOgGyldig aktivitetspliktVurdering={aktivitetspliktVurdering} />
@@ -111,7 +111,7 @@ export const AktivitetspliktSakoversikt = ({
           ),
         })}
       </Box>
-      <VStack paddingInline="8 16" paddingBlock="0 16" maxWidth="70rem" gap="4">
+      <VStack paddingInline="space-8 space-16" paddingBlock="space-0 space-16" maxWidth="70rem" gap="space-4">
         <Heading level="3" size="small">
           Informasjonsbrev og vurdering manuelt
         </Heading>
@@ -131,7 +131,7 @@ export const AktivitetspliktSakoversikt = ({
         {mapSuccess(sakResult, (sakOgBehandlinger) => (
           <>
             <Heading size="xsmall">Opprett oppgave</Heading>
-            <HStack gap="4">
+            <HStack gap="space-4">
               <div>
                 <Button
                   variant="secondary"

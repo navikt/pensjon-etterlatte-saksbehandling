@@ -85,7 +85,7 @@ export const VurderingsboksWrapper = ({
           </Oppsummering>
 
           {redigerbar && (
-            <HStack gap="3">
+            <HStack gap="space-2">
               <Button
                 icon={<PencilIcon />}
                 size="small"

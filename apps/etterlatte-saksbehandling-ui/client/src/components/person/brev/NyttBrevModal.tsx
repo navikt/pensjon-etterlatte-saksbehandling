@@ -189,7 +189,7 @@ export const NyttBrevModal = ({
 
         <form onSubmit={handleSubmit(opprettBrev)}>
           <Modal.Body>
-            <VStack gap="4">
+            <VStack gap="space-4">
               <Select
                 error={errors?.type?.message}
                 label="Type"
@@ -354,7 +354,7 @@ export const NyttBrevModal = ({
           </Modal.Body>
 
           <Modal.Footer>
-            <HStack gap="4" justify="end">
+            <HStack gap="space-4" justify="end">
               <Button variant="secondary" type="button" disabled={isPending(opprettBrevStatus)} onClick={avbryt}>
                 Avbryt
               </Button>

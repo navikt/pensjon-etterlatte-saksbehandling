@@ -46,7 +46,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
     forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
 
   return (
-    <VStack gap="10" paddingInline="16" paddingBlock="16 4">
+    <VStack gap="space-8" paddingInline="space-16" paddingBlock="space-16 space-4">
       <Heading size="xlarge" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
@@ -68,7 +68,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
       )}
 
       {!!beregnetEtteroppgjoerResultat && !doedsfallIEtteroppgjoersaaret && (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
         </VStack>
@@ -92,7 +92,7 @@ export const EtteroppgjoerForbehandlingOversikt = () => {
         </Alert>
       )}
 
-      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+      <Box borderWidth="1 0 0 0" paddingBlock="space-8 space-16">
         <HStack width="100%" justify="center">
           {ferdigstillUtenBrev ? (
             <FerdigstillEtteroppgjoerForbehandlingUtenBrev />

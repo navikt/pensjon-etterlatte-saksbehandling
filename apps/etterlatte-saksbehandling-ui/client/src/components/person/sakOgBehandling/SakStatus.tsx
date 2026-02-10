@@ -66,7 +66,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
   }, [])
 
   return (
-    <HStack gap="4">
+    <HStack gap="space-4">
       {mapResult(vedtakISakResult, {
         pending: <Loader />,
         error: <Tag variant="error">Kunne ikke hente status</Tag>,

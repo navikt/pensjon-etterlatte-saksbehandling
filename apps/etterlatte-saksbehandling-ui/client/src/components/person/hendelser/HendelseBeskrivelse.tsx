@@ -182,13 +182,17 @@ const VisSivilstand = ({ samsvar }: { samsvar: SivilstandSamsvar }) => {
       <div>
         <Label>Nytt grunnlag (PDL)</Label>
         <ListeWrapper>
-          {samsvar.fraPdl?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
+          {samsvar.fraPdl?.map((sivilstand, i) => (
+            <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>
+          ))}
         </ListeWrapper>
       </div>
       <div>
         <Label>Eksisterende grunnlag</Label>
         <ListeWrapper>
-          {samsvar.fraGrunnlag?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
+          {samsvar.fraGrunnlag?.map((sivilstand, i) => (
+            <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>
+          ))}
         </ListeWrapper>
       </div>
     </GrunnlagSammenligningWrapper>
@@ -300,7 +304,7 @@ export const HendelseBeskrivelse = ({
   switch (hendelse.samsvarMellomKildeOgGrunnlag.type) {
     case 'UTLAND':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <UtlandSamsvarVisning samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -308,7 +312,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'FOLKEREGISTERIDENTIFIKATOR':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <FolkeregisterSamsvarVisning samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -316,7 +320,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'ANSVARLIGE_FORELDRE':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <VisAnsvarligeForeldreSamsvar samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -324,7 +328,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'DOEDSDATO':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Doedsdato samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -332,7 +336,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'ADRESSE':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Adresse adresse={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -340,7 +344,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'BARN':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Barn samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -348,7 +352,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'SIVILSTAND':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <VisSivilstand samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -356,7 +360,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'INSTITUSJONSOPPHOLD':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Institusjonsopphold samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -364,7 +368,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'UFOERETRYGD':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Ufoeretrygd hendelse={hendelse.samsvarMellomKildeOgGrunnlag.hendelse} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -372,7 +376,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Vergemaal samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
@@ -380,7 +384,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'GRUNNBELOEP':
       return (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <KortTekst size="small">
             Hendelse fra {grunnlagsendringsKilde(hendelse.samsvarMellomKildeOgGrunnlag.type)}
           </KortTekst>

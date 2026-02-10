@@ -56,7 +56,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
 
       <br />
 
-      <VStack gap="4">
+      <VStack gap="space-4">
         <Info label="Kanal/kilde" tekst={journalpost.kanal} />
         <Info
           label="Registrert dato"
@@ -67,7 +67,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
 
       <br />
 
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
         <Heading size="medium" spacing>
           Gjelder
         </Heading>
@@ -114,8 +114,8 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
                 kobleTilSak={(nySak) => setJournalpost({ ...journalpost, sak: nySak })}
               />
 
-              <VStack gap="2">
-                <HStack gap="2" justify="center">
+              <VStack gap="space-2">
+                <HStack gap="space-2" justify="center">
                   <LagreJournalpostModal journalpost={journalpost} oppgaveId={oppgaveId} />
                   <JournalfoerJournalpostModal journalpost={journalpost} sak={sakMedBehandling.sak} />
                 </HStack>

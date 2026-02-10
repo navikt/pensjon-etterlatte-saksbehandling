@@ -51,19 +51,19 @@ export const Avbrutt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo 
 
   return (
     <SidebarPanel $border>
-      <VStack gap="2">
+      <VStack gap="space-2">
         <div>
           <Heading size="small">{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
           <Heading size="xsmall">Avbrutt</Heading>
         </div>
 
-        <Box paddingInline="2 0">
-          <HStack gap="2">
+        <Box paddingInline="space-2 space-0">
+          <HStack gap="space-2">
             <SakTypeTag sakType={behandlingsInfo.sakType} size="small" />
             <UtenlandstilknytningTypeTag utenlandstilknytningType={behandlingsInfo.nasjonalEllerUtland} size="small" />
           </HStack>
         </Box>
-        <VStack gap="2" justify="space-between">
+        <VStack gap="space-2" justify="space-between">
           {mapResult(oppgaveForBehandling, {
             pending: <Spinner label="Henter oppgave med saksbehandler" />,
             error: () => <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>,
@@ -97,14 +97,14 @@ export const Avbrutt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo 
           </div>
         </VStack>
 
-        <HStack gap="4" justify="space-between">
+        <HStack gap="space-4" justify="space-between">
           <div>
             <Label size="small">Virkningstidspunkt</Label>
             <Detail>{behandlingsInfo.virkningsdato ? formaterDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}</Detail>
           </div>
         </HStack>
 
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <Label size="small">Sakid:</Label>
           <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
         </HStack>

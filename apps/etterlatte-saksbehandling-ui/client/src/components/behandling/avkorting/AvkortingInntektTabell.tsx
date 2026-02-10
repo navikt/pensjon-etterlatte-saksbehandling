@@ -44,17 +44,17 @@ export const AvkortingInntektTabell = ({
         <Table.Row>
           <Table.HeaderCell />
           <Table.HeaderCell>
-            <HStack gap="2" align="center" wrap={false}>
+            <HStack gap="space-2" align="center" wrap={false}>
               Inntektstype
             </HStack>
           </Table.HeaderCell>
           <Table.HeaderCell>
-            <HStack gap="2" align="center" wrap={false}>
+            <HStack gap="space-2" align="center" wrap={false}>
               Inntekt totalt
             </HStack>
           </Table.HeaderCell>
           <Table.HeaderCell>
-            <HStack gap="2" align="center" wrap={false}>
+            <HStack gap="space-2" align="center" wrap={false}>
               Innvilgede måneder
               <InnvilgaMaanederHeaderHjelpeTekst />
             </HStack>
@@ -81,7 +81,7 @@ export const AvkortingInntektTabell = ({
               </Table.DataCell>
               <Table.DataCell key="InntektTotalt">{NOK(avkortingGrunnlag.inntektInnvilgetPeriode)}</Table.DataCell>
               <Table.DataCell>
-                <HStack gap="4" align="center">
+                <HStack gap="space-4" align="center">
                   <BodyShort>{avkortingGrunnlag.innvilgaMaaneder}</BodyShort>
                   {fyller67 &&
                     erForventetInntekt(avkortingGrunnlag) &&
@@ -141,10 +141,10 @@ const ForventetInntektDetaljer = ({
 
   return (
     <div>
-      <Box borderWidth="0 0 1 0" borderColor="border-subtle" marginBlock="0 4">
-        <HStack gap="20">
+      <Box borderWidth="0 0 1 0" marginBlock="space-0 space-4">
+        <HStack gap="space-20">
           <VStack minWidth="15rem">
-            <HStack gap="1">
+            <HStack gap="space-1">
               <Label>Forventet inntekt i Norge</Label>
               <ForventetInntektHjelpeTekst
                 aarsinntekt={aarsinntekt}
@@ -156,7 +156,7 @@ const ForventetInntektDetaljer = ({
           </VStack>
 
           <VStack>
-            <HStack gap="2">
+            <HStack gap="space-2">
               <Label>Fratrekk inn-år Norge</Label>
             </HStack>
             <BodyShort>{NOK(fratrekkInnAar)}</BodyShort>
@@ -164,10 +164,10 @@ const ForventetInntektDetaljer = ({
         </HStack>
       </Box>
 
-      <Box borderWidth="0 0 1 0" borderColor="border-subtle" marginBlock="0 4">
-        <HStack gap="20">
+      <Box borderWidth="0 0 1 0" marginBlock="space-0 space-4">
+        <HStack gap="space-20">
           <VStack minWidth="15rem">
-            <HStack gap="1">
+            <HStack gap="space-1">
               <Label>Forventet inntekt utland</Label>
               <ForventetInntektUtlandHjelpeTekst
                 inntektUtland={inntektUtland}
@@ -179,7 +179,7 @@ const ForventetInntektDetaljer = ({
           </VStack>
 
           <VStack>
-            <HStack gap="2">
+            <HStack gap="space-2">
               <Label>Fratrekk inn-år utland</Label>
             </HStack>
             <BodyShort>{NOK(fratrekkUtland)}</BodyShort>
@@ -187,7 +187,7 @@ const ForventetInntektDetaljer = ({
         </HStack>
       </Box>
 
-      <Box marginBlock="0 4">
+      <Box marginBlock="space-0 space-4">
         <VStack>
           <Label>Spesifikasjon av inntekt</Label>
           <TekstMedMellomrom>{forventetInntektGrunnlag.spesifikasjon}</TekstMedMellomrom>
@@ -200,30 +200,30 @@ const ForventetInntektDetaljer = ({
 const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrunnlag: FaktiskInntektGrunnlag }) => {
   return (
     <div>
-      <Box borderWidth="0 0 1 0" borderColor="border-subtle" marginBlock="0 4">
-        <HStack gap="20">
+      <Box borderWidth="0 0 1 0" marginBlock="space-0 space-4">
+        <HStack gap="space-20">
           <VStack minWidth="15rem">
             <Label>Lønnsinntekt</Label>
             <BodyShort>{NOK(faktiskInntektGrunnlag.loennsinntekt)}</BodyShort>
           </VStack>
 
           <VStack>
-            <HStack gap="2">
+            <HStack gap="space-2">
               <Label>Næringsinntekt</Label>
             </HStack>
             <BodyShort>{NOK(faktiskInntektGrunnlag.naeringsinntekt)}</BodyShort>
           </VStack>
         </HStack>
       </Box>
-      <Box borderWidth="0 0 1 0" borderColor="border-subtle" marginBlock="0 4">
-        <HStack gap="20">
+      <Box borderWidth="0 0 1 0" marginBlock="space-0 space-4">
+        <HStack gap="space-20">
           <VStack minWidth="15rem">
             <Label>AFP</Label>
             <BodyShort>{NOK(faktiskInntektGrunnlag.afp)}</BodyShort>
           </VStack>
 
           <VStack>
-            <HStack gap="2">
+            <HStack gap="space-2">
               <Label>Utlandsinntekt</Label>
             </HStack>
             <BodyShort>{NOK(faktiskInntektGrunnlag.utlandsinntekt)}</BodyShort>
@@ -231,7 +231,7 @@ const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrun
         </HStack>
       </Box>
 
-      <Box marginBlock="0 4">
+      <Box marginBlock="space-0 space-4">
         <VStack>
           <Label>Spesifikasjon av inntekt</Label>
           <TekstMedMellomrom>{faktiskInntektGrunnlag.spesifikasjon}</TekstMedMellomrom>

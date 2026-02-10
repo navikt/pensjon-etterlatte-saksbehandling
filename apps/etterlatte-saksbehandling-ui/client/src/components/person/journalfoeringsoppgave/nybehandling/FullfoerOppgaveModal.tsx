@@ -59,7 +59,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
 
               <br />
 
-              <HStack gap="4" justify="center">
+              <HStack gap="space-4" justify="center">
                 <Button variant="secondary" onClick={() => navigate('/')}>
                   Gå til oppgavelisten
                 </Button>
@@ -69,7 +69,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
               </HStack>
             </>
           ) : (
-            <HStack gap="4" justify="center">
+            <HStack gap="space-4" justify="center">
               <Button
                 variant="secondary"
                 onClick={() => setOpen(false)}

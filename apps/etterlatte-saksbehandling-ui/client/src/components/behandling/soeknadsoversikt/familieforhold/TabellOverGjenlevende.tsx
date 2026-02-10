@@ -20,8 +20,8 @@ interface Props {
 
 export const TabellOverGjenlevende = ({ gjenlevende, alleLand, sakType }: Props) => {
   return (
-    <VStack gap="4">
-      <HStack gap="4" justify="start" align="center" wrap={false}>
+    <VStack gap="space-4">
+      <HStack gap="space-4" justify="start" align="center" wrap={false}>
         <PersonIcon fontSize="1.5rem" aria-hidden />
         <Heading size="small" level="3">
           {sakType === SakType.OMSTILLINGSSTOENAD ? 'Gjenlevende' : 'Biologisk forelder'}

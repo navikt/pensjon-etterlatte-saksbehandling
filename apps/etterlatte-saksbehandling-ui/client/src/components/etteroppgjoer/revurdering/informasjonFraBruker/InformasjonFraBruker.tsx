@@ -36,7 +36,7 @@ export const InformasjonFraBruker = ({
   )
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Heading size="large">Informasjon fra bruker</Heading>
 
       {informasjonFraBrukerSkjemaErAapen && erRedigerbar ? (
@@ -48,7 +48,7 @@ export const InformasjonFraBruker = ({
           setValideringFeilmedling={setValideringFeilmedling}
         />
       ) : (
-        <VStack gap="4">
+        <VStack gap="space-4">
           <InformasjonFraBrukerVisning />
           {erRedigerbar && (
             <div>

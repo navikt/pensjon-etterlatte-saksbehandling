@@ -3,10 +3,10 @@ import { BodyLong, HelpText, HStack, VStack } from '@navikt/ds-react'
 
 export const EtterbetalingHjelpeTekst = (): ReactNode => {
   return (
-    <HStack gap="2">
+    <HStack gap="space-2">
       Skal det etterbetales?
       <HelpText placement="top">
-        <VStack gap="4">
+        <VStack gap="space-4">
           <BodyLong>
             Velg &quot;ja&quot; hvis ytelsen er innvilget tilbake i tid, og normal utbetalingsdato for gjeldende periode
             er forbi. Dette gjelder dersom det vises perioder med &quot;Etterbetaling&quot; under &quot;Simulere

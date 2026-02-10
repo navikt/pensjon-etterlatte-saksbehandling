@@ -104,7 +104,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
               </div>
             )}
           </InfoGrid>
-          <Box padding="4" borderRadius="medium" borderColor="border-subtle" borderWidth="1" background="bg-subtle">
+          <Box padding="space-4" borderWidth="1">
             <Label>Beskrivelse</Label>
             <BodyShort style={{ whiteSpace: 'pre-wrap' }}>{beskrivelse || <i>Mangler beskrivelse</i>}</BodyShort>
           </Box>
@@ -116,7 +116,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
           ) : toggle.konverter ? (
             <OverfoerOppgaveTilGjenny oppgave={oppgave} setToggle={setToggle} />
           ) : (
-            <HStack gap="4" justify="end">
+            <HStack gap="space-4" justify="end">
               <Button size="small" variant="tertiary" onClick={() => setOpen(false)}>
                 Avbryt
               </Button>

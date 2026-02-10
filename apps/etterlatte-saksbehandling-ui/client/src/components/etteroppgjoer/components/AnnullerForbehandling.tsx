@@ -64,10 +64,10 @@ export default function AnnullerForbehandling() {
   }
 
   return (
-    <Box paddingInline="2" paddingBlock="4">
+    <Box paddingInline="space-2" paddingBlock="space-4">
       <ExpansionCard aria-labelledby="card-heading" size="small">
         <ExpansionCard.Header>
-          <HStack wrap={false} gap="4" align="center">
+          <HStack wrap={false} gap="space-4" align="center">
             <ExclamationmarkTriangleFillIcon aria-hidden />
             <div>
               <ExpansionCard.Title size="small">Annuller forbehandling</ExpansionCard.Title>
@@ -94,7 +94,7 @@ export default function AnnullerForbehandling() {
         </Modal.Header>
 
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-4">
             <BodyLong>
               Denne forbehandlingen blir annullert og må opprettes på nytt for å fullføre etteroppgjøret
             </BodyLong>
@@ -158,7 +158,7 @@ export default function AnnullerForbehandling() {
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" justify="center">
+          <HStack gap="space-4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(status)}>
               Nei, fortsett forbehandlingen
             </Button>

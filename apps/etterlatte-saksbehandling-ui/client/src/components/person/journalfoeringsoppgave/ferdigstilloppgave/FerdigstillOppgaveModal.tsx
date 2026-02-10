@@ -36,7 +36,7 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
 
               <br />
 
-              <HStack gap="4" justify="center">
+              <HStack gap="space-4" justify="center">
                 <Button variant="secondary" onClick={() => navigate('/')}>
                   Gå til oppgavelisten
                 </Button>
@@ -46,7 +46,7 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
               </HStack>
             </>
           ) : (
-            <HStack gap="4" justify="center">
+            <HStack gap="space-4" justify="center">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillOppgaveStatus)}>
                 Nei, avbryt
               </Button>

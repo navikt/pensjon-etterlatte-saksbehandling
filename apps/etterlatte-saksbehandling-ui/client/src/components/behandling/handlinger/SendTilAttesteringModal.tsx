@@ -81,7 +81,7 @@ export const SendTilAttesteringModal = ({
             Er du sikker på at du vil sende vedtaket til attestering?
           </Heading>
           <BodyShort spacing>Når du sender til attestering vil vedtaket låses og du får ikke gjort endringer</BodyShort>
-          <HStack gap="4" justify="center">
+          <HStack gap="space-4" justify="center">
             <Button
               variant="secondary"
               onClick={() => {

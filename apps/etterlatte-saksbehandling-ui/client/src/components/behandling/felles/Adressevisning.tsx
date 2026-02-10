@@ -10,7 +10,7 @@ export const Adressevisning = ({
   soeknadsoversikt?: boolean
 }) => {
   return (
-    <VStack gap="1">
+    <VStack gap="space-1">
       {adresser?.length > 0 ? (
         adresser
           .sort((a, b) => (new Date(b.gyldigFraOgMed!) > new Date(a.gyldigFraOgMed!) ? 1 : -1))

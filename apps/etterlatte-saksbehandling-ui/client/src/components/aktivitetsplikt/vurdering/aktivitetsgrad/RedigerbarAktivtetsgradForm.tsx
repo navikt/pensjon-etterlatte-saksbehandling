@@ -43,7 +43,7 @@ export const RedigerbarAktivtetsgradForm = ({
 
   return (
     <form onSubmit={handleSubmit(lagreOgOppdater)}>
-      <VStack gap="6">
+      <VStack gap="space-6">
         <ControlledRadioGruppe
           control={control}
           name="vurderingAvAktivitet.aktivitetsgrad"
@@ -65,7 +65,7 @@ export const RedigerbarAktivtetsgradForm = ({
             </>
           }
         />
-        <HStack gap="6">
+        <HStack gap="space-6">
           <ControlledDatoVelger
             name="vurderingAvAktivitet.fom"
             label="Fra og med"
@@ -138,7 +138,7 @@ export const RedigerbarAktivtetsgradForm = ({
         )}
         {feilmelding.length > 0 && <ErrorMessage>{feilmelding}</ErrorMessage>}
 
-        <HStack gap="4">
+        <HStack gap="space-4">
           <Button type="submit" loading={isPending(lagreStatus)}>
             Lagre
           </Button>

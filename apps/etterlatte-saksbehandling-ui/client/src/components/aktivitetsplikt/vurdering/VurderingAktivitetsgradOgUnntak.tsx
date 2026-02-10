@@ -134,7 +134,7 @@ export function VurderingAktivitetsgradOgUnntak(props: {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <VStack gap="6">
+        <VStack gap="space-6">
           <ControlledRadioGruppe
             control={control}
             name="vurderingAvAktivitet.aktivitetsgrad"
@@ -164,7 +164,7 @@ export function VurderingAktivitetsgradOgUnntak(props: {
               </Alert>
             </Box>
           )}
-          <HStack gap="6">
+          <HStack gap="space-6">
             <ControlledDatoVelger
               name="vurderingAvAktivitet.fom"
               label="Fra og med"
@@ -252,7 +252,7 @@ export function VurderingAktivitetsgradOgUnntak(props: {
             <ApiErrorAlert>Kunne ikke lagre vurdering: {lagreStatus.error.detail} </ApiErrorAlert>
           )}
 
-          <HStack gap="4">
+          <HStack gap="space-4">
             <Button type="submit" loading={isPending(lagreStatus)}>
               Lagre
             </Button>
@@ -274,8 +274,8 @@ const UnntakValg = (props: { vurderingType: AktivitetspliktOppgaveVurderingType 
   const er6mndVurdering = vurderingType === AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
   return (
     <Box maxWidth="40rem">
-      <VStack gap="4">
-        <HStack gap="4">
+      <VStack gap="space-4">
+        <HStack gap="space-4">
           <ControlledDatoVelger name="unntak.fom" label="Unntak fra og med" control={control} />
           <ControlledDatoVelger name="unntak.tom" label="Unntak til og med" required={false} control={control} />
         </HStack>

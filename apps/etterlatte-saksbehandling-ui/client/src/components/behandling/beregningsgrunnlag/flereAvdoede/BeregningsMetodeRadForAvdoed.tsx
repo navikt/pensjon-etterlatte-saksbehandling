@@ -201,7 +201,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
         redigerbar ? (
           <>
             <form onSubmit={handleSubmit(oppdaterBeregningsMetodeForAvdoed)}>
-              <VStack gap="4">
+              <VStack gap="space-4">
                 {erTidligsteAvdoede && kunEnJuridiskForelderPersongalleri && (
                   <ControlledMaanedVelger
                     name="datoTilKunEnJuridiskForelder"
@@ -237,7 +237,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
                   Disse datoene brukes til å regne ut satsen for barnepensjon ut ifra om det er en eller to forelder
                   død.
                 </BodyShort>
-                <HStack gap="4">
+                <HStack gap="space-4">
                   <ControlledMaanedVelger
                     name="fom"
                     label="Fra og med"
@@ -265,7 +265,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
                 <Box width="15rem">
                   <Textarea {...register('data.beregningsMetode.begrunnelse')} label="Begrunnelse (valgfritt)" />
                 </Box>
-                <HStack gap="4">
+                <HStack gap="space-4">
                   <Button
                     size="small"
                     icon={<FloppydiskIcon aria-hidden />}

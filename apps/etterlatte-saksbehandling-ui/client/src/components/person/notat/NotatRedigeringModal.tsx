@@ -84,8 +84,8 @@ export const NotatRedigeringModal = ({ notat, minifyRedigerKnapp }: RedigerbartN
             </Tabs.List>
 
             <Tabs.Panel value={NotatRedigeringFane.REDIGER}>
-              <Box paddingBlock="4">
-                <VStack gap="4">
+              <Box paddingBlock="space-4">
+                <VStack gap="space-4">
                   <RedigerNotatTittel id={notat.id} tittel={notat.tittel} />
 
                   <Heading size="xsmall">Rediger notat</Heading>

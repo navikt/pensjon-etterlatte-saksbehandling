@@ -10,7 +10,6 @@ import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch } from '~store/Store'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
-import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -135,8 +134,8 @@ export const BosattUtland = ({
                 {visLagretOk ? (
                   <div style={{ minWidth: '148px', minHeight: '24px' }}>
                     <CheckmarkCircleIcon
-                      color={AWhite}
-                      stroke={AWhite}
+                      color="var(--a-white)"
+                      stroke="var(--a-white)"
                       aria-hidden="true"
                       style={{
                         width: '1.8rem',

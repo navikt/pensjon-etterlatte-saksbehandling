@@ -18,7 +18,7 @@ export const TrygdetidManueltOverstyrtVisning = ({
     : beregnetTrygdetid.resultat.samletTrygdetidNorge
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Box>
         <Heading size="xsmall">Anvendt trygdetid</Heading>
         <BodyShort>{trygdetidAar} år</BodyShort>

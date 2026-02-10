@@ -129,7 +129,7 @@ export const TidligereFamiliepleierVurdering = ({
         </Heading>
 
         <Box width="15rem">
-          <VStack gap="4">
+          <VStack gap="space-4">
             <ControlledRadioGruppe
               name="svar"
               legend=""
@@ -137,7 +137,7 @@ export const TidligereFamiliepleierVurdering = ({
               control={control}
               errorVedTomInput="Du må velge om gjenlevende er tidligere familiepleier"
               radios={
-                <HStack gap="4">
+                <HStack gap="space-4">
                   <Radio size="small" value={JaNei.JA}>
                     Ja
                   </Radio>
@@ -185,7 +185,7 @@ export const TidligereFamiliepleierVurdering = ({
                 required: { value: true, message: 'Du må skrive en begrunnelse' },
               })}
             />
-            <HStack gap="3">
+            <HStack gap="space-2">
               <Button variant="primary" type="button" size="small" onClick={handleSubmit(lagre)}>
                 Lagre
               </Button>

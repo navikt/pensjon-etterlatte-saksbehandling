@@ -44,7 +44,7 @@ export const DokumentFilter = ({
   filter: DokumentFilter
   setFilter: Dispatch<SetStateAction<DokumentFilter>>
 }) => (
-  <HStack gap="4">
+  <HStack gap="space-4">
     <UNSAFE_Combobox
       label="Tema"
       options={Object.entries(TEMA_FILTER).map(([, tema]) => tema)}

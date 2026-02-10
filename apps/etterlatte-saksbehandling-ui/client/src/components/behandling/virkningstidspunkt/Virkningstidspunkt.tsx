@@ -128,22 +128,22 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
         hjemler={hjemler}
         status={Boolean(behandling.virkningstidspunkt) ? 'success' : 'warning'}
       >
-        <VStack gap="2">
-          <Box marginBlock="3" marginInline="0" maxWidth="41rem">
+        <VStack gap="space-2">
+          <Box marginBlock="space-2" marginInline="space-0" maxWidth="41rem">
             {beskrivelse}
           </Box>
-          <HStack gap="4">{children}</HStack>
+          <HStack gap="space-4">{children}</HStack>
         </VStack>
 
-        <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+        <Box paddingInline="space-2 space-0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2">
           <VurderingsboksWrapper
             tittel="Hva er virkningstidspunkt for behandlingen?"
             subtittelKomponent={
-              <VStack gap="4">
+              <VStack gap="space-4">
                 {erBosattUtland && (
                   <div>
                     <Heading size="xsmall">
-                      <HStack gap="1">
+                      <HStack gap="space-1">
                         Kravdato utland
                         <HelpText placement="top">
                           Skriv inn kravdato for søknad i utlandet, som hentes fra SED P2100.
@@ -180,7 +180,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
             defaultRediger={behandling.virkningstidspunkt === null}
             visAvbryt={!!behandling.virkningstidspunkt}
           >
-            <VStack gap="4">
+            <VStack gap="space-4">
               <Heading level="3" size="small">
                 Hva er virkningstidspunkt for behandlingen?
               </Heading>
@@ -192,7 +192,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
               {erBosattUtland && (
                 <DatoVelger
                   label={
-                    <HStack gap="1">
+                    <HStack gap="space-1">
                       Kravdato utland
                       <HelpText placement="top">
                         Skriv inn kravdato for søknad i utlandet, som hentes fra SED P2100.

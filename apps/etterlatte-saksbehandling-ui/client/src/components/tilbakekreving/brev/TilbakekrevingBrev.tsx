@@ -64,8 +64,8 @@ export function TilbakekrevingBrev({
     <>
       <BrevContent>
         <Sidebar>
-          <Box paddingInline="16" paddingBlock="16 4">
-            <VStack gap="4">
+          <Box paddingInline="space-16" paddingBlock="space-16 space-4">
+            <VStack gap="space-4">
               <Heading size="large" level="1">
                 Vedtaksbrev
               </Heading>
@@ -93,7 +93,7 @@ export function TilbakekrevingBrev({
           />
         )}
       </BrevContent>
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
         <HStack justify="center">
           {kanAttesteres && (
             <SendTilAttesteringModal

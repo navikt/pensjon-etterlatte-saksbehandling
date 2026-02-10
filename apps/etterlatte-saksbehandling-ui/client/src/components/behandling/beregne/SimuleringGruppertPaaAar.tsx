@@ -10,11 +10,11 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
   return (
     <>
       {aarMedPerioder.map((aar) => (
-        <Box key={aar.aarstall} maxWidth="70rem" background="surface-subtle" padding="5">
+        <Box key={aar.aarstall} maxWidth="70rem" padding="space-4">
           <Heading level="3" size="small">
             Resultat av simulering i {aar.aarstall}
           </Heading>
-          <Box width="25rem" marginBlock="5">
+          <Box width="25rem" marginBlock="space-4">
             <Table>
               <Table.Header>
                 <Table.Row>
@@ -41,7 +41,7 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
               <Accordion.Item>
                 <Accordion.Header>Se detaljer om simulering i {aar.aarstall}</Accordion.Header>
                 <Accordion.Content>
-                  <VStack gap="5">
+                  <VStack gap="space-4">
                     <UtbetalingTable tittel={`Etterbetaling ${aar.aarstall}`} perioder={aar.etterbetaling} />
                     <UtbetalingTable tittel={`Tilbakekreving ${aar.aarstall}`} perioder={aar.tilbakekreving} />
                   </VStack>

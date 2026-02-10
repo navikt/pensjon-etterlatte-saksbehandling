@@ -56,7 +56,7 @@ export function KlageStegmeny() {
 
   return (
     <StegMenyBox>
-      <HStack gap="6" align="center">
+      <HStack gap="space-6" align="center">
         <KlageNavLenke path="formkrav" description="Vurder formkrav" enabled={true} />
         <KlageNavLenke path="vurdering" description="Vurder klagen" enabled={kanVurdereUtfall(klage)} />
         <KlageNavLenke path="brev" description="Brev" enabled={klageKanSeBrev(klage)} />

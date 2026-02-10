@@ -18,12 +18,11 @@ export function LenkeTilInntektOversikt() {
   return (
     <Box
       borderWidth="2"
-      paddingInline="4"
-      paddingBlock="3"
+      paddingInline="space-4"
+      paddingBlock="space-2"
       maxWidth="fit-content"
-      background="bg-default"
+      background="default"
       borderRadius="4"
-      borderColor="border-on-inverted"
     >
       {mapResult(urlForInntektOversiktResult, {
         pending: <Loader />,
@@ -33,7 +32,7 @@ export function LenkeTilInntektOversikt() {
           </Alert>
         ),
         success: ({ url }) => (
-          <HStack gap="2">
+          <HStack gap="space-2">
             <Tag variant="alt3" size="small">
               Ai
             </Tag>

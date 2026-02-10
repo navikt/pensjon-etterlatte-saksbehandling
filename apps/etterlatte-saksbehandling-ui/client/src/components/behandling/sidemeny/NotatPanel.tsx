@@ -30,7 +30,7 @@ export const NotatPanel = ({ sakId, fnr }: { sakId: number; fnr: string }) => {
           Notater
         </Heading>
 
-        <VStack gap="2">
+        <VStack gap="space-2">
           {!!notater?.length ? (
             notater.map((notat, index) => (
               <TextOverflow key={index} size="small">

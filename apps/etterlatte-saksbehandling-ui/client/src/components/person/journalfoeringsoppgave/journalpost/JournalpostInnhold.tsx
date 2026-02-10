@@ -30,11 +30,11 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
       Journalpostdetaljer
     </Heading>
 
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Info label="Tema" tekst={<TemaTag journalpost={journalpost} />} />
       <Info label="Kanal/kilde" tekst={journalpost.kanal} />
       <Info label="Status" tekst={formaterJournalpostStatus(journalpost.journalstatus)} />
-      <HStack gap="4">
+      <HStack gap="space-4">
         <Info
           label="Registrert dato"
           tekst={journalpost.datoOpprettet ? formaterDato(journalpost.datoOpprettet) : 'Mangler opprettelsesdato'}
@@ -51,14 +51,14 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
       </HStack>
     </VStack>
 
-    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-      <VStack gap="4">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+      <VStack gap="space-4">
         <Info label="Bruker" tekst={journalpost.bruker?.id ? <KopierbarVerdi value={journalpost.bruker.id} /> : '-'} />
 
         <Info
           label="Avsender/mottaker"
           tekst={
-            <HStack gap="4" align="center">
+            <HStack gap="space-4" align="center">
               <span>{journalpost.avsenderMottaker.navn || '-'}</span>
               {journalpost.avsenderMottaker.id && <KopierbarVerdi value={journalpost.avsenderMottaker?.id} />}
             </HStack>
@@ -68,8 +68,8 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
     </Box>
 
     <br />
-    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-      <VStack gap="4">
+    <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+      <VStack gap="space-4">
         <Info label="SakID" tekst={journalpost.sak?.fagsakId || '-'} />
         <Info
           label="Sakstype"

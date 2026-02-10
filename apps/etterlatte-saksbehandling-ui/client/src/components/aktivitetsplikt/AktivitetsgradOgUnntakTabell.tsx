@@ -42,8 +42,8 @@ export function AktivitetsgradOgUnntakTabell({
   aktiviteterOgUnntak.sort((a, b) => new Date(a.fom).getUTCMilliseconds() - new Date(b.fom).getUTCMilliseconds())
 
   return (
-    <VStack gap="4">
-      <HStack gap="4" align="center">
+    <VStack gap="space-4">
+      <HStack gap="space-4" align="center">
         <BriefcaseIcon fontSize="1.5rem" aria-hidden />
         <Heading size="small">Aktivitetsgrad og unntak</Heading>
       </HStack>

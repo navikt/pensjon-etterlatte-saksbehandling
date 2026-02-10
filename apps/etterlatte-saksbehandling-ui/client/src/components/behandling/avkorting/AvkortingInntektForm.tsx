@@ -104,7 +104,7 @@ export function AvkortingInntektForm({
               Inntekt for {inntektsAar}
             </Heading>
             <VStack>
-              <HStack marginBlock="0 8" gap="2" align="start" wrap={false}>
+              <HStack marginBlock="space-0 space-8" gap="space-2" align="start" wrap={false}>
                 <Box maxWidth="14rem">
                   <TextField
                     {...register(`inntekter.${index}.inntektTom`, {
@@ -184,7 +184,7 @@ export function AvkortingInntektForm({
                     error={errors.inntekter?.[index]?.fratrekkInnAarUtland?.message}
                   />
                 </Box>
-                <VStack gap="4">
+                <VStack gap="space-4">
                   <Label>Fra og med dato</Label>
                   <BodyShort>{formaterKanskjeStringDato(item.fom)}</BodyShort>
                 </VStack>
@@ -197,7 +197,7 @@ export function AvkortingInntektForm({
                 />
               </Box>
 
-              <VStack marginBlock="2" gap="1">
+              <VStack marginBlock="space-2" gap="space-1">
                 <ReadMore header="Hva regnes som inntekt?">
                   Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
                   arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
@@ -223,7 +223,7 @@ export function AvkortingInntektForm({
       {mapFailure(statusLagreInntektListe, (error) => (
         <ApiErrorAlert>Kunne ikke lagre inntekt(er), på grunn av feil: {error.detail}</ApiErrorAlert>
       ))}
-      <HStack gap="3" marginBlock="4">
+      <HStack gap="space-2" marginBlock="space-4">
         <Button size="medium" type="submit" loading={isPending(statusLagreInntektListe)}>
           Lagre
         </Button>

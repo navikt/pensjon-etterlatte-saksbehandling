@@ -45,12 +45,12 @@ export const HaandterAvvikModal = ({
         </Modal.Header>
 
         <Modal.Body>
-          <Box borderWidth="1" padding="4" borderRadius="medium" borderColor="border-subtle" background="bg-subtle">
+          <Box borderWidth="1" padding="space-4">
             <Heading size="xsmall" spacing>
               Journalpostdetaljer
             </Heading>
 
-            <VStack gap="4">
+            <VStack gap="space-4">
               <Info label="Journalpost ID" tekst={journalpost.journalpostId} />
               <Info label="Bruker" tekst={`${journalpost.bruker?.id || '-'} (${journalpost.bruker?.type})`} />
               <Info label="Sakstype" tekst={journalpost.sak?.sakstype || '-'} />

@@ -34,7 +34,7 @@ export const PersonInfoAdresse = (props: Props) => {
       )}
 
       {adresser && props.visHistorikk && (
-        <Box paddingBlock="2 0">
+        <Box paddingBlock="space-2 space-0">
           <ReadMore header="Historikk">
             <Adressevisning adresser={adresser} soeknadsoversikt={true} />
           </ReadMore>

@@ -52,8 +52,8 @@ export const SettNyOppgaveFristModal = ({ oppgave, oppdaterFrist }: Props) => {
               Sett ny frist
             </Heading>
           </Modal.Header>
-          <VStack gap="2">
-            <VStack gap="1">
+          <VStack gap="space-2">
+            <VStack gap="space-1">
               <DatePicker.Standalone
                 onSelect={(frist) => frist && setNyFrist(frist)}
                 selected={nyFrist}
@@ -64,7 +64,7 @@ export const SettNyOppgaveFristModal = ({ oppgave, oppdaterFrist }: Props) => {
               {fristFeilmelding && <ErrorMessage>{fristFeilmelding}</ErrorMessage>}
             </VStack>
             {isFailureHandler({ apiResult: redigerFristResult, errorMessage: 'Kunne ikke sette ny frist' })}
-            <HStack gap="2" justify="end">
+            <HStack gap="space-2" justify="end">
               <Button variant="secondary" onClick={() => setAapen(false)} disabled={isPending(redigerFristResult)}>
                 Avbryt
               </Button>

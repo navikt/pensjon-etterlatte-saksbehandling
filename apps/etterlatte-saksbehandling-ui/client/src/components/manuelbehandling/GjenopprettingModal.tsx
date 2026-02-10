@@ -53,7 +53,7 @@ export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveS
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" justify="center">
+          <HStack gap="space-4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(ferdigstillOppgaveStatus)}>
               Nei
             </Button>

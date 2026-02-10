@@ -39,7 +39,7 @@ export function RedigerMottattDato() {
 
   if (redigererDato) {
     return (
-      <VStack gap="4">
+      <VStack gap="space-4">
         <DatoVelger
           error={feilmelding}
           value={datoUnderRedigering}

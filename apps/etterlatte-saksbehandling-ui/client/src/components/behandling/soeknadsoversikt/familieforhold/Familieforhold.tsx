@@ -35,8 +35,8 @@ export const Familieforhold = ({ behandling, redigerbar, personopplysninger }: P
   }, [])
 
   return (
-    <VStack paddingInline="16" paddingBlock="4" gap="8">
-      <HStack gap="4" justify="start" align="center" wrap={false}>
+    <VStack paddingInline="space-16" paddingBlock="space-4" gap="space-8">
+      <HStack gap="space-4" justify="start" align="center" wrap={false}>
         <Heading size="medium" level="2">
           Familieforhold
         </Heading>
@@ -51,12 +51,12 @@ export const Familieforhold = ({ behandling, redigerbar, personopplysninger }: P
           <RedigerFamilieforholdModal behandling={behandling} personopplysninger={personopplysninger} />
         )}
       </HStack>
-      <Box paddingInline="4 0">
+      <Box paddingInline="space-4 space-0">
         {mapResult(hentAlleLandResult, {
           pending: <Spinner label="Henter alle land..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
           success: (alleLand) => (
-            <VStack gap="8">
+            <VStack gap="space-8">
               <SamsvarPersongalleri landListe={alleLand} />
               {skaViseAnnenForelderSkjema && (
                 <AnnenForelderSkjema behandlingId={behandling.id} personopplysninger={personopplysninger} />

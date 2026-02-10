@@ -52,8 +52,8 @@ export const OverstyrtTrygdetid = ({
         setRedigerNorskPoengaar(false)
       })}
     >
-      <VStack gap="4">
-        <HStack gap="2" align="center">
+      <VStack gap="space-4">
+        <HStack gap="space-2" align="center">
           <TruckIcon aria-hidden height="1.5rem" width="1.5rem" />
           <Heading size="small" level="3">
             Poengår i Norge - registreres kun ved eksportvurdering
@@ -68,7 +68,7 @@ export const OverstyrtTrygdetid = ({
                 : 'Poengår ikke satt'}
             </Label>
             {redigerbar && (
-              <HStack gap="4">
+              <HStack gap="space-4">
                 <Button
                   type="button"
                   variant="secondary"
@@ -109,7 +109,7 @@ export const OverstyrtTrygdetid = ({
                 error={errors.overstyrtNorskPoengaar?.message}
               />
             </Box>
-            <HStack gap="4">
+            <HStack gap="space-4">
               <Button
                 type="button"
                 variant="secondary"

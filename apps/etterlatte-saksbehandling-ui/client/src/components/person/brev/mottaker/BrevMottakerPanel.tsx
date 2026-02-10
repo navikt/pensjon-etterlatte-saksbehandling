@@ -93,19 +93,19 @@ export function BrevMottakerPanel({
   }
 
   return (
-    <Box padding="4" borderWidth="1" borderRadius="small">
+    <Box padding="space-4" borderWidth="1">
       {mapResult(soeker, {
         initial: kanRedigeres && mottaker.type === MottakerType.HOVED && (
-          <Box marginBlock="0 2">
+          <Box marginBlock="space-0 space-2">
             <Alert variant="info" size="small">
               Sjekk om bruker har verge
             </Alert>
           </Box>
         ),
-        pending: <Spinner label="Henter eventuelle verger" margin="0" />,
+        pending: <Spinner label="Henter eventuelle verger" margin="space-0" />,
         error: () =>
           kanRedigeres && (
-            <Box marginBlock="0 2">
+            <Box marginBlock="space-0 space-2">
               <Alert variant="info" size="small">
                 Sjekk om brevet skal sendes til verge. Registrer eventuelt riktig adresse.
               </Alert>
@@ -113,7 +113,7 @@ export function BrevMottakerPanel({
           ),
         success: (soekeren) =>
           ((kanRedigeres && soekeren?.opplysning?.vergemaalEllerFremtidsfullmakt) || []).length > 0 && (
-            <Box marginBlock="0 2">
+            <Box marginBlock="space-0 space-2">
               <Alert variant="info" size="small">
                 Brevet skal sendes til verge. Registrer riktig adresse.
               </Alert>
@@ -121,9 +121,9 @@ export function BrevMottakerPanel({
           ),
       })}
 
-      <HStack gap="2" justify="space-between">
+      <HStack gap="space-2" justify="space-between">
         <Heading spacing level="2" size="medium">
-          <HStack gap="2">
+          <HStack gap="space-2">
             {flereMottakere ? formaterMottakerType(mottaker.type) : 'Mottaker'}
 
             {mottaker.adresse.adresseType === AdresseType.UTENLANDSKPOSTADRESSE && (
@@ -135,7 +135,7 @@ export function BrevMottakerPanel({
         </Heading>
 
         {kanRedigeres && (
-          <HStack gap="4" align="start">
+          <HStack gap="space-4" align="start">
             {mottaker.type === MottakerType.KOPI && !!fjernMottaker && (
               <SlettMottakerModal
                 brevId={brevId}
@@ -159,13 +159,13 @@ export function BrevMottakerPanel({
       {flereMottakere ? <MottakerInnholdKompakt mottaker={mottaker} /> : <MottakerInnhold mottaker={mottaker} />}
 
       {!!mottaker.bestillingId && (
-        <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="4 0" marginBlock="4 0">
+        <Box borderWidth="1 0 0 0" paddingBlock="space-4 space-0" marginBlock="space-4 space-0">
           <Info label="JournalpostID" tekst={mottaker.journalpostId} wide />
           <Info label="DistribusjonID" tekst={mottaker.bestillingId} wide />
         </Box>
       )}
 
-      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="4 0" marginBlock="4 0">
+      <Box borderWidth="1 0 0 0" paddingBlock="space-4 space-0" marginBlock="space-4 space-0">
         <Heading size="xsmall" spacing>
           Distribusjonsmetode
         </Heading>
@@ -175,7 +175,7 @@ export function BrevMottakerPanel({
           : mapResult(distKanalResult, {
               pending: <Loader />,
               success: (res: DokDistKanalResponse) => (
-                <VStack gap="4">
+                <VStack gap="space-4">
                   <Info label="Kanal" tekst={formaterDistribusjonskanal(res.distribusjonskanal)} />
                   <Info label="Begrunnelse" tekst={res.regelBegrunnelse} />
                 </VStack>
@@ -188,7 +188,7 @@ export function BrevMottakerPanel({
       ))}
 
       {mottaker.type === MottakerType.KOPI && (
-        <HStack justify="center" marginBlock="4 0">
+        <HStack justify="center" marginBlock="space-4 space-0">
           <Button
             variant="secondary"
             icon={<PersonCheckmarkIcon aria-hidden />}
@@ -210,7 +210,7 @@ const MottakerInnholdKompakt = ({ mottaker }: { mottaker: Mottaker }) => {
   const { navn, adresse, foedselsnummer, orgnummer } = mottaker
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-2">
       <BodyShort as="div">
         {/[a-zA-Z\s]/.test(navn) ? (
           navn
@@ -267,7 +267,7 @@ const MottakerInnhold = ({ mottaker }: { mottaker: Mottaker }) => {
   const { navn, adresse, foedselsnummer, orgnummer } = mottaker
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-2">
       <Info
         wide
         label="Navn"

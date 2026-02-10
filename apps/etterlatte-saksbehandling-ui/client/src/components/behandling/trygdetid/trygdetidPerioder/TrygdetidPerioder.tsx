@@ -112,8 +112,8 @@ export const TrygdetidPerioder = ({
 
   const faktiskTrygdetid = trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK
   return (
-    <VStack gap="4">
-      <HStack gap="2" align="center">
+    <VStack gap="space-4">
+      <HStack gap="space-2" align="center">
         <CalendarIcon aria-hidden height="1.5rem" width="1.5rem" />
         <Heading size="small">{formaterEnumTilLesbarString(trygdetidGrunnlagType)} trygdetid</Heading>
       </HStack>

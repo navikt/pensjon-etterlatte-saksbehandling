@@ -2,7 +2,6 @@ import styled from 'styled-components'
 import { BodyShort, Search as SearchField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ABlue500, AGray900, ANavRed } from '@navikt/ds-tokens/dist/tokens'
 import { InformationSquareIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { fnrErGyldig } from '~utils/fnr'
@@ -85,7 +84,7 @@ export const Search = () => {
       {feilInput && (
         <Dropdown $info={true}>
           <span className="icon">
-            <InformationSquareIcon stroke={ABlue500} fill={ABlue500} />
+            <InformationSquareIcon stroke="var(--a-blue-500)" fill="var(--a-blue-500)" />
           </span>
           <SearchResult>
             <BodyShort className="text">Tast inn gyldig fødselsnummer eller saksid</BodyShort>
@@ -96,7 +95,7 @@ export const Search = () => {
       {mapFailure(funnetSak, (error) => (
         <Dropdown $error={true}>
           <span className="icon">
-            <XMarkOctagonIcon color={ANavRed} fill={AGray900} />
+            <XMarkOctagonIcon color="var(--a-nav-red)" fill="var(--a-gray-900)" />
           </span>
           <SearchResult>
             <BodyShort className="text">{feilkodehaandtering(error)}</BodyShort>

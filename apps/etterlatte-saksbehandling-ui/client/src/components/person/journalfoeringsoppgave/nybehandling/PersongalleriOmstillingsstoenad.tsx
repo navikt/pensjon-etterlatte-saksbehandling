@@ -18,7 +18,7 @@ export default function PersongalleriOmstillingsstoenad() {
   const soeskenFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.soesken' })
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Box width="20rem">
         <TextField
           {...register('persongalleri.soeker')}
@@ -48,15 +48,15 @@ export default function PersongalleriOmstillingsstoenad() {
           />
         </Box>
       ))}
-      <Box padding="4" borderWidth="1" borderRadius="small">
+      <Box padding="space-4" borderWidth="1">
         <Heading size="small" spacing>
           Barn
           <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
         </Heading>
 
-        <VStack gap="4" align="start">
+        <VStack gap="space-4" align="start">
           {soeskenFormArray.fields.map((field, index) => (
-            <HStack gap="2" key={index} align="end">
+            <HStack gap="space-2" key={index} align="end">
               <Box width="20rem">
                 <TextField
                   {...register(`persongalleri.soesken.${index}.value`, { validate: validateFnrObligatorisk })}

@@ -67,14 +67,14 @@ export function KlageAvvisning(props: { klage: Klage }) {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-16" paddingBlock="space-16 space-4">
         <Heading level="1" size="large">
           Avvis klagen
         </Heading>
       </Box>
       <form onSubmit={handleSubmit(sendInnVurdering)}>
-        <Box paddingBlock="8" paddingInline="16 8">
-          <VStack gap="4">
+        <Box paddingBlock="space-8" paddingInline="space-16 space-8">
+          <VStack gap="space-4">
             {klage.formkrav?.formkrav?.erKlagenFramsattInnenFrist === JaNei.NEI && (
               <BodyLong>
                 Siden klagefristen ikke er overholdt må klagen formelt avvises, men du kan likevel bestemme at vedtaket
@@ -118,7 +118,7 @@ export function KlageAvvisning(props: { klage: Klage }) {
           errorMessage: 'Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
         })}
 
-        <HStack gap="4" justify="center">
+        <HStack gap="space-4" justify="center">
           <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
             Gå tilbake
           </Button>

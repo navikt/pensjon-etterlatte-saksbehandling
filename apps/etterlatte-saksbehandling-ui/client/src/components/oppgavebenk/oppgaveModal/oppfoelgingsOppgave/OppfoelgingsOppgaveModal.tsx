@@ -88,7 +88,7 @@ export function OppfoelgingAvOppgaveModal({
           <Box minWidth="42.5rem">
             <form onSubmit={handleSubmit(ferdigstill)}>
               <Modal.Body>
-                <VStack gap="4">
+                <VStack gap="space-4">
                   {erRedigerbar && (
                     <BodyShort>
                       Når oppfølgingen er gjennomført, kan oppgaven ferdigstilles med en beskrivelse.
@@ -109,15 +109,15 @@ export function OppfoelgingAvOppgaveModal({
                     apiResult: opprettOppgaveKommentarResult,
                     errorMessage: 'Kunne ikke opprette hva som ble fulgt opp',
                   })}
-                  <VStack gap="4">
-                    <VStack gap="2">
+                  <VStack gap="space-4">
+                    <VStack gap="space-2">
                       <Heading size="xsmall">{erRedigerbar ? 'Hva skal følges opp?' : 'Hva ble fulgt opp'}</Heading>
                       <BodyShort>{oppgave.merknad}</BodyShort>
                     </VStack>
                     <PersonLink fnr={oppgave.fnr!!} target="_blank" rel="noreferrer noopener">
                       Gå til saksoversikten <ExternalLinkIcon title="a11y-title" fontSize="1.3rem" />
                     </PersonLink>
-                    <VStack gap="2">
+                    <VStack gap="space-2">
                       <Label>Historikk</Label>
                       <OppgaveKommentarer hentOppgaveKommentarerResult={hentOppgaveKommentarerResult} />
                     </VStack>

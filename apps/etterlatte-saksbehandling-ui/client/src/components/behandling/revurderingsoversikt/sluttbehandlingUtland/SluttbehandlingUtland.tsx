@@ -9,7 +9,7 @@ import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { hentRevurderingerForSakMedAarsak, lagreRevurderingInfo } from '~shared/api/revurdering'
-import { AWhite } from '@navikt/ds-tokens/dist/tokens'
+
 import { CheckmarkCircleIcon, ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
 import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
@@ -97,7 +97,7 @@ export default function SluttbehandlingUtland({
   }
 
   return (
-    <Box marginBlock="10 0" maxWidth="1200px">
+    <Box marginBlock="space-8 space-0" maxWidth="1200px">
       <Heading level="2" size="medium">
         Sluttbehandling ved mottatt info utland
       </Heading>
@@ -120,7 +120,7 @@ export default function SluttbehandlingUtland({
         success: ({ avdoed, kravpakke }) => (
           <>
             {kravpakke.innhold ? (
-              <VStack gap="4">
+              <VStack gap="space-4">
                 <Info label="Kravpakke gjelder" tekst={formaterNavn(avdoed)} />
                 <Info tekst={formaterKravpakkeLand(kravpakke.innhold, alleLandKodeverk)} label="Kravpakke sendt til" />
                 <Info label="Dokumenttyper og dato sendt" tekst={visDatoerForSendteDokumenter(kravpakke.innhold)} />
@@ -180,8 +180,8 @@ export default function SluttbehandlingUtland({
           {visLagretOk ? (
             <div style={{ minWidth: '148px', minHeight: '24px' }}>
               <CheckmarkCircleIcon
-                color={AWhite}
-                stroke={AWhite}
+                color="var(--a-white)"
+                stroke="var(--a-white)"
                 aria-hidden="true"
                 style={{
                   width: '1.8rem',

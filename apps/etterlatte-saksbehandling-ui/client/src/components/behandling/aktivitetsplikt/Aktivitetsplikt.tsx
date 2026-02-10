@@ -79,7 +79,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
         apiResult: hentetAktivitetspliktOppfoelgingStatus,
       })}
 
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-16" paddingBlock="space-16 space-4">
         <Heading spacing size="large" level="1">
           Oppfølging av aktivitet
         </Heading>
@@ -88,7 +88,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
         </BodyShort>
       </Box>
 
-      <VStack gap="10" paddingInline="16" paddingBlock="8">
+      <VStack gap="space-8" paddingInline="space-16" paddingBlock="space-8">
         <VStack maxWidth="42.5rem">
           <Heading level="1" spacing size="medium">
             Gjenlevende sin situasjon
@@ -201,7 +201,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
         )}
       </VStack>
 
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
         <BehandlingHandlingKnapper>
           <Button variant="primary" onClick={() => erFerdigUtfylt()}>
             {handlinger.NESTE.navn}

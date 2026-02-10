@@ -75,7 +75,7 @@ export const TrygdetidManueltOverstyrtSkjema = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(lagre)}>
-        <VStack gap="4">
+        <VStack gap="space-4">
           <TextField
             {...register('anvendtTrygdetid', {
               pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
@@ -91,7 +91,7 @@ export const TrygdetidManueltOverstyrtSkjema = ({
           <Checkbox {...register('skalHaProrata')}>Prorata brøk</Checkbox>
 
           {watch('skalHaProrata') && (
-            <HStack gap="4">
+            <HStack gap="space-4">
               <Box width="10rem">
                 <TextField
                   {...register('prorataTeller', {
@@ -131,7 +131,7 @@ export const TrygdetidManueltOverstyrtSkjema = ({
               error={errors.begrunnelse?.message}
             />
           </Box>
-          <VStack gap="4">
+          <VStack gap="space-4">
             {mapResult(oppdaterStatus, {
               pending: <Spinner label="Lagrer overstyrt trygdetid" />,
               error: () => <ApiErrorAlert>En feil har oppstått ved lagring av overstyrt trygdetid</ApiErrorAlert>,

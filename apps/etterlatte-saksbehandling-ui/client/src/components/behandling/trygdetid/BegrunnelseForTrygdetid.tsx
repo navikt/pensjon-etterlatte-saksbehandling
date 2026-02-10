@@ -31,8 +31,8 @@ export const BegrunnelseForTrygdetid = ({
         setRedigerBegrunnelse(false)
       })}
     >
-      <VStack gap="4">
-        <HStack gap="2" align="center">
+      <VStack gap="space-4">
+        <HStack gap="space-2" align="center">
           <DocPencilIcon aria-hidden height="1.5rem" width="1.5rem" />
           <Heading size="small" level="3">
             Begrunnelse for trygdetid
@@ -40,7 +40,7 @@ export const BegrunnelseForTrygdetid = ({
         </HStack>
         {!redigerBegrunnelse && (
           <>
-            <VStack gap="4">
+            <VStack gap="space-4">
               {getValues().begrunnelse ? (
                 <BodyLong style={{ whiteSpace: 'pre-line' }}>{getValues().begrunnelse}</BodyLong>
               ) : (
@@ -48,7 +48,7 @@ export const BegrunnelseForTrygdetid = ({
               )}
 
               {redigerbar && (
-                <HStack gap="4">
+                <HStack gap="space-4">
                   <Button
                     type="button"
                     variant="secondary"
@@ -88,7 +88,7 @@ export const BegrunnelseForTrygdetid = ({
                 label=""
               />
             </Box>
-            <HStack gap="4">
+            <HStack gap="space-4">
               <Button
                 type="button"
                 variant="secondary"

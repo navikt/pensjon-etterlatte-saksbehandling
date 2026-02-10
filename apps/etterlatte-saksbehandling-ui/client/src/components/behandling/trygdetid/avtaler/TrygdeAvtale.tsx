@@ -71,9 +71,9 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
   }
 
   return (
-    <Box paddingBlock="8 0">
-      <VStack gap="4">
-        <HStack gap="2" align="center">
+    <Box paddingBlock="space-8 space-0">
+      <VStack gap="space-4">
+        <HStack gap="space-2" align="center">
           <HandshakeIcon fontSize={IconSize.DEFAULT} />
           <Heading size="small" level="3">
             Vurdering av trygdeavtale (avdød)

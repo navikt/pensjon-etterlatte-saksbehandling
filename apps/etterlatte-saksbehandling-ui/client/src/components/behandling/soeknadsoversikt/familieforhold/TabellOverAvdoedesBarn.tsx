@@ -66,8 +66,8 @@ export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
     .filter((b, index, arr) => index === arr.findIndex((t) => t?.foedselsnummer === b.foedselsnummer))
 
   return (
-    <VStack gap="4">
-      <HStack gap="4" justify="start" align="center" wrap={false}>
+    <VStack gap="space-4">
+      <HStack gap="space-4" justify="start" align="center" wrap={false}>
         <ChildHairEyesIcon fontSize="1.75rem" aria-hidden />
         <Heading size="small" level="3">
           Avdødes barn
@@ -88,7 +88,7 @@ export const TabellOverAvdoedesBarn = ({ sakType }: Props) => {
             avdoedesBarn.map((barn, index) => (
               <Table.Row key={index}>
                 <Table.DataCell>
-                  <HStack gap="2" justify="start" align="center" wrap={false}>
+                  <HStack gap="space-2" justify="start" align="center" wrap={false}>
                     <BodyShort>{`${formaterNavn(barn)} (${hentAlderForDato(barn.foedselsdato)} år)`}</BodyShort>
                     <DoedsdatoTag doedsdato={barn.doedsdato} />
                   </HStack>

@@ -10,9 +10,9 @@ export const TabellForBeregnetEtteroppgjoerResultat = () => {
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Heading size="large">
-        <HStack gap="2">Resultat</HStack>
+        <HStack gap="space-2">Resultat</HStack>
       </Heading>
       <Box maxWidth="42.5rem">
         <BodyLong>
@@ -45,7 +45,7 @@ export const TabellForBeregnetEtteroppgjoerResultat = () => {
             </Table.Row>
             <Table.Row>
               <Table.HeaderCell scope="row">
-                <HStack gap="2">
+                <HStack gap="space-2">
                   {beregnetEtteroppgjoerResultat.differanse > 0
                     ? 'For mye utbetalt'
                     : beregnetEtteroppgjoerResultat.differanse < 0
@@ -60,7 +60,7 @@ export const TabellForBeregnetEtteroppgjoerResultat = () => {
             </Table.Row>
             <Table.Row>
               <Table.HeaderCell scope="row">
-                <HStack gap="2">
+                <HStack gap="space-2">
                   Toleransegrense
                   <HelpText>
                     Etteroppgjør skal unnlates hvis for lite utbetalt er mindre enn 25 prosent av rettsgebyret, eller

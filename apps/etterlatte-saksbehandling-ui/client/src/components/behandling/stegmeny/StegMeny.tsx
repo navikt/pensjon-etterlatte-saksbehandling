@@ -38,7 +38,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
         ),
         () => (
           <StegMenyBox>
-            <HStack gap="6" align="center">
+            <HStack gap="space-6" align="center">
               {behandlingRoutes.map((pathInfo, index) => (
                 <NavLenke
                   key={pathInfo.path}

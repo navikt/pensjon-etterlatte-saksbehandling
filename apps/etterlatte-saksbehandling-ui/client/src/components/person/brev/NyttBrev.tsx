@@ -56,7 +56,7 @@ export default function NyttBrev() {
         ),
         (brev) => (
           <HStack height="100%" minHeight="100vh" wrap={false}>
-            <VStack gap="4" margin="4" minWidth="30rem">
+            <VStack gap="space-4" margin="space-4" minWidth="30rem">
               <BrevTittel
                 brevId={brev.id}
                 sakId={brev.sakId}
@@ -65,8 +65,8 @@ export default function NyttBrev() {
                 manueltBrev={brev.spraak !== Spraak.NB}
               />
 
-              <Box padding="4" borderWidth="1" borderRadius="small">
-                <VStack gap="2" justify="space-between">
+              <Box padding="space-4" borderWidth="1">
+                <VStack gap="space-2" justify="space-between">
                   <Heading level="2" size="medium">
                     Språk / målform
                   </Heading>
@@ -77,7 +77,7 @@ export default function NyttBrev() {
 
               <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
             </VStack>
-            <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-subtle">
+            <Box minWidth="50rem" width="100%" borderWidth="0 1">
               {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (
                 <ForhaandsvisningBrev brev={brev} />
               ) : (
@@ -90,7 +90,7 @@ export default function NyttBrev() {
             </Box>
             <Box minWidth="30rem">
               <BrevStatusPanel brev={brev} />
-              <Box padding="4" borderRadius="small">
+              <Box padding="space-4">
                 <Heading spacing level="2" size="medium">
                   Handlinger
                 </Heading>

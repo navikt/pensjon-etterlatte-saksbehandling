@@ -119,7 +119,7 @@ export const BrevSpraakModal = ({
           </Modal.Body>
 
           <Modal.Footer>
-            <HStack gap="4" justify="end">
+            <HStack gap="space-4" justify="end">
               <Button
                 variant="secondary"
                 type="button"

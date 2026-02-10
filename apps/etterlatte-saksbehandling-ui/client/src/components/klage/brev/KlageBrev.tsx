@@ -55,7 +55,7 @@ export function KlageBrev() {
     <>
       <BrevContent>
         <Sidebar>
-          <Box paddingInline="16" paddingBlock="16 4">
+          <Box paddingInline="space-16" paddingBlock="space-16 space-4">
             <Heading spacing level="1" size="large">
               Brev
             </Heading>
@@ -65,7 +65,7 @@ export function KlageBrev() {
                 : 'Avvisningsbrev til klager'}
             </BodyShort>
             {mapSuccess(hentetBrev, (brev) => (
-              <VStack gap="4">
+              <VStack gap="space-4">
                 <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={redigerbar} />
 
                 <BrevMottakerWrapper brev={brev} kanRedigeres={redigerbar} />
@@ -98,8 +98,8 @@ export function KlageBrev() {
         )}
       </BrevContent>
 
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-        <HStack gap="4" justify="center">
+      <Box paddingBlock="space-4 space-0" borderWidth="1 0 0 0">
+        <HStack gap="space-4" justify="center">
           <Button className="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'brev'))}>
             Gå tilbake
           </Button>

@@ -27,13 +27,13 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="12 4">
+      <Box paddingInline="space-16" paddingBlock="space-12 space-4">
         <Heading level="1" size="large">
           Vurder klagen
         </Heading>
       </Box>
-      <Box paddingBlock="8" paddingInline="16 8">
-        <VStack gap="4">
+      <Box paddingBlock="space-8" paddingInline="space-16 space-8">
+        <VStack gap="space-4">
           {kanRedigere ? (
             <>
               <InitiellVurdering klage={klage} />
@@ -64,7 +64,7 @@ function skalAvvises(klage: Klage) {
 
 function Navigeringsknapper({ klage, navigate }: { klage: Klage; navigate: NavigateFunction }) {
   return (
-    <HStack gap="4" justify="center">
+    <HStack gap="space-4" justify="center">
       <Button className="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
         Gå tilbake
       </Button>

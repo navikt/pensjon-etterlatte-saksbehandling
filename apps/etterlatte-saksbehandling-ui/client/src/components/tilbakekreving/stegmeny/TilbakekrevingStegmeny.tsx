@@ -10,7 +10,7 @@ export function TilbakekrevingStegmeny() {
 
   return (
     <StegMenyBox>
-      <HStack gap="6" align="center">
+      <HStack gap="space-6" align="center">
         <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled separator />
         <TilbakekrevingNavLenke path="utbetalinger" description="Utbetalinger" enabled separator />
         <TilbakekrevingNavLenke

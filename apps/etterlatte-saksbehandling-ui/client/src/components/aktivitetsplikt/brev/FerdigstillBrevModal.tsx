@@ -42,7 +42,7 @@ export function FerdigstillAktivitetspliktBrevModal() {
           <Heading size="large">Ferdigstill oppgave</Heading>
         </Modal.Header>
         <Modal.Body>
-          <VStack gap="6">
+          <VStack gap="space-6">
             <BodyShort>
               Når du ferdigstiller oppgaven vil den bli låst for endringer, og infobrevet vil bli journalført og
               distribuert.

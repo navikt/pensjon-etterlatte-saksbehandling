@@ -40,9 +40,9 @@ export const Personopplysninger = ({ sakResult, fnr }: Props) => {
     pending: <Spinner label="Henter familieopplysninger..." />,
     error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente familieopplysninger'}</ApiErrorAlert>,
     success: ({ soeker, avdoede }) => (
-      <VStack padding="8" gap="8">
+      <VStack padding="space-8" gap="space-8">
         <BrukersOpplysningerIAndreSystemerExpansionCard fnr={fnr} />
-        <HStack gap="4" wrap={false}>
+        <HStack gap="space-4" wrap={false}>
           <Box width="100%">
             <BostedsadresserExpansionCard bostedsadresser={soeker?.bostedsadresse} />
           </Box>
@@ -55,7 +55,7 @@ export const Personopplysninger = ({ sakResult, fnr }: Props) => {
         </HStack>
         <VergemaalExpansionCard vergemaal={soeker?.vergemaalEllerFremtidsfullmakt} />
         <AvdoedesBarnExpansionCard avdoede={avdoede} />
-        <HStack gap="4" wrap={false}>
+        <HStack gap="space-4" wrap={false}>
           <Box width="100%">
             <SivilstandExpansionCard sivilstand={soeker?.sivilstand} avdoede={avdoede} />
           </Box>
@@ -72,7 +72,7 @@ export const Personopplysninger = ({ sakResult, fnr }: Props) => {
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente alle land'}</ApiErrorAlert>,
           success: (alleLand) => (
             <>
-              <HStack gap="4" wrap={false}>
+              <HStack gap="space-4" wrap={false}>
                 <Box width="100%">
                   <StatsborgerskapExpansionCard
                     statsborgerskap={soeker?.statsborgerskap ? [soeker.statsborgerskap] : []}
@@ -89,7 +89,7 @@ export const Personopplysninger = ({ sakResult, fnr }: Props) => {
                   />
                 </Box>
               </HStack>
-              <HStack gap="4" wrap={false}>
+              <HStack gap="space-4" wrap={false}>
                 <Box width="100%">
                   <InnflyttingExpansionCard innflytting={soeker?.utland?.innflyttingTilNorge} alleLand={alleLand} />
                 </Box>
@@ -101,7 +101,7 @@ export const Personopplysninger = ({ sakResult, fnr }: Props) => {
                   />
                 </Box>
               </HStack>
-              <HStack gap="4" wrap={false}>
+              <HStack gap="space-4" wrap={false}>
                 <Box width="100%">
                   <UtflyttingExpansionCard utflytting={soeker?.utland?.utflyttingFraNorge} alleLand={alleLand} />
                 </Box>

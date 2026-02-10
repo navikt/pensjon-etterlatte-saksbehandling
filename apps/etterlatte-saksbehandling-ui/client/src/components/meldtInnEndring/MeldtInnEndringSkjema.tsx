@@ -74,7 +74,7 @@ export const MeldtInnEndringSkjema = ({
 
   return (
     <form onSubmit={handleSubmit(avsluttOppgaveEllerOpprettRevurdering)}>
-      <VStack gap="4">
+      <VStack gap="space-4">
         {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.OPPRETT_REVURDERING &&
           mapResult(hentStoettedeRevurderingsAarsakerResult, {
             pending: <Spinner label="Henter revurderingsårsaker..." />,

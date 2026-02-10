@@ -43,10 +43,10 @@ export const OpprettSaksgrunnlag = ({ sak }: { sak: ISakMedUtlandstilknytning })
           success: (grunnlagFinnes) =>
             grunnlagFinnes ? (
               <Modal.Body>
-                <VStack gap="4">
+                <VStack gap="space-4">
                   <Alert variant="warning">Grunnlag finnes allerede for denne saken!</Alert>
 
-                  <HStack gap="4" justify="end">
+                  <HStack gap="space-4" justify="end">
                     <Button variant="secondary" onClick={avbryt}>
                       Lukk
                     </Button>
@@ -75,7 +75,7 @@ export const OpprettSaksgrunnlag = ({ sak }: { sak: ISakMedUtlandstilknytning })
                 </Modal.Body>
 
                 <Modal.Footer>
-                  <HStack gap="4" justify="end">
+                  <HStack gap="space-4" justify="end">
                     <Button
                       variant="secondary"
                       type="button"

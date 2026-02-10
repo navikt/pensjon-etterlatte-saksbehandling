@@ -43,11 +43,11 @@ export default function OppsummeringKlagebehandling() {
         </Tag>
       </Heading>
 
-      <VStack gap="4">
+      <VStack gap="space-4">
         <Info label="Klage framsatt dato" tekst={formaterDato(mottattDato)} />
       </VStack>
       <div>
-        <HStack gap="4" justify="center">
+        <HStack gap="space-4" justify="center">
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>

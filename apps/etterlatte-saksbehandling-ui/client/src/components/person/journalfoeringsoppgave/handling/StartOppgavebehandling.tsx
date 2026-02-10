@@ -147,7 +147,7 @@ export default function StartOppgavebehandling() {
           </Radio>
         )}
       </RadioGroup>
-      <VStack gap="2">
+      <VStack gap="space-2">
         <HStack justify="center">
           <Button variant="primary" onClick={neste} disabled={!oppgaveHandling}>
             Neste
@@ -167,7 +167,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       Oppgavedetaljer
     </Heading>
 
-    <VStack gap="4">
+    <VStack gap="space-4">
       <Info
         label="Type"
         tekst={

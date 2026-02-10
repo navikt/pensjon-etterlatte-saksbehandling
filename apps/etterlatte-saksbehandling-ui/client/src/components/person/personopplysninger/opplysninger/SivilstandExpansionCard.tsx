@@ -21,7 +21,7 @@ export const SivilstandExpansionCard = ({ sivilstand, avdoede, erAvdoedesSivilst
   return (
     <ExpansionCard aria-labelledby="Sivilstand" size="small" defaultOpen>
       <ExpansionCard.Header>
-        <HStack gap="4" align="center">
+        <HStack gap="space-4" align="center">
           <HeartIcon aria-hidden fontSize="1.5rem" />
           <ExpansionCard.Title size="small">
             {erAvdoedesSivilstand ? 'Avdødes sivilstand' : 'Sivilstand'}
@@ -43,7 +43,7 @@ export const SivilstandExpansionCard = ({ sivilstand, avdoede, erAvdoedesSivilst
                 <Table.Row key={index}>
                   <Table.DataCell>{startCase(lowerCase(stand.sivilstatus))}</Table.DataCell>
                   <Table.DataCell>
-                    <HStack gap="4">
+                    <HStack gap="space-4">
                       {!!stand.relatertVedSivilstand ? (
                         <>
                           <KopierbarVerdi value={stand.relatertVedSivilstand} iconPosition="right" />

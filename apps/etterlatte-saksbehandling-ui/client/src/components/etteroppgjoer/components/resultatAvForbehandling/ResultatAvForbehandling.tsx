@@ -50,16 +50,14 @@ export const ResultatAvForbehandling = () => {
 
   return (
     <Box
-      marginBlock="8 0"
-      paddingInline="6"
-      paddingBlock="8"
-      background="surface-action-subtle"
-      borderColor="border-action"
+      marginBlock="space-8 space-0"
+      paddingInline="space-6"
+      paddingBlock="space-8"
       borderWidth="0 0 0 4"
       maxWidth="42.5rem"
     >
-      <HStack gap="2" maxWidth="fit-content">
-        <VStack gap="2" maxWidth="42.5rem" marginBlock="05 0">
+      <HStack gap="space-2" maxWidth="fit-content">
+        <VStack gap="space-2" maxWidth="42.5rem" marginBlock="space-1 space-0">
           <Label>{resultatTekst[resultatType]}</Label>
           <BodyShort>{velgBeskrivelse()}</BodyShort>
         </VStack>

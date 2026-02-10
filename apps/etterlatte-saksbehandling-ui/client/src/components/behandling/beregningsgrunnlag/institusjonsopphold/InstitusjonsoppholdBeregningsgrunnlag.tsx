@@ -29,8 +29,8 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
     useState<boolean>(false)
 
   return (
-    <VStack gap="4">
-      <HStack gap="2" align="center">
+    <VStack gap="space-4">
+      <HStack gap="space-2" align="center">
         <HospitalIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small" level="3">
           Beregningsgrunnlag for institusjonsopphold

@@ -101,5 +101,4 @@ enum class Vedlegg(
     OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL("Utfall ved beregning av omstillingsstønad"),
     OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL("Utfall ved forhåndsvarsel av feilutbetaling"),
     OMS_EO_BEREGNINGVEDLEGG_INNHOLD("Utfall etteroppgjør beregningvedlegg"),
-    OMS_BEREGNING("Utfall i beregningsvedlegg ved innvilgelse av OMS"),
 }

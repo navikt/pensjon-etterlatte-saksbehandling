@@ -69,9 +69,9 @@ enum class Revurderingaarsak(
 
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     SLUTTBEHANDLING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    FENGSELSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    UT_AV_FENGSEL(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
 
-    FENGSELSOPPHOLD(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
-    UT_AV_FENGSEL(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
     UTLAND(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
     BARN(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
     ANSVARLIGE_FORELDRE(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),

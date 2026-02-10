@@ -55,7 +55,7 @@ class EtteroppgjoerHendelseService(
                     .hentSummerteInntekter(etteroppgjoerForbehandling.id),
             pensjonsgivendeInntekt =
                 etteroppgjoerForbehandlingDao
-                    .hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id)!!,
+                    .hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id),
             utlandstilknytningType = utlandstilknytning?.type,
             saksbehandler = saksbehandler,
         )
@@ -101,12 +101,16 @@ class EtteroppgjoerHendelseService(
             )
         val meldingMap =
             when (etteroppgjoerResultat) {
-                null -> standardfelter
-                else ->
+                null -> {
+                    standardfelter
+                }
+
+                else -> {
                     standardfelter +
                         mapOf(
                             ETTEROPPGJOER_RESULTAT_RIVER_KEY to etteroppgjoerResultat,
                         )
+                }
             }
 
         rapidPubliserer

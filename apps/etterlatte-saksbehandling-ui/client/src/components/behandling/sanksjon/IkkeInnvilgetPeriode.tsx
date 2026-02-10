@@ -151,7 +151,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
   }
 
   const validerTom = (value: Date): string | undefined => {
-    const tom = value ? new Date(value) : null
+    const tom = new Date(value)
     const skjemaFom = getValues('datoFom')
     const fom = skjemaFom ? new Date(skjemaFom) : null
 
@@ -311,11 +311,12 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
                       required
                     />
                     <ControlledMaanedVelger
-                      label="Dato til og med (valgfri)"
+                      label="Dato til og med"
                       name="datoTom"
                       control={control}
                       fromDate={tidligstSanksjonFom(ikkeInnvilgedePerioder, behandling)}
                       validate={validerTom}
+                      required
                     />
                   </HStack>
 

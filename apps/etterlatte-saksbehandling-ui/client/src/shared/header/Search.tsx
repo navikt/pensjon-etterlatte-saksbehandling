@@ -84,7 +84,7 @@ export const Search = () => {
       {feilInput && (
         <Dropdown $info={true}>
           <span className="icon">
-            <InformationSquareIcon stroke="var(--a-blue-500)" fill="var(--a-blue-500)" />
+            <InformationSquareIcon stroke="var(--ax-accent-600)" fill="var(--ax-accent-600)" />
           </span>
           <SearchResult>
             <BodyShort className="text">Tast inn gyldig fødselsnummer eller saksid</BodyShort>
@@ -95,7 +95,7 @@ export const Search = () => {
       {mapFailure(funnetSak, (error) => (
         <Dropdown $error={true}>
           <span className="icon">
-            <XMarkOctagonIcon color="var(--a-nav-red)" fill="var(--a-gray-900)" />
+            <XMarkOctagonIcon color="var(--ax-text-logo)" fill="var(--ax-neutral-1000)" />
           </span>
           <SearchResult>
             <BodyShort className="text">{feilkodehaandtering(error)}</BodyShort>

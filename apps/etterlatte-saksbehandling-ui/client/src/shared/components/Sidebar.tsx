@@ -49,8 +49,8 @@ export const SidebarPanel = styled.div<{ $border?: boolean }>`
 `
 
 const CollapsibleSidebar = styled.div<{ $collapsed: boolean }>`
-  background: var(--a-white);
-  border-left: 1px solid var(--a-border-subtle);
+  background: var(--ax-neutral-100);
+  border-left: 1px solid var(--ax-border-neutral-subtle);
   min-width: ${(props) => (props.$collapsed ? '50px' : '20%')};
 `
 
@@ -67,7 +67,7 @@ const Scroller = styled.div`
 
 const SidebarTools = styled.div`
   border-top: 1px solid #c6c2bf;
-  background-color: var(--a-gray-50);
+  background-color: var(--ax-neutral-100);
 
   position: fixed;
   bottom: 0;

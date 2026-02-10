@@ -253,5 +253,5 @@ const SidebarBox = styled(Box)`
   max-height: fit-content;
   min-width: 40%;
   width: 40%;
-  border-right: 1px solid var(--a-border-subtle);
+  border-right: 1px solid var(--ax-border-neutral-subtle);
 `

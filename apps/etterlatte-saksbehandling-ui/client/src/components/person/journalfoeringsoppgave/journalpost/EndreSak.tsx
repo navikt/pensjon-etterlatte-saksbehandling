@@ -67,7 +67,7 @@ export const EndreSak = ({
         </Table.Header>
         <Table.Body>
           {!!fagsak && (
-            <Table.Row style={{ background: 'var(--ac-alert-success-bg, var(--a-surface-success-subtle))' }}>
+            <Table.Row style={{ background: 'var(--ac-alert-success-bg, var(--ax-bg-success-soft))' }}>
               <Table.DataCell>{fagsak?.fagsakId || '-'}</Table.DataCell>
               <Table.DataCell>{fagsak?.sakstype ? formaterSakstype(fagsak.sakstype) : '-'}</Table.DataCell>
               <Table.DataCell>{fagsak?.fagsaksystem || '-'}</Table.DataCell>
@@ -87,7 +87,7 @@ export const EndreSak = ({
 
           {sakTilhoererIkkeGjenny && (
             <>
-              <Table.Row style={{ background: 'var(--ac-alert-warning-bg, var(--a-surface-warning-subtle))' }}>
+              <Table.Row style={{ background: 'var(--ac-alert-warning-bg, var(--ax-bg-warning-soft))' }}>
                 <Table.DataCell>{gjennySak.id}</Table.DataCell>
                 <Table.DataCell>{formaterSakstype(Sakstype.FAGSAK)}</Table.DataCell>
                 <Table.DataCell>EY</Table.DataCell>

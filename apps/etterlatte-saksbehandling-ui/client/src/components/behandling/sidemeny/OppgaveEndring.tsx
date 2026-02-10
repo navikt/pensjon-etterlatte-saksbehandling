@@ -60,7 +60,7 @@ export const EndringElement = styled.li`
   margin-left: 10px;
 
   &:first-child:before {
-    background: var(--a-blue-200);
+    background: var(--ax-accent-300);
     border: none;
   }
 
@@ -74,7 +74,7 @@ export const EndringElement = styled.li`
     width: 15px;
     height: 15px;
     background: white;
-    border: 3px solid var(--a-gray-600);
+    border: 3px solid var(--ax-neutral-700);
     border-radius: 50%;
     position: absolute;
     left: -8px;

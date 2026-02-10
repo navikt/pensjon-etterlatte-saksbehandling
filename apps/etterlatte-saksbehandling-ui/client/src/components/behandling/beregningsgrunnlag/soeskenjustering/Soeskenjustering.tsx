@@ -227,7 +227,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
               <Button type="submit" onClick={handleSubmit(ferdigstillForm)} size="small">
                 Lagre søskenjustering
               </Button>
-              {visOkLagret && <CheckmarkCircleIcon color="var(--a-green-500)" />}
+              {visOkLagret && <CheckmarkCircleIcon color="var(--ax-success-600)" />}
             </HStack>
           )}
         </form>

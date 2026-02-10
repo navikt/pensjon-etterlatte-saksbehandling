@@ -221,7 +221,7 @@ const FormWrapper = styled.div`
   margin: 2em;
   width: 25em;
   display: grid;
-  gap: var(--a-spacing-4);
+  gap: var(--ax-space-16);
 `
 const Knapp = styled.div`
   margin-top: 1em;

@@ -293,7 +293,7 @@ const KravpakkeUtlandBehandling = (props: {
 
               <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
                 Gå til RINA for å opprette kravpakke til utlandet
-                <ExternalLinkIcon fill="var(--a-blue-500)" aria-hidden />
+                <ExternalLinkIcon fill="var(--ax-accent-600)" aria-hidden />
               </LenkeMargin>
               <TextField
                 label="Saksnummer RINA"

@@ -180,8 +180,8 @@ export default function SluttbehandlingUtland({
           {visLagretOk ? (
             <div style={{ minWidth: '148px', minHeight: '24px' }}>
               <CheckmarkCircleIcon
-                color="var(--a-white)"
-                stroke="var(--a-white)"
+                color="var(--ax-neutral-100)"
+                stroke="var(--ax-neutral-100)"
                 aria-hidden="true"
                 style={{
                   width: '1.8rem',

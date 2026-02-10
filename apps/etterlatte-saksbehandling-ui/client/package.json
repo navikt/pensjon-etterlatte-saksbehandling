@@ -14,7 +14,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@navikt/aksel-icons": "^8.1.0",
+    "@navikt/aksel-icons": "8.1.0",
     "@navikt/ds-css": "~8.1.0",
     "@navikt/ds-react": "~8.1.0",
     "@navikt/ds-tokens": "~8.1.0",
@@ -38,7 +38,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.0",
-    "@navikt/aksel": "^8.1.0",
+    "@navikt/aksel": "8.1.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/is-hotkey": "^0.1.10",

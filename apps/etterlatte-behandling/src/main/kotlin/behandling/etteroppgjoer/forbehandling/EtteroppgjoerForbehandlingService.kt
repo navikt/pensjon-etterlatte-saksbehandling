@@ -715,7 +715,7 @@ class EtteroppgjoerForbehandlingService(
             dao.lagrePensjonsgivendeInntekt(forbehandling.id, pensjonsgivendeInntekter)
         } catch (e: Exception) {
             logger.warn(
-                "Kunne ikke hente og lagre ned summerte inntekter fra Skatteetaten for forbehandlingen i sakId=${sak.id}",
+                "Kunne ikke hente og lagre PGI fra Skatt for forbehandlingen i sakId=${sak.id}",
                 e,
             )
             if (forbehandling.mottattSkatteoppgjoer) {

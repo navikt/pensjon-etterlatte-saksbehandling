@@ -123,7 +123,7 @@ export const EtteroppgjoerRevurderingOversikt = ({ behandling }: { behandling: I
 
       {!!forbehandling.harVedtakAvTypeOpphoer && (
         <OpphoerSkyldesDoedsfall
-          erRedigerbar={kanRedigereFaktiskInntekt}
+          erRedigerbar={erRedigerbar}
           setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerSkyldesDoedsfallSkjemaErrors}
         />
       )}

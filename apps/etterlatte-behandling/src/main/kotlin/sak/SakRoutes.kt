@@ -259,17 +259,25 @@ internal fun Route.sakWebRoutes(
                 )
             }
 
-            get("/behandlinger/sisteIverksatte") {
-                logger.info("Henter siste iverksatte behandling for $sakId")
+            route("behandlinger") {
+                get {
+                    logger.info("Henter behandlinger i sak med id=$sakId")
+                    val behandlinger = inTransaction { behandlingService.hentBehandlingerForSak(sakId, brukerTokenInfo) }
+                    call.respond(behandlinger)
+                }
 
-                val sisteIverksatteBehandling =
-                    inTransaction {
-                        behandlingService
-                            .hentSisteIverksatteBehandling(sakId)
-                            ?.let { SisteIverksatteBehandling(it.id) }
-                    } ?: throw GenerellIkkeFunnetException()
+                get("sisteIverksatte") {
+                    logger.info("Henter siste iverksatte behandling for $sakId")
 
-                call.respond(sisteIverksatteBehandling)
+                    val sisteIverksatteBehandling =
+                        inTransaction {
+                            behandlingService
+                                .hentSisteIverksatteBehandling(sakId)
+                                ?.let { SisteIverksatteBehandling(it.id) }
+                        } ?: throw GenerellIkkeFunnetException()
+
+                    call.respond(sisteIverksatteBehandling)
+                }
             }
 
             get("/endringer") {

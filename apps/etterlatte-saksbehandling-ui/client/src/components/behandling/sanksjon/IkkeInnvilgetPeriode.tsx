@@ -15,40 +15,32 @@ import {
   Heading,
   HStack,
   ReadMore,
-  Select,
   Table,
   Textarea,
   VStack,
 } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { aarFraDatoString, formaterDato, formaterMaanednavnAar } from '~utils/formatering/dato'
+import { formaterDato, formaterMaanednavnAar } from '~utils/formatering/dato'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
 import { formatISO, isBefore, startOfDay } from 'date-fns'
 import { hentSanksjon, lagreSanksjon, slettSanksjon } from '~shared/api/sanksjon'
 import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
-import {
-  ISanksjon,
-  ISanksjonLagre,
-  SanksjonType,
-  tekstSanksjon,
-  valgbareSanksjonstyper,
-  visbareSanksjonstyper,
-} from '~shared/types/sanksjon'
+import { ISanksjon, ISanksjonLagre, SanksjonType } from '~shared/types/sanksjon'
 import { useAppDispatch } from '~store/Store'
 import { hentAvkorting } from '~shared/api/avkorting'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
-import { IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
-interface SanksjonDefaultValue {
+interface IkkeInnvilgetSanksjonDefaultValue {
   datoFom?: Date
   datoTom?: Date | null
   beskrivelse: string
   type: SanksjonType | ''
 }
 
-const sanksjonDefaultValue: SanksjonDefaultValue = {
+const ikkeInnvilgetPeriodeDefaultValue: IkkeInnvilgetSanksjonDefaultValue = {
   datoFom: undefined,
   datoTom: undefined,
   beskrivelse: '',
@@ -69,19 +61,13 @@ function tidligstSanksjonFom(sanksjoner?: ISanksjon[], behandling?: IBehandlingR
   return undefined
 }
 
-export const Sanksjon = ({
-  behandling,
-  manglerInntektVirkAar,
-}: {
-  behandling: IBehandlingReducer
-  manglerInntektVirkAar: boolean
-}) => {
+export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const [lagreSanksjonResponse, lagreSanksjonRequest] = useApiCall(lagreSanksjon)
   const [hentSanksjonStatus, hentSanksjonRequest] = useApiCall(hentSanksjon)
   const [slettSanksjonStatus, slettSanksjonRequest] = useApiCall(slettSanksjon)
-  const [sanksjoner, setSanksjoner] = useState<ISanksjon[]>()
+  const [ikkeInnvilgedePerioder, setIkkeInnvilgedePerioder] = useState<ISanksjon[]>()
   const [visForm, setVisForm] = useState(false)
-  const [redigerSanksjonId, setRedigerSanksjonId] = useState('')
+  const [redigerIkkeInnvilgetPeriode, setRedigerIkkeInnvilgetPeriode] = useState('')
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [avkortingStatus, fetchAvkorting] = useApiCall(hentAvkorting)
   const dispatch = useAppDispatch()
@@ -97,15 +83,15 @@ export const Sanksjon = ({
     reset,
     getValues,
     formState: { errors },
-  } = useForm<SanksjonDefaultValue>({
-    defaultValues: sanksjonDefaultValue,
+  } = useForm<IkkeInnvilgetSanksjonDefaultValue>({
+    defaultValues: ikkeInnvilgetPeriodeDefaultValue,
   })
 
-  const submitSanksjon = (data: SanksjonDefaultValue) => {
+  const submitIkkeInnvilgetPeriode = (data: IkkeInnvilgetSanksjonDefaultValue) => {
     const { datoFom, datoTom, beskrivelse } = data
 
     const lagreSanksjon: ISanksjonLagre = {
-      id: redigerSanksjonId ? redigerSanksjonId : '',
+      id: redigerIkkeInnvilgetPeriode ? redigerIkkeInnvilgetPeriode : '',
       sakId: behandling.sakId,
       type: data.type as SanksjonType,
       fom: formatISO(datoFom!, { representation: 'date' }),
@@ -119,9 +105,9 @@ export const Sanksjon = ({
         sanksjon: lagreSanksjon,
       },
       () => {
-        reset(sanksjonDefaultValue)
+        reset(ikkeInnvilgetPeriodeDefaultValue)
         hentSanksjoner()
-        setRedigerSanksjonId('')
+        setRedigerIkkeInnvilgetPeriode('')
         setVisForm(false)
         fetchAvkorting(behandling.id, (hentetAvkorting) => dispatch(oppdaterAvkorting(hentetAvkorting)))
       }
@@ -137,12 +123,12 @@ export const Sanksjon = ({
 
   const hentSanksjoner = () => {
     hentSanksjonRequest(behandling.id, (res) => {
-      setSanksjoner(res)
+      setIkkeInnvilgedePerioder(res)
     })
   }
 
   useEffect(() => {
-    if (!sanksjoner) {
+    if (!ikkeInnvilgedePerioder) {
       hentSanksjoner()
     }
   }, [])
@@ -178,33 +164,21 @@ export const Sanksjon = ({
   return (
     <TableBox>
       {mapResult(hentSanksjonStatus, {
-        pending: <Spinner label="Henter sanksjoner" />,
+        pending: <Spinner label="Henter ikke innvilgede perioder" />,
         error: <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>,
         success: () => (
-          <VStack gap="space-4">
+          <VStack gap="4">
             <Heading size="small" level="2">
-              Sanksjoner
+              Ikke innvilgede perioder
             </Heading>
-            {sanksjoner &&
-              sanksjoner.some(
-                (sanksjon) => aarFraDatoString(sanksjon.fom) === aarFraDatoString(virkningstidspunkt(behandling).dato)
-              ) &&
-              manglerInntektVirkAar && (
-                <Alert variant="warning">
-                  Det er ikke lagt inn en inntekt for året virkningstidspunkt gjelder fra. Hvis det ikke går å legge inn
-                  inntekt for inneværende år over må sanksjon som har fra og med / til og med i virk år slettes før
-                  inntekt kan legges inn, og så kan sanksjon legges inn.
-                </Alert>
-              )}
 
             <Box>
-              <HjemmelLenke tittel="Folketrygdloven § 17-8" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-8" />
               <BodyShort spacing>
-                Når en bruker har en sanksjon for en periode, vil ikke omstillingsstønaden bli utbetalt. Hvis det er
-                restanse fra endringer i forventet årsinntekt vil heller ikke den bli hentet inn i sanksjonsperioden,
+                TODO: Når en bruker har en sanksjon for en periode, vil ikke omstillingsstønaden bli utbetalt. Hvis det
+                er restanse fra endringer i forventet årsinntekt vil heller ikke den bli hentet inn i sanksjonsperioden,
                 men omfordelt på måneder etter sanksjon.
               </BodyShort>
-              <ReadMore header="Når skal sanksjoner gis?">
+              <ReadMore header="Når skal ikke innvilget periode brukes?">
                 <BodyShort spacing>
                   Dersom den gjenlevende ikke følger opp aktivitetskravet i{' '}
                   <HjemmelLenke tittel="§ 17-7" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-7" />, skal
@@ -232,7 +206,6 @@ export const Sanksjon = ({
                   <Table.Row>
                     <Table.HeaderCell>Fra dato</Table.HeaderCell>
                     <Table.HeaderCell>Til dato</Table.HeaderCell>
-                    <Table.HeaderCell>Type sanksjon</Table.HeaderCell>
                     <Table.HeaderCell>Beskrivelse</Table.HeaderCell>
                     <Table.HeaderCell>Registrert</Table.HeaderCell>
                     <Table.HeaderCell>Endret</Table.HeaderCell>
@@ -240,27 +213,28 @@ export const Sanksjon = ({
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {sanksjoner && sanksjoner.length > 0 ? (
+                  {ikkeInnvilgedePerioder && ikkeInnvilgedePerioder.length > 0 ? (
                     <>
-                      {sanksjoner
-                        .filter((sanksjon) => visbareSanksjonstyper.includes(sanksjon.type))
-                        .map((lagretSanksjon, index) => (
+                      {ikkeInnvilgedePerioder
+                        .filter(
+                          (ikkeInnvilgetPeriode) => ikkeInnvilgetPeriode.type === SanksjonType.IKKE_INNVILGET_PERIODE
+                        )
+                        .map((ikkeInnvilgetPeriode, index) => (
                           <Table.Row key={index}>
-                            <Table.DataCell>{formaterMaanednavnAar(lagretSanksjon.fom)}</Table.DataCell>
+                            <Table.DataCell>{formaterMaanednavnAar(ikkeInnvilgetPeriode.fom)}</Table.DataCell>
                             <Table.DataCell>
-                              {lagretSanksjon.tom ? formaterMaanednavnAar(lagretSanksjon.tom) : '-'}
+                              {ikkeInnvilgetPeriode.tom ? formaterMaanednavnAar(ikkeInnvilgetPeriode.tom) : '-'}
                             </Table.DataCell>
-                            <Table.DataCell>{tekstSanksjon[lagretSanksjon.type]}</Table.DataCell>
-                            <Table.DataCell>{lagretSanksjon.beskrivelse}</Table.DataCell>
+                            <Table.DataCell>{ikkeInnvilgetPeriode.beskrivelse}</Table.DataCell>
                             <Table.DataCell>
-                              <BodyShort>{lagretSanksjon.opprettet.ident}</BodyShort>
-                              <Detail>{`saksbehandler: ${formaterDato(lagretSanksjon.opprettet.tidspunkt)}`}</Detail>
+                              <BodyShort>{ikkeInnvilgetPeriode.opprettet.ident}</BodyShort>
+                              <Detail>{`saksbehandler: ${formaterDato(ikkeInnvilgetPeriode.opprettet.tidspunkt)}`}</Detail>
                             </Table.DataCell>
                             <Table.DataCell>
-                              {lagretSanksjon.endret ? (
+                              {ikkeInnvilgetPeriode.endret ? (
                                 <>
-                                  <BodyShort>{lagretSanksjon.endret.ident}</BodyShort>
-                                  <Detail>{`saksbehandler: ${formaterDato(lagretSanksjon.endret.tidspunkt)}`}</Detail>
+                                  <BodyShort>{ikkeInnvilgetPeriode.endret.ident}</BodyShort>
+                                  <Detail>{`saksbehandler: ${formaterDato(ikkeInnvilgetPeriode.endret.tidspunkt)}`}</Detail>
                                 </>
                               ) : (
                                 '-'
@@ -274,12 +248,12 @@ export const Sanksjon = ({
                                     variant="tertiary"
                                     onClick={() => {
                                       reset({
-                                        datoFom: new Date(lagretSanksjon.fom),
-                                        datoTom: lagretSanksjon.tom ? new Date(lagretSanksjon.tom) : null,
-                                        type: lagretSanksjon.type,
-                                        beskrivelse: lagretSanksjon.beskrivelse,
+                                        datoFom: new Date(ikkeInnvilgetPeriode.fom),
+                                        datoTom: ikkeInnvilgetPeriode.tom ? new Date(ikkeInnvilgetPeriode.tom) : null,
+                                        type: ikkeInnvilgetPeriode.type,
+                                        beskrivelse: ikkeInnvilgetPeriode.beskrivelse,
                                       })
-                                      setRedigerSanksjonId(lagretSanksjon.id!!)
+                                      setRedigerIkkeInnvilgetPeriode(ikkeInnvilgetPeriode.id!!)
                                       setVisForm(true)
                                     }}
                                   >
@@ -289,7 +263,7 @@ export const Sanksjon = ({
                                     size="small"
                                     variant="tertiary"
                                     onClick={() => {
-                                      slettEnkeltSanksjon(lagretSanksjon.behandlingId, lagretSanksjon.id!!)
+                                      slettEnkeltSanksjon(ikkeInnvilgetPeriode.behandlingId, ikkeInnvilgetPeriode.id!!)
                                     }}
                                     loading={isPending(slettSanksjonStatus)}
                                   >
@@ -317,22 +291,22 @@ export const Sanksjon = ({
             })}
             {isFailure(slettSanksjonStatus) && (
               <Alert variant="error">
-                {slettSanksjonStatus.error.detail || 'Det skjedde en feil ved sletting av sanksjon'}
+                {slettSanksjonStatus.error.detail || 'Det skjedde en feil ved sletting av ikke innvilget periode'}
               </Alert>
             )}
 
             {visForm && (
-              <form onSubmit={handleSubmit(submitSanksjon)}>
+              <form onSubmit={handleSubmit(submitIkkeInnvilgetPeriode)}>
                 <Heading size="small" level="3" spacing>
-                  Ny sanksjon
+                  Ny ikke innvilget periode
                 </Heading>
-                <VStack gap="space-4" align="start">
-                  <HStack gap="space-4">
+                <VStack gap="4" align="start">
+                  <HStack gap="4">
                     <ControlledMaanedVelger
                       label="Dato fra og med"
                       name="datoFom"
                       control={control}
-                      fromDate={tidligstSanksjonFom(sanksjoner, behandling)}
+                      fromDate={tidligstSanksjonFom(ikkeInnvilgedePerioder, behandling)}
                       validate={validerFom}
                       required
                     />
@@ -340,24 +314,13 @@ export const Sanksjon = ({
                       label="Dato til og med (valgfri)"
                       name="datoTom"
                       control={control}
-                      fromDate={tidligstSanksjonFom(sanksjoner, behandling)}
+                      fromDate={tidligstSanksjonFom(ikkeInnvilgedePerioder, behandling)}
                       validate={validerTom}
                     />
                   </HStack>
-                  <Select
-                    {...register('type', {
-                      required: { value: true, message: 'Du må velge sanksjonstype' },
-                    })}
-                    label="Type sanksjon"
-                    error={errors.type?.message}
-                  >
-                    <option value="">Velg sanksjon</option>
-                    {valgbareSanksjonstyper.map((type, index) => (
-                      <option key={index} value={type}>
-                        {tekstSanksjon[type as SanksjonType]}
-                      </option>
-                    ))}
-                  </Select>
+
+                  <input type="hidden" name="type" value={SanksjonType.IKKE_INNVILGET_PERIODE} />
+
                   <Textarea
                     {...register('beskrivelse', {
                       required: { value: true, message: 'Må fylles ut' },
@@ -365,15 +328,15 @@ export const Sanksjon = ({
                     label="Beskrivelse"
                     error={errors.beskrivelse?.message}
                   />
-                  <HStack gap="space-4">
+                  <HStack gap="4">
                     <Button
                       size="small"
                       variant="secondary"
                       type="button"
                       onClick={(e) => {
                         e.preventDefault()
-                        reset(sanksjonDefaultValue)
-                        setRedigerSanksjonId('')
+                        reset(ikkeInnvilgetPeriodeDefaultValue)
+                        setRedigerIkkeInnvilgetPeriode('')
                         setVisForm(false)
                       }}
                     >
@@ -404,7 +367,7 @@ export const Sanksjon = ({
                     setVisForm(true)
                   }}
                 >
-                  Legg til sanksjon
+                  Legg til ikke innvilget periode
                 </Button>
               </HStack>
             )}

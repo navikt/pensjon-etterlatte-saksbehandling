@@ -18,10 +18,7 @@ import java.util.UUID
 class EtteroppgjoerDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun hentEtteroppgjoerMedSvarfristUtloept(
-        inntektsaar: Int,
-        svarfrist: EtteroppgjoerSvarfrist,
-    ): List<Etteroppgjoer>? =
+    fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -33,12 +30,10 @@ class EtteroppgjoerDao(
                         AND eb.varselbrev_sendt IS NOT NULL
                           AND eb.varselbrev_sendt < (now() - interval '${svarfrist.value}')
                           AND eb.status = ?
-                          AND eb.aar = ?
                         """.trimIndent(),
                     )
                 statement.setString(1, EtteroppgjoerStatus.VENTER_PAA_SVAR.name)
                 statement.setString(2, EtteroppgjoerStatus.FERDIGSTILT.name)
-                statement.setInt(3, inntektsaar)
 
                 statement.executeQuery().toList { toEtteroppgjoer() }
             }

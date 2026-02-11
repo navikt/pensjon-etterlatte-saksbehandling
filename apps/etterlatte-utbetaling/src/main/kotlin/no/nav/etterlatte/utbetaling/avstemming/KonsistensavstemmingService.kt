@@ -108,7 +108,8 @@ class KonsistensavstemmingService(
                 } // 3
                 .mapValues { entry ->
                     // 4
-                    val gjeldendeForKonsistensavstemming = gjeldendeLinjerForEnDato(entry.value.utbetalingslinjer, dag)
+                    val gjeldendeForKonsistensavstemming =
+                        gjeldendeLinjerForEnDato(entry.value.utbetalingslinjer.sortedBy { it.id.value }, dag)
                     entry.value.copy(
                         utbetalingslinjer = gjeldendeForKonsistensavstemming,
                     )

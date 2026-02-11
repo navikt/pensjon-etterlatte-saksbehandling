@@ -57,7 +57,7 @@ class EtteroppgjoerDataService(
                 )
             }
         } catch (e: Exception) {
-            logger.warn("Kunne ikke hente tidligere avkorting for behandling med id=$sisteIverksatteBehandling", e)
+            logger.warn("Kunne ikke hente tidligere avkorting for behandling med id=${sisteIverksatteBehandling.id}", e)
             null
         }
     }

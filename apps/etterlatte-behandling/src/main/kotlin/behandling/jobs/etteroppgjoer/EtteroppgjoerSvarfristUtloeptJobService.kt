@@ -38,8 +38,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
     }
 
     private fun opprettNyOppgaveSvarfristUtloept() {
-        val etteroppgjoersAar = ETTEROPPGJOER_AAR
-        val relevanteEtteroppgjoer = etteroppgjoerService.hentEtteroppgjoerMedSvarfristUtloept(etteroppgjoersAar, svarfrist)
+        val relevanteEtteroppgjoer = etteroppgjoerService.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 
         val antallOppgaverOpprettet =
             relevanteEtteroppgjoer?.count { etteroppgjoer ->
@@ -63,13 +62,13 @@ class EtteroppgjoerSvarfristUtloeptJobService(
                         referanse = etteroppgjoer.sisteFerdigstilteForbehandling.toString(),
                         sakId = etteroppgjoer.sakId,
                         type = OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING,
-                        merknad = "Svarfrist for etteroppgjør $etteroppgjoersAar er utløpt",
+                        merknad = "Svarfrist for etteroppgjør ${etteroppgjoer.inntektsaar} er utløpt",
                         kilde = OppgaveKilde.HENDELSE,
                     )
                     true
                 }
             }
 
-        logger.info("Opprettet $antallOppgaverOpprettet oppgaver for etteroppgjør med svarfrist utløpt for $etteroppgjoersAar")
+        logger.info("Opprettet $antallOppgaverOpprettet oppgaver for etteroppgjør med svarfrist utløpt")
     }
 }

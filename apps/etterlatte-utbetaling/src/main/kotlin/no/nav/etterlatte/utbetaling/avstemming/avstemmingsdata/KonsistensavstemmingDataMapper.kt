@@ -120,8 +120,8 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata =
                     delytelseId = it.id.value.toString()
                     klassifikasjonKode =
                         when (sakType) {
-                            Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.oppdragVerdi
-                            Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP.oppdragVerdi
+                            Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.toString()
+                            Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP.toString()
                         }
                     vedtakPeriode =
                         Periode().apply {

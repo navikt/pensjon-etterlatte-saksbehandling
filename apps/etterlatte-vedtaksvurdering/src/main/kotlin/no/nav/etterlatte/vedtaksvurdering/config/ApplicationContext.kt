@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakEtteroppgjoerService
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.adhoc.IkkeInnvilgedePerioderJob
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
@@ -178,17 +177,6 @@ class ApplicationContext {
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(1, ChronoUnit.MINUTES),
-        )
-    }
-
-    val ikkeInnvilgedePerioderJob: IkkeInnvilgedePerioderJob by lazy {
-        IkkeInnvilgedePerioderJob(
-            vedtaksvurderingService = vedtaksvurderingService,
-            vedtaksvurderingRepository = repository,
-            erLeader = { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(1, ChronoUnit.MINUTES),
-            featureToggleService = featureToggleService,
         )
     }
 }

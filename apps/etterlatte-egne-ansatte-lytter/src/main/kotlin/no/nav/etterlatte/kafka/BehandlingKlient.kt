@@ -1,12 +1,16 @@
 package no.nav.etterlatte.kafka
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.pdl.PdlFeilAarsak
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
@@ -43,17 +47,38 @@ class BehandlingKlient(
         fnr: String,
         skjermet: Boolean,
     ) = runBlocking {
-        behandlingHttpClient.post(
-            "$url/egenansatt",
-        ) {
-            contentType(ContentType.Application.Json)
-            setBody(
-                EgenAnsattSkjermet(
-                    fnr = fnr,
-                    inntruffet = Tidspunkt.now(),
-                    skjermet = skjermet,
-                ),
-            )
+        try {
+            behandlingHttpClient.post(
+                "$url/egenansatt",
+            ) {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    EgenAnsattSkjermet(
+                        fnr = fnr,
+                        inntruffet = Tidspunkt.now(),
+                        skjermet = skjermet,
+                    ),
+                )
+            }
+        } catch (feil: Exception) {
+            if (feil !is ResponseException) {
+                throw feil
+            }
+
+            val pdlExceptionCode =
+                try {
+                    feil.response.body<ExceptionResponse>().code
+                } catch (e: Exception) {
+                    logger.warn("Noe rart har skjedd her, vi får feil fra PDL som ikke har en exception response", e)
+                    throw feil
+                }
+
+            if (pdlExceptionCode == PdlFeilAarsak.FANT_IKKE_PERSON.name) {
+                sikkerlogger().error("Klarte ikke slå opp i PDL på person $fnr")
+                logger.error("Vi får feil fra PDL, fant ikke person med ident ${fnr.maskerFnr()}", feil)
+            } else {
+                throw feil
+            }
         }
     }
 }

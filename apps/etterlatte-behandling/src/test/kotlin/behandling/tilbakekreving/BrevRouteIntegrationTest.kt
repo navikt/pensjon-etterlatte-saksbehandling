@@ -167,7 +167,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
     inner class GammelPullModell {
         @Test
         fun `skal opprette vedtaksbrev for behandling`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON) // BP er fortsatt på gammel model
             val behandling: no.nav.etterlatte.behandling.domain.Behandling = opprettBehandling(sak)
             coEvery { vedtakKlient.hentVedtak(any(), any()) } returns
                 vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
@@ -186,7 +186,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
         @Test
         fun `skal tilbakestille vedtaksbrev`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
             val behandling = opprettBehandling(sak)
             coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
@@ -216,7 +216,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
         @Test
         fun `skal generere pdf`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
             val behandling = opprettBehandling(sak)
             coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
             coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns
@@ -240,7 +240,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
         @Test
         fun `skal ferdigstille vedtaksbrev`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
             val behandling = opprettBehandling(sak)
             coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
@@ -260,7 +260,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
         @Test
         fun `skal hente vedtaksbrev`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
             val behandling = opprettBehandling(sak)
             coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
@@ -285,7 +285,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
     inner class NyPushModell {
         @Test
         fun `skal opprette vedtaksbrev for tilbakekreving`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.OMSTILLINGSSTOENAD)
             val tilbakekrevingBehandling = opprettTilbakekreving(sak)
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
@@ -307,7 +307,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
         @Test
         fun `skal tilbakestille vedtaksbrev for tilbakekreving`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.OMSTILLINGSSTOENAD)
             val tilbakekrevingBehandling = opprettTilbakekreving(sak)
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
@@ -338,7 +338,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
         @Test
         fun `skal generere pdf for tilbakekreving`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.OMSTILLINGSSTOENAD)
             val tilbakekrevingBehandling = opprettTilbakekreving(sak)
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
@@ -365,7 +365,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
         @Test
         fun `skal ferdigstille vedtaksbrev for tilbakekreving`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.OMSTILLINGSSTOENAD)
             val tilbakekrevingBehandling = opprettTilbakekreving(sak)
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
@@ -393,7 +393,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
 
         @Test
         fun `skal hente vedtaksbrev for tilbakekreving`() {
-            val sak = opprettSakMedGrunnlag()
+            val sak = opprettSakMedGrunnlag(SakType.OMSTILLINGSSTOENAD)
             val tilbakekrevingBehandling = opprettTilbakekreving(sak)
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
@@ -459,12 +459,12 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             behandlingDao.hentBehandling(opprettBehandling.id) as Foerstegangsbehandling
         }
 
-    private fun opprettSakMedGrunnlag() =
+    private fun opprettSakMedGrunnlag(sakType: SakType) =
         inTransaction {
             val sak =
                 sakSkrivDao.opprettSak(
                     SOEKER_FOEDSELSNUMMER.value,
-                    SakType.OMSTILLINGSSTOENAD,
+                    sakType,
                     Enheter.defaultEnhet.enhetNr,
                 )
             every { grunnlagServiceMock.hentOpplysningsgrunnlagForSak(sak.id) } returns

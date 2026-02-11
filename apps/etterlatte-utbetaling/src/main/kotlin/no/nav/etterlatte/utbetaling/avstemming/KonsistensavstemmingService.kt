@@ -85,6 +85,7 @@ class KonsistensavstemmingService(
                 .mapValues { entry ->
                     // 3
                     entry.value
+                        .sortedByDescending { it.opprettet }
                         .map { utbetaling ->
                             UtbetalingslinjerPerSak(
                                 sakId = SakId(0),

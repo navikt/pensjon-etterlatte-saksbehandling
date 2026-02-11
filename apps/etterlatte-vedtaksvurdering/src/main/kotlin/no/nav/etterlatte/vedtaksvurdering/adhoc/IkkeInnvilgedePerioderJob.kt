@@ -28,24 +28,22 @@ class IkkeInnvilgedePerioderJob(
     override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med service=${vedtaksvurderingService::class.simpleName} og periode $periode")
 
-        val skalTelleHull =
-            object : FeatureToggle {
-                override fun key(): String = "skal-telle-hull-i-innvilgede-perioder"
-            }
-
         return fixedRateCancellableTimer(
             name = jobbNavn,
             initialDelay = initialDelay,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = periode.toMillis(),
         ) {
-            if (erLeader() && featureToggleService.isEnabled(skalTelleHull, false)) {
+            if (erLeader() && featureToggleService.isEnabled(skalTelleHullToggle, false)) {
                 logger.info("$jobbNavn starter vurdering av alle saker som har fattede vedtak")
                 sakerMedFattedeVedtak()
-                    .map { sakId ->
-                        sakId to hentInnvilgedePerioder(sakId)
-                    }.filter { (_, perioder) ->
-                        perioder.size > 1
+                    .mapNotNull { sakId ->
+                        val perioder = hentInnvilgedePerioder(sakId)
+                        if (perioder.size > 1) {
+                            Pair(sakId, perioder)
+                        } else {
+                            null
+                        }
                     }.forEach { (sakId, perioder) ->
                         logger.info("Fant sak med hull: $sakId: ${perioderString(perioder)}")
                     }
@@ -81,5 +79,10 @@ class IkkeInnvilgedePerioderJob(
     private fun perioderString(perioder: List<InnvilgetPeriode>): String =
         perioder.joinToString(", ") { periode ->
             "${periode.periode.fom}-${periode.periode.tom}"
+        }
+
+    private val skalTelleHullToggle =
+        object : FeatureToggle {
+            override fun key(): String = "skal-telle-hull-i-innvilgede-perioder"
         }
 }

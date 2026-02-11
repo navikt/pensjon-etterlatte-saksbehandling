@@ -146,7 +146,7 @@ class EtteroppgjoerService(
         val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
 
         val (vedtakReferanse, vedtakPerioder) = hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar)
-        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId, false)
+        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId)
 
         val inntektsgrunnlag =
             krevIkkeNull(avkortingRepository.hentFaktiskInntekt(nyForbehandlingAvkorting.id)) {
@@ -199,8 +199,9 @@ class EtteroppgjoerService(
                 )
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode ->
+            is RegelkjoeringResultat.UgyldigPeriode -> {
                 throw InternfeilException("Ugyldig regler for periode: ${beregningResultat.ugyldigeReglerForPeriode}")
+            }
         }
     }
 
@@ -227,46 +228,33 @@ class EtteroppgjoerService(
         val aarsoppgjoer = avkorting?.aarsoppgjoer?.single { it.aar == aar }
 
         return when (aarsoppgjoer) {
-            is AarsoppgjoerLoepende ->
+            is AarsoppgjoerLoepende -> {
                 AvkortingDto(
                     avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
+            }
 
-            is Etteroppgjoer ->
+            is Etteroppgjoer -> {
                 AvkortingDto(
                     avkortingGrunnlag = listOf(aarsoppgjoer.inntekt.toDto()),
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 
     private fun finnAarsoppgjoerForEtteroppgjoer(
         aar: Int,
         behandlingId: UUID,
-        reparer: Boolean,
     ): Aarsoppgjoer {
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw GenerellIkkeFunnetException()
-        val reparertAvkorting =
-            if (reparer) {
-                val behandling = runBlocking { behandlingKlient.hentBehandling(behandlingId, HardkodaSystembruker.etteroppgjoer) }
-                val sakId = behandling.sak
-                val vedtak = runBlocking { vedtakKlient.hentIverksatteVedtak(sakId, HardkodaSystembruker.etteroppgjoer) }
-                val nyAvkorting =
-                    reparerAarsoppgjoeret.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-                        alleVedtak = vedtak,
-                        avkortingSistIverksatt = avkorting,
-                    )
-                if (avkorting.aarsoppgjoer.map { it.aar }.toSet() != nyAvkorting.aarsoppgjoer.map { it.aar }.toSet()) {
-                    logger.warn("Vi reparerte manglende årsoppgjør i sak $sakId i forbindelse med etteroppgjøret")
-                }
-                nyAvkorting
-            } else {
-                avkorting
-            }
-        val aarsoppgjoer = reparertAvkorting.aarsoppgjoer.filter { it.aar == aar }
+        val aarsoppgjoer = avkorting.aarsoppgjoer.filter { it.aar == aar }
+
         return when (aarsoppgjoer.size) {
             1 -> aarsoppgjoer.single()
             0 -> throw InternfeilException("Fant ikke aarsoppgjoer for $aar, selv etter reparasjon")

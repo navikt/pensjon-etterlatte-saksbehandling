@@ -74,6 +74,8 @@ fun TrygdetidDto.fromDto(
     ident = this.ident,
 )
 
+fun TrygdetidDto.erYrkesskade() = beregnetTrygdetid?.resultat?.yrkesskade ?: false
+
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,

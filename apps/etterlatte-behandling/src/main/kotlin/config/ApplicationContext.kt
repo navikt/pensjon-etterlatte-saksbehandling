@@ -792,7 +792,6 @@ internal class ApplicationContext(
             etteroppgjoerForbehandlingBrevService = etteroppgjoerForbehandlingBrevService,
             etteroppgjoerRevurderingBrevService = etteroppgjoerRevurderingBrevService,
             vedtaksbrevService = vedtaksbrevService,
-            featureToggleService = featureToggleService,
         )
 
     val tilbakekrevingService =

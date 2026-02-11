@@ -173,17 +173,13 @@ class AarligInntektsjusteringJobbService(
     ): Boolean {
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
 
-        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak.id)
-        if (aapneBehandlinger.isNotEmpty()) {
-            nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)
-            return true
-        }
+        val aapneOppgaver =
+            oppgaveService
+                .hentOppgaverForSak(sakId)
+                .filter { it.kilde == OppgaveKilde.BEHANDLING }
+                .any { it.erIkkeAvsluttet() }
 
-        val aapneForbehandlinger =
-            etteroppgjoerForbehandlingService
-                .hentForbehandlinger(sakId, ETTEROPPGJOER_AAR)
-                .filter { it.erUnderBehandling() }
-        if (aapneForbehandlinger.isNotEmpty()) {
+        if (aapneOppgaver) {
             nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)
             return true
         }

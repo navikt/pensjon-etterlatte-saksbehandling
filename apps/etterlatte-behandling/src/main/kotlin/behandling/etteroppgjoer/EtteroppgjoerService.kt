@@ -82,6 +82,9 @@ class EtteroppgjoerService(
         dao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, status)
     }
 
+    fun hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
+        dao.hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall)
+
     fun oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         if (!forbehandling.erFerdigstilt()) {
             throw IkkeTillattException("FORBEHADNLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")

@@ -108,6 +108,19 @@ class EtteroppgjoerDaoTest(
     }
 
     @Test
+    fun `skal hente etteroppgjoer som venter paa skatteoppgjoer`() {
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak2.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
+
+        etteroppgjoerDao.hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(10) shouldBe
+            listOf(
+                Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER),
+                Etteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER),
+            )
+    }
+
+    @Test
     fun `skal hente saker både med og uten aktivitetskrav hvis filter er satt til don't care`() {
         etteroppgjoerDao.lagreEtteroppgjoer(
             Etteroppgjoer(

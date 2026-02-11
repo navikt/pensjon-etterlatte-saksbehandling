@@ -89,6 +89,24 @@ class EtteroppgjoerDao(
             }
         }
 
+    fun hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM etteroppgjoer
+                        WHERE status = ?
+                        LIMIT ?
+                        """.trimIndent(),
+                    )
+                statement.setString(1, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER.name)
+                statement.setInt(2, antall)
+                statement.executeQuery().toList { toEtteroppgjoer() }
+            }
+        }
+
     fun hentEtteroppgjoerSakerIBulk(
         inntektsaar: Int,
         antall: Int,

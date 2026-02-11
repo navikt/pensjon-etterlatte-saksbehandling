@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.common
 
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
 import no.trygdeetaten.skjema.oppdrag.TfradragTillegg
 import java.time.LocalDate
@@ -14,7 +13,6 @@ object OppdragDefaults {
     const val SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER = "EY" // Placeholder for å identifisere
     const val UTBETALINGSFREKVENS = "MND"
     const val AKSJONSKODE_OPPDATER = "1"
-    val KODEKOMPONENT = OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
     val DATO_OPPDRAG_GJELDER_FOM = LocalDate.EPOCH.toXMLDate()
     val OPPDRAGSENHET_DATO_FOM: LocalDate = LocalDate.of(1900, Month.JANUARY, 1)
     val OPPDRAGSENHET =

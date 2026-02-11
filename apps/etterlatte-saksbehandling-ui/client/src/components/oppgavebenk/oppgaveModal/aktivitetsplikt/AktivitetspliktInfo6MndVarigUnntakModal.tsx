@@ -2,8 +2,7 @@ import { BodyLong, Button, Heading, Modal, Textarea, VStack } from '@navikt/ds-r
 import React, { useEffect, useState } from 'react'
 import { ferdigstillOppgaveMedMerknad, hentOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { isPending } from '@reduxjs/toolkit'
-import { isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { Toast } from '~shared/alerts/Toast'
@@ -65,7 +64,8 @@ export const AktivitetspliktInfo6MndVarigUnntakModal = ({
               <div>
                 <Heading size="xsmall">Opprett informasjonsbrev til bruker</Heading>
                 <BodyLong>
-                  Den etterlatte skal informeres om stønaden sin og hvilke krav som stilles til dem i tiden fremover.{' '}
+                  Den etterlatte skal informeres om stønaden sin og hvilke krav som stilles til dem i tiden
+                  fremover.{' '}
                 </BodyLong>
               </div>
               <BodyLong>

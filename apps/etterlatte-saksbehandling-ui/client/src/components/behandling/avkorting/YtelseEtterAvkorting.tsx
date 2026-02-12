@@ -9,7 +9,6 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { lastDayOfMonth } from 'date-fns'
 import { tekstSanksjon } from '~shared/types/sanksjon'
 import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
@@ -32,8 +31,6 @@ export const YtelseEtterAvkorting = ({
   avkortetYtelse: IAvkortetYtelse[]
   tidligereAvkortetYtelse: IAvkortetYtelse[]
 }) => {
-  const sanksjonTilgjengelig = useFeaturetoggle(FeatureToggle.sanksjon)
-
   const behandling = useBehandling()
 
   const ytelser = [...avkortetYtelse].sort(sorterNyligsteFoerstOgBakover)
@@ -51,7 +48,7 @@ export const YtelseEtterAvkorting = ({
       {ytelser.length > 0 && (
         <TableBox>
           <Heading spacing size="small" level="2">
-            {sanksjonTilgjengelig ? 'Beregning etter avkorting og sanksjon' : 'Beregning etter avkorting'}
+            Beregning etter avkorting og sanksjon
           </Heading>
           <Table className="table" zebraStripes>
             <Table.Header>
@@ -60,17 +57,8 @@ export const YtelseEtterAvkorting = ({
                 <Table.HeaderCell>Periode</Table.HeaderCell>
                 <Table.HeaderCell>Beregning</Table.HeaderCell>
                 <Table.HeaderCell>Avkorting</Table.HeaderCell>
-                {sanksjonTilgjengelig ? (
-                  <>
-                    <Table.HeaderCell>Restanse / sanksjon</Table.HeaderCell>
-                    <Table.HeaderCell>Brutto stønad etter avkorting / sanksjon</Table.HeaderCell>
-                  </>
-                ) : (
-                  <>
-                    <Table.HeaderCell>Restanse</Table.HeaderCell>
-                    <Table.HeaderCell>Brutto stønad etter avkorting</Table.HeaderCell>
-                  </>
-                )}
+                <Table.HeaderCell>Restanse / sanksjon</Table.HeaderCell>
+                <Table.HeaderCell>Brutto stønad etter avkorting / sanksjon</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>

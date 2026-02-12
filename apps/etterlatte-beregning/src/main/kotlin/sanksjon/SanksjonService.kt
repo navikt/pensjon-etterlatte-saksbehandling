@@ -3,7 +3,6 @@ package no.nav.etterlatte.sanksjon
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -16,26 +15,13 @@ import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
-enum class SanksjonToggles(
-    val value: String,
-) : FeatureToggle {
-    SANKSJON("sanksjon"),
-    ;
-
-    override fun key(): String = this.value
-}
-
 class SanksjonService(
     private val behandlingKlient: BehandlingKlient,
     private val sanksjonRepository: SanksjonRepository,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
-        if (!featureToggleService.isEnabled(SanksjonToggles.SANKSJON, defaultValue = false)) {
-            return null
-        }
         logger.info("Henter sanksjoner med behandlingID=$behandlingId")
         return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
     }

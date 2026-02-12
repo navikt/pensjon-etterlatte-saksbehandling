@@ -36,6 +36,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.YearMonth
@@ -234,6 +236,25 @@ class EtteroppgjoerDaoTest(
 
         val etteroppgjoer = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
         etteroppgjoer!!.sisteFerdigstilteForbehandling shouldBe forbehandlingId
+    }
+
+    @Test
+    fun `skal hente etteroppgjoer for inntektsaar`() {
+        val forbehandlingId = UUID.randomUUID()
+        val inntektsaar = 2024
+
+        // negative null result
+        assertDoesNotThrow { etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024) }
+
+        etteroppgjoerDao.lagreEtteroppgjoer(
+            Etteroppgjoer(
+                sakId = sak.id,
+                inntektsaar = inntektsaar,
+                status = EtteroppgjoerStatus.VENTER_PAA_SVAR,
+                sisteFerdigstilteForbehandling = forbehandlingId,
+            ),
+        )
+        assertDoesNotThrow { etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024) }
     }
 
     @Test

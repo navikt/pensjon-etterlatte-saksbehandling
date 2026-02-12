@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -239,6 +240,8 @@ class AarligInntektsjusteringJobbServiceTest {
                 saker = listOf(SakId(123L)),
             )
 
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
+
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)
         }
@@ -343,42 +346,6 @@ class AarligInntektsjusteringJobbServiceTest {
     }
 
     @Test
-    fun `Sak med Etteroppgjoer forbehandling skal gjoeres manuelt`() {
-        val request =
-            AarligInntektsjusteringRequest(
-                kjoering = "kjoering",
-                loependeFom = YearMonth.of(2025, 1),
-                saker = listOf(SakId(123L)),
-            )
-
-        every { etteroppgjoerForbehandlingService.hentForbehandlinger(any(), any()) } returns
-            listOf(
-                EtteroppgjoerForbehandling.opprett(gyldigSak, mockk(relaxed = true), mockk(), mottattSkatteoppgjoer = true),
-            )
-
-        every { omregningService.oppdaterKjoering(any()) } returns mockk()
-
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
-
-        runBlocking {
-            service.startAarligInntektsjusteringJobb(request)
-        }
-
-        verify {
-            omregningService.oppdaterKjoering(
-                withArg {
-                    with(it) {
-                        kjoering shouldBe "kjoering"
-                        status shouldBe KjoeringStatus.TIL_MANUELL
-                        sakId shouldBe SakId(123L)
-                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING.name
-                    }
-                },
-            )
-        }
-    }
-
-    @Test
     fun `Sak som er under samordning skal gjoeres manuelt`() {
         val request =
             AarligInntektsjusteringRequest(
@@ -393,8 +360,8 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
-
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
 
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)
@@ -429,6 +396,14 @@ class AarligInntektsjusteringJobbServiceTest {
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
+
+        every { oppgaveService.hentOppgaverForSak(any()) } returns
+            listOf(
+                mockk<OppgaveIntern> {
+                    every { kilde } returns OppgaveKilde.BEHANDLING
+                    every { erIkkeAvsluttet() } returns true
+                },
+            )
 
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)
@@ -475,6 +450,8 @@ class AarligInntektsjusteringJobbServiceTest {
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
+
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)
         }
@@ -506,6 +483,8 @@ class AarligInntektsjusteringJobbServiceTest {
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns PdlIdentifikator.FolkeregisterIdent(nyttFnr)
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
 
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)
@@ -543,6 +522,7 @@ class AarligInntektsjusteringJobbServiceTest {
             }
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
 
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)
@@ -575,6 +555,8 @@ class AarligInntektsjusteringJobbServiceTest {
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
+
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)
         }
@@ -605,6 +587,8 @@ class AarligInntektsjusteringJobbServiceTest {
         coEvery { beregningKlient.harOverstyrt(any(), any()) } returns true
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
 
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)
@@ -645,6 +629,8 @@ class AarligInntektsjusteringJobbServiceTest {
         } returns endretOpplysningPdl
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
 
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)
@@ -710,6 +696,8 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
 
         runBlocking {
             service.startAarligInntektsjusteringJobb(request)

@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.kafka.avro) {

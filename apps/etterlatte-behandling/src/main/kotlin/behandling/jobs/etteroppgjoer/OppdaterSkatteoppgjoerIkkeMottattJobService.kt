@@ -4,13 +4,13 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
+import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -44,27 +44,33 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
     }
 
     fun oppdaterSkatteoppgjoerIkkeMottatt() {
-        val relevanteSaker: List<SakId> =
+        val relevanteEtteroppgjoer: List<Etteroppgjoer> =
             inTransaction {
-                etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
-                    inntektsaar = ETTEROPPGJOER_AAR,
+                etteroppgjoerService.hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(
                     antall = 200,
-                    etteroppgjoerFilter = EtteroppgjoerFilter.ALLE_SAKER,
-                    status = EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
                 )
             }
 
-        relevanteSaker.map { sakId ->
+        relevanteEtteroppgjoer.map { etteroppgjoer ->
             try {
                 inTransaction {
-                    etteroppgjoerService.oppdaterEtteroppgjoerStatus(sakId, ETTEROPPGJOER_AAR, EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER)
-                    etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
+                    etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                        etteroppgjoer.sakId,
+                        ETTEROPPGJOER_AAR,
+                        EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
+                    )
+                    etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(etteroppgjoer.sakId)
                 }
             } catch (e: Error) {
-                logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
+                logger.error(
+                    "Kunne ikke opprette etteroppgjør forbehandling for sak med id: ${etteroppgjoer.sakId} for inntektsaar ${etteroppgjoer.inntektsaar}",
+                    e,
+                )
             }
         }
 
-        logger.info("Opprettet ${relevanteSaker.size} oppgaver for opprettelse av forbehandling hvor vi ikke har mottatt skatteoppgjør")
+        logger.info(
+            "Opprettet ${relevanteEtteroppgjoer.size} oppgaver for opprettelse av forbehandling hvor vi ikke har mottatt skatteoppgjør",
+        )
     }
 }

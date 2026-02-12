@@ -3,6 +3,7 @@ package no.nav.etterlatte.common.klienter
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.accept
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -12,6 +13,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
+import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
+import no.nav.etterlatte.libs.common.pdl.PdlFeilAarsak
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -217,7 +221,10 @@ class PdlTjenesterKlientImpl(
                 }.body()
         }.let { result ->
             when (result) {
-                is RetryResult.Success -> result.content
+                is RetryResult.Success -> {
+                    result.content
+                }
+
                 is RetryResult.Failure -> {
                     logger.error("Feil ved henting av ident fra PDL for fnr=${ident.maskerFnr()}")
                     throw result.samlaExceptions()
@@ -237,10 +244,31 @@ class PdlTjenesterKlientImpl(
                 }.body()
         }.let { result ->
             when (result) {
-                is RetryResult.Success -> result.content
+                is RetryResult.Success -> {
+                    result.content
+                }
+
                 is RetryResult.Failure -> {
                     logger.error("Feil ved henting av folkeregisteridenter fra PDL for fnr=${ident.maskerFnr()}")
-                    throw result.samlaExceptions()
+                    val feil = result.samlaExceptions()
+
+                    if (feil !is ResponseException) {
+                        throw feil
+                    }
+
+                    val pdlExceptionCode =
+                        try {
+                            feil.response.body<ExceptionResponse>().code
+                        } catch (e: Exception) {
+                            logger.warn("Noe rart har skjedd her, vi får feil fra PDL som ikke har en exception response", e)
+                            throw feil
+                        }
+
+                    if (pdlExceptionCode == PdlFeilAarsak.FANT_IKKE_PERSON.name) {
+                        throw FantIkkePersonException("Fant ikke angitt person (ident=${ident.maskerFnr()}) i PDL", feil)
+                    } else {
+                        throw feil
+                    }
                 }
             }
         }

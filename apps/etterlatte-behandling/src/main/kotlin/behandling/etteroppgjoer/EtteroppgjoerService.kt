@@ -45,10 +45,8 @@ class EtteroppgjoerService(
             ?.takeIf { !it.erFerdigstilt() }
             ?: throw InternfeilException("Fant ikke aktivt etteroppgjoer ($ETTEROPPGJOER_AAR) for sak $sakId")
 
-    fun hentEtteroppgjoerMedSvarfristUtloept(
-        inntektsaar: Int,
-        svarfrist: EtteroppgjoerSvarfrist,
-    ): List<Etteroppgjoer>? = dao.hentEtteroppgjoerMedSvarfristUtloept(inntektsaar, svarfrist)
+    fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer>? =
+        dao.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
@@ -81,6 +79,9 @@ class EtteroppgjoerService(
     ) {
         dao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, status)
     }
+
+    fun hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
+        dao.hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall)
 
     fun oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         if (!forbehandling.erFerdigstilt()) {

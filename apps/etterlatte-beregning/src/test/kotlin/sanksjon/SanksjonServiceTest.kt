@@ -16,7 +16,6 @@ import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.lagreSanksjon
 import no.nav.etterlatte.beregning.regler.sanksjon
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -28,7 +27,6 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sanksjon.SanksjonEndresFoerVirkException
 import no.nav.etterlatte.sanksjon.SanksjonRepository
 import no.nav.etterlatte.sanksjon.SanksjonService
-import no.nav.etterlatte.sanksjon.SanksjonToggles
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -41,15 +39,10 @@ import java.util.UUID
 internal class SanksjonServiceTest {
     private val sanksjonRepository: SanksjonRepository = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
-    private val featureToggleService: FeatureToggleService =
-        mockk(relaxed = true) {
-            every { isEnabled(SanksjonToggles.SANKSJON, any(), any()) } returns true
-        }
     private val service =
         SanksjonService(
             sanksjonRepository = sanksjonRepository,
             behandlingKlient = behandlingKlient,
-            featureToggleService = featureToggleService,
         )
     private val sakId = STANDARDSAK
 

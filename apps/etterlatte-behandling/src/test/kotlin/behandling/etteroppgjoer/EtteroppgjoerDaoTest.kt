@@ -36,6 +36,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.YearMonth
@@ -105,6 +107,19 @@ class EtteroppgjoerDaoTest(
                 ).firstOrNull()
 
         SakId(etteroppgjoerSak!!.sakId) shouldBe sak.id
+    }
+
+    @Test
+    fun `skal hente etteroppgjoer som venter paa skatteoppgjoer`() {
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
+        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak2.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
+
+        etteroppgjoerDao.hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(10) shouldBe
+            listOf(
+                Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER),
+                Etteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER),
+            )
     }
 
     @Test
@@ -208,51 +223,76 @@ class EtteroppgjoerDaoTest(
 
     @Test
     fun `oppdater ferdigstilt forbehandlingId`() {
+        val forbehandlingId = UUID.randomUUID()
+        val inntektsaar = 2024
+        etteroppgjoerDao.lagreEtteroppgjoer(
+            Etteroppgjoer(
+                sakId = sak.id,
+                inntektsaar = inntektsaar,
+                status = EtteroppgjoerStatus.VENTER_PAA_SVAR,
+                sisteFerdigstilteForbehandling = forbehandlingId,
+            ),
+        )
+
+        val etteroppgjoer = etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
+        etteroppgjoer!!.sisteFerdigstilteForbehandling shouldBe forbehandlingId
+    }
+
+    @Test
+    fun `skal hente etteroppgjoer for inntektsaar`() {
+        val forbehandlingId = UUID.randomUUID()
         val inntektsaar = 2024
 
-        val forbehandling =
-            EtteroppgjoerForbehandling(
-                id = UUID.randomUUID(),
-                status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
-                aar = inntektsaar,
-                opprettet = Tidspunkt.now(),
-                sak = sak,
-                brevId = null,
-                innvilgetPeriode = Periode(YearMonth.of(inntektsaar, 1), YearMonth.of(inntektsaar, 12)),
-                kopiertFra = null,
-                sisteIverksatteBehandlingId = UUID.randomUUID(),
-                harMottattNyInformasjon = null,
-                endringErTilUgunstForBruker = null,
-                beskrivelseAvUgunst = null,
-                varselbrevSendt = LocalDate.now().minusMonths(1),
-                opphoerSkyldesDoedsfall = null,
-                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
-            )
-        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling)
+        // negative null result
+        assertDoesNotThrow { etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024) }
 
         etteroppgjoerDao.lagreEtteroppgjoer(
             Etteroppgjoer(
                 sakId = sak.id,
                 inntektsaar = inntektsaar,
                 status = EtteroppgjoerStatus.VENTER_PAA_SVAR,
-                sisteFerdigstilteForbehandling = forbehandling.id,
+                sisteFerdigstilteForbehandling = forbehandlingId,
             ),
         )
+        assertDoesNotThrow { etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sak.id, 2024) }
+    }
 
-        // negative test
-        etteroppgjoerForbehandlingDao.lagreForbehandling(forbehandling.copy(varselbrevSendt = LocalDate.now()))
-
-        val svarfristUtloept =
-            etteroppgjoerDao.hentEtteroppgjoerMedSvarfristUtloept(
-                inntektsaar,
-                EtteroppgjoerSvarfrist.ETT_MINUTT,
+    @Test
+    fun `skal hente etteroppgjoer med svarfrist utloept`() {
+        val forbehandlinger =
+            listOf(
+                opprettForbehandling(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, 2024, LocalDate.now().minusMonths(2)),
+                opprettForbehandling(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, 2025, LocalDate.now().minusMonths(2)),
+                opprettForbehandling(EtteroppgjoerForbehandlingStatus.FERDIGSTILT, 2026, LocalDate.now()),
             )
 
-        svarfristUtloept!!.size shouldBe 1
-        svarfristUtloept.first().sakId shouldBe sak.id
-        svarfristUtloept.first().inntektsaar shouldBe inntektsaar
-        svarfristUtloept.first().status shouldBe EtteroppgjoerStatus.VENTER_PAA_SVAR
-        svarfristUtloept.first().sisteFerdigstilteForbehandling shouldBe forbehandling.id
+        forbehandlinger.forEach { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
+        forbehandlinger.forEach {
+            etteroppgjoerDao.lagreEtteroppgjoer(
+                Etteroppgjoer(
+                    sakId = sak.id,
+                    inntektsaar = it.aar,
+                    status = EtteroppgjoerStatus.VENTER_PAA_SVAR,
+                    sisteFerdigstilteForbehandling = it.id,
+                ),
+            )
+        }
+
+        val etteroppgjoerMedSvarfristUtloept =
+            forbehandlinger
+                .filter { it.aar != 2026 }
+                .map {
+                    Etteroppgjoer(
+                        sakId = sak.id,
+                        inntektsaar = it.aar,
+                        status = EtteroppgjoerStatus.VENTER_PAA_SVAR,
+                        sisteFerdigstilteForbehandling = it.id,
+                    )
+                }
+
+        etteroppgjoerDao
+            .hentEtteroppgjoerMedSvarfristUtloept(EtteroppgjoerSvarfrist.EN_MND)
+            .shouldContainExactlyInAnyOrder(etteroppgjoerMedSvarfristUtloept)
     }
 
     @Test
@@ -325,4 +365,27 @@ class EtteroppgjoerDaoTest(
             first().inntektsaar shouldBe 2024
         }
     }
+
+    private fun opprettForbehandling(
+        status: EtteroppgjoerForbehandlingStatus,
+        inntektsaar: Int,
+        varselbrevSendt: LocalDate,
+    ): EtteroppgjoerForbehandling =
+        EtteroppgjoerForbehandling(
+            id = UUID.randomUUID(),
+            status = status,
+            aar = inntektsaar,
+            opprettet = Tidspunkt.now(),
+            sak = sak,
+            brevId = null,
+            innvilgetPeriode = Periode(YearMonth.of(inntektsaar, 1), YearMonth.of(inntektsaar, 12)),
+            kopiertFra = null,
+            sisteIverksatteBehandlingId = UUID.randomUUID(),
+            harMottattNyInformasjon = null,
+            endringErTilUgunstForBruker = null,
+            beskrivelseAvUgunst = null,
+            varselbrevSendt = varselbrevSendt,
+            opphoerSkyldesDoedsfall = null,
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
+        )
 }

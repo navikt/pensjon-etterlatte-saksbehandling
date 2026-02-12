@@ -18,10 +18,7 @@ import java.util.UUID
 class EtteroppgjoerDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun hentEtteroppgjoerMedSvarfristUtloept(
-        inntektsaar: Int,
-        svarfrist: EtteroppgjoerSvarfrist,
-    ): List<Etteroppgjoer>? =
+    fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -33,12 +30,10 @@ class EtteroppgjoerDao(
                         AND eb.varselbrev_sendt IS NOT NULL
                           AND eb.varselbrev_sendt < (now() - interval '${svarfrist.value}')
                           AND eb.status = ?
-                          AND eb.aar = ?
                         """.trimIndent(),
                     )
                 statement.setString(1, EtteroppgjoerStatus.VENTER_PAA_SVAR.name)
                 statement.setString(2, EtteroppgjoerStatus.FERDIGSTILT.name)
-                statement.setInt(3, inntektsaar)
 
                 statement.executeQuery().toList { toEtteroppgjoer() }
             }
@@ -85,7 +80,31 @@ class EtteroppgjoerDao(
                     )
                 statement.setLong(1, sakId.sakId)
                 statement.setInt(2, inntektsaar)
-                statement.executeQuery().singleOrNull { toEtteroppgjoer() }
+                val results = statement.executeQuery().toList { toEtteroppgjoer() }
+
+                if (results.isNotEmpty()) {
+                    krev(results.size == 1) { "Fant flere Etteroppgjør for inntektsår=$inntektsaar og sakId=$sakId" }
+                }
+
+                results.singleOrNull()
+            }
+        }
+
+    fun hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM etteroppgjoer
+                        WHERE status = ?
+                        LIMIT ?
+                        """.trimIndent(),
+                    )
+                statement.setString(1, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER.name)
+                statement.setInt(2, antall)
+                statement.executeQuery().toList { toEtteroppgjoer() }
             }
         }
 

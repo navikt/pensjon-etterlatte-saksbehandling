@@ -76,7 +76,7 @@ class LesSkatteoppgjoerHendelserJob(
         logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt ")
         if (jobbenErAktivert()) {
             skatteoppgjoerHendelserService.lesOgBehandleHendelser(
-                HendelseKjoeringRequest(hendelserBatchSize, ETTEROPPGJOER_AAR, true),
+                HendelseKjoeringRequest(hendelserBatchSize),
             )
         } else {
             logger.info("Avslutter fordi feature toggle er av")

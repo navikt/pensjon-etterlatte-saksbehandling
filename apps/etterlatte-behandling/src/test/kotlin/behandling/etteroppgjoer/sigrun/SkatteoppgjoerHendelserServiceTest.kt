@@ -83,7 +83,7 @@ class SkatteoppgjoerHendelserServiceTest {
         } just runs
 
         runBlocking {
-            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall, 2024, false))
+            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall))
         }
 
         coVerify {

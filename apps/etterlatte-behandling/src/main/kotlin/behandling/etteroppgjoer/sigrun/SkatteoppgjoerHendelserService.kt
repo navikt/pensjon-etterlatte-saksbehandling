@@ -32,31 +32,22 @@ class SkatteoppgjoerHendelserService(
             inTransaction {
                 val hendelsesliste = lesHendelsesliste(request)
 
-                if (!hendelsesliste.hendelser.isEmpty()) {
-                    behandleHendelser(hendelsesliste.hendelser, request)
+                if (hendelsesliste.hendelser.isNotEmpty()) {
+                    behandleHendelser(hendelsesliste.hendelser)
                 }
+
                 hendelsesliste.hendelser.size
             }
 
         return antallLest
     }
 
-    private fun behandleHendelser(
-        hendelsesListe: List<SkatteoppgjoerHendelse>,
-        request: HendelseKjoeringRequest,
-    ) {
+    private fun behandleHendelser(hendelsesListe: List<SkatteoppgjoerHendelse>) {
         measureTimedValue {
             hendelsesListe
                 .count { hendelse ->
+
                     logger.info("Behandler hendelse ${hendelse.sekvensnummer}")
-                    if (hendelse.gjelderPeriode == null) {
-                        logger.error("Hendelse med sekvensnummer ${hendelse.sekvensnummer} mangler periode")
-                        return@count false
-                    }
-                    if (hendelse.gjelderPeriode.toInt() != request.etteroppgjoerAar) {
-                        logger.info("Hendelse med sekvensnummer ${hendelse.sekvensnummer} har ikke relevant periode")
-                        return@count false
-                    }
                     try {
                         return@count behandleHendelse(hendelse)
                     } catch (e: Exception) {
@@ -92,29 +83,27 @@ class SkatteoppgjoerHendelserService(
         val inntektsaar = krevIkkeNull(hendelse.gjelderPeriode?.toInt(), { "Mangler inntektsår" })
         val ident = hendelse.identifikator
 
-        val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)
-        val etteroppgjoer: Etteroppgjoer? =
-            sak?.let { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) }
+        val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD) ?: return false
+        val etteroppgjoer: Etteroppgjoer =
+            sak.let { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(it.id, inntektsaar) } ?: return false
 
         sikkerLogg.info(
-            "Behandler hendelse med sekvensnummer=${hendelse.sekvensnummer} for ident=$ident, sakId=${sak?.id}. Hendelse=${hendelse.toJson()}",
+            "Behandler hendelse med sekvensnummer=${hendelse.sekvensnummer} for ident=$ident, sakId=${sak.id}. Hendelse=${hendelse.toJson()}",
         )
 
-        if (etteroppgjoer != null) {
-            if (hendelse.hendelsetype == null || hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
-                oppdaterEtteroppgjoerStatus(etteroppgjoer, hendelse, sak)
-            } else {
-                logger.warn(
-                    """
-                    Mottok hendelse av type ${hendelse.hendelsetype} på sak ${sak.id}, 
-                    som skal ha etteroppgjør. Hendelsen blir ikke behandlet.
-                    Sekvensnummer: ${hendelse.sekvensnummer}, inntektsår: $inntektsaar
-                    """.trimIndent(),
-                )
-            }
+        if (hendelse.hendelsetype == null || hendelse.hendelsetype == SigrunKlient.HENDELSETYPE_NY) {
+            oppdaterEtteroppgjoerStatus(etteroppgjoer, hendelse, sak)
+        } else {
+            logger.warn(
+                """
+                Mottok hendelse av type ${hendelse.hendelsetype} på sak ${sak.id}, 
+                som skal ha etteroppgjør. Hendelsen blir ikke behandlet.
+                Sekvensnummer: ${hendelse.sekvensnummer}, inntektsår: $inntektsaar
+                """.trimIndent(),
+            )
         }
 
-        return etteroppgjoer != null
+        return true
     }
 
     private fun oppdaterEtteroppgjoerStatus(
@@ -157,13 +146,10 @@ class SkatteoppgjoerHendelserService(
 
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {
         val sisteKjoering = dao.hentSisteKjoering()
-
         return runBlocking { sigrunKlient.hentHendelsesliste(request.antallHendelser, sisteKjoering.nesteSekvensnummer()) }
     }
 }
 
 data class HendelseKjoeringRequest(
     val antallHendelser: Int,
-    val etteroppgjoerAar: Int,
-    val venteMellomKjoeringer: Boolean,
 )

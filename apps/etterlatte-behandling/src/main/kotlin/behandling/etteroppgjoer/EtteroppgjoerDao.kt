@@ -80,7 +80,13 @@ class EtteroppgjoerDao(
                     )
                 statement.setLong(1, sakId.sakId)
                 statement.setInt(2, inntektsaar)
-                statement.executeQuery().singleOrNull { toEtteroppgjoer() }
+                val results = statement.executeQuery().toList { toEtteroppgjoer() }
+
+                if (results.isNotEmpty()) {
+                    krev(results.size == 1) { "Fant flere Etteroppgjør for inntektsår=$inntektsaar og sakId=$sakId" }
+                }
+
+                results.singleOrNull()
             }
         }
 

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.util.UUID
 
@@ -34,6 +32,8 @@ data class Etteroppgjoer(
         status in listOf(EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER)
 
     fun erFerdigstilt() = status == EtteroppgjoerStatus.FERDIGSTILT
+
+    fun kanOppdateresMedSkatteoppgjoerMottatt(): Boolean = venterPaaSkatteoppgjoer() || mottattSkatteoppgjoer()
 }
 
 enum class EtteroppgjoerStatus {

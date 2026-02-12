@@ -17,6 +17,9 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.HendelseKjoeringRequest
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -31,6 +34,7 @@ class SkatteoppgjoerHendelserServiceTest {
     private val sigrunKlient: SigrunKlient = mockk()
     private val etteroppgjoerService: EtteroppgjoerService = mockk()
     private val sakService: SakService = mockk()
+    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = mockk()
 
     @BeforeEach
     fun setup() {
@@ -39,7 +43,8 @@ class SkatteoppgjoerHendelserServiceTest {
 
     @Test
     fun `skal behandle hendelser fra Sigrun og oppdatere status for relevante etteroppgjoer`() {
-        val skatteoppgjoerHendelserService = SkatteoppgjoerHendelserService(dao, sigrunKlient, etteroppgjoerService, sakService)
+        val skatteoppgjoerHendelserService =
+            SkatteoppgjoerHendelserService(dao, sigrunKlient, etteroppgjoerService, sakService)
 
         val sisteSekvensnummer = 10.toLong()
         val sisteKjoering = HendelserKjoering(sisteSekvensnummer, 10, 0, Tidspunkt.now())
@@ -71,7 +76,11 @@ class SkatteoppgjoerHendelserServiceTest {
             Etteroppgjoer(SakId(3L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
 
         coEvery { dao.lagreKjoering(any()) } returns 1
-        coEvery { etteroppgjoerService.oppdaterEtteroppgjoerStatus(any(), any(), any()) } just runs
+        coEvery { etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any(), any()) } just runs
+
+        coEvery {
+            etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any())
+        } just runs
 
         runBlocking {
             skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall, 2024, false))
@@ -89,12 +98,10 @@ class SkatteoppgjoerHendelserServiceTest {
         }
 
         coVerify {
-            etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+            etteroppgjoerService.haandterSkatteoppgjoerMottatt(
                 any(),
                 any(),
-                withArg { status ->
-                    status shouldBe EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
-                },
+                any(),
             )
         }
     }

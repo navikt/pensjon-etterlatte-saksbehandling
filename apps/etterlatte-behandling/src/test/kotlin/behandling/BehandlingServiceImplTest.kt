@@ -499,9 +499,8 @@ internal class BehandlingServiceImplTest {
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
         every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any(), any()) } just runs
-
-        every { etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(any(), any(), any()) } just runs
         every { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any()) } just runs
+        every { etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(any(), any(), any()) } just runs
 
         behandlingService.avbrytBehandling(
             revurdering.id,
@@ -512,7 +511,6 @@ internal class BehandlingServiceImplTest {
 
         verify(exactly = 1) {
             behandlingDaoMock.avbrytBehandling(revurdering.id, AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST, "kom men tar")
-
             etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(
                 revurdering,
                 AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST,
@@ -522,6 +520,7 @@ internal class BehandlingServiceImplTest {
             etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
                 revurdering.sak.id,
                 "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring",
+                any(),
             )
         }
     }
@@ -1209,13 +1208,14 @@ internal class BehandlingServiceImplTest {
             )
         val (behandling, tidligereBehandlinger) =
             when (behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING ->
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
                     Pair(
                         foerstegangsbehandling,
                         emptyList(),
                     )
+                }
 
-                BehandlingType.REVURDERING ->
+                BehandlingType.REVURDERING -> {
                     Pair(
                         revurdering(
                             id = BEHANDLINGS_ID,
@@ -1245,6 +1245,7 @@ internal class BehandlingServiceImplTest {
                             emptyList()
                         },
                     )
+                }
             }
 
         every {

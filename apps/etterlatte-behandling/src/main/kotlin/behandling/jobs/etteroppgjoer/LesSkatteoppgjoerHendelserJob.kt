@@ -4,10 +4,9 @@ import kotlinx.coroutines.sync.Semaphore
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
-import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.HendelseKjoeringRequest
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.LoggerInfo

@@ -4,6 +4,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
@@ -15,6 +16,7 @@ import java.util.UUID
 class EtteroppgjoerTempService(
     private val etteroppgjoerDao: EtteroppgjoerDao,
     private val etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao,
+    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     private val hendelserService: EtteroppgjoerHendelseService,
 ) {
     /**
@@ -72,6 +74,7 @@ class EtteroppgjoerTempService(
                             EtteroppgjoerStatus.VENTER_PAA_SVAR
                         },
                 )
+
                 hendelserService.registrerOgSendEtteroppgjoerHendelse(
                     etteroppgjoerForbehandling = avbruttForbehandling,
                     hendelseType = EtteroppgjoerHendelseType.AVBRUTT,

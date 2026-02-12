@@ -499,7 +499,7 @@ internal class BehandlingServiceImplTest {
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
         every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any(), any()) } just runs
-        every { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any()) } just runs
+        every { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) } just runs
         every { etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(any(), any(), any()) } just runs
 
         behandlingService.avbrytBehandling(
@@ -519,7 +519,7 @@ internal class BehandlingServiceImplTest {
 
             etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
                 revurdering.sak.id,
-                "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring",
+                "Opprett ny forbehandling for etteroppgjør 2024 – revurdering avbrutt pga ugunstig endring",
                 any(),
             )
         }

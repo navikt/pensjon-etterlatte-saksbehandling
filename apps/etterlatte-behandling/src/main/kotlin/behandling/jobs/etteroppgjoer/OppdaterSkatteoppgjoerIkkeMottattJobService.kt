@@ -60,8 +60,8 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
                         EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
                     )
                     etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
-                        etteroppgjoer.sakId,
-                        "Etteroppgjøret for $ETTEROPPGJOER_AAR er klart til behandling",
+                        sakId = etteroppgjoer.sakId,
+                        inntektsAar = ETTEROPPGJOER_AAR,
                     )
                 }
             } catch (e: Error) {

@@ -18,7 +18,8 @@ class EtteroppgjoerOppgaveService(
 ) {
     fun opprettOppgaveForOpprettForbehandling(
         sakId: SakId,
-        merknad: String,
+        merknad: String? = null,
+        inntektsAar: Int,
         opprettetManuelt: Boolean? = false,
     ) {
         // Samme oppgave brukes for oppretting og behandling av forbehandling.
@@ -54,12 +55,13 @@ class EtteroppgjoerOppgaveService(
             }
 
             else -> {
+                val default = "Etteroppgjøret for $inntektsAar er klart til behandling"
                 oppgaveService.opprettOppgave(
                     referanse = "",
                     sakId = sakId,
                     kilde = OppgaveKilde.HENDELSE,
                     type = OppgaveType.ETTEROPPGJOER,
-                    merknad = merknad,
+                    merknad = merknad ?: default,
                 )
             }
         }

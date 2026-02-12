@@ -131,8 +131,8 @@ class EtteroppgjoerService(
         )
 
         etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
-            sak.id,
-            "Etteroppgjøret for ${etteroppgjoer.inntektsaar} er klart til behandling",
+            sakId = sak.id,
+            inntektsAar = etteroppgjoer.inntektsaar,
         )
     }
 

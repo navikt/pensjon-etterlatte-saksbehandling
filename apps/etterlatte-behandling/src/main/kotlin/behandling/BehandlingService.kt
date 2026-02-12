@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -458,8 +459,9 @@ internal class BehandlingServiceImpl(
 
             if (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
                 etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
-                    behandling.sak.id,
-                    "Opprett ny forbehandling – revurdering avbrutt pga ugunstig endring",
+                    sakId = behandling.sak.id,
+                    inntektsAar = ETTEROPPGJOER_AAR,
+                    merknad = "Opprett ny forbehandling for etteroppgjør $ETTEROPPGJOER_AAR – revurdering avbrutt pga ugunstig endring",
                 )
             }
         }

@@ -322,7 +322,7 @@ class EtteroppgjoerForbehandlingService(
         etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
             sakId = sakId,
             opprettetManuelt = opprettetManuelt,
-            merknad = "Etteroppgjøret for $etteroppgjoerAar er klart til behandling",
+            inntektsAar = etteroppgjoerAar,
         )
     }
 
@@ -348,8 +348,8 @@ class EtteroppgjoerForbehandlingService(
         relevanteSaker.map { sakId ->
             try {
                 etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
-                    sakId,
-                    "Etteroppgjøret for $inntektsaar er klart til behandling",
+                    sakId = sakId,
+                    inntektsAar = inntektsaar,
                 )
             } catch (e: Error) {
                 logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)

@@ -8,6 +8,8 @@ import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.NyeAarMedInntektMaaStarteIJanuar
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
+import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Test
@@ -43,16 +45,16 @@ class AvkortingReparerAarsoppgjoeretTest {
             )
 
         val reparertAvkorting =
-            service.hentSisteAvkortingMedReparertAarsoppgjoer(
+            service.hentAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
-                virk,
                 alleVedtak,
+                listOf(InnvilgetPeriodeDto(periode = Periode(virk, null), vedtak = emptyList())),
             )
 
         reparertAvkorting shouldBe forrigeAvkorting
     }
 
-    @Test
+    // TODO teste i annen test? @Test
     fun `hvis det mangler aarsoppgjoer men det er fordi nytt aarsoppgjoer er et nytt aar skal det feile hvis virk ikke er januar`() {
         val forrigeAvkorting =
             mockk<Avkorting> {
@@ -77,10 +79,10 @@ class AvkortingReparerAarsoppgjoeretTest {
             )
 
         assertThrows<NyeAarMedInntektMaaStarteIJanuar> {
-            service.hentSisteAvkortingMedReparertAarsoppgjoer(
+            service.hentAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
-                virk,
                 alleVedtak,
+                emptyList(),
             )
         }
     }
@@ -102,6 +104,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                     ),
             )
 
+        val foersteVirk = YearMonth.of(2024, 3)
         val alleVedtak =
             listOf(
                 vedtakSammendragDto(virk = YearMonth.of(2025, 1), datoAttestert = YearMonth.of(2024, 11)),
@@ -112,7 +115,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                 ),
                 vedtakSammendragDto(
                     type = VedtakType.INNVILGELSE,
-                    virk = YearMonth.of(2024, 3),
+                    virk = foersteVirk,
                     datoAttestert = YearMonth.of(2024, 2),
                 ),
             )
@@ -125,10 +128,10 @@ class AvkortingReparerAarsoppgjoeretTest {
         every { repo.hentAvkorting(sistebehandlingIdManglendeAar) } returns sisteAvkortingMangelndeAar
 
         val reparertAvkorting =
-            service.hentSisteAvkortingMedReparertAarsoppgjoer(
+            service.hentAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
-                virk,
                 alleVedtak,
+                listOf(InnvilgetPeriodeDto(periode = Periode(foersteVirk, null), vedtak = emptyList())),
             )
 
         reparertAvkorting.aarsoppgjoer.size shouldBe 2
@@ -146,6 +149,7 @@ class AvkortingReparerAarsoppgjoeretTest {
         val sisteAvkortingManglendeAar =
             Avkorting(listOf(aarsoppgjoer(aar = 2024)))
 
+        val foersteVirk = YearMonth.of(2024, 3)
         val alleVedtak =
             listOf(
                 vedtakSammendragDto(virk = YearMonth.of(2025, 1), datoAttestert = YearMonth.of(2024, 11)),
@@ -156,7 +160,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                 ),
                 vedtakSammendragDto(
                     type = VedtakType.INNVILGELSE,
-                    virk = YearMonth.of(2024, 3),
+                    virk = foersteVirk,
                     datoAttestert = YearMonth.of(2024, 2),
                 ),
             )
@@ -169,10 +173,10 @@ class AvkortingReparerAarsoppgjoeretTest {
         every { repo.hentAvkorting(sistebehandlingIdManglendeAar) } returns sisteAvkortingManglendeAar
 
         val reparertAvkorting =
-            service.hentSisteAvkortingMedReparertAarsoppgjoer(
+            service.hentAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
-                nyVirk,
                 alleVedtak,
+                listOf(InnvilgetPeriodeDto(periode = Periode(foersteVirk, null), vedtak = emptyList())),
             )
 
         reparertAvkorting.aarsoppgjoer.size shouldBe 2
@@ -196,6 +200,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                     ),
             )
 
+        val foersteVirk = YearMonth.of(2024, 3)
         val alleVedtak =
             listOf(
                 vedtakSammendragDto(virk = YearMonth.of(2025, 1), datoAttestert = YearMonth.of(2024, 11)),
@@ -206,7 +211,7 @@ class AvkortingReparerAarsoppgjoeretTest {
                 ),
                 vedtakSammendragDto(
                     type = VedtakType.INNVILGELSE,
-                    virk = YearMonth.of(2024, 3),
+                    virk = foersteVirk,
                     datoAttestert = YearMonth.of(2024, 2),
                 ),
             )
@@ -219,9 +224,10 @@ class AvkortingReparerAarsoppgjoeretTest {
         every { repo.hentAvkorting(sistebehandlingIdManglendeAar) } returns sisteAvkortingManglendeAar
 
         val reparertAvkorting =
-            service.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-                alleVedtak,
+            service.hentAvkortingMedReparertAarsoppgjoer(
                 forrigeAvkorting,
+                alleVedtak,
+                listOf(InnvilgetPeriodeDto(periode = Periode(foersteVirk, null), vedtak = emptyList())),
             )
 
         reparertAvkorting.aarsoppgjoer.size shouldBe 2

@@ -1,10 +1,11 @@
 package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vedtak.erInnvilgetIAar
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 
 /*
 * Inntektsjobb for 2025 innførte en feil i alle behandlinger som ble gjort automatisk som kompanseres for her.
@@ -23,77 +24,50 @@ class AvkortingReparerAarsoppgjoeret(
 ) {
     private val logger = LoggerFactory.getLogger(AvkortingReparerAarsoppgjoeret::class.java)
 
-    fun hentSisteAvkortingMedReparertAarsoppgjoer(
-        forrigeAvkorting: Avkorting,
-        virkningstidspunkt: YearMonth,
+    fun hentAvkortingMedReparertAarsoppgjoer(
+        avkorting: Avkorting,
         iverksatteVedtakPaaSak: List<VedtakSammendragDto>,
-    ): Avkorting {
-        val sisteAarsoppgjoer = forrigeAvkorting.aarsoppgjoer.maxBy { it.aar }
-        if (sisteAarsoppgjoer.aar < virkningstidspunkt.year) {
-            if (virkningstidspunkt != YearMonth.of(virkningstidspunkt.year, 1)) {
-                throw NyeAarMedInntektMaaStarteIJanuar()
-            }
-        }
-        val behandlingerMedVedtak = iverksatteVedtakPaaSak.map { it.behandlingId }
-        val alleAarMedAarsoppgjoer =
-            avkortingRepository.hentAlleAarsoppgjoer(behandlingerMedVedtak).map { it.aar }.toSet()
-        val alleAarNyAvkortng = forrigeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
+        innvilgedePerioder: List<InnvilgetPeriodeDto>,
+    ): Avkorting = reparer(iverksatteVedtakPaaSak, avkorting, innvilgedePerioder)
 
-        val alleManglendeAar = alleAarMedAarsoppgjoer - alleAarNyAvkortng
-        if (alleManglendeAar.isNotEmpty()) {
-            logger.info(
-                "Fant manglende årsoppgjør. Forrige årsoppgjør-ID: ${forrigeAvkorting.aarsoppgjoer.firstOrNull()?.id}. " +
-                    "Manglende år: " + alleManglendeAar,
-            )
-        } else {
-            logger.info("Fant ingen manglende årsoppgjør. Forrige årsoppgjør-ID: ${forrigeAvkorting.aarsoppgjoer.firstOrNull()?.id}.")
-        }
-        val aarsoppgjoerManglende =
-            alleManglendeAar.map { manglendeAar ->
-                val behandlingId = iverksatteVedtakPaaSak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
-                val avkorting =
-                    avkortingRepository.hentAvkorting(behandlingId)
-                        ?: throw TidligereAvkortingFinnesIkkeException(behandlingId)
-                avkorting.aarsoppgjoer.single { manglendeAar == it.aar }
-            }
-
-        return Avkorting((aarsoppgjoerManglende + forrigeAvkorting.aarsoppgjoer).sortedBy { it.aar })
-    }
-
-    fun hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
+    private fun reparer(
         alleVedtak: List<VedtakSammendragDto>,
-        avkortingSistIverksatt: Avkorting,
+        avkorting: Avkorting,
+        innvilgedePerioder: List<InnvilgetPeriodeDto>,
     ): Avkorting {
         val alleAarMedAarsoppgjoer =
             avkortingRepository
                 .hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId })
                 .map { it.aar }
                 .toSet()
-        val alleAarNyAvkortng = avkortingSistIverksatt.aarsoppgjoer.map { it.aar }.toSet()
-        val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng
+        val alleAarNyAvkortng = avkorting.aarsoppgjoer.map { it.aar }.toSet()
 
-        if (manglerAar) {
-            val alleManglendeAar = alleAarMedAarsoppgjoer - alleAarNyAvkortng
-            if (alleManglendeAar.isNotEmpty()) {
-                logger.info(
-                    "Fant manglende årsoppgjør. Forrige årsoppgjør-ID: ${avkortingSistIverksatt.aarsoppgjoer.firstOrNull()?.id}. " +
-                        "Manglende år: " + alleManglendeAar,
-                )
-            }
-            val aarsoppgjoerManglende =
-                alleManglendeAar.map { manglendeAar ->
-                    val behandlingId = alleVedtak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
-                    val avkorting =
-                        avkortingRepository.hentAvkorting(behandlingId)
-                            ?: throw InternfeilException("Kunne ikke hente avkorting som skal finnes for $behandlingId")
-                    avkorting.aarsoppgjoer.single { manglendeAar == it.aar }
-                }
-            return Avkorting((avkortingSistIverksatt.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar })
-        } else {
-            logger.info("Fant ingen manglende årsoppgjør. Forrige årsoppgjør-ID: ${avkortingSistIverksatt.aarsoppgjoer.firstOrNull()?.id}.")
-            return avkortingSistIverksatt
+        val alleManglendeAar = manglendeAar(alleAarMedAarsoppgjoer, alleAarNyAvkortng, innvilgedePerioder)
+        if (alleManglendeAar.isNotEmpty()) {
+            logger.info(
+                "Fant manglende årsoppgjør. Forrige årsoppgjør-ID: ${avkorting.aarsoppgjoer.firstOrNull()?.id}. " +
+                    "Manglende år: " + alleManglendeAar,
+            )
         }
+        val aarsoppgjoerManglende =
+            alleManglendeAar.map { manglendeAar ->
+                val behandlingId = alleVedtak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
+                val avkortingen =
+                    avkortingRepository.hentAvkorting(behandlingId)
+                        ?: throw TidligereAvkortingFinnesIkkeException(behandlingId)
+                avkortingen.aarsoppgjoer.single { manglendeAar == it.aar }
+            }
+        return Avkorting((avkorting.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar })
     }
+
+    private fun manglendeAar(
+        alleAarMedAarsoppgjoer: Set<Int>,
+        alleAarIAvkorting: Set<Int>,
+        innvilgedePerioder: List<InnvilgetPeriodeDto>,
+    ): Set<Int> =
+        (alleAarMedAarsoppgjoer - alleAarIAvkorting)
+            .filter { aar -> innvilgedePerioder.erInnvilgetIAar(aar) }
+            .toSet()
 }
 
 fun List<VedtakSammendragDto>.sisteLoependeVedtakForAar(aar: Int) =

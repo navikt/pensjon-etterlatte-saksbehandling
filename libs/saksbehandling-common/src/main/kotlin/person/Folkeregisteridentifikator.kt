@@ -68,7 +68,7 @@ class Folkeregisteridentifikator private constructor(
     override fun toString(): String = this.value.replaceRange(6 until 11, "*****")
 }
 
-internal fun firesifretAarstallFraTosifret(
+fun firesifretAarstallFraTosifret(
     year: Int,
     individnummer: Int,
 ): Int =

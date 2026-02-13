@@ -11,6 +11,7 @@ import no.nav.etterlatte.avkorting.regler.faktiskInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.regler.forventetInntektInnvilgetPeriode
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.avkorting.regler.restanse
+import no.nav.etterlatte.avkorting.regler.restanse_v2
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
@@ -401,6 +402,7 @@ object AvkortingRegelkjoring {
         nyInntektsavkorting: Inntektsavkorting,
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
         sanksjoner: List<Sanksjon>,
+        brukNyeReglerAvkorting: Boolean,
     ): Restanse {
         val oppstartNyInntekt = nyInntektsavkorting.grunnlag.periode.fom
         val maanederMedSanksjonIAar =
@@ -410,6 +412,21 @@ object AvkortingRegelkjoring {
                 }.map { maaned ->
                     maaned to sanksjoner.any { it.fom <= maaned && (it.tom == null || it.tom!! >= maaned) }
                 }
+        val maanederInnvilget: FaktumNode<List<MaanedInnvilget>> =
+            if (brukNyeReglerAvkorting) {
+                if (nyInntektsavkorting.grunnlag.maanederInnvilget != null) {
+                    FaktumNode(
+                        verdi = nyInntektsavkorting.grunnlag.maanederInnvilget,
+                        kilde = nyInntektsavkorting.grunnlag.id.toString(),
+                        beskrivelse = "Måneder innvilget i forventet inntekt",
+                    )
+                } else {
+                    throw InternfeilException("Mangler utledning av måneder innvilget i inntekten vi skal finne restanse for. ")
+                }
+            } else {
+                FaktumNode(emptyList(), "", "Placeholder i grunnlag hvis vi ikke bruker nye regler")
+            }
+
         val grunnlag =
             RestanseGrunnlag(
                 tidligereYtelseEtterAvkorting =
@@ -440,18 +457,25 @@ object AvkortingRegelkjoring {
                         kilde = sanksjoner.joinToString(prefix = "[", postfix = "]") { it.id.toString() },
                         beskrivelse = "Måneder i året og om det er en sanksjon for den måneden",
                     ),
+                maanederInnvilget = maanederInnvilget,
             )
+        val regel =
+            if (brukNyeReglerAvkorting) {
+                restanse_v2
+            } else {
+                restanse
+            }
 
         val resultat =
-            restanse.eksekver(
-                KonstantGrunnlag(grunnlag),
-                Periode(fom = fraOgMed, tom = null).tilRegelPeriode(),
+            regel.eksekver(
+                grunnlag = KonstantGrunnlag(grunnlag),
+                periode = Periode(fom = fraOgMed, tom = null).tilRegelPeriode(),
             )
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val (totalRestanse, fordeltRestanse) =
                     resultat.periodiserteResultater
-                        .first()
+                        .single()
                         .resultat.verdi
                 val tidspunkt = Tidspunkt.now()
                 Restanse(
@@ -462,7 +486,7 @@ object AvkortingRegelkjoring {
                     tidspunkt = tidspunkt,
                     kilde =
                         Grunnlagsopplysning.RegelKilde(
-                            navn = restanse.regelReferanse.id,
+                            navn = regel.regelReferanse.id,
                             ts = tidspunkt,
                             versjon = resultat.reglerVersjon,
                         ),

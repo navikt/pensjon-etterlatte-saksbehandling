@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
-import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import org.junit.jupiter.api.Test
@@ -388,6 +387,8 @@ class EtteroppgjoerBeregningResultatTest {
                         spesifikasjon = "",
                         kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                         inntektInnvilgetPeriode = mockk(),
+                        maanederInnvilget = null,
+                        maanederInnvilgetRegelResultat = null,
                     ),
                     "",
                     "",

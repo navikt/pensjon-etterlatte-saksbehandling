@@ -394,11 +394,13 @@ class AvkortingRepository(
             INSERT INTO avkortingsgrunnlag_forventet(
                 id, behandling_id, fom, tom, inntekt_tom, fratrekk_inn_ut, inntekt_utland_tom, fratrekk_inn_aar_utland,
                 spesifikasjon, kilde, aarsoppgjoer_id, relevante_maaneder,
-                overstyrt_innvilga_maaneder_aarsak, overstyrt_innvilga_maaneder_begrunnelse
+                overstyrt_innvilga_maaneder_aarsak, overstyrt_innvilga_maaneder_begrunnelse, maaneder_innvilget,
+                maaneder_innvilget_regel_resultat
             ) VALUES (
                 :id, :behandlingId, :fom, :tom, :inntektTom, :fratrekkInnAar, :inntektUtlandTom, :fratrekkInnAarUtland,
                 :spesifikasjon, :kilde, :aarsoppgjoerId, :relevanteMaaneder,
-                :overstyrtInnvilgaMaanederAarsak, :overstyrtInnvilgaMaanederBegrunnelse
+                :overstyrtInnvilgaMaanederAarsak, :overstyrtInnvilgaMaanederBegrunnelse, :maanederInnvilget::jsonb,
+                :maanederInnvilgetRegelResultat
             )
             """.trimIndent(),
         paramMap =
@@ -417,6 +419,8 @@ class AvkortingRepository(
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
                 "overstyrtInnvilgaMaanederAarsak" to avkortingsgrunnlag.overstyrtInnvilgaMaanederAarsak?.name,
                 "overstyrtInnvilgaMaanederBegrunnelse" to avkortingsgrunnlag.overstyrtInnvilgaMaanederBegrunnelse,
+                "maanederInnvilget" to avkortingsgrunnlag.maanederInnvilget?.toJson(),
+                "maanederInnvilgetRegelResultat" to avkortingsgrunnlag.maanederInnvilgetRegelResultat,
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -429,9 +433,9 @@ class AvkortingRepository(
         statement =
             """
             INSERT INTO avkortingsgrunnlag_faktisk(
-                id, behandling_id, aarsoppgjoer_id, fom, tom, innvilgede_maaneder, loennsinntekt, naeringsinntekt, afp, utlandsinntekt, spesifikasjon, kilde
+                id, behandling_id, aarsoppgjoer_id, fom, tom, innvilgede_maaneder, loennsinntekt, naeringsinntekt, afp, utlandsinntekt, spesifikasjon, kilde, maaneder_innvilget, maaneder_innvilget_regel_resultat
             ) VALUES (
-                :id, :behandlingId, :aarsoppgjoerId, :fom, :tom, :innvilgedeMaaneder, :loennsinntekt, :naeringsinntekt, :afp, :utlandsinntekt, :spesifikasjon, :kilde
+                :id, :behandlingId, :aarsoppgjoerId, :fom, :tom, :innvilgedeMaaneder, :loennsinntekt, :naeringsinntekt, :afp, :utlandsinntekt, :spesifikasjon, :kilde, :maanederInnvilget::jsonb, :maanederInnvilgetRegelResultat
             )
             """.trimIndent(),
         paramMap =
@@ -448,6 +452,8 @@ class AvkortingRepository(
                 "utlandsinntekt" to faktisk.utlandsinntekt,
                 "spesifikasjon" to faktisk.spesifikasjon,
                 "kilde" to faktisk.kilde.toJson(),
+                "maanederInnvilget" to faktisk.maanederInnvilget?.toJson(),
+                "maanederInnvilgetRegelResultat" to faktisk.maanederInnvilgetRegelResultat,
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -637,6 +643,8 @@ class AvkortingRepository(
             },
         overstyrtInnvilgaMaanederBegrunnelse = stringOrNull("overstyrt_innvilga_maaneder_begrunnelse"),
         inntektInnvilgetPeriode = inntektInnvilgetPeriode,
+        maanederInnvilget = stringOrNull("maaneder_innvilget")?.let { objectMapper.readValue(it) },
+        maanederInnvilgetRegelResultat = null, // Vi trenger ikke hente regelresultatet når vi skal bruke verdien
     )
 
     private fun Row.toFaktiskInntekt(
@@ -660,6 +668,8 @@ class AvkortingRepository(
             },
         inntektInnvilgetPeriode = inntektInnvilgetPeriode,
         spesifikasjon = stringOrNull("spesifikasjon") ?: "", // TODO fjern denne når feltet har blitt satt til NOT NULL,
+        maanederInnvilget = stringOrNull("maaneder_innvilget")?.let { objectMapper.readValue(it) },
+        maanederInnvilgetRegelResultat = null, // Vi trenger ikke hente regelresultatet når vi skal bruke verdien
     )
 
     private fun Row.toYtelseFoerAvkorting() =

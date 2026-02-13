@@ -14,6 +14,7 @@ import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
 import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
+import no.nav.etterlatte.avkorting.finnAntallInnvilgaMaanederForAar
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
@@ -64,6 +65,7 @@ import no.nav.etterlatte.sanksjon.LagreSanksjon
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 val REGEL_PERIODE = RegelPeriode(LocalDate.of(2023, 1, 1))
@@ -146,31 +148,55 @@ fun avkortinggrunnlag(
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
     overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
     overstyrtInnvilgaMaanederBegrunnelse: String? = null,
-) = ForventetInntekt(
-    id = id,
-    periode = periode,
-    inntektTom = inntektTom,
-    fratrekkInnAar = fratrekkInnAar,
-    inntektUtlandTom = inntektUtlandTom,
-    fratrekkInnAarUtland = fratrekkInnAarUtland,
-    innvilgaMaaneder = innvilgaMaaneder,
-    spesifikasjon = "Spesifikasjon",
-    kilde = kilde,
-    overstyrtInnvilgaMaanederAarsak = overstyrtInnvilgaMaanederAarsak,
-    overstyrtInnvilgaMaanederBegrunnelse = overstyrtInnvilgaMaanederBegrunnelse,
-    inntektInnvilgetPeriode =
-        BenyttetInntektInnvilgetPeriode(
-            verdi = inntektTom - fratrekkInnAar + inntektUtlandTom - fratrekkInnAarUtland,
-            tidspunkt = Tidspunkt.now(),
-            regelResultat = "".toJsonNode(),
-            kilde =
-                Grunnlagsopplysning.RegelKilde(
-                    navn = "",
-                    ts = Tidspunkt.now(),
-                    versjon = "",
-                ),
-        ),
-)
+): ForventetInntekt {
+    val periodeFom = periode.fom
+    val periodeTom = periode.tom ?: YearMonth.of(periode.fom.year, 12)
+    val maanederInnvilget =
+        finnAntallInnvilgaMaanederForAar(
+            fom = periodeFom,
+            tom = periodeTom,
+            aldersovergang = null,
+            ytelse = emptyList(),
+            brukNyeReglerAvkorting = false,
+        )
+
+    return ForventetInntekt(
+        id = id,
+        periode = periode,
+        inntektTom = inntektTom,
+        fratrekkInnAar = fratrekkInnAar,
+        inntektUtlandTom = inntektUtlandTom,
+        fratrekkInnAarUtland = fratrekkInnAarUtland,
+        innvilgaMaaneder = innvilgaMaaneder,
+        spesifikasjon = "Spesifikasjon",
+        kilde = kilde,
+        overstyrtInnvilgaMaanederAarsak = overstyrtInnvilgaMaanederAarsak,
+        overstyrtInnvilgaMaanederBegrunnelse = overstyrtInnvilgaMaanederBegrunnelse,
+        inntektInnvilgetPeriode =
+            BenyttetInntektInnvilgetPeriode(
+                verdi = inntektTom - fratrekkInnAar + inntektUtlandTom - fratrekkInnAarUtland,
+                tidspunkt = Tidspunkt.now(),
+                regelResultat = "".toJsonNode(),
+                kilde =
+                    Grunnlagsopplysning.RegelKilde(
+                        navn = "",
+                        ts = Tidspunkt.now(),
+                        versjon = "",
+                    ),
+            ),
+        maanederInnvilget = maanederInnvilget.maaneder,
+        maanederInnvilgetRegelResultat = maanederInnvilget.regelResultat,
+    )
+}
+
+fun yearMonthsBetween(
+    start: YearMonth,
+    end: YearMonth,
+): List<YearMonth> {
+    require(!start.isAfter(end))
+    val months = start.until(end, ChronoUnit.MONTHS)
+    return (0..months).map { start.plusMonths(it) }
+}
 
 fun avkortinggrunnlagLagreDto(
     id: UUID = UUID.randomUUID(),
@@ -246,6 +272,8 @@ fun etteroppgjoer(
                     regelResultat = "".toJsonNode(),
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
                 ),
+            maanederInnvilget = null,
+            maanederInnvilgetRegelResultat = null,
         ),
     avkortetYtelse: List<AvkortetYtelse> = emptyList(),
 ) = Etteroppgjoer(

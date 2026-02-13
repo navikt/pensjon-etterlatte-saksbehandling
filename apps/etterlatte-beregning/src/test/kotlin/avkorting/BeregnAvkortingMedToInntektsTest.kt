@@ -119,6 +119,7 @@ class BeregnAvkortingMedToInntektsTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting førstegangsbehandling neste år`(eksisterende: Avkorting) =
@@ -145,6 +146,7 @@ class BeregnAvkortingMedToInntektsTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting revurdering inneværende år`(eksisterende: Avkorting) =
@@ -171,6 +173,7 @@ class BeregnAvkortingMedToInntektsTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting revurdering neste år`(eksisterende: Avkorting) =
@@ -203,5 +206,6 @@ class BeregnAvkortingMedToInntektsTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 }

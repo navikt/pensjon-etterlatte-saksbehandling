@@ -147,6 +147,7 @@ class ApplicationContext {
             reparerAarsoppgjoeret = avkortingReparerAarsoppgjoeret,
             vedtakKlient = vedtaksvurderingKlient,
             behandlingKlient = behandlingKlient,
+            featureToggleService = featureToggleService,
         )
     val beregningOgAvkortingBrevService =
         BeregningOgAvkortingBrevService(

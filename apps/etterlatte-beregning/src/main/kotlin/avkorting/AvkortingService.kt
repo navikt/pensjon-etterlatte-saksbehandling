@@ -3,6 +3,7 @@ package no.nav.etterlatte.avkorting
 import no.nav.etterlatte.avkorting.AvkortingMapper.avkortingForFrontend
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekter
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.beregning.BeregningToggles
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -91,13 +92,17 @@ class AvkortingService(
 
         val forrigeAvkorting =
             when (behandling.behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> null
-                BehandlingType.REVURDERING ->
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    null
+                }
+
+                BehandlingType.REVURDERING -> {
                     hentAvkortingForrigeBehandling(
                         behandling,
                         brukerTokenInfo,
                         behandling.virkningstidspunkt().dato,
                     )
+                }
             }
         if (eksisterendeAvkorting == null && forrigeAvkorting == null) {
             return null
@@ -220,7 +225,9 @@ class AvkortingService(
                     }
                 }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
         // liste av nye grunnlag, hvert element er for et konkret år
         // + måned bruker har aldersovergang (hvis de har det)
@@ -233,6 +240,11 @@ class AvkortingService(
                 sanksjoner = sanksjoner ?: emptyList(),
                 opphoerFom = behandling.opphoerFraOgMed,
                 aldersovergang = aldersovergangMaaned,
+                brukNyeReglerAvkorting =
+                    featureToggleService.isEnabled(
+                        BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
+                        false,
+                    ),
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, oppdatert)
@@ -330,7 +342,9 @@ class AvkortingService(
                     avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, eksisterendeAvkorting)
                 }
 
-                else -> eksisterendeAvkorting
+                else -> {
+                    eksisterendeAvkorting
+                }
             }
 
         val beregnetAvkorting =
@@ -339,6 +353,10 @@ class AvkortingService(
                 beregning,
                 sanksjoner,
                 behandling.opphoerFraOgMed,
+                featureToggleService.isEnabled(
+                    BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
+                    false,
+                ),
             )
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)

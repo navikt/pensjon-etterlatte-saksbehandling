@@ -331,6 +331,7 @@ fun Route.etteroppgjoerRoutes(
 
             post("/omgjoer") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+
                     sjekkEtteroppgjoerEnabled(featureToggleService)
                     val behandling =
                         etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, saksbehandler)

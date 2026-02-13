@@ -6,8 +6,9 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt
+import no.nav.etterlatte.avkorting.regler.MaanederInnvilgetGrunnlag
+import no.nav.etterlatte.avkorting.regler.antallInnvilgedeMaanederForAar
 import no.nav.etterlatte.beregning.Beregning
-import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
@@ -20,18 +21,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.regler.FaktumNode
-import no.nav.etterlatte.libs.regler.Regel
-import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelPeriode
-import no.nav.etterlatte.libs.regler.RegelReferanse
-import no.nav.etterlatte.libs.regler.benytter
-import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
-import no.nav.etterlatte.libs.regler.med
-import no.nav.etterlatte.libs.regler.og
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 /**
@@ -1236,7 +1229,6 @@ data class MaanederInnvilgetResultat(
     val regelResultat: JsonNode?,
 )
 
-// returner subsumsjonsnoden? evt returne resultat + json for regelanvendelse for dokumentasjon
 fun finnAntallInnvilgaMaanederForAar(
     fom: YearMonth,
     tom: YearMonth?,
@@ -1265,7 +1257,6 @@ fun finnAntallInnvilgaMaanederForAar(
     }
     val grunnlag =
         MaanederInnvilgetGrunnlag(
-            aar = FaktumNode(fom.year, "", ""),
             beregningsperioder = FaktumNode(ytelse, "", ""),
             tilOgMed = FaktumNode(tomMaaned, "", ""),
         )
@@ -1284,105 +1275,7 @@ fun finnAntallInnvilgaMaanederForAar(
     )
 }
 
-data class MaanederInnvilgetGrunnlag(
-    val aar: FaktumNode<Int>,
-    val beregningsperioder: FaktumNode<List<YtelseFoerAvkorting>>,
-    val tilOgMed: FaktumNode<YearMonth?>,
-)
-
-val perioderMedYtelse =
-    finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        finnFaktum = MaanederInnvilgetGrunnlag::beregningsperioder,
-        finnFelt = { it },
-    )
-
-val tilOgMed =
-    finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        finnFaktum = MaanederInnvilgetGrunnlag::tilOgMed,
-        finnFelt = { it },
-    )
-
-val aar =
-    finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "TODO()",
-        finnFaktum = MaanederInnvilgetGrunnlag::aar,
-        finnFelt = { it },
-    )
-
-val perioderMedYtelserOgAldersovergang: Regel<MaanederInnvilgetGrunnlag, List<YtelseFoerAvkorting>> =
-    RegelMeta(
-        OMS_GYLDIG_FRA,
-        "",
-        RegelReferanse("", ""),
-    ) benytter perioderMedYtelse og tilOgMed med { beregningsperioder, tilOgMed ->
-        if (tilOgMed == null) {
-            beregningsperioder
-        } else {
-            val perioder = beregningsperioder.filter { it.periode.fom < tilOgMed }
-            if (perioder.isNotEmpty()) {
-                val sistePeriode = perioder.last()
-
-                perioder.dropLast(1) +
-                    sistePeriode.copy(
-                        periode =
-                            sistePeriode.periode.copy(
-                                tom = tilOgMed,
-                            ),
-                    )
-            } else {
-                perioder
-            }
-        }
-    }
-
-val alleMaanederIAaret =
-    RegelMeta(
-        OMS_GYLDIG_FRA,
-        "",
-        RegelReferanse("", ""),
-    ) benytter aar med { year ->
-        (1..12).map { YearMonth.of(year, it) }
-    }
-
-val antallInnvilgedeMaanederForAar: Regel<MaanederInnvilgetGrunnlag, List<MaanedInnvilget>> =
-    RegelMeta(
-        OMS_GYLDIG_FRA,
-        "",
-        RegelReferanse("", ""),
-    ) benytter perioderMedYtelserOgAldersovergang og alleMaanederIAaret med { beregningsperioder, alleMaaneder ->
-        alleMaaneder.map { maaned ->
-            val innvilget =
-                beregningsperioder.any {
-                    it.periode.erMaanedIPerioden(maaned) && it.beregning > 0
-                }
-            MaanedInnvilget(
-                maaned = maaned,
-                innvilget = innvilget,
-            )
-        }
-    }
-
-fun Periode.erMaanedIPerioden(maaned: YearMonth): Boolean = this.fom <= maaned && (this.tom ?: maaned) >= maaned
-
 data class MaanedInnvilget(
     val maaned: YearMonth,
     val innvilget: Boolean,
 )
-
-fun Periode.antallMaanederIPeriode(): Long {
-    val tomEllerDesember =
-        this.tom ?: YearMonth.of(
-            this.fom.year,
-            Month.DECEMBER,
-        )
-
-    return this.fom.until(
-        tomEllerDesember,
-        ChronoUnit.MONTHS,
-    ) + 1L
-}

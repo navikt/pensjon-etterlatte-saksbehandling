@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -11,7 +10,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Month
@@ -56,12 +54,12 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
                 inTransaction {
                     etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                         etteroppgjoer.sakId,
-                        ETTEROPPGJOER_AAR,
+                        etteroppgjoer.inntektsaar,
                         EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
                     )
                     etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
                         sakId = etteroppgjoer.sakId,
-                        inntektsAar = ETTEROPPGJOER_AAR,
+                        inntektsAar = etteroppgjoer.inntektsaar,
                     )
                 }
             } catch (e: Error) {

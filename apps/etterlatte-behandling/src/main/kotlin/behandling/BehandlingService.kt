@@ -451,8 +451,15 @@ internal class BehandlingServiceImpl(
         if (behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER) {
             logger.info("Tilbakestiller etteroppgjøret ved avbrutt revurdering")
 
+            krev(behandling.relatertBehandlingId != null) {
+                "Revurdering mangler forbehandlingId"
+            }
+
+            val forbehandlingId = UUID.fromString(behandling.relatertBehandlingId)
+            val forbehandling = etteroppgjoerTempService.hentForbehandling(forbehandlingId)
+
             etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(
-                behandling,
+                forbehandling,
                 aarsak,
                 hentUtlandstilknytningForSak(behandling.sak.id),
             )
@@ -460,8 +467,8 @@ internal class BehandlingServiceImpl(
             if (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
                 etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
                     sakId = behandling.sak.id,
-                    inntektsAar = ETTEROPPGJOER_AAR,
-                    merknad = "Opprett ny forbehandling for etteroppgjør $ETTEROPPGJOER_AAR – revurdering avbrutt pga ugunstig endring",
+                    inntektsAar = forbehandling.aar,
+                    merknad = "Opprett ny forbehandling for etteroppgjør ${forbehandling.aar} – revurdering avbrutt pga ugunstig endring",
                 )
             }
         }

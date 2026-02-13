@@ -136,7 +136,7 @@ class EtteroppgjoerRevurderingBrevService(
 
             val sak = detaljertForbehandling.forbehandling.sak
             val forhaandsvarselBrev = hentForhaandsvarsel(detaljertForbehandling, behandlingId, brukerTokenInfo)
-            val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+            val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, detaljertForbehandling.forbehandling.aar)
             val summertPensjonsgivendeInntekt = detaljertForbehandling.opplysninger.summertPgi?.summertInntekt
             val mottattSkatteoppgjoer = detaljertForbehandling.forbehandling.mottattSkatteoppgjoer
 

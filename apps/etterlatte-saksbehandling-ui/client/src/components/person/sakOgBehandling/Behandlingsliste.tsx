@@ -104,7 +104,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                         {behandling.behandlingType === 'REVURDERING' &&
                           behandling.aarsak === 'ETTEROPPGJOER' &&
                           behandling.status === 'AVBRUTT' && (
-                            <EtteroppgjoerOmgjoerRevurderingModal behandlingId={behandling.id} />
+                            <EtteroppgjoerOmgjoerRevurderingModal sakId={behandling.sak} behandlingId={behandling.id} />
                           )}
                       </HStack>
                     </Table.DataCell>

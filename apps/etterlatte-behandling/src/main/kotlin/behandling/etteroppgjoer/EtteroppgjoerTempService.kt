@@ -2,8 +2,10 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -16,23 +18,21 @@ import java.util.UUID
 class EtteroppgjoerTempService(
     private val etteroppgjoerDao: EtteroppgjoerDao,
     private val etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao,
-    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     private val hendelserService: EtteroppgjoerHendelseService,
 ) {
+    fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
+        etteroppgjoerForbehandlingDao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
+
     /**
      * Setter status tilbake til MOTTATT_SKATTEOPPGJOER i etteroppgjøret hvis det skal være ny forbehandling, eller
      * VENTER_PAA_SVAR hvis det ikke skal være en ny forbehandling. Etteroppgjørbehandlingen avbrytes også.
      */
     fun tilbakestillEtteroppgjoerVedAvbruttRevurdering(
-        behandling: Behandling,
+        forbehandling: EtteroppgjoerForbehandling,
         aarsak: AarsakTilAvbrytelse?,
         utlandstilknytning: Utlandstilknytning?,
     ) {
-        val sakId = behandling.sak.id
-        val forbehandling =
-            etteroppgjoerForbehandlingDao.hentForbehandling(UUID.fromString(behandling.relatertBehandlingId))
-                ?: throw InternfeilException("Fant ikke forbehandling med relatertBehandlingId=${behandling.relatertBehandlingId}")
-
+        val sakId = forbehandling.sak.id
         val etteroppgjoer =
             etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(sakId, forbehandling.aar)
                 ?: throw InternfeilException("Fant ikke etteroppgjoer for sakId=$sakId og inntektsaar=${forbehandling.aar}")

@@ -89,8 +89,18 @@ class SkatteoppgjoerHendelserService(
         val ident = hendelse.identifikator
 
         val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD) ?: return false
+
         val etteroppgjoer =
-            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar) ?: return false
+            try {
+                etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
+            } catch (e: Exception) {
+                logger.error(
+                    "Feilet ved innhenting av etteroppgjør for sakId=${sak.id} og inntektsår=$inntektsaar, " +
+                        "sekvensnummer=${hendelse.sekvensnummer}",
+                    e,
+                )
+                return false
+            }
 
         sikkerLogg.info(
             "Behandler hendelse sekvensnummer=${hendelse.sekvensnummer}, ident=$ident, sakId=${sak.id}. " +

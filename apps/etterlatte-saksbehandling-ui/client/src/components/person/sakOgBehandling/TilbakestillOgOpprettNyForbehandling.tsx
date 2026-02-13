@@ -5,15 +5,20 @@ import { isPending, mapResult } from '~shared/api/apiUtils'
 import { opprettEtteroppgjoerForbehandlingOppgave } from '~shared/api/etteroppgjoer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
+import { useState } from 'react'
+import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/VelgEtteroppgjoersAar'
 
 type IProps = {
   sakId: number
 }
 
 export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
+  const [valgtEtteroppgjoer, setValgtEtteroppgjoer] = useState<string>('')
+
   const [opprettForbehandlingOppgaveStatus, opprettForbehandlingOppgaveFetch] = useApiCall(
     opprettEtteroppgjoerForbehandlingOppgave
   )
+
   return (
     <Box marginBlock="5 0">
       <VStack gap="4">
@@ -22,12 +27,27 @@ export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
             I tilfelle forbehandling, eller etteroppgjøret er ferdigstilt med feil informasjon, kan etteroppgjøret
             tilbakestilles og ny forbehandling opprettes.
           </InlineMessage>
+
+          <Box marginBlock="5 0">
+            <VelgEtteroppgjoersAar
+              sakId={sakId.toString()}
+              value={valgtEtteroppgjoer}
+              onChange={setValgtEtteroppgjoer}
+            />
+          </Box>
+
           <Box marginBlock="5 0">
             <Button
               loading={isPending(opprettForbehandlingOppgaveStatus)}
+              disabled={!valgtEtteroppgjoer}
               variant="secondary"
-              onClick={() => opprettForbehandlingOppgaveFetch(sakId)}
               icon={<ArrowUndoIcon />}
+              onClick={() =>
+                opprettForbehandlingOppgaveFetch({
+                  sakId,
+                  inntektsaar: valgtEtteroppgjoer,
+                })
+              }
             >
               Tilbakestill etteroppgjøret og opprett ny forbehandling
             </Button>

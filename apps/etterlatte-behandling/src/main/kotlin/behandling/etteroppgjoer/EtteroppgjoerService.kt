@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -43,19 +44,15 @@ class EtteroppgjoerService(
     val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     val sigrunKlient: SigrunKlient,
 ) {
-    fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer =
-        dao
-            .hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
-            ?.takeIf { !it.erFerdigstilt() }
-            ?: throw InternfeilException("Fant ikke aktivt etteroppgjoer ($ETTEROPPGJOER_AAR) for sak $sakId")
-
     fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer>? =
         dao.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+    ): Etteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) ?: throw FantIkkEtteroppgjoer(sakId, inntektsaar)
+
+    fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
 
     fun hentEtteroppgjoerSakerIBulk(
         inntektsaar: Int,

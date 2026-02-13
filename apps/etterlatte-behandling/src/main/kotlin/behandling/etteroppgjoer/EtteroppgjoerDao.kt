@@ -63,6 +63,22 @@ class EtteroppgjoerDao(
         }
     }
 
+    fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM etteroppgjoer
+                        WHERE sak_id = ?
+                        """.trimIndent(),
+                    )
+                statement.setLong(1, sakId.sakId)
+                statement.executeQuery().toList { toEtteroppgjoer() }
+            }
+        }
+
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,

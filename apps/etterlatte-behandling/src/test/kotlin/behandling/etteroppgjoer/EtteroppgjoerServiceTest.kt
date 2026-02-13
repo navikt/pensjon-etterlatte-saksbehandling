@@ -161,28 +161,6 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `skal kaste feil hvis ikke aktivt etteroppgjør for sak`() {
-        val ctx = TestContext(sakId)
-        ctx.ingenEtteroppgjoer()
-
-        assertThrows<InternfeilException> {
-            ctx.service.hentAktivtEtteroppgjoerForSak(sakId)
-        }
-
-        ctx.returnerEtteroppgjoer(
-            Etteroppgjoer(
-                sakId = sakId,
-                inntektsaar = ETTEROPPGJOER_AAR,
-                status = EtteroppgjoerStatus.FERDIGSTILT,
-            ),
-        )
-
-        assertThrows<InternfeilException> {
-            ctx.service.hentAktivtEtteroppgjoerForSak(sakId)
-        }
-    }
-
-    @Test
     fun `skal opprette etteroppgjør med status MOTTATT_SKATTEOPPGJOER hvis vi får svar fra sigrun`() {
         val ctx = TestContext(sakId)
         ctx.sigrunGirSvar()

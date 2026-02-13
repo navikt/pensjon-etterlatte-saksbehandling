@@ -15,16 +15,26 @@ export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Ette
   return apiClient.get(`/etteroppgjoer/${sakId}`)
 }
 
-export const opprettEtteroppgjoerForbehandlingIDev = async (
-  sakId: number
-): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
-  return apiClient.post(`/etteroppgjoer/${sakId}/kundev-opprett-forbehandling`, {})
+export const hentEtteroppgjoerListe = async (sakId: string): Promise<ApiResponse<Etteroppgjoer[]>> => {
+  return apiClient.get(`/etteroppgjoer/${sakId}/liste`)
 }
 
-export const opprettEtteroppgjoerForbehandlingOppgave = async (
+export const opprettEtteroppgjoerForbehandlingIDev = async (args: {
   sakId: number
-): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
-  return apiClient.post(`/etteroppgjoer/${sakId}/tilbakestill-og-opprett-forbehandlingsoppgave`, {})
+  inntektsaar: string
+}): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+  return apiClient.post(`/etteroppgjoer/${args.sakId}/kundev-opprett-forbehandling`, {
+    inntektsaar: args.inntektsaar,
+  })
+}
+
+export const opprettEtteroppgjoerForbehandlingOppgave = async (args: {
+  sakId: number
+  inntektsaar: string
+}): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+  return apiClient.post(`/etteroppgjoer/${args.sakId}/tilbakestill-og-opprett-forbehandlingsoppgave`, {
+    inntektsaar: args.inntektsaar,
+  })
 }
 
 export const opprettEtteroppgoerForbehandling = async (args: {

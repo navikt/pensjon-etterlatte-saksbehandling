@@ -17,6 +17,7 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
@@ -484,11 +485,18 @@ internal class BehandlingServiceImplTest {
     fun `avbryt revurdering for etteroppgjoer tilbakestiller ogsaa etteroppgjoeret`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
+        val forbehandlingId = UUID.randomUUID().toString()
         val revurdering =
             revurdering(
                 sakId = randomSakId(),
                 revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
+                relatertBehandlingId = forbehandlingId,
             )
+
+        val forbehandling =
+            mockk<EtteroppgjoerForbehandling>(relaxed = true) {
+                every { aar } returns 2024
+            }
 
         every { behandlingDaoMock.hentBehandlingerForSak(revurdering.sak.id) } returns listOf(revurdering)
         every { behandlingDaoMock.hentBehandling(revurdering.id) } returns revurdering
@@ -501,6 +509,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any(), any()) } just runs
         every { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) } just runs
         every { etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(any(), any(), any()) } just runs
+        every { etteroppgjoerTempService.hentForbehandling(any()) } returns forbehandling
 
         behandlingService.avbrytBehandling(
             revurdering.id,
@@ -512,7 +521,7 @@ internal class BehandlingServiceImplTest {
         verify(exactly = 1) {
             behandlingDaoMock.avbrytBehandling(revurdering.id, AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST, "kom men tar")
             etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(
-                revurdering,
+                forbehandling,
                 AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST,
                 null,
             )

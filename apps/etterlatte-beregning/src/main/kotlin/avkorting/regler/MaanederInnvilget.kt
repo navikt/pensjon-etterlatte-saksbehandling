@@ -22,7 +22,7 @@ data class MaanederInnvilgetGrunnlag(
 val perioderMedYtelse =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
+        beskrivelse = "Beregningsperiodene i årsoppgjøret",
         finnFaktum = MaanederInnvilgetGrunnlag::beregningsperioder,
         finnFelt = { it },
     )
@@ -30,33 +30,38 @@ val perioderMedYtelse =
 val tilOgMed =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
+        beskrivelse = "En til-og-med-dato satt for året",
         finnFaktum = MaanederInnvilgetGrunnlag::tilOgMed,
         finnFelt = { it },
     )
 
-val perioderMedYtelserOgAldersovergang: Regel<MaanederInnvilgetGrunnlag, List<YtelseFoerAvkorting>> =
+val ytelsesperioderJustertForTilOgMed: Regel<MaanederInnvilgetGrunnlag, List<YtelseFoerAvkorting>> =
     RegelMeta(
         OMS_GYLDIG_FRA,
-        "",
-        RegelReferanse("", ""),
+        "Finner de relevante ytelsesperiodene avhengig av om vi har en til-og-med-dato",
+        RegelReferanse("JUSTERTE-BEREGNINGSPERIODER", "1.0"),
     ) benytter perioderMedYtelse og tilOgMed med { beregningsperioder, tilOgMed ->
         if (tilOgMed == null) {
             beregningsperioder
         } else {
-            val perioder = beregningsperioder.filter { it.periode.fom < tilOgMed }
-            if (perioder.isNotEmpty()) {
-                val sistePeriode = perioder.last()
+            val perioderFoerTilOgMed = beregningsperioder.filter { it.periode.fom < tilOgMed }
+            if (perioderFoerTilOgMed.isNotEmpty()) {
+                val sistePeriode = perioderFoerTilOgMed.last()
+                val sistePeriodeTilOgMed = sistePeriode.periode.tom
 
-                perioder.dropLast(1) +
-                    sistePeriode.copy(
-                        periode =
-                            sistePeriode.periode.copy(
-                                tom = tilOgMed,
-                            ),
-                    )
+                if (sistePeriodeTilOgMed != null && sistePeriodeTilOgMed < tilOgMed) {
+                    perioderFoerTilOgMed
+                } else {
+                    perioderFoerTilOgMed.dropLast(1) +
+                        sistePeriode.copy(
+                            periode =
+                                sistePeriode.periode.copy(
+                                    tom = tilOgMed,
+                                ),
+                        )
+                }
             } else {
-                perioder
+                perioderFoerTilOgMed
             }
         }
     }
@@ -64,8 +69,8 @@ val perioderMedYtelserOgAldersovergang: Regel<MaanederInnvilgetGrunnlag, List<Yt
 val alleMaanederIAaret =
     RegelMeta(
         OMS_GYLDIG_FRA,
-        "",
-        RegelReferanse("", ""),
+        "Gir en liste av alle månedene i året",
+        RegelReferanse("MAANEDER-I-AARET", "1.0"),
     ) benytter perioderMedYtelse med { perioder ->
         val aar =
             perioder
@@ -74,12 +79,12 @@ val alleMaanederIAaret =
         (1..12).map { YearMonth.of(aar, it) }
     }
 
-val antallInnvilgedeMaanederForAar: Regel<MaanederInnvilgetGrunnlag, List<MaanedInnvilget>> =
+val erMaanederForAaretInnvilget: Regel<MaanederInnvilgetGrunnlag, List<MaanedInnvilget>> =
     RegelMeta(
         OMS_GYLDIG_FRA,
-        "",
-        RegelReferanse("", ""),
-    ) benytter perioderMedYtelserOgAldersovergang og alleMaanederIAaret med { beregningsperioder, alleMaaneder ->
+        "Finner om hver måned i året har en innvilget ytelse > 0",
+        RegelReferanse("MAANEDER-INNVILGET-MED-YTELSE", "1.0"),
+    ) benytter ytelsesperioderJustertForTilOgMed og alleMaanederIAaret med { beregningsperioder, alleMaaneder ->
         alleMaaneder.map { maaned ->
             val innvilget =
                 beregningsperioder.any {

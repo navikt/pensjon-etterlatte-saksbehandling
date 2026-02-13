@@ -7,7 +7,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt
 import no.nav.etterlatte.avkorting.AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt
 import no.nav.etterlatte.avkorting.regler.MaanederInnvilgetGrunnlag
-import no.nav.etterlatte.avkorting.regler.antallInnvilgedeMaanederForAar
+import no.nav.etterlatte.avkorting.regler.erMaanederForAaretInnvilget
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
@@ -1261,7 +1261,7 @@ fun finnAntallInnvilgaMaanederForAar(
             tilOgMed = FaktumNode(tomMaaned, "", ""),
         )
     val antallInvilgedeMaaneder =
-        antallInnvilgedeMaanederForAar.anvend(
+        erMaanederForAaretInnvilget.anvend(
             grunnlag,
             periode =
                 RegelPeriode(

@@ -197,4 +197,5 @@ data class RevurderingInfoDto(
 
 data class OpprettEtteroppgjoerRevurderingRequest(
     val opprinnelse: BehandlingOpprinnelse,
+    val inntektsaar: Int,
 )

@@ -809,6 +809,13 @@ class FantIkkeForbehandling(
         detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
     )
 
+class FantIkkEtteroppgjoer(
+    val sakId: SakId,
+) : IkkeFunnetException(
+        code = "MANGLER_ETTEROPPGJOER",
+        detail = "Fant ikke etteroppgjør for sakId=$sakId",
+    )
+
 class ForbehandlingKanIkkeEndres :
     IkkeTillattException(
         code = "FORBEHANDLINGEN_KAN_IKKE_ENDRES",

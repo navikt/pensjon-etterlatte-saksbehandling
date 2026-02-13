@@ -11,6 +11,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeForbehandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -50,10 +52,12 @@ class EtteroppgjoerRevurderingService(
 ) {
     fun opprettEtteroppgjoerRevurdering(
         sakId: SakId,
+        inntektsaar: Int,
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val etteroppgjoer = inTransaction { etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId) }
+        val etteroppgjoer =
+            inTransaction { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) } ?: throw FantIkkEtteroppgjoer(sakId)
         val sisteFerdigstilteForbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling
 
         krevIkkeNull(sisteFerdigstilteForbehandlingId) {

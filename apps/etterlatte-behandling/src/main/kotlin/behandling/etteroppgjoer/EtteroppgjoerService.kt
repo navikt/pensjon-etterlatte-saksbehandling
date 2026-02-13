@@ -57,6 +57,8 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
 
+    fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
+
     fun hentEtteroppgjoerSakerIBulk(
         inntektsaar: Int,
         antall: Int,

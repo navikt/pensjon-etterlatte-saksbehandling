@@ -79,6 +79,15 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(etteroppgjoer)
             }
 
+            get("liste") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                val etteroppgjoer =
+                    inTransaction {
+                        etteroppgjoerService.hentEtteroppgjoerForSak(sakId)
+                    }
+                call.respond(etteroppgjoer)
+            }
+
             post("/kundev-opprett-forbehandling") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 if (appIsInGCP() && !isDev()) {

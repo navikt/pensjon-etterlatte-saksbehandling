@@ -15,6 +15,10 @@ export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Ette
   return apiClient.get(`/etteroppgjoer/${sakId}`)
 }
 
+export const hentEtteroppgjoerListe = async (sakId: string): Promise<ApiResponse<Etteroppgjoer[]>> => {
+  return apiClient.get(`/etteroppgjoer/${sakId}/liste`)
+}
+
 export const opprettEtteroppgjoerForbehandlingIDev = async (
   sakId: number
 ): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {

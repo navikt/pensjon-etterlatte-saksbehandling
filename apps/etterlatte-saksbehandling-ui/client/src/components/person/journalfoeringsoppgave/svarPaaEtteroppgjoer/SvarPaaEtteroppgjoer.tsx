@@ -16,30 +16,37 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { Sidebar } from '~shared/components/Sidebar'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
+import { hentEtteroppgjoerListe } from '~shared/api/etteroppgjoer'
+import { EtteroppgjoerSelect } from '~components/etteroppgjoer/components/VelgEtteroppgjoer'
 
 export const SvarPaaEtteroppgjoer = () => {
   useSidetittel('Svar på etteroppgjør')
 
   const { oppgaveId } = useParams()
-
-  const {
-    state: { opprinnelse },
-  } = useLocation()
+  const location = useLocation()
+  const opprinnelse = location.state?.opprinnelse
 
   if (!oppgaveId) {
     return <Alert variant="error">Oppgave ID ligger ikke med i URL</Alert>
   }
 
   const [begrunnelse, setBegrunnelse] = useState<string>('')
+  const [valgtEtteroppgjoer, setValgtEtteroppgjoer] = useState<string>('')
 
   const [hentOppgaveResult, hentOppgaveFetch] = useApiCall(hentOppgave)
-
   const [ferdigstillOppgaveResult, ferdigstillOppgaveRequest] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingEtteroppgjoer)
+  const [, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerListe)
 
   const opprettRevurdering = (oppgave: OppgaveDTO) => {
+    if (!valgtEtteroppgjoer) return
+
     opprettRevurderingRequest(
-      { sakId: oppgave.sakId, opprinnelse: !!opprinnelse ? opprinnelse : Opprinnelse.UKJENT },
+      {
+        sakId: oppgave.sakId,
+        opprinnelse: opprinnelse ?? Opprinnelse.UKJENT,
+        inntektsaar: valgtEtteroppgjoer,
+      },
       () => {
         avsluttOppgave(oppgave)
       }
@@ -53,8 +60,14 @@ export const SvarPaaEtteroppgjoer = () => {
   }
 
   useEffect(() => {
-    hentOppgaveFetch(oppgaveId!)
+    hentOppgaveFetch(oppgaveId)
   }, [oppgaveId])
+
+  useEffect(() => {
+    if (hentOppgaveResult.status === 'success') {
+      hentEtteroppgjoerFetch(hentOppgaveResult.data.sakId.toString())
+    }
+  }, [hentOppgaveResult])
 
   return mapResult(hentOppgaveResult, {
     pending: <Spinner label="Henter oppgaver..." />,
@@ -62,6 +75,7 @@ export const SvarPaaEtteroppgjoer = () => {
     success: (oppgave) => (
       <>
         <StatusBar ident={oppgave.fnr} />
+
         <HStack height="100%" minHeight="100vh" wrap={false}>
           <Box paddingInline="16" paddingBlock="16 4" width="100%">
             <VStack gap="4" maxWidth="50rem">
@@ -79,9 +93,15 @@ export const SvarPaaEtteroppgjoer = () => {
                 forbehandlingen.
               </BodyShort>
 
+              <EtteroppgjoerSelect
+                sakId={oppgave.sakId.toString()}
+                value={valgtEtteroppgjoer}
+                onChange={setValgtEtteroppgjoer}
+              />
+
               <Textarea
                 label="Begrunnelse (valgfri)"
-                value={begrunnelse || ''}
+                value={begrunnelse}
                 onChange={(e) => setBegrunnelse(e.target.value)}
               />
 
@@ -94,6 +114,7 @@ export const SvarPaaEtteroppgjoer = () => {
                 apiResult: opprettRevurderingResult,
                 errorMessage: 'Feil under opprettelse av revurdering',
               })}
+
               <HStack justify="space-between">
                 <Button
                   variant="secondary"
@@ -101,13 +122,16 @@ export const SvarPaaEtteroppgjoer = () => {
                 >
                   Avbryt
                 </Button>
+
                 <HStack gap="4">
                   <Button
                     loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
+                    disabled={!valgtEtteroppgjoer}
                     onClick={() => opprettRevurdering(oppgave)}
                   >
                     Opprett revurdering
                   </Button>
+
                   <Button
                     loading={isPending(opprettRevurderingResult) || isPending(ferdigstillOppgaveResult)}
                     onClick={() => avsluttOppgave(oppgave)}
@@ -118,6 +142,7 @@ export const SvarPaaEtteroppgjoer = () => {
               </HStack>
             </VStack>
           </Box>
+
           <Sidebar>
             <DokumentlisteLiten fnr={oppgave.fnr!} />
           </Sidebar>

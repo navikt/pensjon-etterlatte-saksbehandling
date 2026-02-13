@@ -44,12 +44,6 @@ class EtteroppgjoerService(
     val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     val sigrunKlient: SigrunKlient,
 ) {
-    fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer =
-        dao
-            .hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
-            ?.takeIf { !it.erFerdigstilt() }
-            ?: throw InternfeilException("Fant ikke aktivt etteroppgjoer ($ETTEROPPGJOER_AAR) for sak $sakId")
-
     fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer>? =
         dao.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 

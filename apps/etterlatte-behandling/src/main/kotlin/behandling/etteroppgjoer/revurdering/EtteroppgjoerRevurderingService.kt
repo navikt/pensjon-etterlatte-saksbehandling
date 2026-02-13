@@ -65,7 +65,7 @@ class EtteroppgjoerRevurderingService(
         val (revurdering, sisteIverksatteBehandling) =
             inTransaction {
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
-                val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
 
                 sjekkKanOppretteEtteroppgjoerRevurdering(etteroppgjoer, sisteFerdigstilteForbehandlingId)
 

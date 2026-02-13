@@ -53,5 +53,5 @@ export const tekstSanksjon: Record<SanksjonType, string> = {
   OPPHOER: 'Opphør',
   STANS: 'Stans',
   UTESTENGING: 'Utestenging',
-  IKKE_INNVILGET_PERIODE: 'Ikke innvilget periode',
+  IKKE_INNVILGET_PERIODE: 'Vilkår ikke oppfylt',
 }

@@ -6,19 +6,7 @@ import { IBehandlingReducer, oppdaterAvkorting } from '~store/reducers/Behandlin
 import { behandlingErRedigerbar, hasValue } from '~components/behandling/felles/utils'
 import { isFailure, isPending, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import {
-  Alert,
-  BodyShort,
-  Box,
-  Button,
-  Detail,
-  Heading,
-  HStack,
-  ReadMore,
-  Table,
-  Textarea,
-  VStack,
-} from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Detail, Heading, HStack, Table, Textarea, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterDato, formaterMaanednavnAar } from '~utils/formatering/dato'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
@@ -169,35 +157,16 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
         success: () => (
           <VStack gap="4">
             <Heading size="small" level="2">
-              Ikke innvilgede perioder
+              Vilkår ikke oppfylt tilbake i tid
             </Heading>
 
             <Box>
+              <HjemmelLenke tittel="Folketrygdloven § 17-8" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-8" />
               <BodyShort spacing>
-                TODO: Når en bruker har en sanksjon for en periode, vil ikke omstillingsstønaden bli utbetalt. Hvis det
-                er restanse fra endringer i forventet årsinntekt vil heller ikke den bli hentet inn i sanksjonsperioden,
-                men omfordelt på måneder etter sanksjon.
+                Når bruker har en periode tilbake i tid der vilkårene ikke er oppfylt vil omstillingsstønaden stanses i
+                denne perioden. Ved å legge dato tilbake i tid vil dette føre til en feilutbetaling i stønaden til
+                bruker.
               </BodyShort>
-              <ReadMore header="Når skal ikke innvilget periode brukes?">
-                <BodyShort spacing>
-                  Dersom den gjenlevende ikke følger opp aktivitetskravet i{' '}
-                  <HjemmelLenke tittel="§ 17-7" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-7" />, skal
-                  omstillingsstønaden stanses inntil vilkårene for å motta ytelsen igjen er oppfylt.
-                </BodyShort>
-                <BodyShort spacing>
-                  Dersom den gjenlevende uten rimelig grunn sier opp sin stilling, nekter å ta imot tilbudt arbeid,
-                  unnlater å gjenoppta sitt arbeidsforhold etter endt foreldrepermisjon, nekter å delta i
-                  arbeidsmarkedstiltak eller unnlater å møte ved innkalling til arbeids- og velferdsetaten, faller
-                  omstillingsstønaden bort én måned.
-                </BodyShort>
-                <BodyShort>
-                  Dersom den gjenlevende har gitt uriktige opplysninger om forhold som har betydning for retten til
-                  ytelser etter dette kapitlet, og han eller hun var klar over eller burde vært klar over dette, kan
-                  vedkommende utestenges fra rett til stønad i inntil tre måneder første gang og inntil seks måneder ved
-                  gjentakelser. Det samme gjelder dersom den gjenlevende har unnlatt å gi opplysninger av betydning for
-                  retten til ytelser.
-                </BodyShort>
-              </ReadMore>
             </Box>
 
             <TableBox>
@@ -278,7 +247,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
                   ) : (
                     <Table.Row>
                       <Table.DataCell align="center" colSpan={redigerbar ? 7 : 6}>
-                        Bruker har ingen sanksjoner
+                        Ingen perioder registrert
                       </Table.DataCell>
                     </Table.Row>
                   )}
@@ -298,7 +267,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
             {visForm && (
               <form onSubmit={handleSubmit(submitIkkeInnvilgetPeriode)}>
                 <Heading size="small" level="3" spacing>
-                  Ny ikke innvilget periode
+                  Legg inn periode
                 </Heading>
                 <VStack gap="4" align="start">
                   <HStack gap="4">
@@ -366,7 +335,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
                     setVisForm(true)
                   }}
                 >
-                  Legg til ikke innvilget periode
+                  Legg til periode
                 </Button>
               </HStack>
             )}

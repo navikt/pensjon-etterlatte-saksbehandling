@@ -1,7 +1,7 @@
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Button, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlingerOgKanskjeAnnenSak } from '~components/person/typer'
-import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { SakOversiktHeader } from '~components/person/sakOgBehandling/SakOversiktHeader'
@@ -21,13 +21,12 @@ import { hentGosysOppgaverForPerson } from '~shared/api/gosys'
 import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/ForenkletGosysOppgaverTable'
 import { OpprettOppfoelgingsoppgaveModal } from '~components/oppgavebenk/oppgaveModal/oppfoelgingsOppgave/OpprettOppfoelgingsoppgaveModal'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
-import { opprettEtteroppgjoerForbehandlingIDev } from '~shared/api/etteroppgjoer'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { SakType } from '~shared/types/sak'
 import { EtteroppgjoerForbehandlingTabell } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingTabell'
-import { SandboxIcon } from '@navikt/aksel-icons'
+import { OpprettEtteroppgjoerForbehandlingIDev } from '~components/etteroppgjoer/components/OpprettEtteroppgjoerForbehandlingIDev'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -65,7 +64,6 @@ export const SakOversikt = ({
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
   const [gosysOppgaverResult, gosysOppgaverFetch] = useApiCall(hentGosysOppgaverForPerson)
-  const [opprettForbehandlingStatus, opprettForbehandlingFetch] = useApiCall(opprettEtteroppgjoerForbehandlingIDev)
 
   const person = usePerson()
 
@@ -194,23 +192,7 @@ export const SakOversikt = ({
                 <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
                   <EtteroppgjoerForbehandlingTabell sakId={sak.id} />
-                  {etteroppgjoerForbehandlingKnappEnabled && (
-                    <Box marginBlock="5">
-                      {mapResult(opprettForbehandlingStatus, {
-                        pending: <Spinner label="Oppretter etteroppgjør" />,
-                        error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-                      })}
-
-                      <Button
-                        loading={isPending(opprettForbehandlingStatus)}
-                        variant="secondary"
-                        onClick={() => opprettForbehandlingFetch(sak.id)}
-                        icon={<SandboxIcon />}
-                      >
-                        Opprett etteroppgjør forbehandling (kun i dev)
-                      </Button>
-                    </Box>
-                  )}
+                  {etteroppgjoerForbehandlingKnappEnabled && <OpprettEtteroppgjoerForbehandlingIDev sakId={sak.id} />}
                 </VStack>
               )}
             </VStack>

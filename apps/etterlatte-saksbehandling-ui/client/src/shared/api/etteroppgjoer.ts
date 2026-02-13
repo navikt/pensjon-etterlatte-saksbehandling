@@ -19,16 +19,22 @@ export const hentEtteroppgjoerListe = async (sakId: string): Promise<ApiResponse
   return apiClient.get(`/etteroppgjoer/${sakId}/liste`)
 }
 
-export const opprettEtteroppgjoerForbehandlingIDev = async (
+export const opprettEtteroppgjoerForbehandlingIDev = async (args: {
   sakId: number
-): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
-  return apiClient.post(`/etteroppgjoer/${sakId}/kundev-opprett-forbehandling`, {})
+  inntektsaar: string
+}): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+  return apiClient.post(`/etteroppgjoer/${args.sakId}/kundev-opprett-forbehandling`, {
+    inntektsaar: args.inntektsaar,
+  })
 }
 
-export const opprettEtteroppgjoerForbehandlingOppgave = async (
+export const opprettEtteroppgjoerForbehandlingOppgave = async (args: {
   sakId: number
-): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
-  return apiClient.post(`/etteroppgjoer/${sakId}/tilbakestill-og-opprett-forbehandlingsoppgave`, {})
+  inntektsaar: string
+}): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
+  return apiClient.post(`/etteroppgjoer/${args.sakId}/tilbakestill-og-opprett-forbehandlingsoppgave`, {
+    inntektsaar: args.inntektsaar,
+  })
 }
 
 export const opprettEtteroppgoerForbehandling = async (args: {

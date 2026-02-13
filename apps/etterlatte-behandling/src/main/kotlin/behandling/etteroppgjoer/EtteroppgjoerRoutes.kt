@@ -93,9 +93,13 @@ fun Route.etteroppgjoerRoutes(
                 if (appIsInGCP() && !isDev()) {
                     call.respond(HttpStatusCode.NotFound)
                 }
+
+                val request = call.receive<OpprettEtteroppgjeorForbehandlingIDev>()
+                val inntektsaar = request.inntektsaar
+
                 kunSkrivetilgang {
                     inTransaction {
-                        val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
 
                         krev(etteroppgjoer.venterPaaSkatteoppgjoer() || etteroppgjoer.mottattSkatteoppgjoer()) {
                             "Etteroppgjør for sak $sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling"
@@ -124,7 +128,6 @@ fun Route.etteroppgjoerRoutes(
                     inTransaction {
                         val etteroppgjoer =
                             etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
-                                ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjør for sak $sakId")
 
                         if (etteroppgjoer.venterPaaSkatteoppgjoer()) {
                             throw InternfeilException(
@@ -364,6 +367,10 @@ private fun sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService: Fea
         )
     }
 }
+
+data class OpprettEtteroppgjeorForbehandlingIDev(
+    val inntektsaar: Int,
+)
 
 data class EtteroppgjoerForbehandlingBulkRequest(
     val inntektsaar: Int,

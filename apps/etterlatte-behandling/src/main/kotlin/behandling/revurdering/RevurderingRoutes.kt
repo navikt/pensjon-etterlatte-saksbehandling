@@ -7,6 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
@@ -89,6 +90,7 @@ internal fun Route.revurderingRoutes(
                         val revurdering =
                             etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
                                 sakId,
+                                ETTEROPPGJOER_AAR,
                                 it.opprinnelse,
                                 saksbehandler,
                             )

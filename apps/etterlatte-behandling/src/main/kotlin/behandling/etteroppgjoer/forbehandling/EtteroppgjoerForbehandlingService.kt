@@ -811,9 +811,10 @@ class FantIkkeForbehandling(
 
 class FantIkkEtteroppgjoer(
     val sakId: SakId,
+    val inntektsaar: Int,
 ) : IkkeFunnetException(
         code = "MANGLER_ETTEROPPGJOER",
-        detail = "Fant ikke etteroppgjør for sakId=$sakId",
+        detail = "Fant ikke etteroppgjør $inntektsaar for sakId=$sakId",
     )
 
 class ForbehandlingKanIkkeEndres :

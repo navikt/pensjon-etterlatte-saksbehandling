@@ -1,4 +1,4 @@
-import { Select, VStack, BodyShort } from '@navikt/ds-react'
+import { Select, VStack, BodyShort, Box } from '@navikt/ds-react'
 import { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentEtteroppgjoerListe } from '~shared/api/etteroppgjoer'
@@ -30,19 +30,16 @@ export const VelgEtteroppgjoersAar = ({ sakId, value, onChange }: Props) => {
         {etteroppgjoerListe.length === 0 ? (
           <BodyShort>Ingen etteroppgjør funnet.</BodyShort>
         ) : (
-          <Select
-            label="Velg hvilket etteroppgjør svaret tilhører"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          >
-            <option value="">Velg år</option>
-
-            {etteroppgjoerListe.map((etteroppgjoer) => (
-              <option key={etteroppgjoer.inntektsaar} value={etteroppgjoer.inntektsaar}>
-                {etteroppgjoer.inntektsaar} – {etteroppgjoerStatusTekst[etteroppgjoer.status]}
-              </option>
-            ))}
-          </Select>
+          <Box maxWidth="25rem">
+            <Select label="Velg etteroppgjør" value={value} onChange={(e) => onChange(e.target.value)}>
+              <option value="">Velg år</option>
+              {etteroppgjoerListe.map((etteroppgjoer) => (
+                <option key={etteroppgjoer.inntektsaar} value={etteroppgjoer.inntektsaar}>
+                  {etteroppgjoer.inntektsaar} – {etteroppgjoerStatusTekst[etteroppgjoer.status]}
+                </option>
+              ))}
+            </Select>
+          </Box>
         )}
       </VStack>
     ),

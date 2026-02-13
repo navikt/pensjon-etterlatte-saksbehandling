@@ -57,7 +57,7 @@ class EtteroppgjoerRevurderingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val etteroppgjoer =
-            inTransaction { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) } ?: throw FantIkkEtteroppgjoer(sakId)
+            inTransaction { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) }
         val sisteFerdigstilteForbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling
 
         krevIkkeNull(sisteFerdigstilteForbehandlingId) {
@@ -133,7 +133,7 @@ class EtteroppgjoerRevurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
-        val behandling =
+        val (behandling, etteroppgjoer) =
             inTransaction {
                 val behandling =
                     behandlingService.hentBehandling(behandlingId)
@@ -160,10 +160,10 @@ class EtteroppgjoerRevurderingService(
                     EtteroppgjoerStatus.OMGJOERING,
                 )
 
-                behandling
+                behandling to etteroppgjoer
             }
 
-        return opprettEtteroppgjoerRevurdering(behandling.sak.id, behandling.opprinnelse, brukerTokenInfo)
+        return opprettEtteroppgjoerRevurdering(behandling.sak.id, etteroppgjoer.inntektsaar, behandling.opprinnelse, brukerTokenInfo)
     }
 
     private fun hentForbehandlingForBehandling(behandling: Behandling): EtteroppgjoerForbehandling {

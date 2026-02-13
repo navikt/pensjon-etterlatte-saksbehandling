@@ -35,7 +35,7 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ): Brev =
         klient
-            .post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak?sakId=${sakId.sakId}"), bruker, {})
+            .post(Resource(clientId, "$url/api/behandling/brev/$behandlingId?sakId=$sakId"), bruker, {})
             .mapBoth(
                 success = { readValue(it) },
                 failure = { throw it },
@@ -45,12 +45,14 @@ class BrevService(
         behandlingId: UUID,
         brev: Brev,
         bruker: BrukerTokenInfo,
-    ) = klient.get(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/pdf?brevId=${brev.id}"), bruker).mapError { throw it }
+    ) = klient
+        .get(Resource(clientId, "$url/api/behandling/brev/$behandlingId/pdf?brevId=${brev.id}&sakId=${brev.sakId}"), bruker)
+        .mapError { throw it }
 
     private suspend fun ferdigstillBrev(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) = klient
-        .post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/ferdigstill"), bruker, {})
+        .post(Resource(clientId, "$url/api/behandling/brev/$behandlingId/ferdigstill"), bruker, {})
         .mapError { throw it }
 }

@@ -434,9 +434,9 @@ class BeregnAvkortingTest {
                 it.restanse!!.shouldBeEqualToIgnoringFields(
                     restanse(
                         totalRestanse = 18000,
+                        fordeltRestanse = 3000,
                     ),
                     Restanse::id,
-                    Restanse::fordeltRestanse,
                     AvkortetYtelse::tidspunkt,
                     AvkortetYtelse::regelResultat,
                     AvkortetYtelse::kilde,
@@ -469,7 +469,6 @@ class BeregnAvkortingTest {
                         totalRestanse = 18000,
                         fordeltRestanse = 18000,
                     ),
-                    Restanse::fordeltRestanse,
                     Restanse::id,
                     AvkortetYtelse::tidspunkt,
                     AvkortetYtelse::regelResultat,

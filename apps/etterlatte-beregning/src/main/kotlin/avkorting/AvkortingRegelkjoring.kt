@@ -414,13 +414,17 @@ object AvkortingRegelkjoring {
                 }
         val maanederInnvilget: FaktumNode<List<MaanedInnvilget>> =
             if (brukNyeReglerAvkorting) {
-                FaktumNode(
-                    (nyInntektsavkorting.grunnlag.maanederInnvilget ?: sammenstillMaanedInnvilget(sanksjoner, fraOgMed)),
-                    "",
-                    "",
-                )
+                if (nyInntektsavkorting.grunnlag.maanederInnvilget != null) {
+                    FaktumNode(
+                        verdi = nyInntektsavkorting.grunnlag.maanederInnvilget,
+                        kilde = nyInntektsavkorting.grunnlag.id.toString(),
+                        beskrivelse = "Måneder innvilget i forventet inntekt",
+                    )
+                } else {
+                    throw InternfeilException("Mangler utledning av måneder innvilget i inntekten vi skal finne restanse for. ")
+                }
             } else {
-                FaktumNode(emptyList(), "", "")
+                FaktumNode(emptyList(), "", "Placeholder i grunnlag hvis vi ikke bruker nye regler")
             }
 
         val grunnlag =
@@ -453,21 +457,20 @@ object AvkortingRegelkjoring {
                         kilde = sanksjoner.joinToString(prefix = "[", postfix = "]") { it.id.toString() },
                         beskrivelse = "Måneder i året og om det er en sanksjon for den måneden",
                     ),
-                maanederInnvilget = maanederInnvilget, // TODO sjekk ut denne
+                maanederInnvilget = maanederInnvilget,
             )
+        val regel =
+            if (brukNyeReglerAvkorting) {
+                restanse_v2
+            } else {
+                restanse
+            }
 
         val resultat =
-            if (brukNyeReglerAvkorting) {
-                restanse_v2.eksekver(
-                    grunnlag = KonstantGrunnlag(konstantGrunnlag = grunnlag),
-                    periode = Periode(fom = fraOgMed, tom = null).tilRegelPeriode(),
-                )
-            } else {
-                restanse.eksekver(
-                    grunnlag = KonstantGrunnlag(grunnlag),
-                    periode = Periode(fom = fraOgMed, tom = null).tilRegelPeriode(),
-                )
-            }
+            regel.eksekver(
+                grunnlag = KonstantGrunnlag(grunnlag),
+                periode = Periode(fom = fraOgMed, tom = null).tilRegelPeriode(),
+            )
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
                 val (totalRestanse, fordeltRestanse) =
@@ -483,7 +486,7 @@ object AvkortingRegelkjoring {
                     tidspunkt = tidspunkt,
                     kilde =
                         Grunnlagsopplysning.RegelKilde(
-                            navn = restanse.regelReferanse.id,
+                            navn = regel.regelReferanse.id,
                             ts = tidspunkt,
                             versjon = resultat.reglerVersjon,
                         ),
@@ -495,20 +498,6 @@ object AvkortingRegelkjoring {
             }
         }
     }
-
-    private fun sammenstillMaanedInnvilget(
-        sanksjoner: List<Sanksjon>,
-        fraOgMed: YearMonth,
-    ): List<MaanedInnvilget> =
-        (fraOgMed.monthValue..12)
-            .map {
-                YearMonth.of(fraOgMed.year, it)
-            }.map { maaned ->
-                MaanedInnvilget(
-                    maaned,
-                    sanksjoner.any { it.fom <= maaned && (it.tom == null || it.tom!! >= maaned) },
-                )
-            }
 
     private fun List<AvkortetYtelse>.spreYtelsePerMaaned(
         fraOgMed: YearMonth,

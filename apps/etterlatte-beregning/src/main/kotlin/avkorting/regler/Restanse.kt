@@ -95,7 +95,9 @@ val gjenvaerendeMaaneder =
 val gjenvaerendeMaaneder_v2 =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "Beregner hvor mange måneder som gjenstår i gjeldende år fra nytt virkningstidspunkt, ekskludert sanksjoner",
+        beskrivelse =
+            "Beregner hvor mange måneder som gjenstår i gjeldende år fra nytt " +
+                "virkningstidspunkt, ekskludert måneder vi ikke er innvilget",
         regelReferanse = RegelReferanse(id = "GJENVAERENDE-MAANEDER-FOR-FORDELT-RESTANSE", versjon = "3.0"),
     ) benytter virkningstidspunkt og maanederInnvilget med { virk, maaneder ->
         maaneder.count { it.innvilget && it.maaned >= virk }
@@ -110,7 +112,7 @@ val fordeltRestanse =
         if (gjenvaerendeMaaneder.toInteger() == 0) {
             sumRestanse
         } else {
-            Beregningstall(sumRestanse).divide(gjenvaerendeMaaneder).toInteger() // TODO: skal denne være en round?
+            Beregningstall(sumRestanse).divide(gjenvaerendeMaaneder).toInteger()
         }
     }
 
@@ -123,7 +125,7 @@ val fordeltRestanse_v2 =
         if (gjenvaerendeMaaneder == 0) {
             sumRestanse
         } else {
-            Beregningstall(sumRestanse).divide(gjenvaerendeMaaneder).toInteger() // TODO: skal denne være en round?
+            Beregningstall(sumRestanse).divide(gjenvaerendeMaaneder).toInteger()
         }
     }
 
@@ -140,7 +142,7 @@ val restanse_v2 =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Beregner restanse etter endret ytelse etter avkorting på grunn av endret årsinntekt",
-        regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING"),
+        regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING", versjon = "2"),
     ) benytter totalRestanse og fordeltRestanse_v2 med { totalRestanse, fordeltRestanse ->
         totalRestanse to fordeltRestanse
     }

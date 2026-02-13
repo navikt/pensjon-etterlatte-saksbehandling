@@ -200,9 +200,9 @@ export const Sanksjon = ({
             <Box>
               <HjemmelLenke tittel="Folketrygdloven § 17-8" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-8" />
               <BodyShort spacing>
-                Når en bruker har en sanksjon for en periode, vil ikke omstillingsstønaden bli utbetalt. Hvis det er
-                restanse fra endringer i forventet årsinntekt vil heller ikke den bli hentet inn i sanksjonsperioden,
-                men omfordelt på måneder etter sanksjon.
+                Når en bruker har en sanksjon for en periode, vil ikke omstillingsstønaden bli utbetalt. Sanksjon kan
+                kun brukes frem i tid. Hvis det er restanse fra endringer i forventet årsinntekt vil heller ikke den bli
+                hentet inn i sanksjonsperioden, men omfordelt på måneder etter sanksjon.
               </BodyShort>
               <ReadMore header="Når skal sanksjoner gis?">
                 <BodyShort spacing>

@@ -28,20 +28,13 @@ class AvkortingReparerAarsoppgjoeret(
         avkorting: Avkorting,
         iverksatteVedtakPaaSak: List<VedtakSammendragDto>,
         innvilgedePerioder: List<InnvilgetPeriodeDto>,
-    ): Avkorting = reparer(iverksatteVedtakPaaSak, avkorting, innvilgedePerioder)
-
-    private fun reparer(
-        alleVedtak: List<VedtakSammendragDto>,
-        avkorting: Avkorting,
-        innvilgedePerioder: List<InnvilgetPeriodeDto>,
     ): Avkorting {
         val alleAarMedAarsoppgjoer =
             avkortingRepository
-                .hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId })
+                .hentAlleAarsoppgjoer(iverksatteVedtakPaaSak.map { it.behandlingId })
                 .map { it.aar }
                 .toSet()
         val alleAarNyAvkortng = avkorting.aarsoppgjoer.map { it.aar }.toSet()
-
         val alleManglendeAar = manglendeAar(alleAarMedAarsoppgjoer, alleAarNyAvkortng, innvilgedePerioder)
         if (alleManglendeAar.isNotEmpty()) {
             logger.info(
@@ -50,13 +43,13 @@ class AvkortingReparerAarsoppgjoeret(
             )
         }
         val aarsoppgjoerManglende =
-            alleManglendeAar.map { manglendeAar ->
-                val behandlingId = alleVedtak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
-                val avkortingen =
-                    avkortingRepository.hentAvkorting(behandlingId)
-                        ?: throw TidligereAvkortingFinnesIkkeException(behandlingId)
-                avkortingen.aarsoppgjoer.single { manglendeAar == it.aar }
-            }
+            alleManglendeAar
+                .map { manglendeAar ->
+                    aarsoppgjoerIVedtak(
+                        iverksatteVedtakPaaSak.sisteLoependeVedtakForAar(manglendeAar),
+                        manglendeAar,
+                    )
+                }
         return Avkorting((avkorting.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar })
     }
 
@@ -68,6 +61,16 @@ class AvkortingReparerAarsoppgjoeret(
         (alleAarMedAarsoppgjoer - alleAarIAvkorting)
             .filter { aar -> innvilgedePerioder.erInnvilgetIAar(aar) }
             .toSet()
+
+    private fun aarsoppgjoerIVedtak(
+        vedtak: VedtakSammendragDto,
+        aar: Int,
+    ): Aarsoppgjoer {
+        val avkortingen =
+            avkortingRepository.hentAvkorting(vedtak.behandlingId)
+                ?: throw TidligereAvkortingFinnesIkkeException(vedtak.behandlingId)
+        return avkortingen.aarsoppgjoer.single { aar == it.aar }
+    }
 }
 
 fun List<VedtakSammendragDto>.sisteLoependeVedtakForAar(aar: Int) =

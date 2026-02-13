@@ -13,7 +13,7 @@ type Props = {
   onChange: (value: string) => void
 }
 
-export const EtteroppgjoerSelect = ({ sakId, value, onChange }: Props) => {
+export const VelgEtteroppgjoersAar = ({ sakId, value, onChange }: Props) => {
   const [result, fetchEtteroppgjoer] = useApiCall(hentEtteroppgjoerListe)
 
   useEffect(() => {

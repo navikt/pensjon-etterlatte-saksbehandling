@@ -17,7 +17,7 @@ import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { Sidebar } from '~shared/components/Sidebar'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import { hentEtteroppgjoerListe } from '~shared/api/etteroppgjoer'
-import { EtteroppgjoerSelect } from '~components/etteroppgjoer/components/VelgEtteroppgjoer'
+import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/VelgEtteroppgjoersAar'
 
 export const SvarPaaEtteroppgjoer = () => {
   useSidetittel('Svar på etteroppgjør')
@@ -93,7 +93,7 @@ export const SvarPaaEtteroppgjoer = () => {
                 forbehandlingen.
               </BodyShort>
 
-              <EtteroppgjoerSelect
+              <VelgEtteroppgjoersAar
                 sakId={oppgave.sakId.toString()}
                 value={valgtEtteroppgjoer}
                 onChange={setValgtEtteroppgjoer}

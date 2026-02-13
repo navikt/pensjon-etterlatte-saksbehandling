@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
-import { EtteroppgjoerSelect } from '~components/etteroppgjoer/components/VelgEtteroppgjoer'
+import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/VelgEtteroppgjoersAar'
 
 export const HarSvartIModiaModal = ({ sakId }: { sakId: number }) => {
   const [aapen, setAapen] = useState<boolean>(false)
@@ -57,7 +57,11 @@ export const HarSvartIModiaModal = ({ sakId }: { sakId: number }) => {
               Hvis bruker har svart på etteroppgjøret i Modia kan du opprette revurdering for etteroppgjøret her.
             </BodyShort>
 
-            <EtteroppgjoerSelect sakId={sakId.toString()} value={valgtEtteroppgjoer} onChange={setValgtEtteroppgjoer} />
+            <VelgEtteroppgjoersAar
+              sakId={sakId.toString()}
+              value={valgtEtteroppgjoer}
+              onChange={setValgtEtteroppgjoer}
+            />
 
             {isFailureHandler({
               apiResult: opprettRevurderingResult,

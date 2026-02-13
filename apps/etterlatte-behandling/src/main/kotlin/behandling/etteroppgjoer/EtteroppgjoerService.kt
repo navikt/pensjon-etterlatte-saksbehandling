@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -12,7 +13,9 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilte
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -37,6 +40,7 @@ class EtteroppgjoerService(
     val vedtakKlient: VedtakKlient,
     val behandlingService: BehandlingService,
     val beregningKlient: BeregningKlient,
+    val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     val sigrunKlient: SigrunKlient,
 ) {
     fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer =
@@ -100,6 +104,36 @@ class EtteroppgjoerService(
         forbehandlingId: UUID,
     ) {
         dao.oppdaterFerdigstiltForbehandlingId(sakId, inntektsaar, forbehandlingId)
+    }
+
+    fun haandterSkatteoppgjoerMottatt(
+        hendelse: SkatteoppgjoerHendelse,
+        etteroppgjoer: Etteroppgjoer,
+        sak: Sak,
+    ) {
+        krev(etteroppgjoer.kanOppdateresMedSkatteoppgjoerMottatt()) {
+            "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør har status ${etteroppgjoer.status}. " +
+                "Se sikkerlogg for mer informasjon."
+        }
+
+        // TODO: fjerne hvis ikke et problem
+        if (etteroppgjoer.mottattSkatteoppgjoer()) {
+            logger.info(
+                "Ny hendelse (type=${hendelse.hendelsetype}) mottatt etter at status allerede er " +
+                    "MOTTATT_SKATTEOPPGJOER. Sekvensnummer=${hendelse.sekvensnummer}, sakId=${sak.id}.",
+            )
+        }
+
+        oppdaterEtteroppgjoerStatus(
+            sak.id,
+            etteroppgjoer.inntektsaar,
+            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+        )
+
+        etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
+            sakId = sak.id,
+            inntektsAar = etteroppgjoer.inntektsaar,
+        )
     }
 
     suspend fun upsertNyttEtteroppgjoer(

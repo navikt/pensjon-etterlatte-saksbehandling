@@ -317,10 +317,12 @@ class EtteroppgjoerForbehandlingService(
     fun opprettOppgaveForOpprettForbehandling(
         sakId: SakId,
         opprettetManuelt: Boolean,
+        etteroppgjoerAar: Int,
     ) {
         etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
             sakId = sakId,
             opprettetManuelt = opprettetManuelt,
+            inntektsAar = etteroppgjoerAar,
         )
     }
 
@@ -345,7 +347,10 @@ class EtteroppgjoerForbehandlingService(
 
         relevanteSaker.map { sakId ->
             try {
-                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(sakId)
+                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
+                    sakId = sakId,
+                    inntektsAar = inntektsaar,
+                )
             } catch (e: Error) {
                 logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
             }

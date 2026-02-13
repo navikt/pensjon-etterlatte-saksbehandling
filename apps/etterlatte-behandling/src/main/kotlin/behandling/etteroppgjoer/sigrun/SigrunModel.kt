@@ -37,7 +37,9 @@ data class SkatteoppgjoerHendelse(
     val identifikator: String,
     val sekvensnummer: Long,
     val registreringstidspunkt: Tidspunkt?,
-)
+) {
+    fun erNyHendelse(): Boolean = hendelsetype == null || hendelsetype == SigrunKlient.HENDELSETYPE_NY
+}
 
 data class PensjonsgivendeInntektSummert(
     val loensinntekt: Int,

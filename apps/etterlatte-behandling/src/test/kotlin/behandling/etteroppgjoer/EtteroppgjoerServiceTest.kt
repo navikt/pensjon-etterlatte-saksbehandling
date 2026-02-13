@@ -2,14 +2,17 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -52,6 +55,7 @@ class EtteroppgjoerServiceTest {
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakKlient: VedtakKlient = mockk()
+        val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = mockk()
 
         val service =
             EtteroppgjoerService(
@@ -60,6 +64,7 @@ class EtteroppgjoerServiceTest {
                 behandlingService = behandlingService,
                 beregningKlient = beregningKlient,
                 sigrunKlient = sigrunKlient,
+                etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             )
 
         val sisteIverksatteBehandlingId = UUID.randomUUID()
@@ -69,6 +74,8 @@ class EtteroppgjoerServiceTest {
                 mockk {
                     every { status } returns EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
                 }
+
+            coEvery { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) } just Runs
             coEvery { dao.lagreEtteroppgjoer(any()) } returns 1
             every { dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) } returns Unit
             every { dao.oppdaterFerdigstiltForbehandlingId(any(), any(), any()) } returns Unit

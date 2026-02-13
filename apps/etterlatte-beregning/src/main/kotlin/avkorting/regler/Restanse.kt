@@ -1,5 +1,6 @@
 package no.nav.etterlatte.avkorting.regler
 
+import no.nav.etterlatte.avkorting.MaanedInnvilget
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
@@ -17,7 +18,16 @@ data class RestanseGrunnlag(
     val nyForventetYtelseEtterAvkorting: FaktumNode<List<Int>>,
     val fraOgMedNyForventetInntekt: FaktumNode<YearMonth>,
     val maanederOgSanksjon: FaktumNode<List<Pair<YearMonth, Boolean>>>,
+    val maanederInnvilget: FaktumNode<List<MaanedInnvilget>>,
 )
+
+val maanederInnvilget: Regel<RestanseGrunnlag, List<MaanedInnvilget>> =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        finnFaktum = RestanseGrunnlag::maanederInnvilget,
+        finnFelt = { it },
+    )
 
 val tidligereYtelse: Regel<RestanseGrunnlag, List<Int>> =
     finnFaktumIGrunnlag(
@@ -82,6 +92,15 @@ val gjenvaerendeMaaneder =
             .plus(Beregningstall(1))
     }
 
+val gjenvaerendeMaaneder_v2 =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Beregner hvor mange måneder som gjenstår i gjeldende år fra nytt virkningstidspunkt, ekskludert sanksjoner",
+        regelReferanse = RegelReferanse(id = "GJENVAERENDE-MAANEDER-FOR-FORDELT-RESTANSE", versjon = "3.0"),
+    ) benytter virkningstidspunkt og maanederInnvilget med { virk, maaneder ->
+        maaneder.count { it.innvilget && it.maaned >= virk }
+    }
+
 val fordeltRestanse =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
@@ -95,11 +114,33 @@ val fordeltRestanse =
         }
     }
 
+val fordeltRestanse_v2 =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Fordeler oppsummert restanse over gjenværende måneder av gjeldende år",
+        regelReferanse = RegelReferanse("FORDELT-RESTANSE-INNTEKTSENDRING", versjon = "2"),
+    ) benytter totalRestanse og gjenvaerendeMaaneder_v2 med { sumRestanse, gjenvaerendeMaaneder ->
+        if (gjenvaerendeMaaneder == 0) {
+            sumRestanse
+        } else {
+            Beregningstall(sumRestanse).divide(gjenvaerendeMaaneder).toInteger() // TODO: skal denne være en round?
+        }
+    }
+
 val restanse =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Beregner restanse etter endret ytelse etter avkorting på grunn av endret årsinntekt",
         regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING"),
     ) benytter totalRestanse og fordeltRestanse med { totalRestanse, fordeltRestanse ->
+        totalRestanse to fordeltRestanse
+    }
+
+val restanse_v2 =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Beregner restanse etter endret ytelse etter avkorting på grunn av endret årsinntekt",
+        regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING"),
+    ) benytter totalRestanse og fordeltRestanse_v2 med { totalRestanse, fordeltRestanse ->
         totalRestanse to fordeltRestanse
     }

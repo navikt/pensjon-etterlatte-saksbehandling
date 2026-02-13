@@ -13,6 +13,8 @@ import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegelMedDoedsfall
 import no.nav.etterlatte.avkorting.toDto
+import no.nav.etterlatte.beregning.BeregningToggles
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -48,6 +50,7 @@ class EtteroppgjoerService(
     private val reparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
     private val vedtakKlient: VedtaksvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerService::class.java)
 
@@ -126,6 +129,7 @@ class EtteroppgjoerService(
                     spesifikasjon = spesifikasjon,
                     innvilgetPeriodeIEtteroppgjoersAar = innvilgetPeriodeIEtteroppgjoersAar,
                     opphoerFom = opphoerFom,
+                    brukNyeReglerAvkorting = featureToggleService.isEnabled(BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER, false),
                 )
             }
 
@@ -199,8 +203,9 @@ class EtteroppgjoerService(
                 )
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode ->
+            is RegelkjoeringResultat.UgyldigPeriode -> {
                 throw InternfeilException("Ugyldig regler for periode: ${beregningResultat.ugyldigeReglerForPeriode}")
+            }
         }
     }
 
@@ -227,19 +232,23 @@ class EtteroppgjoerService(
         val aarsoppgjoer = avkorting?.aarsoppgjoer?.single { it.aar == aar }
 
         return when (aarsoppgjoer) {
-            is AarsoppgjoerLoepende ->
+            is AarsoppgjoerLoepende -> {
                 AvkortingDto(
                     avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
+            }
 
-            is Etteroppgjoer ->
+            is Etteroppgjoer -> {
                 AvkortingDto(
                     avkortingGrunnlag = listOf(aarsoppgjoer.inntekt.toDto()),
                     avkortetYtelse = aarsoppgjoer.avkortetYtelse.map { it.toDto() },
                 )
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 

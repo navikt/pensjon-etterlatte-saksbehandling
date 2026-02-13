@@ -434,9 +434,9 @@ class BeregnAvkortingTest {
                 it.restanse!!.shouldBeEqualToIgnoringFields(
                     restanse(
                         totalRestanse = 18000,
-                        fordeltRestanse = 3000,
                     ),
                     Restanse::id,
+                    Restanse::fordeltRestanse,
                     AvkortetYtelse::tidspunkt,
                     AvkortetYtelse::regelResultat,
                     AvkortetYtelse::kilde,
@@ -469,6 +469,7 @@ class BeregnAvkortingTest {
                         totalRestanse = 18000,
                         fordeltRestanse = 18000,
                     ),
+                    Restanse::fordeltRestanse,
                     Restanse::id,
                     AvkortetYtelse::tidspunkt,
                     AvkortetYtelse::regelResultat,
@@ -2080,6 +2081,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting foerstegangsbehandling med to inntekter`() =
@@ -2118,6 +2120,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting foerstegangsbehandling med sanksjon`() =
@@ -2156,6 +2159,7 @@ class BeregnAvkortingTest {
                         ),
                     ),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting revurdering med en sanksjon åpen periode`() =
@@ -2175,6 +2179,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.MAY), tom = null)),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting revurdering av sanksjon åpen periode lukker sanksjonsperioden`() =
@@ -2191,6 +2196,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2024, Month.MAY))),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting ny inntekt en`() =
@@ -2219,6 +2225,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Sanksjon tilbake i tid mellom inntektsgrunnlag`() =
@@ -2245,6 +2252,7 @@ class BeregnAvkortingTest {
                         ),
                     ),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Sanksjon etter inntektsendring legges inn`() =
@@ -2267,6 +2275,7 @@ class BeregnAvkortingTest {
                         sanksjon(fom = YearMonth.of(2024, Month.AUGUST), tom = null),
                     ),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Sanksjon etter inntektsendring lukkes`() =
@@ -2286,6 +2295,7 @@ class BeregnAvkortingTest {
                         sanksjon(fom = YearMonth.of(2024, Month.AUGUST), tom = YearMonth.of(2024, Month.AUGUST)),
                     ),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting ny lavere inntekt to etter sanksjon`() =
@@ -2321,6 +2331,7 @@ class BeregnAvkortingTest {
                         ),
                     ),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting ny inntekt to`() =
@@ -2349,6 +2360,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting revurdert beregning`() =
@@ -2372,6 +2384,7 @@ class BeregnAvkortingTest {
                 ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Avkorting korrigere siste inntekt`() =
@@ -2405,6 +2418,7 @@ class BeregnAvkortingTest {
                         ),
                     sanksjoner = emptyList(),
                     opphoerFom = null,
+                    brukNyeReglerAvkorting = false,
                 )
             }
 
@@ -2429,6 +2443,7 @@ class BeregnAvkortingTest {
                 ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Revurdering ny inntekt for nytt år`() =
@@ -2457,6 +2472,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Revurdering med virk tilbake i tidligere år`() =
@@ -2475,6 +2491,7 @@ class BeregnAvkortingTest {
                 ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Revurdering ny inntekt nytt år med opphør`() =
@@ -2504,6 +2521,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = YearMonth.of(2026, Month.JULY),
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Revurdering der opphør flyttes tidligere`() =
@@ -2529,6 +2547,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = listOf(),
                 opphoerFom = YearMonth.of(2024, Month.OCTOBER),
+                brukNyeReglerAvkorting = false,
             )
 
     private fun `Førstegangsbehandling fra mars 2024 med opphør i mai 2025`() =
@@ -2568,5 +2587,6 @@ class BeregnAvkortingTest {
             sanksjoner = listOf(),
             opphoerFom = YearMonth.of(2025, Month.MAY),
             aldersovergang = null,
+            brukNyeReglerAvkorting = false,
         )
 }

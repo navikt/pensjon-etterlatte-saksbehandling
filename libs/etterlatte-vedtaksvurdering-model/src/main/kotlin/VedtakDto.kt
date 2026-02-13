@@ -91,6 +91,13 @@ data class Periode(
             "Fom må vera før eller lik tom, men fom er $fom og tom er $tom"
         }
     }
+
+    fun overlapperMedAar(aar: Int): Boolean {
+        val starterEtter = fom.isAfter(YearMonth.of(aar, 12))
+        val slutterFoer = tom != null && tom.isBefore(YearMonth.of(aar, 1))
+
+        return !starterEtter && !slutterFoer
+    }
 }
 
 data class VedtakFattet(
@@ -193,3 +200,8 @@ data class InnvilgetPeriodeDto(
     val periode: Periode,
     val vedtak: List<VedtakDto>,
 )
+
+fun List<InnvilgetPeriodeDto>.erInnvilgetIAar(aar: Int): Boolean =
+    this.any { periodeOgVedtak ->
+        periodeOgVedtak.periode.overlapperMedAar(aar)
+    }

@@ -91,13 +91,17 @@ class AvkortingService(
 
         val forrigeAvkorting =
             when (behandling.behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> null
-                BehandlingType.REVURDERING ->
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    null
+                }
+
+                BehandlingType.REVURDERING -> {
                     hentAvkortingForrigeBehandling(
                         behandling,
                         brukerTokenInfo,
                         behandling.virkningstidspunkt().dato,
                     )
+                }
             }
         if (eksisterendeAvkorting == null && forrigeAvkorting == null) {
             return null
@@ -220,7 +224,9 @@ class AvkortingService(
                     }
                 }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
         // liste av nye grunnlag, hvert element er for et konkret år
         // + måned bruker har aldersovergang (hvis de har det)
@@ -330,7 +336,9 @@ class AvkortingService(
                     avkortingMedOppdatertAarsoppgjoerFraForbehandling(forbehandlingId, eksisterendeAvkorting)
                 }
 
-                else -> eksisterendeAvkorting
+                else -> {
+                    eksisterendeAvkorting
+                }
             }
 
         val beregnetAvkorting =
@@ -368,10 +376,13 @@ class AvkortingService(
         if (behandling.status == BehandlingStatus.IVERKSATT) {
             return forrigeAvkorting
         }
-        return avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+        sjekkAtNyttAarMedInntektStarterIJanuar(forrigeAvkorting, virkningstidspunkt)
+
+        val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(behandling.sak, brukerTokenInfo)
+        return avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
             forrigeAvkorting,
-            virkningstidspunkt,
             alleVedtak,
+            innvilgedePerioder,
         )
     }
 
@@ -383,9 +394,11 @@ class AvkortingService(
         val alleVedtak = vedtakKlient.hentIverksatteVedtak(sakId, brukerTokenInfo)
         val forrigeAvkorting = hentForrigeAvkorting(behandlingId)
 
-        return avkortingReparerAarsoppgjoeret.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-            alleVedtak = alleVedtak,
-            avkortingSistIverksatt = forrigeAvkorting,
+        val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo)
+        return avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
+            avkorting = forrigeAvkorting,
+            innvilgedePerioder = innvilgedePerioder,
+            iverksatteVedtakPaaSak = alleVedtak,
         )
     }
 
@@ -400,6 +413,23 @@ class AvkortingService(
         val kanAvkorte = behandlingKlient.avkort(behandlingId, bruker, commit = false)
         if (!kanAvkorte) {
             throw AvkortingBehandlingFeilStatus(behandlingId)
+        }
+    }
+
+    private fun sjekkAtNyttAarMedInntektStarterIJanuar(
+        avkorting: Avkorting,
+        virkningstidspunkt: YearMonth,
+    ) {
+        val sisteAarsoppgjoer = avkorting.aarsoppgjoer.maxByOrNull { it.aar }
+        val virkErINyttAar =
+            sisteAarsoppgjoer
+                ?.aar
+                ?.let { sisteAar -> sisteAar < virkningstidspunkt.year } ?: false
+
+        if (virkErINyttAar) {
+            if (virkningstidspunkt != YearMonth.of(virkningstidspunkt.year, 1)) {
+                throw NyeAarMedInntektMaaStarteIJanuar()
+            }
         }
     }
 }

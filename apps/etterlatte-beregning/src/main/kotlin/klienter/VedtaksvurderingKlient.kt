@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakslisteEtteroppgjoerRequest
@@ -28,6 +29,11 @@ interface VedtaksvurderingKlient {
         etteroppgjoersAar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakEtteroppgjoerDto>
+
+    suspend fun hentInnvilgedePerioder(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<InnvilgetPeriodeDto>
 }
 
 class VedtaksvurderingKlientException(
@@ -66,7 +72,10 @@ class VedtaksvurderingKlientImpl(
                 )
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw VedtaksvurderingKlientException(
                         "Klarte ikke hente iverksatte vedtak for sak=$sakId",
@@ -98,7 +107,10 @@ class VedtaksvurderingKlientImpl(
                 )
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw VedtaksvurderingKlientException(
                         "Klarte ikke hente vedtaksliste for sak=$sakId i etteroppgjoersAar=$etteroppgjoersAar",
@@ -107,4 +119,29 @@ class VedtaksvurderingKlientImpl(
                 }
             }
         }
+
+    override suspend fun hentInnvilgedePerioder(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<InnvilgetPeriodeDto> {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vedtak/sak/$sakId/innvilgede-perioder",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtaksvurderingKlientException(
+                "Kunne ikke hente innvilgede perioder i sak med id $sakId",
+                e,
+            )
+        }
+    }
 }

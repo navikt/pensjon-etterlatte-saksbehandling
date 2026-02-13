@@ -1,5 +1,6 @@
 package no.nav.etterlatte.avkorting
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.clearAllMocks
@@ -495,14 +496,12 @@ internal class AvkortingServiceTest {
         }
     }
 
-    // TODO hent avkorting ikke frontend..
-
     @Nested
     inner class LagreAvkorting {
         val endretGrunnlag = mockk<AvkortingGrunnlagLagreDto>()
         val beregning = mockk<Beregning>()
-
         val eksisterendeAvkorting = mockAvkorting()
+
         val beregnetAvkorting = mockAvkorting()
         val lagretAvkorting = mockAvkorting()
         val avkortingFrontend = mockk<AvkortingFrontendDto>()
@@ -776,6 +775,34 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 2) {
                 avkortingRepository.hentAvkorting(behandlingId)
             }
+        }
+    }
+
+    @Test
+    fun `hvis virk for ny behandling er i et nytt aar maa den vaere i januar`() {
+        val behandling = behandling()
+        val forrigeBehandlingId = UUID.randomUUID()
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+            listOf(
+                vedtakSammendragDto(forrigeBehandlingId)
+                    .copy(virkningstidspunkt = YearMonth.of(2026, 2)),
+            )
+        every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns
+            Avkorting(listOf(aarsoppgjoer(2025)))
+
+        shouldThrow<NyeAarMedInntektMaaStarteIJanuar> {
+            runBlocking {
+                service.hentAvkortingForrigeBehandling(
+                    behandling = behandling,
+                    brukerTokenInfo = bruker,
+                    virkningstidspunkt = YearMonth.now(),
+                )
+            }
+        }
+
+        coVerify {
+            avkortingRepository.hentAvkorting(forrigeBehandlingId)
+            vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
         }
     }
 

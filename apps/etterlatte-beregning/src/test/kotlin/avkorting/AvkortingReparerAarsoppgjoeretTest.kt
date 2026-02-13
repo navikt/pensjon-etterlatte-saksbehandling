@@ -6,14 +6,12 @@ import io.mockk.mockk
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
-import no.nav.etterlatte.avkorting.NyeAarMedInntektMaaStarteIJanuar
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.time.YearMonth
@@ -52,39 +50,6 @@ class AvkortingReparerAarsoppgjoeretTest {
             )
 
         reparertAvkorting shouldBe forrigeAvkorting
-    }
-
-    // TODO teste i annen test? @Test
-    fun `hvis det mangler aarsoppgjoer men det er fordi nytt aarsoppgjoer er et nytt aar skal det feile hvis virk ikke er januar`() {
-        val forrigeAvkorting =
-            mockk<Avkorting> {
-                every { aarsoppgjoer } returns
-                    listOf(
-                        aarsoppgjoer(aar = 2024),
-                    )
-            }
-        val virk = YearMonth.of(2025, 2)
-        val alleVedtak =
-            listOf(
-                vedtakSammendragDto(
-                    virk = YearMonth.of(2024, 1),
-                    datoAttestert = YearMonth.of(2024, 1),
-                ),
-            )
-
-        every { repo.hentAlleAarsoppgjoer(alleVedtak.map { it.behandlingId }) } returns
-            listOf(
-                aarsoppgjoer(aar = 2024),
-                aarsoppgjoer(aar = 2025),
-            )
-
-        assertThrows<NyeAarMedInntektMaaStarteIJanuar> {
-            service.hentAvkortingMedReparertAarsoppgjoer(
-                forrigeAvkorting,
-                alleVedtak,
-                emptyList(),
-            )
-        }
     }
 
     @Test

@@ -448,7 +448,7 @@ internal class ApplicationContext(
     private val etteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
 
     val etteroppgjoerTempService =
-        EtteroppgjoerTempService(etteroppgjoerDao, etteroppgjoerForbehandlingDao, etteroppgjoerOppgaveService, etteroppgjoerHendelseService)
+        EtteroppgjoerTempService(etteroppgjoerDao, etteroppgjoerForbehandlingDao, etteroppgjoerHendelseService)
 
     val behandlingService =
         BehandlingServiceImpl(

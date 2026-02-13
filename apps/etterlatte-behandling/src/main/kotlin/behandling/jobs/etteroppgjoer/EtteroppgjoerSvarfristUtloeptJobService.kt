@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 import kotlinx.coroutines.DelicateCoroutinesApi
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles

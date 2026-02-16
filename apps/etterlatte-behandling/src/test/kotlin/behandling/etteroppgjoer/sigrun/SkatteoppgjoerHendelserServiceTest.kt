@@ -17,7 +17,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
-import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -32,7 +33,7 @@ class SkatteoppgjoerHendelserServiceTest {
     private val sigrunKlient: SigrunKlient = mockk()
     private val etteroppgjoerService: EtteroppgjoerService = mockk()
     private val sakService: SakService = mockk()
-    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = mockk()
+    private val vedtakKlient: VedtakKlient = mockk()
 
     @BeforeEach
     fun setup() {
@@ -42,7 +43,7 @@ class SkatteoppgjoerHendelserServiceTest {
     @Test
     fun `skal behandle hendelser fra Sigrun og oppdatere status for relevante etteroppgjoer`() {
         val skatteoppgjoerHendelserService =
-            SkatteoppgjoerHendelserService(dao, sigrunKlient, etteroppgjoerService, sakService)
+            SkatteoppgjoerHendelserService(dao, sigrunKlient, etteroppgjoerService, sakService, vedtakKlient)
 
         val sisteSekvensnummer = 10.toLong()
         val sisteKjoering = HendelserKjoering(sisteSekvensnummer, 10, 0, Tidspunkt.now())
@@ -63,21 +64,26 @@ class SkatteoppgjoerHendelserServiceTest {
                 ),
             )
 
-        coEvery { sakService.finnSak(any(), any()) } returns mockk { every { id } returns SakId(1L) }
+        // Saker som ikke har OMS - returnerer null
+        coEvery { sakService.finnSak("789", any<SakType>()) } returns null
+        coEvery { sakService.finnSak("963", any<SakType>()) } returns null
+
+        // Saker som har OMS
         coEvery { sakService.finnSak(harOms1, any<SakType>()) } returns mockk { every { id } returns SakId(2L) }
         coEvery { sakService.finnSak(harOms2, any<SakType>()) } returns mockk { every { id } returns SakId(3L) }
 
+        // Mock vedtakKlient for å sjekke om saken har utbetaling
+        coEvery { vedtakKlient.harSakUtbetalingForInntektsaar(SakId(2L), 2024, any()) } returns true
+        coEvery { vedtakKlient.harSakUtbetalingForInntektsaar(SakId(2L), 2025, any()) } returns false
+        coEvery { vedtakKlient.harSakUtbetalingForInntektsaar(SakId(3L), 2024, any()) } returns true
+
         coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), 2024) } returns
             Etteroppgjoer(SakId(2L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
-        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(3L), any()) } returns
+        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(3L), 2024) } returns
             Etteroppgjoer(SakId(3L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
 
         coEvery { dao.lagreKjoering(any()) } returns 1
         coEvery { etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any(), any()) } just runs
-
-        coEvery {
-            etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any())
-        } just runs
 
         runBlocking {
             skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall))
@@ -94,12 +100,8 @@ class SkatteoppgjoerHendelserServiceTest {
             )
         }
 
-        coVerify {
-            etteroppgjoerService.haandterSkatteoppgjoerMottatt(
-                any(),
-                any(),
-                any(),
-            )
+        coVerify(exactly = 2) {
+            etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any(), any())
         }
     }
 

@@ -350,7 +350,7 @@ data class Avkorting(
                 fom = tidligereAarsoppgjoer.fom,
                 tom = opphoerFom?.minusMonths(1),
                 aldersovergang = opphoerFom?.minusMonths(1),
-                ytelse = emptyList(), // TODO
+                ytelse = tidligereAarsoppgjoer.ytelseFoerAvkorting,
                 brukNyeReglerAvkorting = brukNyeReglerAvkorting,
             )
 
@@ -1243,7 +1243,6 @@ fun finnAntallInnvilgaMaanederForAar(
         }
     val tomMaaned = tom ?: aldersovergangIInntektsaaret?.minusMonths(1)
     if (ytelse.isEmpty() || !brukNyeReglerAvkorting) {
-        // TODO se over om denne løsningen er rimelig
         return MaanederInnvilgetResultat(
             maaneder =
                 (fom.month.value..(tomMaaned?.month?.value ?: 12)).map {
@@ -1257,8 +1256,18 @@ fun finnAntallInnvilgaMaanederForAar(
     }
     val grunnlag =
         MaanederInnvilgetGrunnlag(
-            beregningsperioder = FaktumNode(ytelse, "", ""),
-            tilOgMed = FaktumNode(tomMaaned, "", ""),
+            beregningsperioder =
+                FaktumNode(
+                    ytelse,
+                    ytelse.map { it.beregningsreferanse }.distinct().joinToString { ", " },
+                    "Beregningsperioder i året",
+                ),
+            tilOgMed =
+                FaktumNode(
+                    tomMaaned,
+                    "TOM: $tom, aldersovergang: $aldersovergang",
+                    "Til og med for året (hvis noen)",
+                ),
         )
     val antallInvilgedeMaaneder =
         erMaanederForAaretInnvilget.anvend(

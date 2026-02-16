@@ -82,6 +82,7 @@ internal class AvkortingServiceTest {
     @AfterEach
     fun afterEach() {
         confirmVerified()
+        clearAllMocks()
     }
 
     @Nested
@@ -118,7 +119,7 @@ internal class AvkortingServiceTest {
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     status = BehandlingStatus.AVKORTET,
                 )
-            val avkorting = mockAvkorting()
+            val avkorting = mockk<Avkorting>(relaxed = true)
             val avkortingFrontend = mockk<AvkortingFrontendDto>()
             val beregning = mockk<Beregning>()
 
@@ -175,10 +176,10 @@ internal class AvkortingServiceTest {
                             ),
                         ),
                 )
-            val eksisterendeAvkorting = mockAvkorting()
+            val eksisterendeAvkorting = mockk<Avkorting>(relaxed = true)
             val beregning = mockk<Beregning>()
-            val reberegnetAvkorting = mockAvkorting()
-            val lagretAvkorting = mockAvkorting()
+            val reberegnetAvkorting = mockk<Avkorting>(relaxed = true)
+            val lagretAvkorting = mockk<Avkorting>(relaxed = true)
             val avkortingFrontend = mockk<AvkortingFrontendDto>()
 
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
@@ -239,12 +240,12 @@ internal class AvkortingServiceTest {
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
             val forrigeBehandlingId = UUID.randomUUID()
-            val eksisterendeAvkorting = mockAvkorting()
+            val eksisterendeAvkorting = mockk<Avkorting>(relaxed = true)
             val beregning =
                 mockk<Beregning> {
                     every { beregningsperioder } returns emptyList()
                 }
-            val forrigeAvkorting = mockAvkorting()
+            val forrigeAvkorting = mockk<Avkorting>(relaxed = true)
             val avkortingFrontend = mockk<AvkortingFrontendDto>()
             val alleVedtak =
                 listOf(
@@ -289,7 +290,7 @@ internal class AvkortingServiceTest {
                 vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
                 avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
-                    alleVedtak,
+                    any(),
                     any(),
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
@@ -327,10 +328,10 @@ internal class AvkortingServiceTest {
                 mockk<Avkorting> {
                     every { aarsoppgjoer } returns listOf(aarsoppgjoer(2024))
                 }
-            val kopiertAvkorting = mockAvkorting()
+            val kopiertAvkorting = mockk<Avkorting>(relaxed = true)
             val beregning = mockk<Beregning>()
-            val beregnetAvkorting = mockAvkorting()
-            val lagretAvkorting = mockAvkorting()
+            val beregnetAvkorting = mockk<Avkorting>(relaxed = true)
+            val lagretAvkorting = mockk<Avkorting>(relaxed = true)
             val avkortingFrontend = mockk<AvkortingFrontendDto>()
             val alleVedtak =
                 listOf(
@@ -375,7 +376,7 @@ internal class AvkortingServiceTest {
                 vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
                 avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
-                    alleVedtak,
+                    any(),
                     any(),
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
@@ -418,11 +419,11 @@ internal class AvkortingServiceTest {
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
             val forrigeBehandlingId = UUID.randomUUID()
-            val eksisterendeAvkorting = mockAvkorting()
-            val forrigeAvkorting = mockAvkorting()
+            val eksisterendeAvkorting = mockk<Avkorting>(relaxed = true)
+            val forrigeAvkorting = mockk<Avkorting>(relaxed = true)
             val beregning = mockk<Beregning>()
-            val reberegnetAvkorting = mockAvkorting()
-            val lagretAvkorting = mockAvkorting()
+            val reberegnetAvkorting = mockk<Avkorting>(relaxed = true)
+            val lagretAvkorting = mockk<Avkorting>(relaxed = true)
             val avkortingFrontend = mockk<AvkortingFrontendDto>()
             val alleVedtak =
                 listOf(
@@ -500,10 +501,10 @@ internal class AvkortingServiceTest {
     inner class LagreAvkorting {
         val endretGrunnlag = mockk<AvkortingGrunnlagLagreDto>()
         val beregning = mockk<Beregning>()
-        val eksisterendeAvkorting = mockAvkorting()
+        val eksisterendeAvkorting = mockk<Avkorting>(relaxed = true)
 
-        val beregnetAvkorting = mockAvkorting()
-        val lagretAvkorting = mockAvkorting()
+        val beregnetAvkorting = mockk<Avkorting>(relaxed = true)
+        val lagretAvkorting = mockk<Avkorting>(relaxed = true)
         val avkortingFrontend = mockk<AvkortingFrontendDto>()
 
         @Test
@@ -600,7 +601,7 @@ internal class AvkortingServiceTest {
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
                 )
             val forrigeBehandling = UUID.randomUUID()
-            val forrigeAvkorting = mockAvkorting()
+            val forrigeAvkorting = mockk<Avkorting>(relaxed = true)
             val alleVedtak =
                 listOf(
                     vedtakSammendragDto(behandlingId = forrigeBehandling),
@@ -821,5 +822,3 @@ internal class AvkortingServiceTest {
             )
     }
 }
-
-private fun mockAvkorting(): Avkorting = mockk<Avkorting>(relaxed = true) {}

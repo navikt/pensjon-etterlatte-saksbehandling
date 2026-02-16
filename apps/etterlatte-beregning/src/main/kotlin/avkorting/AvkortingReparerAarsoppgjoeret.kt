@@ -24,43 +24,36 @@ class AvkortingReparerAarsoppgjoeret(
 ) {
     private val logger = LoggerFactory.getLogger(AvkortingReparerAarsoppgjoeret::class.java)
 
+    /** Forutsetter at avkortingen som skal hentes tilhører et iverksatt vedtak */
     fun hentAvkortingMedReparertAarsoppgjoer(
         avkorting: Avkorting,
         iverksatteVedtakPaaSak: List<VedtakSammendragDto>,
         innvilgedePerioder: List<InnvilgetPeriodeDto>,
     ): Avkorting {
-        val alleAarMedAarsoppgjoer =
+        val paakrevdeAarsoppgjoer =
             avkortingRepository
                 .hentAlleAarsoppgjoer(iverksatteVedtakPaaSak.map { it.behandlingId })
                 .map { it.aar }
+                .filter { aar -> innvilgedePerioder.erInnvilgetIAar(aar) } // Ytelsen har vært innvilget
                 .toSet()
-        val alleAarNyAvkortng = avkorting.aarsoppgjoer.map { it.aar }.toSet()
-        val alleManglendeAar = manglendeAar(alleAarMedAarsoppgjoer, alleAarNyAvkortng, innvilgedePerioder)
-        if (alleManglendeAar.isNotEmpty()) {
+        val alleAarIAvkorting = avkorting.aarsoppgjoer.map { it.aar }.toSet()
+        val manglendeAar = (paakrevdeAarsoppgjoer - alleAarIAvkorting).toSet()
+
+        if (manglendeAar.isNotEmpty()) {
             logger.info(
                 "Fant manglende årsoppgjør. Forrige årsoppgjør-ID: ${avkorting.aarsoppgjoer.firstOrNull()?.id}. " +
-                    "Manglende år: " + alleManglendeAar,
+                    "Manglende år: " + manglendeAar,
             )
         }
         val aarsoppgjoerManglende =
-            alleManglendeAar
-                .map { manglendeAar ->
-                    aarsoppgjoerIVedtak(
-                        iverksatteVedtakPaaSak.sisteLoependeVedtakForAar(manglendeAar),
-                        manglendeAar,
-                    )
-                }
+            manglendeAar.map { aar ->
+                aarsoppgjoerIVedtak(
+                    iverksatteVedtakPaaSak.sisteLoependeVedtakForAar(aar),
+                    aar,
+                )
+            }
         return Avkorting((avkorting.aarsoppgjoer + aarsoppgjoerManglende).sortedBy { it.aar })
     }
-
-    private fun manglendeAar(
-        alleAarMedAarsoppgjoer: Set<Int>,
-        alleAarIAvkorting: Set<Int>,
-        innvilgedePerioder: List<InnvilgetPeriodeDto>,
-    ): Set<Int> =
-        (alleAarMedAarsoppgjoer - alleAarIAvkorting)
-            .filter { aar -> innvilgedePerioder.erInnvilgetIAar(aar) }
-            .toSet()
 
     private fun aarsoppgjoerIVedtak(
         vedtak: VedtakSammendragDto,

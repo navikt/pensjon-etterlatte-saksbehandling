@@ -364,14 +364,14 @@ class AvkortingService(
         virkningstidspunkt: YearMonth,
     ): Avkorting {
         val alleVedtak = vedtakKlient.hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
-        val forrigeBehandlingId =
+        val forrigeVedtak =
             alleVedtak
                 .filter {
                     it.vedtakType != VedtakType.OPPHOER // Opphør har ikke avkorting
                 }.maxBy {
                     it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
-                }.behandlingId
-        val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
+                }
+        val forrigeAvkorting = hentForrigeAvkorting(forrigeVedtak.behandlingId)
 
         if (behandling.status == BehandlingStatus.IVERKSATT) {
             return forrigeAvkorting
@@ -392,11 +392,11 @@ class AvkortingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
         val alleVedtak = vedtakKlient.hentIverksatteVedtak(sakId, brukerTokenInfo)
-        val forrigeAvkorting = hentForrigeAvkorting(behandlingId)
+        val avkorting = hentAvkortingNonNull(behandlingId)
 
         val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo)
         return avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
-            avkorting = forrigeAvkorting,
+            avkorting = avkorting,
             innvilgedePerioder = innvilgedePerioder,
             iverksatteVedtakPaaSak = alleVedtak,
         )

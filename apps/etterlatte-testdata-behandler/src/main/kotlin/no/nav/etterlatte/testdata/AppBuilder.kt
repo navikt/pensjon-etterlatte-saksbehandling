@@ -75,9 +75,9 @@ class AppBuilder {
             )
         val brevService =
             BrevService(
-                settOppHttpClient("brev"),
-                "http://etterlatte-brev-api",
-                config.getString("brev.client.id"),
+                settOppHttpClient("behandling"),
+                "http://etterlatte-behandling",
+                config.getString("behandling.client.id"),
             )
 
         return Behandler(

@@ -14,6 +14,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
+import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/VelgEtteroppgjoersAar'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -22,14 +23,17 @@ type Props = {
 
 export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }: Props) => {
   const [open, setOpen] = useState(false)
+  const [valgtEtteroppgjoer, setValgtEtteroppgjoer] = useState<string>('')
 
   const navigate = useNavigate()
-
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
   const [ferdigstillStatus, ferdigstill] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
+  const [opprettRevurderingResult, opprettRevurderingRequest, resetApiCall] = useApiCall(opprettRevurderingApi)
 
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
+
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
 
   const {
@@ -38,15 +42,28 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
     register,
   } = useForm<{ kommentar: string }>({ defaultValues: { kommentar: '' } })
 
-  const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingApi)
+  const lukkModal = () => {
+    resetApiCall()
+    setValgtEtteroppgjoer('')
+    setOpen(false)
+  }
 
   const opprettRevurderingEtteroppgjoer = () => {
-    opprettRevurderingRequest({ sakId: oppgave.sakId, opprinnelse: Opprinnelse.AUTOMATISK_JOBB }, (result) => {
-      ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
-        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
-        navigate(`/behandling/${result}/etteroppgjoeroversikt`)
-      })
-    })
+    if (!valgtEtteroppgjoer) return
+
+    opprettRevurderingRequest(
+      {
+        sakId: oppgave.sakId,
+        opprinnelse: Opprinnelse.AUTOMATISK_JOBB,
+        inntektsaar: valgtEtteroppgjoer,
+      },
+      (result) => {
+        ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
+          oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+          navigate(`/behandling/${result}/etteroppgjoeroversikt`)
+        })
+      }
+    )
   }
 
   const avslutt = ({ kommentar }: { kommentar: string }) => {
@@ -54,7 +71,7 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
 
     avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, (oppgave) => {
       oppdaterStatus(oppgave.id, oppgave.status)
-      setOpen(false)
+      lukkModal()
     })
   }
 
@@ -68,7 +85,7 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
         open={open}
         aria-labelledby="modal-heading"
         width="medium"
-        onClose={() => setOpen(false)}
+        onClose={lukkModal}
         header={{ heading: 'Etteroppgjør - opprett revurdering' }}
       >
         <Modal.Body>
@@ -82,6 +99,12 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
 
             <BodyShort>Etteroppgjøret kan ferdigstilles</BodyShort>
 
+            <VelgEtteroppgjoersAar
+              sakId={oppgave.sakId.toString()}
+              value={valgtEtteroppgjoer}
+              onChange={setValgtEtteroppgjoer}
+            />
+
             {kanRedigeres &&
               (erTildeltSaksbehandler ? (
                 <Textarea
@@ -92,7 +115,7 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
                     },
                   })}
                   label="Kommentar"
-                  description="Legg til kommentar hvis du avslutter oppgaven. Dette er ikke nødvendig dersom du oppretter en revurdering eller forbehandling."
+                  description="Legg til kommentar hvis du avslutter oppgaven. Dette er ikke nødvendig dersom du oppretter en revurdering."
                   error={errors.kommentar?.message}
                 />
               ) : (
@@ -106,7 +129,7 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
             })}
 
             <HStack gap="4" justify="end">
-              <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillStatus)}>
+              <Button variant="secondary" onClick={lukkModal} disabled={isPending(ferdigstillStatus)}>
                 Lukk
               </Button>
 
@@ -117,7 +140,11 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
               )}
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button loading={isPending(opprettRevurderingResult)} onClick={() => opprettRevurderingEtteroppgjoer()}>
+                <Button
+                  loading={isPending(opprettRevurderingResult)}
+                  disabled={!valgtEtteroppgjoer}
+                  onClick={opprettRevurderingEtteroppgjoer}
+                >
                   Opprett revurdering
                 </Button>
               )}

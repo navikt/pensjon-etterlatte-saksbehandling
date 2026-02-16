@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -37,6 +38,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.UUID
 
@@ -111,16 +113,16 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
 
         inTransaction {
             val etteroppgjoerForForrigeAar =
-                applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, etteroppgjoerAar)!!
+                applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, etteroppgjoerAar)
             with(etteroppgjoerForForrigeAar) {
                 sakId shouldBe sak.id
                 status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
                 inntektsaar shouldBe etteroppgjoerAar
             }
 
-            val etteroppgjoerForIAar =
+            assertThrows<FantIkkEtteroppgjoer> {
                 applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, aarEtterEtteroppgjoerAar)
-            etteroppgjoerForIAar shouldBe null
+            }
         }
     }
 
@@ -138,13 +140,10 @@ class EtteroppgjoerJobServiceTest : BehandlingIntegrationTest() {
             applicationContext.opprettEtteroppgjoerJobService.startEtteroppgjoerKjoering()
         }
 
-        inTransaction {
-            val etteroppgjoerForForrigeAar =
+        assertThrows<FantIkkEtteroppgjoer> {
+            inTransaction {
                 applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear - 1)
-            etteroppgjoerForForrigeAar shouldBe null
-            val etteroppgjoerForIAar =
-                applicationContext.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, currentYear)
-            etteroppgjoerForIAar shouldBe null
+            }
         }
     }
 

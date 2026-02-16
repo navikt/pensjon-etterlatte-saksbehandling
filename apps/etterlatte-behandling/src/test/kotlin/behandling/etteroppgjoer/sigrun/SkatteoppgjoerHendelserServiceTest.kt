@@ -68,7 +68,6 @@ class SkatteoppgjoerHendelserServiceTest {
         coEvery { sakService.finnSak(any(), any()) } returns mockk { every { id } returns SakId(1L) }
         coEvery { sakService.finnSak(harOms1, any<SakType>()) } returns mockk { every { id } returns SakId(2L) }
         coEvery { sakService.finnSak(harOms2, any<SakType>()) } returns mockk { every { id } returns SakId(3L) }
-        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(any()), any()) } returns null
 
         coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), 2024) } returns
             Etteroppgjoer(SakId(2L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)

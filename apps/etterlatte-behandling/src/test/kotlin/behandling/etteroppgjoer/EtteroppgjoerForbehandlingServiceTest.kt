@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import io.kotest.assertions.any
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
@@ -11,6 +12,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
@@ -145,7 +147,7 @@ class EtteroppgjoerForbehandlingServiceTest {
             coEvery { sakDao.hentSak(any()) } returns sak
         }
 
-        fun returnsEtteroppgjoer(etteroppgjoer: Etteroppgjoer?) {
+        fun returnsEtteroppgjoer(etteroppgjoer: Etteroppgjoer) {
             coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer
         }
     }
@@ -270,10 +272,12 @@ class EtteroppgjoerForbehandlingServiceTest {
     fun `skal ikke opprette forbehandling hvis etteroppgjoer ikke finnes`() {
         val ctx = TestContext()
 
-        ctx.returnsEtteroppgjoer(null)
+        coEvery {
+            ctx.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any())
+        } throws FantIkkEtteroppgjoer(sakId1, 2024)
 
         val exception =
-            assertThrows(IkkeTillattException::class.java) {
+            assertThrows(FantIkkEtteroppgjoer::class.java) {
                 ctx.service.opprettEtteroppgjoerForbehandling(
                     sakId1,
                     2024,

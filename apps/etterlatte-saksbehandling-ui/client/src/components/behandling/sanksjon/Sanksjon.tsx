@@ -137,7 +137,7 @@ export const Sanksjon = ({
 
   const hentSanksjoner = () => {
     hentSanksjonRequest(behandling.id, (res) => {
-      setSanksjoner(res)
+      setSanksjoner(res.filter((sanksjon) => visbareSanksjonstyper.includes(sanksjon.type)))
     })
   }
 
@@ -200,9 +200,9 @@ export const Sanksjon = ({
             <Box>
               <HjemmelLenke tittel="Folketrygdloven § 17-8" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-8" />
               <BodyShort spacing>
-                Når en bruker har en sanksjon for en periode, vil ikke omstillingsstønaden bli utbetalt. Hvis det er
-                restanse fra endringer i forventet årsinntekt vil heller ikke den bli hentet inn i sanksjonsperioden,
-                men omfordelt på måneder etter sanksjon.
+                Når en bruker har en sanksjon for en periode, vil ikke omstillingsstønaden bli utbetalt. Sanksjon kan
+                kun brukes frem i tid. Hvis det er restanse fra endringer i forventet årsinntekt vil heller ikke den bli
+                hentet inn i sanksjonsperioden, men omfordelt på måneder etter sanksjon.
               </BodyShort>
               <ReadMore header="Når skal sanksjoner gis?">
                 <BodyShort spacing>
@@ -242,64 +242,62 @@ export const Sanksjon = ({
                 <Table.Body>
                   {sanksjoner && sanksjoner.length > 0 ? (
                     <>
-                      {sanksjoner
-                        .filter((sanksjon) => visbareSanksjonstyper.includes(sanksjon.type))
-                        .map((lagretSanksjon, index) => (
-                          <Table.Row key={index}>
-                            <Table.DataCell>{formaterMaanednavnAar(lagretSanksjon.fom)}</Table.DataCell>
-                            <Table.DataCell>
-                              {lagretSanksjon.tom ? formaterMaanednavnAar(lagretSanksjon.tom) : '-'}
-                            </Table.DataCell>
-                            <Table.DataCell>{tekstSanksjon[lagretSanksjon.type]}</Table.DataCell>
-                            <Table.DataCell>{lagretSanksjon.beskrivelse}</Table.DataCell>
-                            <Table.DataCell>
-                              <BodyShort>{lagretSanksjon.opprettet.ident}</BodyShort>
-                              <Detail>{`saksbehandler: ${formaterDato(lagretSanksjon.opprettet.tidspunkt)}`}</Detail>
-                            </Table.DataCell>
-                            <Table.DataCell>
-                              {lagretSanksjon.endret ? (
-                                <>
-                                  <BodyShort>{lagretSanksjon.endret.ident}</BodyShort>
-                                  <Detail>{`saksbehandler: ${formaterDato(lagretSanksjon.endret.tidspunkt)}`}</Detail>
-                                </>
-                              ) : (
-                                '-'
-                              )}
-                            </Table.DataCell>
-                            {redigerbar && (
-                              <Table.DataCell>
-                                <HStack gap="2">
-                                  <Button
-                                    size="small"
-                                    variant="tertiary"
-                                    onClick={() => {
-                                      reset({
-                                        datoFom: new Date(lagretSanksjon.fom),
-                                        datoTom: lagretSanksjon.tom ? new Date(lagretSanksjon.tom) : null,
-                                        type: lagretSanksjon.type,
-                                        beskrivelse: lagretSanksjon.beskrivelse,
-                                      })
-                                      setRedigerSanksjonId(lagretSanksjon.id!!)
-                                      setVisForm(true)
-                                    }}
-                                  >
-                                    Rediger
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    variant="tertiary"
-                                    onClick={() => {
-                                      slettEnkeltSanksjon(lagretSanksjon.behandlingId, lagretSanksjon.id!!)
-                                    }}
-                                    loading={isPending(slettSanksjonStatus)}
-                                  >
-                                    Slett
-                                  </Button>
-                                </HStack>
-                              </Table.DataCell>
+                      {sanksjoner.map((lagretSanksjon, index) => (
+                        <Table.Row key={index}>
+                          <Table.DataCell>{formaterMaanednavnAar(lagretSanksjon.fom)}</Table.DataCell>
+                          <Table.DataCell>
+                            {lagretSanksjon.tom ? formaterMaanednavnAar(lagretSanksjon.tom) : '-'}
+                          </Table.DataCell>
+                          <Table.DataCell>{tekstSanksjon[lagretSanksjon.type]}</Table.DataCell>
+                          <Table.DataCell>{lagretSanksjon.beskrivelse}</Table.DataCell>
+                          <Table.DataCell>
+                            <BodyShort>{lagretSanksjon.opprettet.ident}</BodyShort>
+                            <Detail>{`saksbehandler: ${formaterDato(lagretSanksjon.opprettet.tidspunkt)}`}</Detail>
+                          </Table.DataCell>
+                          <Table.DataCell>
+                            {lagretSanksjon.endret ? (
+                              <>
+                                <BodyShort>{lagretSanksjon.endret.ident}</BodyShort>
+                                <Detail>{`saksbehandler: ${formaterDato(lagretSanksjon.endret.tidspunkt)}`}</Detail>
+                              </>
+                            ) : (
+                              '-'
                             )}
-                          </Table.Row>
-                        ))}
+                          </Table.DataCell>
+                          {redigerbar && (
+                            <Table.DataCell>
+                              <HStack gap="2">
+                                <Button
+                                  size="small"
+                                  variant="tertiary"
+                                  onClick={() => {
+                                    reset({
+                                      datoFom: new Date(lagretSanksjon.fom),
+                                      datoTom: lagretSanksjon.tom ? new Date(lagretSanksjon.tom) : null,
+                                      type: lagretSanksjon.type,
+                                      beskrivelse: lagretSanksjon.beskrivelse,
+                                    })
+                                    setRedigerSanksjonId(lagretSanksjon.id!!)
+                                    setVisForm(true)
+                                  }}
+                                >
+                                  Rediger
+                                </Button>
+                                <Button
+                                  size="small"
+                                  variant="tertiary"
+                                  onClick={() => {
+                                    slettEnkeltSanksjon(lagretSanksjon.behandlingId, lagretSanksjon.id!!)
+                                  }}
+                                  loading={isPending(slettSanksjonStatus)}
+                                >
+                                  Slett
+                                </Button>
+                              </HStack>
+                            </Table.DataCell>
+                          )}
+                        </Table.Row>
+                      ))}
                     </>
                   ) : (
                     <Table.Row>

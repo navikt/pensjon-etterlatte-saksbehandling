@@ -135,7 +135,7 @@ class EtteroppgjoerForbehandlingServiceTest {
 
         fun returnsForbehandlinger(forbehandlinger: List<EtteroppgjoerForbehandling>) {
             coEvery {
-                dao.hentForbehandlingerForSak(any(), any())
+                dao.hentForbehandlingerForSak(any())
             } returns forbehandlinger
         }
 

@@ -130,7 +130,7 @@ class EtteroppgjoerForbehandlingDaoTest(
     @Test
     fun `skal oppdatere forbehandling med mottatt svar fra bruker`() {
         val forbehandlingId = UUID.randomUUID()
-        val forbehandling = opprettForbehandling(forbehandlingId)
+        val forbehandling = opprettForbehandling(forbehandlingId, 2024)
         forbehandling
             .oppdaterBrukerHarSvart(
                 JaNei.JA,
@@ -159,7 +159,7 @@ class EtteroppgjoerForbehandlingDaoTest(
     @Test
     fun `skal oppdatere forbehandling med opphoer skyldes doedsfall og i etteroppgjoersAar`() {
         val forbehandlingId = UUID.randomUUID()
-        val forbehandling = opprettForbehandling(forbehandlingId)
+        val forbehandling = opprettForbehandling(forbehandlingId, 2024)
         forbehandling
             .oppdaterOmOpphoerSkyldesDoedsfall(opphoerSkyldesDoedsfall = JaNei.JA, opphoerSkyldesDoedsfallIEtteroppgjoersaar = JaNei.JA)
             .also { etteroppgjoerForbehandlingDao.lagreForbehandling(it) }
@@ -209,10 +209,10 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `hent forbehandlinger`() {
-        opprettForbehandling(UUID.randomUUID())
-        opprettForbehandling(UUID.randomUUID())
+        opprettForbehandling(UUID.randomUUID(), 2024)
+        opprettForbehandling(UUID.randomUUID(), 2025)
 
-        with(etteroppgjoerForbehandlingDao.hentForbehandlingerForSak(sak.id, ETTEROPPGJOER_AAR)) {
+        with(etteroppgjoerForbehandlingDao.hentForbehandlingerForSak(sak.id)) {
             size shouldBe 2
             forEach {
                 it.aarsakTilAvbrytelse shouldBe AarsakTilAvbryteForbehandling.FEILREGISTRERT
@@ -222,7 +222,7 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `lagre og hente pensjonsgivendeInntekt`() {
-        val forbehandlingId = opprettForbehandling().id
+        val forbehandlingId = opprettForbehandling(inntektsaar = 2024).id
 
         // negative returnere null hvis tomt
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null
@@ -385,7 +385,7 @@ class EtteroppgjoerForbehandlingDaoTest(
     fun `kopier summerte inntekter til ny forbehandling`() {
         val forbehandlingId = UUID.randomUUID()
         val nyForbehandlingId = UUID.randomUUID()
-        opprettForbehandling(forbehandlingId)
+        opprettForbehandling(forbehandlingId, 2024)
 
         etteroppgjoerForbehandlingDao.hentSummerteInntekter(forbehandlingId) shouldBe null
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(
@@ -403,7 +403,7 @@ class EtteroppgjoerForbehandlingDaoTest(
                     ),
             ),
         )
-        opprettForbehandling(nyForbehandlingId)
+        opprettForbehandling(nyForbehandlingId, 2024)
 
         etteroppgjoerForbehandlingDao.kopierSummerteInntekter(forbehandlingId, nyForbehandlingId)
 
@@ -417,12 +417,15 @@ class EtteroppgjoerForbehandlingDaoTest(
         summerteInntekterKopi.tidspunktBeregnet shouldBe summerteInntekter.tidspunktBeregnet
     }
 
-    private fun opprettForbehandling(forbehandlingId: UUID = UUID.randomUUID()): EtteroppgjoerForbehandling {
+    private fun opprettForbehandling(
+        forbehandlingId: UUID = UUID.randomUUID(),
+        inntektsaar: Int,
+    ): EtteroppgjoerForbehandling {
         val forbehandling =
             EtteroppgjoerForbehandling(
                 id = forbehandlingId,
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                aar = 2024,
+                aar = inntektsaar,
                 opprettet = Tidspunkt.now(),
                 sak = sak,
                 brevId = null,
@@ -449,8 +452,8 @@ class EtteroppgjoerForbehandlingDaoTest(
 
     @Test
     fun `kopier pensjonsgivendeInntekt til ny forbehandling`() {
-        val forbehandlingId = opprettForbehandling().id
-        val nyForbehandlingId = opprettForbehandling().id
+        val forbehandlingId = opprettForbehandling(inntektsaar = 2024).id
+        val nyForbehandlingId = opprettForbehandling(inntektsaar = 2024).id
 
         val regelresultatJson = "{\"regel\":\"lorem\"}".toJsonNode()
         etteroppgjoerForbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) shouldBe null

@@ -2,7 +2,7 @@ import { ArrowUndoIcon } from '@navikt/aksel-icons'
 import { Alert, Box, Button, InlineMessage, VStack } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { opprettEtteroppgjoerForbehandlingOppgave } from '~shared/api/etteroppgjoer'
+import { tilbakestillEtteroppgjoerOgOpprettOppgave } from '~shared/api/etteroppgjoer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { useState } from 'react'
@@ -15,8 +15,8 @@ type IProps = {
 export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
   const [valgtEtteroppgjoer, setValgtEtteroppgjoer] = useState<string>('')
 
-  const [opprettForbehandlingOppgaveStatus, opprettForbehandlingOppgaveFetch] = useApiCall(
-    opprettEtteroppgjoerForbehandlingOppgave
+  const [tilbakestillOgOpprettOppgaveStatus, tilbakestillOgOpprettOppgave] = useApiCall(
+    tilbakestillEtteroppgjoerOgOpprettOppgave
   )
 
   return (
@@ -38,12 +38,12 @@ export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
 
           <Box marginBlock="5 0">
             <Button
-              loading={isPending(opprettForbehandlingOppgaveStatus)}
+              loading={isPending(tilbakestillOgOpprettOppgaveStatus)}
               disabled={!valgtEtteroppgjoer}
               variant="secondary"
               icon={<ArrowUndoIcon />}
               onClick={() =>
-                opprettForbehandlingOppgaveFetch({
+                tilbakestillOgOpprettOppgave({
                   sakId,
                   inntektsaar: valgtEtteroppgjoer,
                 })
@@ -54,7 +54,7 @@ export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
           </Box>
         </Box>
 
-        {mapResult(opprettForbehandlingOppgaveStatus, {
+        {mapResult(tilbakestillOgOpprettOppgaveStatus, {
           pending: <Spinner label="Oppretter ny forbehandling" />,
           error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
           success: () => <Alert variant="success">Ny forbehandling er opprettet og etteroppgjøret tilbakestilt.</Alert>,

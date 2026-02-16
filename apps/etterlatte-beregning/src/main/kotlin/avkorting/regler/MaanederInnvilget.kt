@@ -44,7 +44,7 @@ val ytelsesperioderJustertForTilOgMed: Regel<MaanederInnvilgetGrunnlag, List<Yte
         if (tilOgMed == null) {
             beregningsperioder
         } else {
-            val perioderFoerTilOgMed = beregningsperioder.filter { it.periode.fom < tilOgMed }
+            val perioderFoerTilOgMed = beregningsperioder.filter { it.periode.fom <= tilOgMed }
             if (perioderFoerTilOgMed.isNotEmpty()) {
                 val sistePeriode = perioderFoerTilOgMed.last()
                 val sistePeriodeTilOgMed = sistePeriode.periode.tom

@@ -190,28 +190,28 @@ class EtteroppgjoerService(
     }
 
     suspend fun opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-        sistIverksatteBehandling: Behandling,
+        behandling: Behandling,
         inntektsaar: Int,
     ): Etteroppgjoer {
-        val sakId = sistIverksatteBehandling.sak.id
+        val sakId = behandling.sak.id
+
+        // TODO: blir ikke dette rett?
+        val harOpphoer = behandling.opphoerFraOgMed != null
+
         logger.info(
             """
             Forsøker å opprette etteroppgjør for sakId=$sakId,
-            behandling=$sistIverksatteBehandling og inntektsaar=$inntektsaar
+            behandling=$behandling og inntektsaar=$inntektsaar
             """.trimIndent(),
         )
-        val eksisterendeEtteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
-        if (eksisterendeEtteroppgjoer != null) {
-            return eksisterendeEtteroppgjoer
-        }
 
         val status =
             try {
-                sigrunKlient.hentPensjonsgivendeInntekt(sistIverksatteBehandling.sak.ident, inntektsaar)
+                sigrunKlient.hentPensjonsgivendeInntekt(behandling.sak.ident, inntektsaar)
                 EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
             } catch (e: Exception) {
                 logger.error(
-                    "Vi har opprettet et etteroppgjør for $inntektsaar i sakId=${sistIverksatteBehandling.sak.id}, " +
+                    "Vi har opprettet et etteroppgjør for $inntektsaar i sakId=${behandling.sak.id}, " +
                         "men vi klarte ikke hente skatteoppgjøret, vi antar at dette er fordi skatteoppgjøret ikke er " +
                         "tilgjengelig, hvis annen feil må saken ryddes opp manuelt",
                     e,
@@ -219,7 +219,7 @@ class EtteroppgjoerService(
                 EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
             }
 
-        return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling, status, false)
+        return etteroppgjoer(sakId, inntektsaar, behandling, status, harOpphoer)
             .also { dao.lagreEtteroppgjoer(it) }
     }
 

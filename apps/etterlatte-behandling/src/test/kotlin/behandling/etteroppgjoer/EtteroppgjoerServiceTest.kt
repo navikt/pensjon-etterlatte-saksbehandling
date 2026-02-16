@@ -177,7 +177,7 @@ class EtteroppgjoerServiceTest {
         val etteroppgjoer =
             runBlocking {
                 ctx.service.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-                    sistIverksatteBehandling = foerstegangsBehandling,
+                    behandling = foerstegangsBehandling,
                     inntektsaar = 2023,
                 )
             }
@@ -202,7 +202,7 @@ class EtteroppgjoerServiceTest {
         val etteroppgjoer =
             runBlocking {
                 cx.service.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-                    sistIverksatteBehandling = foerstegangsBehandling,
+                    behandling = foerstegangsBehandling,
                     inntektsaar = 2023,
                 )
             }

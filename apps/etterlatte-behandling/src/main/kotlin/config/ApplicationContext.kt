@@ -816,6 +816,7 @@ internal class ApplicationContext(
             featureToggleService,
             etteroppgjoerOppgaveService,
             etteroppgjoerService,
+            vedtakKlient,
         )
 
     val etteroppgjoerSvarfristUtloeptJobService =

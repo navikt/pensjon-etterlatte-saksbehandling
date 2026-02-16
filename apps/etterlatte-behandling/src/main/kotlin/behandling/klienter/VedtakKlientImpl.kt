@@ -91,6 +91,11 @@ interface VedtakKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto>
 
+    suspend fun hentSakerMedUtbetalingForInntektsaar(
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<SakId>
+
     suspend fun harSakUtbetalingForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
@@ -443,6 +448,32 @@ class VedtakKlientImpl(
                 code = "UKJENT_FEIL_HENTING_AV_IVERKSATTE_VEDTAK",
                 detail = "Ukjent feil oppsto ved henting av iverksatte vedtak",
                 meta = mapOf("sakId" to sakId.sakId),
+            )
+        }
+    }
+
+    override suspend fun hentSakerMedUtbetalingForInntektsaar(
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<SakId> {
+        try {
+            logger.info("Henter sakIder med utbetaling for inntektsaar")
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vedtak/sak/med-utbetaling/$inntektsaar",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Kunne ikke hente saker med utbetaling for inntektsaar $inntektsaar",
+                e,
             )
         }
     }

@@ -247,6 +247,36 @@ class VedtaksvurderingRepository(
         }
     }
 
+    fun hentSakIdMedUtbetalingForInntektsaar(
+        inntektsaar: Int,
+        sakType: SakType? = null,
+        tx: TransactionalSession? = null,
+    ): List<SakId> {
+        val hentVedtak =
+            """
+            SELECT DISTINCT v.sakid FROM vedtak v
+            JOIN utbetalingsperiode u ON v.id = u.vedtakid
+            WHERE EXTRACT(YEAR FROM u.datofom) = :aar
+            ${if (sakType == null) "" else "AND saktype = :saktype"}
+            AND vedtakstatus = :vedtakStatus
+            """.trimIndent()
+
+        return tx.session {
+            hentListe(
+                queryString = hentVedtak,
+                params = {
+                    mapOf(
+                        "aar" to inntektsaar,
+                        "saktype" to sakType?.name,
+                        "vedtakStatus" to VedtakStatus.IVERKSATT.name,
+                    )
+                },
+            ) {
+                it.toSakId()
+            }
+        }
+    }
+
     fun harSakUtbetalingForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,

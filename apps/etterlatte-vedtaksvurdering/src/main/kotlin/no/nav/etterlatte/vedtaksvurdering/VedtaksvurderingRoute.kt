@@ -91,6 +91,15 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        get("/sak/med-utbetaling/{inntektsaar}") {
+            val inntektsaar =
+                krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                    "Inntektsaar mangler"
+                }
+
+            call.respond(vedtakService.hentSakIdMedUtbetalingForInntektsaar(inntektsaar))
+        }
+
         get("/sak/{$SAKID_CALL_PARAMETER}/har-utbetaling-for-inntektsaar/{inntektsaar}") {
             withSakId(behandlingKlient) { sakId ->
                 val inntektsaar =

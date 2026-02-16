@@ -105,11 +105,9 @@ class SkatteoppgjoerHendelserService(
         if (!harUtbetalingIPeriode) return false
 
         val etteroppgjoer =
-            try {
+            runCatching {
                 etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
-            } catch (_: Exception) {
-                null
-            }
+            }.getOrNull()
 
         when (etteroppgjoer) {
             null -> runBlocking { etteroppgjoerService.opprettNyttEtteroppgjoer(sak.id, inntektsaar) }

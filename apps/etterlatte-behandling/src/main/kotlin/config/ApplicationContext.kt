@@ -66,8 +66,6 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtl
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJobService
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJob
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
@@ -729,6 +727,7 @@ internal class ApplicationContext(
             sigrunKlient = sigrunKlient,
             etteroppgjoerService = etteroppgjoerService,
             sakService = sakService,
+            vedtakKlient = vedtakKlient,
         )
 
     private val etteroppgjoerRevurderingBrevService =
@@ -811,13 +810,6 @@ internal class ApplicationContext(
 
     private val saksbehandlerJobService =
         SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, entraProxyKlient)
-
-    val opprettEtteroppgjoerJobService =
-        OpprettEtteroppgjoerJobService(
-            etteroppgjoerService,
-            vedtakKlient,
-            featureToggleService,
-        )
 
     val oppdaterSkatteoppgjoerIkkeMottattJobService =
         OppdaterSkatteoppgjoerIkkeMottattJobService(
@@ -964,17 +956,6 @@ internal class ApplicationContext(
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
-        )
-    }
-
-    val etteroppgjoerJob: OpprettEtteroppgjoerJob by lazy {
-        OpprettEtteroppgjoerJob(
-            opprettEtteroppgjoerJobService = opprettEtteroppgjoerJobService,
-            { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(10, ChronoUnit.MINUTES),
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
         )
     }
 

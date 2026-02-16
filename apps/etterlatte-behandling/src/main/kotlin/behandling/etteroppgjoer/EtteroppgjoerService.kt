@@ -133,31 +133,27 @@ class EtteroppgjoerService(
         )
     }
 
-    suspend fun upsertNyttEtteroppgjoer(
+    // TODO: må vi ha flere måter å opprette etteroppgjør på?
+    suspend fun opprettNyttEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer? {
+    ): Etteroppgjoer {
         logger.info(
             "Forsøker å opprette/oppdatere etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
         val eksisterendeEtteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
-        if (eksisterendeEtteroppgjoer != null && eksisterendeEtteroppgjoer.status !in
-            listOf(
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-            )
-        ) {
+        if (eksisterendeEtteroppgjoer != null && !eksisterendeEtteroppgjoer.kanOppdateresMedSkatteoppgjoerMottatt()) {
             logger.info(
                 "Vi har allerede et opprettet etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar, med status=" +
                     "${eksisterendeEtteroppgjoer.status}. Vi oppdaterer derfor ikke noen felter på dette etteroppgjøret.",
             )
-            return null
         }
 
         val attesterteVedtak =
             vedtakKlient
                 .hentIverksatteVedtak(sakId, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
                 .sortedByDescending { it.datoAttestert }
+
         val harVedtakAvTypeOpphoer = attesterteVedtak.any { it.vedtakType == VedtakType.OPPHOER }
 
         val sisteIverksatteVedtak =
@@ -170,15 +166,17 @@ class EtteroppgjoerService(
                 "Siste iverksatte vedtak (id=${sisteIverksatteVedtak.id} peker på en behandling " +
                     "med id=${sisteIverksatteVedtak.behandlingId} som ikke finnes"
             }
+
         val oppdatertEtteroppgjoer =
             etteroppgjoer(
                 sakId,
                 inntektsaar,
                 sisteIverksatteBehandling,
-                eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
                 harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
                 eksisterendeEtteroppgjoer?.sisteFerdigstilteForbehandling,
             )
+
         if (eksisterendeEtteroppgjoer != null && oppdatertEtteroppgjoer != eksisterendeEtteroppgjoer) {
             logger.info(
                 "Endrer etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar. Endring: " +
@@ -186,9 +184,11 @@ class EtteroppgjoerService(
             )
         }
         dao.lagreEtteroppgjoer(oppdatertEtteroppgjoer)
+
         return oppdatertEtteroppgjoer
     }
 
+    // TODO: må vi ha flere måter å opprette etteroppgjør på?
     suspend fun opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
         behandling: Behandling,
         inntektsaar: Int,

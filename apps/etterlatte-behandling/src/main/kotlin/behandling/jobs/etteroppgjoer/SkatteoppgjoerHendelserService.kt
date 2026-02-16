@@ -1,20 +1,20 @@
 package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelserKjoering
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserDao
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -26,6 +26,7 @@ class SkatteoppgjoerHendelserService(
     private val sigrunKlient: SigrunKlient,
     private val etteroppgjoerService: EtteroppgjoerService,
     private val sakService: SakService,
+    private val vedtakKlient: VedtakKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -45,9 +46,13 @@ class SkatteoppgjoerHendelserService(
     }
 
     private fun behandleHendelseListe(hendelsesListe: List<SkatteoppgjoerHendelse>) {
+        logger.info("Starter å behandle ${hendelsesListe.size} hendelser fra skatt")
         val (antallRelevante, varighet) =
             measureTimedValue {
-                val antallRelevante = hendelsesListe.count { behandleHendelse(it) }
+                val antallRelevante =
+                    hendelsesListe.count {
+                        behandleHendelse(it)
+                    }
 
                 dao.lagreKjoering(
                     HendelserKjoering(
@@ -70,7 +75,7 @@ class SkatteoppgjoerHendelserService(
     private fun behandleHendelse(hendelse: SkatteoppgjoerHendelse): Boolean {
         logger.info("Behandler hendelse ${hendelse.sekvensnummer}")
         return try {
-            oppdaterEtteroppgjoer(hendelse)
+            opprettEllerOppdaterEtteroppgjoer(hendelse)
         } catch (e: Exception) {
             throw InternfeilException(
                 "Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}",
@@ -84,47 +89,32 @@ class SkatteoppgjoerHendelserService(
      *
      * @return true hvis hendelsen er relevant, dvs. at saken skal ha etteroppgjør.
      */
-    private fun oppdaterEtteroppgjoer(hendelse: SkatteoppgjoerHendelse): Boolean {
+    private fun opprettEllerOppdaterEtteroppgjoer(hendelse: SkatteoppgjoerHendelse): Boolean {
         val inntektsaar = krevIkkeNull(hendelse.gjelderPeriode?.toInt()) { "Mangler inntektsår" }
         val ident = hendelse.identifikator
 
         val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD) ?: return false
-
-        val etteroppgjoer =
-            try {
-                etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
-            } catch (e: Exception) {
-                logger.error(
-                    "Feilet ved innhenting av etteroppgjør for sakId=${sak.id} og inntektsår=$inntektsaar, " +
-                        "sekvensnummer=${hendelse.sekvensnummer}",
-                    e,
-                )
-                return false
-            }
 
         sikkerLogg.info(
             "Behandler hendelse sekvensnummer=${hendelse.sekvensnummer}, ident=$ident, sakId=${sak.id}. " +
                 "Hendelse=${hendelse.toJson()}",
         )
 
-        if (!hendelse.erNyHendelse()) {
-            logger.warn(
-                """
-                Mottok hendelse av type ${hendelse.hendelsetype} på sak ${sak.id},
-                som skal ha etteroppgjør. Hendelsen blir ikke behandlet.
-                Sekvensnummer: ${hendelse.sekvensnummer}, inntektsår: $inntektsaar
-                """.trimIndent(),
-            )
-            return false
+        val harUtbetalingIPeriode =
+            runBlocking { vedtakKlient.harSakUtbetalingForInntektsaar(sak.id, inntektsaar, HardkodaSystembruker.etteroppgjoer) }
+        if (!harUtbetalingIPeriode) return false
+
+        val etteroppgjoer =
+            try {
+                etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
+            } catch (_: Exception) {
+                null
+            }
+
+        when (etteroppgjoer) {
+            null -> runBlocking { etteroppgjoerService.opprettNyttEtteroppgjoer(sak.id, inntektsaar) }
+            else -> etteroppgjoerService.haandterSkatteoppgjoerMottatt(hendelse, etteroppgjoer, sak)
         }
-
-        logger.info(
-            "Mottok hendelse ${hendelse.hendelsetype} med sekvensnummer=${hendelse.sekvensnummer} " +
-                "for inntektsår ${hendelse.gjelderPeriode.toInt()}, sakId=${sak.id}. " +
-                "Håndterer hendelse.",
-        )
-
-        etteroppgjoerService.haandterSkatteoppgjoerMottatt(hendelse, etteroppgjoer, sak)
 
         return true
     }
@@ -134,7 +124,3 @@ class SkatteoppgjoerHendelserService(
         return runBlocking { sigrunKlient.hentHendelsesliste(request.antallHendelser, sisteKjoering.nesteSekvensnummer()) }
     }
 }
-
-data class HendelseKjoeringRequest(
-    val antallHendelser: Int,
-)

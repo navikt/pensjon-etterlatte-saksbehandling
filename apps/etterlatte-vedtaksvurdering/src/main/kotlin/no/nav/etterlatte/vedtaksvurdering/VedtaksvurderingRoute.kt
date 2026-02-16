@@ -91,13 +91,17 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        get("/sak/med-utbetaling/{inntektsaar}") {
-            val inntektsaar =
-                krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
-                    "Inntektsaar mangler"
-                }
+        get("/sak/{$SAKID_CALL_PARAMETER}/har-utbetaling-for-inntektsaar/{inntektsaar}") {
+            withSakId(behandlingKlient) { sakId ->
+                val inntektsaar =
+                    krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                        "Inntektsaar mangler"
+                    }
 
-            call.respond(vedtakService.hentSakIdMedUtbetalingForInntektsaar(inntektsaar))
+                logger.info("Sjekker om sak $sakId har utbetaling for inntektsår $inntektsaar")
+                val harUtbetaling = vedtakService.harSakUtbetalingForInntektsaar(sakId, inntektsaar)
+                call.respond(mapOf("harUtbetaling" to harUtbetaling))
+            }
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}/innvilgede-perioder") {
@@ -455,13 +459,16 @@ private fun Vedtak.toVedtakSammendragDto(): VedtakSammendragDto {
             iverksettelsesTidspunkt = iverksettelsesTidspunkt,
         )
     return when (innhold) {
-        is VedtakInnhold.Behandling ->
+        is VedtakInnhold.Behandling -> {
             dto.copy(
                 virkningstidspunkt = innhold.virkningstidspunkt,
                 opphoerFraOgMed = innhold.opphoerFraOgMed,
             )
+        }
 
-        else -> dto
+        else -> {
+            dto
+        }
     }
 }
 

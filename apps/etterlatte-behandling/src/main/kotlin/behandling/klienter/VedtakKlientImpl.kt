@@ -91,10 +91,11 @@ interface VedtakKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto>
 
-    suspend fun hentSakerMedUtbetalingForInntektsaar(
+    suspend fun harSakUtbetalingForInntektsaar(
+        sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<SakId>
+    ): Boolean
 
     suspend fun hentInnvilgedePerioder(
         sakId: SakId,
@@ -446,27 +447,33 @@ class VedtakKlientImpl(
         }
     }
 
-    override suspend fun hentSakerMedUtbetalingForInntektsaar(
+    override suspend fun harSakUtbetalingForInntektsaar(
+        sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<SakId> {
+    ): Boolean {
         try {
-            logger.info("Henter sakIder med utbetaling for inntektsaar")
+            logger.info("Sjekker om sak $sakId har utbetaling for inntektsaar $inntektsaar")
+
             return downstreamResourceClient
                 .get(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/vedtak/sak/med-utbetaling/$inntektsaar",
+                            url = "$resourceUrl/api/vedtak/sak/$sakId/har-utbetaling-for-inntektsaar/$inntektsaar",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { resource ->
+                        val response: HarUtbetalingResponse =
+                            objectMapper.readValue(resource.response.toString())
+                        response.harUtbetaling
+                    },
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: Exception) {
             throw VedtakKlientException(
-                "Kunne ikke hente saker med utbetaling for inntektsaar $inntektsaar",
+                "Kunne ikke sjekke utbetaling for sak $sakId og inntektsaar $inntektsaar",
                 e,
             )
         }
@@ -520,4 +527,8 @@ class VedtakKlientImpl(
             throw VedtakKlientException("Kunne ikke tilbakestille tilbakekrevingsvedtak", e)
         }
     }
+
+    data class HarUtbetalingResponse(
+        val harUtbetaling: Boolean,
+    )
 }

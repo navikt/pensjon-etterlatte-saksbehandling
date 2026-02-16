@@ -330,33 +330,17 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `opprettEtteroppgjoer returnerer null dersom etteroppgjør allerede finnes for år`() {
-        val ctx = TestContext(sakId)
-        every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
-            Etteroppgjoer(
-                sakId = sakId,
-                inntektsaar = 2024,
-                status = EtteroppgjoerStatus.FERDIGSTILT,
-            )
-
-        val opprettetEtteroppgjoer = runBlocking { ctx.service.upsertNyttEtteroppgjoer(sakId, 2024) }
-        assertNull(opprettetEtteroppgjoer)
-        coVerify(exactly = 0) { ctx.vedtakKlient.hentIverksatteVedtak(any(), any()) }
-        coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(any()) }
-    }
-
-    @Test
     fun `opprettEtteroppgjoer returnerer nytt etteroppgjør dersom etteroppgjør ikke finnes for år`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
             null
 
-        val resultat = runBlocking { ctx.service.upsertNyttEtteroppgjoer(sakId, 2024) }
+        val resultat = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
 
-        with(resultat!!) {
+        with(resultat) {
             this.sakId shouldBe ctx.sakId
             this.inntektsaar shouldBe 2024
-            this.status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+            this.status shouldBe EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
         }
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
     }
@@ -381,9 +365,9 @@ class EtteroppgjoerServiceTest {
                 utlandstilknytning = utlandstilsnitt(),
             )
 
-        val resultat = runBlocking { ctx.service.upsertNyttEtteroppgjoer(sakId, 2024) }
+        val resultat = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
 
-        with(resultat!!) {
+        with(resultat) {
             this.sakId shouldBe ctx.sakId
             this.inntektsaar shouldBe 2024
             this.status shouldBe EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER

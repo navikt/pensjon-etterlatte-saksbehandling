@@ -333,12 +333,11 @@ class VedtakKlientTest : VedtakKlient {
         TODO("Not yet implemented")
     }
 
-    override suspend fun hentSakerMedUtbetalingForInntektsaar(
+    override suspend fun harSakUtbetalingForInntektsaar(
+        sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<SakId> {
-        TODO("Not yet implemented")
-    }
+    ): Boolean = true
 
     override suspend fun hentInnvilgedePerioder(
         sakId: SakId,

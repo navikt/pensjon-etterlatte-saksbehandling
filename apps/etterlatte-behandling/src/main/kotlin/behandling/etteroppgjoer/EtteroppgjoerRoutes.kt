@@ -69,16 +69,6 @@ fun Route.etteroppgjoerRoutes(
 ) {
     route("/api/etteroppgjoer") {
         route("/{$SAKID_CALL_PARAMETER}") {
-            get {
-                sjekkEtteroppgjoerEnabled(featureToggleService)
-                val etteroppgjoer =
-                    inTransaction {
-                        etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
-                    } ?: throw IkkeFunnetException("MANGLER_ETTEROPPGJOER", "Fant ikke etteroppgjoer for sak")
-
-                call.respond(etteroppgjoer)
-            }
-
             get("liste") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
                 val etteroppgjoer =

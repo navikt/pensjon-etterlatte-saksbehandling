@@ -3,7 +3,7 @@ import { isFailure, isSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoer } from '~shared/api/etteroppgjoer'
+import { hentEtteroppgjoerListe } from '~shared/api/etteroppgjoer'
 import { ArrowRightIcon, CheckmarkCircleIcon, CircleIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
@@ -24,45 +24,60 @@ const getIcon = (current: number, idx: number) => {
 }
 
 const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBehandlinger> }): ReactNode => {
-  const [hentEtteroppgjoerResponse, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoer)
+  const [fetchEtteroppgjoerListeResult, fetchEtteroppgjoerListe] = useApiCall(hentEtteroppgjoerListe)
+
   const tilbakestillEtteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.vis_tilbakestill_etteroppgjoer)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
-      void hentEtteroppgjoerFetch(sakResult.data.sak.id.toString())
+      void fetchEtteroppgjoerListe(sakResult.data.sak.id.toString())
     }
   }, [sakResult])
 
-  if (isFailure(hentEtteroppgjoerResponse)) {
-    return <ApiErrorAlert>{hentEtteroppgjoerResponse.error.detail}</ApiErrorAlert>
+  if (isFailure(fetchEtteroppgjoerListeResult)) {
+    return <ApiErrorAlert>{fetchEtteroppgjoerListeResult.error.detail}</ApiErrorAlert>
   }
 
-  if (!isSuccess(hentEtteroppgjoerResponse) || !hentEtteroppgjoerResponse.data) {
+  if (!isSuccess(sakResult)) {
     return null
   }
 
-  const etteroppgjoer = hentEtteroppgjoerResponse.data
-  const currentIndex = steg.findIndex((s) => s.status.includes(etteroppgjoer.status))
+  if (!isSuccess(fetchEtteroppgjoerListeResult) || !fetchEtteroppgjoerListeResult.data?.length) {
+    return null
+  }
+
+  const sakId = sakResult.data.sak.id
+  const etteroppgjoerListe = fetchEtteroppgjoerListeResult.data
 
   return (
-    <VStack gap="4">
-      <Box padding="8" maxWidth="70rem">
-        <h1>Etteroppgjør for {etteroppgjoer.inntektsaar}</h1>
-        <List as="ul">
-          {steg.map((step, idx) => (
-            <List.Item
-              key={step.status.join(',')}
-              icon={getIcon(currentIndex, idx)}
-              style={{ color: currentIndex >= idx ? 'black' : 'gray' }}
-            >
-              {step.text()}
-            </List.Item>
-          ))}
-        </List>
-      </Box>
+    <VStack gap="6">
+      {etteroppgjoerListe.map((etteroppgjoer) => {
+        const currentIndex = steg.findIndex((s) => s.status.includes(etteroppgjoer.status))
+
+        return (
+          <Box key={`${etteroppgjoer.inntektsaar}-${etteroppgjoer.status}`} padding="8" maxWidth="70rem">
+            <h2>Etteroppgjør for {etteroppgjoer.inntektsaar}</h2>
+
+            <List as="ul">
+              {steg.map((step, idx) => (
+                <List.Item
+                  key={step.status.join(',')}
+                  icon={getIcon(currentIndex, idx)}
+                  style={{
+                    color: currentIndex >= idx ? 'black' : 'gray',
+                  }}
+                >
+                  {step.text()}
+                </List.Item>
+              ))}
+            </List>
+          </Box>
+        )
+      })}
+
       {tilbakestillEtteroppgjoerEnabled && (
         <Box padding="8" maxWidth="70rem">
-          <TilbakestillOgOpprettNyForbehandling sakId={etteroppgjoer.sakId} />
+          <TilbakestillOgOpprettNyForbehandling sakId={sakId} />
         </Box>
       )}
     </VStack>

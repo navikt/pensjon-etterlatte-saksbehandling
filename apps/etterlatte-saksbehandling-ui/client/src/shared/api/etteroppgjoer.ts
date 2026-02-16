@@ -11,10 +11,6 @@ import {
 import { JaNei } from '~shared/types/ISvar'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-export const hentEtteroppgjoer = async (sakId: string): Promise<ApiResponse<Etteroppgjoer>> => {
-  return apiClient.get(`/etteroppgjoer/${sakId}`)
-}
-
 export const hentEtteroppgjoerListe = async (sakId: string): Promise<ApiResponse<Etteroppgjoer[]>> => {
   return apiClient.get(`/etteroppgjoer/${sakId}/liste`)
 }

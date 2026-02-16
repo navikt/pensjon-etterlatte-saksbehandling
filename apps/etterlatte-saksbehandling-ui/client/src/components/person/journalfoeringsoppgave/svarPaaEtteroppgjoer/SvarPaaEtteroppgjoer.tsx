@@ -36,7 +36,7 @@ export const SvarPaaEtteroppgjoer = () => {
   const [hentOppgaveResult, hentOppgaveFetch] = useApiCall(hentOppgave)
   const [ferdigstillOppgaveResult, ferdigstillOppgaveRequest] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingEtteroppgjoer)
-  const [, hentEtteroppgjoerFetch] = useApiCall(hentEtteroppgjoerListe)
+  const [, fetchEtteroppgjoerListe] = useApiCall(hentEtteroppgjoerListe)
 
   const opprettRevurdering = (oppgave: OppgaveDTO) => {
     if (!valgtEtteroppgjoer) return
@@ -65,7 +65,7 @@ export const SvarPaaEtteroppgjoer = () => {
 
   useEffect(() => {
     if (hentOppgaveResult.status === 'success') {
-      hentEtteroppgjoerFetch(hentOppgaveResult.data.sakId.toString())
+      fetchEtteroppgjoerListe(hentOppgaveResult.data.sakId.toString())
     }
   }, [hentOppgaveResult])
 

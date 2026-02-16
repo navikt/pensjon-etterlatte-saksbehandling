@@ -14,15 +14,15 @@ type Props = {
 }
 
 export const VelgEtteroppgjoersAar = ({ sakId, value, onChange }: Props) => {
-  const [result, fetchEtteroppgjoer] = useApiCall(hentEtteroppgjoerListe)
+  const [hentEtteroppgjoerListeResult, fetchEtteroppgjoerListe] = useApiCall(hentEtteroppgjoerListe)
 
   useEffect(() => {
     if (sakId) {
-      fetchEtteroppgjoer(sakId)
+      fetchEtteroppgjoerListe(sakId)
     }
   }, [sakId])
 
-  return mapResult(result, {
+  return mapResult(hentEtteroppgjoerListeResult, {
     pending: <Spinner label="Henter etteroppgjør..." />,
     error: (error) => <ApiErrorAlert>Kunne ikke hente etteroppgjør: {error.detail}</ApiErrorAlert>,
     success: (etteroppgjoerListe) => (

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.beregning.grunnlag
 
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.beregning.regler.toGrunnlag
@@ -49,7 +48,6 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
 
     @AfterEach
     fun afterEach() {
-        clearAllMocks()
         dbExtension.resetDb()
     }
 

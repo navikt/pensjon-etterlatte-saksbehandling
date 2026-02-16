@@ -54,6 +54,7 @@ class AvkortingTidligAlderspensjonServiceTest {
     @AfterEach
     fun afterEach() {
         confirmVerified()
+        clearAllMocks()
     }
 
     @Test

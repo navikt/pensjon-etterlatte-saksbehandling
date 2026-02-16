@@ -3,9 +3,9 @@ package no.nav.etterlatte.beregning.regler.avkorting
 import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
@@ -54,8 +54,8 @@ class BeregnAvkortingTest {
     }
 
     @AfterEach
-    fun `unmock grunnbeloep`() {
-        unmockkObject(GrunnbeloepRepository)
+    fun afterEach() {
+        clearAllMocks()
     }
 
     @Test

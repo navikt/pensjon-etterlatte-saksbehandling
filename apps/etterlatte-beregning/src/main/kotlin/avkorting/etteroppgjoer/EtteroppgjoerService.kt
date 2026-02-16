@@ -150,7 +150,7 @@ class EtteroppgjoerService(
         val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
 
         val (vedtakReferanse, vedtakPerioder) = hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar)
-        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId, false)
+        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId)
 
         val inntektsgrunnlag =
             krevIkkeNull(avkortingRepository.hentFaktiskInntekt(nyForbehandlingAvkorting.id)) {
@@ -255,27 +255,10 @@ class EtteroppgjoerService(
     private fun finnAarsoppgjoerForEtteroppgjoer(
         aar: Int,
         behandlingId: UUID,
-        reparer: Boolean,
     ): Aarsoppgjoer {
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw GenerellIkkeFunnetException()
-        val reparertAvkorting =
-            if (reparer) {
-                val behandling = runBlocking { behandlingKlient.hentBehandling(behandlingId, HardkodaSystembruker.etteroppgjoer) }
-                val sakId = behandling.sak
-                val vedtak = runBlocking { vedtakKlient.hentIverksatteVedtak(sakId, HardkodaSystembruker.etteroppgjoer) }
-                val nyAvkorting =
-                    reparerAarsoppgjoeret.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-                        alleVedtak = vedtak,
-                        avkortingSistIverksatt = avkorting,
-                    )
-                if (avkorting.aarsoppgjoer.map { it.aar }.toSet() != nyAvkorting.aarsoppgjoer.map { it.aar }.toSet()) {
-                    logger.warn("Vi reparerte manglende årsoppgjør i sak $sakId i forbindelse med etteroppgjøret")
-                }
-                nyAvkorting
-            } else {
-                avkorting
-            }
-        val aarsoppgjoer = reparertAvkorting.aarsoppgjoer.filter { it.aar == aar }
+        val aarsoppgjoer = avkorting.aarsoppgjoer.filter { it.aar == aar }
+
         return when (aarsoppgjoer.size) {
             1 -> aarsoppgjoer.single()
             0 -> throw InternfeilException("Fant ikke aarsoppgjoer for $aar, selv etter reparasjon")

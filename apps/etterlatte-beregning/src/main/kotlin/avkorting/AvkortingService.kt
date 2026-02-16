@@ -374,22 +374,25 @@ class AvkortingService(
         virkningstidspunkt: YearMonth,
     ): Avkorting {
         val alleVedtak = vedtakKlient.hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
-        val forrigeBehandlingId =
+        val forrigeVedtak =
             alleVedtak
                 .filter {
                     it.vedtakType != VedtakType.OPPHOER // Opphør har ikke avkorting
                 }.maxBy {
                     it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
-                }.behandlingId
-        val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
+                }
+        val forrigeAvkorting = hentForrigeAvkorting(forrigeVedtak.behandlingId)
 
         if (behandling.status == BehandlingStatus.IVERKSATT) {
             return forrigeAvkorting
         }
-        return avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+        sjekkAtNyttAarMedInntektStarterIJanuar(forrigeAvkorting, virkningstidspunkt)
+
+        val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(behandling.sak, brukerTokenInfo)
+        return avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
             forrigeAvkorting,
-            virkningstidspunkt,
             alleVedtak,
+            innvilgedePerioder,
         )
     }
 
@@ -399,11 +402,13 @@ class AvkortingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
         val alleVedtak = vedtakKlient.hentIverksatteVedtak(sakId, brukerTokenInfo)
-        val forrigeAvkorting = hentForrigeAvkorting(behandlingId)
+        val avkorting = hentAvkortingNonNull(behandlingId)
 
-        return avkortingReparerAarsoppgjoeret.hentAvkortingForSistIverksattMedReparertAarsoppgjoer(
-            alleVedtak = alleVedtak,
-            avkortingSistIverksatt = forrigeAvkorting,
+        val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo)
+        return avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
+            avkorting = avkorting,
+            innvilgedePerioder = innvilgedePerioder,
+            iverksatteVedtakPaaSak = alleVedtak,
         )
     }
 
@@ -418,6 +423,23 @@ class AvkortingService(
         val kanAvkorte = behandlingKlient.avkort(behandlingId, bruker, commit = false)
         if (!kanAvkorte) {
             throw AvkortingBehandlingFeilStatus(behandlingId)
+        }
+    }
+
+    private fun sjekkAtNyttAarMedInntektStarterIJanuar(
+        avkorting: Avkorting,
+        virkningstidspunkt: YearMonth,
+    ) {
+        val sisteAarsoppgjoer = avkorting.aarsoppgjoer.maxByOrNull { it.aar }
+        val virkErINyttAar =
+            sisteAarsoppgjoer
+                ?.aar
+                ?.let { sisteAar -> sisteAar < virkningstidspunkt.year } ?: false
+
+        if (virkErINyttAar) {
+            if (virkningstidspunkt != YearMonth.of(virkningstidspunkt.year, 1)) {
+                throw NyeAarMedInntektMaaStarteIJanuar()
+            }
         }
     }
 }

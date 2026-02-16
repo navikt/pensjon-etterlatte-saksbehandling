@@ -7,7 +7,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
@@ -84,13 +83,12 @@ internal fun Route.revurderingRoutes(
 
             post("/etteroppgjoer") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                    logger.info("Oppretter ny revurdering på sak $sakId")
-
                     medBody<OpprettEtteroppgjoerRevurderingRequest> {
+                        logger.info("Oppretter revurdering på sakId=$sakId for etteroppgjøret ${it.inntektsaar}")
                         val revurdering =
                             etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
                                 sakId,
-                                ETTEROPPGJOER_AAR,
+                                it.inntektsaar,
                                 it.opprinnelse,
                                 saksbehandler,
                             )

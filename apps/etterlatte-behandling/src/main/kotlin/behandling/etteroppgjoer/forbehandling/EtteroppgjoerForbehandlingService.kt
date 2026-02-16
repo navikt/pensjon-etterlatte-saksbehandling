@@ -181,10 +181,7 @@ class EtteroppgjoerForbehandlingService(
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         dao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
 
-    fun hentForbehandlinger(
-        sakId: SakId,
-        etteroppgjoersAar: Int,
-    ): List<EtteroppgjoerForbehandling> = dao.hentForbehandlingerForSak(sakId, etteroppgjoersAar)
+    fun hentForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlingerForSak(sakId)
 
     fun hentDetaljertForbehandling(
         forbehandlingId: UUID,
@@ -259,7 +256,7 @@ class EtteroppgjoerForbehandlingService(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
-        logger.info("Oppretter forbehandling for etteroppgjør sakId=$sakId, inntektsår=$inntektsaar")
+        logger.info("Oppretter forbehandling for etteroppgjør $inntektsaar for sakId=$sakId")
         val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Kunne ikke hente sak=$sakId")
 
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
@@ -267,10 +264,6 @@ class EtteroppgjoerForbehandlingService(
 
         val etteroppgjoer =
             etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
-                ?: throw IkkeTillattException(
-                    "MANGLER_ETTEROPPGJOER",
-                    "Kan ikke opprette forbehandling fordi sak=${sak.id} ikke har et etteroppgjør",
-                )
 
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar, oppgaveId, etteroppgjoer)
 
@@ -466,13 +459,13 @@ class EtteroppgjoerForbehandlingService(
     ) {
         // Sak
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
-            logger.error("Kan ikke opprette forbehandling for sak=${sak.id} med sakType=${sak.sakType}")
+            logger.error("Kan ikke opprette forbehandling for sakId=${sak.id} med sakType=${sak.sakType}")
             throw IkkeTillattException("FEIL_SAKTYPE", "Kan ikke opprette forbehandling for sakType=${sak.sakType}")
         }
 
         if (!etteroppgjoer.kanOppretteForbehandling()) {
             logger.error(
-                "Kan ikke opprette forbehandling for sak=${sak.id} på grunn av feil status i etteroppgjoeret ${etteroppgjoer.status}",
+                "Kan ikke opprette forbehandling for sakId=${sak.id}, etteroppgjøret ${etteroppgjoer.inntektsaar} har feil status: ${etteroppgjoer.status}",
             )
             throw IkkeTillattException(
                 "FEIL_ETTEROPPGJOERS_STATUS",
@@ -484,18 +477,18 @@ class EtteroppgjoerForbehandlingService(
 
         // Siste iverksatte behandling
         if (behandlingService.hentSisteIverksatteBehandling(sak.id) == null) {
-            logger.error("Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling")
+            logger.error("Sak ${sak.id} mangler iverksatt behandling. Kan ikke opprette forbehandling.")
             throw InternfeilException(
-                "Kan ikke opprette forbehandling for sak=${sak.id}, sak mangler iverksatt behandling",
+                "Sak ${sak.id} mangler iverksatt behandling. Kan ikke opprette forbehandling.",
             )
         }
 
         // Forbehandling
-        val forbehandlinger = hentForbehandlinger(sak.id, etteroppgjoer.inntektsaar)
+        val forbehandlinger = hentForbehandlinger(sak.id)
         if (forbehandlinger.any { it.aar == inntektsaar && it.erUnderBehandling() }) {
             throw IkkeTillattException(
                 "FORBEHANDLING_FINNES_ALLEREDE",
-                "Kan ikke opprette forbehandling fordi det allerede eksisterer en forbehandling som ikke er ferdigstilt",
+                "Kan ikke opprette forbehandling fordi det allerede eksisterer en forbehandling som ikke er ferdigstilt for etteroppgjørsåret $inntektsaar",
             )
         }
     }

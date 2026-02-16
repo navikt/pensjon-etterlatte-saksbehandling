@@ -36,14 +36,23 @@ export const tilbakestillEtteroppgjoerOgOpprettOppgave = async (args: {
 export const opprettEtteroppgoerForbehandling = async (args: {
   sakId: number
   oppgaveId: string
+  inntektsaar: string
 }): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
-  return apiClient.post(`/etteroppgjoer/${args.sakId}/forbehandling/${args.oppgaveId}`, {})
+  return apiClient.post(`/etteroppgjoer/${args.sakId}/opprett-forbehandling/${args.oppgaveId}`, {
+    inntektsaar: args.inntektsaar,
+  })
 }
 
 export const hentEtteroppgjoerForbehandling = async (
   forbehandlingId: string
 ): Promise<ApiResponse<DetaljertEtteroppgjoerForbehandling>> => {
   return apiClient.get(`/etteroppgjoer/forbehandling/${forbehandlingId}`)
+}
+
+export const hentEtteroppgjoerForbehandlinger = async (
+  sakId: number
+): Promise<ApiResponse<EtteroppgjoerForbehandling[]>> => {
+  return apiClient.get(`/etteroppgjoer/forbehandlinger/${sakId}`)
 }
 
 export const omgjoerEtteroppgjoerRevurdering = async (args: {
@@ -59,12 +68,6 @@ export const avbrytEtteroppgjoerForbehandling = async (args: {
   return apiClient.post(`/etteroppgjoer/forbehandling/${args.id}/avbryt`, {
     ...args.avbrytEtteroppgjoerForbehandlingRequest,
   })
-}
-
-export const hentEtteroppgjoerForbehandlinger = async (
-  sakId: number
-): Promise<ApiResponse<EtteroppgjoerForbehandling[]>> => {
-  return apiClient.get(`/etteroppgjoer/forbehandlinger/${sakId}`)
 }
 
 export const lagreFaktiskInntekt = async (args: {

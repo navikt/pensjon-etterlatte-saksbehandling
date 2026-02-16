@@ -127,7 +127,7 @@ fun Route.etteroppgjoerRoutes(
                             )
                         }
 
-                        val forbehandlinger = forbehandlingService.hentForbehandlinger(sakId, etteroppgjoer.inntektsaar)
+                        val forbehandlinger = forbehandlingService.hentForbehandlinger(sakId)
                         if (forbehandlinger.isEmpty()) {
                             throw InternfeilException(
                                 "Kan ikke tilbakestille etteroppgjoer $inntektsaar for sakId=$sakId, fant ingen tidligere forbehandlinger. Ta kontakt for manuell håndtering.",
@@ -154,12 +154,16 @@ fun Route.etteroppgjoerRoutes(
                 }
             }
 
-            post("/forbehandling/{$OPPGAVEID_CALL_PARAMETER}") {
+            post("/opprett-forbehandling/{$OPPGAVEID_CALL_PARAMETER}") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
+
+                val request = call.receive<OpprettEtteroppgjeorForbehandlingIDev>()
+                val inntektsaar = request.inntektsaar
+
                 kunSkrivetilgang {
                     val forbehandling =
                         inTransaction {
-                            forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, ETTEROPPGJOER_AAR, oppgaveId, brukerTokenInfo)
+                            forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, inntektsaar, oppgaveId, brukerTokenInfo)
                         }
                     call.respond(forbehandling)
                 }
@@ -310,7 +314,7 @@ fun Route.etteroppgjoerRoutes(
 
         get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
             sjekkEtteroppgjoerEnabled(featureToggleService)
-            val forbehandlinger = inTransaction { forbehandlingService.hentForbehandlinger(sakId, ETTEROPPGJOER_AAR) }
+            val forbehandlinger = inTransaction { forbehandlingService.hentForbehandlinger(sakId) }
             call.respond(forbehandlinger)
         }
 

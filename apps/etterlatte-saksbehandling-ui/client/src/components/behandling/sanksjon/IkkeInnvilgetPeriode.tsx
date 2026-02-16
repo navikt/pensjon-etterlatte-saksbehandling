@@ -111,7 +111,9 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
 
   const hentSanksjoner = () => {
     hentSanksjonRequest(behandling.id, (res) => {
-      setIkkeInnvilgedePerioder(res)
+      setIkkeInnvilgedePerioder(
+        res.filter((ikkeInnvilgetPeriode) => ikkeInnvilgetPeriode.type === SanksjonType.IKKE_INNVILGET_PERIODE)
+      )
     })
   }
 
@@ -184,65 +186,61 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
                 <Table.Body>
                   {ikkeInnvilgedePerioder && ikkeInnvilgedePerioder.length > 0 ? (
                     <>
-                      {ikkeInnvilgedePerioder
-                        .filter(
-                          (ikkeInnvilgetPeriode) => ikkeInnvilgetPeriode.type === SanksjonType.IKKE_INNVILGET_PERIODE
-                        )
-                        .map((ikkeInnvilgetPeriode, index) => (
-                          <Table.Row key={index}>
-                            <Table.DataCell>{formaterMaanednavnAar(ikkeInnvilgetPeriode.fom)}</Table.DataCell>
-                            <Table.DataCell>
-                              {ikkeInnvilgetPeriode.tom ? formaterMaanednavnAar(ikkeInnvilgetPeriode.tom) : '-'}
-                            </Table.DataCell>
-                            <Table.DataCell>{ikkeInnvilgetPeriode.beskrivelse}</Table.DataCell>
-                            <Table.DataCell>
-                              <BodyShort>{ikkeInnvilgetPeriode.opprettet.ident}</BodyShort>
-                              <Detail>{`saksbehandler: ${formaterDato(ikkeInnvilgetPeriode.opprettet.tidspunkt)}`}</Detail>
-                            </Table.DataCell>
-                            <Table.DataCell>
-                              {ikkeInnvilgetPeriode.endret ? (
-                                <>
-                                  <BodyShort>{ikkeInnvilgetPeriode.endret.ident}</BodyShort>
-                                  <Detail>{`saksbehandler: ${formaterDato(ikkeInnvilgetPeriode.endret.tidspunkt)}`}</Detail>
-                                </>
-                              ) : (
-                                '-'
-                              )}
-                            </Table.DataCell>
-                            {redigerbar && (
-                              <Table.DataCell>
-                                <HStack gap="2">
-                                  <Button
-                                    size="small"
-                                    variant="tertiary"
-                                    onClick={() => {
-                                      reset({
-                                        datoFom: new Date(ikkeInnvilgetPeriode.fom),
-                                        datoTom: ikkeInnvilgetPeriode.tom ? new Date(ikkeInnvilgetPeriode.tom) : null,
-                                        type: ikkeInnvilgetPeriode.type,
-                                        beskrivelse: ikkeInnvilgetPeriode.beskrivelse,
-                                      })
-                                      setRedigerIkkeInnvilgetPeriode(ikkeInnvilgetPeriode.id!!)
-                                      setVisForm(true)
-                                    }}
-                                  >
-                                    Rediger
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    variant="tertiary"
-                                    onClick={() => {
-                                      slettEnkeltSanksjon(ikkeInnvilgetPeriode.behandlingId, ikkeInnvilgetPeriode.id!!)
-                                    }}
-                                    loading={isPending(slettSanksjonStatus)}
-                                  >
-                                    Slett
-                                  </Button>
-                                </HStack>
-                              </Table.DataCell>
+                      {ikkeInnvilgedePerioder.map((ikkeInnvilgetPeriode, index) => (
+                        <Table.Row key={index}>
+                          <Table.DataCell>{formaterMaanednavnAar(ikkeInnvilgetPeriode.fom)}</Table.DataCell>
+                          <Table.DataCell>
+                            {ikkeInnvilgetPeriode.tom ? formaterMaanednavnAar(ikkeInnvilgetPeriode.tom) : '-'}
+                          </Table.DataCell>
+                          <Table.DataCell>{ikkeInnvilgetPeriode.beskrivelse}</Table.DataCell>
+                          <Table.DataCell>
+                            <BodyShort>{ikkeInnvilgetPeriode.opprettet.ident}</BodyShort>
+                            <Detail>{`saksbehandler: ${formaterDato(ikkeInnvilgetPeriode.opprettet.tidspunkt)}`}</Detail>
+                          </Table.DataCell>
+                          <Table.DataCell>
+                            {ikkeInnvilgetPeriode.endret ? (
+                              <>
+                                <BodyShort>{ikkeInnvilgetPeriode.endret.ident}</BodyShort>
+                                <Detail>{`saksbehandler: ${formaterDato(ikkeInnvilgetPeriode.endret.tidspunkt)}`}</Detail>
+                              </>
+                            ) : (
+                              '-'
                             )}
-                          </Table.Row>
-                        ))}
+                          </Table.DataCell>
+                          {redigerbar && (
+                            <Table.DataCell>
+                              <HStack gap="2">
+                                <Button
+                                  size="small"
+                                  variant="tertiary"
+                                  onClick={() => {
+                                    reset({
+                                      datoFom: new Date(ikkeInnvilgetPeriode.fom),
+                                      datoTom: ikkeInnvilgetPeriode.tom ? new Date(ikkeInnvilgetPeriode.tom) : null,
+                                      type: ikkeInnvilgetPeriode.type,
+                                      beskrivelse: ikkeInnvilgetPeriode.beskrivelse,
+                                    })
+                                    setRedigerIkkeInnvilgetPeriode(ikkeInnvilgetPeriode.id!!)
+                                    setVisForm(true)
+                                  }}
+                                >
+                                  Rediger
+                                </Button>
+                                <Button
+                                  size="small"
+                                  variant="tertiary"
+                                  onClick={() => {
+                                    slettEnkeltSanksjon(ikkeInnvilgetPeriode.behandlingId, ikkeInnvilgetPeriode.id!!)
+                                  }}
+                                  loading={isPending(slettSanksjonStatus)}
+                                >
+                                  Slett
+                                </Button>
+                              </HStack>
+                            </Table.DataCell>
+                          )}
+                        </Table.Row>
+                      ))}
                     </>
                   ) : (
                     <Table.Row>

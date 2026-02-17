@@ -2049,6 +2049,42 @@ class BeregnAvkortingNyeReglerTest {
         }
     }
 
+    @Test
+    fun `Avkorting etteroppgjør beregnes riktig`() {
+        val avkorting =
+            `avkorting etteroppgjør 2024 legges inn`(
+                loennsinntekt = 350_000,
+            )
+        val avkorting2024 = avkorting.aarsoppgjoer.single { it.aar == 2024 }
+        with(avkorting2024.avkortetYtelse) {
+            size shouldBe 3
+            get(0).asClue {
+                it.periode.fom shouldBe YearMonth.of(2024, Month.MARCH)
+                it.periode.tom shouldBe YearMonth.of(2024, Month.MARCH)
+                it.ytelseEtterAvkorting shouldBe 8715
+                it.restanse shouldBe null
+                it.avkortingsbeloep shouldBe 13526
+                it.ytelseFoerAvkorting shouldBe 22241
+            }
+            get(1).asClue {
+                it.periode.fom shouldBe YearMonth.of(2024, Month.APRIL)
+                it.periode.tom shouldBe YearMonth.of(2024, Month.APRIL)
+                it.ytelseEtterAvkorting shouldBe 8715
+                it.restanse shouldBe null
+                it.avkortingsbeloep shouldBe 13526
+                it.ytelseFoerAvkorting shouldBe 22241
+            }
+            get(2).asClue {
+                it.periode.fom shouldBe YearMonth.of(2024, Month.MAY)
+                it.periode.tom shouldBe YearMonth.of(2024, Month.DECEMBER)
+                it.ytelseEtterAvkorting shouldBe 8817
+                it.restanse shouldBe null
+                it.avkortingsbeloep shouldBe 13424
+                it.ytelseFoerAvkorting shouldBe 22241
+            }
+        }
+    }
+
     // TODO Revurdering opphør midt i et år
 
     private fun `Avkorting foerstegangsbehandling`() =
@@ -2296,6 +2332,31 @@ class BeregnAvkortingNyeReglerTest {
                 opphoerFom = null,
                 brukNyeReglerAvkorting = true,
             )
+
+    private fun `avkorting etteroppgjør 2024 legges inn`(
+        loennsinntekt: Int = 0,
+        afp: Int = 0,
+        naeringsinntekt: Int = 0,
+        utland: Int = 0,
+    ) = `Revurdering med virk mellom inntektsperioder`()
+        .kopierAvkorting()
+        .let { avkorting ->
+            val periode2024 = avkorting.aarsoppgjoer.single { it.aar == 2024 }.periode()
+
+            avkorting.beregnEtteroppgjoer(
+                brukerTokenInfo = bruker,
+                aar = 2024,
+                loennsinntekt = loennsinntekt,
+                afp = afp,
+                naeringsinntekt = naeringsinntekt,
+                utland = utland,
+                sanksjoner = emptyList(),
+                spesifikasjon = "",
+                innvilgetPeriodeIEtteroppgjoersAar = periode2024,
+                opphoerFom = null,
+                brukNyeReglerAvkorting = true,
+            )
+        }
 
     private fun `Avkorting ny lavere inntekt to etter sanksjon`() =
         `Sanksjon etter inntektsendring lukkes`()

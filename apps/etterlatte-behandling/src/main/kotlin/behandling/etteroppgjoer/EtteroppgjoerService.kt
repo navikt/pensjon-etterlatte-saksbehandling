@@ -255,6 +255,10 @@ class EtteroppgjoerService(
             .also { dao.lagreEtteroppgjoer(it) }
     }
 
+    /*
+     * Henter innvilgede år for en sak ved å hente alle innvilgede perioder og utlede årstallene fra disse.
+     * Filtrerer bort inneværende år og perioder før 2024 da de ikke skal ha etteroppgjør
+     */
     fun finnInnvilgedeAarForSak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,

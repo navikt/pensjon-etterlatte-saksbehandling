@@ -201,6 +201,7 @@ class EtteroppgjoerService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        // første etteroppgjør var 2024, vi skal ha etteroppgjør for alle år utenom inneværende år.
         val aarMedEtteroppgjoer =
             (2024..Year.now().value - 1)
                 .filter { aar ->

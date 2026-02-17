@@ -49,11 +49,11 @@ internal class SanksjonServiceTest {
     @Nested
     inner class HentSanksjon {
         @Test
-        fun `Skal returnere null hvis det ikke finnes sanksjoner`() {
+        fun `Skal returnere tom liste hvis det ikke finnes sanksjoner`() {
             val behandlingId = UUID.randomUUID()
-            every { sanksjonRepository.hentSanksjon(behandlingId) } returns null
+            every { sanksjonRepository.hentSanksjon(behandlingId) } returns emptyList()
 
-            service.hentSanksjon(behandlingId) shouldBe null
+            service.hentSanksjon(behandlingId) shouldBe emptyList()
 
             coVerify {
                 sanksjonRepository.hentSanksjon(behandlingId)
@@ -224,7 +224,7 @@ internal class SanksjonServiceTest {
                 SisteIverksatteBehandling(
                     forrigeBehandling,
                 )
-            every { sanksjonRepository.hentSanksjon(behandlingId) } returns null
+            every { sanksjonRepository.hentSanksjon(behandlingId) } returns emptyList()
             every { sanksjonRepository.hentSanksjon(forrigeBehandling) } returns
                 listOf(
                     sanksjon(
@@ -486,7 +486,7 @@ internal class SanksjonServiceTest {
                 )
 
             every { sanksjonRepository.hentSanksjon(behandlingId) } returns listOf(sanksjoner)
-            every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns null
+            every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns emptyList()
             every {
                 sanksjonRepository.opprettSanksjon(
                     forrigeBehandlingId,

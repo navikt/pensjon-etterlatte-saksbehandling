@@ -2,7 +2,6 @@ package no.nav.etterlatte.sanksjon
 
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -21,9 +20,9 @@ class SanksjonService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
+    fun hentSanksjon(behandlingId: UUID): List<Sanksjon> {
         logger.info("Henter sanksjoner med behandlingID=$behandlingId")
-        return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
+        return sanksjonRepository.hentSanksjon(behandlingId).sortedBy { it.fom }
     }
 
     /**
@@ -54,8 +53,8 @@ class SanksjonService(
         val sanksjonerIDenneBehandlingen = sanksjonRepository.hentSanksjon(behandlingId)
         val sanksjonerIForrigeBehandling = sanksjonRepository.hentSanksjon(forrigeBehandlingId)
 
-        if (sanksjonerIDenneBehandlingen.isNullOrEmpty()) {
-            sanksjonerIForrigeBehandling?.forEach {
+        if (sanksjonerIDenneBehandlingen.isEmpty()) {
+            sanksjonerIForrigeBehandling.forEach {
                 logger.info(
                     "Kopierer sanksjon [${it.id}] fra forrige behandling til behandlingen " +
                         "med behandlingID=$behandlingId, fra behandling med id=$forrigeBehandlingId",
@@ -120,8 +119,8 @@ class SanksjonService(
         val forrigeIverksatteBehandling =
             behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
         val sanksjonerIForrigeBehandling =
-            sanksjonRepository.hentSanksjon(forrigeIverksatteBehandling.id) ?: emptyList()
-        val sanksjonerIBehandling = sanksjonRepository.hentSanksjon(behandling.id) ?: emptyList()
+            sanksjonRepository.hentSanksjon(forrigeIverksatteBehandling.id)
+        val sanksjonerIBehandling = sanksjonRepository.hentSanksjon(behandling.id)
 
         val forrigeBehandlingSanksjoner =
             sanksjonerIForrigeBehandling.map {

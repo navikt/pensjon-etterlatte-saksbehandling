@@ -237,7 +237,7 @@ class AvkortingService(
                 nyttGrunnlag = nyeGrunnlag,
                 bruker = brukerTokenInfo,
                 beregning = beregning,
-                sanksjoner = sanksjoner ?: emptyList(),
+                sanksjoner = sanksjoner,
                 opphoerFom = behandling.opphoerFraOgMed,
                 aldersovergang = aldersovergangMaaned,
                 brukNyeReglerAvkorting =
@@ -327,7 +327,7 @@ class AvkortingService(
     ): Avkorting {
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
-        val sanksjoner = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
+        val sanksjoner = sanksjonService.hentSanksjon(behandling.id)
 
         val avkorting =
             when (behandling.revurderingsaarsak) {

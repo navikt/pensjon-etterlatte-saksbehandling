@@ -28,7 +28,7 @@ object AvkortingValider {
         // Vi trenger inntekter fram til der behandlingen løper, eller i år og potensielt neste i førstegangsbehandlinger
         val sisteAar =
             when (val tilOgMedAarBeregning = sortertePerioder.last().datoTOM?.year) {
-                null ->
+                null -> {
                     if (naa.month >= MAANED_FOR_INNTEKT_NESTE_AAR && krevInntektForNesteAar &&
                         behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING
                     ) {
@@ -38,8 +38,11 @@ object AvkortingValider {
                         // minst like stort som første år i beregning
                         maxOf(naa.year, sisteAarFom)
                     }
+                }
 
-                else -> tilOgMedAarBeregning
+                else -> {
+                    tilOgMedAarBeregning
+                }
             }
         val aarViMaaHaInntekterFor = (foersteAar..sisteAar).toList()
         return aarViMaaHaInntekterFor

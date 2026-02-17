@@ -70,6 +70,7 @@ internal class AvkortingServiceTest {
         clearAllMocks()
         coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
         every { featureToggleService.isEnabled(any(), any(), any()) } returnsArgument 1
+        every { sanksjonService.hentSanksjon(any()) } returns emptyList()
         coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns
             listOf(
                 InnvilgetPeriodeDto(
@@ -187,7 +188,7 @@ internal class AvkortingServiceTest {
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { eksisterendeAvkorting.beregnAvkorting(any(), any(), any(), any(), any()) } returns reberegnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
-            every { sanksjonService.hentSanksjon(behandlingId) } returns null
+            every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
             mockkObject(AvkortingMapper)
             every { AvkortingMapper.avkortingForFrontend(any(), any(), any()) } returns avkortingFrontend
@@ -350,7 +351,7 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(behandlingId) } returns null andThen lagretAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
-            every { sanksjonService.hentSanksjon(behandlingId) } returns null
+            every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             every { forrigeAvkorting.kopierAvkorting() } returns kopiertAvkorting
             every { kopiertAvkorting.beregnAvkorting(any(), any(), any(), any(), any()) } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
@@ -440,7 +441,7 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting andThen lagretAvkorting
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
-            every { sanksjonService.hentSanksjon(behandlingId) } returns null
+            every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             every { eksisterendeAvkorting.beregnAvkorting(any(), any(), any(), any(), any()) } returns reberegnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -529,7 +530,7 @@ internal class AvkortingServiceTest {
             mockkObject(AvkortingValider)
             every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any()) } returns Unit
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
-            every { sanksjonService.hentSanksjon(behandlingId) } returns null
+            every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(1900, 1)
             every { endretGrunnlag.fom } returns YearMonth.of(2024, 1)
             every {
@@ -612,7 +613,7 @@ internal class AvkortingServiceTest {
             mockkObject(AvkortingValider)
             every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any()) } returns Unit
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
-            every { sanksjonService.hentSanksjon(revurderingId) } returns null
+            every { sanksjonService.hentSanksjon(revurderingId) } returns emptyList()
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(1900, 1)
             every { endretGrunnlag.fom } returns YearMonth.of(2024, 1)
             every {
@@ -728,7 +729,7 @@ internal class AvkortingServiceTest {
             mockkObject(AvkortingValider)
             every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any()) } returns Unit
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
-            every { sanksjonService.hentSanksjon(behandlingId) } returns null
+            every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns foedselsdato67aar
             every { endretGrunnlag.fom } returns YearMonth.of(2024, 1)
             every {

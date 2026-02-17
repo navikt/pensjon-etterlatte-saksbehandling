@@ -42,6 +42,7 @@ data class AvkortetBeregningsperiode(
             beregningsMetodeAnvendt = this.beregningsMetodeAnvendt,
             beregningsMetodeFraGrunnlag = this.beregningsMetodeFraGrunnlag,
             sanksjon = this.sanksjon != null,
+            sanksjonType = this.sanksjon?.sanksjonType,
             institusjon = this.institusjon != null && this.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
             erOverstyrtInnvilgaMaaneder = this.erOverstyrtInnvilgaMaaneder,
         )

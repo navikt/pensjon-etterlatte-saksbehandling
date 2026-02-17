@@ -71,6 +71,7 @@ class AvkortingValiderTest {
             ),
             avkorting,
             listOf(inntektMedFratrekk),
+            emptyList(),
             true,
             naa = YearMonth.of(2024, 12),
         )
@@ -104,6 +105,7 @@ class AvkortingValiderTest {
                 beregning(beregningsperiode(datoFOM = fom)),
                 avkorting,
                 listOf(inntektMedFratrekk),
+                emptyList(),
                 true,
                 naa = fom,
             )
@@ -149,6 +151,7 @@ class AvkortingValiderTest {
             beregning(beregningsperiode(datoFOM = fom)),
             avkorting,
             listOf(inntektMedFratrekk),
+            emptyList(),
             true,
             naa = fom,
         )
@@ -191,6 +194,7 @@ class AvkortingValiderTest {
                 beregning(beregningsperiode(datoFOM = fom)),
                 avkorting,
                 listOf(inntektMedFratrekk),
+                emptyList(),
                 true,
                 naa = fom,
             )
@@ -238,6 +242,7 @@ class AvkortingValiderTest {
             beregning(beregninger = listOf(beregningsperiode(datoFOM = YearMonth.of(2024, 1)))),
             avkorting,
             listOf(inntektMedFratrekk),
+            emptyList(),
             true,
             naa = YearMonth.of(2024, 6),
         )
@@ -260,6 +265,7 @@ class AvkortingValiderTest {
                 beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 1))),
                 avkorting,
                 listOf(utenFratrekk),
+                emptyList(),
                 true,
                 naa = YearMonth.of(2024, 3),
             )
@@ -276,6 +282,7 @@ class AvkortingValiderTest {
                     beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 1))),
                     avkorting,
                     listOf(inntektMedFratrekk),
+                    emptyList(),
                     true,
                     naa = YearMonth.of(2024, 3),
                 )
@@ -294,6 +301,7 @@ class AvkortingValiderTest {
                     beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 1))),
                     avkorting,
                     listOf(inntektMedFratrekkUtland),
+                    emptyList(),
                     true,
                     naa = YearMonth.of(2024, 3),
                 )
@@ -325,6 +333,7 @@ class AvkortingValiderTest {
                 beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(aar, 1))),
                 eksisterendeAvkorting = avkorting,
                 nyeGrunnlag = listOf(utenFratrekk),
+                emptyList(),
                 true,
             )
 
@@ -340,6 +349,7 @@ class AvkortingValiderTest {
                     beregning(),
                     avkorting,
                     listOf(inntektMedFratrekk),
+                    emptyList(),
                     true,
                 )
             }
@@ -356,6 +366,7 @@ class AvkortingValiderTest {
                     beregning(),
                     avkorting,
                     listOf(inntektMedFratrekkUtland),
+                    emptyList(),
                     true,
                 )
             }
@@ -392,6 +403,7 @@ class AvkortingValiderTest {
                 ),
             behandling = behandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2024, 2)),
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
+            sanksjoner = emptyList(),
             krevInntektForNesteAar = true,
             naa = YearMonth.of(2024, 5),
         )
@@ -428,6 +440,7 @@ class AvkortingValiderTest {
                 ),
             behandling = behandling(BehandlingType.REVURDERING, virk = YearMonth.of(2024, 2)),
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
+            sanksjoner = emptyList(),
             krevInntektForNesteAar = true,
         )
     }
@@ -451,6 +464,7 @@ class AvkortingValiderTest {
                 avkorting,
                 beregning,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
+                emptyList(),
                 true,
             )
         krav shouldContainExactly listOf(2024, 2025, 2026)
@@ -472,6 +486,7 @@ class AvkortingValiderTest {
                 avkorting,
                 beregning,
                 BehandlingType.REVURDERING,
+                emptyList(),
                 true,
             )
         assertEquals(krav, listOf(2025, 2026))

@@ -102,5 +102,6 @@ internal class SanksjonRepositoryTest(
             sakId = sakId,
             sanksjon = gammelSanksjon,
         )
+        sanksjonRepository.hentSanksjon(nyBehandlingId).size shouldBe 1
     }
 }

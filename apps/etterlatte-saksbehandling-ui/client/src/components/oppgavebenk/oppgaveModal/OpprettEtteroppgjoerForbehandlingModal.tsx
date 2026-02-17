@@ -28,7 +28,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
 
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
 
-  const [opprettForbehandlingResult, opprettForbehandlingRequest] = useApiCall(opprettForbehandlingApi)
+  const [opprettForbehandlingResult, opprettForbehandlingRequest, resetApiCall] = useApiCall(opprettForbehandlingApi)
 
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
 
@@ -48,6 +48,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
   const lukkModal = () => {
     setValgtEtteroppgjoer('')
     reset()
+    resetApiCall()
     setOpen(false)
   }
 

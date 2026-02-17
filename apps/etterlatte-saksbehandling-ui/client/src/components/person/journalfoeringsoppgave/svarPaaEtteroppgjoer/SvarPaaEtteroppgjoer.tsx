@@ -16,7 +16,6 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { Sidebar } from '~shared/components/Sidebar'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
-import { hentEtteroppgjoerListe } from '~shared/api/etteroppgjoer'
 import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
 
 export const SvarPaaEtteroppgjoer = () => {
@@ -36,7 +35,6 @@ export const SvarPaaEtteroppgjoer = () => {
   const [hentOppgaveResult, hentOppgaveFetch] = useApiCall(hentOppgave)
   const [ferdigstillOppgaveResult, ferdigstillOppgaveRequest] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [opprettRevurderingResult, opprettRevurderingRequest] = useApiCall(opprettRevurderingEtteroppgjoer)
-  const [, fetchEtteroppgjoerListe] = useApiCall(hentEtteroppgjoerListe)
 
   const opprettRevurdering = (oppgave: OppgaveDTO) => {
     if (!valgtEtteroppgjoer) return
@@ -62,12 +60,6 @@ export const SvarPaaEtteroppgjoer = () => {
   useEffect(() => {
     hentOppgaveFetch(oppgaveId)
   }, [oppgaveId])
-
-  useEffect(() => {
-    if (hentOppgaveResult.status === 'success') {
-      fetchEtteroppgjoerListe(hentOppgaveResult.data.sakId.toString())
-    }
-  }, [hentOppgaveResult])
 
   return mapResult(hentOppgaveResult, {
     pending: <Spinner label="Henter oppgaver..." />,

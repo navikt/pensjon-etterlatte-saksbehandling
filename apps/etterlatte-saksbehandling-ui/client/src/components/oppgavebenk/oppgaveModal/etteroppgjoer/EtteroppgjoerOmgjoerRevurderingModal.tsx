@@ -3,7 +3,7 @@ import { EyeIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
 import { omgjoerEtteroppgjoerRevurdering as omgjoerEtteroppgjoerRevurderingApi } from '~shared/api/etteroppgjoer'
@@ -53,9 +53,9 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
               å måtte behandle etteroppgjøret på nytt via ny forbehandling.
             </BodyShort>
 
-            {omgjoerEtteroppgjoerResult.status === 'error' && (
-              <ApiErrorAlert>Kunne ikke omgjøre behandling. {omgjoerEtteroppgjoerResult.error.detail}</ApiErrorAlert>
-            )}
+            {mapFailure(omgjoerEtteroppgjoerResult, (error) => (
+              <ApiErrorAlert>Kunne ikke omgjøre behandling. {error.detail}</ApiErrorAlert>
+            ))}
 
             <HStack justify="end">
               <HStack gap="4">

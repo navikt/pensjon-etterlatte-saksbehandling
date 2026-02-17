@@ -95,7 +95,7 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(HttpStatusCode.NotFound)
                 }
 
-                val request = call.receive<OpprettEtteroppgjeorForbehandlingIDev>()
+                val request = call.receive<OpprettEtteroppgjeorForbehandlingRequest>()
                 val inntektsaar = request.inntektsaar
 
                 kunSkrivetilgang {
@@ -126,7 +126,7 @@ fun Route.etteroppgjoerRoutes(
             post("tilbakestill-og-opprett-forbehandlingsoppgave") {
                 sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService)
                 kunSkrivetilgang {
-                    val request = call.receive<OpprettEtteroppgjeorForbehandlingIDev>()
+                    val request = call.receive<OpprettEtteroppgjeorForbehandlingRequest>()
                     val inntektsaar = request.inntektsaar
 
                     inTransaction {
@@ -169,7 +169,7 @@ fun Route.etteroppgjoerRoutes(
             post("/opprett-forbehandling/{$OPPGAVEID_CALL_PARAMETER}") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
 
-                val request = call.receive<OpprettEtteroppgjeorForbehandlingIDev>()
+                val request = call.receive<OpprettEtteroppgjeorForbehandlingRequest>()
                 val inntektsaar = request.inntektsaar
 
                 kunSkrivetilgang {
@@ -377,7 +377,7 @@ private fun sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService: Fea
     }
 }
 
-data class OpprettEtteroppgjeorForbehandlingIDev(
+data class OpprettEtteroppgjeorForbehandlingRequest(
     val inntektsaar: Int,
 )
 

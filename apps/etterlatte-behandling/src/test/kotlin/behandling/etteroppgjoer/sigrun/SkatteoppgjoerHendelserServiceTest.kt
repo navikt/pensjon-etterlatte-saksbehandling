@@ -22,9 +22,12 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
+import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
@@ -72,10 +75,7 @@ class SkatteoppgjoerHendelserServiceTest {
         coEvery { sakService.finnSak(harOms1, any<SakType>()) } returns mockk { every { id } returns SakId(2L) }
         coEvery { sakService.finnSak(harOms2, any<SakType>()) } returns mockk { every { id } returns SakId(3L) }
 
-        // Mock vedtakKlient for å sjekke om saken har utbetaling
-        coEvery { vedtakKlient.harSakUtbetalingForInntektsaar(SakId(2L), 2024, any()) } returns true
-        coEvery { vedtakKlient.harSakUtbetalingForInntektsaar(SakId(2L), 2025, any()) } returns false
-        coEvery { vedtakKlient.harSakUtbetalingForInntektsaar(SakId(3L), 2024, any()) } returns true
+        coEvery { etteroppgjoerService.finnInnvilgedeAarForSak(any(), any()) } returns listOf(2024)
 
         coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), 2024) } returns
             Etteroppgjoer(SakId(2L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)

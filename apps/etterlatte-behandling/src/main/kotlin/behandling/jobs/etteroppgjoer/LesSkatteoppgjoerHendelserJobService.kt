@@ -12,12 +12,16 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
+import java.time.Year
+import java.time.YearMonth
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -100,9 +104,8 @@ class LesSkatteoppgjoerHendelserJobService(
                 "Hendelse=${hendelse.toJson()}",
         )
 
-        val harUtbetalingIPeriode =
-            runBlocking { vedtakKlient.harSakUtbetalingForInntektsaar(sak.id, inntektsaar, HardkodaSystembruker.etteroppgjoer) }
-        if (!harUtbetalingIPeriode) return false
+        val innvilgetAar = etteroppgjoerService.finnInnvilgedeAarForSak(sak.id, HardkodaSystembruker.etteroppgjoer)
+        if (inntektsaar !in innvilgetAar) return false
 
         val etteroppgjoer =
             runCatching {

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilte
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -27,6 +28,7 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import java.time.LocalDate
 import java.time.Year
+import java.time.YearMonth
 import java.util.UUID
 
 enum class EtteroppgjoerSvarfrist(
@@ -197,27 +199,24 @@ class EtteroppgjoerService(
         return oppdatertEtteroppgjoer
     }
 
-    suspend fun finnOgOpprettManglendeEtteroppgjoer(
+    fun finnOgOpprettManglendeEtteroppgjoer(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        // første etteroppgjør var 2024, vi skal ha etteroppgjør for alle år utenom inneværende år.
-        val aarMedEtteroppgjoer =
-            (2024..Year.now().value - 1)
-                .filter { aar ->
-                    vedtakKlient.harSakUtbetalingForInntektsaar(sakId, aar, brukerTokenInfo)
-                }
+        val innvilgedeAar = finnInnvilgedeAarForSak(sakId, brukerTokenInfo)
 
-        val etteroppgjoer =
-            inTransaction {
-                dao.hentEtteroppgjoerForSak(sakId).map { it.inntektsaar }
-            }
+        val etteroppgjoer = dao.hentEtteroppgjoerForSak(sakId).map { it.inntektsaar }
 
-        val aarSomSkalHaEtteroppgjoer = aarMedEtteroppgjoer.toSet() - etteroppgjoer.toSet()
-        aarSomSkalHaEtteroppgjoer.forEach {
-            inTransaction {
-                opprettNyttEtteroppgjoer(sakId, it)
-            }
+        val aarUtenEtteroppgjoer = innvilgedeAar.toSet() - etteroppgjoer.toSet()
+        if (aarUtenEtteroppgjoer.isEmpty()) {
+            logger.info(
+                "Sak med id $sakId har allerede etteroppgjør for alle inntektsår med innvilget periode, ingen etteroppgjør trenger å opprettes.",
+            )
+            return
+        }
+
+        aarUtenEtteroppgjoer.forEach {
+            opprettNyttEtteroppgjoer(sakId, it)
         }
     }
 
@@ -254,6 +253,34 @@ class EtteroppgjoerService(
 
         return etteroppgjoer(sakId, inntektsaar, behandling, status, harOpphoer)
             .also { dao.lagreEtteroppgjoer(it) }
+    }
+
+    fun finnInnvilgedeAarForSak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Int> {
+        val innvilgedePerioder = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
+
+        if (innvilgedePerioder.isEmpty()) {
+            throw UgyldigForespoerselException(
+                "MANGLER_INNVILGET_PERIODE",
+                "Saken har ingen innvilget periode.",
+            )
+        }
+
+        val innvilgedeAar =
+            innvilgedePerioder
+                .flatMap { periodeDto ->
+                    val periode = periodeDto.periode
+                    val fomYear = periode.fom.year
+                    val tomYear = (periode.tom ?: YearMonth.now().minusYears(1)).year
+
+                    (fomYear..tomYear).toList()
+                }.filter { aar ->
+                    aar >= 2024
+                }.distinct()
+
+        return innvilgedeAar
     }
 
     private fun finnStatusForForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerStatus {

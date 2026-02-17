@@ -391,9 +391,11 @@ class EtteroppgjoerServiceTest {
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
         // Innvilget periode f.eks 2024, 2025 og 2026
-        coEvery { ctx.vedtakKlient.harSakUtbetalingForInntektsaar(sakId, Year.now().value - 1, brukerTokenInfo) } returns true
-        coEvery { ctx.vedtakKlient.harSakUtbetalingForInntektsaar(sakId, Year.now().value - 2, brukerTokenInfo) } returns true
-        coEvery { ctx.vedtakKlient.harSakUtbetalingForInntektsaar(sakId, Year.now().value, brukerTokenInfo) } returns true
+        coEvery { ctx.vedtakKlient.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(VedtakPeriode(YearMonth.now().minusYears(1), null), mockk(relaxed = true)),
+                InnvilgetPeriodeDto(VedtakPeriode(YearMonth.now().minusYears(2), null), mockk(relaxed = true)),
+            )
 
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns null
 

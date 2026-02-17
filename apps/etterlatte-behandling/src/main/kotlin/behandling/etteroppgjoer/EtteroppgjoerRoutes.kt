@@ -84,8 +84,12 @@ fun Route.etteroppgjoerRoutes(
                 }
 
                 kunSkrivetilgang {
-                    etteroppgjoerService.finnOgOpprettManglendeEtteroppgjoer(sakId, brukerTokenInfo)
-                    call.respond(HttpStatusCode.OK)
+                    inTransaction {
+                        runBlocking {
+                            etteroppgjoerService.finnOgOpprettManglendeEtteroppgjoer(sakId, brukerTokenInfo)
+                            call.respond(HttpStatusCode.OK)
+                        }
+                    }
                 }
             }
 

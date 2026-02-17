@@ -38,7 +38,6 @@ export const valgbareSanksjonstyper = [
   SanksjonType.OPPHOER,
   SanksjonType.STANS,
   SanksjonType.UTESTENGING,
-  SanksjonType.IKKE_INNVILGET_PERIODE,
 ]
 
 export const visbareSanksjonstyper = [

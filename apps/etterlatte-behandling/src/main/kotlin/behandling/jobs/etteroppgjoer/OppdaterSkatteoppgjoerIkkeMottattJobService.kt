@@ -38,7 +38,7 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
             return
         }
 
-        logger.info("Periodisk jobb for å oppdatere saker med ikke mottatt skatteoppgjør og opprette forbehandlinger")
+        logger.info("Starter jobb for å oppdatere saker med skatteoppgjør ikke mottatt")
         runBlocking {
             oppdaterSkatteoppgjoerIkkeMottatt()
             finnOgOpprettManglendeEtteroppgjoer()

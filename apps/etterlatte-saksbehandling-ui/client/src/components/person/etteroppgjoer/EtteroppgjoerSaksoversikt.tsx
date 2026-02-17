@@ -9,6 +9,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { TilbakestillOgOpprettNyForbehandling } from '~components/person/sakOgBehandling/TilbakestillOgOpprettNyForbehandling'
 import { OpprettEtteroppgjoerIDev } from '~components/etteroppgjoer/components/utils/OpprettEtteroppgjoerIDev'
+import { etteroppgjoerStatusTekst } from '~shared/types/EtteroppgjoerForbehandling'
 
 const steg = [
   { status: ['VENTER_PAA_SKATTEOPPGJOER'], text: () => 'Venter på skatteoppgjøret' },
@@ -65,7 +66,9 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
 
               return (
                 <Accordion.Item key={`${etteroppgjoer.inntektsaar}-${etteroppgjoer.status}`}>
-                  <Accordion.Header>Etteroppgjør for {etteroppgjoer.inntektsaar}</Accordion.Header>
+                  <Accordion.Header>
+                    Etteroppgjør for {etteroppgjoer.inntektsaar} - {etteroppgjoerStatusTekst[etteroppgjoer.status]}
+                  </Accordion.Header>
                   <Accordion.Content>
                     <Box padding="4">
                       <List as="ul">

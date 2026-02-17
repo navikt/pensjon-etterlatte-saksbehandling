@@ -4,6 +4,7 @@ import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import java.time.Month
@@ -16,6 +17,7 @@ object AvkortingValider {
         avkorting: Avkorting,
         beregning: Beregning,
         behandlingType: BehandlingType,
+        sanksjoner: List<Sanksjon>,
         krevInntektForNesteAar: Boolean,
         naa: YearMonth = YearMonth.now(),
     ): List<Int> {
@@ -25,10 +27,12 @@ object AvkortingValider {
         val foersteAar = alleAarViHarAvkortingEllerBeregning.min()
         val sisteAarFom = alleAarViHarAvkortingEllerBeregning.max()
 
+        // TODO: trekke fra siste år hvis bare sansksjon
+
         // Vi trenger inntekter fram til der behandlingen løper, eller i år og potensielt neste i førstegangsbehandlinger
         val sisteAar =
             when (val tilOgMedAarBeregning = sortertePerioder.last().datoTOM?.year) {
-                null ->
+                null -> {
                     if (naa.month >= MAANED_FOR_INNTEKT_NESTE_AAR && krevInntektForNesteAar &&
                         behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING
                     ) {
@@ -38,8 +42,11 @@ object AvkortingValider {
                         // minst like stort som første år i beregning
                         maxOf(naa.year, sisteAarFom)
                     }
+                }
 
-                else -> tilOgMedAarBeregning
+                else -> {
+                    tilOgMedAarBeregning
+                }
             }
         val aarViMaaHaInntekterFor = (foersteAar..sisteAar).toList()
         return aarViMaaHaInntekterFor
@@ -50,6 +57,7 @@ object AvkortingValider {
         beregning: Beregning,
         eksisterendeAvkorting: Avkorting,
         nyeGrunnlag: List<AvkortingGrunnlagLagreDto>,
+        sanksjoner: List<Sanksjon>,
         krevInntektForNesteAar: Boolean,
         naa: YearMonth = YearMonth.now(),
     ) {
@@ -60,6 +68,7 @@ object AvkortingValider {
                 eksisterendeAvkorting,
                 beregning,
                 behandling.behandlingType,
+                sanksjoner,
                 krevInntektForNesteAar,
                 naa,
             ).toSet()

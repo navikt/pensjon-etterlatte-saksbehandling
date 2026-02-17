@@ -206,11 +206,14 @@ class AvkortingService(
                 defaultValue = true,
             )
 
+        val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
+
         validerInntekter(
             behandling,
             beregning,
             avkorting,
             nyeGrunnlag,
+            sanksjoner,
             skalKreveInntektNesteAar,
         )
         val aldersovergangMaaned =
@@ -230,7 +233,6 @@ class AvkortingService(
             }
         // liste av nye grunnlag, hvert element er for et konkret år
         // + måned bruker har aldersovergang (hvis de har det)
-        val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
         val oppdatert =
             avkorting.beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag = nyeGrunnlag,

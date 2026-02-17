@@ -8,14 +8,15 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
-import net.bytebuddy.implementation.FixedValue.argument
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
@@ -320,9 +321,9 @@ internal class VedtakBehandlingServiceTest(
                 null,
                 null,
             )
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } just runs
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
                 virkningstidspunkt,
@@ -533,7 +534,7 @@ internal class VedtakBehandlingServiceTest(
                 null,
                 null,
             )
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
                 virkningstidspunkt,
@@ -581,7 +582,7 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
 
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
                 virk = virkningstidspunktGammel,
@@ -768,8 +769,8 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } just runs
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
                 virkningstidspunkt,
@@ -820,7 +821,7 @@ internal class VedtakBehandlingServiceTest(
                 null,
                 null,
             )
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
@@ -898,9 +899,9 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } just runs
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns regulering
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
@@ -932,7 +933,7 @@ internal class VedtakBehandlingServiceTest(
     fun `skal ikke attestere vedtak naar behandling er i ugyldig tilstand`() {
         val behandlingId = randomUUID()
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns false
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
@@ -1010,9 +1011,9 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } just runs
         coEvery {
             behandlingKlientMock.hentBehandling(
                 any(),
@@ -1055,9 +1056,9 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } just runs
         coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
                 virkningstidspunkt,
@@ -1104,8 +1105,8 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } just runs
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
                 virkningstidspunkt,
@@ -1157,8 +1158,8 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } just runs
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
                 virkningstidspunkt,
@@ -1221,9 +1222,9 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } just runs
         coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } returns true
         coEvery {
             behandlingKlientMock.hentBehandling(
@@ -1267,13 +1268,13 @@ internal class VedtakBehandlingServiceTest(
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
                 virkningstidspunkt,
                 behandlingId,
             )
-        coEvery { behandlingKlientMock.underkjennVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.underkjennVedtak(any(), any()) } just runs
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
             BeregningOgAvkorting(
@@ -1312,7 +1313,7 @@ internal class VedtakBehandlingServiceTest(
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns false
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
             mockBehandling(
@@ -1385,11 +1386,11 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } just runs
         coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } just runs
         coEvery {
             behandlingKlientMock.hentBehandling(
                 any(),

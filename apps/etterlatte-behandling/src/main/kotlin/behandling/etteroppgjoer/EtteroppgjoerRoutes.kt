@@ -15,7 +15,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBr
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.OpphoerSkyldesDoedsfallRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJobService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -62,7 +62,7 @@ fun Route.etteroppgjoerRoutes(
     forbehandlingService: EtteroppgjoerForbehandlingService,
     forbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     etteroppgjoerService: EtteroppgjoerService,
-    skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
+    lesSkatteoppgjoerHendelserJobService: LesSkatteoppgjoerHendelserJobService,
     featureToggleService: FeatureToggleService,
     etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
 ) {
@@ -75,6 +75,18 @@ fun Route.etteroppgjoerRoutes(
                         etteroppgjoerService.hentEtteroppgjoerForSak(sakId)
                     }
                 call.respond(etteroppgjoer)
+            }
+
+            post("/kundev-finn-og-etteroppgjoer") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                if (appIsInGCP() && !isDev()) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
+
+                kunSkrivetilgang {
+                    etteroppgjoerService.finnOgOpprettManglendeEtteroppgjoer(sakId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
 
             post("/kundev-opprett-forbehandling") {
@@ -341,7 +353,7 @@ fun Route.etteroppgjoerRoutes(
 
             kunSystembruker {
                 val hendelseKjoeringRequest: HendelseKjoeringRequest = call.receive()
-                skatteoppgjoerHendelserService.lesOgBehandleHendelser(hendelseKjoeringRequest)
+                lesSkatteoppgjoerHendelserJobService.lesOgBehandleHendelser(hendelseKjoeringRequest)
 
                 call.respond(HttpStatusCode.OK)
             }

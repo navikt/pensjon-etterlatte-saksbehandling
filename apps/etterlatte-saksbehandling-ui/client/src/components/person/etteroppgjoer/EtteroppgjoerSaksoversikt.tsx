@@ -1,4 +1,4 @@
-import { Box, List, VStack } from '@navikt/ds-react'
+import { Accordion, Box, Heading, List, VStack } from '@navikt/ds-react'
 import { isFailure, isSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
@@ -8,9 +8,11 @@ import { ArrowRightIcon, CheckmarkCircleIcon, CircleIcon } from '@navikt/aksel-i
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { TilbakestillOgOpprettNyForbehandling } from '~components/person/sakOgBehandling/TilbakestillOgOpprettNyForbehandling'
+import { OpprettEtteroppgjoerIDev } from '~components/etteroppgjoer/components/utils/OpprettEtteroppgjoerIDev'
 
 const steg = [
   { status: ['VENTER_PAA_SKATTEOPPGJOER'], text: () => 'Venter på skatteoppgjøret' },
+  { status: ['MOTTATT_SKATTEOPPGJOER'], text: () => 'Mottatt skatteoppgjør' },
   { status: ['UNDER_FORBEHANDLING'], text: () => 'Etteroppgjøret er under forbehandling' },
   { status: ['VENTER_PAA_SVAR'], text: () => 'Varselbrev sendt, venter på svar fra bruker' },
   { status: ['UNDER_REVURDERING'], text: () => 'Behandler mottatt svar fra bruker' },
@@ -25,7 +27,7 @@ const getIcon = (current: number, idx: number) => {
 
 const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBehandlinger> }): ReactNode => {
   const [fetchEtteroppgjoerListeResult, fetchEtteroppgjoerListe] = useApiCall(hentEtteroppgjoerListe)
-
+  const etteroppgjoerDevKnappEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer_dev_opprett_forbehandling)
   const tilbakestillEtteroppgjoerEnabled = useFeaturetoggle(FeatureToggle.vis_tilbakestill_etteroppgjoer)
 
   useEffect(() => {
@@ -38,11 +40,11 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
     return <ApiErrorAlert>{fetchEtteroppgjoerListeResult.error.detail}</ApiErrorAlert>
   }
 
-  if (!isSuccess(sakResult)) {
-    return null
-  }
-
-  if (!isSuccess(fetchEtteroppgjoerListeResult) || !fetchEtteroppgjoerListeResult.data?.length) {
+  if (
+    !isSuccess(sakResult) ||
+    !isSuccess(fetchEtteroppgjoerListeResult) ||
+    !fetchEtteroppgjoerListeResult.data?.length
+  ) {
     return null
   }
 
@@ -50,33 +52,49 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
   const etteroppgjoerListe = fetchEtteroppgjoerListeResult.data
 
   return (
-    <VStack gap="6">
-      {etteroppgjoerListe.map((etteroppgjoer) => {
-        const currentIndex = steg.findIndex((s) => s.status.includes(etteroppgjoer.status))
+    <VStack gap="2" maxWidth="70rem">
+      <Box padding="8">
+        <Box marginBlock="0 8">
+          <Heading size="medium">Etteroppgjoer Saksoveriskt</Heading>
+        </Box>
+        <Accordion>
+          {etteroppgjoerListe
+            .sort((a, b) => b.inntektsaar - a.inntektsaar)
+            .map((etteroppgjoer) => {
+              const currentIndex = steg.findIndex((s) => s.status.includes(etteroppgjoer.status))
 
-        return (
-          <Box key={`${etteroppgjoer.inntektsaar}-${etteroppgjoer.status}`} padding="8" maxWidth="70rem">
-            <h2>Etteroppgjør for {etteroppgjoer.inntektsaar}</h2>
+              return (
+                <Accordion.Item key={`${etteroppgjoer.inntektsaar}-${etteroppgjoer.status}`}>
+                  <Accordion.Header>Etteroppgjør for {etteroppgjoer.inntektsaar}</Accordion.Header>
+                  <Accordion.Content>
+                    <Box padding="4">
+                      <List as="ul">
+                        {steg.map((step, idx) => (
+                          <List.Item
+                            key={step.status.join(',')}
+                            icon={getIcon(currentIndex, idx)}
+                            style={{ color: currentIndex >= idx ? 'black' : 'gray' }}
+                          >
+                            {step.text()}
+                          </List.Item>
+                        ))}
+                      </List>
+                    </Box>
+                  </Accordion.Content>
+                </Accordion.Item>
+              )
+            })}
+        </Accordion>
+      </Box>
 
-            <List as="ul">
-              {steg.map((step, idx) => (
-                <List.Item
-                  key={step.status.join(',')}
-                  icon={getIcon(currentIndex, idx)}
-                  style={{
-                    color: currentIndex >= idx ? 'black' : 'gray',
-                  }}
-                >
-                  {step.text()}
-                </List.Item>
-              ))}
-            </List>
-          </Box>
-        )
-      })}
+      {etteroppgjoerDevKnappEnabled && (
+        <Box padding="8">
+          <OpprettEtteroppgjoerIDev sakId={sakId} />
+        </Box>
+      )}
 
       {tilbakestillEtteroppgjoerEnabled && (
-        <Box padding="8" maxWidth="70rem">
+        <Box padding="8">
           <TilbakestillOgOpprettNyForbehandling sakId={sakId} />
         </Box>
       )}

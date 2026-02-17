@@ -68,9 +68,7 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
             )
             try {
                 inTransaction {
-                    runBlocking {
-                        etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, etteroppgjoersAar)
-                    }
+                    etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, etteroppgjoersAar)
                 }
             } catch (e: Exception) {
                 logger.error("Kunne ikke opprette etteroppgjør for sak med id: $sakId for inntektsaar $etteroppgjoersAar", e)

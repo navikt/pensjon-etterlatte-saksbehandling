@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
@@ -8,6 +9,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveSe
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
@@ -20,9 +22,11 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import java.time.LocalDate
+import java.time.Year
 import java.util.UUID
 
 enum class EtteroppgjoerSvarfrist(
@@ -82,7 +86,7 @@ class EtteroppgjoerService(
     }
 
     fun hentEtteroppgjoerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
-        dao.hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall)
+        dao.hentEtteroppgjoerSomVenterPaaSkatteoppgjoer(antall)
 
     fun oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         if (!forbehandling.erFerdigstilt()) {
@@ -108,6 +112,7 @@ class EtteroppgjoerService(
         etteroppgjoer: Etteroppgjoer,
         sak: Sak,
     ) {
+        // hente etteroppgjoer
         krev(etteroppgjoer.kanOppdateresMedSkatteoppgjoerMottatt()) {
             "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør har status ${etteroppgjoer.status}. " +
                 "Se sikkerlogg for mer informasjon."
@@ -134,7 +139,7 @@ class EtteroppgjoerService(
     }
 
     // TODO: må vi ha flere måter å opprette etteroppgjør på?
-    suspend fun opprettNyttEtteroppgjoer(
+    fun opprettNyttEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
     ): Etteroppgjoer {
@@ -150,9 +155,11 @@ class EtteroppgjoerService(
         }
 
         val attesterteVedtak =
-            vedtakKlient
-                .hentIverksatteVedtak(sakId, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
-                .sortedByDescending { it.datoAttestert }
+            runBlocking {
+                vedtakKlient
+                    .hentIverksatteVedtak(sakId, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
+                    .sortedByDescending { it.datoAttestert }
+            }
 
         val harVedtakAvTypeOpphoer = attesterteVedtak.any { it.vedtakType == VedtakType.OPPHOER }
 
@@ -168,14 +175,16 @@ class EtteroppgjoerService(
             }
 
         val oppdatertEtteroppgjoer =
-            etteroppgjoer(
-                sakId,
-                inntektsaar,
-                sisteIverksatteBehandling,
-                eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
-                eksisterendeEtteroppgjoer?.sisteFerdigstilteForbehandling,
-            )
+            runBlocking {
+                etteroppgjoer(
+                    sakId,
+                    inntektsaar,
+                    sisteIverksatteBehandling,
+                    eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
+                    eksisterendeEtteroppgjoer?.sisteFerdigstilteForbehandling,
+                )
+            }
 
         if (eksisterendeEtteroppgjoer != null && oppdatertEtteroppgjoer != eksisterendeEtteroppgjoer) {
             logger.info(
@@ -186,6 +195,29 @@ class EtteroppgjoerService(
         dao.lagreEtteroppgjoer(oppdatertEtteroppgjoer)
 
         return oppdatertEtteroppgjoer
+    }
+
+    suspend fun finnOgOpprettManglendeEtteroppgjoer(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val aarMedEtteroppgjoer =
+            (2024..Year.now().value - 1)
+                .filter { aar ->
+                    vedtakKlient.harSakUtbetalingForInntektsaar(sakId, aar, brukerTokenInfo)
+                }
+
+        val etteroppgjoer =
+            inTransaction {
+                dao.hentEtteroppgjoerForSak(sakId).map { it.inntektsaar }
+            }
+
+        val aarSomSkalHaEtteroppgjoer = aarMedEtteroppgjoer.toSet() - etteroppgjoer.toSet()
+        aarSomSkalHaEtteroppgjoer.forEach {
+            inTransaction {
+                opprettNyttEtteroppgjoer(sakId, it)
+            }
+        }
     }
 
     // TODO: må vi ha flere måter å opprette etteroppgjør på?

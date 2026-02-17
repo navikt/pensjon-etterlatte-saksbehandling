@@ -17,7 +17,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJobService
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -42,8 +42,8 @@ class SkatteoppgjoerHendelserServiceTest {
 
     @Test
     fun `skal behandle hendelser fra Sigrun og oppdatere status for relevante etteroppgjoer`() {
-        val skatteoppgjoerHendelserService =
-            SkatteoppgjoerHendelserService(dao, sigrunKlient, etteroppgjoerService, sakService, vedtakKlient)
+        val lesSkatteoppgjoerHendelserJobService =
+            LesSkatteoppgjoerHendelserJobService(dao, sigrunKlient, etteroppgjoerService, sakService, vedtakKlient)
 
         val sisteSekvensnummer = 10.toLong()
         val sisteKjoering = HendelserKjoering(sisteSekvensnummer, 10, 0, Tidspunkt.now())
@@ -86,7 +86,7 @@ class SkatteoppgjoerHendelserServiceTest {
         coEvery { etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any(), any()) } just runs
 
         runBlocking {
-            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall))
+            lesSkatteoppgjoerHendelserJobService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall))
         }
 
         coVerify {

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
-class SkatteoppgjoerHendelserService(
+class LesSkatteoppgjoerHendelserJobService(
     private val dao: SkatteoppgjoerHendelserDao,
     private val sigrunKlient: SigrunKlient,
     private val etteroppgjoerService: EtteroppgjoerService,
@@ -107,12 +107,11 @@ class SkatteoppgjoerHendelserService(
         val etteroppgjoer =
             runCatching {
                 etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
-            }.getOrNull()
+            }.getOrNull() ?: runBlocking {
+                etteroppgjoerService.opprettNyttEtteroppgjoer(sak.id, inntektsaar)
+            }
 
-        when (etteroppgjoer) {
-            null -> runBlocking { etteroppgjoerService.opprettNyttEtteroppgjoer(sak.id, inntektsaar) }
-            else -> etteroppgjoerService.haandterSkatteoppgjoerMottatt(hendelse, etteroppgjoer, sak)
-        }
+        etteroppgjoerService.haandterSkatteoppgjoerMottatt(hendelse, etteroppgjoer, sak)
 
         return true
     }

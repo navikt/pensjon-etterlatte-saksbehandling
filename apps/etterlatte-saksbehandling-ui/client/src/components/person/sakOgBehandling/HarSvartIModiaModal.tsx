@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
-import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/VelgEtteroppgjoersAar'
+import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
 
 export const HarSvartIModiaModal = ({ sakId }: { sakId: number }) => {
   const [aapen, setAapen] = useState<boolean>(false)

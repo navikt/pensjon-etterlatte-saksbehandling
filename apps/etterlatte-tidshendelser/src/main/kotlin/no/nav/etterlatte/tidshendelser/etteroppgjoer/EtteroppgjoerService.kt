@@ -6,6 +6,7 @@ import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+// TODO: denne trenger vi ikke lengre kanskje? fin backup?
 class EtteroppgjoerService(
     private val etteroppgjoerDao: EtteroppgjoerDao,
     private val behandlingKlient: BehandlingKlient,

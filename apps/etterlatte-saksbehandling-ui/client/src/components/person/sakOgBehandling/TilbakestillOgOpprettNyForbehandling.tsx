@@ -6,7 +6,7 @@ import { tilbakestillEtteroppgjoerOgOpprettOppgave } from '~shared/api/etteroppg
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { useState } from 'react'
-import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/VelgEtteroppgjoersAar'
+import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
 
 type IProps = {
   sakId: number

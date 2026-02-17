@@ -31,8 +31,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -41,8 +43,10 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
+import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.etterlatte.libs.common.vedtak.Periode as VedtakPeriode
 
 class EtteroppgjoerServiceTest {
     private val sakId = sakId1
@@ -380,4 +384,36 @@ class EtteroppgjoerServiceTest {
         Utlandstilknytning(UtlandstilknytningType.UTLANDSTILSNITT, kildeSaksbehandler(), "begrunnelse")
 
     fun kildeSaksbehandler() = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now()))
+
+    @Test
+    fun `finnOgOpprettManglendeEtteroppgjoer oppretter etteroppgjoer for manglende aar`() {
+        val ctx = TestContext(sakId)
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
+
+        // Innvilget periode f.eks 2024, 2025 og 2026
+        coEvery { ctx.vedtakKlient.harSakUtbetalingForInntektsaar(sakId, Year.now().value - 1, brukerTokenInfo) } returns true
+        coEvery { ctx.vedtakKlient.harSakUtbetalingForInntektsaar(sakId, Year.now().value - 2, brukerTokenInfo) } returns true
+        coEvery { ctx.vedtakKlient.harSakUtbetalingForInntektsaar(sakId, Year.now().value, brukerTokenInfo) } returns true
+
+        every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns null
+
+        // Ingen eksisterende etteroppgjør
+        every { ctx.dao.hentEtteroppgjoerForSak(sakId) } returns
+            listOf(
+                Etteroppgjoer(
+                    sakId = sakId,
+                    inntektsaar = Year.now().value - 2, // f.eks 2024
+                    status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                ),
+            )
+
+        runBlocking {
+            ctx.service.finnOgOpprettManglendeEtteroppgjoer(sakId, brukerTokenInfo)
+        }
+
+        // Skal opprette etteroppgjør for 2025
+        coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 1 }) } // f.eks 2025
+        coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 2 }) } // f.eks 2024
+        coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value }) } // f.eks 2026
+    }
 }

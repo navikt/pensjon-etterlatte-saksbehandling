@@ -26,7 +26,7 @@ import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentMo
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { SakType } from '~shared/types/sak'
 import { EtteroppgjoerForbehandlingTabell } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingTabell'
-import { OpprettEtteroppgjoerForbehandlingIDev } from '~components/etteroppgjoer/components/OpprettEtteroppgjoerForbehandlingIDev'
+import { OpprettEtteroppgjoerForbehandlingIDev } from '~components/etteroppgjoer/components/utils/OpprettEtteroppgjoerForbehandlingIDev'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -59,7 +59,7 @@ export const SakOversikt = ({
 }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const etteroppgjoerForbehandlingKnappEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer_dev_opprett_forbehandling)
+  const etteroppgjoerDevKnappEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer_dev_opprett_forbehandling)
   const byttTilAnnenSakEnabled = useFeaturetoggle(FeatureToggle.bytt_til_annen_sak)
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
@@ -192,7 +192,7 @@ export const SakOversikt = ({
                 <VStack marginBlock="16" gap="4">
                   <Heading size="medium">Etteroppgjør forbehandlinger</Heading>
                   <EtteroppgjoerForbehandlingTabell sakId={sak.id} />
-                  {etteroppgjoerForbehandlingKnappEnabled && <OpprettEtteroppgjoerForbehandlingIDev sakId={sak.id} />}
+                  {etteroppgjoerDevKnappEnabled && <OpprettEtteroppgjoerForbehandlingIDev sakId={sak.id} />}
                 </VStack>
               )}
             </VStack>

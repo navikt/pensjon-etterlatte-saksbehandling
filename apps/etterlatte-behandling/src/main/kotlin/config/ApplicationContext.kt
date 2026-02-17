@@ -64,9 +64,9 @@ import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJobService
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
@@ -721,8 +721,8 @@ internal class ApplicationContext(
             grunnlagService,
         )
 
-    val skatteoppgjoerHendelserService =
-        SkatteoppgjoerHendelserService(
+    val lesSkatteoppgjoerHendelserJobService =
+        LesSkatteoppgjoerHendelserJobService(
             dao = skatteoppgjoerHendelserDao,
             sigrunKlient = sigrunKlient,
             etteroppgjoerService = etteroppgjoerService,
@@ -1010,7 +1010,7 @@ internal class ApplicationContext(
 
     val lesSkatteoppgjoerHendelserJob: LesSkatteoppgjoerHendelserJob by lazy {
         LesSkatteoppgjoerHendelserJob(
-            skatteoppgjoerHendelserService = skatteoppgjoerHendelserService,
+            lesSkatteoppgjoerHendelserJobService = lesSkatteoppgjoerHendelserJobService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.HOURS),

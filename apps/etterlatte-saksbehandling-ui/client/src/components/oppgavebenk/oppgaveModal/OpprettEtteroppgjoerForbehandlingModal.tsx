@@ -13,7 +13,7 @@ import { useForm } from 'react-hook-form'
 import { opprettEtteroppgoerForbehandling as opprettForbehandlingApi } from '~shared/api/etteroppgjoer'
 import { useNavigate } from 'react-router-dom'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/VelgEtteroppgjoersAar'
+import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
 
 type Props = {
   oppgave: OppgaveDTO

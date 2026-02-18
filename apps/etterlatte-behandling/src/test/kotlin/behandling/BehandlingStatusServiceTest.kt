@@ -69,6 +69,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
@@ -265,7 +266,7 @@ internal class BehandlingStatusServiceTest {
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfallDto(behandlingId)
         coEvery {
             etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-                sistIverksatteBehandling = behandling,
+                behandling = behandling,
                 inntektsaar = any(),
             )
         } returns mockk<Etteroppgjoer>()
@@ -294,9 +295,63 @@ internal class BehandlingStatusServiceTest {
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
             etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-                sistIverksatteBehandling = behandling,
+                behandling = behandling,
                 inntektsaar = any(),
             )
+        }
+    }
+
+    @Test
+    fun `opprettEtteroppgjoerHvisTilbakevirkendeFoerstegangsbehandling oppretter etteroppgjoer for flere aar`() {
+        val sakId = sakId1
+        val virkAar = Year.now().value - 2 // Sett virkningstidspunkt til 2 år tilbake i tid
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.of(virkAar, Month.MARCH)),
+            )
+
+        coEvery {
+            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+                behandling = behandling,
+                inntektsaar = any(),
+            )
+        } returns mockk<Etteroppgjoer>()
+
+        runBlocking {
+            sut.opprettEtteroppgjoerHvisTilbakevirkendeFoerstegangsbehandling(behandling, virkAar)
+        }
+
+        // F.eks inneværende år er 2026, så etteroppgjør skal opprettes for 2024 og 2025
+        coVerify(exactly = 1) {
+            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, Year.now().value - 2)
+        }
+        coVerify(exactly = 1) {
+            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, Year.now().value - 1)
+        }
+    }
+
+    @Test
+    fun `opprettEtteroppgjoerHvisTilbakevirkendeFoerstegangsbehandling oppretter ikke etteroppgjoer hvis virkAar er innevaerende aar`() {
+        val sakId = sakId1
+        val virkAar = Year.now().value
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                status = BehandlingStatus.ATTESTERT,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.of(virkAar, Month.MARCH)),
+            )
+
+        runBlocking {
+            sut.opprettEtteroppgjoerHvisTilbakevirkendeFoerstegangsbehandling(behandling, virkAar)
+        }
+
+        // Ingen etteroppgjør skal opprettes når virkningstidspunkt er inneværende år
+        coVerify(exactly = 0) {
+            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(any(), any())
         }
     }
 

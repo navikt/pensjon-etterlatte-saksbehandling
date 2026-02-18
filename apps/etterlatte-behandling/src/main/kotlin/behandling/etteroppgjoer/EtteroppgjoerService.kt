@@ -1,27 +1,34 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import java.time.LocalDate
+import java.time.Year
+import java.time.YearMonth
 import java.util.UUID
 
 enum class EtteroppgjoerSvarfrist(
@@ -43,19 +50,15 @@ class EtteroppgjoerService(
     val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     val sigrunKlient: SigrunKlient,
 ) {
-    fun hentAktivtEtteroppgjoerForSak(sakId: SakId): Etteroppgjoer =
-        dao
-            .hentEtteroppgjoerForInntektsaar(sakId, ETTEROPPGJOER_AAR)
-            ?.takeIf { !it.erFerdigstilt() }
-            ?: throw InternfeilException("Fant ikke aktivt etteroppgjoer ($ETTEROPPGJOER_AAR) for sak $sakId")
-
     fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer>? =
         dao.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+    ): Etteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) ?: throw FantIkkEtteroppgjoer(sakId, inntektsaar)
+
+    fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
 
     fun hentEtteroppgjoerSakerIBulk(
         inntektsaar: Int,
@@ -84,8 +87,8 @@ class EtteroppgjoerService(
         dao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, status)
     }
 
-    fun hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
-        dao.hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall)
+    fun hentEtteroppgjoerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
+        dao.hentEtteroppgjoerSomVenterPaaSkatteoppgjoer(antall)
 
     fun oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         if (!forbehandling.erFerdigstilt()) {
@@ -111,6 +114,7 @@ class EtteroppgjoerService(
         etteroppgjoer: Etteroppgjoer,
         sak: Sak,
     ) {
+        // hente etteroppgjoer
         krev(etteroppgjoer.kanOppdateresMedSkatteoppgjoerMottatt()) {
             "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør har status ${etteroppgjoer.status}. " +
                 "Se sikkerlogg for mer informasjon."
@@ -136,31 +140,29 @@ class EtteroppgjoerService(
         )
     }
 
-    suspend fun upsertNyttEtteroppgjoer(
+    // TODO: må vi ha flere måter å opprette etteroppgjør på?
+    fun opprettNyttEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer? {
+    ): Etteroppgjoer {
         logger.info(
             "Forsøker å opprette/oppdatere etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar",
         )
         val eksisterendeEtteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
-        if (eksisterendeEtteroppgjoer != null && eksisterendeEtteroppgjoer.status !in
-            listOf(
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-            )
-        ) {
+        if (eksisterendeEtteroppgjoer != null && !eksisterendeEtteroppgjoer.kanOppdateresMedSkatteoppgjoerMottatt()) {
             logger.info(
                 "Vi har allerede et opprettet etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar, med status=" +
                     "${eksisterendeEtteroppgjoer.status}. Vi oppdaterer derfor ikke noen felter på dette etteroppgjøret.",
             )
-            return null
         }
 
         val attesterteVedtak =
-            vedtakKlient
-                .hentIverksatteVedtak(sakId, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
-                .sortedByDescending { it.datoAttestert }
+            runBlocking {
+                vedtakKlient
+                    .hentIverksatteVedtak(sakId, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
+                    .sortedByDescending { it.datoAttestert }
+            }
+
         val harVedtakAvTypeOpphoer = attesterteVedtak.any { it.vedtakType == VedtakType.OPPHOER }
 
         val sisteIverksatteVedtak =
@@ -173,15 +175,19 @@ class EtteroppgjoerService(
                 "Siste iverksatte vedtak (id=${sisteIverksatteVedtak.id} peker på en behandling " +
                     "med id=${sisteIverksatteVedtak.behandlingId} som ikke finnes"
             }
+
         val oppdatertEtteroppgjoer =
-            etteroppgjoer(
-                sakId,
-                inntektsaar,
-                sisteIverksatteBehandling,
-                eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-                harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
-                eksisterendeEtteroppgjoer?.sisteFerdigstilteForbehandling,
-            )
+            runBlocking {
+                etteroppgjoer(
+                    sakId,
+                    inntektsaar,
+                    sisteIverksatteBehandling,
+                    eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
+                    eksisterendeEtteroppgjoer?.sisteFerdigstilteForbehandling,
+                )
+            }
+
         if (eksisterendeEtteroppgjoer != null && oppdatertEtteroppgjoer != eksisterendeEtteroppgjoer) {
             logger.info(
                 "Endrer etteroppgjør for sakId=$sakId og inntektsaar=$inntektsaar. Endring: " +
@@ -189,32 +195,55 @@ class EtteroppgjoerService(
             )
         }
         dao.lagreEtteroppgjoer(oppdatertEtteroppgjoer)
+
         return oppdatertEtteroppgjoer
     }
 
+    fun finnOgOpprettManglendeEtteroppgjoer(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val innvilgedeAar = finnInnvilgedeAarForSak(sakId, brukerTokenInfo)
+
+        val etteroppgjoer = dao.hentEtteroppgjoerForSak(sakId).map { it.inntektsaar }
+
+        val aarUtenEtteroppgjoer = innvilgedeAar.toSet() - etteroppgjoer.toSet()
+        if (aarUtenEtteroppgjoer.isEmpty()) {
+            logger.info(
+                "Sak med id $sakId har allerede etteroppgjør for alle inntektsår med innvilget periode, ingen etteroppgjør trenger å opprettes.",
+            )
+            return
+        }
+
+        aarUtenEtteroppgjoer.forEach {
+            opprettNyttEtteroppgjoer(sakId, it)
+        }
+    }
+
+    // TODO: må vi ha flere måter å opprette etteroppgjør på?
     suspend fun opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-        sistIverksatteBehandling: Behandling,
+        behandling: Behandling,
         inntektsaar: Int,
     ): Etteroppgjoer {
-        val sakId = sistIverksatteBehandling.sak.id
+        val sakId = behandling.sak.id
+
+        // TODO: blir ikke dette rett?
+        val harOpphoer = behandling.opphoerFraOgMed != null
+
         logger.info(
             """
             Forsøker å opprette etteroppgjør for sakId=$sakId,
-            behandling=$sistIverksatteBehandling og inntektsaar=$inntektsaar
+            behandling=$behandling og inntektsaar=$inntektsaar
             """.trimIndent(),
         )
-        val eksisterendeEtteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
-        if (eksisterendeEtteroppgjoer != null) {
-            return eksisterendeEtteroppgjoer
-        }
 
         val status =
             try {
-                sigrunKlient.hentPensjonsgivendeInntekt(sistIverksatteBehandling.sak.ident, inntektsaar)
+                sigrunKlient.hentPensjonsgivendeInntekt(behandling.sak.ident, inntektsaar)
                 EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
             } catch (e: Exception) {
                 logger.error(
-                    "Vi har opprettet et etteroppgjør for $inntektsaar i sakId=${sistIverksatteBehandling.sak.id}, " +
+                    "Vi har opprettet et etteroppgjør for $inntektsaar i sakId=${behandling.sak.id}, " +
                         "men vi klarte ikke hente skatteoppgjøret, vi antar at dette er fordi skatteoppgjøret ikke er " +
                         "tilgjengelig, hvis annen feil må saken ryddes opp manuelt",
                     e,
@@ -222,8 +251,40 @@ class EtteroppgjoerService(
                 EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
             }
 
-        return etteroppgjoer(sakId, inntektsaar, sistIverksatteBehandling, status, false)
+        return etteroppgjoer(sakId, inntektsaar, behandling, status, harOpphoer)
             .also { dao.lagreEtteroppgjoer(it) }
+    }
+
+    /*
+     * Henter innvilgede år for en sak ved å hente alle innvilgede perioder og utlede årstallene fra disse.
+     * Filtrerer bort inneværende år og perioder før 2024 da de ikke skal ha etteroppgjør
+     */
+    fun finnInnvilgedeAarForSak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Int> {
+        val innvilgedePerioder = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
+
+        if (innvilgedePerioder.isEmpty()) {
+            throw UgyldigForespoerselException(
+                "MANGLER_INNVILGET_PERIODE",
+                "Saken har ingen innvilget periode.",
+            )
+        }
+
+        val innvilgedeAar =
+            innvilgedePerioder
+                .flatMap { periodeDto ->
+                    val periode = periodeDto.periode
+                    val fomYear = periode.fom.year
+                    val tomYear = (periode.tom ?: YearMonth.now().minusYears(1)).year
+
+                    (fomYear..tomYear).toList()
+                }.filter { aar ->
+                    aar >= 2024
+                }.distinct()
+
+        return innvilgedeAar
     }
 
     private fun finnStatusForForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerStatus {

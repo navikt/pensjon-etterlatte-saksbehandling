@@ -50,10 +50,12 @@ class EtteroppgjoerRevurderingService(
 ) {
     fun opprettEtteroppgjoerRevurdering(
         sakId: SakId,
+        inntektsaar: Int,
         opprinnelse: BehandlingOpprinnelse,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
-        val etteroppgjoer = inTransaction { etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId) }
+        val etteroppgjoer =
+            inTransaction { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) }
         val sisteFerdigstilteForbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling
 
         krevIkkeNull(sisteFerdigstilteForbehandlingId) {
@@ -63,7 +65,7 @@ class EtteroppgjoerRevurderingService(
         val (revurdering, sisteIverksatteBehandling) =
             inTransaction {
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
-                val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(sakId)
+                val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
 
                 sjekkKanOppretteEtteroppgjoerRevurdering(etteroppgjoer, sisteFerdigstilteForbehandlingId)
 
@@ -129,7 +131,7 @@ class EtteroppgjoerRevurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
-        val behandling =
+        val (behandling, forbehandling) =
             inTransaction {
                 val behandling =
                     behandlingService.hentBehandling(behandlingId)
@@ -141,8 +143,7 @@ class EtteroppgjoerRevurderingService(
                     )
                 }
 
-                val etteroppgjoer = etteroppgjoerService.hentAktivtEtteroppgjoerForSak(behandling.sak.id)
-                val forbehandling = hentForbehandlingForBehandling(behandling)
+                val forbehandling = hentForbehandlingForRevurdering(behandling)
                 if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
                     throw IkkeTillattException(
                         "FORBEHANDLING_IKKE_AVBRUTT",
@@ -151,18 +152,18 @@ class EtteroppgjoerRevurderingService(
                 }
 
                 etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                    etteroppgjoer.sakId,
-                    etteroppgjoer.inntektsaar,
+                    forbehandling.sak.id,
+                    forbehandling.aar,
                     EtteroppgjoerStatus.OMGJOERING,
                 )
 
-                behandling
+                behandling to forbehandling
             }
 
-        return opprettEtteroppgjoerRevurdering(behandling.sak.id, behandling.opprinnelse, brukerTokenInfo)
+        return opprettEtteroppgjoerRevurdering(behandling.sak.id, forbehandling.aar, behandling.opprinnelse, brukerTokenInfo)
     }
 
-    private fun hentForbehandlingForBehandling(behandling: Behandling): EtteroppgjoerForbehandling {
+    private fun hentForbehandlingForRevurdering(behandling: Behandling): EtteroppgjoerForbehandling {
         val forbehandlingId =
             behandling.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
                 "MANGLER_FORBEHANDLING_ID",
@@ -178,7 +179,7 @@ class EtteroppgjoerRevurderingService(
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
-        val forbehandling = hentForbehandlingForBehandling(behandling)
+        val forbehandling = hentForbehandlingForRevurdering(behandling)
         return etteroppgjoerForbehandlingService.hentBeregnetEtteroppgjoerResultat(forbehandling, brukerTokenInfo)
             ?: throw IkkeFunnetException(
                 "MANGLER_BEREGNET_RESULTAT",

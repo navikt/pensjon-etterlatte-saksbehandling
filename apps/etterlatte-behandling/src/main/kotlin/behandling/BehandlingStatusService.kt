@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
-import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
@@ -360,30 +359,56 @@ class BehandlingStatusServiceImpl(
                 "Iverksatt behandling må ha virkningstidspunkt"
             }
 
-        // opprett forventet etteroppgjør hvis virkningstidspunkt er tilbake
-        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            val virkAar = virk.dato.year
-            val aar = Year.now().value
+        when {
+            behandling.erFoerstegangsbehandling() -> {
+                opprettEtteroppgjoerHvisTilbakevirkendeFoerstegangsbehandling(behandling, virk.dato.year)
+            }
 
-            // TODO: Dette må tilpasses bedre når vi faktisk behandler EO for 2024 og 2025
-            if (aar > virkAar && virkAar == ETTEROPPGJOER_AAR) {
-                try {
-                    etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, virkAar)
-                } catch (e: Exception) {
-                    logger.error("Kunne ikke opprette etteroppgjør ved iverksettelse av sak", e)
-                }
+            behandling.erEtteroppgjoerRevurdering() -> {
+                ferdigstillEtteroppgjoer(behandling, virk.dato.year)
             }
         }
+    }
 
-        // oppdater etteroppgjoer status til ferdigstilt
-        if (behandling.type == BehandlingType.REVURDERING && behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER) {
-            etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                behandling.sak.id,
-                virk.dato.year,
-                EtteroppgjoerStatus.FERDIGSTILT,
-            )
+    suspend fun opprettEtteroppgjoerHvisTilbakevirkendeFoerstegangsbehandling(
+        behandling: Behandling,
+        virkAar: Int,
+    ) {
+        val innevaerendeAar = Year.now().value
+        val aktuelleAar = (maxOf(virkAar, 2024) until innevaerendeAar)
+
+        if (aktuelleAar.isEmpty()) return
+
+        logger.info(
+            "Virkningstidspunkt er for behandlingen er $virkAar, oppretter derfor etteroppgjør for år ${aktuelleAar.joinToString()}",
+        )
+
+        aktuelleAar.forEach { inntektsaar ->
+            try {
+                etteroppgjoerService
+                    .opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, inntektsaar)
+            } catch (e: Exception) {
+                logger.error("Kunne ikke opprette etteroppgjør ved iverksettelse av sak for år $inntektsaar", e)
+            }
         }
     }
+
+    private fun ferdigstillEtteroppgjoer(
+        behandling: Behandling,
+        virkAar: Int,
+    ) {
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+            behandling.sak.id,
+            virkAar,
+            EtteroppgjoerStatus.FERDIGSTILT,
+        )
+    }
+
+    private fun Behandling.erFoerstegangsbehandling() = type == BehandlingType.FØRSTEGANGSBEHANDLING
+
+    private fun Behandling.erEtteroppgjoerRevurdering() =
+        type == BehandlingType.REVURDERING &&
+            revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER
 
     private fun haandterEtteroppgjoerAttestertVedtak(
         behandling: Behandling,

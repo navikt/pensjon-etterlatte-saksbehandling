@@ -83,12 +83,12 @@ internal fun Route.revurderingRoutes(
 
             post("/etteroppgjoer") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                    logger.info("Oppretter ny revurdering på sak $sakId")
-
                     medBody<OpprettEtteroppgjoerRevurderingRequest> {
+                        logger.info("Oppretter revurdering på sakId=$sakId for etteroppgjøret ${it.inntektsaar}")
                         val revurdering =
                             etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
                                 sakId,
+                                it.inntektsaar,
                                 it.opprinnelse,
                                 saksbehandler,
                             )
@@ -197,4 +197,5 @@ data class RevurderingInfoDto(
 
 data class OpprettEtteroppgjoerRevurderingRequest(
     val opprinnelse: BehandlingOpprinnelse,
+    val inntektsaar: Int,
 )

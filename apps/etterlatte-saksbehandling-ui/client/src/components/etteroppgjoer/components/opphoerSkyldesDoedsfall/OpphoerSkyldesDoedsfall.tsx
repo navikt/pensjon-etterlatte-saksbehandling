@@ -73,7 +73,7 @@ export const OpphoerSkyldesDoedsfall = ({ erRedigerbar, setOpphoerSkyldesDoedsfa
       <VStack gap="4">
         <Heading size="large">Opphør skyldes dødsfall</Heading>
         <BodyShort>
-          Det er registrert et opphør på saken, du må derfor svare på om opphøret skyldes et dødsfall.
+          Det er registrert et opphør på saken, du må derfor svare på om opphøret skyldes et dødsfall.{' '}
           <Link href="https://lovdata.no/pro/forskrift/2023-06-21-1007/§9">Se forskriften §9</Link>
         </BodyShort>
 

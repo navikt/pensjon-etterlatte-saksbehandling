@@ -298,7 +298,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny)
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningen)
 
-        val hentetInntekter = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(ny.id)
+        val hentetInntekter = etteroppgjoerForbehandlingDao.hentSummertAInntektNonNull(ny.id)
         summerteInntekterAOrdningen.shouldBeEqualToIgnoringFields(hentetInntekter, SummerteInntekterAOrdningen::regelresultat)
     }
 
@@ -372,11 +372,11 @@ class EtteroppgjoerForbehandlingDaoTest(
             )
 
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningenEn)
-        val hentetInntekterEn = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(ny.id)
+        val hentetInntekterEn = etteroppgjoerForbehandlingDao.hentSummertAInntektNonNull(ny.id)
         summerteInntekterAOrdningenEn.shouldBeEqualToIgnoringFields(hentetInntekterEn, SummerteInntekterAOrdningen::regelresultat)
 
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(ny.id, summerteInntekterAOrdningenTo)
-        val hentetInntekterTo = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(ny.id)
+        val hentetInntekterTo = etteroppgjoerForbehandlingDao.hentSummertAInntektNonNull(ny.id)
         summerteInntekterAOrdningenTo.shouldBeEqualToIgnoringFields(hentetInntekterTo, SummerteInntekterAOrdningen::regelresultat)
         hentetInntekterEn shouldNotBeEqual hentetInntekterTo
     }
@@ -387,7 +387,7 @@ class EtteroppgjoerForbehandlingDaoTest(
         val nyForbehandlingId = UUID.randomUUID()
         opprettForbehandling(forbehandlingId, 2024)
 
-        etteroppgjoerForbehandlingDao.hentSummerteInntekter(forbehandlingId) shouldBe null
+        etteroppgjoerForbehandlingDao.hentSummertAInntekt(forbehandlingId) shouldBe null
         etteroppgjoerForbehandlingDao.lagreSummerteInntekter(
             forbehandlingId,
             SummerteInntekterAOrdningen(
@@ -407,8 +407,8 @@ class EtteroppgjoerForbehandlingDaoTest(
 
         etteroppgjoerForbehandlingDao.kopierSummerteInntekter(forbehandlingId, nyForbehandlingId)
 
-        val summerteInntekter = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(forbehandlingId)
-        val summerteInntekterKopi = etteroppgjoerForbehandlingDao.hentSummerteInntekterNonNull(nyForbehandlingId)
+        val summerteInntekter = etteroppgjoerForbehandlingDao.hentSummertAInntektNonNull(forbehandlingId)
+        val summerteInntekterKopi = etteroppgjoerForbehandlingDao.hentSummertAInntektNonNull(nyForbehandlingId)
 
         summerteInntekterKopi.loenn shouldBe summerteInntekter.loenn
         summerteInntekterKopi.afp shouldBe summerteInntekter.afp

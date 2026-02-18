@@ -246,12 +246,12 @@ class EtteroppgjoerForbehandlingDao(
         logger.info("Lagret inntekter for forbehandling $forbehandlingId")
     }
 
-    fun hentSummerteInntekterNonNull(forbehandlingId: UUID) =
-        krevIkkeNull(hentSummerteInntekter(forbehandlingId)) {
+    fun hentSummertAInntektNonNull(forbehandlingId: UUID) =
+        krevIkkeNull(hentSummertAInntekt(forbehandlingId)) {
             "Fant ikke summerte inntekter for forbehandling med id=$forbehandlingId"
         }
 
-    fun hentSummerteInntekter(forbehandlingId: UUID): SummerteInntekterAOrdningen? =
+    fun hentSummertAInntekt(forbehandlingId: UUID): SummerteInntekterAOrdningen? =
         connectionAutoclosing.hentConnection { connection ->
             val statement =
                 connection.prepareStatement(

@@ -44,9 +44,7 @@ export const Inntektsopplysninger = ({ forbehandling }: { forbehandling: Etterop
             <OpplysningerFraSkatteetaten inntektFraSkatteetatenSummert={opplysninger.summertPgi} />
           )}
 
-          {opplysninger.summerteInntekter && (
-            <OpplysningerFraAInntektSummert inntekter={opplysninger.summerteInntekter} />
-          )}
+          {opplysninger.summertAInntekt && <OpplysningerFraAInntektSummert inntekter={opplysninger.summertAInntekt} />}
 
           {opplysninger.tidligereAvkorting ? (
             <BrukeroppgittInntektForInnvilgedePerioder

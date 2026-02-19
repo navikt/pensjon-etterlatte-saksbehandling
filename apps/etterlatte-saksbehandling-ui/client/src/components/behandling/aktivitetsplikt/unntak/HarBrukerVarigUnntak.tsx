@@ -177,6 +177,9 @@ export function HarBrukerVarigUnntak(props: {
                 />
               </Box>
               <HStack gap="4">
+                <Button loading={isPending(lagreUnntakVarigStatus)} variant="primary" type="submit" size="small">
+                  Lagre
+                </Button>
                 <Button
                   variant="secondary"
                   size="small"
@@ -184,9 +187,6 @@ export function HarBrukerVarigUnntak(props: {
                   onClick={() => avbrytRedigering()}
                 >
                   Avbryt
-                </Button>
-                <Button loading={isPending(lagreUnntakVarigStatus)} variant="primary" type="submit" size="small">
-                  Lagre
                 </Button>
               </HStack>
             </>
@@ -197,6 +197,9 @@ export function HarBrukerVarigUnntak(props: {
       {jaHarAktivitetsplikt &&
         (vurderingHarInnholdUnntattVarigUnntak(vurdering) ? (
           <HStack gap="4">
+            <Button size="small" variant="primary" disabled={isPending(slettStatus)} onClick={slettVarigUnntakHvisFins}>
+              Lagre
+            </Button>
             <Button
               variant="secondary"
               size="small"
@@ -204,9 +207,6 @@ export function HarBrukerVarigUnntak(props: {
               onClick={() => avbrytRedigering()}
             >
               Avbryt
-            </Button>
-            <Button size="small" variant="primary" disabled={isPending(slettStatus)} onClick={slettVarigUnntakHvisFins}>
-              Lagre
             </Button>
           </HStack>
         ) : (

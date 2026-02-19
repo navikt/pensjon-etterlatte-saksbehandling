@@ -52,6 +52,7 @@ internal val skjekklisteItemsFoerstegangsbehandlingBP =
 
 internal val sjekklisteItemsFoerstegangsbehandlingOMS =
     listOf(
+        "Vedtaket er tilpasset brukers sivilstand",
         "Behov for stønad til barnetilsyn og/eller utdanningsstønad. Oppfølgingsoppgave er opprettet.",
         "Ikke søkt om, men kan ha rett på stønad til barnetilsyn - informert søker",
         "Mulighet for, og ikke søkt om (utvidet) barnetrygd. Oppgave til barnetrygd sendt",

@@ -3,6 +3,7 @@ package no.nav.etterlatte.avkorting
 import no.nav.etterlatte.avkorting.AvkortingMapper.avkortingForFrontend
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekter
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.beregning.BeregningToggles
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -239,6 +240,11 @@ class AvkortingService(
                 sanksjoner = sanksjoner ?: emptyList(),
                 opphoerFom = behandling.opphoerFraOgMed,
                 aldersovergang = aldersovergangMaaned,
+                brukNyeReglerAvkorting =
+                    featureToggleService.isEnabled(
+                        BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
+                        false,
+                    ),
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, oppdatert)
@@ -347,6 +353,10 @@ class AvkortingService(
                 beregning,
                 sanksjoner,
                 behandling.opphoerFraOgMed,
+                featureToggleService.isEnabled(
+                    BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
+                    false,
+                ),
             )
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)

@@ -383,6 +383,15 @@ internal class AvkortingRepositoryTest(
                                 versjon = "",
                             ),
                     ),
+                maanederInnvilget = (1..12).map { MaanedInnvilget(maaned = YearMonth.of(2024, it), innvilget = true) },
+                maanederInnvilgetRegelResultat =
+                    finnAntallInnvilgaMaanederForAar(
+                        fom = YearMonth.of(2024, 1),
+                        tom = null,
+                        aldersovergang = null,
+                        ytelse = emptyList(),
+                        brukNyeReglerAvkorting = false,
+                    ).regelResultat,
             )
 
         return Etteroppgjoer(

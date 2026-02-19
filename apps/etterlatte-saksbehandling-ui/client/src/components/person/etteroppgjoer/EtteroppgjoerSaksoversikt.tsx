@@ -56,7 +56,7 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
     <VStack gap="2" maxWidth="70rem">
       <Box padding="8">
         <Box marginBlock="0 8">
-          <Heading size="medium">Etteroppgjoer Saksoveriskt</Heading>
+          <Heading size="medium">Etteroppgjør saksoversikt</Heading>
         </Box>
         <Accordion>
           {etteroppgjoerListe

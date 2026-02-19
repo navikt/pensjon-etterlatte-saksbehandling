@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 

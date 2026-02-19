@@ -6,16 +6,16 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 data class HendelseslisteFraSkatt(
     val hendelser: List<SkatteoppgjoerHendelse>,
 ) {
+    // TODO: støtte stub for flere perioder?
     companion object {
         fun stub(
             startSekvensnummer: Long = 0,
             antall: Int = 10,
-            aar: Int = ETTEROPPGJOER_AAR,
         ): HendelseslisteFraSkatt {
             val hendelser =
                 List(antall) { index ->
                     SkatteoppgjoerHendelse(
-                        gjelderPeriode = aar.toString(),
+                        gjelderPeriode = "2024",
                         hendelsetype = SigrunKlient.HENDELSETYPE_NY,
                         identifikator = index.toString(),
                         sekvensnummer = startSekvensnummer + index,

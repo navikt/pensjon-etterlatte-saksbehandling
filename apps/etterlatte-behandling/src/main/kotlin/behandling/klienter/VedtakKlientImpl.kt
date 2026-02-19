@@ -96,6 +96,12 @@ interface VedtakKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<SakId>
 
+    suspend fun harSakUtbetalingForInntektsaar(
+        sakId: SakId,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
+
     suspend fun hentInnvilgedePerioder(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
@@ -472,6 +478,38 @@ class VedtakKlientImpl(
         }
     }
 
+    override suspend fun harSakUtbetalingForInntektsaar(
+        sakId: SakId,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        try {
+            logger.info("Sjekker om sak $sakId har utbetaling for inntektsaar $inntektsaar")
+
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vedtak/sak/$sakId/har-utbetaling-for-inntektsaar/$inntektsaar",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource ->
+                        val response: HarUtbetalingResponse =
+                            objectMapper.readValue(resource.response.toString())
+                        response.harUtbetaling
+                    },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Kunne ikke sjekke utbetaling for sak $sakId og inntektsaar $inntektsaar",
+                e,
+            )
+        }
+    }
+
     override suspend fun hentInnvilgedePerioder(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
@@ -520,4 +558,8 @@ class VedtakKlientImpl(
             throw VedtakKlientException("Kunne ikke tilbakestille tilbakekrevingsvedtak", e)
         }
     }
+
+    data class HarUtbetalingResponse(
+        val harUtbetaling: Boolean,
+    )
 }

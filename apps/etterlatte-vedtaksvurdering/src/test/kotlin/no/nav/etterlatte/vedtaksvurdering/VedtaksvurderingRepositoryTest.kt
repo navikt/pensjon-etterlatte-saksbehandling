@@ -536,9 +536,8 @@ internal class VedtaksvurderingRepositoryTest(
         ).map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }
 
-        val results = repository.hentSakIdMedUtbetalingForInntektsaar(2023, SakType.OMSTILLINGSSTOENAD)
-        results.size shouldBeExactly 1
-        results.first().sakId shouldBe sakid.sakId
+        val results = repository.harSakUtbetalingForInntektsaar(sakid, 2023, SakType.OMSTILLINGSSTOENAD)
+        results shouldBe true
     }
 
     @Test

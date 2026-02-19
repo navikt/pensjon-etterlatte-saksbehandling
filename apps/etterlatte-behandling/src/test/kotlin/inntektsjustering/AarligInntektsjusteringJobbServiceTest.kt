@@ -99,7 +99,7 @@ class AarligInntektsjusteringJobbServiceTest {
         clearAllMocks()
         every { featureToggleService.isEnabled(any(), any()) } returns true
 
-        coEvery { etteroppgjoerForbehandlingService.hentForbehandlinger(any(), any()) } returns emptyList()
+        coEvery { etteroppgjoerForbehandlingService.hentForbehandlinger(any()) } returns emptyList()
 
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
         coEvery {

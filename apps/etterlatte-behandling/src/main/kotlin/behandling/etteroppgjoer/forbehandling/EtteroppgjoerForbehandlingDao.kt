@@ -55,10 +55,7 @@ class EtteroppgjoerForbehandlingDao(
             }
         }
 
-    fun hentForbehandlingerForSak(
-        sakId: SakId,
-        etteroppgjoersAar: Int,
-    ): List<EtteroppgjoerForbehandling> =
+    fun hentForbehandlingerForSak(sakId: SakId): List<EtteroppgjoerForbehandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -67,11 +64,9 @@ class EtteroppgjoerForbehandlingDao(
                         SELECT *  
                         FROM etteroppgjoer_behandling e INNER JOIN sak s on e.sak_id = s.id
                         WHERE e.sak_id = ?
-                        AND e.aar = ?
                         """.trimIndent(),
                     )
                 statement.setObject(1, sakId.sakId)
-                statement.setObject(2, etteroppgjoersAar)
                 statement.executeQuery().toList { toForbehandling() }
             }
         }
@@ -251,12 +246,12 @@ class EtteroppgjoerForbehandlingDao(
         logger.info("Lagret inntekter for forbehandling $forbehandlingId")
     }
 
-    fun hentSummerteInntekterNonNull(forbehandlingId: UUID) =
-        krevIkkeNull(hentSummerteInntekter(forbehandlingId)) {
+    fun hentSummertAInntektNonNull(forbehandlingId: UUID) =
+        krevIkkeNull(hentSummertAInntekt(forbehandlingId)) {
             "Fant ikke summerte inntekter for forbehandling med id=$forbehandlingId"
         }
 
-    fun hentSummerteInntekter(forbehandlingId: UUID): SummerteInntekterAOrdningen? =
+    fun hentSummertAInntekt(forbehandlingId: UUID): SummerteInntekterAOrdningen? =
         connectionAutoclosing.hentConnection { connection ->
             val statement =
                 connection.prepareStatement(

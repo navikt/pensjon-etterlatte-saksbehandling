@@ -64,11 +64,9 @@ import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.doedsmelding.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtloeptJobService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJobService
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJob
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OpprettEtteroppgjoerJobService
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
@@ -448,7 +446,7 @@ internal class ApplicationContext(
     private val etteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
 
     val etteroppgjoerTempService =
-        EtteroppgjoerTempService(etteroppgjoerDao, etteroppgjoerForbehandlingDao, etteroppgjoerOppgaveService, etteroppgjoerHendelseService)
+        EtteroppgjoerTempService(etteroppgjoerDao, etteroppgjoerForbehandlingDao, etteroppgjoerHendelseService)
 
     val behandlingService =
         BehandlingServiceImpl(
@@ -723,12 +721,13 @@ internal class ApplicationContext(
             grunnlagService,
         )
 
-    val skatteoppgjoerHendelserService =
-        SkatteoppgjoerHendelserService(
+    val lesSkatteoppgjoerHendelserJobService =
+        LesSkatteoppgjoerHendelserJobService(
             dao = skatteoppgjoerHendelserDao,
             sigrunKlient = sigrunKlient,
             etteroppgjoerService = etteroppgjoerService,
             sakService = sakService,
+            vedtakKlient = vedtakKlient,
         )
 
     private val etteroppgjoerRevurderingBrevService =
@@ -812,18 +811,12 @@ internal class ApplicationContext(
     private val saksbehandlerJobService =
         SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, entraProxyKlient)
 
-    val opprettEtteroppgjoerJobService =
-        OpprettEtteroppgjoerJobService(
-            etteroppgjoerService,
-            vedtakKlient,
-            featureToggleService,
-        )
-
     val oppdaterSkatteoppgjoerIkkeMottattJobService =
         OppdaterSkatteoppgjoerIkkeMottattJobService(
             featureToggleService,
             etteroppgjoerOppgaveService,
             etteroppgjoerService,
+            vedtakKlient,
         )
 
     val etteroppgjoerSvarfristUtloeptJobService =
@@ -967,17 +960,6 @@ internal class ApplicationContext(
         )
     }
 
-    val etteroppgjoerJob: OpprettEtteroppgjoerJob by lazy {
-        OpprettEtteroppgjoerJob(
-            opprettEtteroppgjoerJobService = opprettEtteroppgjoerJobService,
-            { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(10, ChronoUnit.MINUTES),
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-        )
-    }
-
     val oppdaterSkatteoppgjoerIkkeMottattJob: OppdaterSkatteoppgjoerIkkeMottattJob by lazy {
         OppdaterSkatteoppgjoerIkkeMottattJob(
             oppdaterSkatteoppgjoerIkkeMottattJobService = oppdaterSkatteoppgjoerIkkeMottattJobService,
@@ -1028,7 +1010,7 @@ internal class ApplicationContext(
 
     val lesSkatteoppgjoerHendelserJob: LesSkatteoppgjoerHendelserJob by lazy {
         LesSkatteoppgjoerHendelserJob(
-            skatteoppgjoerHendelserService = skatteoppgjoerHendelserService,
+            lesSkatteoppgjoerHendelserJobService = lesSkatteoppgjoerHendelserJobService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.HOURS),

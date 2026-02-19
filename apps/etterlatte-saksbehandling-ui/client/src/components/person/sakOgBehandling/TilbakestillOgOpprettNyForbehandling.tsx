@@ -2,18 +2,23 @@ import { ArrowUndoIcon } from '@navikt/aksel-icons'
 import { Alert, Box, Button, InlineMessage, VStack } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { opprettEtteroppgjoerForbehandlingOppgave } from '~shared/api/etteroppgjoer'
+import { tilbakestillEtteroppgjoerOgOpprettOppgave } from '~shared/api/etteroppgjoer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
+import { useState } from 'react'
+import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
 
 type IProps = {
   sakId: number
 }
 
 export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
-  const [opprettForbehandlingOppgaveStatus, opprettForbehandlingOppgaveFetch] = useApiCall(
-    opprettEtteroppgjoerForbehandlingOppgave
+  const [valgtEtteroppgjoer, setValgtEtteroppgjoer] = useState<string>('')
+
+  const [tilbakestillOgOpprettOppgaveStatus, tilbakestillOgOpprettOppgave] = useApiCall(
+    tilbakestillEtteroppgjoerOgOpprettOppgave
   )
+
   return (
     <Box marginBlock="5 0">
       <VStack gap="4">
@@ -22,19 +27,34 @@ export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
             I tilfelle forbehandling, eller etteroppgjøret er ferdigstilt med feil informasjon, kan etteroppgjøret
             tilbakestilles og ny forbehandling opprettes.
           </InlineMessage>
+
+          <Box marginBlock="5 0">
+            <VelgEtteroppgjoersAar
+              sakId={sakId.toString()}
+              value={valgtEtteroppgjoer}
+              onChange={setValgtEtteroppgjoer}
+            />
+          </Box>
+
           <Box marginBlock="5 0">
             <Button
-              loading={isPending(opprettForbehandlingOppgaveStatus)}
+              loading={isPending(tilbakestillOgOpprettOppgaveStatus)}
+              disabled={!valgtEtteroppgjoer}
               variant="secondary"
-              onClick={() => opprettForbehandlingOppgaveFetch(sakId)}
               icon={<ArrowUndoIcon />}
+              onClick={() =>
+                tilbakestillOgOpprettOppgave({
+                  sakId,
+                  inntektsaar: valgtEtteroppgjoer,
+                })
+              }
             >
               Tilbakestill etteroppgjøret og opprett ny forbehandling
             </Button>
           </Box>
         </Box>
 
-        {mapResult(opprettForbehandlingOppgaveStatus, {
+        {mapResult(tilbakestillOgOpprettOppgaveStatus, {
           pending: <Spinner label="Oppretter ny forbehandling" />,
           error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
           success: () => <Alert variant="success">Ny forbehandling er opprettet og etteroppgjøret tilbakestilt.</Alert>,

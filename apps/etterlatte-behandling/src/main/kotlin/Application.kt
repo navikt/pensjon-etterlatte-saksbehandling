@@ -102,7 +102,6 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerJob,
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
-        context.etteroppgjoerJob,
         context.etteroppgjoerSvarfristUtloeptJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
         context.sjekkAdressebeskyttelseJob,
@@ -183,7 +182,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         forbehandlingService = applicationContext.etteroppgjoerForbehandlingService,
         forbehandlingBrevService = applicationContext.etteroppgjoerForbehandlingBrevService,
         etteroppgjoerService = applicationContext.etteroppgjoerService,
-        skatteoppgjoerHendelserService = applicationContext.skatteoppgjoerHendelserService,
+        lesSkatteoppgjoerHendelserJobService = applicationContext.lesSkatteoppgjoerHendelserJobService,
         featureToggleService = applicationContext.featureToggleService,
         etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
     )

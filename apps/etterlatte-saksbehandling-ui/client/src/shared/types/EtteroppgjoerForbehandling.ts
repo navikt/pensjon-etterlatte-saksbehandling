@@ -19,6 +19,16 @@ enum EtteroppgjoerStatus {
   OMGJOERING = 'OMGJOERING',
 }
 
+export const etteroppgjoerStatusTekst = {
+  VENTER_PAA_SKATTEOPPGJOER: 'Venter på skatteoppgjør',
+  MOTTATT_SKATTEOPPGJOER: 'Mottatt skatteoppgjør',
+  VENTER_PAA_SVAR: 'Venter på svar fra bruker',
+  UNDER_FORBEHANDLING: 'Under forbehandling',
+  UNDER_REVURDERING: 'Under revurdering',
+  FERDIGSTILT: 'Ferdigstilt',
+  OMGJOERING: 'Omgjøring',
+} satisfies Record<EtteroppgjoerStatus, string>
+
 export interface EtteroppgjoerForbehandling {
   id: string
   status: EtteroppgjoerForbehandlingStatus
@@ -84,7 +94,7 @@ export interface SummerteInntekterAOrdningen {
 
 export interface EtteroppgjoerOpplysninger {
   summertPgi?: PensjonsgivendeInntektFraSkatteetatenSummert
-  summerteInntekter?: SummerteInntekterAOrdningen
+  summertAInntekt?: SummerteInntekterAOrdningen
   tidligereAvkorting?: Avkorting
 }
 

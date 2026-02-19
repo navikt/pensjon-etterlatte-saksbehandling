@@ -17,15 +17,17 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
-import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.HendelseKjoeringRequest
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJobService
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
+import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
@@ -34,7 +36,7 @@ class SkatteoppgjoerHendelserServiceTest {
     private val sigrunKlient: SigrunKlient = mockk()
     private val etteroppgjoerService: EtteroppgjoerService = mockk()
     private val sakService: SakService = mockk()
-    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = mockk()
+    private val vedtakKlient: VedtakKlient = mockk()
 
     @BeforeEach
     fun setup() {
@@ -43,8 +45,8 @@ class SkatteoppgjoerHendelserServiceTest {
 
     @Test
     fun `skal behandle hendelser fra Sigrun og oppdatere status for relevante etteroppgjoer`() {
-        val skatteoppgjoerHendelserService =
-            SkatteoppgjoerHendelserService(dao, sigrunKlient, etteroppgjoerService, sakService)
+        val lesSkatteoppgjoerHendelserJobService =
+            LesSkatteoppgjoerHendelserJobService(dao, sigrunKlient, etteroppgjoerService, sakService, vedtakKlient)
 
         val sisteSekvensnummer = 10.toLong()
         val sisteKjoering = HendelserKjoering(sisteSekvensnummer, 10, 0, Tidspunkt.now())
@@ -65,25 +67,26 @@ class SkatteoppgjoerHendelserServiceTest {
                 ),
             )
 
-        coEvery { sakService.finnSak(any(), any()) } returns mockk { every { id } returns SakId(1L) }
+        // Saker som ikke har OMS - returnerer null
+        coEvery { sakService.finnSak("789", any<SakType>()) } returns null
+        coEvery { sakService.finnSak("963", any<SakType>()) } returns null
+
+        // Saker som har OMS
         coEvery { sakService.finnSak(harOms1, any<SakType>()) } returns mockk { every { id } returns SakId(2L) }
         coEvery { sakService.finnSak(harOms2, any<SakType>()) } returns mockk { every { id } returns SakId(3L) }
-        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(any()), any()) } returns null
+
+        coEvery { etteroppgjoerService.finnInnvilgedeAarForSak(any(), any()) } returns listOf(2024)
 
         coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), 2024) } returns
             Etteroppgjoer(SakId(2L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
-        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(3L), any()) } returns
+        coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(3L), 2024) } returns
             Etteroppgjoer(SakId(3L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
 
         coEvery { dao.lagreKjoering(any()) } returns 1
         coEvery { etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any(), any()) } just runs
 
-        coEvery {
-            etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any())
-        } just runs
-
         runBlocking {
-            skatteoppgjoerHendelserService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall))
+            lesSkatteoppgjoerHendelserJobService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall))
         }
 
         coVerify {
@@ -97,12 +100,8 @@ class SkatteoppgjoerHendelserServiceTest {
             )
         }
 
-        coVerify {
-            etteroppgjoerService.haandterSkatteoppgjoerMottatt(
-                any(),
-                any(),
-                any(),
-            )
+        coVerify(exactly = 2) {
+            etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any(), any())
         }
     }
 

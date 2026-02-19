@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form'
 import { opprettEtteroppgoerForbehandling as opprettForbehandlingApi } from '~shared/api/etteroppgjoer'
 import { useNavigate } from 'react-router-dom'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -21,11 +22,16 @@ type Props = {
 
 export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus }: Props) => {
   const [open, setOpen] = useState(false)
+  const [valgtEtteroppgjoer, setValgtEtteroppgjoer] = useState<string>('')
+
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const [ferdigstillStatus] = useApiCall(ferdigstillOppgaveMedMerknad)
+
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
 
+  const [opprettForbehandlingResult, opprettForbehandlingRequest, resetApiCall] = useApiCall(opprettForbehandlingApi)
+
   const erTildeltSaksbehandler = innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident
+
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
 
   const navigate = useNavigate()
@@ -34,22 +40,40 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
     formState: { errors },
     handleSubmit,
     register,
-  } = useForm<{ kommentar: string }>({ defaultValues: { kommentar: '' } })
+    reset,
+  } = useForm<{ kommentar: string }>({
+    defaultValues: { kommentar: '' },
+  })
 
-  const [opprettForbehandlingResult, opprettForbehandlingRequest] = useApiCall(opprettForbehandlingApi)
+  const lukkModal = () => {
+    setValgtEtteroppgjoer('')
+    reset()
+    resetApiCall()
+    setOpen(false)
+  }
 
   const opprettForbehandling = () => {
-    opprettForbehandlingRequest({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (forbehandling) => {
-      navigate(`/etteroppgjoer/${forbehandling.id}`)
-    })
+    if (!valgtEtteroppgjoer) return
+
+    opprettForbehandlingRequest(
+      {
+        sakId: oppgave.sakId,
+        oppgaveId: oppgave.id,
+        inntektsaar: valgtEtteroppgjoer,
+      },
+      (forbehandling) => {
+        lukkModal()
+        navigate(`/etteroppgjoer/${forbehandling.id}`)
+      }
+    )
   }
 
   const avslutt = ({ kommentar }: { kommentar: string }) => {
-    const nyMerknad = `${oppgave.merknad} – Kommentar: ${kommentar}`
+    const nyMerknad = `${oppgave.merknad ?? ''} – Kommentar: ${kommentar}`
 
-    avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, (oppgave) => {
-      oppdaterStatus(oppgave.id, oppgave.status)
-      setOpen(false)
+    avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, (oppgaveResponse) => {
+      oppdaterStatus(oppgaveResponse.id, oppgaveResponse.status)
+      lukkModal()
     })
   }
 
@@ -63,7 +87,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
         open={open}
         aria-labelledby="modal-heading"
         width="medium"
-        onClose={() => setOpen(false)}
+        onClose={lukkModal}
         header={{ heading: 'Etteroppgjør – opprett forbehandling' }}
       >
         <Modal.Body>
@@ -75,6 +99,14 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
 
             {oppgave.merknad && <Alert variant="info">{oppgave.merknad}</Alert>}
 
+            {kanRedigeres && erTildeltSaksbehandler && (
+              <VelgEtteroppgjoersAar
+                sakId={oppgave.sakId.toString()}
+                value={valgtEtteroppgjoer}
+                onChange={setValgtEtteroppgjoer}
+              />
+            )}
+
             {kanRedigeres &&
               (erTildeltSaksbehandler ? (
                 <Textarea
@@ -85,7 +117,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
                     },
                   })}
                   label="Kommentar"
-                  description="Legg til kommentar hvis du avslutter oppgaven. Dette er ikke nødvendig dersom du oppretter en revurdering eller forbehandling."
+                  description="Legg til kommentar hvis du avslutter oppgaven. Dette er ikke nødvendig dersom du oppretter forbehandling."
                   error={errors.kommentar?.message}
                 />
               ) : (
@@ -98,7 +130,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
             })}
 
             <HStack gap="4" justify="end">
-              <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillStatus)}>
+              <Button variant="secondary" onClick={lukkModal} disabled={isPending(ferdigstillOppgaveStatus)}>
                 Lukk
               </Button>
 
@@ -109,7 +141,11 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
               )}
 
               {kanRedigeres && erTildeltSaksbehandler && (
-                <Button loading={isPending(opprettForbehandlingResult)} onClick={() => opprettForbehandling()}>
+                <Button
+                  loading={isPending(opprettForbehandlingResult)}
+                  disabled={!valgtEtteroppgjoer}
+                  onClick={opprettForbehandling}
+                >
                   Opprett forbehandling
                 </Button>
               )}

@@ -277,6 +277,33 @@ class VedtaksvurderingRepository(
         }
     }
 
+    fun harSakUtbetalingForInntektsaar(
+        sakId: SakId,
+        inntektsaar: Int,
+        sakType: SakType,
+        tx: TransactionalSession? = null,
+    ): Boolean =
+        tx.session {
+            hent(
+                queryString = """
+                    SELECT 1 FROM vedtak v
+                    JOIN utbetalingsperiode u ON v.id = u.vedtakid
+                    WHERE v.sakid = :sakId
+                    AND EXTRACT(YEAR FROM u.datofom) = :aar
+                    AND v.saktype = :saktype
+                    AND v.vedtakstatus = :vedtakStatus
+                    LIMIT 1
+                    """,
+                params =
+                    mapOf(
+                        "sakId" to sakId.sakId,
+                        "aar" to inntektsaar,
+                        "saktype" to sakType.name,
+                        "vedtakStatus" to VedtakStatus.IVERKSATT.name,
+                    ),
+            ) { true } ?: false
+        }
+
     fun hentFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
         sakType: SakType? = null,

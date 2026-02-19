@@ -31,8 +31,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -41,8 +43,10 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
+import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.etterlatte.libs.common.vedtak.Periode as VedtakPeriode
 
 class EtteroppgjoerServiceTest {
     private val sakId = sakId1
@@ -161,28 +165,6 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `skal kaste feil hvis ikke aktivt etteroppgjør for sak`() {
-        val ctx = TestContext(sakId)
-        ctx.ingenEtteroppgjoer()
-
-        assertThrows<InternfeilException> {
-            ctx.service.hentAktivtEtteroppgjoerForSak(sakId)
-        }
-
-        ctx.returnerEtteroppgjoer(
-            Etteroppgjoer(
-                sakId = sakId,
-                inntektsaar = ETTEROPPGJOER_AAR,
-                status = EtteroppgjoerStatus.FERDIGSTILT,
-            ),
-        )
-
-        assertThrows<InternfeilException> {
-            ctx.service.hentAktivtEtteroppgjoerForSak(sakId)
-        }
-    }
-
-    @Test
     fun `skal opprette etteroppgjør med status MOTTATT_SKATTEOPPGJOER hvis vi får svar fra sigrun`() {
         val ctx = TestContext(sakId)
         ctx.sigrunGirSvar()
@@ -199,7 +181,7 @@ class EtteroppgjoerServiceTest {
         val etteroppgjoer =
             runBlocking {
                 ctx.service.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-                    sistIverksatteBehandling = foerstegangsBehandling,
+                    behandling = foerstegangsBehandling,
                     inntektsaar = 2023,
                 )
             }
@@ -224,7 +206,7 @@ class EtteroppgjoerServiceTest {
         val etteroppgjoer =
             runBlocking {
                 cx.service.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
-                    sistIverksatteBehandling = foerstegangsBehandling,
+                    behandling = foerstegangsBehandling,
                     inntektsaar = 2023,
                 )
             }
@@ -352,33 +334,17 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `opprettEtteroppgjoer returnerer null dersom etteroppgjør allerede finnes for år`() {
-        val ctx = TestContext(sakId)
-        every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
-            Etteroppgjoer(
-                sakId = sakId,
-                inntektsaar = 2024,
-                status = EtteroppgjoerStatus.FERDIGSTILT,
-            )
-
-        val opprettetEtteroppgjoer = runBlocking { ctx.service.upsertNyttEtteroppgjoer(sakId, 2024) }
-        assertNull(opprettetEtteroppgjoer)
-        coVerify(exactly = 0) { ctx.vedtakKlient.hentIverksatteVedtak(any(), any()) }
-        coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(any()) }
-    }
-
-    @Test
     fun `opprettEtteroppgjoer returnerer nytt etteroppgjør dersom etteroppgjør ikke finnes for år`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
             null
 
-        val resultat = runBlocking { ctx.service.upsertNyttEtteroppgjoer(sakId, 2024) }
+        val resultat = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
 
-        with(resultat!!) {
+        with(resultat) {
             this.sakId shouldBe ctx.sakId
             this.inntektsaar shouldBe 2024
-            this.status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+            this.status shouldBe EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
         }
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
     }
@@ -403,9 +369,9 @@ class EtteroppgjoerServiceTest {
                 utlandstilknytning = utlandstilsnitt(),
             )
 
-        val resultat = runBlocking { ctx.service.upsertNyttEtteroppgjoer(sakId, 2024) }
+        val resultat = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
 
-        with(resultat!!) {
+        with(resultat) {
             this.sakId shouldBe ctx.sakId
             this.inntektsaar shouldBe 2024
             this.status shouldBe EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
@@ -418,4 +384,38 @@ class EtteroppgjoerServiceTest {
         Utlandstilknytning(UtlandstilknytningType.UTLANDSTILSNITT, kildeSaksbehandler(), "begrunnelse")
 
     fun kildeSaksbehandler() = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now()))
+
+    @Test
+    fun `finnOgOpprettManglendeEtteroppgjoer oppretter etteroppgjoer for manglende aar`() {
+        val ctx = TestContext(sakId)
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
+
+        // Innvilget periode f.eks 2024, 2025 og 2026
+        coEvery { ctx.vedtakKlient.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(VedtakPeriode(YearMonth.now().minusYears(1), null), mockk(relaxed = true)),
+                InnvilgetPeriodeDto(VedtakPeriode(YearMonth.now().minusYears(2), null), mockk(relaxed = true)),
+            )
+
+        every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns null
+
+        // Ingen eksisterende etteroppgjør
+        every { ctx.dao.hentEtteroppgjoerForSak(sakId) } returns
+            listOf(
+                Etteroppgjoer(
+                    sakId = sakId,
+                    inntektsaar = Year.now().value - 2, // f.eks 2024
+                    status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                ),
+            )
+
+        runBlocking {
+            ctx.service.finnOgOpprettManglendeEtteroppgjoer(sakId, brukerTokenInfo)
+        }
+
+        // Skal opprette etteroppgjør for 2025
+        coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 1 }) } // f.eks 2025
+        coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 2 }) } // f.eks 2024
+        coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value }) } // f.eks 2026
+    }
 }

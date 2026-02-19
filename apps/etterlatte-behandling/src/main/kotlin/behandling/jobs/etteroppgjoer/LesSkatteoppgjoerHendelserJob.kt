@@ -5,8 +5,8 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.HendelseKjoeringRequest
-import no.nav.etterlatte.behandling.jobs.etteroppgjoer.SkatteoppgjoerHendelserService
+import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
+import no.nav.etterlatte.behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJobService
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.LoggerInfo
@@ -20,7 +20,7 @@ import java.util.Timer
 import javax.sql.DataSource
 
 class LesSkatteoppgjoerHendelserJob(
-    private val skatteoppgjoerHendelserService: SkatteoppgjoerHendelserService,
+    private val lesSkatteoppgjoerHendelserJobService: LesSkatteoppgjoerHendelserJobService,
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
@@ -36,7 +36,7 @@ class LesSkatteoppgjoerHendelserJob(
 
     private var jobContext: Context =
         Context(
-            AppUser = Self(skatteoppgjoerHendelserService::class.java.simpleName),
+            AppUser = Self(lesSkatteoppgjoerHendelserJobService::class.java.simpleName),
             databasecontxt = DatabaseContext(dataSource),
             sakTilgangDao = sakTilgangDao,
             brukerTokenInfo = HardkodaSystembruker.etteroppgjoer,
@@ -45,7 +45,7 @@ class LesSkatteoppgjoerHendelserJob(
     override fun schedule(): Timer {
         if (jobbenErAktivert()) {
             logger.info(
-                "$jobbNavn er satt til å kjøre med skatteoppgjoerHendelserService=${skatteoppgjoerHendelserService::class.simpleName} og periode $interval",
+                "$jobbNavn er satt til å kjøre med skatteoppgjoerHendelserService=${lesSkatteoppgjoerHendelserJobService::class.simpleName} og periode $interval",
             )
         }
 
@@ -75,7 +75,7 @@ class LesSkatteoppgjoerHendelserJob(
     private fun lesOgBehandleFlereGanger() {
         logger.info("Leser og behandler $hendelserBatchSize hendelser fra skatt ")
         if (jobbenErAktivert()) {
-            skatteoppgjoerHendelserService.lesOgBehandleHendelser(
+            lesSkatteoppgjoerHendelserJobService.lesOgBehandleHendelser(
                 HendelseKjoeringRequest(hendelserBatchSize),
             )
         } else {

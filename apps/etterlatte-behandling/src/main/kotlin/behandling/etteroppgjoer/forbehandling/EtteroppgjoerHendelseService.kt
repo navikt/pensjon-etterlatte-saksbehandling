@@ -52,7 +52,7 @@ class EtteroppgjoerHendelseService(
             etteroppgjoerResultat = etteroppgjoerResultat,
             summerteInntekter =
                 etteroppgjoerForbehandlingDao
-                    .hentSummerteInntekter(etteroppgjoerForbehandling.id),
+                    .hentSummertAInntekt(etteroppgjoerForbehandling.id),
             pensjonsgivendeInntekt =
                 etteroppgjoerForbehandlingDao
                     .hentPensjonsgivendeInntekt(etteroppgjoerForbehandling.id),

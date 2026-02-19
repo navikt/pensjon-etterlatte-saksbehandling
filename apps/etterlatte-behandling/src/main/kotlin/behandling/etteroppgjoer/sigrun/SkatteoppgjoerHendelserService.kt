@@ -146,7 +146,9 @@ class SkatteoppgjoerHendelserService(
 
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {
         val sisteKjoering = dao.hentSisteKjoering()
-        return runBlocking { sigrunKlient.hentHendelsesliste(request.antallHendelser, sisteKjoering.nesteSekvensnummer()) }
+        return runBlocking {
+            sigrunKlient.hentHendelsesliste(request.antallHendelser, sisteKjoering.nesteSekvensnummer())
+        }
     }
 }
 

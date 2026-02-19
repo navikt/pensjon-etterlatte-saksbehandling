@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
-import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.util.UUID
@@ -63,6 +62,22 @@ class EtteroppgjoerDao(
         }
     }
 
+    fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT *
+                        FROM etteroppgjoer
+                        WHERE sak_id = ?
+                        """.trimIndent(),
+                    )
+                statement.setLong(1, sakId.sakId)
+                statement.executeQuery().toList { toEtteroppgjoer() }
+            }
+        }
+
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
@@ -90,7 +105,7 @@ class EtteroppgjoerDao(
             }
         }
 
-    fun hentEtteroppgjoerSakerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
+    fun hentEtteroppgjoerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

@@ -3,27 +3,34 @@ import { EyeIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
 import { omgjoerEtteroppgjoerRevurdering as omgjoerEtteroppgjoerRevurderingApi } from '~shared/api/etteroppgjoer'
 
 type Props = {
   behandlingId: string
+  sakId: number
 }
 
 export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) => {
   const [open, setOpen] = useState(false)
 
   const navigate = useNavigate()
+
   const [omgjoerEtteroppgjoerResult, omgjoerEtteroppgjoerRevurderingRequest] = useApiCall(
     omgjoerEtteroppgjoerRevurderingApi
   )
 
   const omgjoerEoRevurdering = () => {
-    omgjoerEtteroppgjoerRevurderingRequest({ behandlingId: behandlingId }, (result) => {
-      navigate(`/behandling/${result.id}`)
-    })
+    omgjoerEtteroppgjoerRevurderingRequest(
+      {
+        behandlingId: behandlingId,
+      },
+      (result) => {
+        navigate(`/behandling/${result.id}`)
+      }
+    )
   }
 
   return (
@@ -42,21 +49,22 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
         <Modal.Body>
           <VStack gap="4">
             <BodyShort>
-              I tilfeller hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du omgjøre revurderingen uten å
-              måtte behandle etteroppgjøret på nytt via ny forbehandling.
+              I tilfeller hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du omgjøre revurderingen uten
+              å måtte behandle etteroppgjøret på nytt via ny forbehandling.
             </BodyShort>
 
-            {mapResult(omgjoerEtteroppgjoerResult, {
-              error: (error) => <ApiErrorAlert>Kunne ikke omgjøre behandling. {error.detail}</ApiErrorAlert>,
-            })}
+            {mapFailure(omgjoerEtteroppgjoerResult, (error) => (
+              <ApiErrorAlert>Kunne ikke omgjøre behandling. {error.detail}</ApiErrorAlert>
+            ))}
 
-            <HStack gap="4" justify="end">
+            <HStack justify="end">
               <HStack gap="4">
                 <Button size="small" onClick={() => setOpen(false)} variant="secondary">
                   Nei
                 </Button>
+
                 <Button size="small" onClick={omgjoerEoRevurdering} loading={isPending(omgjoerEtteroppgjoerResult)}>
-                  Ja, omgjør
+                  Ja, omgjør denne behandlingen
                 </Button>
               </HStack>
             </HStack>

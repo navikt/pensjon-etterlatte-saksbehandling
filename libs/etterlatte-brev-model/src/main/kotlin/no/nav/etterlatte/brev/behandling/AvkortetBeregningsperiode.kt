@@ -4,6 +4,7 @@ import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnla
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -42,7 +43,7 @@ data class AvkortetBeregningsperiode(
             beregningsMetodeAnvendt = this.beregningsMetodeAnvendt,
             beregningsMetodeFraGrunnlag = this.beregningsMetodeFraGrunnlag,
             sanksjon = this.sanksjon != null,
-            sanksjonType = this.sanksjon?.sanksjonType,
+            erFakeSanksjon = this.sanksjon?.sanksjonType == SanksjonType.IKKE_INNVILGET_PERIODE,
             institusjon = this.institusjon != null && this.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
             erOverstyrtInnvilgaMaaneder = this.erOverstyrtInnvilgaMaaneder,
         )

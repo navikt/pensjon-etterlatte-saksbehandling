@@ -203,7 +203,7 @@ class AktivitetspliktUnntakDaoTest(
                 begrunnelse = null,
                 relatertBehandlingId = null,
                 sendeBrev = true,
-                opphoerFraOgMed = null,
+                opphoer = null,
                 opprinnelse = BehandlingOpprinnelse.UKJENT,
             )
         behandlingDao.opprettBehandling(behandling)

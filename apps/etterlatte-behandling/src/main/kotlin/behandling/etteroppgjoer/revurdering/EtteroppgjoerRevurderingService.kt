@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer.revurdering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.OpphoerFraTidligereBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
@@ -32,6 +33,8 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.YearMonth
@@ -69,24 +72,31 @@ class EtteroppgjoerRevurderingService(
 
                 sjekkKanOppretteEtteroppgjoerRevurdering(etteroppgjoer, sisteFerdigstilteForbehandlingId)
 
-                val (sisteIverksatteBehandling, opphoerFom) =
-                    etteroppgjoerDataService.hentSisteIverksatteBehandlingOgOpphoer(
-                        sakId,
-                        brukerTokenInfo,
-                    )
+                val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sakId, brukerTokenInfo)
+                val sisteIverksatteBehandlingMedAvkorting =
+                    hentBehandling(etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe).behandlingId)
+                val vedtakMedGjeldendeOpphoer = etteroppgjoerDataService.vedtakMedGjeldendeOpphoer(vedtakListe)
+
                 val revurdering =
                     opprettRevurdering(
                         sakId,
-                        sisteIverksatteBehandling,
+                        sisteIverksatteBehandlingMedAvkorting,
                         sisteFerdigstilteForbehandlingId,
                         opprinnelse,
-                        opphoerFom,
+                        if (vedtakMedGjeldendeOpphoer != null) {
+                            OpphoerFraTidligereBehandling(
+                                vedtakMedGjeldendeOpphoer.opphoersdato()!!,
+                                vedtakMedGjeldendeOpphoer.behandlingId,
+                            )
+                        } else {
+                            null
+                        },
                         brukerTokenInfo,
                     )
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = revurdering.id,
-                    kopierFraBehandling = sisteIverksatteBehandling.id,
+                    kopierFraBehandling = sisteIverksatteBehandlingMedAvkorting.id,
                     brukerTokenInfo = brukerTokenInfo,
                 )
 
@@ -96,7 +106,7 @@ class EtteroppgjoerRevurderingService(
                     EtteroppgjoerStatus.UNDER_REVURDERING,
                 )
 
-                revurdering to sisteIverksatteBehandling
+                revurdering to sisteIverksatteBehandlingMedAvkorting
             }
 
         // TODO her må noe gjøres da feil her medfører en "halvveis behandling"
@@ -134,8 +144,7 @@ class EtteroppgjoerRevurderingService(
         val (behandling, forbehandling) =
             inTransaction {
                 val behandling =
-                    behandlingService.hentBehandling(behandlingId)
-                        ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
+                    hentBehandling(behandlingId)
                 if (behandling.status != BehandlingStatus.AVBRUTT) {
                     throw IkkeTillattException(
                         "BEHANDLING_IKKE_AVBRUTT",
@@ -162,6 +171,12 @@ class EtteroppgjoerRevurderingService(
 
         return opprettEtteroppgjoerRevurdering(behandling.sak.id, forbehandling.aar, behandling.opprinnelse, brukerTokenInfo)
     }
+
+    private fun hentBehandling(behandlingId: UUID): Behandling =
+        (
+            behandlingService.hentBehandling(behandlingId)
+                ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
+        )
 
     private fun hentForbehandlingForRevurdering(behandling: Behandling): EtteroppgjoerForbehandling {
         val forbehandlingId =
@@ -193,7 +208,7 @@ class EtteroppgjoerRevurderingService(
         sisteIverksatteBehandling: Behandling,
         sisteFerdigstilteForbehandlingId: UUID,
         opprinnelse: BehandlingOpprinnelse,
-        opphoerFom: YearMonth?,
+        opphoerFom: OpphoerFraTidligereBehandling?,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val forbehandling =
@@ -289,6 +304,16 @@ class EtteroppgjoerRevurderingService(
         } catch (_: IllegalArgumentException) {
             null
         }
+}
+
+private fun VedtakSammendragDto.opphoersdato(): YearMonth? {
+    val opphoerFom =
+        if (vedtakType == VedtakType.OPPHOER) {
+            virkningstidspunkt
+        } else {
+            opphoerFraOgMed
+        }
+    return opphoerFom
 }
 
 data class SisteAvkortingOgOpphoer(

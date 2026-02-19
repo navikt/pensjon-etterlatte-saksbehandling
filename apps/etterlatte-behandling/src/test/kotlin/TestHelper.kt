@@ -234,7 +234,6 @@ fun opprettBehandling(
     revurderingAarsak: Revurderingaarsak? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    opphoerFraOgMed: YearMonth? = null,
     relatertBehandlingId: String? = null,
 ) = OpprettBehandling(
     type = type,
@@ -246,7 +245,6 @@ fun opprettBehandling(
     prosesstype = prosesstype,
     vedtaksloesning = kilde,
     sendeBrev = true,
-    opphoerFraOgMed = opphoerFraOgMed,
     relatertBehandlingId = relatertBehandlingId,
     opprinnelse = BehandlingOpprinnelse.UKJENT,
 )

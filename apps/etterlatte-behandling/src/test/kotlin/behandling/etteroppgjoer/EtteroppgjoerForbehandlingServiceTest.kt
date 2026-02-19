@@ -1,12 +1,10 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import io.kotest.assertions.any
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
@@ -201,11 +199,12 @@ class EtteroppgjoerForbehandlingServiceTest {
         coEvery { ctx.behandlingService.hentBehandlingerForSak(sakId1) } returns
             listOf(behandling, revurdering, underBehandling)
 
-        val sisteIverksatteAvkortingOgOpphoer =
-            runBlocking { ctx.etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(sakId1, mockk()) }
+        val vedtakListe = ctx.etteroppgjoerDataService.hentIverksatteVedtak(sakId1, mockk())
+        val sisteVedtakMedAvkorting = ctx.etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe)
+        val vedtakMedGjeldendeOpphoer = ctx.etteroppgjoerDataService.vedtakMedGjeldendeOpphoer(vedtakListe)
 
-        sisteIverksatteAvkortingOgOpphoer.sisteBehandlingMedAvkorting shouldBe behandling.id
-        sisteIverksatteAvkortingOgOpphoer.opphoerFom shouldBe null
+        sisteVedtakMedAvkorting.behandlingId shouldBe behandling.id
+        vedtakMedGjeldendeOpphoer shouldBe null
     }
 
     @ParameterizedTest(name = "skal ikke opprette forbehandling hvis det allerede eksisterer en med status={0}")

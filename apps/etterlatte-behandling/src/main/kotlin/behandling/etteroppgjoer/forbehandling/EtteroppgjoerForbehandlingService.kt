@@ -512,15 +512,12 @@ class EtteroppgjoerForbehandlingService(
         etteroppgjoer: Etteroppgjoer,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
-        val sisteAvkortingOgOpphoer =
-            runBlocking { etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(sak.id, brukerTokenInfo) }
-
-        krevIkkeNull(sisteAvkortingOgOpphoer) {
-            "Fant ikke sisteIverksatteBehandling for Sak=${sak.id} kan derfor ikke opprette forbehandling"
-        }
+        val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sak.id, brukerTokenInfo)
+        val sisteVedtakMedAvkorting = etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe)
+        val vedtakMedGjeldendeOpphoer = etteroppgjoerDataService.vedtakMedGjeldendeOpphoer(vedtakListe)
 
         logger.info(
-            "Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id $sisteAvkortingOgOpphoer",
+            "Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id ${sisteVedtakMedAvkorting.behandlingId}",
         )
 
         val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
@@ -530,8 +527,8 @@ class EtteroppgjoerForbehandlingService(
             .opprett(
                 sak = sak,
                 innvilgetPeriode = innvilgetPeriode,
-                sisteIverksatteBehandling = sisteAvkortingOgOpphoer.sisteBehandlingMedAvkorting,
-                harVedtakAvTypeOpphoer = sisteAvkortingOgOpphoer.opphoerFom != null,
+                sisteIverksatteBehandling = sisteVedtakMedAvkorting.behandlingId,
+                harVedtakAvTypeOpphoer = vedtakMedGjeldendeOpphoer != null,
                 mottattSkatteoppgjoer = etteroppgjoer.status != EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
             )
     }
@@ -591,7 +588,9 @@ class EtteroppgjoerForbehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
-            runBlocking { etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo) }
+            runBlocking {
+                etteroppgjoerDataService.sisteVedtakMedAvkorting(etteroppgjoerDataService.hentIverksatteVedtak(sakId, brukerTokenInfo))
+            }
 
         val forbehandling = hentForbehandling(forbehandlingId)
 
@@ -601,7 +600,7 @@ class EtteroppgjoerForbehandlingService(
                 status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(), // ny dato
                 kopiertFra = forbehandling.id,
-                sisteIverksatteBehandlingId = sisteIverksatteBehandling.sisteBehandlingMedAvkorting,
+                sisteIverksatteBehandlingId = sisteIverksatteBehandling.behandlingId,
                 brevId = null,
                 varselbrevSendt = null,
             )
@@ -664,18 +663,20 @@ class EtteroppgjoerForbehandlingService(
         forbehandling: EtteroppgjoerForbehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val sisteIverksatteBehandling =
+        val sisteVedtakMedAvkorting =
             runBlocking {
-                etteroppgjoerDataService.hentSisteIverksatteBehandlingMedAvkorting(
-                    forbehandling.sak.id,
-                    brukerTokenInfo,
+                etteroppgjoerDataService.sisteVedtakMedAvkorting(
+                    etteroppgjoerDataService.hentIverksatteVedtak(
+                        forbehandling.sak.id,
+                        brukerTokenInfo,
+                    ),
                 )
             }
 
         // verifisere at vi bruker siste iverksatte behandling
-        if (sisteIverksatteBehandling.sisteBehandlingMedAvkorting != forbehandling.sisteIverksatteBehandlingId) {
+        if (sisteVedtakMedAvkorting.behandlingId != forbehandling.sisteIverksatteBehandlingId) {
             throw InternfeilException(
-                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteIverksatteBehandling.sisteBehandlingMedAvkorting}",
+                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteVedtakMedAvkorting.behandlingId}",
             )
         }
     }

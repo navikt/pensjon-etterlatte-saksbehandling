@@ -30,7 +30,7 @@ data class OpprettBehandling(
     val begrunnelse: String? = null,
     val relatertBehandlingId: String? = null,
     val sendeBrev: Boolean,
-    val opphoerFraOgMed: YearMonth? = null,
+    val opphoer: OpphoerFraTidligereBehandling? = null,
     val tidligereFamiliepleier: TidligereFamiliepleier? = null,
     val opprinnelse: BehandlingOpprinnelse,
 ) {
@@ -42,6 +42,11 @@ data class BehandlingOpprettet(
     val timestamp: Tidspunkt,
     val id: UUID,
     val sak: SakId,
+)
+
+data class OpphoerFraTidligereBehandling(
+    val opphoerFraOgMed: YearMonth,
+    val behandlingId: UUID,
 )
 
 fun OpprettBehandling.toBehandlingOpprettet() = BehandlingOpprettet(opprettet, id, sakId)

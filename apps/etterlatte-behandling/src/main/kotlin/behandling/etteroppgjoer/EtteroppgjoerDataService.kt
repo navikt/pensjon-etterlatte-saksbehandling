@@ -10,12 +10,11 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.logger
-import java.time.YearMonth
 
 class EtteroppgjoerDataService(
     val behandlingService: BehandlingService,
@@ -23,16 +22,26 @@ class EtteroppgjoerDataService(
     val vedtakKlient: VedtakKlient,
     val beregningKlient: BeregningKlient,
 ) {
-    fun hentSisteIverksatteBehandlingOgOpphoer(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<Behandling, YearMonth?> {
-        val sisteAvkortingOgOpphoer = hentSisteIverksatteVedtakIkkeOpphoer(sakId, brukerTokenInfo)
-        val behandling =
-            behandlingService.hentBehandling(sisteAvkortingOgOpphoer.sisteBehandlingMedAvkorting)
-                ?: throw InternfeilException("Fant ikke iverksatt behandling $sisteAvkortingOgOpphoer")
+    fun sisteVedtakMedAvkorting(vedtakListe: List<VedtakSammendragDto>): VedtakSammendragDto =
+        vedtakListe
+            .sortedByDescending { it.datoAttestert }
+            .first { it.vedtakType != VedtakType.OPPHOER }
 
-        return behandling to sisteAvkortingOgOpphoer.opphoerFom
+    fun vedtakMedGjeldendeOpphoer(vedtakListe: List<VedtakSammendragDto>): VedtakSammendragDto? {
+        val sisteVedtak =
+            vedtakListe
+                .sortedByDescending { it.datoAttestert }
+                .first()
+
+        if (sisteVedtak.vedtakType == VedtakType.OPPHOER) {
+            return sisteVedtak
+        } else {
+            val sisteVedtakMedAvkorting = sisteVedtakMedAvkorting(vedtakListe)
+            if (sisteVedtakMedAvkorting.opphoerFraOgMed != null) {
+                return sisteVedtakMedAvkorting
+            }
+        }
+        return null
     }
 
     fun hentAvkortingForForbehandling(
@@ -62,22 +71,15 @@ class EtteroppgjoerDataService(
         }
     }
 
-    suspend fun hentSisteIverksatteBehandlingMedAvkorting(
+    fun hentSisteIverksatteBehandlingMedAvkorting(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteAvkortingOgOpphoer {
         // TODO: Med periodisert vilkårsvurdering kan vi være smartere her
-        val iverksatteVedtak =
-            vedtakKlient
-                .hentIverksatteVedtak(sakId, brukerTokenInfo)
-                .sortedByDescending { it.datoFattet }
+        val iverksatteVedtak = hentIverksatteVedtak(sakId, brukerTokenInfo)
 
-        val sisteVedtakMedAvkorting = iverksatteVedtak.first { it.vedtakType != VedtakType.OPPHOER }
-        val opphoer =
-            iverksatteVedtak.firstOrNull {
-                it.vedtakType == VedtakType.OPPHOER &&
-                    it.datoAttestert!! > sisteVedtakMedAvkorting.datoAttestert!!
-            }
+        val sisteVedtakMedAvkorting = sisteVedtakMedAvkorting(iverksatteVedtak)
+        val opphoer = vedtakMedGjeldendeOpphoer(iverksatteVedtak)
 
         return SisteAvkortingOgOpphoer(
             sisteBehandlingMedAvkorting = sisteVedtakMedAvkorting.behandlingId,
@@ -85,11 +87,12 @@ class EtteroppgjoerDataService(
         )
     }
 
-    private fun hentSisteIverksatteVedtakIkkeOpphoer(
+    fun hentIverksatteVedtak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): SisteAvkortingOgOpphoer =
+    ): List<VedtakSammendragDto> =
         runBlocking {
-            hentSisteIverksatteBehandlingMedAvkorting(sakId, brukerTokenInfo)
+            vedtakKlient
+                .hentIverksatteVedtak(sakId, brukerTokenInfo)
         }
 }

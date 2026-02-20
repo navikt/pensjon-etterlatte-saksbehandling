@@ -64,6 +64,7 @@ export const ViderefoereOpphoer = ({
                 behandlingId={behandling.id}
                 vilkaarTyper={vilkaarTyper}
                 setVisSkjema={setVisSkjema}
+                redigerbar={redigerbar}
               />
             ) : (
               redigerbar && (

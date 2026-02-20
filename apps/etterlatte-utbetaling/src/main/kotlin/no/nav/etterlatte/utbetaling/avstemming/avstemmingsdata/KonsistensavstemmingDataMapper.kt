@@ -8,6 +8,7 @@ import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
 import no.nav.etterlatte.utbetaling.common.tidsstempelDatoOppdrag
 import no.nav.etterlatte.utbetaling.common.tidsstempelMikroOppdrag
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.informasjon.konsistensavstemmingsdata.v1.Attestant
@@ -117,7 +118,11 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata =
             utbetalingslinjer.map {
                 Oppdragslinje().apply {
                     delytelseId = it.id.value.toString()
-                    klassifikasjonKode = OppdragDefaults.KODEKOMPONENT.toString()
+                    klassifikasjonKode =
+                        when (sakType) {
+                            Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.toString()
+                            Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP.toString()
+                        }
                     vedtakPeriode =
                         Periode().apply {
                             fom = it.fraOgMed.format(tidsstempelDatoOppdrag)

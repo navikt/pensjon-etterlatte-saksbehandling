@@ -315,8 +315,3 @@ private fun VedtakSammendragDto.opphoersdato(): YearMonth? {
         }
     return opphoerFom
 }
-
-data class SisteAvkortingOgOpphoer(
-    val sisteBehandlingMedAvkorting: UUID,
-    val opphoerFom: YearMonth?,
-)

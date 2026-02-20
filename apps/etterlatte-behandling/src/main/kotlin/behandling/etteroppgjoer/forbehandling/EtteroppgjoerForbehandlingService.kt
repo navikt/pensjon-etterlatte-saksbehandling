@@ -202,9 +202,9 @@ class EtteroppgjoerForbehandlingService(
                 null
             }
 
-        val summerteInntekter =
+        val summertAInntekt =
             try {
-                dao.hentSummerteInntekter(forbehandling.id)
+                dao.hentSummertAInntekt(forbehandling.id)
             } catch (e: Exception) {
                 logger.error("Kunne ikke hente summerte inntekter", e)
                 null
@@ -234,7 +234,7 @@ class EtteroppgjoerForbehandlingService(
             opplysninger =
                 EtteroppgjoerOpplysninger(
                     summertPgi = pensjonsgivendeInntekt,
-                    summertAInntekt = summerteInntekter,
+                    summertAInntekt = summertAInntekt,
                     tidligereAvkorting = avkorting?.avkortingMedForventaInntekt,
                 ),
             beregnetEtteroppgjoerResultat = beregnetEtteroppgjoerResultat,
@@ -391,7 +391,7 @@ class EtteroppgjoerForbehandlingService(
         val beregnetForbehandling =
             forbehandling
                 .tilBeregnet(beregnetEtteroppgjoerResultat)
-                .also { it ->
+                .also {
                     dao.lagreForbehandling(it)
                     behandlingService
                         .hentBehandlingerForSak(it.sak.id)
@@ -635,7 +635,7 @@ class EtteroppgjoerForbehandlingService(
             }
 
             // verifisere at vi har siste summerte inntekter fra A-inntekt
-            dao.hentSummerteInntekterNonNull(forbehandling.id).let { summerteInntekter ->
+            dao.hentSummertAInntektNonNull(forbehandling.id).let { summerteInntekter ->
                 if (summerteInntekter.afp != sisteSummerteInntekter.afp) {
                     throw InternfeilException(
                         "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste AFP inntekt",

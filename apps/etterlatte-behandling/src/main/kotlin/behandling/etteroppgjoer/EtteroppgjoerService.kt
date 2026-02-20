@@ -242,7 +242,7 @@ class EtteroppgjoerService(
                 sigrunKlient.hentPensjonsgivendeInntekt(behandling.sak.ident, inntektsaar)
                 EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
             } catch (e: Exception) {
-                logger.error(
+                logger.info(
                     "Vi har opprettet et etteroppgjør for $inntektsaar i sakId=${behandling.sak.id}, " +
                         "men vi klarte ikke hente skatteoppgjøret, vi antar at dette er fordi skatteoppgjøret ikke er " +
                         "tilgjengelig, hvis annen feil må saken ryddes opp manuelt",

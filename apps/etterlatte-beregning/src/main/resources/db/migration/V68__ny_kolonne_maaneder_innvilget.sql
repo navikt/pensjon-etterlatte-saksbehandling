@@ -1,0 +1,4 @@
+alter table avkortingsgrunnlag_faktisk add column maaneder_innvilget jsonb;
+alter table avkortingsgrunnlag_faktisk add column maaneder_innvilget_regel_resultat jsonb;
+alter table avkortingsgrunnlag_forventet add column maaneder_innvilget jsonb;
+alter table avkortingsgrunnlag_forventet add column maaneder_innvilget_regel_resultat jsonb;

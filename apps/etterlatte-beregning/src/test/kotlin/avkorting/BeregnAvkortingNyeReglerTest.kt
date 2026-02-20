@@ -3,9 +3,9 @@ package no.nav.etterlatte.beregning.regler.avkorting
 import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
@@ -32,7 +32,7 @@ import java.time.YearMonth
 import java.util.UUID
 import kotlin.test.assertEquals
 
-class BeregnAvkortingTest {
+class BeregnAvkortingNyeReglerTest {
     @BeforeEach
     fun `mock grunnbeloep`() {
         mockkObject(GrunnbeloepRepository)
@@ -54,8 +54,8 @@ class BeregnAvkortingTest {
     }
 
     @AfterEach
-    fun afterEach() {
-        clearAllMocks()
+    fun `unmock grunnbeloep`() {
+        unmockkObject(GrunnbeloepRepository)
     }
 
     @Test
@@ -452,9 +452,9 @@ class BeregnAvkortingTest {
                                 tom = null,
                             ),
                         ytelseEtterAvkorting = 0,
-                        ytelseEtterAvkortingFoerRestanse = 3258,
+                        ytelseEtterAvkortingFoerRestanse = -13424,
                         avkortingsbeloep = 13424,
-                        ytelseFoerAvkorting = 16682,
+                        ytelseFoerAvkorting = 0,
                         inntektsgrunnlag = null,
                     ),
                     AvkortetYtelse::id,
@@ -467,7 +467,7 @@ class BeregnAvkortingTest {
                 it.restanse!!.shouldBeEqualToIgnoringFields(
                     restanse(
                         totalRestanse = 18000,
-                        fordeltRestanse = 18000,
+                        fordeltRestanse = 3000,
                     ),
                     Restanse::id,
                     AvkortetYtelse::tidspunkt,
@@ -661,9 +661,9 @@ class BeregnAvkortingTest {
                                 tom = YearMonth.of(2024, Month.AUGUST),
                             ),
                         ytelseEtterAvkorting = 0,
-                        ytelseEtterAvkortingFoerRestanse = 3258,
+                        ytelseEtterAvkortingFoerRestanse = -13424,
                         avkortingsbeloep = 13424,
-                        ytelseFoerAvkorting = 16682,
+                        ytelseFoerAvkorting = 0,
                         inntektsgrunnlag = null,
                     ),
                     AvkortetYtelse::id,
@@ -676,7 +676,7 @@ class BeregnAvkortingTest {
                 it.restanse!!.shouldBeEqualToIgnoringFields(
                     restanse(
                         totalRestanse = 18000,
-                        fordeltRestanse = 3600,
+                        fordeltRestanse = 3000,
                     ),
                     Restanse::id,
                     AvkortetYtelse::tidspunkt,
@@ -694,7 +694,7 @@ class BeregnAvkortingTest {
                                 fom = YearMonth.of(2024, Month.SEPTEMBER),
                                 tom = null,
                             ),
-                        ytelseEtterAvkorting = 0,
+                        ytelseEtterAvkorting = 258,
                         ytelseEtterAvkortingFoerRestanse = 3258,
                         avkortingsbeloep = 13424,
                         ytelseFoerAvkorting = 16682,
@@ -710,7 +710,7 @@ class BeregnAvkortingTest {
                 it.restanse!!.shouldBeEqualToIgnoringFields(
                     restanse(
                         totalRestanse = 18000,
-                        fordeltRestanse = 3600,
+                        fordeltRestanse = 3000,
                     ),
                     Restanse::id,
                     AvkortetYtelse::tidspunkt,
@@ -811,9 +811,9 @@ class BeregnAvkortingTest {
                                 tom = YearMonth.of(2024, Month.AUGUST),
                             ),
                         ytelseEtterAvkorting = 0,
-                        ytelseEtterAvkortingFoerRestanse = 7758,
-                        avkortingsbeloep = 8924,
-                        ytelseFoerAvkorting = 16682,
+                        ytelseEtterAvkortingFoerRestanse = -10174,
+                        avkortingsbeloep = 10174,
+                        ytelseFoerAvkorting = 0,
                         inntektsgrunnlag = null,
                     ),
                     AvkortetYtelse::id,
@@ -825,8 +825,8 @@ class BeregnAvkortingTest {
                 )
                 it.restanse!!.shouldBeEqualToIgnoringFields(
                     restanse(
-                        totalRestanse = -15000,
-                        fordeltRestanse = -3750,
+                        totalRestanse = -1250,
+                        fordeltRestanse = -312,
                     ),
                     Restanse::id,
                     AvkortetYtelse::tidspunkt,
@@ -844,9 +844,9 @@ class BeregnAvkortingTest {
                                 fom = YearMonth.of(2024, Month.SEPTEMBER),
                                 tom = null,
                             ),
-                        ytelseEtterAvkorting = 11508,
-                        ytelseEtterAvkortingFoerRestanse = 7758,
-                        avkortingsbeloep = 8924,
+                        ytelseEtterAvkorting = 6820,
+                        ytelseEtterAvkortingFoerRestanse = 6508,
+                        avkortingsbeloep = 10174,
                         ytelseFoerAvkorting = 16682,
                         inntektsgrunnlag = null,
                     ),
@@ -859,8 +859,8 @@ class BeregnAvkortingTest {
                 )
                 it.restanse!!.shouldBeEqualToIgnoringFields(
                     restanse(
-                        totalRestanse = -15000,
-                        fordeltRestanse = -3750,
+                        totalRestanse = -1250,
+                        fordeltRestanse = -312,
                     ),
                     Restanse::id,
                     AvkortetYtelse::tidspunkt,
@@ -2116,7 +2116,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Avkorting foerstegangsbehandling med to inntekter`() =
@@ -2155,7 +2155,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Avkorting foerstegangsbehandling med sanksjon`() =
@@ -2194,7 +2194,7 @@ class BeregnAvkortingTest {
                         ),
                     ),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Avkorting revurdering med en sanksjon åpen periode`() =
@@ -2214,7 +2214,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.MAY), tom = null)),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Avkorting revurdering av sanksjon åpen periode lukker sanksjonsperioden`() =
@@ -2231,7 +2231,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2024, Month.MAY))),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Avkorting ny inntekt en`() =
@@ -2260,7 +2260,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Sanksjon tilbake i tid mellom inntektsgrunnlag`() =
@@ -2287,7 +2287,7 @@ class BeregnAvkortingTest {
                         ),
                     ),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Sanksjon etter inntektsendring legges inn`() =
@@ -2301,7 +2301,7 @@ class BeregnAvkortingTest {
                             beregningsperiode(
                                 datoFOM = YearMonth.of(2024, Month.AUGUST),
                                 datoTOM = null,
-                                utbetaltBeloep = 16682,
+                                utbetaltBeloep = 0,
                             ),
                         ),
                 ),
@@ -2310,7 +2310,7 @@ class BeregnAvkortingTest {
                         sanksjon(fom = YearMonth.of(2024, Month.AUGUST), tom = null),
                     ),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Sanksjon etter inntektsendring lukkes`() =
@@ -2322,10 +2322,7 @@ class BeregnAvkortingTest {
                     beregning(
                         beregninger =
                             listOf(
-                                beregningsperiode(
-                                    datoFOM = YearMonth.of(2024, Month.SEPTEMBER),
-                                    utbetaltBeloep = 16682,
-                                ),
+                                beregningsperiode(datoFOM = YearMonth.of(2024, Month.SEPTEMBER), utbetaltBeloep = 16682),
                             ),
                     ),
                 sanksjoner =
@@ -2333,7 +2330,7 @@ class BeregnAvkortingTest {
                         sanksjon(fom = YearMonth.of(2024, Month.AUGUST), tom = YearMonth.of(2024, Month.AUGUST)),
                     ),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `avkorting etteroppgjør 2024 legges inn`(
@@ -2357,7 +2354,7 @@ class BeregnAvkortingTest {
                 spesifikasjon = "",
                 innvilgetPeriodeIEtteroppgjoersAar = periode2024,
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
         }
 
@@ -2394,7 +2391,7 @@ class BeregnAvkortingTest {
                         ),
                     ),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Avkorting ny inntekt to`() =
@@ -2423,7 +2420,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Avkorting revurdert beregning`() =
@@ -2447,7 +2444,7 @@ class BeregnAvkortingTest {
                 ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Avkorting korrigere siste inntekt`() =
@@ -2481,7 +2478,7 @@ class BeregnAvkortingTest {
                         ),
                     sanksjoner = emptyList(),
                     opphoerFom = null,
-                    brukNyeReglerAvkorting = false,
+                    brukNyeReglerAvkorting = true,
                 )
             }
 
@@ -2506,7 +2503,7 @@ class BeregnAvkortingTest {
                 ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Revurdering ny inntekt for nytt år`() =
@@ -2535,7 +2532,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Revurdering med virk tilbake i tidligere år`() =
@@ -2554,7 +2551,7 @@ class BeregnAvkortingTest {
                 ),
                 sanksjoner = emptyList(),
                 opphoerFom = null,
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Revurdering ny inntekt nytt år med opphør`() =
@@ -2584,7 +2581,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = YearMonth.of(2026, Month.JULY),
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Revurdering der opphør flyttes tidligere`() =
@@ -2610,7 +2607,7 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = listOf(),
                 opphoerFom = YearMonth.of(2024, Month.OCTOBER),
-                brukNyeReglerAvkorting = false,
+                brukNyeReglerAvkorting = true,
             )
 
     private fun `Førstegangsbehandling fra mars 2024 med opphør i mai 2025`() =
@@ -2650,6 +2647,6 @@ class BeregnAvkortingTest {
             sanksjoner = listOf(),
             opphoerFom = YearMonth.of(2025, Month.MAY),
             aldersovergang = null,
-            brukNyeReglerAvkorting = false,
+            brukNyeReglerAvkorting = true,
         )
 }

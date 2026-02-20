@@ -19,6 +19,7 @@ data class OmstillingsstoenadBeregningsperiode(
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val sanksjon: Boolean,
+    val erFakeSanksjon: Boolean,
     val institusjon: Boolean,
     val erOverstyrtInnvilgaMaaneder: Boolean,
 )

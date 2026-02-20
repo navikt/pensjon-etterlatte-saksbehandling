@@ -421,7 +421,24 @@ object AvkortingRegelkjoring {
                         beskrivelse = "Måneder innvilget i forventet inntekt",
                     )
                 } else {
-                    throw InternfeilException("Mangler utledning av måneder innvilget i inntekten vi skal finne restanse for. ")
+                    val fom = nyInntektsavkorting.grunnlag.periode.fom
+                    val tom = nyInntektsavkorting.grunnlag.periode.tom ?: YearMonth.of(fom.year, 12)
+                    val ytelse =
+                        finnAntallInnvilgaMaanederForAar(
+                            fom = fom,
+                            tom = tom,
+                            aldersovergang = tom,
+                            ytelse = emptyList(),
+                            brukNyeReglerAvkorting = false,
+                        )
+                    logger.info(
+                        "Mangler maanederInnvilget i inntektsgrunnlag, utledet ${ytelse.maaneder}. regelresultat: ${ytelse.regelResultat}",
+                    )
+                    FaktumNode(
+                        verdi = ytelse.maaneder,
+                        kilde = "finnAntallInnvilgaMaanederForAar",
+                        beskrivelse = "Fallback for henting av liste av måneder innvilget",
+                    )
                 }
             } else {
                 FaktumNode(emptyList(), "", "Placeholder i grunnlag hvis vi ikke bruker nye regler")

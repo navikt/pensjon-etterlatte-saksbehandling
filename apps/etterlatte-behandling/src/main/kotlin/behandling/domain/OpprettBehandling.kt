@@ -30,7 +30,7 @@ data class OpprettBehandling(
     val begrunnelse: String? = null,
     val relatertBehandlingId: String? = null,
     val sendeBrev: Boolean,
-    val opphoer: OpphoerFraTidligereBehandling? = null,
+    val opphoerFraOgMed: YearMonth? = null,
     val tidligereFamiliepleier: TidligereFamiliepleier? = null,
     val opprinnelse: BehandlingOpprinnelse,
 ) {

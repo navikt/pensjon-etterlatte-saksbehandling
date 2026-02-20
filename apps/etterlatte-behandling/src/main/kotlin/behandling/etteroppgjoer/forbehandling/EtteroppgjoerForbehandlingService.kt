@@ -589,7 +589,7 @@ class EtteroppgjoerForbehandlingService(
     ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
             runBlocking {
-                etteroppgjoerDataService.sisteVedtakMedAvkorting(etteroppgjoerDataService.hentIverksatteVedtak(sakId, brukerTokenInfo))
+                etteroppgjoerDataService.sisteVedtakMedAvkorting(sakId, brukerTokenInfo)
             }
 
         val forbehandling = hentForbehandling(forbehandlingId)
@@ -666,10 +666,8 @@ class EtteroppgjoerForbehandlingService(
         val sisteVedtakMedAvkorting =
             runBlocking {
                 etteroppgjoerDataService.sisteVedtakMedAvkorting(
-                    etteroppgjoerDataService.hentIverksatteVedtak(
-                        forbehandling.sak.id,
-                        brukerTokenInfo,
-                    ),
+                    forbehandling.sak.id,
+                    brukerTokenInfo,
                 )
             }
 

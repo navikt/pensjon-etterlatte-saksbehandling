@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.revurdering
 import io.ktor.server.plugins.BadRequestException
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.OpphoerFraTidligereBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -39,6 +40,8 @@ class ManuellRevurderingService(
         begrunnelse: String?,
         fritekstAarsak: String? = null,
         saksbehandler: Saksbehandler,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling? = null,
+        forrigeBehandlingId: UUID? = null,
     ): Revurdering {
         if (!aarsak.kanBrukesIMiljo()) {
             throw RevurderingaarsakIkkeStoettet(aarsak)
@@ -64,7 +67,9 @@ class ManuellRevurderingService(
 
         revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
         val forrigeIverksatteBehandling =
-            behandlingService.hentSisteIverksatteBehandling(sakId)
+            forrigeBehandlingId
+                ?.let { behandlingService.hentBehandling(it) }
+                ?: behandlingService.hentSisteIverksatteBehandling(sakId)
                 ?: throw RevurderingManglerIverksattBehandling(sakId)
 
         if (forrigeIverksatteBehandling.status != BehandlingStatus.IVERKSATT) {
@@ -98,6 +103,7 @@ class ManuellRevurderingService(
                 } else {
                     BehandlingOpprinnelse.SAKSBEHANDLER
                 },
+            opphoerFraTidligereBehandling = opphoerFraTidligereBehandling,
         )
     }
 
@@ -120,6 +126,7 @@ class ManuellRevurderingService(
         fritekstAarsak: String?,
         saksbehandler: Saksbehandler,
         opprinnelse: BehandlingOpprinnelse,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling? = null,
     ): Revurdering =
         forrigeBehandling.let {
             val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
@@ -140,6 +147,7 @@ class ManuellRevurderingService(
                     frist = triggendeOppgave?.frist,
                     paaGrunnAvOppgave = paaGrunnAvOppgave,
                     opprinnelse = opprinnelse,
+                    opphoerFraTidligereBehandling = opphoerFraTidligereBehandling,
                 ).oppdater()
                 .also { revurdering ->
                     if (!fritekstAarsak.isNullOrEmpty() && revurdering.revurderingsaarsak!!.kanLagreFritekstFeltForManuellRevurdering()) {

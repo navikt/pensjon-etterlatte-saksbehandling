@@ -223,7 +223,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 begrunnelse = null,
                 relatertBehandlingId = null,
                 sendeBrev = true,
-                opphoer = null,
+                opphoerFraOgMed = null,
                 opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
             )
         behandlingDao.opprettBehandling(behandling)

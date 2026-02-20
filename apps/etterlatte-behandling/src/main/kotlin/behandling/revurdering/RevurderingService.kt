@@ -163,7 +163,7 @@ class RevurderingService(
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
-        opphoerFraOgMed: OpphoerFraTidligereBehandling? = null,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -179,21 +179,20 @@ class RevurderingService(
             begrunnelse = begrunnelse,
             relatertBehandlingId = relatertBehandlingId,
             sendeBrev = revurderingAarsak.skalSendeBrev,
-            opphoer = opphoerFraOgMed ?: opphoerFraBehandling(forrigeBehandling),
+            opphoerFraOgMed = opphoerFraTidligereBehandling?.opphoerFraOgMed,
             tidligereFamiliepleier = forrigeBehandling.tidligereFamiliepleier,
             opprinnelse = opprinnelse,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 
-            forrigeBehandling.id.let { behandlingId ->
-                kommerBarnetTilGodeService
-                    .hentKommerBarnetTilGode(behandlingId)
-                    ?.copy(behandlingId = opprettBehandling.id)
-                    ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
-                aktivitetspliktDao.kopierAktiviteter(behandlingId, opprettBehandling.id)
-                aktivitetspliktKopierService.kopierVurderingTilBehandling(sakId, opprettBehandling.id)
-                kopierViderefoertOpphoer(opprettBehandling, saksbehandlerIdent)
-            }
+            kommerBarnetTilGodeService
+                .hentKommerBarnetTilGode(forrigeBehandling.id)
+                ?.copy(behandlingId = opprettBehandling.id)
+                ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
+            aktivitetspliktDao.kopierAktiviteter(forrigeBehandling.id, opprettBehandling.id)
+            aktivitetspliktKopierService.kopierVurderingTilBehandling(sakId, opprettBehandling.id)
+
+            kopierViderefoertOpphoer(opprettBehandling, opphoerFraTidligereBehandling, saksbehandlerIdent)
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
@@ -271,14 +270,6 @@ class RevurderingService(
             )
         }
 
-    private fun opphoerFraBehandling(behandling: Behandling): OpphoerFraTidligereBehandling? =
-        behandling.opphoerFraOgMed?.let { opphoerFraOgMed ->
-            OpphoerFraTidligereBehandling(
-                opphoerFraOgMed,
-                behandling.id,
-            )
-        }
-
     fun fjernSaksbehandlerFraRevurderingsOppgave(revurdering: Revurdering) {
         val revurderingsOppgave =
             oppgaveService
@@ -313,23 +304,24 @@ class RevurderingService(
      * opprettes det en ny ViderefoertOpphoer uten vilkår satt. Dette fordi det ikke er trivielt å utlede fra
      * den forrige behandlingens vilkårsvurdering.
      */
-    private fun kopierViderefoertOpphoer(
+    internal fun kopierViderefoertOpphoer(
         opprettBehandling: OpprettBehandling,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling?,
         saksbehandlerIdent: String?,
     ) {
-        if (opprettBehandling.opphoer != null) {
-            val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opprettBehandling.opphoer.behandlingId)
+        if (opphoerFraTidligereBehandling != null) {
+            val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opphoerFraTidligereBehandling.behandlingId)
             loggHvisViderefoertOpphoerIkkeViderefoerer(viderefoertOpphoer)
 
             if (viderefoertOpphoer != null && viderefoertOpphoer.skalViderefoere == JaNei.JA) {
-                loggHvisAvvikendeOpphoersdato(viderefoertOpphoer, opprettBehandling)
+                sjekkAtOpphoersdatoStemmerMedViderefoertOpphoer(viderefoertOpphoer, opphoerFraTidligereBehandling, opprettBehandling.id)
                 logger.info("Lagrer tidligere opprettet videreført opphør i behandling ${opprettBehandling.id}")
                 behandlingDao.lagreViderefoertOpphoer(
                     opprettBehandling.id,
                     viderefoertOpphoer.copy(
                         skalViderefoere = JaNei.JA,
                         behandlingId = opprettBehandling.id,
-                        dato = opprettBehandling.opphoer.opphoerFraOgMed,
+                        dato = opphoerFraTidligereBehandling.opphoerFraOgMed,
                     ),
                 )
             } else {
@@ -339,7 +331,7 @@ class RevurderingService(
                     ViderefoertOpphoer(
                         skalViderefoere = JaNei.JA,
                         behandlingId = opprettBehandling.id,
-                        dato = opprettBehandling.opphoer.opphoerFraOgMed,
+                        dato = opphoerFraTidligereBehandling.opphoerFraOgMed,
                         vilkaar = null,
                         begrunnelse = "Automatisk videreført fra eksisterende opphør",
                         kilde =
@@ -357,15 +349,16 @@ class RevurderingService(
         }
     }
 
-    private fun loggHvisAvvikendeOpphoersdato(
+    private fun sjekkAtOpphoersdatoStemmerMedViderefoertOpphoer(
         viderefoertOpphoer: ViderefoertOpphoer,
-        opprettBehandling: OpprettBehandling,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling,
+        nyBehandlingId: UUID,
     ) {
-        val nyOpphoerFraOgMed = opprettBehandling.opphoer?.opphoerFraOgMed
+        val nyOpphoerFraOgMed = opphoerFraTidligereBehandling.opphoerFraOgMed
         if (viderefoertOpphoer.dato != nyOpphoerFraOgMed) {
-            logger.error(
+            throw InternfeilException(
                 """
-                Ny behandling med id=${opprettBehandling.id} har opphoerFraOgMed=$nyOpphoerFraOgMed,
+                Ny behandling med id=$nyBehandlingId har opphoerFraOgMed=$nyOpphoerFraOgMed,
                 mens videreført opphør fra tidligere behandling ${viderefoertOpphoer.behandlingId}
                 har opphoerFraOgMed=${viderefoertOpphoer.dato}.
                 """.trimIndent(),

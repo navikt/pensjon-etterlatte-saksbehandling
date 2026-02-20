@@ -76,7 +76,7 @@ class AutomatiskRevurderingService(
                     persongalleri = persongalleri,
                     frist = request.oppgavefrist?.let { Tidspunkt.ofNorskTidssone(it, LocalTime.NOON) },
                     mottattDato = request.mottattDato?.toString(),
-                    opphoerFraMed =
+                    opphoerFraTidligereBehandling =
                         if (forrigeIverksatteBehandling.opphoerFraOgMed != null) {
                             OpphoerFraTidligereBehandling(
                                 forrigeIverksatteBehandling.opphoerFraOgMed!!,
@@ -180,7 +180,7 @@ class AutomatiskRevurderingService(
         persongalleri: Persongalleri,
         frist: Tidspunkt? = null,
         mottattDato: String? = null,
-        opphoerFraMed: OpphoerFraTidligereBehandling? = null,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling? = null,
     ) = forrigeBehandling.let {
         revurderingService.opprettRevurdering(
             sakId = sakId,
@@ -194,7 +194,7 @@ class AutomatiskRevurderingService(
             begrunnelse = "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
             saksbehandlerIdent = Fagsaksystem.EY.navn,
             frist = frist,
-            opphoerFraOgMed = opphoerFraMed,
+            opphoerFraTidligereBehandling = opphoerFraTidligereBehandling,
             opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
         )
     }

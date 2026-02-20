@@ -263,7 +263,7 @@ class BehandlingDao(
                     stmt.setString(14, begrunnelse)
                     stmt.setString(15, relatertBehandlingId)
                     stmt.setBoolean(16, sendeBrev)
-                    stmt.setString(17, opphoer?.opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
+                    stmt.setString(17, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
                     stmt.setJsonb(18, tidligereFamiliepleier)
                     stmt.setString(19, opprinnelse.name)
                 }

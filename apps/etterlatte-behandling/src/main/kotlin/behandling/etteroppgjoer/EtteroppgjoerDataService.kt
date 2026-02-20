@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.SisteAvkortingOgOpphoer
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -22,6 +21,14 @@ class EtteroppgjoerDataService(
     val vedtakKlient: VedtakKlient,
     val beregningKlient: BeregningKlient,
 ) {
+    fun sisteVedtakMedAvkorting(
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): VedtakSammendragDto =
+        sisteVedtakMedAvkorting(
+            hentIverksatteVedtak(sakId, bruker),
+        )
+
     fun sisteVedtakMedAvkorting(vedtakListe: List<VedtakSammendragDto>): VedtakSammendragDto =
         vedtakListe
             .sortedByDescending { it.datoAttestert }
@@ -69,22 +76,6 @@ class EtteroppgjoerDataService(
             logger.warn("Kunne ikke hente tidligere avkorting for behandling med id=${sisteIverksatteBehandling.id}", e)
             null
         }
-    }
-
-    fun hentSisteIverksatteBehandlingMedAvkorting(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): SisteAvkortingOgOpphoer {
-        // TODO: Med periodisert vilkårsvurdering kan vi være smartere her
-        val iverksatteVedtak = hentIverksatteVedtak(sakId, brukerTokenInfo)
-
-        val sisteVedtakMedAvkorting = sisteVedtakMedAvkorting(iverksatteVedtak)
-        val opphoer = vedtakMedGjeldendeOpphoer(iverksatteVedtak)
-
-        return SisteAvkortingOgOpphoer(
-            sisteBehandlingMedAvkorting = sisteVedtakMedAvkorting.behandlingId,
-            opphoerFom = opphoer?.virkningstidspunkt ?: sisteVedtakMedAvkorting.opphoerFraOgMed,
-        )
     }
 
     fun hentIverksatteVedtak(

@@ -208,7 +208,7 @@ class EtteroppgjoerRevurderingService(
         sisteIverksatteBehandling: Behandling,
         sisteFerdigstilteForbehandlingId: UUID,
         opprinnelse: BehandlingOpprinnelse,
-        opphoerFom: OpphoerFraTidligereBehandling?,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling?,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val forbehandling =
@@ -251,7 +251,7 @@ class EtteroppgjoerRevurderingService(
                 frist = null,
                 paaGrunnAvOppgave = null,
                 opprinnelse = opprinnelse,
-                opphoerFraOgMed = opphoerFom,
+                opphoerFraTidligereBehandling = opphoerFraTidligereBehandling,
             ).oppdater()
     }
 

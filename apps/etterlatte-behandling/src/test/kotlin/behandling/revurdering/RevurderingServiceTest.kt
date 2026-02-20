@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -8,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.OpphoerFraTidligereBehandling
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.opprettBehandling
@@ -35,24 +37,32 @@ class RevurderingServiceTest {
 
         val tidligereBehandlingId = UUID.randomUUID()
         every { behandlingDao.hentViderefoertOpphoer(tidligereBehandlingId) } returns
-            viderefoertOpphoer(tidligereBehandlingId)
+            viderefoertOpphoer(
+                behandlingId = tidligereBehandlingId,
+                opphoersdato = YearMonth.of(2018, 2),
+            )
 
-        revurderingService.kopierViderefoertOpphoer(
-            opprettBehandling =
-                opprettBehandling(
-                    type = BehandlingType.REVURDERING,
-                    sakId = randomSakId(),
-                ),
-            opphoerFraTidligereBehandling = OpphoerFraTidligereBehandling(YearMonth.of(2018, 1), tidligereBehandlingId),
-            saksbehandlerIdent = "JABO",
-        )
+        shouldThrow<InternfeilException> {
+            revurderingService.kopierViderefoertOpphoer(
+                opprettBehandling =
+                    opprettBehandling(
+                        type = BehandlingType.REVURDERING,
+                        sakId = randomSakId(),
+                    ),
+                opphoerFraTidligereBehandling = OpphoerFraTidligereBehandling(YearMonth.of(2018, 1), tidligereBehandlingId),
+                saksbehandlerIdent = "JABO",
+            )
+        }
     }
 
-    private fun viderefoertOpphoer(tidligereBehandlingId: UUID): ViderefoertOpphoer =
+    private fun viderefoertOpphoer(
+        behandlingId: UUID,
+        opphoersdato: YearMonth,
+    ): ViderefoertOpphoer =
         ViderefoertOpphoer(
             JaNei.JA,
-            tidligereBehandlingId,
-            YearMonth.of(2018, 2),
+            behandlingId,
+            opphoersdato,
             VilkaarType.BP_ALDER_BARN,
             "begrunnelse",
             kilde,

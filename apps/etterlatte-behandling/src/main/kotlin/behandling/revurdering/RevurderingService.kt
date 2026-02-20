@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.OpphoerFraTidligereBehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -39,7 +40,6 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.Locale
 import java.util.UUID
 
@@ -163,7 +163,7 @@ class RevurderingService(
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
-        opphoerFraOgMed: YearMonth? = null,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -179,21 +179,20 @@ class RevurderingService(
             begrunnelse = begrunnelse,
             relatertBehandlingId = relatertBehandlingId,
             sendeBrev = revurderingAarsak.skalSendeBrev,
-            opphoerFraOgMed = opphoerFraOgMed ?: forrigeBehandling.opphoerFraOgMed,
+            opphoerFraOgMed = opphoerFraTidligereBehandling?.opphoerFraOgMed,
             tidligereFamiliepleier = forrigeBehandling.tidligereFamiliepleier,
             opprinnelse = opprinnelse,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 
-            forrigeBehandling.id.let { behandlingId ->
-                kommerBarnetTilGodeService
-                    .hentKommerBarnetTilGode(behandlingId)
-                    ?.copy(behandlingId = opprettBehandling.id)
-                    ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
-                aktivitetspliktDao.kopierAktiviteter(behandlingId, opprettBehandling.id)
-                aktivitetspliktKopierService.kopierVurderingTilBehandling(sakId, opprettBehandling.id)
-                kopierViderefoertOpphoer(behandlingId, opprettBehandling, saksbehandlerIdent)
-            }
+            kommerBarnetTilGodeService
+                .hentKommerBarnetTilGode(forrigeBehandling.id)
+                ?.copy(behandlingId = opprettBehandling.id)
+                ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
+            aktivitetspliktDao.kopierAktiviteter(forrigeBehandling.id, opprettBehandling.id)
+            aktivitetspliktKopierService.kopierVurderingTilBehandling(sakId, opprettBehandling.id)
+
+            kopierViderefoertOpphoer(opprettBehandling, opphoerFraTidligereBehandling, saksbehandlerIdent)
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
@@ -257,8 +256,11 @@ class RevurderingService(
                                 frist = frist,
                                 gruppeId = persongalleri.avdoed.firstOrNull(),
                             )
-                        if (saksbehandlerIdent != null &&
-                            (prosessType == Prosesstype.MANUELL && saksbehandlerIdent != Fagsaksystem.EY.navn) ||
+                        if (
+                            (
+                                saksbehandlerIdent != null &&
+                                    (prosessType == Prosesstype.MANUELL && saksbehandlerIdent != Fagsaksystem.EY.navn)
+                            ) ||
                             (prosessType == Prosesstype.AUTOMATISK && saksbehandlerIdent == Fagsaksystem.EY.navn)
                         ) {
                             oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
@@ -302,18 +304,25 @@ class RevurderingService(
      * opprettes det en ny ViderefoertOpphoer uten vilkår satt. Dette fordi det ikke er trivielt å utlede fra
      * den forrige behandlingens vilkårsvurdering.
      */
-    private fun kopierViderefoertOpphoer(
-        forrigeBehandlingId: UUID,
+    internal fun kopierViderefoertOpphoer(
         opprettBehandling: OpprettBehandling,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling?,
         saksbehandlerIdent: String?,
     ) {
-        if (opprettBehandling.opphoerFraOgMed != null) {
-            val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(forrigeBehandlingId)
-            if (viderefoertOpphoer != null) {
+        if (opphoerFraTidligereBehandling != null) {
+            val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opphoerFraTidligereBehandling.behandlingId)
+            loggHvisViderefoertOpphoerIkkeViderefoerer(viderefoertOpphoer)
+
+            if (viderefoertOpphoer != null && viderefoertOpphoer.skalViderefoere == JaNei.JA) {
+                sjekkAtOpphoersdatoStemmerMedViderefoertOpphoer(viderefoertOpphoer, opphoerFraTidligereBehandling, opprettBehandling.id)
                 logger.info("Lagrer tidligere opprettet videreført opphør i behandling ${opprettBehandling.id}")
                 behandlingDao.lagreViderefoertOpphoer(
                     opprettBehandling.id,
-                    viderefoertOpphoer.copy(behandlingId = opprettBehandling.id),
+                    viderefoertOpphoer.copy(
+                        skalViderefoere = JaNei.JA,
+                        behandlingId = opprettBehandling.id,
+                        dato = opphoerFraTidligereBehandling.opphoerFraOgMed,
+                    ),
                 )
             } else {
                 logger.info("Oppretter nytt videreført opphør i behandling ${opprettBehandling.id}")
@@ -322,7 +331,7 @@ class RevurderingService(
                     ViderefoertOpphoer(
                         skalViderefoere = JaNei.JA,
                         behandlingId = opprettBehandling.id,
-                        dato = opprettBehandling.opphoerFraOgMed,
+                        dato = opphoerFraTidligereBehandling.opphoerFraOgMed,
                         vilkaar = null,
                         begrunnelse = "Automatisk videreført fra eksisterende opphør",
                         kilde =
@@ -331,6 +340,29 @@ class RevurderingService(
                     ),
                 )
             }
+        }
+    }
+
+    private fun loggHvisViderefoertOpphoerIkkeViderefoerer(viderefoertOpphoer: ViderefoertOpphoer?) {
+        if (viderefoertOpphoer != null && viderefoertOpphoer.skalViderefoere == JaNei.NEI) {
+            logger.error("Viderefører opphør fra behandling ${viderefoertOpphoer.behandlingId}")
+        }
+    }
+
+    private fun sjekkAtOpphoersdatoStemmerMedViderefoertOpphoer(
+        viderefoertOpphoer: ViderefoertOpphoer,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling,
+        nyBehandlingId: UUID,
+    ) {
+        val nyOpphoerFraOgMed = opphoerFraTidligereBehandling.opphoerFraOgMed
+        if (viderefoertOpphoer.dato != nyOpphoerFraOgMed) {
+            throw InternfeilException(
+                """
+                Ny behandling med id=$nyBehandlingId har opphoerFraOgMed=$nyOpphoerFraOgMed,
+                mens videreført opphør fra tidligere behandling ${viderefoertOpphoer.behandlingId}
+                har opphoerFraOgMed=${viderefoertOpphoer.dato}.
+                """.trimIndent(),
+            )
         }
     }
 }

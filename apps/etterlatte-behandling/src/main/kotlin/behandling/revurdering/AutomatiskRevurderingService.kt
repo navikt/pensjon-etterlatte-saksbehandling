@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.revurdering
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.OpphoerFraTidligereBehandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.grunnlag.GrunnlagService
@@ -25,7 +26,6 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.YearMonth
 
 class AutomatiskRevurderingService(
     private val revurderingService: RevurderingService,
@@ -76,7 +76,15 @@ class AutomatiskRevurderingService(
                     persongalleri = persongalleri,
                     frist = request.oppgavefrist?.let { Tidspunkt.ofNorskTidssone(it, LocalTime.NOON) },
                     mottattDato = request.mottattDato?.toString(),
-                    opphoerFraMed = forrigeIverksatteBehandling.opphoerFraOgMed,
+                    opphoerFraTidligereBehandling =
+                        if (forrigeIverksatteBehandling.opphoerFraOgMed != null) {
+                            OpphoerFraTidligereBehandling(
+                                forrigeIverksatteBehandling.opphoerFraOgMed!!,
+                                forrigeIverksatteBehandling.id,
+                            )
+                        } else {
+                            null
+                        },
                 )
             }
 
@@ -107,6 +115,7 @@ class AutomatiskRevurderingService(
         when (request.revurderingAarsak) {
             // Har egen sjekk tidligere for å slippe kall mot vedtak
             Revurderingaarsak.ALDERSOVERGANG -> {}
+
             /*
              * Skal ikke kjøre regulering hvis:
              * Det ikke er en løpende sak
@@ -171,7 +180,7 @@ class AutomatiskRevurderingService(
         persongalleri: Persongalleri,
         frist: Tidspunkt? = null,
         mottattDato: String? = null,
-        opphoerFraMed: YearMonth? = null,
+        opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling? = null,
     ) = forrigeBehandling.let {
         revurderingService.opprettRevurdering(
             sakId = sakId,
@@ -185,7 +194,7 @@ class AutomatiskRevurderingService(
             begrunnelse = "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
             saksbehandlerIdent = Fagsaksystem.EY.navn,
             frist = frist,
-            opphoerFraOgMed = opphoerFraMed,
+            opphoerFraTidligereBehandling = opphoerFraTidligereBehandling,
             opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
         )
     }

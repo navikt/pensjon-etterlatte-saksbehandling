@@ -44,4 +44,9 @@ data class BehandlingOpprettet(
     val sak: SakId,
 )
 
+data class OpphoerFraTidligereBehandling(
+    val opphoerFraOgMed: YearMonth,
+    val behandlingId: UUID,
+)
+
 fun OpprettBehandling.toBehandlingOpprettet() = BehandlingOpprettet(opprettet, id, sakId)

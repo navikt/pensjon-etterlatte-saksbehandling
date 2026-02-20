@@ -17,11 +17,13 @@ export const ViderefoereOpphoerVisning = ({
   viderefoertOpphoer,
   vilkaarTyper,
   setVisSkjema,
+  redigerbar,
 }: {
   behandlingId: string
   viderefoertOpphoer: ViderefoertOpphoer
   vilkaarTyper: Vilkaartyper
   setVisSkjema: (visSkjema: boolean) => void
+  redigerbar: boolean
 }) => {
   const dispatch = useAppDispatch()
   const [slettViderefoertOpphoerResult, slettViderefoertOpphoerRequest] = useApiCall(slettViderefoertOpphoer)
@@ -67,18 +69,22 @@ export const ViderefoereOpphoerVisning = ({
           {isFailure(slettViderefoertOpphoerResult) && (
             <Alert variant="error">Kunne ikke slette videreført opphør</Alert>
           )}
-          <Button icon={<PencilIcon />} size="small" variant="tertiary" onClick={() => setVisSkjema(true)}>
-            Rediger
-          </Button>
-          <Button
-            icon={<TrashIcon />}
-            loading={isPending(slettViderefoertOpphoerResult)}
-            size="small"
-            variant="tertiary"
-            onClick={slett}
-          >
-            Slett
-          </Button>
+          {redigerbar && (
+            <>
+              <Button icon={<PencilIcon />} size="small" variant="tertiary" onClick={() => setVisSkjema(true)}>
+                Rediger
+              </Button>
+              <Button
+                icon={<TrashIcon />}
+                loading={isPending(slettViderefoertOpphoerResult)}
+                size="small"
+                variant="tertiary"
+                onClick={slett}
+              >
+                Slett
+              </Button>
+            </>
+          )}
         </HStack>
       </VStack>
     </Box>

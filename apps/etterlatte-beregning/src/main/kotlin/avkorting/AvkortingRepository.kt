@@ -420,7 +420,7 @@ class AvkortingRepository(
                 "overstyrtInnvilgaMaanederAarsak" to avkortingsgrunnlag.overstyrtInnvilgaMaanederAarsak?.name,
                 "overstyrtInnvilgaMaanederBegrunnelse" to avkortingsgrunnlag.overstyrtInnvilgaMaanederBegrunnelse,
                 "maanederInnvilget" to avkortingsgrunnlag.maanederInnvilget?.toJson(),
-                "maanederInnvilgetRegelResultat" to avkortingsgrunnlag.maanederInnvilgetRegelResultat,
+                "maanederInnvilgetRegelResultat" to avkortingsgrunnlag.maanederInnvilgetRegelResultat?.toJson(),
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -453,7 +453,7 @@ class AvkortingRepository(
                 "spesifikasjon" to faktisk.spesifikasjon,
                 "kilde" to faktisk.kilde.toJson(),
                 "maanederInnvilget" to faktisk.maanederInnvilget?.toJson(),
-                "maanederInnvilgetRegelResultat" to faktisk.maanederInnvilgetRegelResultat,
+                "maanederInnvilgetRegelResultat" to faktisk.maanederInnvilgetRegelResultat?.toJson(),
             ),
     ).let { query -> tx.run(query.asUpdate) }
 

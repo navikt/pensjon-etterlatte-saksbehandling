@@ -20,6 +20,8 @@ fungere.
    Kjør scriptet `get-secret.sh` og velg applikasjon fra listen
 
 2. **Kjør docker compose**
+
+    Kjør kommando fra mappen til appen som skal startes:
     ```shell
     docker compose up -d
     ```
@@ -29,7 +31,7 @@ fungere.
 
 3. **Kjør run config** \
    Config for å kjøre appen (i IntelliJ) ligger i `.run`. Denne skal dukke opp automatisk under `Run configurations` i
-   IntelliJ.
+   IntelliJ. Link til app: http://localhost:3000
 
 ### Feilsøking
 
@@ -63,9 +65,31 @@ kan det ikke sendes passord ved opprettelse av database-kobling.
 
 **OBS:** Ved bruk av proxy til lokal kjøring må du passe på å ikke endre på Flyway-scripts i prosjektet.
 
+### Tilgang for saksbehandler i dev
+
+For tilgang til Gjenny i dev må saksbehandler være medlem av følgende AD-grupper:
+```
+0000-GA-GJENNY_SAKSBEHANDLER
+0000-GA-GJENNY_ATTESTERING
+```
+
+I tillegg må det legges inn følgende enheter i Axsys med tema `PEN`, `EYO` og `EYB`:
+```
+4411
+4483
+4808
+4405
+4803
+4815
+0001
+4862
+4817
+```
+Administrering av saksbehandlere i dev gjøres i [IDA](https://ida.intern.nav.no/). Logg inn med din NAV-ident.
+
 # Bygg og deploy
 
-En app bygges og deployes automatisk når en endring legges til i `main`.
+En app bygges og deployes automatisk når en endring legges til i `main`.    
 
 For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
 

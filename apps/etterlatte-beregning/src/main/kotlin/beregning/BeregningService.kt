@@ -43,34 +43,34 @@ class BeregningService(
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
             val overstyrBeregning = hentOverstyrBeregning(behandling)
-
+            if (behandling.sakType == SakType.OMSTILLINGSSTOENAD && behandling.behandlingType == BehandlingType.REVURDERING) {
+                sanksjonService.kopierSanksjon(behandlingId, brukerTokenInfo)
+            }
             val beregning =
                 if (overstyrBeregning != null) {
                     beregnOverstyrBeregningService.beregn(behandling, overstyrBeregning, brukerTokenInfo)
                 } else {
                     when (behandling.sakType) {
-                        SakType.BARNEPENSJON ->
+                        SakType.BARNEPENSJON -> {
                             beregnBarnepensjonService.beregn(
                                 behandling,
                                 brukerTokenInfo,
                                 tilDato = behandling.opphoerFraOgMed?.minusMonths(1)?.atEndOfMonth(),
                             )
-                        SakType.OMSTILLINGSSTOENAD ->
+                        }
+
+                        SakType.OMSTILLINGSSTOENAD -> {
                             beregnOmstillingsstoenadService.beregn(
                                 behandling,
                                 brukerTokenInfo,
                                 tilDato = behandling.opphoerFraOgMed?.minusMonths(1)?.atEndOfMonth(),
                             )
+                        }
                     }
                 }
 
             val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
             behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, commit = true)
-
-            if (behandling.sakType == SakType.OMSTILLINGSSTOENAD && behandling.behandlingType == BehandlingType.REVURDERING) {
-                sanksjonService.kopierSanksjon(behandlingId, brukerTokenInfo)
-            }
-
             return lagretBeregning.berikMedOverstyrBeregning(brukerTokenInfo) ?: lagretBeregning
         } else {
             throw IllegalStateException("Kan ikke beregne behandlingId=$behandlingId, behandling er i feil tilstand")

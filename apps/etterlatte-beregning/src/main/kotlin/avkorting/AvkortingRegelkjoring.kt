@@ -434,6 +434,15 @@ object AvkortingRegelkjoring {
                     logger.info(
                         "Mangler maanederInnvilget i inntektsgrunnlag, utledet ${ytelse.maaneder}. regelresultat: ${ytelse.regelResultat}",
                     )
+                    val antallMaanederInnvilget = ytelse.maaneder.count { it.innvilget }
+                    if (antallMaanederInnvilget != nyInntektsavkorting.grunnlag.innvilgaMaaneder) {
+                        throw InternfeilException(
+                            "Kunne ikke bygge opp riktig antall måneder " +
+                                "innvilget for grunnlag med id=${nyInntektsavkorting.grunnlag.id}, " +
+                                "forventet ${nyInntektsavkorting.grunnlag.innvilgaMaaneder}, " +
+                                "men fikk $antallMaanederInnvilget (${ytelse.maaneder}).",
+                        )
+                    }
                     FaktumNode(
                         verdi = ytelse.maaneder,
                         kilde = "finnAntallInnvilgaMaanederForAar",

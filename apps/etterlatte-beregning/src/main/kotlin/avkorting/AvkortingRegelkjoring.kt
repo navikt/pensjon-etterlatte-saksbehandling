@@ -421,11 +421,10 @@ object AvkortingRegelkjoring {
                         beskrivelse = "Måneder innvilget i forventet inntekt",
                     )
                 } else {
-                    val fom = nyInntektsavkorting.grunnlag.periode.fom
-                    val tom = nyInntektsavkorting.grunnlag.periode.tom ?: YearMonth.of(fom.year, 12)
+                    val tom = nyInntektsavkorting.grunnlag.periode.tom ?: YearMonth.of(fraOgMed.year, 12)
                     val ytelse =
                         finnAntallInnvilgaMaanederForAar(
-                            fom = fom,
+                            fom = fraOgMed,
                             tom = tom,
                             aldersovergang = tom,
                             ytelse = emptyList(),

@@ -429,6 +429,8 @@ object AvkortingRegelkjoring {
                             tom = tom,
                             aldersovergang = tom,
                             ytelse = emptyList(),
+                            // Bruk nye regler avkorting er satt som false, siden denne inntekten og utregningen av
+                            // innvilget periode er gjort med gammel regel
                             brukNyeReglerAvkorting = false,
                         )
                     logger.info(

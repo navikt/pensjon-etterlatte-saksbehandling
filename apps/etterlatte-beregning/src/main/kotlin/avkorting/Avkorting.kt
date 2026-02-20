@@ -347,13 +347,12 @@ data class Avkorting(
         val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
         val maanederInnvilget =
             finnAntallInnvilgaMaanederForAar(
-                fom = tidligereAarsoppgjoer.fom,
-                tom = opphoerFom?.minusMonths(1),
-                aldersovergang = opphoerFom?.minusMonths(1),
+                fom = innvilgetPeriodeIEtteroppgjoersAar.fom,
+                tom = innvilgetPeriodeIEtteroppgjoersAar.tom,
+                aldersovergang = null,
                 ytelse = tidligereAarsoppgjoer.ytelseFoerAvkorting,
                 brukNyeReglerAvkorting = brukNyeReglerAvkorting,
             )
-
         val inntekt =
             FaktiskInntekt(
                 id = UUID.randomUUID(),

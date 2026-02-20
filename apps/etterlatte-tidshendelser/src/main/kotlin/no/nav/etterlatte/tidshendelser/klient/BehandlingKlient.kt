@@ -58,6 +58,11 @@ class BehandlingKlient(
                 .get("$behandlingUrl/api/grunnlag/aldersovergang/$foedselsmaaned") {
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
+                    timeout {
+                        requestTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                        socketTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                        connectTimeoutMillis = Duration.ofSeconds(30).toMillis()
+                    }
                 }.body()
         }
 

@@ -11,7 +11,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelser
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -92,7 +91,7 @@ class LesSkatteoppgjoerHendelserJobService(
         val inntektsaar = krevIkkeNull(hendelse.gjelderPeriode?.toInt()) { "Mangler inntektsår" }
         val ident = hendelse.identifikator
 
-        val sak = krevIkkeNull(sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD)) { "Fant ingen sak for ident $ident" }
+        val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD) ?: return false
 
         sikkerLogg.info(
             "Behandler hendelse sekvensnummer=${hendelse.sekvensnummer}, ident=$ident, sakId=${sak.id}. " +
@@ -100,9 +99,7 @@ class LesSkatteoppgjoerHendelserJobService(
         )
 
         val innvilgetAar = etteroppgjoerService.finnInnvilgedeAarForSak(sak.id, HardkodaSystembruker.etteroppgjoer)
-        krev(inntektsaar in innvilgetAar) {
-            "Sak ${sak.id} er ikke innvilget i inntektsår $inntektsaar (innvilgetAar=$innvilgetAar)"
-        }
+        if (inntektsaar !in innvilgetAar) return false
 
         val etteroppgjoer =
             runCatching {
@@ -113,7 +110,7 @@ class LesSkatteoppgjoerHendelserJobService(
 
         etteroppgjoerService.haandterSkatteoppgjoerMottatt(hendelse, etteroppgjoer, sak)
 
-        return true // teller for relevante hendelser
+        return true
     }
 
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {

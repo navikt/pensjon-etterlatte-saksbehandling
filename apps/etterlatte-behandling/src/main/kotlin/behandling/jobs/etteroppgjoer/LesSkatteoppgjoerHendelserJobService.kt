@@ -94,10 +94,18 @@ class LesSkatteoppgjoerHendelserJobService(
      * @return true hvis hendelsen er relevant, dvs. at saken skal ha etteroppgjør.
      */
     private fun opprettEllerOppdaterEtteroppgjoer(hendelse: SkatteoppgjoerHendelse): Boolean {
-        val inntektsaar = krevIkkeNull(hendelse.gjelderPeriode?.toInt()) { "Mangler inntektsår" }
-        val ident = hendelse.identifikator
+        val inntektsaar =
+            hendelse.gjelderPeriode?.toInt() ?: run {
+                logger.info("${hendelse.sekvensnummer}: har ikke gyldig gjelderPeriode, hopper over")
+                return false
+            }
 
-        val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD) ?: return false
+        val ident = hendelse.identifikator
+        val sak =
+            sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD) ?: run {
+                logger.info("${hendelse.sekvensnummer}: fant ingen sak for ident, hopper over")
+                return false
+            }
 
         sikkerLogg.info(
             "Behandler hendelse sekvensnummer=${hendelse.sekvensnummer}, ident=$ident, sakId=${sak.id}. " +
@@ -105,12 +113,18 @@ class LesSkatteoppgjoerHendelserJobService(
         )
 
         val innvilgetAar = etteroppgjoerService.finnInnvilgedeAarForSak(sak.id, HardkodaSystembruker.etteroppgjoer)
-        if (inntektsaar !in innvilgetAar) return false
+        if (inntektsaar !in innvilgetAar) {
+            logger.info(
+                "${hendelse.sekvensnummer}: fant ingen innvilgede perioder ($innvilgetAar) i sak for periode $inntektsaar, hopper over",
+            )
+            return false
+        }
 
         val etteroppgjoer =
             runCatching {
                 etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
             }.getOrNull() ?: runBlocking {
+                logger.info("${hendelse.sekvensnummer}: fant ingen etteroppgjør for sak og inntektsår, oppretter nytt etteroppgjør")
                 etteroppgjoerService.opprettNyttEtteroppgjoer(sak.id, inntektsaar)
             }
 

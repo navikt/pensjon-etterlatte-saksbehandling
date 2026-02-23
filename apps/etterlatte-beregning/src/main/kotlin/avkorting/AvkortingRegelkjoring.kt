@@ -421,7 +421,34 @@ object AvkortingRegelkjoring {
                         beskrivelse = "Måneder innvilget i forventet inntekt",
                     )
                 } else {
-                    throw InternfeilException("Mangler utledning av måneder innvilget i inntekten vi skal finne restanse for. ")
+                    val tom = nyInntektsavkorting.grunnlag.periode.tom ?: YearMonth.of(fraOgMed.year, 12)
+                    val ytelse =
+                        finnAntallInnvilgaMaanederForAar(
+                            fom = fraOgMed,
+                            tom = tom,
+                            aldersovergang = tom,
+                            ytelse = emptyList(),
+                            // Bruk nye regler avkorting er satt som false, siden denne inntekten og utregningen av
+                            // innvilget periode er gjort med gammel regel
+                            brukNyeReglerAvkorting = false,
+                        )
+                    logger.info(
+                        "Mangler maanederInnvilget i inntektsgrunnlag, utledet ${ytelse.maaneder}. regelresultat: ${ytelse.regelResultat}",
+                    )
+                    val antallMaanederInnvilget = ytelse.maaneder.count { it.innvilget }
+                    if (antallMaanederInnvilget != nyInntektsavkorting.grunnlag.innvilgaMaaneder) {
+                        throw InternfeilException(
+                            "Kunne ikke bygge opp riktig antall måneder " +
+                                "innvilget for grunnlag med id=${nyInntektsavkorting.grunnlag.id}, " +
+                                "forventet ${nyInntektsavkorting.grunnlag.innvilgaMaaneder}, " +
+                                "men fikk $antallMaanederInnvilget (${ytelse.maaneder}).",
+                        )
+                    }
+                    FaktumNode(
+                        verdi = ytelse.maaneder,
+                        kilde = "finnAntallInnvilgaMaanederForAar",
+                        beskrivelse = "Fallback for henting av liste av måneder innvilget",
+                    )
                 }
             } else {
                 FaktumNode(emptyList(), "", "Placeholder i grunnlag hvis vi ikke bruker nye regler")

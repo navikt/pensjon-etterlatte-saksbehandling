@@ -727,7 +727,6 @@ internal class ApplicationContext(
             sigrunKlient = sigrunKlient,
             etteroppgjoerService = etteroppgjoerService,
             sakService = sakService,
-            vedtakKlient = vedtakKlient,
         )
 
     private val etteroppgjoerRevurderingBrevService =
@@ -1013,7 +1012,12 @@ internal class ApplicationContext(
             lesSkatteoppgjoerHendelserJobService = lesSkatteoppgjoerHendelserJobService,
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.HOURS),
+            interval =
+                if (isProd()) {
+                    Duration.of(1, ChronoUnit.HOURS)
+                } else {
+                    Duration.of(5, ChronoUnit.MINUTES)
+                },
             hendelserBatchSize = 1000,
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,

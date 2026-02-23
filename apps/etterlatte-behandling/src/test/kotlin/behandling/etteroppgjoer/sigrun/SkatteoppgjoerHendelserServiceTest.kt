@@ -18,16 +18,12 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.SkatteoppgjoerHendelse
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJobService
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
-import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
@@ -36,7 +32,6 @@ class SkatteoppgjoerHendelserServiceTest {
     private val sigrunKlient: SigrunKlient = mockk()
     private val etteroppgjoerService: EtteroppgjoerService = mockk()
     private val sakService: SakService = mockk()
-    private val vedtakKlient: VedtakKlient = mockk()
 
     @BeforeEach
     fun setup() {
@@ -46,7 +41,7 @@ class SkatteoppgjoerHendelserServiceTest {
     @Test
     fun `skal behandle hendelser fra Sigrun og oppdatere status for relevante etteroppgjoer`() {
         val lesSkatteoppgjoerHendelserJobService =
-            LesSkatteoppgjoerHendelserJobService(dao, sigrunKlient, etteroppgjoerService, sakService, vedtakKlient)
+            LesSkatteoppgjoerHendelserJobService(dao, sigrunKlient, etteroppgjoerService, sakService)
 
         val sisteSekvensnummer = 10.toLong()
         val sisteKjoering = HendelserKjoering(sisteSekvensnummer, 10, 0, Tidspunkt.now())

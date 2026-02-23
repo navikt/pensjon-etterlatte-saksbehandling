@@ -283,7 +283,7 @@ internal class AvstemmingsdataJaxbTest {
                 </oppdragsenhetListe>
                 <oppdragslinjeListe>
                     <delytelseId>1</delytelseId>
-                    <klassifikasjonKode>BARNEPENSJON-OPTP</klassifikasjonKode>
+                    <klassifikasjonKode>OMSTILLINGOR</klassifikasjonKode>
                     <vedtakPeriode>
                         <fom>2022-10-07</fom>
                     </vedtakPeriode>

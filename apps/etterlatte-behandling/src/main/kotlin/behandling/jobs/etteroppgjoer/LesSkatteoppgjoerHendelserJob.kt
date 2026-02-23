@@ -32,7 +32,6 @@ class LesSkatteoppgjoerHendelserJob(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
     private val lock = Semaphore(1, 0)
-    private val antallKjoeringer = 100
 
     private var jobContext: Context =
         Context(

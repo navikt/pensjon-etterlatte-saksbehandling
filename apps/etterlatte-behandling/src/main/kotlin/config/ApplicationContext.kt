@@ -595,6 +595,7 @@ internal class ApplicationContext(
             beregningKlient = beregningKlient,
             sigrunKlient = sigrunKlient,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
+            hendelseDao = hendelseDao,
         )
 
     val etteroppgjoerDataService = EtteroppgjoerDataService(behandlingService, featureToggleService, vedtakKlient, beregningKlient)

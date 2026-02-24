@@ -69,6 +69,7 @@ class EtteroppgjoerServiceTest {
                 beregningKlient = beregningKlient,
                 sigrunKlient = sigrunKlient,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
+                hendelseDao = mockk(),
             )
 
         val sisteIverksatteBehandlingId = UUID.randomUUID()

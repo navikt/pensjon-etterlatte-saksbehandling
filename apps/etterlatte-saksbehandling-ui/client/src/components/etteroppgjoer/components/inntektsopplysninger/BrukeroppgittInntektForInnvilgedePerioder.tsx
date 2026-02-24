@@ -1,5 +1,10 @@
 import { BodyShort, Detail, Heading, HelpText, HStack, Label, Table, VStack } from '@navikt/ds-react'
-import { ForventetInntektGrunnlag, IAvkortingGrunnlag, erForventetInntekt } from '~shared/types/IAvkorting'
+import {
+  ForventetInntektGrunnlag,
+  FaktiskInntektGrunnlag,
+  IAvkortingGrunnlag,
+  erForventetInntekt,
+} from '~shared/types/IAvkorting'
 import { NOK } from '~utils/formatering/formatering'
 import { formaterDato, formaterDatoMedFallback, formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { lastDayOfMonth } from 'date-fns'
@@ -9,10 +14,14 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
 }: {
   avkortingGrunnlag: IAvkortingGrunnlag[]
 }) => {
-  const inntektNorge = (avkortingGrunnlag: ForventetInntektGrunnlag) =>
+  const forventetInntektNorge = (avkortingGrunnlag: ForventetInntektGrunnlag) =>
     avkortingGrunnlag.inntektTom - avkortingGrunnlag.fratrekkInnAar
-  const inntektUtland = (avkortingGrunnlag: ForventetInntektGrunnlag) =>
+  const forventetInntektUtland = (avkortingGrunnlag: ForventetInntektGrunnlag) =>
     avkortingGrunnlag.inntektUtlandTom - avkortingGrunnlag.fratrekkInnAarUtland
+
+  const faktiskInntektNorge = (avkortingGrunnlag: FaktiskInntektGrunnlag) =>
+    avkortingGrunnlag.loennsinntekt + avkortingGrunnlag.naeringsinntekt + avkortingGrunnlag.afp
+  const faktiskInntektUtland = (avkortingGrunnlag: FaktiskInntektGrunnlag) => avkortingGrunnlag.utlandsinntekt
 
   return (
     <VStack gap="4">
@@ -25,7 +34,8 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell />
-            <Table.HeaderCell scope="col">Forventet inntekt</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Type</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
             <Table.HeaderCell scope="col">
               <HStack gap="1">
                 Innvilgede måneder
@@ -51,11 +61,11 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
                       <HStack gap="6">
                         <VStack gap="2">
                           <Label>Forventet inntekt Norge</Label>
-                          <BodyShort>{NOK(inntektNorge(grunnlag))}</BodyShort>
+                          <BodyShort>{NOK(forventetInntektNorge(grunnlag))}</BodyShort>
                         </VStack>
                         <VStack gap="2">
                           <Label>Forventet inntekt utland</Label>
-                          <BodyShort>{NOK(inntektUtland(grunnlag))}</BodyShort>
+                          <BodyShort>{NOK(forventetInntektUtland(grunnlag))}</BodyShort>
                         </VStack>
                         <VStack gap="2">
                           <Label>Kilde</Label>
@@ -65,7 +75,10 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
                       </HStack>
                     }
                   >
-                    <Table.DataCell>{NOK(inntektNorge(grunnlag) + inntektUtland(grunnlag))}</Table.DataCell>
+                    <Table.DataCell>Forventet</Table.DataCell>
+                    <Table.DataCell>
+                      {NOK(forventetInntektNorge(grunnlag) + forventetInntektUtland(grunnlag))}
+                    </Table.DataCell>
                     <Table.DataCell>{grunnlag.innvilgaMaaneder}</Table.DataCell>
                     <Table.DataCell>{formaterDatoMedFallback(grunnlag.fom, '-')}</Table.DataCell>
                     <Table.DataCell>
@@ -76,17 +89,46 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
                 )
               } else {
                 return (
-                  <Table.Row key={i}>
-                    <Table.DataCell colSpan={6}>
-                      <Heading size="xsmall">Har kun forventet inntekt, faktisk inntekt er ikke støttet</Heading>
+                  <Table.ExpandableRow
+                    key={i}
+                    content={
+                      <HStack gap="6">
+                        <VStack gap="2">
+                          <Label>Faktisk inntekt Norge</Label>
+                          <BodyShort>{NOK(faktiskInntektNorge(grunnlag))}</BodyShort>
+                          <Detail>Lønnsinntekt: {NOK(grunnlag.loennsinntekt)}</Detail>
+                          <Detail>Næringsinntekt: {NOK(grunnlag.naeringsinntekt)}</Detail>
+                          <Detail>AFP: {NOK(grunnlag.afp)}</Detail>
+                        </VStack>
+                        <VStack gap="2">
+                          <Label>Faktisk inntekt utland</Label>
+                          <BodyShort>{NOK(faktiskInntektUtland(grunnlag))}</BodyShort>
+                        </VStack>
+                        <VStack gap="2">
+                          <Label>Kilde</Label>
+                          <BodyShort>{grunnlag.kilde.ident}</BodyShort>
+                          <Detail>Saksbehandler: {formaterDatoMedKlokkeslett(grunnlag.kilde.tidspunkt)}</Detail>
+                        </VStack>
+                      </HStack>
+                    }
+                  >
+                    <Table.DataCell>Faktisk</Table.DataCell>
+                    <Table.DataCell>
+                      {NOK(faktiskInntektNorge(grunnlag) + faktiskInntektUtland(grunnlag))}
                     </Table.DataCell>
-                  </Table.Row>
+                    <Table.DataCell>{grunnlag.innvilgaMaaneder}</Table.DataCell>
+                    <Table.DataCell>{formaterDatoMedFallback(grunnlag.fom, '-')}</Table.DataCell>
+                    <Table.DataCell>
+                      {!!grunnlag.tom ? formaterDato(lastDayOfMonth(new Date(grunnlag.tom))) : '-'}
+                    </Table.DataCell>
+                    <Table.DataCell>{grunnlag.spesifikasjon}</Table.DataCell>
+                  </Table.ExpandableRow>
                 )
               }
             })
           ) : (
             <Table.Row>
-              <Table.DataCell colSpan={6}>
+              <Table.DataCell colSpan={7}>
                 <Heading size="xsmall">Ingen inntekt oppgitt fra bruker</Heading>
               </Table.DataCell>
             </Table.Row>

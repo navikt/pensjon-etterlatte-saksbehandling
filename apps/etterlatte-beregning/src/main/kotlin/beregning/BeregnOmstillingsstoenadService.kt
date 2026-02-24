@@ -50,6 +50,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
+import kotlin.collections.map
 
 enum class BeregningToggles(
     val value: String,
@@ -91,7 +92,7 @@ class BeregnOmstillingsstoenadService(
                 throw TrygdetidMangler(behandling.id)
             }
 
-        val sanksjon = sanksjonService.hentSanksjon(behandling.id)
+        val sanksjon = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val beregningsgrunnlag =
@@ -110,9 +111,8 @@ class BeregnOmstillingsstoenadService(
                 sanksjon,
             )
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
                 beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
-            }
 
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall =
@@ -125,13 +125,11 @@ class BeregnOmstillingsstoenadService(
                         ?: throw Exception("Forventa å ha vilkårsvurderingsresultat for behandlingId=${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {
-                    VilkaarsvurderingUtfall.OPPFYLT -> {
+                    VilkaarsvurderingUtfall.OPPFYLT ->
                         beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
-                    }
 
-                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
                         opphoer(behandling.id, grunnlag, virkningstidspunkt)
-                    }
                 }
             }
         }
@@ -163,7 +161,7 @@ class BeregnOmstillingsstoenadService(
 
         val beregnetDato = Tidspunkt.now()
         return when (resultat) {
-            is RegelkjoeringResultat.Suksess -> {
+            is RegelkjoeringResultat.Suksess ->
                 Beregning(
                     beregningId = randomUUID(),
                     behandlingId = behandlingId,
@@ -232,11 +230,9 @@ class BeregnOmstillingsstoenadService(
                         },
                     overstyrBeregning = null,
                 )
-            }
 
-            is RegelkjoeringResultat.UgyldigPeriode -> {
+            is RegelkjoeringResultat.UgyldigPeriode ->
                 throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
-            }
         }
     }
 

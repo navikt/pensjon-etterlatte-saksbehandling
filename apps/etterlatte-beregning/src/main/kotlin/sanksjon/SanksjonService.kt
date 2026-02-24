@@ -23,9 +23,9 @@ class SanksjonService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentSanksjon(behandlingId: UUID): List<Sanksjon> {
+    fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
         logger.info("Henter sanksjoner med behandlingID=$behandlingId")
-        return sanksjonRepository.hentSanksjon(behandlingId).sortedBy { it.fom }
+        return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
     }
 
     /**
@@ -56,8 +56,8 @@ class SanksjonService(
         val sanksjonerIDenneBehandlingen = sanksjonRepository.hentSanksjon(behandlingId)
         val sanksjonerIForrigeBehandling = sanksjonRepository.hentSanksjon(forrigeBehandlingId)
 
-        if (sanksjonerIDenneBehandlingen.isEmpty()) {
-            sanksjonerIForrigeBehandling.forEach {
+        if (sanksjonerIDenneBehandlingen.isNullOrEmpty()) {
+            sanksjonerIForrigeBehandling?.forEach {
                 logger.info(
                     "Kopierer sanksjon [${it.id}] fra forrige behandling til behandlingen " +
                         "med behandlingID=$behandlingId, fra behandling med id=$forrigeBehandlingId",
@@ -121,8 +121,8 @@ class SanksjonService(
         val forrigeIverksatteBehandling =
             behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
         val sanksjonerIForrigeBehandling =
-            sanksjonRepository.hentSanksjon(forrigeIverksatteBehandling.id)
-        val sanksjonerIBehandling = sanksjonRepository.hentSanksjon(behandling.id)
+            sanksjonRepository.hentSanksjon(forrigeIverksatteBehandling.id) ?: emptyList()
+        val sanksjonerIBehandling = sanksjonRepository.hentSanksjon(behandling.id) ?: emptyList()
 
         val forrigeBehandlingSanksjoner =
             sanksjonerIForrigeBehandling.map {

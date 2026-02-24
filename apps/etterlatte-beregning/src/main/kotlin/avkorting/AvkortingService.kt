@@ -76,7 +76,6 @@ class AvkortingService(
                     avkorting = avkorting ?: Avkorting(),
                     beregning = beregning,
                     behandlingType = behandling.behandlingType,
-                    sanksjoner = sanksjonService.hentSanksjon(behandlingId),
                     krevInntektForNesteAar = skalKreveInntektNesteAar,
                 ).toSet()
         val manglendeAar = paakrevdeAar - aarMedAvkorting
@@ -208,14 +207,11 @@ class AvkortingService(
                 defaultValue = true,
             )
 
-        val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
-
         validerInntekter(
             behandling,
             beregning,
             avkorting,
             nyeGrunnlag,
-            sanksjoner,
             skalKreveInntektNesteAar,
         )
         val aldersovergangMaaned =
@@ -235,12 +231,13 @@ class AvkortingService(
             }
         // liste av nye grunnlag, hvert element er for et konkret år
         // + måned bruker har aldersovergang (hvis de har det)
+        val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
         val oppdatert =
             avkorting.beregnAvkortingMedNyeGrunnlag(
                 nyttGrunnlag = nyeGrunnlag,
                 bruker = brukerTokenInfo,
                 beregning = beregning,
-                sanksjoner = sanksjoner,
+                sanksjoner = sanksjoner ?: emptyList(),
                 opphoerFom = behandling.opphoerFraOgMed,
                 aldersovergang = aldersovergangMaaned,
                 brukNyeReglerAvkorting =
@@ -330,7 +327,7 @@ class AvkortingService(
     ): Avkorting {
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
-        val sanksjoner = sanksjonService.hentSanksjon(behandling.id)
+        val sanksjoner = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
 
         val avkorting =
             when (behandling.revurderingsaarsak) {

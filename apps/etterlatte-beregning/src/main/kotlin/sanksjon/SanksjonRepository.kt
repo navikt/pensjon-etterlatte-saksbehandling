@@ -17,14 +17,16 @@ import javax.sql.DataSource
 class SanksjonRepository(
     private val dataSource: DataSource,
 ) {
-    fun hentSanksjon(behandlingId: UUID): List<Sanksjon> =
+    fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? =
         dataSource.transaction { tx ->
             queryOf(
                 statement =
                     "SELECT * FROM sanksjon WHERE behandling_id = ?",
                 behandlingId,
             ).let { query ->
-                tx.run(query.map { row -> row.toSanksjon() }.asList)
+                tx.run(query.map { row -> row.toSanksjon() }.asList).ifEmpty {
+                    null
+                }
             }
         }
 

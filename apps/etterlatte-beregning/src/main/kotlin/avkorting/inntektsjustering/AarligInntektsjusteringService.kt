@@ -28,7 +28,7 @@ class AarligInntektsjusteringService(
             sakId = request.sakId,
             aar = request.aar,
             harInntektForAar = avkortingRepository.harSakInntektForAar(request),
-            harSanksjon = sanksjoner.any { it.tom == null },
+            harSanksjon = sanksjoner?.any { it.tom == null } ?: false,
         )
     }
 

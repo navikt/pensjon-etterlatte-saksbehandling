@@ -35,7 +35,6 @@ import kotlin.test.assertEquals
 class BeregnAvkortingTest {
     @BeforeEach
     fun `mock grunnbeloep`() {
-        clearAllMocks()
         mockkObject(GrunnbeloepRepository)
         every { GrunnbeloepRepository.historiskeGrunnbeloep } returns
             listOf(

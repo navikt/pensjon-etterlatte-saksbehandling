@@ -100,7 +100,7 @@ class EtteroppgjoerService(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val sanksjoner = sanksjonService.hentSanksjon(request.sisteIverksatteBehandling)
+        val sanksjoner = sanksjonService.hentSanksjon(request.sisteIverksatteBehandling) ?: emptyList()
 
         val tidligereAarsoppgjoer =
             runBlocking {

@@ -185,6 +185,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         lesSkatteoppgjoerHendelserJobService = applicationContext.lesSkatteoppgjoerHendelserJobService,
         featureToggleService = applicationContext.featureToggleService,
         etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
+        hendelseDao = applicationContext.hendelseDao,
     )
     behandlingRoutes(
         behandlingService = applicationContext.behandlingService,

@@ -9,8 +9,8 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_RESULTAT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_STATISTIKK_RIVER_KEY
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummertePensjonsgivendeInntekterStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
@@ -22,21 +22,21 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
-class EtteroppgjoerHendelseService(
+class EtteroppgjoerForbehandlingHendelseService(
     private val rapidPubliserer: KafkaProdusent<String, String>,
     private val hendelseDao: HendelseDao,
     private val etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerHendelseService::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingHendelseService::class.java)
 
-    fun registrerOgSendEtteroppgjoerHendelse(
+    fun registrerOgSendHendelse(
         etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto? = null,
-        hendelseType: EtteroppgjoerHendelseType,
+        hendelseType: EtteroppgjoerForbehandlingHendelser,
         saksbehandler: String? = null,
         utlandstilknytning: Utlandstilknytning? = null,
     ) {
-        hendelseDao.etteroppgjoerHendelse(
+        hendelseDao.etteroppgjoerForbehandlingHendelse(
             forbehandlingId = etteroppgjoerForbehandling.id,
             sakId = etteroppgjoerForbehandling.sak.id,
             hendelseType = hendelseType,
@@ -63,7 +63,7 @@ class EtteroppgjoerHendelseService(
 
     private fun sendKafkaMelding(
         etteroppgjoerForbehandling: EtteroppgjoerForbehandling,
-        hendelseType: EtteroppgjoerHendelseType,
+        hendelseType: EtteroppgjoerForbehandlingHendelser,
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
         summerteInntekter: SummerteInntekterAOrdningen?,
         pensjonsgivendeInntekt: SummertePensjonsgivendeInntekter?,

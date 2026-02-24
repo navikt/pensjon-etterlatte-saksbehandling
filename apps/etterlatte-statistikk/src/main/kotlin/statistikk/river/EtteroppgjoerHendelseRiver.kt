@@ -7,8 +7,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_RESULTAT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.ETTEROPPGJOER_STATISTIKK_RIVER_KEY
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -25,7 +25,7 @@ class EtteroppgjoerHendelseRiver(
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerHendelseRiver::class.java)
 
-    private val etteroppgjoerHendelser = EtteroppgjoerHendelseType.entries.map { it.lagEventnameForType() }
+    private val etteroppgjoerHendelser = EtteroppgjoerForbehandlingHendelser.entries.map { it.lagEventnameForType() }
 
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
@@ -41,7 +41,7 @@ class EtteroppgjoerHendelseRiver(
         context: MessageContext,
     ) {
         try {
-            val hendelse: EtteroppgjoerHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
+            val hendelse: EtteroppgjoerForbehandlingHendelser = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
             val tekniskTid = parseTekniskTid(packet, logger)
             val statistikkDto: EtteroppgjoerForbehandlingStatistikkDto =
                 objectMapper.treeToValue(packet[ETTEROPPGJOER_STATISTIKK_RIVER_KEY])

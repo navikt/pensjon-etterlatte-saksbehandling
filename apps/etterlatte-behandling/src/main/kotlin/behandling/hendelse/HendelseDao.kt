@@ -2,9 +2,12 @@ package no.nav.etterlatte.behandling.hendelse
 
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
+import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -114,9 +117,31 @@ class HendelseDao(
     )
 
     fun etteroppgjoerHendelse(
+        sakId: SakId,
+        sisteIverksatteBehandling: UUID,
+        inntektsaar: Int,
+        hendelseType: EtteroppgjoerHendelser,
+        saksbehandler: String? = null,
+        kommentar: String? = null,
+        begrunnelse: String? = null,
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = "ETTEROPPGJOER_$inntektsaar:${hendelseType.name}",
+            inntruffet = Tidspunkt.now(),
+            vedtakId = null,
+            behandlingId = sisteIverksatteBehandling,
+            sakId = sakId,
+            ident = saksbehandler,
+            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
+            kommentar = kommentar,
+            valgtBegrunnelse = begrunnelse,
+        ),
+    )
+
+    fun etteroppgjoerForbehandlingHendelse(
         forbehandlingId: UUID,
         sakId: SakId,
-        hendelseType: EtteroppgjoerHendelseType,
+        hendelseType: EtteroppgjoerForbehandlingHendelser,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,

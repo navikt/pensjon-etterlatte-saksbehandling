@@ -7,12 +7,14 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -49,6 +51,7 @@ class EtteroppgjoerService(
     val beregningKlient: BeregningKlient,
     val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     val sigrunKlient: SigrunKlient,
+    val hendelseDao: HendelseDao,
 ) {
     fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer>? =
         dao.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
@@ -83,8 +86,33 @@ class EtteroppgjoerService(
         sakId: SakId,
         inntektsaar: Int,
         status: EtteroppgjoerStatus,
+        hendelse: EtteroppgjoerHendelser? = null,
     ) {
         dao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, status)
+        registrerHendelseForEtteroppgjoer(sakId, inntektsaar, hendelse)
+    }
+
+    private fun registrerHendelseForEtteroppgjoer(
+        sakId: SakId,
+        inntektsaar: Int,
+        hendelse: EtteroppgjoerHendelser?,
+    ) {
+        try {
+            if (hendelse != null) {
+                val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sakId)
+                hendelseDao.etteroppgjoerHendelse(
+                    sakId = sakId,
+                    inntektsaar = inntektsaar,
+                    hendelseType = hendelse,
+                    sisteIverksatteBehandling = UUID.fromString(sisteIverksatteBehandling?.id.toString()),
+                )
+            }
+        } catch (ex: Exception) {
+            logger.error(
+                "Feil ved registrering av hendelse for etteroppgjør. sakId=$sakId, inntektsaar=$inntektsaar, hendelse=$hendelse",
+                ex,
+            )
+        }
     }
 
     fun hentEtteroppgjoerSomVenterPaaSkatteoppgjoer(antall: Int): List<Etteroppgjoer> =
@@ -96,8 +124,13 @@ class EtteroppgjoerService(
         }
 
         val nyEtteroppgjoerStatus = finnStatusForForbehandling(forbehandling)
+        val hendelse =
+            when (nyEtteroppgjoerStatus) {
+                EtteroppgjoerStatus.FERDIGSTILT -> EtteroppgjoerHendelser.FERDIGSTILT
+                else -> null
+            }
 
-        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, nyEtteroppgjoerStatus)
+        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, nyEtteroppgjoerStatus, hendelse)
         oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)
     }
 
@@ -132,6 +165,7 @@ class EtteroppgjoerService(
             sak.id,
             etteroppgjoer.inntektsaar,
             EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            EtteroppgjoerHendelser.MOTTATT_SKATTEOPPGJOER,
         )
 
         etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
@@ -194,7 +228,15 @@ class EtteroppgjoerService(
                     mapOf("foer" to eksisterendeEtteroppgjoer, "etter" to oppdatertEtteroppgjoer).toJson(),
             )
         }
+
         dao.lagreEtteroppgjoer(oppdatertEtteroppgjoer)
+
+        hendelseDao.etteroppgjoerHendelse(
+            sakId = sakId,
+            inntektsaar = inntektsaar,
+            hendelseType = EtteroppgjoerHendelser.OPPRETTET,
+            sisteIverksatteBehandling = sisteIverksatteBehandling.id,
+        )
 
         return oppdatertEtteroppgjoer
     }
@@ -252,7 +294,15 @@ class EtteroppgjoerService(
             }
 
         return etteroppgjoer(sakId, inntektsaar, behandling, status, harOpphoer)
-            .also { dao.lagreEtteroppgjoer(it) }
+            .also {
+                dao.lagreEtteroppgjoer(it)
+                hendelseDao.etteroppgjoerHendelse(
+                    sakId = it.sakId,
+                    sisteIverksatteBehandling = behandling.id,
+                    inntektsaar = it.inntektsaar,
+                    hendelseType = EtteroppgjoerHendelser.OPPRETTET,
+                )
+            }
     }
 
     /*

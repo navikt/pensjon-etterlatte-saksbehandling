@@ -1,9 +1,9 @@
 package no.nav.etterlatte.statistikk.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummertePensjonsgivendeInntekterStatistikkDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
@@ -130,7 +130,7 @@ private fun ResultSet.tilEtteroppgjoerRad(): EtteroppgjoerRad =
         forbehandlingId = getObject("forbehandling_id") as UUID,
         sakId = SakId(getLong("sak_id")),
         aar = getInt("aar"),
-        hendelse = enumValueOf<EtteroppgjoerHendelseType>(getString("hendelse")),
+        hendelse = enumValueOf<EtteroppgjoerForbehandlingHendelser>(getString("hendelse")),
         forbehandlingStatus = enumValueOf(getString("forbehandling_status")),
         opprettet = getTidspunkt("opprettet"),
         maanederYtelse = objectMapper.readValue<List<Int>>(getString("maaneder_ytelse")),
@@ -156,7 +156,7 @@ data class EtteroppgjoerRad(
     val forbehandlingId: UUID,
     val sakId: SakId,
     val aar: Int,
-    val hendelse: EtteroppgjoerHendelseType,
+    val hendelse: EtteroppgjoerForbehandlingHendelser,
     val forbehandlingStatus: EtteroppgjoerForbehandlingStatus,
     val opprettet: Tidspunkt,
     val maanederYtelse: List<Int>,
@@ -176,7 +176,7 @@ data class EtteroppgjoerRad(
 ) {
     companion object {
         fun fraHendelseOgDto(
-            hendelse: EtteroppgjoerHendelseType,
+            hendelse: EtteroppgjoerForbehandlingHendelser,
             statistikkDto: EtteroppgjoerForbehandlingStatistikkDto,
             tekniskTid: Tidspunkt,
             resultat: BeregnetEtteroppgjoerResultatDto?,

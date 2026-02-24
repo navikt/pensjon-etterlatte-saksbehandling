@@ -14,8 +14,8 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -261,7 +261,7 @@ class StatistikkService(
     }
 
     fun registrerEtteroppgjoerHendelse(
-        hendelse: EtteroppgjoerHendelseType,
+        hendelse: EtteroppgjoerForbehandlingHendelser,
         statistikkDto: EtteroppgjoerForbehandlingStatistikkDto,
         tekniskTid: Tidspunkt,
         resultat: BeregnetEtteroppgjoerResultatDto?,
@@ -291,7 +291,7 @@ class StatistikkService(
     ): SakRad {
         val sisteResultat =
             when (etteroppgjoerRad.hendelse) {
-                EtteroppgjoerHendelseType.FERDIGSTILT -> {
+                EtteroppgjoerForbehandlingHendelser.FERDIGSTILT -> {
                     etteroppgjoerService.hentNyesteBeregnedeResultat(etteroppgjoerRad.forbehandlingId)
                 }
 
@@ -311,7 +311,7 @@ class StatistikkService(
             ferdigbehandletTidspunkt =
                 etteroppgjoerRad.tekniskTid.takeIf {
                     etteroppgjoerRad.hendelse ==
-                        EtteroppgjoerHendelseType.FERDIGSTILT
+                        EtteroppgjoerForbehandlingHendelser.FERDIGSTILT
                 },
             vedtakTidspunkt = null,
             type = "ETTEROPPGJOER_FORBEHANDLING",

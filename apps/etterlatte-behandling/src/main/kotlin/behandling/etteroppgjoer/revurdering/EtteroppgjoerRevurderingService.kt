@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -164,6 +165,7 @@ class EtteroppgjoerRevurderingService(
                     forbehandling.sak.id,
                     forbehandling.aar,
                     EtteroppgjoerStatus.OMGJOERING,
+                    EtteroppgjoerHendelser.OMGJOERING,
                 )
 
                 behandling to forbehandling

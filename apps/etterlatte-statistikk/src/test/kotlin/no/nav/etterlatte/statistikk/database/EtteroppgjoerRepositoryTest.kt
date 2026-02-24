@@ -2,8 +2,8 @@ package no.nav.etterlatte.statistikk.database
 
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.equals.shouldBeEqual
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.Inntektsmaaned
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.SummerteInntekterAOrdningenStatistikkDto
@@ -32,7 +32,7 @@ class EtteroppgjoerRepositoryTest(
                 forbehandlingId = UUID.randomUUID(),
                 sakId = SakId(1L),
                 aar = 2024,
-                hendelse = EtteroppgjoerHendelseType.OPPRETTET,
+                hendelse = EtteroppgjoerForbehandlingHendelser.OPPRETTET,
                 forbehandlingStatus = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(),
                 maanederYtelse = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
@@ -75,7 +75,7 @@ class EtteroppgjoerRepositoryTest(
                 forbehandlingId = UUID.randomUUID(),
                 sakId = SakId(1L),
                 aar = 2024,
-                hendelse = EtteroppgjoerHendelseType.OPPRETTET,
+                hendelse = EtteroppgjoerForbehandlingHendelser.OPPRETTET,
                 forbehandlingStatus = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(),
                 maanederYtelse = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),

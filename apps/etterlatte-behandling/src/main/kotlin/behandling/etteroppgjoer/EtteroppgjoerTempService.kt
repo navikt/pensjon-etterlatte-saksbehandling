@@ -1,16 +1,14 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeForbehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import java.util.UUID
 
@@ -18,7 +16,7 @@ import java.util.UUID
 class EtteroppgjoerTempService(
     private val etteroppgjoerDao: EtteroppgjoerDao,
     private val etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao,
-    private val hendelserService: EtteroppgjoerHendelseService,
+    private val hendelserService: EtteroppgjoerForbehandlingHendelseService,
 ) {
     fun hentForbehandling(behandlingId: UUID): EtteroppgjoerForbehandling =
         etteroppgjoerForbehandlingDao.hentForbehandling(behandlingId) ?: throw FantIkkeForbehandling(behandlingId)
@@ -75,9 +73,9 @@ class EtteroppgjoerTempService(
                         },
                 )
 
-                hendelserService.registrerOgSendEtteroppgjoerHendelse(
+                hendelserService.registrerOgSendHendelse(
                     etteroppgjoerForbehandling = avbruttForbehandling,
-                    hendelseType = EtteroppgjoerHendelseType.AVBRUTT,
+                    hendelseType = EtteroppgjoerForbehandlingHendelser.AVBRUTT,
                     saksbehandler = (Kontekst.get().brukerTokenInfo)?.ident(),
                     utlandstilknytning = utlandstilknytning,
                 )

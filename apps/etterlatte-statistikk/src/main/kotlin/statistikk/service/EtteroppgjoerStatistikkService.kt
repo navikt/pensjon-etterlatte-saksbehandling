@@ -1,8 +1,8 @@
 package no.nav.etterlatte.statistikk.service
 
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser.BEREGNET
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatistikkDto
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType.BEREGNET
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -16,7 +16,7 @@ class EtteroppgjoerStatistikkService(
     private val etteroppgjoerRepository: EtteroppgjoerRepository,
 ) {
     fun registrerEtteroppgjoerHendelse(
-        hendelse: EtteroppgjoerHendelseType,
+        hendelse: EtteroppgjoerForbehandlingHendelser,
         statistikkDto: EtteroppgjoerForbehandlingStatistikkDto,
         tekniskTid: Tidspunkt,
         resultat: BeregnetEtteroppgjoerResultatDto?,

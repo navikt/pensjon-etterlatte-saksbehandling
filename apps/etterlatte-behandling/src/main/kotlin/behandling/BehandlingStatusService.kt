@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -401,6 +402,7 @@ class BehandlingStatusServiceImpl(
             behandling.sak.id,
             virkAar,
             EtteroppgjoerStatus.FERDIGSTILT,
+            EtteroppgjoerHendelser.FERDIGSTILT,
         )
     }
 

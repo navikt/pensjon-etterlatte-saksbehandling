@@ -22,6 +22,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -157,6 +158,7 @@ fun Route.etteroppgjoerRoutes(
                             sakId,
                             etteroppgjoer.inntektsaar,
                             EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                            EtteroppgjoerHendelser.TILBAKESTILT,
                         )
 
                         forbehandlingService.opprettOppgaveForOpprettForbehandling(

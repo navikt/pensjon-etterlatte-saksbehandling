@@ -33,7 +33,19 @@ data class EtteroppgjoerForbehandlingDto(
     val kopiertFra: UUID? = null,
 )
 
-enum class EtteroppgjoerHendelseType(
+enum class EtteroppgjoerHendelser : EventnameHendelseType {
+    OPPRETTET,
+    MOTTATT_SKATTEOPPGJOER,
+    TILBAKESTILT,
+    OMGJOERING,
+    FERDIGSTILT,
+    MANGLER_SKATTEOPPGJOER,
+    ;
+
+    override fun lagEventnameForType(): String = "ETTEROPPGJOER:${this.name}"
+}
+
+enum class EtteroppgjoerForbehandlingHendelser(
     val skalSendeStatistikk: Boolean,
 ) : EventnameHendelseType {
     OPPRETTET(true),

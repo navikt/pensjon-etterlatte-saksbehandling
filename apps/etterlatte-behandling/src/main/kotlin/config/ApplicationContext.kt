@@ -44,8 +44,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlientImpl
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
@@ -442,7 +442,7 @@ internal class ApplicationContext(
             oppdaterTilgangService,
         )
 
-    private val etteroppgjoerHendelseService = EtteroppgjoerHendelseService(rapid, hendelseDao, etteroppgjoerForbehandlingDao)
+    private val etteroppgjoerHendelseService = EtteroppgjoerForbehandlingHendelseService(rapid, hendelseDao, etteroppgjoerForbehandlingDao)
     private val etteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
 
     val etteroppgjoerTempService =
@@ -595,6 +595,7 @@ internal class ApplicationContext(
             beregningKlient = beregningKlient,
             sigrunKlient = sigrunKlient,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
+            hendelseDao = hendelseDao,
         )
 
     val etteroppgjoerDataService = EtteroppgjoerDataService(behandlingService, featureToggleService, vedtakKlient, beregningKlient)

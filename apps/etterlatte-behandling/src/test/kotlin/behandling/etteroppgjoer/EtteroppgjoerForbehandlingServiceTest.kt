@@ -8,8 +8,8 @@ import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
@@ -56,7 +56,7 @@ class EtteroppgjoerForbehandlingServiceTest {
         val oppgaveService: OppgaveService = mockk()
         val inntektskomponentService: InntektskomponentService = mockk()
         val pensjonsgivendeInntektService: PensjonsgivendeInntektService = mockk()
-        val hendelserService: EtteroppgjoerHendelseService = mockk()
+        val hendelserService: EtteroppgjoerForbehandlingHendelseService = mockk()
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakKlient: VedtakKlient = mockk()

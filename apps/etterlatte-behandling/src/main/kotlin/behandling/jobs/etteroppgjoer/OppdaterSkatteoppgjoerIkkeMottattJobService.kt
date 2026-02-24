@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveSe
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -91,6 +92,7 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
                         etteroppgjoer.sakId,
                         etteroppgjoer.inntektsaar,
                         EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
+                        EtteroppgjoerHendelser.MANGLER_SKATTEOPPGJOER,
                     )
                     etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
                         sakId = etteroppgjoer.sakId,

@@ -24,8 +24,8 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelseType
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -463,7 +463,7 @@ class StatistikkServiceTest {
                 forbehandlingId = forbehandlingId,
                 sakId = SakId(6734),
                 aar = YearMonth.now().year,
-                hendelse = EtteroppgjoerHendelseType.OPPRETTET,
+                hendelse = EtteroppgjoerForbehandlingHendelser.OPPRETTET,
                 forbehandlingStatus = EtteroppgjoerForbehandlingStatus.OPPRETTET,
                 opprettet = Tidspunkt.now(),
                 maanederYtelse = emptyList(),

@@ -67,3 +67,7 @@ data class HendelserKjoering(
 ) {
     fun nesteSekvensnummer() = sisteSekvensnummer + 1
 }
+
+data class HendelseKjoeringRequest(
+    val antallHendelser: Int,
+)

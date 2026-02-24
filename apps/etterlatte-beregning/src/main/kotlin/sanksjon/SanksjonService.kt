@@ -1,7 +1,9 @@
 package no.nav.etterlatte.sanksjon
 
+import no.nav.etterlatte.beregning.BeregningToggles
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -17,6 +19,7 @@ import java.util.UUID
 class SanksjonService(
     private val behandlingKlient: BehandlingKlient,
     private val sanksjonRepository: SanksjonRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -90,13 +93,12 @@ class SanksjonService(
 
         if (sanksjon.id === null) {
             logger.info("Oppretter sanksjon med behandlingID=$behandlingId")
-            settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
+            oppdaterBehandlingstatusEtterOppdateringSanksjon(behandlingId, brukerTokenInfo)
             return sanksjonRepository.opprettSanksjon(behandlingId, behandling.sak, brukerTokenInfo.ident(), sanksjon)
         }
 
         logger.info("Oppdaterer sanksjon med behandlingID=$behandlingId")
-        // TODO: vi vil kanskje ikke tvinge noen avkortings-reberegning her hvis det er kun beskrivelse som endrer seg
-        settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
+        oppdaterBehandlingstatusEtterOppdateringSanksjon(behandlingId, brukerTokenInfo)
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
     }
 
@@ -185,18 +187,27 @@ class SanksjonService(
             throw SanksjonEndresFoerVirkException()
         }
 
-        settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
+        oppdaterBehandlingstatusEtterOppdateringSanksjon(behandlingId, brukerTokenInfo)
         logger.info("Sletter sanksjon med sanksjonID=$sanksjonId")
         sanksjonRepository.slettSanksjon(sanksjonId)
     }
 
-    private suspend fun settBehandlingTilBeregnetStatus(
+    private suspend fun oppdaterBehandlingstatusEtterOppdateringSanksjon(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        // Setter behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
-        if (!behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)) {
-            throw BehandlingKanIkkeEndres()
+        val brukNyeReglerAvkorting = featureToggleService.isEnabled(BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER, false)
+
+        if (brukNyeReglerAvkorting) {
+            // Setter behandlingen tl status "trygdetid oppdatert", slik at vi fanger opp at beregningen må oppdateres
+            if (!behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, true)) {
+                throw BehandlingKanIkkeEndres()
+            }
+        } else {
+            // Setter behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
+            if (!behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)) {
+                throw BehandlingKanIkkeEndres()
+            }
         }
     }
 }

@@ -400,7 +400,7 @@ class AvkortingRepository(
                 :id, :behandlingId, :fom, :tom, :inntektTom, :fratrekkInnAar, :inntektUtlandTom, :fratrekkInnAarUtland,
                 :spesifikasjon, :kilde, :aarsoppgjoerId, :relevanteMaaneder,
                 :overstyrtInnvilgaMaanederAarsak, :overstyrtInnvilgaMaanederBegrunnelse, :maanederInnvilget::jsonb,
-                :maanederInnvilgetRegelResultat
+                :maanederInnvilgetRegelResultat::jsonb
             )
             """.trimIndent(),
         paramMap =
@@ -420,7 +420,7 @@ class AvkortingRepository(
                 "overstyrtInnvilgaMaanederAarsak" to avkortingsgrunnlag.overstyrtInnvilgaMaanederAarsak?.name,
                 "overstyrtInnvilgaMaanederBegrunnelse" to avkortingsgrunnlag.overstyrtInnvilgaMaanederBegrunnelse,
                 "maanederInnvilget" to avkortingsgrunnlag.maanederInnvilget?.toJson(),
-                "maanederInnvilgetRegelResultat" to avkortingsgrunnlag.maanederInnvilgetRegelResultat,
+                "maanederInnvilgetRegelResultat" to avkortingsgrunnlag.maanederInnvilgetRegelResultat?.toJson(),
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -435,7 +435,7 @@ class AvkortingRepository(
             INSERT INTO avkortingsgrunnlag_faktisk(
                 id, behandling_id, aarsoppgjoer_id, fom, tom, innvilgede_maaneder, loennsinntekt, naeringsinntekt, afp, utlandsinntekt, spesifikasjon, kilde, maaneder_innvilget, maaneder_innvilget_regel_resultat
             ) VALUES (
-                :id, :behandlingId, :aarsoppgjoerId, :fom, :tom, :innvilgedeMaaneder, :loennsinntekt, :naeringsinntekt, :afp, :utlandsinntekt, :spesifikasjon, :kilde, :maanederInnvilget::jsonb, :maanederInnvilgetRegelResultat
+                :id, :behandlingId, :aarsoppgjoerId, :fom, :tom, :innvilgedeMaaneder, :loennsinntekt, :naeringsinntekt, :afp, :utlandsinntekt, :spesifikasjon, :kilde, :maanederInnvilget::jsonb, :maanederInnvilgetRegelResultat::jsonb
             )
             """.trimIndent(),
         paramMap =
@@ -453,7 +453,7 @@ class AvkortingRepository(
                 "spesifikasjon" to faktisk.spesifikasjon,
                 "kilde" to faktisk.kilde.toJson(),
                 "maanederInnvilget" to faktisk.maanederInnvilget?.toJson(),
-                "maanederInnvilgetRegelResultat" to faktisk.maanederInnvilgetRegelResultat,
+                "maanederInnvilgetRegelResultat" to faktisk.maanederInnvilgetRegelResultat?.toJson(),
             ),
     ).let { query -> tx.run(query.asUpdate) }
 

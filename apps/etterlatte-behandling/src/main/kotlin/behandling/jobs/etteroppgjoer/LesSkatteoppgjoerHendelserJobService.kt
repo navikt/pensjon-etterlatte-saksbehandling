@@ -8,20 +8,15 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelseKjoeringRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.HendelserKjoering
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserDao
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
-import java.time.Year
-import java.time.YearMonth
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -30,7 +25,6 @@ class LesSkatteoppgjoerHendelserJobService(
     private val sigrunKlient: SigrunKlient,
     private val etteroppgjoerService: EtteroppgjoerService,
     private val sakService: SakService,
-    private val vedtakKlient: VedtakKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -94,10 +88,18 @@ class LesSkatteoppgjoerHendelserJobService(
      * @return true hvis hendelsen er relevant, dvs. at saken skal ha etteroppgjør.
      */
     private fun opprettEllerOppdaterEtteroppgjoer(hendelse: SkatteoppgjoerHendelse): Boolean {
-        val inntektsaar = krevIkkeNull(hendelse.gjelderPeriode?.toInt()) { "Mangler inntektsår" }
-        val ident = hendelse.identifikator
+        val inntektsaar =
+            hendelse.gjelderPeriode?.toInt() ?: run {
+                logger.info("${hendelse.sekvensnummer}: har ikke gyldig gjelderPeriode, hopper over")
+                return false
+            }
 
-        val sak = sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD) ?: return false
+        val ident = hendelse.identifikator
+        val sak =
+            sakService.finnSak(ident, SakType.OMSTILLINGSSTOENAD) ?: run {
+                logger.info("${hendelse.sekvensnummer}: fant ingen sak for ident, hopper over")
+                return false
+            }
 
         sikkerLogg.info(
             "Behandler hendelse sekvensnummer=${hendelse.sekvensnummer}, ident=$ident, sakId=${sak.id}. " +
@@ -105,12 +107,18 @@ class LesSkatteoppgjoerHendelserJobService(
         )
 
         val innvilgetAar = etteroppgjoerService.finnInnvilgedeAarForSak(sak.id, HardkodaSystembruker.etteroppgjoer)
-        if (inntektsaar !in innvilgetAar) return false
+        if (inntektsaar !in innvilgetAar) {
+            logger.info(
+                "${hendelse.sekvensnummer}: fant ingen innvilgede perioder ($innvilgetAar) i sak for periode $inntektsaar, hopper over",
+            )
+            return false
+        }
 
         val etteroppgjoer =
             runCatching {
                 etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
             }.getOrNull() ?: runBlocking {
+                logger.info("${hendelse.sekvensnummer}: fant ingen etteroppgjør for sak og inntektsår, oppretter nytt etteroppgjør")
                 etteroppgjoerService.opprettNyttEtteroppgjoer(sak.id, inntektsaar)
             }
 

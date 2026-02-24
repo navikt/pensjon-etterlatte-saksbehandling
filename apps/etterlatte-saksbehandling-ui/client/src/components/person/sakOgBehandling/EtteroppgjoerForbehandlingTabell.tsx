@@ -14,9 +14,11 @@ import { mapResult } from '~shared/api/apiUtils'
 import { HarSvartIModiaModal } from '~components/person/sakOgBehandling/HarSvartIModiaModal'
 
 export function EtteroppgjoerForbehandlingTabell({ sakId }: { sakId: number }) {
-  const [hentEtteroppgjoerForbehandlingerResult, hentEtteroppgjoerForbehandlingerFetch] = useApiCall(
-    hentEtteroppgjoerForbehandlinger
-  )
+  const [
+    hentEtteroppgjoerForbehandlingerResult,
+    hentEtteroppgjoerForbehandlingerFetch,
+    resetEtteroppgjoerForbehandlinger,
+  ] = useApiCall(hentEtteroppgjoerForbehandlinger)
 
   const harFerdigstiltForbehandling = (forbehandlinger: Array<EtteroppgjoerForbehandling>) => {
     const ferdigstilteForbehandlinger = [...forbehandlinger].filter(
@@ -30,6 +32,7 @@ export function EtteroppgjoerForbehandlingTabell({ sakId }: { sakId: number }) {
     forbehandlinger.filter((forbehandling) => forbehandling.kopiertFra == null)
 
   useEffect(() => {
+    resetEtteroppgjoerForbehandlinger()
     hentEtteroppgjoerForbehandlingerFetch(sakId)
   }, [sakId])
 

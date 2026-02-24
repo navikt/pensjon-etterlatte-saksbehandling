@@ -17,9 +17,10 @@ import { BagdeIcon, Buildings3Icon, FolderIcon, PadlockLockedIcon } from '@navik
 import { ENHETER } from '~shared/types/Enhet'
 
 export const Sakshistorikk = ({ sakId }: { sakId: number }) => {
-  const [hentSaksendringerStatus, hentSaksendringerKall] = useApiCall(hentSaksendringer)
+  const [hentSaksendringerStatus, hentSaksendringerKall, resetSaksendringer] = useApiCall(hentSaksendringer)
 
   useEffect(() => {
+    resetSaksendringer()
     hentSaksendringerKall(sakId)
   }, [sakId])
 

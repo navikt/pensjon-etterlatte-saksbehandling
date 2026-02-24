@@ -20,6 +20,7 @@ import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosat
 import { formaterDato } from '~utils/formatering/dato'
 import { formaterBehandlingstype } from '~utils/formatering/formatering'
 import { EtteroppgjoerOmgjoerRevurderingModal } from '~components/oppgavebenk/oppgaveModal/etteroppgjoer/EtteroppgjoerOmgjoerRevurderingModal'
+import { UTLANDSENHETER } from '~shared/types/Enhet'
 
 type alleBehandlingsTyper = IBehandlingsammendrag | Generellbehandling
 
@@ -87,7 +88,8 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                       <HStack gap="2" align="center">
                         {formaterBehandlingstype(behandling.behandlingType)}
                         {(sak.utlandstilknytning?.type === UtlandstilknytningType.UTLANDSTILSNITT ||
-                          sak.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND) && (
+                          sak.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND ||
+                          UTLANDSENHETER.includes(sak.enhet)) && (
                           <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
                         )}
                       </HStack>

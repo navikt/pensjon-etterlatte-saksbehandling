@@ -30,7 +30,7 @@ userIsAuthenticated() {
 
   gcloud auth print-identity-token &> /dev/null
   if [ $? -gt 0 ]; then
-    error "Not logged into gcloud... Please run:\n\n\t$ nais login"
+    error "Not logged into gcloud... Please run:\n\n\t$ nais auth login"
   fi
 
   CURRENT_CONTEXT=$(kubectl config current-context)

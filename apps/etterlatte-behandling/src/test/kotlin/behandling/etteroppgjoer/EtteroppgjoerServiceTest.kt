@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.sakId1
@@ -60,6 +61,7 @@ class EtteroppgjoerServiceTest {
         val behandlingService: BehandlingService = mockk()
         val vedtakKlient: VedtakKlient = mockk()
         val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = mockk()
+        val hendelsesDao = mockk<HendelseDao>()
 
         val service =
             EtteroppgjoerService(
@@ -69,7 +71,7 @@ class EtteroppgjoerServiceTest {
                 beregningKlient = beregningKlient,
                 sigrunKlient = sigrunKlient,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
-                hendelseDao = mockk(),
+                hendelseDao = hendelsesDao,
             )
 
         val sisteIverksatteBehandlingId = UUID.randomUUID()
@@ -80,6 +82,7 @@ class EtteroppgjoerServiceTest {
                     every { status } returns EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
                 }
 
+            coEvery { hendelsesDao.etteroppgjoerHendelse(any(), any(), any(), any()) } just Runs
             coEvery { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) } just Runs
             coEvery { dao.lagreEtteroppgjoer(any()) } returns 1
             every { dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) } returns Unit

@@ -45,7 +45,7 @@ internal class SanksjonRoutesTest {
 
     @Test
     fun `Skal returnere 204 naar sanksjon ikke finnes`() {
-        coEvery { sanksjonService.hentSanksjon(any()) } returns null
+        coEvery { sanksjonService.hentSanksjon(any()) } returns emptyList()
 
         testApplication {
             runServer(server) {

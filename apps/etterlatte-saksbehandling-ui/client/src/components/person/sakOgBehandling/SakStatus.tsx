@@ -15,7 +15,7 @@ import {
 } from '~components/person/sakOgBehandling/sakStatusUtils'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
-  const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)
+  const [vedtakISakResult, vedtakISakFetch, resetVedtakISak] = useApiCall(hentAlleVedtakISak)
 
   const visStatusPaaSisteVedtak = (vedtakISak: VedtakSammendrag[]): ReactNode => {
     const loependeVedtak = hentLoependeVedtak(vedtakISak)
@@ -62,8 +62,9 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
   }
 
   useEffect(() => {
+    resetVedtakISak()
     vedtakISakFetch(sakId)
-  }, [])
+  }, [sakId])
 
   return (
     <HStack gap="4">

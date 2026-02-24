@@ -32,11 +32,14 @@ interface Props {
 export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const [navkontorResult, hentNavkontor] = useApiCall(hentNavkontorForPerson)
-  const [yrkesskadefordelResult, hentYrkesskadefordel] = useApiCall(hentMigrertYrkesskadeFordel)
-  const [flyktningResult, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
+  const [navkontorResult, hentNavkontor, resetNavkontor] = useApiCall(hentNavkontorForPerson)
+  const [yrkesskadefordelResult, hentYrkesskadefordel, resetYrkesskadefordel] = useApiCall(hentMigrertYrkesskadeFordel)
+  const [flyktningResult, hentFlyktning, resetFlyktning] = useApiCall(hentFlyktningStatusForSak)
 
   useEffect(() => {
+    resetNavkontor()
+    resetFlyktning()
+    resetYrkesskadefordel()
     hentNavkontor(fnr)
     hentFlyktning(sak.id)
 
@@ -49,7 +52,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
     if (migrertBehandling) {
       hentYrkesskadefordel(migrertBehandling.id)
     }
-  }, [])
+  }, [sak, fnr, behandlinger])
 
   return (
     <VStack gap="4">

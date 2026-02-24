@@ -62,8 +62,8 @@ export const SakOversikt = ({
   const etteroppgjoerDevKnappEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer_dev_opprett_forbehandling)
   const byttTilAnnenSakEnabled = useFeaturetoggle(FeatureToggle.bytt_til_annen_sak)
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
-  const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
-  const [gosysOppgaverResult, gosysOppgaverFetch] = useApiCall(hentGosysOppgaverForPerson)
+  const [oppgaverResult, oppgaverFetch, resetOppgaver] = useApiCall(hentOppgaverTilknyttetSak)
+  const [gosysOppgaverResult, gosysOppgaverFetch, resetGosysOppgaver] = useApiCall(hentGosysOppgaverForPerson)
 
   const person = usePerson()
 
@@ -78,6 +78,8 @@ export const SakOversikt = ({
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
+      resetOppgaver()
+      resetGosysOppgaver()
       oppgaverFetch(sakResult.data.sak.id)
       gosysOppgaverFetch(fnr)
     }

@@ -71,7 +71,7 @@ export const ForenkletOppgaverTable = ({
     if (!!innloggetSaksbehandler.enheter.length) {
       saksbehandlereIEnheterFetch({ enheter: innloggetSaksbehandler.enheter }, setSaksbehandlereIEnheter)
     }
-  }, [])
+  }, [innloggetSaksbehandler.enheter])
 
   return !!filtrerteOppgaver?.length ? (
     <Table zebraStripes size="small">

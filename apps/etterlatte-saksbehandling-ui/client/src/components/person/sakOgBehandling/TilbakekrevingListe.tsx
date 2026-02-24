@@ -77,9 +77,10 @@ function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBeh
 
 export function TilbakekrevingListe(props: { sakId: number }) {
   const { sakId } = props
-  const [tilbakekrevinger, hentTilbakekrevinger] = useApiCall(hentTilbakekrevingerISak)
+  const [tilbakekrevinger, hentTilbakekrevinger, resetTilbakekrevinger] = useApiCall(hentTilbakekrevingerISak)
 
   useEffect(() => {
+    resetTilbakekrevinger()
     void hentTilbakekrevinger(sakId)
   }, [sakId])
 

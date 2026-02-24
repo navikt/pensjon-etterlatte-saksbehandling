@@ -52,7 +52,7 @@ export const Person = () => {
 
   const [foretrukketSak, setForetrukketSak] = useState<number | undefined>()
 
-  const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
+  const [sakResult, sakFetch, resetSak] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
 
   const velgFane = (value: string) => {
@@ -71,6 +71,7 @@ export const Person = () => {
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
+      resetSak()
       sakFetch(fnr!!)
     }
   }, [fnr])

@@ -45,7 +45,7 @@ export const ForenkletGosysOppgaverTable = ({
     if (!!innloggetSaksbehandler.enheter.length) {
       saksbehandlereIEnheterFetch({ enheter: innloggetSaksbehandler.enheter }, setSaksbehandlereIEnheter)
     }
-  }, [])
+  }, [innloggetSaksbehandler.enheter])
 
   return !!oppgaver?.length ? (
     <Table zebraStripes size="small">

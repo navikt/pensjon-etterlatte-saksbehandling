@@ -31,11 +31,10 @@
     "globals": "^17.1.0",
     "mocha": "~11.7.5",
     "ts-node": "~10.9.2",
-    "ts-node-dev": "~2.0.0",
     "typescript": "~5.9.3"
   },
   "scripts": {
-    "dev": "ts-node-dev ./src/index.ts",
+    "dev": "ts-node ./src/index.ts",
     "build": "tsc && eslint src",
     "lint": "eslint src",
     "test": "mocha -r ts-node/register './src/tests/**/*.test.ts'"

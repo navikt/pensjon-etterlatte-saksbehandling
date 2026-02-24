@@ -22,8 +22,8 @@ internal class SanksjonRepositoryTest(
     private val sakId = randomSakId()
 
     @Test
-    fun `skal returnere null hvis mangler sanksjon`() {
-        sanksjonRepository.hentSanksjon(UUID.randomUUID()) shouldBe null
+    fun `skal returnere tom liste hvis mangler sanksjon`() {
+        sanksjonRepository.hentSanksjon(UUID.randomUUID()) shouldBe emptyList()
     }
 
     @Test
@@ -35,7 +35,7 @@ internal class SanksjonRepositoryTest(
 
         val lagretSanksjon = sanksjonRepository.hentSanksjon(behandlingId)
 
-        lagretSanksjon!!.asClue {
+        lagretSanksjon.asClue {
             it[0].asClue { sanksjon ->
                 sanksjon.behandlingId shouldBe behandlingId
             }
@@ -51,7 +51,7 @@ internal class SanksjonRepositoryTest(
 
         val lagretSanksjon = sanksjonRepository.hentSanksjon(behandlingId)
 
-        lagretSanksjon!!.asClue {
+        lagretSanksjon.asClue {
             it[0].asClue { sanksjonLagret ->
                 sanksjonLagret.beskrivelse shouldBe sanksjon.beskrivelse
             }
@@ -67,7 +67,7 @@ internal class SanksjonRepositoryTest(
 
         val lagretOppdatertSanksjon = sanksjonRepository.hentSanksjon(behandlingId)
 
-        lagretOppdatertSanksjon!!.asClue {
+        lagretOppdatertSanksjon.asClue {
             it[0].asClue { sanksjonLagret ->
                 sanksjonLagret.beskrivelse shouldNotBe sanksjon.beskrivelse
                 sanksjonLagret.beskrivelse shouldBe oppdatertSanksjon.beskrivelse
@@ -82,15 +82,11 @@ internal class SanksjonRepositoryTest(
 
         sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon)
 
-        val lagretSanksjon = sanksjonRepository.hentSanksjon(behandlingId)
+        val lagretSanksjon = sanksjonRepository.hentSanksjon(behandlingId).single()
 
-        lagretSanksjon!!.size shouldBe 1
+        sanksjonRepository.slettSanksjon(lagretSanksjon.id!!)
 
-        sanksjonRepository.slettSanksjon(lagretSanksjon.first().id!!)
-
-        val ingenSanksjoner = sanksjonRepository.hentSanksjon(behandlingId)
-
-        ingenSanksjoner shouldBe null
+        sanksjonRepository.hentSanksjon(behandlingId) shouldBe emptyList()
     }
 
     @Test
@@ -100,12 +96,12 @@ internal class SanksjonRepositoryTest(
         sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon)
 
         val nyBehandlingId = UUID.randomUUID()
-        val gammelSanksjon = sanksjonRepository.hentSanksjon(behandlingId)?.get(0)!!
+        val gammelSanksjon = sanksjonRepository.hentSanksjon(behandlingId).single()
         sanksjonRepository.opprettSanksjonFraKopi(
             behandlingId = nyBehandlingId,
             sakId = sakId,
             sanksjon = gammelSanksjon,
         )
-        sanksjonRepository.hentSanksjon(nyBehandlingId)?.size shouldBe 1
+        sanksjonRepository.hentSanksjon(nyBehandlingId).size shouldBe 1
     }
 }

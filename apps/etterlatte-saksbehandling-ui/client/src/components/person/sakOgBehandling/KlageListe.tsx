@@ -96,9 +96,10 @@ function KlageTabell(props: { klager: Array<Klage> }) {
 
 export function KlageListe(props: { sakId: number }) {
   const { sakId } = props
-  const [klager, hentKlager] = useApiCall(hentKlagerISak)
+  const [klager, hentKlager, resetKlager] = useApiCall(hentKlagerISak)
 
   useEffect(() => {
+    resetKlager()
     void hentKlager(sakId)
   }, [sakId])
 

@@ -45,11 +45,13 @@ function hentDato(behandling: alleBehandlingsTyper): string {
 }
 
 export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: SakMedBehandlinger }) => {
-  const [generellbehandlingStatus, hentGenerellbehandlinger] = useApiCall(hentGenerelleBehandlingForSak)
+  const [generellbehandlingStatus, hentGenerellbehandlinger, resetGenerellbehandlinger] =
+    useApiCall(hentGenerelleBehandlingForSak)
 
   const { sak, behandlinger } = sakOgBehandlinger
 
   useEffect(() => {
+    resetGenerellbehandlinger()
     hentGenerellbehandlinger(sak.id)
   }, [sak.id])
 

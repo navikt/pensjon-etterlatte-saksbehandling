@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -52,6 +53,7 @@ class BeregningsGrunnlagService(
     private val behandlingKlient: BehandlingKlient,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
+    private val sanksjonService: SanksjonService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningsGrunnlagService::class.java)
 
@@ -103,7 +105,10 @@ class BeregningsGrunnlagService(
                     if (behandling.sakType == SakType.BARNEPENSJON) {
                         beregningsGrunnlag.soeskenMedIBeregning.ifEmpty {
                             when (val virk = behandling.virkningstidspunkt) {
-                                null -> throw ManglerVirkningstidspunktBP()
+                                null -> {
+                                    throw ManglerVirkningstidspunktBP()
+                                }
+
                                 else -> {
                                     if (virk.dato.isBefore(REFORM_TIDSPUNKT_BP)) {
                                         // Her burde man egentlig ha en sjekk på om avdøde har noen barn.
@@ -153,7 +158,9 @@ class BeregningsGrunnlagService(
                 }
             }
 
-            else -> null
+            else -> {
+                null
+            }
         }
 
     private fun validerSoeskenMedIBeregning(
@@ -275,11 +282,13 @@ class BeregningsGrunnlagService(
 
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeBehandlingId)
+
+        val behandling =
+            runBlocking {
+                behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            }
+
         if (forrigeGrunnlag == null) {
-            val behandling =
-                runBlocking {
-                    behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-                }
             if (beregningRepository.hentOverstyrBeregning(behandling.sak) != null) {
                 dupliserOverstyrBeregningGrunnlag(behandlingId, forrigeBehandlingId)
                 return
@@ -295,6 +304,10 @@ class BeregningsGrunnlagService(
         beregningsGrunnlagRepository.lagreBeregningsGrunnlag(forrigeGrunnlag.copy(behandlingId = behandlingId))
 
         dupliserOverstyrBeregningGrunnlag(behandlingId, forrigeBehandlingId)
+
+        if (behandling.sakType == SakType.OMSTILLINGSSTOENAD && behandling.behandlingType == BehandlingType.REVURDERING) {
+            runBlocking { sanksjonService.kopierSanksjon(behandlingId, brukerTokenInfo) }
+        }
     }
 
     private fun dupliserOverstyrBeregningGrunnlag(

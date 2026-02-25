@@ -30,6 +30,7 @@ export const Avkorting = () => {
   const [, hentBehandlingstatusRequest] = useApiCall(hentBehandlingstatus)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const visIkkeInnvilgetPeriode = useFeaturetoggle(FeatureToggle.vis_ikke_innvilget_periode)
+  const brukNyeBeregningsregler = useFeaturetoggle(FeatureToggle.beregning_bruk_nye_beregningsregler)
 
   const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
   if (!behandling) {
@@ -91,9 +92,10 @@ export const Avkorting = () => {
           success: () => <AvkortingInntekt redigerbar={redigerbar} />,
         })}
 
-        <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
-
-        {visIkkeInnvilgetPeriode && <IkkeInnvilgetPeriode behandling={behandling} />}
+        {!brukNyeBeregningsregler && (
+          <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
+        )}
+        {!brukNyeBeregningsregler && visIkkeInnvilgetPeriode && <IkkeInnvilgetPeriode behandling={behandling} />}
 
         {avkorting && (
           <YtelseEtterAvkorting avkortetYtelse={avkortetYtelse} tidligereAvkortetYtelse={tidligereAvkortetYtelse} />

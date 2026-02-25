@@ -3,15 +3,17 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { BehandlingRouteContext } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
+  oppdaterAvkorting,
   oppdaterBehandlingsstatus,
   oppdaterBeregning,
   oppdaterBeregningsGrunnlag,
+  resetAvkorting,
 } from '~store/reducers/BehandlingReducer'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import React, { useContext, useEffect, useState } from 'react'
 import {
   Beregning,
@@ -34,6 +36,13 @@ import { useBehandling } from '~components/behandling/useBehandling'
 import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { formaterNavn } from '~shared/types/Person'
+import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
+import { IkkeInnvilgetPeriode } from '~components/behandling/sanksjon/IkkeInnvilgetPeriode'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { IAvkorting } from '~shared/types/IAvkorting'
+import { hentAvkorting } from '~shared/api/avkorting'
+import { aarFraDatoString } from '~utils/formatering/dato'
+import { hentBehandlingstatus } from '~shared/api/behandling'
 
 const BeregningsgrunnlagOmstillingsstoenad = () => {
   const behandling = useBehandling()
@@ -42,6 +51,11 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [visManglendeBeregningsgrunnlag, setVisManglendeBeregningsgrunnlag] = useState(false)
+  const visIkkeInnvilgetPeriode = useFeaturetoggle(FeatureToggle.vis_ikke_innvilget_periode)
+  const brukNyeBeregningsregler = useFeaturetoggle(FeatureToggle.beregning_bruk_nye_beregningsregler)
+  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting) as IAvkorting
+  const [, hentAvkortingRequest] = useApiCall(hentAvkorting)
+  const [, hentBehandlingstatusRequest] = useApiCall(hentBehandlingstatus)
 
   const [hentBeregningsgrunnlagResult, hentBeregningsgrunnlagRequest] = useApiCall(hentBeregningsGrunnlag)
   const [lagreBeregningsGrunnlagResult, lagreBeregningsGrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
@@ -54,6 +68,26 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
+
+  if (brukNyeBeregningsregler) {
+    useEffect(() => {
+      if (!avkorting) {
+        dispatch(resetAvkorting())
+        hentAvkortingRequest(behandling.id, (avkorting) => {
+          hentBehandlingstatusRequest(behandling.id, (status) => {
+            dispatch(oppdaterBehandlingsstatus(status))
+            dispatch(oppdaterAvkorting(avkorting))
+          })
+        })
+      }
+    }, [])
+  }
+
+  const avkortingGrunnlagInnevaerendeAar = () => {
+    return avkorting?.avkortingGrunnlag.find(
+      (grunnlag) => aarFraDatoString(grunnlag.fom) == aarFraDatoString(virkningstidspunkt(behandling).dato)
+    )
+  }
 
   const onSubmit = () => {
     if (!behandling.beregningsGrunnlag?.beregningsMetode) {
@@ -137,6 +171,11 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
                 beregningsgrunnlag={behandling.beregningsGrunnlag}
                 institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
               />
+
+              {brukNyeBeregningsregler && (
+                <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
+              )}
+              {brukNyeBeregningsregler && visIkkeInnvilgetPeriode && <IkkeInnvilgetPeriode behandling={behandling} />}
             </>
           ),
         })}

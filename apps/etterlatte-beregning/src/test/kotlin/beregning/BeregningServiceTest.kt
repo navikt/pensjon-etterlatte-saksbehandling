@@ -32,7 +32,6 @@ internal class BeregningServiceTest {
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
     private val beregnOverstyrBeregningService = mockk<BeregnOverstyrBeregningService>()
-    private val sanksjonService = mockk<SanksjonService>()
     private val beregningService: BeregningService =
         BeregningService(
             beregningRepository = beregningRepository,
@@ -40,7 +39,6 @@ internal class BeregningServiceTest {
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
             beregnOverstyrBeregningService = beregnOverstyrBeregningService,
-            sanksjonService = sanksjonService,
         )
 
     @Test

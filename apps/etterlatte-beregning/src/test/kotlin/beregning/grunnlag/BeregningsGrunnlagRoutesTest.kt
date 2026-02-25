@@ -10,6 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -47,6 +48,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -65,6 +67,7 @@ internal class BeregningsGrunnlagRoutesTest {
     private val repository = mockk<BeregningsGrunnlagRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val sanksjonService = mockk<SanksjonService>()
     private val service =
         BeregningsGrunnlagService(
             repository,
@@ -72,6 +75,7 @@ internal class BeregningsGrunnlagRoutesTest {
             behandlingKlient,
             vedtaksvurderingKlient,
             grunnlagKlient,
+            sanksjonService,
         )
 
     @BeforeAll
@@ -427,6 +431,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk(relaxed = true)
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBeregningsGrunnlag(forrige) } returns
@@ -440,6 +445,7 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(nye) } returns null
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
+        coEvery { sanksjonService.kopierSanksjon(any(), any()) } just Runs
 
         testApplication {
             runServer(mockOAuth2Server) {
@@ -461,6 +467,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk(relaxed = true)
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBeregningsGrunnlag(forrige) } returns
@@ -474,6 +481,7 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(nye) } returns null
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
+        coEvery { sanksjonService.kopierSanksjon(any(), any()) } just Runs
 
         testApplication {
             runServer(mockOAuth2Server) {

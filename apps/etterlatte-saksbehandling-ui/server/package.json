@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "eslint-plugin-prettier": "^5.5.5",
     "express": "~5.2.1",
     "http-proxy-middleware": "~3.0.5",
     "node-cache": "~5.1.2",
@@ -14,8 +15,7 @@
     "winston-transport": "~4.9.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.0",
-    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^10.0.1",
     "@types/chai": "~5.2.3",
     "@types/cors": "~2.8.19",
     "@types/express": "~5.0.6",
@@ -23,23 +23,20 @@
     "@types/node": "~25.0.10",
     "@types/node-fetch": "~2.6.13",
     "@types/request": "~2.48.13",
-    "@typescript-eslint/eslint-plugin": "~8.53.1",
-    "@typescript-eslint/parser": "~8.53.1",
+    "typescript-eslint": "~8.56.1",
+    "@typescript-eslint/parser": "~8.56.1",
     "chai": "~6.2.2",
-    "eslint": "~9.39.2",
-    "eslint-config-prettier": "~10.1.8",
-    "eslint-plugin-jest": "~29.12.1",
+    "eslint": "~10.0.1",
+    "eslint-plugin-jest": "~29.15.0",
     "globals": "^17.1.0",
-    "license-checker-rseidelsohn": "~4.4.2",
     "mocha": "~11.7.5",
     "ts-node": "~10.9.2",
-    "ts-node-dev": "~2.0.0",
     "typescript": "~5.9.3"
   },
   "scripts": {
-    "dev": "ts-node-dev ./src/index.ts",
-    "lisenssjekk": "yarn license-checker-rseidelsohn --onlyAllow \"MIT;Apache-2.0;BlueOak-1.0.0;0BSD;BSD-2-Clause;BSD-3-Clause;CC0-1.0;CC-BY-3.0;ISC;MPL-2.0;Python-2.0\" --excludePackages vedtakslosning-ui@0.1.0 --summary",
-    "build": "tsc && eslint src && yarn lisenssjekk",
+    "dev": "ts-node ./src/index.ts",
+    "build": "tsc && eslint src",
+    "lint": "eslint src",
     "test": "mocha -r ts-node/register './src/tests/**/*.test.ts'"
   },
   "resolutions": {

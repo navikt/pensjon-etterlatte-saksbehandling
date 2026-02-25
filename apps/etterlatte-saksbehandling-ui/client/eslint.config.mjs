@@ -6,7 +6,7 @@ import tsParser from '@typescript-eslint/parser'
 // import js from '@eslint/js'
 
 export default [
-  //js.configs.recommended, // TODO: Her må vi gjøre endringer før vi kommenterer denne inn igjen.
+  //js.configs.recommended, // TODO: Her må vi gjøre endringer før vi kommenterer denne inn
   ...typescriptEslint.configs.recommended,
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],

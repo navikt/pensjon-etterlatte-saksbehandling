@@ -20,7 +20,7 @@ class BeregningsGrunnlagRepository(
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    statement = finnBarnepensjonsGrunnlagForBehandling,
+                    statement = finnBeregningsGrunnlag,
                     paramMap = mapOf("behandlings_id" to id),
                 ).map { it.asBeregningsGrunnlag() }.asSingle,
             )
@@ -150,7 +150,7 @@ class BeregningsGrunnlagRepository(
             WHERE behandlings_id = :behandlings_id
             """.trimMargin()
 
-        val finnBarnepensjonsGrunnlagForBehandling =
+        val finnBeregningsGrunnlag =
             """
             SELECT
                 behandlings_id,

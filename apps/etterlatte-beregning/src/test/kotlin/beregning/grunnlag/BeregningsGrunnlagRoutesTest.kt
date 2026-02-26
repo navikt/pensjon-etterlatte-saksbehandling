@@ -150,6 +150,8 @@ internal class BeregningsGrunnlagRoutesTest {
                     ),
                 begrunnelse = "",
             )
+        coEvery { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns mockk(relaxed = true)
+        coEvery { repository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } just Runs
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns
             DetaljertBehandling(
@@ -206,11 +208,11 @@ internal class BeregningsGrunnlagRoutesTest {
 
         coVerify(exactly = 1) {
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
-        }
-        verify(exactly = 1) {
-            repository.lagreBeregningsGrunnlag(any())
-            repository.finnBeregningsGrunnlag(idRevurdering)
             repository.finnBeregningsGrunnlag(idForrigeIverksatt)
+            repository.lagreBeregningsGrunnlag(any())
+        }
+        verify(exactly = 2) {
+            repository.finnBeregningsGrunnlag(idRevurdering)
         }
     }
 

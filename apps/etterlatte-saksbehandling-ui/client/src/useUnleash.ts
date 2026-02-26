@@ -34,6 +34,11 @@ export interface Toggle {
   enabled: boolean
 }
 
+const beregning_bruk_nye_beregningsregler: Toggle = {
+  togglename: FeatureToggle.beregning_bruk_nye_beregningsregler,
+  enabled: false,
+}
+
 const avslutte_omgjoeringsoppgave: Toggle = {
   togglename: FeatureToggle.avslutte_omgjoeringsoppgave,
   enabled: false,
@@ -135,6 +140,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.overstyr_netto_brutto_tilbakekreving]: overstyr_netto_brutto_tilbakekreving,
   [FeatureToggle.vis_ikke_innvilget_periode]: vis_ikke_innvilget_periode,
   [FeatureToggle.avslutte_omgjoeringsoppgave]: avslutte_omgjoeringsoppgave,
+  [FeatureToggle.beregning_bruk_nye_beregningsregler]: beregning_bruk_nye_beregningsregler,
 }
 
 export const Unleashcontext = createContext<{

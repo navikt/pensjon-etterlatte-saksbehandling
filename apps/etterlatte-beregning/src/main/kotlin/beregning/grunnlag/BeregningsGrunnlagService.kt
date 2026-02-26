@@ -552,7 +552,7 @@ class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(
         code = "BP_BEREGNING_SOESKEN_IKKE_AVDOEDES_BARN",
-        detail = "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødeds barn",
+        detail = "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødes barn",
         meta = mapOf("behandlingId" to behandlingId),
     )
 

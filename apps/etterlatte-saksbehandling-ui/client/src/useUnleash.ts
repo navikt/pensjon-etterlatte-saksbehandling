@@ -26,7 +26,7 @@ export const enum FeatureToggle {
   overstyr_netto_brutto_tilbakekreving = 'overstyr-netto-brutto-tilbakekreving',
   vis_ikke_innvilget_periode = 'vis-ikke-innvilget-periode',
   avslutte_omgjoeringsoppgave = 'avslutte-omgjoeringsoppgave',
-  beregning_bruk_nye_beregningsregler = 'beregning_bruk_nye_beregningsregler',
+  beregning_bruk_nye_beregningsregler = 'beregning-bruk-nye-beregningsregler',
 }
 
 export interface Toggle {

@@ -54,7 +54,7 @@ import java.util.UUID.randomUUID
 enum class BeregningToggles(
     val value: String,
 ) : FeatureToggle {
-    BEREGNING_BRUK_NYE_BEREGNINGSREGLER("beregning-bruk-nye-beregningsregler"),
+    BEREGNING_BRUK_NYE_BEREGNINGSREGLER("beregning_bruk_nye_beregningsregler"),
     ;
 
     override fun key(): String = this.value

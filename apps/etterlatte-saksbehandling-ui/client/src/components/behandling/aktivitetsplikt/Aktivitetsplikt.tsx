@@ -84,7 +84,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
           Oppfølging av aktivitet
         </Heading>
         <BodyShort spacing>
-          <strong>Avdødeds dødsdato: </strong> {avdoedesDoedsdato ? formaterDato(avdoedesDoedsdato) : 'Fant ingen dato'}
+          <strong>Avdødes dødsdato: </strong> {avdoedesDoedsdato ? formaterDato(avdoedesDoedsdato) : 'Fant ingen dato'}
         </BodyShort>
       </Box>
 

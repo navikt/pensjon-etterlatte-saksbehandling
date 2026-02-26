@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning.grunnlag
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.regler.overstyr.nyttGrunnbeloep
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -52,6 +54,7 @@ class BeregningsGrunnlagService(
     private val behandlingKlient: BehandlingKlient,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
+    private val sanksjonService: SanksjonService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningsGrunnlagService::class.java)
 
@@ -103,7 +106,10 @@ class BeregningsGrunnlagService(
                     if (behandling.sakType == SakType.BARNEPENSJON) {
                         beregningsGrunnlag.soeskenMedIBeregning.ifEmpty {
                             when (val virk = behandling.virkningstidspunkt) {
-                                null -> throw ManglerVirkningstidspunktBP()
+                                null -> {
+                                    throw ManglerVirkningstidspunktBP()
+                                }
+
                                 else -> {
                                     if (virk.dato.isBefore(REFORM_TIDSPUNKT_BP)) {
                                         // Her burde man egentlig ha en sjekk på om avdøde har noen barn.
@@ -153,7 +159,9 @@ class BeregningsGrunnlagService(
                 }
             }
 
-            else -> null
+            else -> {
+                null
+            }
         }
 
     private fun validerSoeskenMedIBeregning(
@@ -249,18 +257,10 @@ class BeregningsGrunnlagService(
             return grunnlag
         }
 
-        val forrigeIverksatte = forrigeIverksatteBehandling(behandlingId, brukerTokenInfo)
         // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
+        val forrigeIverksatte = forrigeIverksatteBehandling(behandlingId, brukerTokenInfo)
         return if (forrigeIverksatte != null) {
-            beregningsGrunnlagRepository
-                .finnBeregningsGrunnlag(forrigeIverksatte.behandlingId)
-                ?.also {
-                    logger.info(
-                        "Ga ut forrige beregningsgrunnlag for $behandlingId, funnet i " +
-                            "${forrigeIverksatte.id}. Dette grunnlaget er kopiert inn til $behandlingId.",
-                    )
-                    beregningsGrunnlagRepository.lagreBeregningsGrunnlag(it.copy(behandlingId = behandlingId))
-                }
+            dupliserBeregningsGrunnlag(behandlingId, forrigeIverksatte.behandlingId, brukerTokenInfo)
         } else {
             null
         }
@@ -270,19 +270,21 @@ class BeregningsGrunnlagService(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): BeregningsGrunnlag? {
         logger.info("Dupliser grunnlag for $behandlingId fra $forrigeBehandlingId")
 
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeBehandlingId)
+
+        val behandling =
+            runBlocking {
+                behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            }
+
         if (forrigeGrunnlag == null) {
-            val behandling =
-                runBlocking {
-                    behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-                }
             if (beregningRepository.hentOverstyrBeregning(behandling.sak) != null) {
                 dupliserOverstyrBeregningGrunnlag(behandlingId, forrigeBehandlingId)
-                return
+                return null
             } else {
                 throw RuntimeException("Ingen grunnlag funnet for $forrigeBehandlingId")
             }
@@ -292,9 +294,16 @@ class BeregningsGrunnlagService(
             throw RuntimeException("Eksisterende grunnlag funnet for $behandlingId")
         }
 
-        beregningsGrunnlagRepository.lagreBeregningsGrunnlag(forrigeGrunnlag.copy(behandlingId = behandlingId))
+        val nyttGrunnlag = forrigeGrunnlag.copy(behandlingId = behandlingId)
+        beregningsGrunnlagRepository.lagreBeregningsGrunnlag(nyttGrunnlag)
 
         dupliserOverstyrBeregningGrunnlag(behandlingId, forrigeBehandlingId)
+
+        if (behandling.sakType == SakType.OMSTILLINGSSTOENAD && behandling.behandlingType == BehandlingType.REVURDERING) {
+            runBlocking { sanksjonService.kopierSanksjon(behandlingId, brukerTokenInfo) }
+        }
+
+        return nyttGrunnlag
     }
 
     private fun dupliserOverstyrBeregningGrunnlag(

@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.sanksjon.SanksjonService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -63,6 +64,7 @@ internal class BeregningsGrunnlagServiceTest {
     private val beregningsGrunnlagRepository = mockk<BeregningsGrunnlagRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val sanksjonService = mockk<SanksjonService>()
     private val beregningsGrunnlagService: BeregningsGrunnlagService =
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository,
@@ -70,6 +72,7 @@ internal class BeregningsGrunnlagServiceTest {
             behandlingKlient,
             vedtaksvurderingKlient,
             grunnlagKlient,
+            sanksjonService,
         )
 
     @BeforeEach
@@ -501,6 +504,45 @@ internal class BeregningsGrunnlagServiceTest {
                     any(),
                 )
             }
+        }
+    }
+
+    @Test
+    fun `skal lage et kopi av grunnlaget og kopiere sanksjon hvis revurdering`() {
+        val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD, randomUUID(), BehandlingType.REVURDERING)
+
+        val omregningsId = randomUUID()
+        val behandlingsId = randomUUID()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { sanksjonService.kopierSanksjon(any(), any()) } just Runs
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
+        every {
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId)
+        } returns
+            BeregningsGrunnlag(
+                behandlingsId,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                BeregningsMetode.BEST.toGrunnlag(),
+                emptyList(),
+            )
+
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        runBlocking {
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
+
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+            verify(exactly = 0) {
+                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                    any(),
+                    any(),
+                )
+            }
+            coVerify(exactly = 1) { sanksjonService.kopierSanksjon(any(), any()) }
         }
     }
 

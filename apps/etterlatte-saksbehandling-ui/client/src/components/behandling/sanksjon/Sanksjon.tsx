@@ -137,7 +137,7 @@ export const Sanksjon = ({
 
   const hentSanksjoner = () => {
     hentSanksjonRequest(behandling.id, (res) => {
-      setSanksjoner(res.filter((sanksjon) => visbareSanksjonstyper.includes(sanksjon.type)))
+      setSanksjoner((res ?? []).filter((sanksjon) => visbareSanksjonstyper.includes(sanksjon.type)))
     })
   }
 

@@ -50,7 +50,7 @@ internal class BeregningRoutesTest {
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
     private val beregnOverstyrBeregningService = mockk<BeregnOverstyrBeregningService>()
-    private val sanksjonService = mockk<SanksjonService>()
+
     private val beregningService =
         BeregningService(
             beregningRepository = beregningRepository,
@@ -58,7 +58,6 @@ internal class BeregningRoutesTest {
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
             beregnOverstyrBeregningService = beregnOverstyrBeregningService,
-            sanksjonService = sanksjonService,
         )
 
     @BeforeAll

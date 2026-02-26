@@ -26,11 +26,17 @@ export const enum FeatureToggle {
   overstyr_netto_brutto_tilbakekreving = 'overstyr-netto-brutto-tilbakekreving',
   vis_ikke_innvilget_periode = 'vis-ikke-innvilget-periode',
   avslutte_omgjoeringsoppgave = 'avslutte-omgjoeringsoppgave',
+  beregning_bruk_nye_beregningsregler = 'beregning_bruk_nye_beregningsregler',
 }
 
 export interface Toggle {
   togglename: FeatureToggle
   enabled: boolean
+}
+
+const beregning_bruk_nye_beregningsregler: Toggle = {
+  togglename: FeatureToggle.beregning_bruk_nye_beregningsregler,
+  enabled: false,
 }
 
 const avslutte_omgjoeringsoppgave: Toggle = {
@@ -134,6 +140,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.overstyr_netto_brutto_tilbakekreving]: overstyr_netto_brutto_tilbakekreving,
   [FeatureToggle.vis_ikke_innvilget_periode]: vis_ikke_innvilget_periode,
   [FeatureToggle.avslutte_omgjoeringsoppgave]: avslutte_omgjoeringsoppgave,
+  [FeatureToggle.beregning_bruk_nye_beregningsregler]: beregning_bruk_nye_beregningsregler,
 }
 
 export const Unleashcontext = createContext<{

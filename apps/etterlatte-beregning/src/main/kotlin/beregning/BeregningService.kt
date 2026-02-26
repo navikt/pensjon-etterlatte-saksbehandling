@@ -21,7 +21,6 @@ class BeregningService(
     private val beregnBarnepensjonService: BeregnBarnepensjonService,
     private val beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService,
     private val beregnOverstyrBeregningService: BeregnOverstyrBeregningService,
-    private val sanksjonService: SanksjonService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
@@ -43,9 +42,7 @@ class BeregningService(
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
             val overstyrBeregning = hentOverstyrBeregning(behandling)
-            if (behandling.sakType == SakType.OMSTILLINGSSTOENAD && behandling.behandlingType == BehandlingType.REVURDERING) {
-                sanksjonService.kopierSanksjon(behandlingId, brukerTokenInfo)
-            }
+
             val beregning =
                 if (overstyrBeregning != null) {
                     beregnOverstyrBeregningService.beregn(behandling, overstyrBeregning, brukerTokenInfo)

@@ -112,7 +112,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
   const hentSanksjoner = () => {
     hentSanksjonRequest(behandling.id, (res) => {
       setIkkeInnvilgedePerioder(
-        res.filter((ikkeInnvilgetPeriode) => ikkeInnvilgetPeriode.type === SanksjonType.IKKE_INNVILGET_PERIODE)
+        (res ?? []).filter((ikkeInnvilgetPeriode) => ikkeInnvilgetPeriode.type === SanksjonType.IKKE_INNVILGET_PERIODE)
       )
     })
   }

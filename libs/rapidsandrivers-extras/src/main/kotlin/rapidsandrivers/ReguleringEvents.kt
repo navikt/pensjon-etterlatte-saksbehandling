@@ -10,4 +10,6 @@ object ReguleringEvents {
     const val AVKORTING_FOER = "avkorting_foer"
     const val AVKORTING_ETTER = "avkorting_etter"
     const val VEDTAK_BELOEP = "vedtak_beloep"
+    const val INNVILGEDE_PERIODER_FOER = "innvilgede_perioder_foer"
+    const val INNVILGEDE_PERIODER_ETTER = "innvilgede_perioder_etter"
 }

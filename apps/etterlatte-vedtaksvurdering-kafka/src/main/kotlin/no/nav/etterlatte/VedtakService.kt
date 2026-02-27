@@ -11,6 +11,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.migrering.MigreringKjoringVariant
@@ -48,6 +49,8 @@ interface VedtakService {
     fun samordnetVedtak(vedtakId: String): VedtakDto?
 
     fun iverksattVedtak(behandlingId: UUID): VedtakDto
+
+    fun hentInnvilgedePerioder(behandlingId: UUID): List<InnvilgetPeriodeDto>
 }
 
 class VedtakServiceImpl(
@@ -130,6 +133,11 @@ class VedtakServiceImpl(
                 .post("$url/api/vedtak/$behandlingId/iverksett") {
                     contentType(ContentType.Application.Json)
                 }.body()
+        }
+
+    override fun hentInnvilgedePerioder(behandlingId: UUID): List<InnvilgetPeriodeDto> =
+        runBlocking {
+            vedtakKlient.get("$url/api/vedtak/$behandlingId/innvilgede-perioder").body()
         }
 }
 

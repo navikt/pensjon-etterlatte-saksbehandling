@@ -12,6 +12,7 @@ import no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.omregning.OmregningDataPacket
 import no.nav.etterlatte.omregning.OmregningHendelseType
@@ -60,22 +61,29 @@ internal class OpprettVedtakforespoerselRiver(
         logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
         val behandlingId = omregningData.hentBehandlingId()
         val dato = omregningData.hentFraDato()
-        val revurderingaarsak = omregningData.revurderingaarsak
 
         val respons =
-            when (revurderingaarsak) {
-                Revurderingaarsak.AARLIG_INNTEKTSJUSTERING, Revurderingaarsak.INNTEKTSENDRING ->
+            when (val revurderingaarsak = omregningData.revurderingaarsak) {
+                Revurderingaarsak.AARLIG_INNTEKTSJUSTERING, Revurderingaarsak.INNTEKTSENDRING -> {
                     vedtakOgBrev(
                         sakId,
                         behandlingId,
                         revurderingaarsak,
                         omregningData.utbetalingVerifikasjon,
                     )
+                }
 
-                else -> vedtakUtenBrev(sakId, behandlingId, revurderingaarsak, omregningData.utbetalingVerifikasjon)
+                else -> {
+                    vedtakUtenBrev(sakId, behandlingId, revurderingaarsak, omregningData.utbetalingVerifikasjon)
+                }
             }
-
         hentBeloep(respons, dato)?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
+
+        packet[ReguleringEvents.INNVILGEDE_PERIODER_FOER] =
+            hentInnvilgedePerioderForBehandling(omregningData.hentForrigeBehandlingid())
+        packet[ReguleringEvents.INNVILGEDE_PERIODER_ETTER] =
+            hentInnvilgedePerioderForBehandling(omregningData.hentBehandlingId())
+
         logger.info("Opprettet vedtak ${respons.vedtak.id} for sak: $sakId og behandling: $behandlingId")
         RapidUtsender.sendUt(respons, packet, context)
     }
@@ -173,13 +181,16 @@ internal class OpprettVedtakforespoerselRiver(
         revurderingaarsak: Revurderingaarsak,
     ) {
         when (revurderingaarsak) {
-            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING ->
+            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {
                 brevKlient.genererPdfOgFerdigstillVedtaksbrev(
                     behandlingId,
                     GenererOgFerdigstillVedtaksbrev(behandlingId, brevId),
                 )
+            }
 
-            else -> throw InternfeilException("Støtter ikke brev under automatisk omregning for $revurderingaarsak")
+            else -> {
+                throw InternfeilException("Støtter ikke brev under automatisk omregning for $revurderingaarsak")
+            }
         }
     }
 
@@ -199,4 +210,10 @@ internal class OpprettVedtakforespoerselRiver(
         } else {
             null
         }
+
+    private fun hentInnvilgedePerioderForBehandling(behandlingId: UUID): List<Periode> =
+        vedtak
+            .hentInnvilgedePerioder(behandlingId)
+            .map { it.periode }
+            .sortedBy { it.fom }
 }

@@ -6,8 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "lisenssjekk": "yarn license-checker-rseidelsohn --onlyAllow \"MIT;Apache-2.0;BlueOak-1.0.0;BSD-2-Clause;BSD-3-Clause;CC0-1.0;CC-BY-3.0;ISC;MPL-2.0;Python-2.0;0BSD\" --excludePackages vedtakslosning-ui@0.1.0 --summary",
-    "build": "tsc && eslint src && vite build && yarn lisenssjekk",
+    "build": "tsc && eslint src && vite build",
     "lint": "eslint",
     "test": "vitest",
     "preview": "vite preview --port 5173",
@@ -53,7 +52,6 @@
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.1.0",
     "jsdom": "^27.4.0",
-    "license-checker-rseidelsohn": "^4.4.2",
     "prettier": "^3.8.1",
     "typescript": "~5.9.3",
     "vite": "7.3.1",

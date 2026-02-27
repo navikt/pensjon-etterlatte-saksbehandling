@@ -3,11 +3,13 @@ package no.nav.etterlatte.behandling.klage
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -26,8 +28,14 @@ class KlageBrevService(
         saksbehandler: Saksbehandler,
     ): KlageOversendelsebrev =
         when (val utfall = klage.utfall) {
-            is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling.brev
-            is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling.brev
+            is KlageUtfallMedData.DelvisOmgjoering -> {
+                utfall.innstilling.brev
+            }
+
+            is KlageUtfallMedData.StadfesteVedtak -> {
+                utfall.innstilling.brev
+            }
+
             else -> {
                 val brev =
                     runBlocking {
@@ -58,6 +66,14 @@ class KlageBrevService(
         saksbehandler: Saksbehandler,
     ): FerdigstillResultat {
         val innstillingsbrev = innstilling.brev
+        val brev = runBlocking { brevApiKlient.hentBrev(klage.sak.id, innstillingsbrev.brevId, saksbehandler) }
+        if (brev.kanEndres() && brev.mottakere.none { it.type == MottakerType.HOVED }) {
+            throw UgyldigForespoerselException(
+                "MANGLER_HOVEDMOTTAKER",
+                "Ingen mottaker er satt som hovedmottaker i oversendelsesbrevet.",
+            )
+        }
+
         return runBlocking {
             val (tidJournalfoert, journalpostId) =
                 ferdigstillOgDistribuerBrev(
@@ -150,7 +166,8 @@ class KlageBrevService(
         val tidspunktJournalfoert = Tidspunkt.now()
 
         if (eksisterendeInnstillingsbrev.status.ikkeDistribuert()) {
-            val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId.first()
+            val bestillingsIdDistribuering =
+                brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId.first()
             logger.info(
                 "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
                     "med bestillingsId $bestillingsIdDistribuering",

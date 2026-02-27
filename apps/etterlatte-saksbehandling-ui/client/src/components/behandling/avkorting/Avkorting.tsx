@@ -42,13 +42,15 @@ export const Avkorting = () => {
     behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER
 
   useEffect(() => {
-    dispatch(resetAvkorting())
-    hentAvkortingRequest(behandling.id, (avkorting) => {
-      hentBehandlingstatusRequest(behandling.id, (status) => {
-        dispatch(oppdaterBehandlingsstatus(status))
-        dispatch(oppdaterAvkorting(avkorting))
+    if (!avkorting) {
+      dispatch(resetAvkorting())
+      hentAvkortingRequest(behandling.id, (avkorting) => {
+        hentBehandlingstatusRequest(behandling.id, (status) => {
+          dispatch(oppdaterBehandlingsstatus(status))
+          dispatch(oppdaterAvkorting(avkorting))
+        })
       })
-    })
+    }
   }, [])
 
   const avkortingGrunnlagInnevaerendeAar = () => {
@@ -88,8 +90,9 @@ export const Avkorting = () => {
         {mapResult(avkortingStatus, {
           pending: <Spinner label="Henter avkorting" />,
           error: (e) => <ApiErrorAlert>En feil har oppstått: {e.detail}</ApiErrorAlert>,
-          success: () => <AvkortingInntekt redigerbar={redigerbar} />,
         })}
+
+        {avkorting && <AvkortingInntekt redigerbar={redigerbar} />}
 
         {!brukNyeBeregningsregler && (
           <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />

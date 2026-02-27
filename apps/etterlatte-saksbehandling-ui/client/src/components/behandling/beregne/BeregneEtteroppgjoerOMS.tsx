@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import React, { useContext, useEffect } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
 import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
@@ -35,7 +35,6 @@ export const BeregneEtteroppgjoerOMS = () => {
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
-  const behandlingsstatus = useAppSelector((state) => state.behandlingReducer.behandling?.status)
 
   const dispatch = useAppDispatch()
   const [beregningResult, hentBeregningRequest] = useApiCall(hentBeregning)
@@ -47,13 +46,11 @@ export const BeregneEtteroppgjoerOMS = () => {
   }, [])
 
   const opprettEllerOppdaterVedtak = () => {
-    if (behandlingsstatus == IBehandlingStatus.BEREGNET) {
-      return
+    if (redigerbar) {
+      oppdaterVedtakRequest(behandling.id)
     }
 
-    oppdaterVedtakRequest(behandling.id, () => {
-      next()
-    })
+    next()
   }
 
   const erAvkortet = () =>

@@ -712,21 +712,20 @@ class KlageServiceImpl(
     private fun opprettVedtakOgBrev(
         klage: Klage,
         saksbehandler: Saksbehandler,
-    ): Pair<KlageVedtak, KlageVedtaksbrev> {
-        return when (val utfall = klage.utfall) {
+    ): Pair<KlageVedtak, KlageVedtaksbrev> =
+        when (val utfall = klage.utfall) {
             is KlageUtfallMedData.Avvist -> {
                 Pair(utfall.vedtak, utfall.brev)
             }
 
             else -> {
-                return runBlocking {
+                runBlocking {
                     val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
                     val vedtaksbrevId = klageBrevService.vedtaksbrev(klage, saksbehandler)
                     Pair(vedtakId, vedtaksbrevId)
                 }
             }
         }
-    }
 
     private suspend fun lagreVedtakForAvvisning(
         klage: Klage,

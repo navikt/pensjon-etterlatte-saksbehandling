@@ -785,7 +785,8 @@ class KlageServiceImpl(
         val brevMottaker =
             if (mottakere.size > 1) {
                 mottakere.find { it.foedselsnummer?.value == innsender }
-                    ?: mottakere.single { it.type == MottakerType.HOVED }
+                    ?: mottakere.singleOrNull { it.type == MottakerType.HOVED }
+                    ?: mottakere.first()
             } else {
                 mottakere.singleOrNull()
                     ?: throw InternfeilException("Mangler mottaker på klageinnstilling")

@@ -36,6 +36,8 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
 
   const navigate = useNavigate()
 
+  const aarFinnesPaaOppgave = oppgave.referanse?.length === 4
+
   const {
     formState: { errors },
     handleSubmit,
@@ -53,7 +55,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
   }
 
   const opprettForbehandling = () => {
-    if (!valgtEtteroppgjoer) return
+    if (!valgtEtteroppgjoer && !aarFinnesPaaOppgave) return
 
     opprettForbehandlingRequest(
       {
@@ -67,8 +69,6 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
       }
     )
   }
-
-  const aarFinnesPaaOppgave = oppgave.referanse?.length === 4
 
   const avslutt = ({ kommentar }: { kommentar: string }) => {
     const nyMerknad = `${oppgave.merknad ?? ''} – Kommentar: ${kommentar}`

@@ -86,11 +86,13 @@ export const Avkorting = () => {
             fordeles på gjenværende måneder. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
           </BodyShort>
         </VStack>
+
         {mapResult(avkortingStatus, {
           pending: <Spinner label="Henter avkorting" />,
           error: (e) => <ApiErrorAlert>En feil har oppstått: {e.detail}</ApiErrorAlert>,
-          success: () => <AvkortingInntekt redigerbar={redigerbar} />,
         })}
+
+        {avkorting && <AvkortingInntekt redigerbar={redigerbar} />}
 
         {!brukNyeBeregningsregler && (
           <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />

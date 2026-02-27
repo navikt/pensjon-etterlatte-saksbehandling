@@ -1,11 +1,19 @@
-import { SummerteInntekterAOrdningen } from '~shared/types/EtteroppgjoerForbehandling'
-import { BodyShort, Heading, Label, VStack, Table } from '@navikt/ds-react'
+import { Avkorting, SummerteInntekterAOrdningen } from '~shared/types/EtteroppgjoerForbehandling'
+import { BodyShort, Heading, Label, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import React from 'react'
 import { formaterDatoMedKlokkeslett, formaterMaanedAar } from '~utils/formatering/dato'
-import { LenkeTilInntektOversikt } from '~components/etteroppgjoer/components/inntektsopplysninger/LenkeTilInntektOversikt'
+import {
+  LenkeTilInntektOversikt
+} from '~components/etteroppgjoer/components/inntektsopplysninger/LenkeTilInntektOversikt'
 
-export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: SummerteInntekterAOrdningen }) {
+export function OpplysningerFraAInntektSummert({
+  inntekter,
+  avkorting,
+}: {
+  inntekter: SummerteInntekterAOrdningen
+  avkorting?: Avkorting
+}) {
   return (
     <VStack gap="4">
       <Heading size="small">Opplysninger fra A-ordningen</Heading>
@@ -51,6 +59,24 @@ export function OpplysningerFraAInntektSummert({ inntekter }: { inntekter: Summe
               </Table.DataCell>
             ))}
           </Table.Row>
+          {avkorting && (
+            <Table.Row>
+              <Table.DataCell>Har ytelse &gt; 0</Table.DataCell>
+              {inntekter.oms.inntekter.map((maaned) => {
+                const avkortingForMaaned = avkorting.avkortetYtelse.find(
+                  (avkortetYtelse) =>
+                    avkortetYtelse.fom <= maaned.maaned && (!avkortetYtelse.tom || avkortetYtelse.tom >= maaned.maaned)
+                )
+                const harYtelseIMaaned = avkortingForMaaned && avkortingForMaaned.ytelseFoerAvkorting > 0
+
+                return (
+                  <Table.DataCell key={maaned.maaned} align="right">
+                    {harYtelseIMaaned ? 'Ja' : 'Nei'}
+                  </Table.DataCell>
+                )
+              })}
+            </Table.Row>
+          )}
         </Table.Body>
       </Table>
 

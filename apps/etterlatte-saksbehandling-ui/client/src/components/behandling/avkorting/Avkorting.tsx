@@ -42,15 +42,13 @@ export const Avkorting = () => {
     behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER
 
   useEffect(() => {
-    if (!avkorting) {
-      dispatch(resetAvkorting())
-      hentAvkortingRequest(behandling.id, (avkorting) => {
-        hentBehandlingstatusRequest(behandling.id, (status) => {
-          dispatch(oppdaterBehandlingsstatus(status))
-          dispatch(oppdaterAvkorting(avkorting))
-        })
+    dispatch(resetAvkorting())
+    hentAvkortingRequest(behandling.id, (avkorting) => {
+      hentBehandlingstatusRequest(behandling.id, (status) => {
+        dispatch(oppdaterBehandlingsstatus(status))
+        dispatch(oppdaterAvkorting(avkorting))
       })
-    }
+    })
   }, [])
 
   const avkortingGrunnlagInnevaerendeAar = () => {
@@ -86,6 +84,7 @@ export const Avkorting = () => {
             fordeles på gjenværende måneder. På samme måte skal inntekt etter opphør holdes utenfor i opphørsåret.
           </BodyShort>
         </VStack>
+
         {mapResult(avkortingStatus, {
           pending: <Spinner label="Henter avkorting" />,
           error: (e) => <ApiErrorAlert>En feil har oppstått: {e.detail}</ApiErrorAlert>,

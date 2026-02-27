@@ -116,6 +116,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                     every { sakId } returns sakId1
                     every { erAvsluttet() } returns false
                     every { type } returns OppgaveType.ETTEROPPGJOER
+                    every { referanse } returns "2024"
                 }
             coEvery { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
             coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer

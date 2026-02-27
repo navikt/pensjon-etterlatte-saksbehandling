@@ -42,7 +42,7 @@ export const tilbakestillEtteroppgjoerOgOpprettOppgave = async (args: {
 export const opprettEtteroppgoerForbehandling = async (args: {
   sakId: number
   oppgaveId: string
-  inntektsaar: string
+  inntektsaar?: string
 }): Promise<ApiResponse<EtteroppgjoerForbehandling>> => {
   return apiClient.post(`/etteroppgjoer/${args.sakId}/opprett-forbehandling/${args.oppgaveId}`, {
     inntektsaar: args.inntektsaar,

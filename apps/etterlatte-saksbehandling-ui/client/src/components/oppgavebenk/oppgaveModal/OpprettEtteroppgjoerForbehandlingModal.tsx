@@ -68,6 +68,8 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
     )
   }
 
+  const aarFinnesPaaOppgave = oppgave.referanse?.length === 4
+
   const avslutt = ({ kommentar }: { kommentar: string }) => {
     const nyMerknad = `${oppgave.merknad ?? ''} – Kommentar: ${kommentar}`
 
@@ -99,7 +101,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
 
             {oppgave.merknad && <Alert variant="info">{oppgave.merknad}</Alert>}
 
-            {kanRedigeres && erTildeltSaksbehandler && (
+            {kanRedigeres && erTildeltSaksbehandler && !aarFinnesPaaOppgave && (
               <VelgEtteroppgjoersAar
                 sakId={oppgave.sakId.toString()}
                 value={valgtEtteroppgjoer}

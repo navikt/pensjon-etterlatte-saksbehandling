@@ -56,7 +56,7 @@ class EtteroppgjoerOppgaveService(
             else -> {
                 val default = "Etteroppgjøret for $inntektsAar er klart til behandling"
                 oppgaveService.opprettOppgave(
-                    referanse = "",
+                    referanse = inntektsAar.toString(),
                     sakId = sakId,
                     kilde = OppgaveKilde.HENDELSE,
                     type = OppgaveType.ETTEROPPGJOER,

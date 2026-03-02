@@ -160,11 +160,15 @@ internal class OmregningHendelserBeregningRiver(
         val dato = packet.omregningData.hentFraDato()
         val forrigeBeregning =
             when (val forrigePeriode = beregning.forrigeBeregning.beregningsperioder.paaDato(dato)) {
-                null ->
+                null -> {
                     beregning.forrigeBeregning.beregningsperioder
                         .minByOrNull { it.datoFOM }
                         ?.takeIf { it.datoFOM.atDay(1) > dato }
-                else -> forrigePeriode
+                }
+
+                else -> {
+                    forrigePeriode
+                }
             }
         val forrige =
             krevIkkeNull(forrigeBeregning) {
@@ -192,19 +196,14 @@ internal class OmregningHendelserBeregningRiver(
             }
 
         if (beregning.forrigeAvkorting != null) {
-            val forrigeAvkortingBeloep =
-                when (val forrigePeriode = beregning.forrigeAvkorting.avkortetYtelse.paaDato(dato)) {
-                    null ->
-                        beregning.forrigeAvkorting.avkortetYtelse
-                            .minByOrNull { it.fom }
-                            ?.takeIf { it.fom.atDay(1) > dato }
-                    else -> forrigePeriode.avkortingsbeloep
-                }
-            krevIkkeNull(forrigeAvkortingBeloep) {
+            val forrigeAvkorting: AvkortetYtelseDto? =
+                beregning.forrigeAvkorting.avkortetYtelse.paaDato(dato)
+                    ?: beregning.forrigeAvkorting.avkortetYtelse.naermesteEtterDato(dato)
+
+            krevIkkeNull(forrigeAvkorting) {
                 "Forrige beregning mangler avkortingsperiode på dato $dato, og har heller ikke en senere avkortingsperiode"
-            }.let { beloep ->
-                packet[AVKORTING_FOER] = beloep
             }
+            packet[AVKORTING_FOER] = forrigeAvkorting.avkortingsbeloep
 
             krevIkkeNull(beregning.avkorting?.avkortetYtelse?.paaDato(dato)) {
                 "Vi har en tidligere avkorting men har ikke nåværende avkorting"
@@ -287,6 +286,11 @@ internal class OmregningHendelserBeregningRiver(
     private fun List<AvkortetYtelseDto>.paaDato(dato: LocalDate) =
         filter { it.fom.erFoerEllerPaa(dato) }
             .firstOrNull { it.tom.erEtter(dato) }
+
+    private fun List<AvkortetYtelseDto>.naermesteEtterDato(dato: LocalDate): AvkortetYtelseDto? =
+        this
+            .minByOrNull { it.fom }
+            ?.takeIf { it.fom.atDay(1) > dato }
 }
 
 class MindreEnnForrigeBehandling(

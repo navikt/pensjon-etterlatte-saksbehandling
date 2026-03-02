@@ -120,6 +120,8 @@ internal class TilbakekrevingHendelseRiverTest {
                                 tilbakekreving(Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, null)),
                                 Tidspunkt.now(),
                                 null,
+                                "EY",
+                                null,
                             ),
                     ),
                 ).toJson()

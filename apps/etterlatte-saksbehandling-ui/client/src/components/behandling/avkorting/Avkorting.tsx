@@ -92,7 +92,7 @@ export const Avkorting = () => {
           error: (e) => <ApiErrorAlert>En feil har oppstått: {e.detail}</ApiErrorAlert>,
         })}
 
-        {avkorting && <AvkortingInntekt redigerbar={redigerbar} />}
+        <AvkortingInntekt redigerbar={redigerbar} />
 
         {!brukNyeBeregningsregler && (
           <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />

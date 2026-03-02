@@ -92,7 +92,7 @@ class EtteroppgjoerService(
         registrerHendelseForEtteroppgjoer(sakId, inntektsaar, hendelse)
     }
 
-    private fun registrerHendelseForEtteroppgjoer(
+    fun registrerHendelseForEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
         hendelse: EtteroppgjoerHendelser?,

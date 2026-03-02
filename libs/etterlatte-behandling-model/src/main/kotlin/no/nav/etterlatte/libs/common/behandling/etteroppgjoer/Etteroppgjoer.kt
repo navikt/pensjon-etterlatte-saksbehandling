@@ -39,6 +39,7 @@ enum class EtteroppgjoerHendelser : EventnameHendelseType {
     TILBAKESTILT,
     OMGJOERING,
     FERDIGSTILT,
+    SVARFRIST_UTLOEPT,
     MANGLER_SKATTEOPPGJOER,
     ;
 

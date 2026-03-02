@@ -1,11 +1,9 @@
 import { Avkorting, SummerteInntekterAOrdningen } from '~shared/types/EtteroppgjoerForbehandling'
-import { BodyShort, Heading, Label, Table, VStack } from '@navikt/ds-react'
+import { BodyShort, Heading, HelpText, HStack, Label, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import React from 'react'
 import { formaterDatoMedKlokkeslett, formaterMaanedAar } from '~utils/formatering/dato'
-import {
-  LenkeTilInntektOversikt
-} from '~components/etteroppgjoer/components/inntektsopplysninger/LenkeTilInntektOversikt'
+import { LenkeTilInntektOversikt } from '~components/etteroppgjoer/components/inntektsopplysninger/LenkeTilInntektOversikt'
 
 export function OpplysningerFraAInntektSummert({
   inntekter,
@@ -61,7 +59,15 @@ export function OpplysningerFraAInntektSummert({
           </Table.Row>
           {avkorting && (
             <Table.Row>
-              <Table.DataCell>Har ytelse &gt; 0</Table.DataCell>
+              <Table.DataCell>
+                <HStack gap="1">
+                  Har ytelse &gt; 0
+                  <HelpText>
+                    Her vises måneder der det er beregnet ytelse &gt; 0 kr før inntektsavkorting. Det er kun inntekten
+                    for månedene med beregnet ytelse &gt; 0 som skal legges inn i inntekten.
+                  </HelpText>
+                </HStack>
+              </Table.DataCell>
               {inntekter.oms.inntekter.map((maaned) => {
                 const avkortingForMaaned = avkorting.avkortetYtelse.find(
                   (avkortetYtelse) =>

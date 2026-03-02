@@ -265,7 +265,7 @@ class EtteroppgjoerForbehandlingService(
         val etteroppgjoer =
             etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
 
-        kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar, oppgaveId, etteroppgjoer)
+        kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar, oppgaveId, etteroppgjoer, brukerTokenInfo)
 
         val nyForbehandling = opprettForbehandling(sak, inntektsaar, etteroppgjoer, brukerTokenInfo)
         dao.lagreForbehandling(nyForbehandling)
@@ -456,6 +456,7 @@ class EtteroppgjoerForbehandlingService(
         inntektsaar: Int,
         oppgaveId: UUID,
         etteroppgjoer: Etteroppgjoer,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // Sak
         if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
@@ -475,8 +476,9 @@ class EtteroppgjoerForbehandlingService(
 
         sjekkHarAapneBehandlinger(sak.id, oppgaveId)
 
+        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sak.id)
         // Siste iverksatte behandling
-        if (behandlingService.hentSisteIverksatteBehandling(sak.id) == null) {
+        if (sisteIverksatteBehandling == null) {
             logger.error("Sak ${sak.id} mangler iverksatt behandling. Kan ikke opprette forbehandling.")
             throw InternfeilException(
                 "Sak ${sak.id} mangler iverksatt behandling. Kan ikke opprette forbehandling.",
@@ -489,6 +491,22 @@ class EtteroppgjoerForbehandlingService(
             throw IkkeTillattException(
                 "FORBEHANDLING_FINNES_ALLEREDE",
                 "Kan ikke opprette forbehandling fordi det allerede eksisterer en forbehandling som ikke er ferdigstilt for etteroppgjørsåret $inntektsaar",
+            )
+        }
+
+        // Avkorting for etteroppgjørsåret har ingen sanksjoner som er beregnet med gamle avkortingsregler
+        val avkorting =
+            runBlocking { beregningKlient.hentBeregningOgAvkorting(sisteIverksatteBehandling.id, brukerTokenInfo) }
+        val perioderForEtteroppgjoeret = avkorting.perioder.filter { it.periode.fom.year == inntektsaar }
+        val harPerioderMedSanksjonOgBeregnetYtelse =
+            perioderForEtteroppgjoeret.any { it.sanksjon != null && it.ytelseFoerAvkorting > 0 }
+        if (harPerioderMedSanksjonOgBeregnetYtelse) {
+            throw UgyldigForespoerselException(
+                "SANKSJON_GAMLE_REGLER",
+                "Eksisterende avkorting i etteroppgjørsåret ($inntektsaar) har " +
+                    "sanksjoner som er beregnet med gamle regler for avkorting. For at etteroppgjøret " +
+                    "skal bli riktig må behandlingen revurderes fra første virk med de nye reglene før " +
+                    "etteroppgjøret kan påstartes.",
             )
         }
     }

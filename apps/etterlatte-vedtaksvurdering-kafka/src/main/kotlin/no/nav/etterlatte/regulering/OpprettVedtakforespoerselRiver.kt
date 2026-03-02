@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.omregning.OmregningDataPacket
 import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.omregning.UtbetalingVerifikasjon
@@ -60,9 +61,8 @@ internal class OpprettVedtakforespoerselRiver(
         val sakId = omregningData.sakId
         logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
         val behandlingId = omregningData.hentBehandlingId()
-        val dato = omregningData.hentFraDato()
 
-        val respons =
+        val vedtakOgRapid =
             when (val revurderingaarsak = omregningData.revurderingaarsak) {
                 Revurderingaarsak.AARLIG_INNTEKTSJUSTERING, Revurderingaarsak.INNTEKTSENDRING -> {
                     vedtakOgBrev(
@@ -77,15 +77,26 @@ internal class OpprettVedtakforespoerselRiver(
                     vedtakUtenBrev(sakId, behandlingId, revurderingaarsak, omregningData.utbetalingVerifikasjon)
                 }
             }
-        hentBeloep(respons, dato)?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
+        sendMedInformasjonTilKontrollsjekking(omregningData, vedtakOgRapid, packet)
+
+        logger.info("Opprettet vedtak ${vedtakOgRapid.vedtak.id} for sak: $sakId og behandling: $behandlingId")
+        RapidUtsender.sendUt(vedtakOgRapid, packet, context)
+    }
+
+    private fun sendMedInformasjonTilKontrollsjekking(
+        omregningData: OmregningData,
+        respons: VedtakOgRapid,
+        packet: JsonMessage,
+    ) {
+        hentBeloep(respons, omregningData.hentFraDato())?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
 
         packet[ReguleringEvents.INNVILGEDE_PERIODER_FOER] =
             hentInnvilgedePerioderForBehandling(omregningData.hentForrigeBehandlingid())
-        packet[ReguleringEvents.INNVILGEDE_PERIODER_ETTER] =
-            hentInnvilgedePerioderForBehandling(omregningData.hentBehandlingId())
 
-        logger.info("Opprettet vedtak ${respons.vedtak.id} for sak: $sakId og behandling: $behandlingId")
-        RapidUtsender.sendUt(respons, packet, context)
+        if (!skalStoppeEtterFattet(omregningData.revurderingaarsak)) {
+            packet[ReguleringEvents.INNVILGEDE_PERIODER_ETTER] =
+                hentInnvilgedePerioderForBehandling(omregningData.hentBehandlingId())
+        }
     }
 
     private fun skalStoppeEtterFattet(revurderingaarsak: Revurderingaarsak): Boolean {

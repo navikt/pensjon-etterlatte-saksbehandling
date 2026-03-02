@@ -76,6 +76,8 @@ class OmregningServiceTest(
                 avkortingFoer = BigDecimal("1000"),
                 avkortingEtter = BigDecimal("2000"),
                 vedtakBeloep = BigDecimal("15000"),
+                innvilgedePerioderFoer = null,
+                innvilgedePerioderEtter = null,
             )
 
         service.kjoeringFullfoert(request)
@@ -107,6 +109,8 @@ class OmregningServiceTest(
                                 avkortingFoer = getBigDecimal("avkorting_foer"),
                                 avkortingEtter = getBigDecimal("avkorting_etter"),
                                 vedtakBeloep = getBigDecimal("vedtak_beloep"),
+                                innvilgedePerioderFoer = null,
+                                innvilgedePerioderEtter = null,
                             )
                         }.first()
                 }

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 
@@ -47,8 +48,9 @@ class OmregningDao(
                         """
                         INSERT INTO omregningskjoering (kjoering, status, sak_id, beregning_beloep_foer, 
                         beregning_beloep_etter, beregning_g_foer, beregning_g_etter, 
-                        beregning_brukt_omregningsfaktor, avkorting_foer, avkorting_etter, vedtak_beloep)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        beregning_brukt_omregningsfaktor, avkorting_foer, avkorting_etter, vedtak_beloep, 
+                        innvilgede_perioder_foer, innvilgede_perioder_etter)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setString(1, request.kjoering)
@@ -62,9 +64,11 @@ class OmregningDao(
                 statement.setBigDecimal(9, request.avkortingFoer)
                 statement.setBigDecimal(10, request.avkortingEtter)
                 statement.setBigDecimal(11, request.vedtakBeloep)
+                statement.setJsonb(12, request.innvilgedePerioderFoer)
+                statement.setJsonb(13, request.innvilgedePerioderEtter)
                 statement.executeUpdate().also {
                     krev(it > 0) {
-                        "Kunne ikke lagreKjoering for id sakid ${request.sakId}"
+                        "Kunne ikke lagre kjøring for sak ${request.sakId}"
                     }
                 }
             }

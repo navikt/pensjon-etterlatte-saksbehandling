@@ -6,10 +6,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.omregning.OmregningDataPacket
 import no.nav.etterlatte.omregning.omregningData
@@ -22,6 +24,8 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BELOEP_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.INNVILGEDE_PERIODER_ETTER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.INNVILGEDE_PERIODER_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
@@ -92,6 +96,8 @@ internal class VedtakAttestertRiver(
                 avkortingFoer = bigDecimal(packet, AVKORTING_FOER),
                 avkortingEtter = bigDecimal(packet, AVKORTING_ETTER),
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
+                innvilgedePerioderFoer = deserialize(packet[INNVILGEDE_PERIODER_FOER].toJson()),
+                innvilgedePerioderEtter = deserialize(packet[INNVILGEDE_PERIODER_ETTER].toJson()),
             )
 
         behandlingService.lagreFullfoertKjoering(request)

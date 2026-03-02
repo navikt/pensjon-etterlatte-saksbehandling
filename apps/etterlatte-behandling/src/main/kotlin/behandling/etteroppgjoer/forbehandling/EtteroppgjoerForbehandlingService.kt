@@ -262,9 +262,9 @@ class EtteroppgjoerForbehandlingService(
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         validerOppgaveForOpprettForbehandling(oppgave, sakId)
 
-        val etteroppgjoersAar = if (oppgave.referanse.length == 4) oppgave.referanse.toInt() else inntektsaar
+        val etteroppgjoersaar = if (oppgave.referanse.length == 4) oppgave.referanse.toInt() else inntektsaar
 
-        if (etteroppgjoersAar == null) {
+        if (etteroppgjoersaar == null) {
             throw UgyldigForespoerselException(
                 "UGYLDIG_INNTEKTSAAR",
                 "Kan ikke opprette forbehandling, etteroppgjørsåret mangler",
@@ -272,13 +272,13 @@ class EtteroppgjoerForbehandlingService(
         }
 
         val etteroppgjoer =
-            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, etteroppgjoersAar)
+            etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, etteroppgjoersaar)
 
-        kanOppretteForbehandlingForEtteroppgjoer(sak, etteroppgjoersAar, oppgaveId, etteroppgjoer)
+        kanOppretteForbehandlingForEtteroppgjoer(sak, etteroppgjoersaar, oppgaveId, etteroppgjoer)
 
-        val nyForbehandling = opprettForbehandling(sak, etteroppgjoersAar, etteroppgjoer, brukerTokenInfo)
+        val nyForbehandling = opprettForbehandling(sak, etteroppgjoersaar, etteroppgjoer, brukerTokenInfo)
         dao.lagreForbehandling(nyForbehandling)
-        etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, etteroppgjoersAar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, etteroppgjoersaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
         hentOgLagreAInntektOgPgi(sak, nyForbehandling)
 

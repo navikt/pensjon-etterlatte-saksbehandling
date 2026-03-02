@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVilkaar
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingskomponentenFeil
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -149,7 +150,7 @@ class TilbakekrevingService(
             lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.OPPRETTET)
 
             tilbakekrevinghendelser.sendTilbakekreving(
-                statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
+                statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving, saksbehandler?.ident, null),
                 type = TilbakekrevingHendelseType.OPPRETTET,
             )
 
@@ -202,7 +203,7 @@ class TilbakekrevingService(
             lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.AVBRUTT)
 
             tilbakekrevinghendelser.sendTilbakekreving(
-                statistikkTilbakekreving = tilbakekrevingForStatistikk(avbruttTilbakekreving),
+                statistikkTilbakekreving = tilbakekrevingForStatistikk(avbruttTilbakekreving, Fagsaksystem.EY.name, null),
                 type = TilbakekrevingHendelseType.AVBRUTT,
             )
 
@@ -346,7 +347,7 @@ class TilbakekrevingService(
                     begrunnelse = TilbakekrevingAvbruttAarsak.IKKE_NOE_KRAVGRUNNLAG.name,
                 )
                 tilbakekrevinghendelser.sendTilbakekreving(
-                    statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving),
+                    statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving, saksbehandler.ident, null),
                     type = TilbakekrevingHendelseType.AVBRUTT,
                 )
                 return@inTransaction oppdatertTilbakekreving
@@ -432,7 +433,7 @@ class TilbakekrevingService(
         lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.FATTET_VEDTAK, vedtak.id, saksbehandler)
 
         tilbakekrevinghendelser.sendTilbakekreving(
-            statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving),
+            statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving, saksbehandler.ident, null),
             type = TilbakekrevingHendelseType.FATTET_VEDTAK,
         )
 
@@ -522,7 +523,12 @@ class TilbakekrevingService(
             }
 
             tilbakekrevinghendelser.sendTilbakekreving(
-                statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving),
+                statistikkTilbakekreving =
+                    tilbakekrevingForStatistikk(
+                        oppdatertTilbakekreving,
+                        vedtak.vedtakFattet?.ansvarligSaksbehandler,
+                        saksbehandler.ident,
+                    ),
                 type = TilbakekrevingHendelseType.ATTESTERT,
             )
 
@@ -562,14 +568,20 @@ class TilbakekrevingService(
                 begrunnelse = valgtBegrunnelse,
             )
 
-            oppgaveService.tilUnderkjent(
-                referanse = tilbakekreving.id.toString(),
-                type = OppgaveType.TILBAKEKREVING,
-                merknad = listOfNotNull(valgtBegrunnelse, kommentar).joinToString(separator = ": "),
-            )
+            val underkjentOppgave =
+                oppgaveService.tilUnderkjent(
+                    referanse = tilbakekreving.id.toString(),
+                    type = OppgaveType.TILBAKEKREVING,
+                    merknad = listOfNotNull(valgtBegrunnelse, kommentar).joinToString(separator = ": "),
+                )
 
             tilbakekrevinghendelser.sendTilbakekreving(
-                statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving),
+                statistikkTilbakekreving =
+                    tilbakekrevingForStatistikk(
+                        oppdatertTilbakekreving,
+                        underkjentOppgave.saksbehandler?.ident,
+                        saksbehandler.ident,
+                    ),
                 type = TilbakekrevingHendelseType.UNDERKJENT,
             )
 
@@ -686,13 +698,19 @@ class TilbakekrevingService(
             }
         }
 
-    private fun tilbakekrevingForStatistikk(tilbakekreving: TilbakekrevingBehandling): StatistikkTilbakekrevingDto {
+    private fun tilbakekrevingForStatistikk(
+        tilbakekreving: TilbakekrevingBehandling,
+        saksbehandler: String?,
+        attestant: String?,
+    ): StatistikkTilbakekrevingDto {
         val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(tilbakekreving.sak.id)?.type
         return StatistikkTilbakekrevingDto(
             tilbakekreving.id,
             tilbakekreving,
             Tidspunkt.now(),
             utlandstilknytningType,
+            saksbehandler,
+            attestant,
         )
     }
 

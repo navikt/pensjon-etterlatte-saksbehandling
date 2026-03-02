@@ -356,6 +356,7 @@ class OppgaveDaoImpl(
                         WHERE (? OR o.status = ANY(?))
                         AND o.enhet = ANY(?)
                         AND (? OR o.saksbehandler = ?)
+                        ORDER BY o.opprettet DESC
                         """.trimIndent(),
                     )
 

@@ -53,7 +53,7 @@ create index idx_vedtakid
 
 create table public.outbox_vedtakshendelse
 (
-    id        uuid                     default uuid_generate_v4()               not null
+    id        uuid                     default gen_random_uuid()               not null
         primary key,
     vedtakid  bigint                                                            not null
         references public.vedtak,
@@ -67,7 +67,7 @@ create index outbox_vedtakshendelse_publisert_idx
 
 create table public.avkortet_ytelse_periode
 (
-    id          uuid                     default uuid_generate_v4()               not null
+    id          uuid                     default gen_random_uuid()               not null
         primary key,
     vedtakid    bigint                                                            not null
         references public.vedtak,
@@ -84,7 +84,7 @@ create index avkortet_ytelse_periode_vedtakid_idx
 
 create table public.samordning_manuell
 (
-    id            uuid                     default uuid_generate_v4()               not null
+    id            uuid                     default gen_random_uuid()               not null
         primary key,
     opprettet     timestamp with time zone default (now() AT TIME ZONE 'UTC'::text) not null,
     opprettet_av  text                                                              not null,

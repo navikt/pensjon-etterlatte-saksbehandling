@@ -495,9 +495,24 @@ class EtteroppgjoerForbehandlingService(
         }
 
         // Avkorting for etteroppgjørsåret har ingen sanksjoner som er beregnet med gamle avkortingsregler
+        val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sak.id, brukerTokenInfo)
+        val sisteVedtakMedAvkorting = etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe)
         val avkorting =
-            runBlocking { beregningKlient.hentBeregningOgAvkorting(sisteIverksatteBehandling.id, brukerTokenInfo) }
+            runBlocking {
+                beregningKlient.hentBeregningOgAvkorting(
+                    sisteVedtakMedAvkorting.behandlingId,
+                    brukerTokenInfo,
+                )
+            }
         val perioderForEtteroppgjoeret = avkorting.perioder.filter { it.periode.fom.year == inntektsaar }
+        if (perioderForEtteroppgjoeret.isEmpty()) {
+            throw InternfeilException(
+                "Kunne ikke finne avkortingsperioder for etteroppgjørsåret $inntektsaar i sak ${sak.id}. " +
+                    "Siste iverksatte vedtak med avkorting (behandlingId=${sisteVedtakMedAvkorting.behandlingId}) " +
+                    "har ingen perioder for etteroppgjørsåret.",
+            )
+        }
+
         val harPerioderMedSanksjonOgBeregnetYtelse =
             perioderForEtteroppgjoeret.any { it.sanksjon != null && it.ytelseFoerAvkorting > 0 }
         if (harPerioderMedSanksjonOgBeregnetYtelse) {

@@ -24,6 +24,8 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
   const [open, setOpen] = useState(false)
   const [valgtEtteroppgjoer, setValgtEtteroppgjoer] = useState<string>('')
 
+  const etteroppgjoersAar = oppgave.gjelderAar?.toString() ?? valgtEtteroppgjoer
+
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
@@ -53,13 +55,13 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
   }
 
   const opprettForbehandling = () => {
-    if (!valgtEtteroppgjoer) return
+    if (!etteroppgjoersAar) return
 
     opprettForbehandlingRequest(
       {
         sakId: oppgave.sakId,
         oppgaveId: oppgave.id,
-        inntektsaar: valgtEtteroppgjoer,
+        inntektsaar: etteroppgjoersAar,
       },
       (forbehandling) => {
         lukkModal()
@@ -99,7 +101,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
 
             {oppgave.merknad && <Alert variant="info">{oppgave.merknad}</Alert>}
 
-            {kanRedigeres && erTildeltSaksbehandler && (
+            {kanRedigeres && erTildeltSaksbehandler && !oppgave.gjelderAar && (
               <VelgEtteroppgjoersAar
                 sakId={oppgave.sakId.toString()}
                 value={valgtEtteroppgjoer}
@@ -143,7 +145,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
               {kanRedigeres && erTildeltSaksbehandler && (
                 <Button
                   loading={isPending(opprettForbehandlingResult)}
-                  disabled={!valgtEtteroppgjoer}
+                  disabled={!etteroppgjoersAar}
                   onClick={opprettForbehandling}
                 >
                   Opprett forbehandling

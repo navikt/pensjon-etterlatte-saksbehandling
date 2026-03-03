@@ -25,6 +25,8 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
   const [open, setOpen] = useState(false)
   const [valgtEtteroppgjoer, setValgtEtteroppgjoer] = useState<string>('')
 
+  const etteroppgjoersAar = oppgave.gjelderAar?.toString() ?? valgtEtteroppgjoer
+
   const navigate = useNavigate()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -49,13 +51,13 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
   }
 
   const opprettRevurderingEtteroppgjoer = () => {
-    if (!valgtEtteroppgjoer) return
+    if (!etteroppgjoersAar) return
 
     opprettRevurderingRequest(
       {
         sakId: oppgave.sakId,
         opprinnelse: Opprinnelse.AUTOMATISK_JOBB,
-        inntektsaar: valgtEtteroppgjoer,
+        inntektsaar: etteroppgjoersAar,
       },
       (result) => {
         ferdigstill({ id: oppgave.id, merknad: oppgave.merknad }, () => {
@@ -99,11 +101,13 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
 
             <BodyShort>Etteroppgjøret kan ferdigstilles</BodyShort>
 
-            <VelgEtteroppgjoersAar
-              sakId={oppgave.sakId.toString()}
-              value={valgtEtteroppgjoer}
-              onChange={setValgtEtteroppgjoer}
-            />
+            {!oppgave.gjelderAar && (
+              <VelgEtteroppgjoersAar
+                sakId={oppgave.sakId.toString()}
+                value={valgtEtteroppgjoer}
+                onChange={setValgtEtteroppgjoer}
+              />
+            )}
 
             {kanRedigeres &&
               (erTildeltSaksbehandler ? (
@@ -142,7 +146,7 @@ export const EtteroppgjoerOpprettRevurderingModal = ({ oppgave, oppdaterStatus }
               {kanRedigeres && erTildeltSaksbehandler && (
                 <Button
                   loading={isPending(opprettRevurderingResult)}
-                  disabled={!valgtEtteroppgjoer}
+                  disabled={!etteroppgjoersAar}
                   onClick={opprettRevurderingEtteroppgjoer}
                 >
                   Opprett revurdering

@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row

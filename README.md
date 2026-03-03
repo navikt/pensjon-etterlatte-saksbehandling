@@ -6,6 +6,24 @@ Monorepoet bruker `husky` for pre-commit-hooks. Denne kjører `Prettier` for fro
 Før man starter å kode er det derfor viktig å kjøre `bash get-started.sh` fra Root. Da vil alle de tre overnevnte bli
 installert.
 
+## Gradle
+
+Vi bruker personal access token (PAT) til autentisering for å hente intern pakker til prosjektet. Se [opprett nytt personlig token](https://github.com/settings/tokens/new).   
+Legg til token i `$HOME/.zshrc` t.d `export GITHUB_TOKEN=<TOKEN>` for å opprette miljøvariabel. NB! Husk å autorisere tokenet mot navikt i Github
+
+## Lokal bygg/test - docker
+
+Docker må være installert og kjørende for at lokal bygg/test skal fungere. Hvis man bruker docker desktop så klarer
+testene å finne docker socket automatisk. Hvis man har colima kjørende så må man sette opp noen miljøvariabler.
+
+```
+DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock
+TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+```
+
+* DOCKER_HOST peker docker app osv mot sock filen fra colima
+* TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE setter sock adressen på innsiden av kontainere
+
 # Lokal utvikling
 
 ## Hvordan kjøre en eller flere apper 
@@ -89,27 +107,9 @@ Administrering av saksbehandlere i dev gjøres i [IDA](https://ida.intern.nav.no
 
 # Bygg og deploy
 
-En app bygges og deployes automatisk når en endring legges til i `main`.    
+En app bygges og deployes automatisk når en endring legges til i `main`.
 
 For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
-
-## Gradle
-
-Vi bruker personal access token (PAT) til autentisering for å hente intern pakker til prosjektet. Se [opprett nytt personlig token](https://github.com/settings/tokens/new).   
-Legg til token i `$HOME/.zshrc` t.d `export GITHUB_TOKEN=<TOKEN>` for å opprette miljøvariabel. NB! Husk å autorisere tokenet mot navikt i Github
-
-## Lokal bygg/test - docker
-
-Docker må være installert og kjørende for at lokal bygg/test skal fungere. Hvis man bruker docker desktop så klarer
-testene å finne docker socket automatisk. Hvis man har colima kjørende så må man sette opp noen miljøvariabler.
-
-```
-DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock
-TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
-```
-
-* DOCKER_HOST peker docker app osv mot sock filen fra colima
-* TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE setter sock adressen på innsiden av kontainere
 
 ## Arbeidsflyter og bygging
 Foruten lokal Gradle-bruk skjer bygging via Github Actions. Vi har definert flere arbeidsflyter (workflows) som spiller sammen.

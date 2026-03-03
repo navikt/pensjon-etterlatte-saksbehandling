@@ -63,8 +63,9 @@ export function OpplysningerFraAInntektSummert({
                 <HStack gap="1">
                   Har ytelse &gt; 0
                   <HelpText>
-                    Her vises måneder der det er beregnet ytelse &gt; 0 kr før inntektsavkorting. Det er kun inntekten
-                    for månedene med beregnet ytelse &gt; 0 som skal legges inn i inntekten.
+                    Oversikt over innvilgede måneder med brutto stønad større enn 0 kr før inntektsavkorting. Legg inn
+                    faktisk inntekt for de månedene der beregnet ytelse er større enn 0 kr under "fastsett faktisk
+                    inntekt".
                   </HelpText>
                 </HStack>
               </Table.DataCell>

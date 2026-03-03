@@ -145,7 +145,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
               {kanRedigeres && erTildeltSaksbehandler && (
                 <Button
                   loading={isPending(opprettForbehandlingResult)}
-                  disabled={!valgtEtteroppgjoer}
+                  disabled={!etteroppgjoersAar}
                   onClick={opprettForbehandling}
                 >
                   Opprett forbehandling

@@ -1,11 +1,11 @@
 package no.nav.etterlatte
 
 val azureAdStrengtFortroligClaim: String by lazy {
-    "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
+    "a1b518e2-3947-478d-8929-e5d685c47cac"
 }
 
 val azureAdFortroligClaim: String by lazy {
-    "ea930b6b-9397-44d9-b9e6-f4cf527a632a"
+    "2e1dc582-f762-4510-a660-88bf68fb7128"
 }
 
 val azureAdSaksbehandlerClaim: String by lazy {

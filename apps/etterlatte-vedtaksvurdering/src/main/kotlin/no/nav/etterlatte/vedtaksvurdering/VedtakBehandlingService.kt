@@ -782,12 +782,12 @@ class VedtakBehandlingService(
                     when (vilkaarsvurdering?.resultat?.utfall) {
                         VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
                             VedtakData(
-                                behandling,
-                                vilkaarsvurdering,
-                                null,
-                                sak,
-                                trygdetider,
-                                etteroppgjoerResultat,
+                                detaljertBehandling = behandling,
+                                vilkaarsvurderingDto = vilkaarsvurdering,
+                                beregningOgAvkorting = null,
+                                sak = sak,
+                                trygdetid = trygdetider,
+                                etteroppgjoerResultat = etteroppgjoerResultat,
                             )
                         }
 

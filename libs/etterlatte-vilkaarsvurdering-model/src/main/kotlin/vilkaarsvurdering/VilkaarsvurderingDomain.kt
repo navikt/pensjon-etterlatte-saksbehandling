@@ -24,7 +24,18 @@ data class Vilkaarsvurdering(
     val virkningstidspunkt: YearMonth,
     val vilkaar: List<Vilkaar>,
     val resultat: VilkaarsvurderingResultat? = null,
-)
+) {
+    // TODO: Se på dette.
+    fun toDto() =
+        VilkaarsvurderingDto(
+            behandlingId = behandlingId,
+            vilkaar = vilkaar,
+            virkningstidspunkt = virkningstidspunkt,
+            resultat = resultat,
+            grunnlagVersjon = grunnlagVersjon,
+            behandlingGrunnlagVersjon = null, // TODO: Se på dette.
+        )
+}
 
 data class VilkaarTypeOgUtfall(
     val type: VilkaarType,

@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -32,7 +31,6 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakEtteroppgjoerService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -41,7 +39,7 @@ fun Route.vedtaksvurderingRoute(
     vedtakService: VedtaksvurderingService,
     vedtakBehandlingService: VedtakBehandlingService,
     rapidService: VedtaksvurderingRapidService,
-    behandlingKlient: BehandlingKlient,
+    behandlingKlient: BehandlingKlient, // TODO: Dette må jo fikses.
 ) {
     route("/api/vedtak") {
         val logger = LoggerFactory.getLogger("VedtaksvurderingRoute")
@@ -255,7 +253,7 @@ fun Route.vedtaksvurderingRoute(
         post("/{$BEHANDLINGID_CALL_PARAMETER}/iverksett") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
-                val vedtak = vedtakBehandlingService.iverksattVedtak(behandlingId, brukerTokenInfo)
+                val vedtak = vedtakBehandlingService.iverksattVedtak(behandlingId)
                 rapidService.sendToRapid(vedtak)
 
                 call.respond(HttpStatusCode.OK, vedtak.vedtak)

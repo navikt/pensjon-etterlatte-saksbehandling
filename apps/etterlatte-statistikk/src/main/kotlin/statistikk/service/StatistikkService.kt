@@ -552,12 +552,12 @@ class StatistikkService(
         vedtakLoependeTom = null,
         aktorId = statistikkTilbakekreving.tilbakekreving.sak.ident,
         vedtaksloesning = Vedtaksloesning.GJENNY,
-        ansvarligBeslutter = statistikkTilbakekreving.tilbakekreving.tilbakekreving.kravgrunnlag.saksbehandler.value,
+        ansvarligBeslutter = statistikkTilbakekreving.attestant,
         ferdigbehandletTidspunkt =
             statistikkTilbakekreving.tidspunkt.takeIf {
                 statistikkTilbakekreving.tilbakekreving.status == TilbakekrevingStatus.ATTESTERT
             },
-        saksbehandler = statistikkTilbakekreving.tilbakekreving.tilbakekreving.kravgrunnlag.saksbehandler.value,
+        saksbehandler = statistikkTilbakekreving.saksbehandler,
         relatertTil = null,
     )
 

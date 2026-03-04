@@ -64,6 +64,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
                         type = OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING,
                         merknad = "Svarfrist for etteroppgjør ${etteroppgjoer.inntektsaar} er utløpt",
                         kilde = OppgaveKilde.HENDELSE,
+                        gjelderAar = etteroppgjoer.inntektsaar,
                     )
 
                     etteroppgjoerService.registrerHendelseForEtteroppgjoer(

@@ -61,6 +61,7 @@ class EtteroppgjoerOppgaveService(
                     kilde = OppgaveKilde.HENDELSE,
                     type = OppgaveType.ETTEROPPGJOER,
                     merknad = merknad ?: default,
+                    gjelderAar = inntektsAar,
                 )
             }
         }

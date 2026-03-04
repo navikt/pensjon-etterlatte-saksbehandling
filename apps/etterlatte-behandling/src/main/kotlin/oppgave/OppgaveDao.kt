@@ -1,6 +1,8 @@
 package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.behandling.hendelse.getUUID
+import no.nav.etterlatte.behandling.tilbakekreving.getIntOrNull
+import no.nav.etterlatte.behandling.tilbakekreving.setInt
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
@@ -19,6 +21,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.database.setNullableInt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -146,8 +149,8 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, gruppe_id, merknad, opprettet, saktype, fnr, frist, kilde)
-                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, gjelder_aar, gruppe_id, merknad, opprettet, saktype, fnr, frist, kilde)
+                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setObject(1, oppgaveIntern.id)
@@ -157,13 +160,14 @@ class OppgaveDaoImpl(
                 statement.setString(5, oppgaveIntern.type.name)
                 statement.setString(6, oppgaveIntern.saksbehandler?.ident)
                 statement.setString(7, oppgaveIntern.referanse)
-                statement.setString(8, oppgaveIntern.gruppeId)
-                statement.setString(9, oppgaveIntern.merknad)
-                statement.setTidspunkt(10, oppgaveIntern.opprettet)
-                statement.setString(11, oppgaveIntern.sakType.name)
-                statement.setString(12, oppgaveIntern.fnr)
-                statement.setTidspunkt(13, oppgaveIntern.frist)
-                statement.setString(14, oppgaveIntern.kilde?.name)
+                statement.setNullableInt(8, oppgaveIntern.gjelderAar)
+                statement.setString(9, oppgaveIntern.gruppeId)
+                statement.setString(10, oppgaveIntern.merknad)
+                statement.setTidspunkt(11, oppgaveIntern.opprettet)
+                statement.setString(12, oppgaveIntern.sakType.name)
+                statement.setString(13, oppgaveIntern.fnr)
+                statement.setTidspunkt(14, oppgaveIntern.frist)
+                statement.setString(15, oppgaveIntern.kilde?.name)
                 statement.executeUpdate()
                 logger.info("lagret oppgave for ${oppgaveIntern.id} for sakid ${oppgaveIntern.sakId}")
             }
@@ -176,8 +180,8 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, gruppe_id, merknad, opprettet, saktype, fnr, frist, kilde)
-                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, gjelder_aar, gruppe_id, merknad, opprettet, saktype, fnr, frist, kilde)
+                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -189,13 +193,14 @@ class OppgaveDaoImpl(
                     statement.setString(5, oppgaveIntern.type.name)
                     statement.setString(6, oppgaveIntern.saksbehandler?.ident)
                     statement.setString(7, oppgaveIntern.referanse)
-                    statement.setString(8, oppgaveIntern.gruppeId)
-                    statement.setString(9, oppgaveIntern.merknad)
-                    statement.setTidspunkt(10, oppgaveIntern.opprettet)
-                    statement.setString(11, oppgaveIntern.sakType.name)
-                    statement.setString(12, oppgaveIntern.fnr)
-                    statement.setTidspunkt(13, oppgaveIntern.frist)
-                    statement.setString(14, oppgaveIntern.kilde?.name)
+                    statement.setInt(8, oppgaveIntern.gjelderAar)
+                    statement.setString(9, oppgaveIntern.gruppeId)
+                    statement.setString(10, oppgaveIntern.merknad)
+                    statement.setTidspunkt(11, oppgaveIntern.opprettet)
+                    statement.setString(12, oppgaveIntern.sakType.name)
+                    statement.setString(13, oppgaveIntern.fnr)
+                    statement.setTidspunkt(14, oppgaveIntern.frist)
+                    statement.setString(15, oppgaveIntern.kilde?.name)
 
                     statement.addBatch()
                 }
@@ -211,7 +216,7 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id,
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gjelder_aar, o.gruppe_id,
                             o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o 
                             LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
@@ -231,7 +236,7 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gjelder_aar, o.gruppe_id, 
                             o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o 
                             LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
@@ -258,7 +263,7 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gjelder_aar, o.gruppe_id, 
                             o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o 
                             LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
@@ -319,7 +324,7 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gjelder_aar, o.gruppe_id, 
                             o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o 
                             LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
@@ -348,7 +353,7 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gjelder_aar, o.gruppe_id, 
                             o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o 
                             INNER JOIN sak s ON o.sak_id = s.id 
@@ -356,6 +361,7 @@ class OppgaveDaoImpl(
                         WHERE (? OR o.status = ANY(?))
                         AND o.enhet = ANY(?)
                         AND (? OR o.saksbehandler = ?)
+                        ORDER BY o.opprettet DESC
                         """.trimIndent(),
                     )
 
@@ -384,7 +390,7 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gjelder_aar, o.gruppe_id, 
                             o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o 
                             INNER JOIN sak s ON o.sak_id = s.id 
@@ -771,6 +777,7 @@ class OppgaveDaoImpl(
             kilde = getString("kilde")?.let { OppgaveKilde.valueOf(it) },
             type = OppgaveType.valueOf(getString("type")),
             referanse = getString("referanse"),
+            gjelderAar = getIntOrNull("gjelder_aar"),
             gruppeId = getString("gruppe_id"),
             merknad = getString("merknad"),
             opprettet = getTidspunkt("opprettet"),

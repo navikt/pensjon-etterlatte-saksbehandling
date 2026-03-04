@@ -207,6 +207,15 @@ internal class OppgaveDaoTest(
     }
 
     @Test
+    fun `skal opprette oppgave med gjelderAar`() {
+        val sak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sak).copy(gjelderAar = 2024)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
+        assertEquals(2024, hentetOppgave?.gjelderAar)
+    }
+
+    @Test
     fun `legg til oppgaver og hent oppgaver`() {
         val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)

@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -63,7 +64,15 @@ class EtteroppgjoerSvarfristUtloeptJobService(
                         type = OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING,
                         merknad = "Svarfrist for etteroppgjør ${etteroppgjoer.inntektsaar} er utløpt",
                         kilde = OppgaveKilde.HENDELSE,
+                        gjelderAar = etteroppgjoer.inntektsaar,
                     )
+
+                    etteroppgjoerService.registrerHendelseForEtteroppgjoer(
+                        etteroppgjoer.sakId,
+                        etteroppgjoer.inntektsaar,
+                        EtteroppgjoerHendelser.SVARFRIST_UTLOEPT,
+                    )
+
                     true
                 }
             }

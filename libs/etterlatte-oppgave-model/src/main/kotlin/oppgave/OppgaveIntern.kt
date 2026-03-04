@@ -28,6 +28,7 @@ data class OppgaveIntern(
     val saksbehandler: OppgaveSaksbehandler? = null,
     val forrigeSaksbehandlerIdent: String? = null,
     val referanse: String,
+    val gjelderAar: Int? = null,
     val gruppeId: String?,
     val merknad: String? = null,
     val opprettet: Tidspunkt,
@@ -206,6 +207,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
     frist: Tidspunkt? = null,
     saksbehandler: String? = null,
     gruppeId: String? = null,
+    gjelderAar: Int? = null,
 ): OppgaveIntern {
     val opprettet = Tidspunkt.now()
 
@@ -219,6 +221,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         kilde = kilde,
         saksbehandler = saksbehandler?.let { OppgaveSaksbehandler(ident = it) },
         referanse = referanse,
+        gjelderAar = gjelderAar,
         gruppeId = gruppeId,
         merknad = merknad,
         opprettet = opprettet,

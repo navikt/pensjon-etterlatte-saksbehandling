@@ -56,7 +56,7 @@ class OppgaveService(
                 bruker.enheter(),
                 oppgaveStatuser,
                 minOppgavelisteIdentFilter,
-            ).sortedByDescending { it.opprettet }
+            )
 
     fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =
         oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
@@ -64,8 +64,14 @@ class OppgaveService(
     private fun sjekkOmkanTildeleAttestantOppgave(saksbehandler: String): Boolean {
         val appUser = Kontekst.get().AppUser
         return when (appUser) {
-            is SystemUser -> true
-            is Self -> true
+            is SystemUser -> {
+                true
+            }
+
+            is Self -> {
+                true
+            }
+
             is SaksbehandlerMedEnheterOgRoller -> {
                 val saksbehandlerMedRoller = appUser.saksbehandlerMedRoller
                 if (saksbehandler == appUser.name()) {
@@ -79,10 +85,15 @@ class OppgaveService(
                 }
             }
 
-            is ExternalUser -> throw IllegalArgumentException("ExternalUser er ikke støttet for å tildele oppgave")
-            else -> throw IllegalArgumentException(
-                "Ukjent brukertype ${appUser.name()} støtter ikke tildeling av oppgave",
-            )
+            is ExternalUser -> {
+                throw IllegalArgumentException("ExternalUser er ikke støttet for å tildele oppgave")
+            }
+
+            else -> {
+                throw IllegalArgumentException(
+                    "Ukjent brukertype ${appUser.name()} støtter ikke tildeling av oppgave",
+                )
+            }
         }
     }
 
@@ -704,6 +715,7 @@ class OppgaveService(
         frist: Tidspunkt? = null,
         saksbehandler: String? = null,
         gruppeId: String? = null,
+        gjelderAar: Int? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
 
@@ -716,6 +728,7 @@ class OppgaveService(
                 merknad = merknad,
                 frist = frist,
                 gruppeId = gruppeId,
+                gjelderAar = gjelderAar,
             )
         oppgaveDao.opprettOppgave(oppgave)
 

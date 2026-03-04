@@ -11,8 +11,11 @@ import no.nav.etterlatte.klienter.BrevKlient
 import no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.omregning.OmregningDataPacket
@@ -30,6 +33,7 @@ import tidspunkt.erEtter
 import tidspunkt.erFoerEllerPaa
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 internal class OpprettVedtakforespoerselRiver(
@@ -85,14 +89,27 @@ internal class OpprettVedtakforespoerselRiver(
 
     private fun sendMedInformasjonTilKontrollsjekking(
         omregningData: OmregningData,
-        respons: VedtakOgRapid,
+        vedtakOgRapid: VedtakOgRapid,
         packet: JsonMessage,
     ) {
-        hentBeloep(respons, omregningData.hentFraDato())?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
+        val forrigeVedtak = krevIkkeNull(vedtak.hentVedtak(omregningData.hentForrigeBehandlingid())) { "Vedtak mangler" }
+
+        forrigeVedtak.utbetalingsperioder().beloepPaaDato(omregningData.hentFraDato())?.let {
+            packet[ReguleringEvents.VEDTAK_BELOEP_FOER] = it
+        }
+        vedtakOgRapid.utbetalingsperioder().beloepPaaDato(omregningData.hentFraDato())?.let {
+            packet[ReguleringEvents.VEDTAK_BELOEP_ETTER] = it
+        }
+
+        forrigeVedtak.opphoerFraOgMed()?.let {
+            packet[ReguleringEvents.VEDTAK_OPPHOER_FOER] = it
+        }
+        (vedtakOgRapid.vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).opphoerFraOgMed?.let {
+            packet[ReguleringEvents.VEDTAK_OPPHOER_ETTER] = it
+        }
 
         packet[ReguleringEvents.INNVILGEDE_PERIODER_FOER] =
             hentInnvilgedePerioderForBehandling(omregningData.hentForrigeBehandlingid())
-
         if (!skalStoppeEtterFattet(omregningData.revurderingaarsak)) {
             packet[ReguleringEvents.INNVILGEDE_PERIODER_ETTER] =
                 hentInnvilgedePerioderForBehandling(omregningData.hentBehandlingId())
@@ -205,22 +222,23 @@ internal class OpprettVedtakforespoerselRiver(
         }
     }
 
-    private fun hentBeloep(
-        respons: VedtakOgRapid,
-        dato: LocalDate,
-    ): BigDecimal? =
-        if (respons.vedtak.innhold is VedtakInnholdDto.VedtakBehandlingDto) {
-            (respons.vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
-                .utbetalingsperioder
-                .filter {
-                    it.periode.fom.erFoerEllerPaa(
-                        dato,
-                    )
-                }.first { it.periode.tom.erEtter(dato) }
-                .beloep
-        } else {
-            null
-        }
+    private fun List<Utbetalingsperiode>.beloepPaaDato(dato: LocalDate): BigDecimal? =
+        this
+            .filter { it.periode.fom.erFoerEllerPaa(dato) }
+            .first { it.periode.tom.erEtter(dato) }
+            .beloep
+
+    private fun VedtakDto.utbetalingsperioder() =
+        (this.innhold as VedtakInnholdDto.VedtakBehandlingDto)
+            .utbetalingsperioder
+
+    private fun VedtakDto.opphoerFraOgMed(): YearMonth? =
+        (this.innhold as VedtakInnholdDto.VedtakBehandlingDto)
+            .opphoerFraOgMed
+
+    private fun VedtakOgRapid.utbetalingsperioder(): List<Utbetalingsperiode> =
+        (this.vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
+            .utbetalingsperioder
 
     private fun hentInnvilgedePerioderForBehandling(behandlingId: UUID): List<Periode> =
         vedtak

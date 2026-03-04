@@ -51,6 +51,8 @@ interface VedtakService {
     fun iverksattVedtak(behandlingId: UUID): VedtakDto
 
     fun hentInnvilgedePerioder(behandlingId: UUID): List<InnvilgetPeriodeDto>
+
+    fun hentVedtak(behandlingId: UUID): VedtakDto?
 }
 
 class VedtakServiceImpl(
@@ -138,6 +140,11 @@ class VedtakServiceImpl(
     override fun hentInnvilgedePerioder(behandlingId: UUID): List<InnvilgetPeriodeDto> =
         runBlocking {
             vedtakKlient.get("$url/api/vedtak/$behandlingId/innvilgede-perioder").body()
+        }
+
+    override fun hentVedtak(behandlingId: UUID): VedtakDto? =
+        runBlocking {
+            vedtakKlient.get("$url/api/vedtak/$behandlingId").body()
         }
 }
 

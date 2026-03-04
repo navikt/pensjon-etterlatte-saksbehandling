@@ -1,5 +1,6 @@
 package behandling.omregning
 
+import io.kotest.matchers.equals.shouldBeEqual
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -9,6 +10,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.common.Enheter
@@ -17,9 +19,11 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
@@ -31,11 +35,11 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -68,6 +72,8 @@ class OmregningServiceTest(
                 kjoering = "Regulering-2024",
                 status = KjoeringStatus.FERDIGSTILT,
                 sakId = sak.id,
+                behandling = UUID.randomUUID(),
+                sisteIverksatteBehandling = UUID.randomUUID(),
                 beregningBeloepFoer = BigDecimal("1000"),
                 beregningBeloepEtter = BigDecimal("1500"),
                 beregningGFoer = BigDecimal("10000"),
@@ -75,48 +81,57 @@ class OmregningServiceTest(
                 beregningBruktOmregningsfaktor = BigDecimal("1.5"),
                 avkortingFoer = BigDecimal("1000"),
                 avkortingEtter = BigDecimal("2000"),
-                vedtakBeloep = BigDecimal("15000"),
-                innvilgedePerioderFoer = null,
-                innvilgedePerioderEtter = null,
+                vedtakBeloepFoer = BigDecimal("15000"),
+                vedtakBeloepEtter = BigDecimal("16000"),
+                vedtakOpphoerFoer = YearMonth.of(2025, 1),
+                vedtakOpphoerEtter = YearMonth.of(2025, 2),
+                innvilgedePerioderFoer = listOf(Periode(YearMonth.of(2024, 2), null)),
+                innvilgedePerioderEtter = listOf(Periode(YearMonth.of(2024, 3), null)),
             )
 
         service.kjoeringFullfoert(request)
 
         val lagraIDatabasen: LagreKjoeringRequest =
-            connection.hentConnection {
-                with(connection) {
-                    val statement =
-                        it.prepareStatement(
-                            """
-                            SELECT kjoering, status, sak_id, beregning_beloep_foer, 
-                            beregning_beloep_etter, beregning_g_foer, beregning_g_etter, 
-                            beregning_brukt_omregningsfaktor, avkorting_foer, avkorting_etter, vedtak_beloep 
-                            FROM omregningskjoering WHERE sak_id=${sak.id}
-                            """.trimIndent(),
+            connection.hentConnection { connection ->
+                val statement =
+                    connection.prepareStatement(
+                        """
+                        SELECT kjoering, status, sak_id, behandling_id, siste_iverksatte_behandling_id, beregning_beloep_foer, 
+                        beregning_beloep_etter, beregning_g_foer, beregning_g_etter, 
+                        beregning_brukt_omregningsfaktor, avkorting_foer, avkorting_etter, 
+                        vedtak_beloep_foer, vedtak_beloep_etter,
+                        vedtak_opphoer_foer, vedtak_opphoer_etter,
+                        innvilgede_perioder_foer, innvilgede_perioder_etter
+                        FROM omregningskjoering WHERE sak_id=${sak.id}
+                        """.trimIndent(),
+                    )
+                statement
+                    .executeQuery()
+                    .toList {
+                        LagreKjoeringRequest(
+                            kjoering = getString("kjoering"),
+                            status = KjoeringStatus.valueOf(getString("status")),
+                            sakId = SakId(getLong("sak_id")),
+                            behandling = getUUID("behandling_id"),
+                            sisteIverksatteBehandling = getUUID("siste_iverksatte_behandling_id"),
+                            beregningBeloepFoer = getBigDecimal("beregning_beloep_foer"),
+                            beregningBeloepEtter = getBigDecimal("beregning_beloep_etter"),
+                            beregningGFoer = getBigDecimal("beregning_g_foer"),
+                            beregningGEtter = getBigDecimal("beregning_g_etter"),
+                            beregningBruktOmregningsfaktor = getBigDecimal("beregning_brukt_omregningsfaktor"),
+                            avkortingFoer = getBigDecimal("avkorting_foer"),
+                            avkortingEtter = getBigDecimal("avkorting_etter"),
+                            vedtakBeloepFoer = getBigDecimal("vedtak_beloep_foer"),
+                            vedtakBeloepEtter = getBigDecimal("vedtak_beloep_etter"),
+                            vedtakOpphoerFoer = getString("vedtak_opphoer_foer")?.let { deserialize(it) },
+                            vedtakOpphoerEtter = getString("vedtak_opphoer_etter")?.let { deserialize(it) },
+                            innvilgedePerioderFoer = getString("innvilgede_perioder_foer")?.let { deserialize(it) },
+                            innvilgedePerioderEtter = getString("innvilgede_perioder_etter")?.let { deserialize(it) },
                         )
-                    statement
-                        .executeQuery()
-                        .toList {
-                            LagreKjoeringRequest(
-                                kjoering = getString("kjoering"),
-                                status = KjoeringStatus.valueOf(getString("status")),
-                                sakId = SakId(getLong("sak_id")),
-                                beregningBeloepFoer = getBigDecimal("beregning_beloep_foer"),
-                                beregningBeloepEtter = getBigDecimal("beregning_beloep_etter"),
-                                beregningGFoer = getBigDecimal("beregning_g_foer"),
-                                beregningGEtter = getBigDecimal("beregning_g_etter"),
-                                beregningBruktOmregningsfaktor = getBigDecimal("beregning_brukt_omregningsfaktor"),
-                                avkortingFoer = getBigDecimal("avkorting_foer"),
-                                avkortingEtter = getBigDecimal("avkorting_etter"),
-                                vedtakBeloep = getBigDecimal("vedtak_beloep"),
-                                innvilgedePerioderFoer = null,
-                                innvilgedePerioderEtter = null,
-                            )
-                        }.first()
-                }
+                    }.first()
             }
 
-        Assertions.assertEquals(request, lagraIDatabasen)
+        lagraIDatabasen shouldBeEqual request
     }
 
     @Test

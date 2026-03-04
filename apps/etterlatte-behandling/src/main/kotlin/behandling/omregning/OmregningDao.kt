@@ -46,26 +46,36 @@ class OmregningDao(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO omregningskjoering (kjoering, status, sak_id, beregning_beloep_foer, 
-                        beregning_beloep_etter, beregning_g_foer, beregning_g_etter, 
-                        beregning_brukt_omregningsfaktor, avkorting_foer, avkorting_etter, vedtak_beloep, 
+                        INSERT INTO omregningskjoering (kjoering, status, sak_id, 
+                        behandling_id, siste_iverksatte_behandling_id,
+                        beregning_beloep_foer, beregning_beloep_etter,
+                        beregning_g_foer, beregning_g_etter,
+                        beregning_brukt_omregningsfaktor, avkorting_foer, avkorting_etter,
+                        vedtak_beloep_foer, vedtak_beloep_etter,
+                        vedtak_opphoer_foer, vedtak_opphoer_etter,
                         innvilgede_perioder_foer, innvilgede_perioder_etter)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
+
                 statement.setString(1, request.kjoering)
                 statement.setString(2, request.status.name)
                 statement.setSakId(3, request.sakId)
-                statement.setBigDecimal(4, request.beregningBeloepFoer)
-                statement.setBigDecimal(5, request.beregningBeloepEtter)
-                statement.setBigDecimal(6, request.beregningGFoer)
-                statement.setBigDecimal(7, request.beregningGEtter)
-                statement.setBigDecimal(8, request.beregningBruktOmregningsfaktor)
-                statement.setBigDecimal(9, request.avkortingFoer)
-                statement.setBigDecimal(10, request.avkortingEtter)
-                statement.setBigDecimal(11, request.vedtakBeloep)
-                statement.setJsonb(12, request.innvilgedePerioderFoer)
-                statement.setJsonb(13, request.innvilgedePerioderEtter)
+                statement.setObject(4, request.behandling)
+                statement.setObject(5, request.sisteIverksatteBehandling)
+                statement.setBigDecimal(6, request.beregningBeloepFoer)
+                statement.setBigDecimal(7, request.beregningBeloepEtter)
+                statement.setBigDecimal(8, request.beregningGFoer)
+                statement.setBigDecimal(9, request.beregningGEtter)
+                statement.setBigDecimal(10, request.beregningBruktOmregningsfaktor)
+                statement.setBigDecimal(11, request.avkortingFoer)
+                statement.setBigDecimal(12, request.avkortingEtter)
+                statement.setBigDecimal(13, request.vedtakBeloepFoer)
+                statement.setBigDecimal(14, request.vedtakBeloepEtter)
+                statement.setJsonb(15, request.vedtakOpphoerFoer)
+                statement.setJsonb(16, request.vedtakOpphoerEtter)
+                statement.setJsonb(17, request.innvilgedePerioderFoer)
+                statement.setJsonb(18, request.innvilgedePerioderEtter)
                 statement.executeUpdate().also {
                     krev(it > 0) {
                         "Kunne ikke lagre kjøring for sak ${request.sakId}"

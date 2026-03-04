@@ -13,6 +13,7 @@ interface Props<T extends FieldValues> {
   toDate?: Date
   validate?: (maaned: Date) => string | undefined
   required?: boolean
+  kunViseMaanedOgAar?: boolean
 }
 
 export const ControlledMaanedVelger = <T extends FieldValues>({
@@ -24,6 +25,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
   toDate,
   validate,
   required = false,
+  kunViseMaanedOgAar,
 }: Props<T>): ReactNode => {
   const {
     field,
@@ -44,7 +46,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
     fromDate: fromDate ?? undefined,
     toDate: toDate ?? undefined,
     locale: 'nb',
-    inputFormat: 'dd.MM.yyyy',
+    inputFormat: kunViseMaanedOgAar ? 'MMMM yyyy' : 'dd.MM.yyyy',
     onValidate: (val) => {
       if (val.isEmpty) field.onChange(null)
       else setDateError(val)

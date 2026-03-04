@@ -276,6 +276,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
                       fromDate={tidligstSanksjonFom(ikkeInnvilgedePerioder, behandling)}
                       validate={validerFom}
                       required
+                      kunViseMaanedOgAar={true}
                     />
                     <ControlledMaanedVelger
                       label="Dato til og med"
@@ -284,6 +285,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
                       fromDate={tidligstSanksjonFom(ikkeInnvilgedePerioder, behandling)}
                       validate={validerTom}
                       required
+                      kunViseMaanedOgAar={true}
                     />
                   </HStack>
 

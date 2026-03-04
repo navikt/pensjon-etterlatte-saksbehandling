@@ -130,7 +130,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
     <form onSubmit={handleSubmit(lagrePeriode)}>
       <VStack gap="4">
         <HGrid gap="4" columns="min-content min-content max-content" align="start">
-          <ControlledMaanedVelger name="fom" label="Fra og med" control={control} required />
+          <ControlledMaanedVelger name="fom" label="Fra og med" control={control} required kunViseMaanedOgAar={true} />
           <ControlledMaanedVelger
             name="tom"
             label="Til og med"
@@ -146,6 +146,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
               }
               return undefined
             }}
+            kunViseMaanedOgAar={true}
           />
           <Box width="fit-content">
             <HStack gap="3" align="center">

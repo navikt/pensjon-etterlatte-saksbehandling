@@ -94,6 +94,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
   const erRevurdering = kontekst.type === EtteroppgjoerKontekstType.REVURDERING
   const erRedigerbar = erRedigerbart(kontekst, forbehandling, innloggetSaksbehandler.skriveEnheter)
   const erRedigerbartFaktiskInntekt = kanRedigereFaktiskInntekt(erRedigerbar, kontekst, forbehandling)
+  const revurderingSkalAvsluttes = erRevurdering && forbehandling.endringErTilUgunstForBruker === JaNei.JA
 
   const visBeregnetResultat = erRevurdering
     ? forbehandling.endringErTilUgunstForBruker !== JaNei.JA
@@ -137,14 +138,14 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         />
       )}
 
-      {forbehandling.harVedtakAvTypeOpphoer && (
+      {forbehandling.harVedtakAvTypeOpphoer && !revurderingSkalAvsluttes && (
         <OpphoerSkyldesDoedsfall
           erRedigerbar={erRedigerbar}
           setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerDoedsfallErrors}
         />
       )}
 
-      {!doedsfallIEtteroppgjoersaaret && (
+      {!doedsfallIEtteroppgjoersaaret && !revurderingSkalAvsluttes && (
         <FastsettFaktiskInntekt
           erRedigerbar={erRedigerbartFaktiskInntekt}
           setFastsettFaktiskInntektSkjemaErrors={setFaktiskInntektErrors}

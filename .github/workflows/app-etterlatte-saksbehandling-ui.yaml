@@ -37,15 +37,15 @@ jobs:
       digest: ${{ steps.docker-build-push.outputs.digest }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # ratchet:actions/checkout@v5
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # ratchet:actions/setup-node@v6
         with:
           node-version: '20.x'
           cache: 'yarn'
           cache-dependency-path: apps/${{ env.APP_NAME }}/client/yarn.lock
       - name: Inject slug/short variables
-        uses: rlespinasse/github-slug-action@v5
+        uses: rlespinasse/github-slug-action@9e7def61550737ba68c62d34a32dd31792e3f429 # ratchet:rlespinasse/github-slug-action@v5
       - name: License check top level
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn install --frozen-lockfile && yarn lisenssjekk
@@ -59,7 +59,7 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
       - name: Build and publish Docker image
-        uses: nais/docker-build-push@v0
+        uses: nais/docker-build-push@ae613eff6f44f0323476eda1c3994a7c518761c3 # ratchet:nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: etterlatte
@@ -78,7 +78,7 @@ jobs:
       id-token: write
     steps:
       - name: NAIS login
-        uses: nais/login@v0
+        uses: nais/login@e7cf2c159677dc7c7d599feff5f808f2bf59c7cf # ratchet:nais/login@v0
         id: login
         with:
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
@@ -91,7 +91,7 @@ jobs:
           echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build.outputs.digest }}" >> $GITHUB_ENV
       - name: Generate SBOM, attest and sign image
         id: attest-sign
-        uses: nais/attest-sign@v1
+        uses: nais/attest-sign@4026aea21c05a2c711a00bced0d9bb5fc944fcf6 # ratchet:nais/attest-sign@v1
         env:
           TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
         with:
@@ -102,8 +102,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # ratchet:actions/checkout@v5
+      - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
           TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           CLUSTER: dev-gcp
@@ -114,11 +114,11 @@ jobs:
   deploy-to-prod-gcp:
     name: Deploy to prod-gcp
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
-    needs: [build,deploy-to-dev-gcp]
+    needs: [build, deploy-to-dev-gcp]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # ratchet:actions/checkout@v5
+      - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
           TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           CLUSTER: prod-gcp

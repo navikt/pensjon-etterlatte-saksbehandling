@@ -17,7 +17,7 @@ import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
@@ -30,7 +30,7 @@ export const BeregneEtteroppgjoerOMS = () => {
   }
   const { next } = useContext(BehandlingRouteContext)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

@@ -14,7 +14,7 @@ import {
   PeriodisertBeregningsgrunnlag,
   PeriodisertBeregningsgrunnlagDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
@@ -90,7 +90,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   })
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

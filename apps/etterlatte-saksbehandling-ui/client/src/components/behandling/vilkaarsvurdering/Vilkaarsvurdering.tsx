@@ -11,7 +11,7 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { Alert, BodyLong, Box, Button, Heading } from '@navikt/ds-react'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
@@ -34,7 +34,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const dispatch = useAppDispatch()
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

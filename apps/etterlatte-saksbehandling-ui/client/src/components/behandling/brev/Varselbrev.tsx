@@ -4,7 +4,7 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import Spinner from '~shared/Spinner'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
@@ -34,7 +34,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [redigerbar, setKanRedigeres] = useState(
-    behandlingErRedigerbar(props.behandling.status, props.behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
+    erBehandlingRedigerbar(props.behandling.status, props.behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
   )
 
   const [varselbrev, setVarselbrev] = useState<IBrev>()

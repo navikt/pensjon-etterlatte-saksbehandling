@@ -17,7 +17,7 @@ import { hentAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { isPending } from '~shared/api/apiUtils'
 import { isBefore, isValid, parse, subMonths } from 'date-fns'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 const isValidDateOfDeath = (date?: Date) => {
@@ -33,7 +33,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

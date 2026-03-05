@@ -1,7 +1,7 @@
 import { Box, Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
-import { behandlingErRedigerbar } from '../felles/utils'
+import { erBehandlingRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
@@ -71,7 +71,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
     })
   }, [])
 
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

@@ -10,7 +10,7 @@ import { redigerAktivitetsgradForBehandling, slettAktivitetsgradForBehandling } 
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { RedigerbarAktivitsgradKnapper } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivitetsgradOppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { RedigerAktivitetsgrad } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradWrapperOppgave'
 import { setVurderingBehandling } from '~store/reducers/AktivitetspliktBehandlingReducer'
 import { RedigerbarAktivtetsgradForm } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivtetsgradForm'
@@ -29,7 +29,7 @@ export function RedigerbarAktivitetsgradBehandling({
 
   const [slettStatus, slettAktivtetsgrad] = useApiCall(slettAktivitetsgradForBehandling)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

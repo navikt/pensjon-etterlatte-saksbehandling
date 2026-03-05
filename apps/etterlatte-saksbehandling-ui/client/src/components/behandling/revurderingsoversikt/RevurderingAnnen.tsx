@@ -7,7 +7,7 @@ import {
 } from '~shared/types/RevurderingInfo'
 import { FormEvent, useState } from 'react'
 import { BodyLong, BodyShort, Button, Heading, Textarea, TextField, VStack } from '@navikt/ds-react'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
@@ -31,7 +31,7 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
   const [feilmelding, setFeilmelding] = useState<string | null>(null)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

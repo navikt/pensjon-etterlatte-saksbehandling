@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
@@ -22,7 +22,7 @@ export default function OppdaterGrunnlagModal({
   const [isOpen, setIsOpen] = useState(false)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const behandles = behandlingErRedigerbar(behandlingStatus, enhetId, innloggetSaksbehandler.skriveEnheter)
+  const behandles = erBehandlingRedigerbar(behandlingStatus, enhetId, innloggetSaksbehandler.skriveEnheter)
   const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 
   if (!behandles) return

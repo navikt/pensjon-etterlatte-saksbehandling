@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingReducer, oppdaterAvkorting } from '~store/reducers/BehandlingReducer'
-import { behandlingErRedigerbar, hasValue } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar, hasValue } from '~components/behandling/felles/utils'
 import { isFailure, isPending, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import {
@@ -87,7 +87,7 @@ export const Sanksjon = ({
   const dispatch = useAppDispatch()
 
   const redigerbar =
-    behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
+    erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
     behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER
 
   const {

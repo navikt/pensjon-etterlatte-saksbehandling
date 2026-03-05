@@ -17,7 +17,10 @@ import {
   EtteroppjoerForbehandlingSteg,
   EtteroppjoerForbehandlingStegmeny,
 } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
-import { EtteroppgjoerForbehandlingOversikt } from '~components/etteroppgjoer/forbehandling/EtteroppgjoerForbehandlingOversikt'
+import {
+  EtteroppgjoerOversikt,
+  EtteroppgjoerKontekstType,
+} from '~components/etteroppgjoer/components/EtteroppgjoerForbehandlingOversikt'
 import { EtteroppjoerSidemeny } from '~components/etteroppgjoer/forbehandling/sidemeny/EtteroppgjoerForbehandlingSidemeny'
 
 export function EtteroppgjoerForbehandling() {
@@ -53,7 +56,10 @@ export function EtteroppgjoerForbehandling() {
         <HStack height="100%" minHeight="100vh" wrap={false}>
           <Box width="100%">
             <Routes>
-              <Route path={EtteroppjoerForbehandlingSteg.OVERSIKT} element={<EtteroppgjoerForbehandlingOversikt />} />
+              <Route
+                path={EtteroppjoerForbehandlingSteg.OVERSIKT}
+                element={<EtteroppgjoerOversikt kontekst={{ type: EtteroppgjoerKontekstType.FORBEHANDLING }} />}
+              />
               <Route path={EtteroppjoerForbehandlingSteg.BREV} element={<EtteroppgjoerForbehandlingBrev />} />
               <Route
                 path="*"

@@ -23,10 +23,10 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: alerts.yaml
-          VAR: LOGS_URL=https://logs.adeo.no/app/r/s/RxEhL
+          VAR: LOGS_URL=https://logs.az.nav.no/goto/e50de3b91964f2cc53e69aa07a48e96e?security_tenant=navlogs
       - name: deploy to prod
         uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
           RESOURCE: alerts.yaml
-          VAR: LOGS_URL=https://logs.adeo.no/app/r/s/awtWK
+          VAR: LOGS_URL=https://logs.az.nav.no/goto/7ce0886fddc960bdc9d19d0071e6f8f0?security_tenant=navlogs

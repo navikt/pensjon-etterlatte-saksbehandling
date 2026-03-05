@@ -8,6 +8,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
@@ -31,7 +32,8 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.sak.TilgangServiceSjekker
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -39,54 +41,46 @@ fun Route.vedtaksvurderingRoute(
     vedtakService: VedtaksvurderingService,
     vedtakBehandlingService: VedtakBehandlingService,
     rapidService: VedtaksvurderingRapidService,
-    behandlingKlient: BehandlingKlient, // TODO: Dette må jo fikses.
+    tilgangService: TilgangServiceSjekker,
 ) {
     route("/api/vedtak") {
         val logger = LoggerFactory.getLogger("VedtaksvurderingRoute")
 
         get("/sak/{$SAKID_CALL_PARAMETER}/iverksatte") {
-            withSakId(behandlingKlient) { sakId ->
-                logger.info("Henter iverksatte vedtak for sak $sakId")
-                val iverksatteVedtak = vedtakBehandlingService.hentIverksatteVedtakISak(sakId)
-                call.respond(iverksatteVedtak.map { it.toVedtakSammendragDto() })
-            }
+            logger.info("Henter iverksatte vedtak for sak $sakId")
+            val iverksatteVedtak = vedtakBehandlingService.hentIverksatteVedtakISak(sakId)
+            call.respond(iverksatteVedtak.map { it.toVedtakSammendragDto() })
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}/samordning") {
-            withSakId(behandlingKlient) { sakId ->
-                logger.info("Henter samordningsinfo for sak $sakId")
-                val samordningsinfo = vedtakBehandlingService.samordningsinfo(sakId)
-                call.respond(samordningsinfo)
-            }
+            logger.info("Henter samordningsinfo for sak $sakId")
+            val samordningsinfo = vedtakBehandlingService.samordningsinfo(sakId)
+            call.respond(samordningsinfo)
         }
 
         post("/sak/{$SAKID_CALL_PARAMETER}/samordning/melding") {
-            withSakId(behandlingKlient) { sakId ->
-                val oppdatering = call.receive<OppdaterSamordningsmelding>()
+            val oppdatering = call.receive<OppdaterSamordningsmelding>()
 
-                logger.info("Oppdaterer samordningsmelding=${oppdatering.samId}, sak=$sakId")
-                vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo).run {
-                    rapidService.sendGenerellHendelse(
-                        VedtakKafkaHendelseHendelseType.SAMORDNING_MANUELT_BEHANDLET,
-                        mapOf(
-                            "sakId" to sakId,
-                            "vedtakId" to oppdatering.vedtakId,
-                            "samordningsmeldingId" to oppdatering.samId,
-                            "saksbehandlerId" to brukerTokenInfo.ident(),
-                            "kommentar" to oppdatering.kommentar,
-                        ),
-                    )
-                }
-                call.respond(HttpStatusCode.OK)
+            logger.info("Oppdaterer samordningsmelding=${oppdatering.samId}, sak=$sakId")
+            vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo).run {
+                rapidService.sendGenerellHendelse(
+                    VedtakKafkaHendelseHendelseType.SAMORDNING_MANUELT_BEHANDLET,
+                    mapOf(
+                        "sakId" to sakId,
+                        "vedtakId" to oppdatering.vedtakId,
+                        "samordningsmeldingId" to oppdatering.samId,
+                        "saksbehandlerId" to brukerTokenInfo.ident(),
+                        "kommentar" to oppdatering.kommentar,
+                    ),
+                )
             }
+            call.respond(HttpStatusCode.OK)
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
-            withSakId(behandlingKlient) { sakId ->
-                logger.info("Henter alle vedtak for sak $sakId")
-                val vedtak = vedtakService.hentVedtakISak(sakId)
-                call.respond(vedtak.map { it.toVedtakSammendragDto() })
-            }
+            logger.info("Henter alle vedtak for sak $sakId")
+            val vedtak = vedtakService.hentVedtakISak(sakId)
+            call.respond(vedtak.map { it.toVedtakSammendragDto() })
         }
 
         get("/sak/med-utbetaling/{inntektsaar}") {
@@ -99,16 +93,14 @@ fun Route.vedtaksvurderingRoute(
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}/har-utbetaling-for-inntektsaar/{inntektsaar}") {
-            withSakId(behandlingKlient) { sakId ->
-                val inntektsaar =
-                    krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
-                        "Inntektsaar mangler"
-                    }
+            val inntektsaar =
+                krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
+                    "Inntektsaar mangler"
+                }
 
-                logger.info("Sjekker om sak $sakId har utbetaling for inntektsår $inntektsaar")
-                val harUtbetaling = vedtakService.harSakUtbetalingForInntektsaar(sakId, inntektsaar)
-                call.respond(mapOf("harUtbetaling" to harUtbetaling))
-            }
+            logger.info("Sjekker om sak $sakId har utbetaling for inntektsår $inntektsaar")
+            val harUtbetaling = vedtakService.harSakUtbetalingForInntektsaar(sakId, inntektsaar)
+            call.respond(mapOf("harUtbetaling" to harUtbetaling))
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}/innvilgede-perioder") {
@@ -120,31 +112,27 @@ fun Route.vedtaksvurderingRoute(
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak =
-                    vedtakService.hentVedtakMedBehandlingId(behandlingId) ?: throw IkkeFunnetException(
-                        "FANT_IKKE_VEDTAK",
-                        "Fant ikke vedtaket til behandlingen med id=$behandlingId",
-                    )
-                call.respond(vedtak.toDto())
-            }
+            logger.info("Henter vedtak for behandling $behandlingId")
+            val vedtak =
+                vedtakService.hentVedtakMedBehandlingId(behandlingId) ?: throw IkkeFunnetException(
+                    "FANT_IKKE_VEDTAK",
+                    "Fant ikke vedtaket til behandlingen med id=$behandlingId",
+                )
+            call.respond(vedtak.toDto())
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}/sammendrag") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
-                val vedtaksresultat = vedtakService.hentVedtakMedBehandlingId(behandlingId)?.toVedtakSammendragDto()
-                if (vedtaksresultat == null) {
-                    call.response.status(HttpStatusCode.NoContent)
-                } else {
-                    call.respond(vedtaksresultat)
-                }
+            logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
+            val vedtaksresultat = vedtakService.hentVedtakMedBehandlingId(behandlingId)?.toVedtakSammendragDto()
+            if (vedtaksresultat == null) {
+                call.response.status(HttpStatusCode.NoContent)
+            } else {
+                call.respond(vedtaksresultat)
             }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/simulering") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Henter/oppdaterer vedtak for sinulering (behandling=$behandlingId)")
 
                 vedtakService.hentVedtakMedBehandlingId(behandlingId)?.let {
@@ -160,7 +148,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/upsert") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
                 val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
                 call.respond(nyttVedtak.toDto())
@@ -168,7 +156,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/fattvedtak") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak = vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(fattetVedtak)
@@ -178,7 +166,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/attester") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 val (kommentar) = call.receive<AttesterVedtakDto>()
                 val attestert = vedtakBehandlingService.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
@@ -200,14 +188,12 @@ fun Route.vedtaksvurderingRoute(
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}/samordning") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                val respons = vedtakBehandlingService.samordningsinfo(behandlingId)
-                call.respond(respons)
-            }
+            val respons = vedtakBehandlingService.samordningsinfo(behandlingId)
+            call.respond(respons)
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/underkjenn") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Underkjenner vedtak for behandling $behandlingId")
                 val begrunnelse = call.receive<UnderkjennVedtakDto>()
                 val underkjentVedtak =
@@ -223,7 +209,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/tilsamordning") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Vedtak er til samordning for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.tilSamordningVedtak(behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(vedtak)
@@ -232,7 +218,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/samordne") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Behandler samordning for behandling $behandlingId")
                 val skalVentePaaSamordning = vedtakBehandlingService.samordne(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK, mapOf("skalVentePaaSamordning" to skalVentePaaSamordning))
@@ -240,7 +226,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/samordnet") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Vedtak ferdig samordning for behandling $behandlingId")
 
                 vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)?.let { vedtak ->
@@ -251,7 +237,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/iverksett") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.iverksattVedtak(behandlingId)
                 rapidService.sendToRapid(vedtak)
@@ -261,7 +247,11 @@ fun Route.vedtaksvurderingRoute(
         }
 
         get("/loepende/{$SAKID_CALL_PARAMETER}") {
-            withSakId(behandlingKlient) { sakId ->
+            if (tilgangService.harTilgangTilSak(
+                    sakId,
+                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                )
+            ) {
                 val dato =
                     call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
                         ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
@@ -273,7 +263,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         patch("/{$BEHANDLINGID_CALL_PARAMETER}/tilbakestill") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
                 vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(behandlingId)
                 call.respond(HttpStatusCode.OK)
@@ -344,13 +334,10 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
     }
 }
 
-fun Route.etteroppgjoerSystembrukerVedtakRoute(
-    vedtakEtteroppgjoerService: VedtakEtteroppgjoerService,
-    behandlingKlient: BehandlingKlient,
-) {
+fun Route.etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService: VedtakEtteroppgjoerService) {
     route("/vedtak/etteroppgjoer/{$SAKID_CALL_PARAMETER}") {
         post {
-            withSakId(behandlingKlient, skrivetilgang = true) {
+            kunSkrivetilgang {
                 val request = call.receive<VedtakslisteEtteroppgjoerRequest>()
 
                 val vedtaksliste =
@@ -364,41 +351,38 @@ fun Route.etteroppgjoerSystembrukerVedtakRoute(
     }
 }
 
-fun Route.tilbakekrevingvedtakRoute(
-    service: VedtakTilbakekrevingService,
-    behandlingKlient: BehandlingKlient,
-) {
+fun Route.tilbakekrevingvedtakRoute(service: VedtakTilbakekrevingService) {
     val logger = LoggerFactory.getLogger("TilbakekrevingsvedtakRoute")
     route("/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/lagre-vedtak") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            kunSkrivetilgang {
                 val dto = call.receive<TilbakekrevingVedtakDto>()
                 logger.info("Oppretter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
                 call.respond(service.opprettEllerOppdaterVedtak(dto).toDto())
             }
         }
         post("/fatt-vedtak") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            kunSkrivetilgang {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
                 call.respond(service.fattVedtak(dto, brukerTokenInfo).toDto())
             }
         }
         post("/attester-vedtak") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            kunSkrivetilgang {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
                 call.respond(service.attesterVedtak(dto, brukerTokenInfo).toDto())
             }
         }
         post("/underkjenn-vedtak") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            kunSkrivetilgang {
                 logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
                 call.respond(service.underkjennVedtak(behandlingId).toDto())
             }
         }
         post("/tilbakestill-vedtak") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            kunSkrivetilgang {
                 logger.info("Tilbakestiller vedtak fra attestert for tilbakekreving med id=$behandlingId")
                 call.respond(service.tilbakeStillAttestert(behandlingId).toDto())
             }
@@ -406,15 +390,12 @@ fun Route.tilbakekrevingvedtakRoute(
     }
 }
 
-fun Route.klagevedtakRoute(
-    service: VedtakKlageService,
-    behandlingKlient: BehandlingKlient,
-) {
+fun Route.klagevedtakRoute(service: VedtakKlageService) {
     val logger = LoggerFactory.getLogger("KlagevedtakRoute")
 
     route("/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/upsert") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            kunSkrivetilgang {
                 val klage = call.receive<Klage>()
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
                 logger.info("Oppretter vedtak for klage med id=$behandlingId")
@@ -424,7 +405,7 @@ fun Route.klagevedtakRoute(
         }
 
         post("/fatt") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            kunSkrivetilgang {
                 val klage = call.receive<Klage>()
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
 
@@ -434,7 +415,7 @@ fun Route.klagevedtakRoute(
         }
 
         post("/attester") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            kunSkrivetilgang {
                 val klage = call.receive<Klage>()
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
 
@@ -443,7 +424,7 @@ fun Route.klagevedtakRoute(
             }
         }
         post("/underkjenn") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            kunSkrivetilgang {
                 logger.info("Underkjenner vedtak for klage=$behandlingId")
                 call.respond(service.underkjennVedtak(behandlingId).toDto())
             }

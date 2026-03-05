@@ -3,7 +3,7 @@ package no.nav.etterlatte.grunnlag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
 import org.slf4j.LoggerFactory
@@ -12,7 +12,7 @@ object GrunnlagVersjonValidering {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun validerVersjon(
-        vilkaarsvurdering: VilkaarsvurderingDto?,
+        vilkaarsvurdering: Vilkaarsvurdering?,
         beregningOgAvkorting: BeregningOgAvkorting?,
         trygdetider: List<TrygdetidDto>,
         behandling: DetaljertBehandling,

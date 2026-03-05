@@ -33,8 +33,8 @@ import Spinner from '~shared/Spinner'
 import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
 
 export enum EtteroppgjoerKontekstType {
-  FORBEHANDLING = 'forbehandling',
-  REVURDERING = 'revurdering',
+  FORBEHANDLING = 'FORBEHANDLING',
+  REVURDERING = 'REVURDERING',
 }
 
 type ForbehandlingKontekst = { type: EtteroppgjoerKontekstType.FORBEHANDLING }

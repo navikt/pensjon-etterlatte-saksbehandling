@@ -6,10 +6,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.omregning.OmregningDataPacket
 import no.nav.etterlatte.omregning.omregningData
@@ -22,7 +24,12 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BELOEP_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.INNVILGEDE_PERIODER_ETTER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.INNVILGEDE_PERIODER_FOER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP_ETTER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP_FOER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_OPPHOER_ETTER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_OPPHOER_FOER
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
@@ -56,7 +63,12 @@ internal class VedtakAttestertRiver(
             validate { it.interestedIn(BEREGNING_BRUKT_OMREGNINGSFAKTOR) }
             validate { it.interestedIn(AVKORTING_FOER) }
             validate { it.interestedIn(AVKORTING_ETTER) }
-            validate { it.requireKey(VEDTAK_BELOEP) }
+            validate { it.interestedIn(VEDTAK_BELOEP_FOER) }
+            validate { it.interestedIn(VEDTAK_BELOEP_ETTER) }
+            validate { it.interestedIn(INNVILGEDE_PERIODER_FOER) }
+            validate { it.interestedIn(INNVILGEDE_PERIODER_ETTER) }
+            validate { it.interestedIn(VEDTAK_OPPHOER_FOER) }
+            validate { it.interestedIn(VEDTAK_OPPHOER_ETTER) }
         }
     }
 
@@ -84,6 +96,7 @@ internal class VedtakAttestertRiver(
                     },
                 sakId = sakId,
                 behandling = packet.omregningData.hentBehandlingId(),
+                sisteIverksatteBehandling = packet.omregningData.hentForrigeBehandlingid(),
                 beregningBeloepFoer = bigDecimal(packet, BEREGNING_BELOEP_FOER),
                 beregningBeloepEtter = bigDecimal(packet, BEREGNING_BELOEP_ETTER),
                 beregningGFoer = bigDecimal(packet, BEREGNING_G_FOER),
@@ -91,7 +104,12 @@ internal class VedtakAttestertRiver(
                 beregningBruktOmregningsfaktor = bigDecimal(packet, BEREGNING_BRUKT_OMREGNINGSFAKTOR),
                 avkortingFoer = bigDecimal(packet, AVKORTING_FOER),
                 avkortingEtter = bigDecimal(packet, AVKORTING_ETTER),
-                vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
+                vedtakBeloepFoer = bigDecimal(packet, VEDTAK_BELOEP_FOER),
+                vedtakBeloepEtter = bigDecimal(packet, VEDTAK_BELOEP_ETTER),
+                vedtakOpphoerFoer = deserialize(packet[VEDTAK_OPPHOER_FOER].toJson()),
+                vedtakOpphoerEtter = deserialize(packet[VEDTAK_OPPHOER_ETTER].toJson()),
+                innvilgedePerioderFoer = deserialize(packet[INNVILGEDE_PERIODER_FOER].toJson()),
+                innvilgedePerioderEtter = deserialize(packet[INNVILGEDE_PERIODER_ETTER].toJson()),
             )
 
         behandlingService.lagreFullfoertKjoering(request)

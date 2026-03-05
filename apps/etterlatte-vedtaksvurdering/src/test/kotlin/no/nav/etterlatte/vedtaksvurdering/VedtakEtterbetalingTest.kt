@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -24,6 +25,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.Month
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
 internal class VedtakEtterbetalingTest {
@@ -77,7 +79,7 @@ internal class VedtakEtterbetalingTest {
                 id = 2L,
                 virkningstidspunkt = februar2024,
                 beloep = 2500,
-                fattetTidspunkt = "2024-01-29T14:05:00Z",
+                attestertTidspunkt = "2024-01-29T14:05:00Z",
             )
 
         every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
@@ -86,7 +88,7 @@ internal class VedtakEtterbetalingTest {
                     id = 1L,
                     virkningstidspunkt = januar2024,
                     beloep = 2500,
-                    fattetTidspunkt = "2024-01-26T11:25:00Z",
+                    attestertTidspunkt = "2024-01-26T11:25:00Z",
                 ),
             )
 
@@ -102,7 +104,7 @@ internal class VedtakEtterbetalingTest {
                 id = 2L,
                 virkningstidspunkt = februar2024,
                 beloep = null,
-                fattetTidspunkt = "2024-10-29T14:05:00Z",
+                attestertTidspunkt = "2024-10-29T14:05:00Z",
             )
 
         every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
@@ -111,13 +113,13 @@ internal class VedtakEtterbetalingTest {
                     id = 1L,
                     virkningstidspunkt = februar2024,
                     beloep = 3000,
-                    fattetTidspunkt = "2024-01-26T11:25:00Z",
+                    attestertTidspunkt = "2024-01-26T11:25:00Z",
                 ),
                 aVedtakMedUtbetalingsperiode(
                     id = 1L,
                     virkningstidspunkt = mai2024,
                     beloep = 4000,
-                    fattetTidspunkt = "2024-01-26T11:25:00Z",
+                    attestertTidspunkt = "2024-01-26T11:25:00Z",
                 ),
             )
 
@@ -138,7 +140,7 @@ internal class VedtakEtterbetalingTest {
                 id = 2L,
                 virkningstidspunkt = februar2024,
                 beloep = 3500,
-                fattetTidspunkt = "2024-01-26T11:25:00Z",
+                attestertTidspunkt = "2024-01-26T11:25:00Z",
             )
 
         every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
@@ -147,7 +149,7 @@ internal class VedtakEtterbetalingTest {
                     id = 1L,
                     virkningstidspunkt = januar2024,
                     beloep = 2500,
-                    fattetTidspunkt = "2023-12-16T13:30:00Z",
+                    attestertTidspunkt = "2023-12-16T13:30:00Z",
                 ),
             )
 
@@ -163,7 +165,7 @@ internal class VedtakEtterbetalingTest {
                 id = 10L,
                 virkningstidspunkt = februar2024,
                 beloep = 3500,
-                fattetTidspunkt = "2024-03-06T13:30:00Z",
+                attestertTidspunkt = "2024-03-06T13:30:00Z",
             )
 
         every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
@@ -172,19 +174,19 @@ internal class VedtakEtterbetalingTest {
                     id = 1L,
                     virkningstidspunkt = januar2024,
                     beloep = 2000,
-                    fattetTidspunkt = "2024-01-07T13:30:00Z",
+                    attestertTidspunkt = "2024-01-07T13:30:00Z",
                 ),
                 aVedtakMedUtbetalingsperiode(
                     id = 2L,
                     virkningstidspunkt = februar2024,
                     beloep = 2500,
-                    fattetTidspunkt = "2024-01-26T14:00:00Z",
+                    attestertTidspunkt = "2024-01-26T14:00:00Z",
                 ),
                 aVedtakMedUtbetalingsperiode(
                     id = 3L,
                     virkningstidspunkt = mars2024,
                     beloep = 3000,
-                    fattetTidspunkt = "2024-03-05T10:00:00Z",
+                    attestertTidspunkt = "2024-03-05T10:00:00Z",
                 ),
             )
 
@@ -228,13 +230,13 @@ internal class VedtakEtterbetalingTest {
                     id = 1L,
                     virkningstidspunkt = virkningstidspunkt,
                     beloep = 9302,
-                    fattetTidspunkt = "2024-01-07T14:00:00Z",
+                    attestertTidspunkt = "2024-01-07T14:00:00Z",
                 ),
                 aVedtakMedUtbetalingsperiode(
                     id = 2L,
                     virkningstidspunkt = virkningstidspunkt.plusMonths(1),
                     beloep = 3876,
-                    fattetTidspunkt = "2024-02-07T13:30:00Z",
+                    attestertTidspunkt = "2024-02-07T13:30:00Z",
                 ),
             )
 
@@ -253,7 +255,7 @@ internal class VedtakEtterbetalingTest {
         id: Long,
         virkningstidspunkt: YearMonth,
         beloep: Long?,
-        fattetTidspunkt: String,
+        attestertTidspunkt: String,
     ) = vedtak(
         id = id,
         sakType = SakType.OMSTILLINGSSTOENAD,
@@ -263,7 +265,13 @@ internal class VedtakEtterbetalingTest {
             VedtakFattet(
                 "Z01",
                 ENHET_1,
-                Tidspunkt.parse(fattetTidspunkt),
+                Tidspunkt.parse(attestertTidspunkt).minus(1, ChronoUnit.HOURS),
+            ),
+        attestasjon =
+            Attestasjon(
+                attestant = "Z02",
+                ENHET_1,
+                Tidspunkt.parse(attestertTidspunkt),
             ),
         utbetalingsperioder =
             listOf(

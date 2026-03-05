@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.AvkortetYtelsePeriode
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -84,6 +85,12 @@ class VedtakSamordningServiceTest {
                             Enheter.defaultEnhet.enhetNr,
                             Tidspunkt.parse("2023-12-05T14:20:50Z"),
                         ),
+                    attestasjon =
+                        Attestasjon(
+                            "SBI",
+                            Enheter.defaultEnhet.enhetNr,
+                            Tidspunkt.parse("2023-12-05T14:21:50Z"),
+                        ),
                     utbetalingsperioder =
                         listOf(
                             Utbetalingsperiode(
@@ -107,6 +114,12 @@ class VedtakSamordningServiceTest {
                             "SBH",
                             Enheter.defaultEnhet.enhetNr,
                             Tidspunkt.parse("2024-01-11T09:43:04Z"),
+                        ),
+                    attestasjon =
+                        Attestasjon(
+                            "SBI",
+                            Enheter.defaultEnhet.enhetNr,
+                            Tidspunkt.parse("2024-01-11T09:44:04Z"),
                         ),
                     utbetalingsperioder =
                         listOf(

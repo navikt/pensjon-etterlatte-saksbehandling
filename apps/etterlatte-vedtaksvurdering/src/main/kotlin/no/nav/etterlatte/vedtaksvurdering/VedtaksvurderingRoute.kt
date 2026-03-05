@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -119,6 +118,16 @@ fun Route.vedtaksvurderingRoute(
                     .hentInnvilgedePerioder(sakId)
                     .map(InnvilgetPeriode::tilDto)
             call.respond(innvilgedePerioder)
+        }
+
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/innvilgede-perioder") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val innvilgedePerioder =
+                    vedtakService
+                        .hentInnvilgedePerioder(behandlingId)
+                        .map(InnvilgetPeriode::tilDto)
+                call.respond(innvilgedePerioder)
+            }
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {

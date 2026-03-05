@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Inntektsopplysninger } from '~components/etteroppgjoer/components/inntektsopplysninger/Inntektsopplysninger'
 import { FastsettFaktiskInntekt } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FastsettFaktiskInntekt'
@@ -22,7 +22,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { erBehandlingRedigerbar, enhetErSkrivbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { FerdigstillEtteroppgjoerForbehandlingUtenBrev } from '~components/etteroppgjoer/components/FerdigstillEtteroppgjoerForbehandlingUtenBrev'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { InformasjonFraBruker } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBruker'
@@ -73,11 +73,17 @@ function kanRedigereFaktiskInntektForKontekst(
 export function EtteroppgjoerOversikt({ kontekst }: Props) {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const etteroppgjoerForbehandling = useEtteroppgjoerForbehandling()
+  const { next } = useBehandlingRoutes()
+  const navigate = useNavigate()
 
   const [opphoerDoedsfallErrors, setOpphoerDoedsfallErrors] = useState<FieldErrors<OpphoerSkyldesDoedsfallSkjema>>()
   const [faktiskInntektErrors, setFaktiskInntektErrors] = useState<FieldErrors<FastsettFaktiskInntektSkjema>>()
   const [informasjonFraBrukerErrors, setInformasjonFraBrukerErrors] = useState<FieldErrors<IInformasjonFraBruker>>()
   const [valideringFeilmelding, setValideringFeilmelding] = useState<string>('')
+
+  useEffect(() => {
+    setValideringFeilmelding('')
+  }, [etteroppgjoerForbehandling])
 
   if (!etteroppgjoerForbehandling) {
     return <Spinner label="Laster etteroppgjør forbehandling" />
@@ -92,6 +98,27 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
   const visBeregnetResultat = erRevurdering
     ? forbehandling.endringErTilUgunstForBruker !== JaNei.JA
     : !!beregnetEtteroppgjoerResultat && !doedsfallIEtteroppgjoersaaret
+
+  const validerOgNaviger = (naviger: () => void) => {
+    if (opphoerDoedsfallErrors || informasjonFraBrukerErrors || faktiskInntektErrors) {
+      return
+    }
+
+    if (forbehandling.harVedtakAvTypeOpphoer && !forbehandling.opphoerSkyldesDoedsfall) {
+      setValideringFeilmelding('Du må ta stilling til om opphør skyldes dødsfall')
+    } else if (
+      erRevurdering &&
+      kontekst.behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB &&
+      !forbehandling.harMottattNyInformasjon
+    ) {
+      setValideringFeilmelding('Du må ta stilling til informasjon fra bruker')
+    } else if (!beregnetEtteroppgjoerResultat && !doedsfallIEtteroppgjoersaaret) {
+      setValideringFeilmelding('Du må fastsette faktisk inntekt')
+    } else {
+      setValideringFeilmelding('')
+      naviger()
+    }
+  }
 
   return (
     <VStack gap="10" paddingInline="16" paddingBlock="16 4">
@@ -150,19 +177,16 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         <RevurderingNavigasjon
           behandling={kontekst.behandling}
           forbehandling={forbehandling}
-          harSkjemaErrors={
-            !!(
-              (opphoerDoedsfallErrors && Object.keys(opphoerDoedsfallErrors).length > 0) ||
-              (informasjonFraBrukerErrors && Object.keys(informasjonFraBrukerErrors).length > 0) ||
-              (faktiskInntektErrors && Object.keys(faktiskInntektErrors).length > 0)
-            )
-          }
-          setValideringFeilmelding={setValideringFeilmelding}
+          onNesteSteg={() => validerOgNaviger(next)}
         />
       ) : (
         <ForbehandlingNavigasjon
           forbehandling={forbehandling}
           beregnetEtteroppgjoerResultat={beregnetEtteroppgjoerResultat}
+          doedsfallIEtteroppgjoersaaret={doedsfallIEtteroppgjoersaaret}
+          onNesteSteg={() =>
+            validerOgNaviger(() => navigate(`/etteroppgjoer/${forbehandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`))
+          }
         />
       )}
     </VStack>
@@ -210,46 +234,12 @@ function RevurderingSpesifikkeSeksjoner({
 function RevurderingNavigasjon({
   behandling,
   forbehandling,
-  harSkjemaErrors,
-  setValideringFeilmelding,
+  onNesteSteg,
 }: {
   behandling: IDetaljertBehandling
   forbehandling: EtteroppgjoerForbehandling
-  harSkjemaErrors: boolean
-  setValideringFeilmelding: Dispatch<SetStateAction<string>>
+  onNesteSteg: () => void
 }) {
-  const { next } = useBehandlingRoutes()
-
-  const manglerOpphoerSkyldesDoedsfallVurdering =
-    forbehandling.harVedtakAvTypeOpphoer && !forbehandling.opphoerSkyldesDoedsfall
-
-  const manglerInformasjonFraBrukerVurdering =
-    behandling.opprinnelse === Opprinnelse.AUTOMATISK_JOBB && !forbehandling.harMottattNyInformasjon
-
-  const manglerFastsattInntekt =
-    forbehandling.harMottattNyInformasjon === JaNei.JA && forbehandling.kopiertFra === undefined
-
-  const validerForNavigering = (): string | undefined => {
-    if (manglerOpphoerSkyldesDoedsfallVurdering) return 'Du må ta stilling til om opphør skyldes dødsfall'
-    if (manglerInformasjonFraBrukerVurdering) return 'Du må ta stilling til informasjon fra bruker'
-    if (manglerFastsattInntekt) return 'Du må gjøre en endring i fastsatt inntekt'
-    return undefined
-  }
-
-  const navigerTilNesteSteg = () => {
-    if (harSkjemaErrors) {
-      return
-    }
-
-    const feilmelding = validerForNavigering()
-    if (feilmelding) {
-      setValideringFeilmelding(feilmelding)
-    } else {
-      setValideringFeilmelding('')
-      next()
-    }
-  }
-
   return (
     <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
       <HStack width="100%" justify="center">
@@ -261,7 +251,7 @@ function RevurderingNavigasjon({
             />
           ) : (
             <div>
-              <Button type="button" onClick={navigerTilNesteSteg}>
+              <Button type="button" onClick={onNesteSteg}>
                 Neste side
               </Button>
             </div>
@@ -276,9 +266,13 @@ function RevurderingNavigasjon({
 function ForbehandlingNavigasjon({
   forbehandling,
   beregnetEtteroppgjoerResultat,
+  doedsfallIEtteroppgjoersaaret,
+  onNesteSteg,
 }: {
   forbehandling: EtteroppgjoerForbehandling
   beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto | undefined
+  doedsfallIEtteroppgjoersaaret: boolean
+  onNesteSteg: () => void
 }) {
   const ferdigstillUtenBrev =
     beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
@@ -289,8 +283,8 @@ function ForbehandlingNavigasjon({
       <HStack width="100%" justify="center">
         {ferdigstillUtenBrev ? (
           <FerdigstillEtteroppgjoerForbehandlingUtenBrev />
-        ) : (
-          <Button as={Link} to={`/etteroppgjoer/${forbehandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`}>
+        ) : doedsfallIEtteroppgjoersaaret ? null : (
+          <Button type="button" onClick={onNesteSteg}>
             Gå til brev
           </Button>
         )}

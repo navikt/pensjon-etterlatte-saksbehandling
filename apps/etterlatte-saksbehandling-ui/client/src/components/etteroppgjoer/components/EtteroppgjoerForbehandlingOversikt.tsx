@@ -56,7 +56,7 @@ function erRedigerbart(
   return erForbehandlingRedigerbar(forbehandling.status) && enhetErSkrivbar(forbehandling.sak.enhet, skriveEnheter)
 }
 
-function kanRedigereFaktiskInntektForKontekst(
+function kanRedigereFaktiskInntekt(
   erRedigerbar: boolean,
   kontekst: EtteroppgjoerKontekst,
   forbehandling: EtteroppgjoerForbehandling
@@ -90,10 +90,10 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
   }
 
   const { forbehandling, beregnetEtteroppgjoerResultat } = etteroppgjoerForbehandling
+  const doedsfallIEtteroppgjoersaaret = forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA
   const erRevurdering = kontekst.type === EtteroppgjoerKontekstType.REVURDERING
   const erRedigerbar = erRedigerbart(kontekst, forbehandling, innloggetSaksbehandler.skriveEnheter)
-  const doedsfallIEtteroppgjoersaaret = forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar === JaNei.JA
-  const kanRedigereFaktiskInntekt = kanRedigereFaktiskInntektForKontekst(erRedigerbar, kontekst, forbehandling)
+  const erRedigerbartFaktiskInntekt = kanRedigereFaktiskInntekt(erRedigerbar, kontekst, forbehandling)
 
   const visBeregnetResultat = erRevurdering
     ? forbehandling.endringErTilUgunstForBruker !== JaNei.JA
@@ -146,7 +146,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
 
       {!doedsfallIEtteroppgjoersaaret && (
         <FastsettFaktiskInntekt
-          erRedigerbar={kanRedigereFaktiskInntekt}
+          erRedigerbar={erRedigerbartFaktiskInntekt}
           setFastsettFaktiskInntektSkjemaErrors={setFaktiskInntektErrors}
         />
       )}

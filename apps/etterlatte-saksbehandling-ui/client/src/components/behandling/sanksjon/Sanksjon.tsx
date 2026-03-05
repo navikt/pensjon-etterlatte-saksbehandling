@@ -333,6 +333,7 @@ export const Sanksjon = ({
                       fromDate={tidligstSanksjonFom(sanksjoner, behandling)}
                       validate={validerFom}
                       required
+                      kunViseMaanedOgAar={true}
                     />
                     <ControlledMaanedVelger
                       label="Dato til og med (valgfri)"
@@ -340,6 +341,7 @@ export const Sanksjon = ({
                       control={control}
                       fromDate={tidligstSanksjonFom(sanksjoner, behandling)}
                       validate={validerTom}
+                      kunViseMaanedOgAar={true}
                     />
                   </HStack>
                   <Select

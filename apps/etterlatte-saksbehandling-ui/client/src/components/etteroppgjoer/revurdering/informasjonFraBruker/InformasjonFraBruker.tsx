@@ -1,7 +1,7 @@
 import { Button, Heading, VStack } from '@navikt/ds-react'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { InformasjonFraBrukerVisning } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBrukerVisning'
@@ -25,7 +25,7 @@ export const InformasjonFraBruker = ({
 
   const { forbehandling } = useEtteroppgjoerForbehandling()
 
-  const erRedigerbar = behandlingErRedigerbar(
+  const erRedigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

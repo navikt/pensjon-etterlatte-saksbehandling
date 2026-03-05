@@ -18,7 +18,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { ConfigContext } from '~clientConfig'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { ISjekklisteItem } from '~shared/types/Sjekkliste'
 import debounce from 'lodash/debounce'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
@@ -64,7 +64,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
     const erSammeIdent = oppgave?.saksbehandler?.ident === innloggetSaksbehandler.ident
     setOppgaveErTildeltInnloggetBruker(erSammeIdent)
     setRedigerbar(
-      behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
+      erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
         erSammeIdent
     )
   }, [])

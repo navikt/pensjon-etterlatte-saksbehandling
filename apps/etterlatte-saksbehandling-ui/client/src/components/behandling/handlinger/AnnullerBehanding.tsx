@@ -14,7 +14,7 @@ import {
 import { avbrytBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
@@ -41,7 +41,7 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const behandles = behandlingErRedigerbar(
+  const behandles = erBehandlingRedigerbar(
     behandling?.status ?? IBehandlingStatus.IVERKSATT,
     behandling?.sakEnhetId ?? '',
     innloggetSaksbehandler.skriveEnheter

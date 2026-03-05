@@ -64,7 +64,7 @@ export const statusErRedigerbar = (status: IBehandlingStatus) => {
   )
 }
 
-export const behandlingErRedigerbar = (status: IBehandlingStatus, enhetId: string, enheter: Array<string>): boolean => {
+export const erBehandlingRedigerbar = (status: IBehandlingStatus, enhetId: string, enheter: Array<string>): boolean => {
   return enhetErSkrivbar(enhetId, enheter) && statusErRedigerbar(status)
 }
 

@@ -1,5 +1,5 @@
 import { Control, Controller, useFieldArray, UseFormWatch } from 'react-hook-form'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import PeriodeAccordion from '~components/behandling/beregningsgrunnlag/PeriodeAccordion'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { BodyShort, Button, HStack, Label, Radio, RadioGroup } from '@navikt/ds-react'
@@ -37,7 +37,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
     control,
   })
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const behandles = behandlingErRedigerbar(
+  const behandles = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

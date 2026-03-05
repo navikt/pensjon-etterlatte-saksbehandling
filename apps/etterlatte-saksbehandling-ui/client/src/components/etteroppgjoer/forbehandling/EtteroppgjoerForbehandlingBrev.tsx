@@ -12,7 +12,7 @@ import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { ferdigstillEtteroppgjoerForbehandlingMedBrev } from '~shared/api/etteroppgjoer'
-import { kanRedigereEtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { erForbehandlingRedigerbar } from '~shared/types/EtteroppgjoerForbehandling'
 import { navigerTilPersonOversikt } from '~components/person/lenker/navigerTilPersonOversikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IBrev } from '~shared/types/Brev'
@@ -31,7 +31,7 @@ export function EtteroppgjoerForbehandlingBrev() {
   const [ferdigstillForbehandlingResult, ferdigstillForbehandlingRequest, resetFerdigstillForbehandlingStatus] =
     useApiCall(ferdigstillEtteroppgjoerForbehandlingMedBrev)
 
-  const kanRedigeres = kanRedigereEtteroppgjoerForbehandling(forbehandling.status)
+  const kanRedigeres = erForbehandlingRedigerbar(forbehandling.status)
   const [tilbakestilt, setTilbakestilt] = useState(false)
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
   const [bekreftetSettOverBrev, setBekreftetSettOverBrev] = useState<boolean>(false)

@@ -10,7 +10,7 @@ import {
 import { hentAktivitspliktVurderingForBehandling } from '~shared/api/aktivitetsplikt'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useDispatch } from 'react-redux'
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -47,7 +47,7 @@ export const AktivitetspliktVurdering = ({
   const [hentetVurdering, hentVurdering] = useApiCall(hentAktivitspliktVurderingForBehandling)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const dispatch = useDispatch()
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

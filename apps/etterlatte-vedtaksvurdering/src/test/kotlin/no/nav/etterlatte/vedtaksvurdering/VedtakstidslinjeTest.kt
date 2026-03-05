@@ -24,7 +24,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
-import java.time.Year
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.DAYS
@@ -1032,6 +1031,37 @@ internal class VedtakstidslinjeTest {
             )
         }
 
+        @Test
+        fun `innvilgede perioder ser bare paa attesterte vedtak`() {
+            val vedtakUtenOpphoer =
+                lagStandardVedtakMedEnAapenUtbetalingsperiode(
+                    id = 1,
+                    virkningFom = YearMonth.of(2024, Month.JANUARY),
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    vedtakFattetDato = Tidspunkt.now().minus(3, DAYS),
+                    opphoerFraOgMed = null,
+                )
+
+            val vedtakMedOpphoer =
+                lagVedtak(
+                    id = 2,
+                    virkningsDato = YearMonth.of(2024, Month.AUGUST).atDay(1),
+                    vedtakStatus = VedtakStatus.FATTET_VEDTAK,
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakFattetDato = Tidspunkt.now().minus(1, DAYS),
+                    datoAttestert = null,
+                    opphoerFraOgMed = YearMonth.of(2025, Month.FEBRUARY),
+                )
+
+            val tidslinje =
+                Vedtakstidslinje(listOf(vedtakUtenOpphoer, vedtakMedOpphoer))
+
+            val innvilgetPeriode = tidslinje.innvilgedePerioder()
+            innvilgetPeriode.size shouldBe 1
+            innvilgetPeriode[0].periode.fom shouldBe januar2024
+            innvilgetPeriode[0].periode.tom shouldBe null
+        }
+
         private val Vedtak.utbetalingsperioder: List<Utbetalingsperiode>
             get() = (this.innhold as VedtakInnhold.Behandling).utbetalingsperioder
     }
@@ -1043,7 +1073,7 @@ internal fun lagVedtak(
     behandlingId: UUID = UUID.randomUUID(),
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     vedtakStatus: VedtakStatus,
-    datoAttestert: Tidspunkt = Tidspunkt.now(),
+    datoAttestert: Tidspunkt? = Tidspunkt.now(),
     vedtakType: VedtakType = VedtakType.INNVILGELSE,
     vedtakFattetDato: Tidspunkt = Tidspunkt.now(),
     utbetalingsperioder: List<Utbetalingsperiode> = emptyList(),
@@ -1064,11 +1094,13 @@ internal fun lagVedtak(
                 tidspunkt = vedtakFattetDato,
             ),
         attestasjon =
-            Attestasjon(
-                attestant = SAKSBEHANDLER_2,
-                attesterendeEnhet = ENHET_2,
-                tidspunkt = datoAttestert,
-            ),
+            datoAttestert?.let {
+                Attestasjon(
+                    attestant = SAKSBEHANDLER_2,
+                    attesterendeEnhet = ENHET_2,
+                    tidspunkt = datoAttestert,
+                )
+            },
         innhold =
             VedtakInnhold.Behandling(
                 virkningstidspunkt = virkningsDato.let { YearMonth.from(it) },

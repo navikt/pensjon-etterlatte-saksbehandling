@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator

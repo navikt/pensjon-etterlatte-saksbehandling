@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
@@ -29,8 +29,6 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.sakId
-import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangServiceSjekker
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang

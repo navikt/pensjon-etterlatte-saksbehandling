@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevur
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.vedtaksbehandling.klienter.SamordningsKlient
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
@@ -59,7 +60,6 @@ import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakLesDao
-import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.vilkaarsvurdering.service.BehandlingstilstandException
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.AfterEach

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
@@ -7,6 +7,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.vedtaksvurdering.RapidInfo
+import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import java.util.UUID
 
 class VedtaksvurderingRapidService(

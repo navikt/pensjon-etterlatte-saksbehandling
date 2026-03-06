@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle

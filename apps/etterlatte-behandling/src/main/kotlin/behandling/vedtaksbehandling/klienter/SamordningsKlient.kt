@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.klienter
+package no.nav.etterlatte.behandling.vedtaksbehandling.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
@@ -15,16 +15,16 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.behandling.vedtaksbehandling.EtterbetalingResultat
+import no.nav.etterlatte.behandling.vedtaksbehandling.OppdaterSamordningsmelding
+import no.nav.etterlatte.behandling.vedtaksbehandling.Samordningsvedtak
+import no.nav.etterlatte.behandling.vedtaksbehandling.Vedtak
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtakInnhold
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.vedtaksvurdering.EtterbetalingResultat
-import no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
-import no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 

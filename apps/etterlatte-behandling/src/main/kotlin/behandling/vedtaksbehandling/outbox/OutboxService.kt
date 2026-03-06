@@ -1,14 +1,14 @@
-package no.nav.etterlatte.vedtaksvurdering.outbox
+package no.nav.etterlatte.behandling.vedtaksbehandling.outbox
 
 import net.logstash.logback.marker.Markers
+import no.nav.etterlatte.behandling.vedtaksbehandling.Vedtak
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtakInnhold
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeExactly
@@ -9,6 +9,8 @@ import io.kotest.matchers.types.beInstanceOf
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.vedtaksbehandling.outbox.OutboxItemType
+import no.nav.etterlatte.behandling.vedtaksbehandling.outbox.OutboxRepository
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -29,8 +31,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxItemType
-import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test

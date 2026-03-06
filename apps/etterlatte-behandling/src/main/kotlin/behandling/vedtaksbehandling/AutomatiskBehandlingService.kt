@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.vedtaksvurdering.RapidInfo
+import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

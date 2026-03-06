@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
+import no.nav.etterlatte.behandling.vedtaksbehandling.klienter.SamordningsKlient
 import no.nav.etterlatte.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -43,7 +44,9 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.migrering.KILDE_KEY
 import no.nav.etterlatte.sak.SakLesDao
-import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlient
+import no.nav.etterlatte.vedtaksvurdering.RapidInfo
+import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
+import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate

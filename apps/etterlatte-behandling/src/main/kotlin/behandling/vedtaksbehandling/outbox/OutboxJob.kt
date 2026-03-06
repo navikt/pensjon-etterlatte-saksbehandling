@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.outbox
+package no.nav.etterlatte.behandling.vedtaksbehandling.outbox
 
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer

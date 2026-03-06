@@ -13,6 +13,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
+import kotliquery.queryOf
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
@@ -54,6 +55,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakLesDao
@@ -609,6 +611,7 @@ internal class VedtakBehandlingServiceTest(
                 behandlingId = behandlingId,
                 saktype = SakType.OMSTILLINGSSTOENAD,
             )
+        coEvery { behandlingService.hentBehandling(any()) } returns mockk()
         coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
             mockBeregning(
@@ -687,17 +690,16 @@ internal class VedtakBehandlingServiceTest(
         }
     }
 
-    /*@Test
-    TODO: Denne er litt vanskelig.
+    @Test
     fun `skal rulle tilbake vedtak som blir fattet hvis attesteringsoppgave feiler`() {
         val behandlingId = randomUUID()
         val sakId = sakId1
         val virkningstidspunkt = YearMonth.of(2022, Month.AUGUST)
         val gjeldendeSaksbehandler = saksbehandler
 
-        coEvery { behandlingKlientMock.kanFatteVedtak(behandlingId, any()) } returns true
+        coEvery { behandlingStatusService.sjekkOmKanFatteVedtak(behandlingId) } just runs
         coEvery {
-            behandlingKlientMock.fattVedtakBehandling(any(), any())
+            behandlingStatusService.settFattetVedtak(any(), any(), any())
         } throws RuntimeException("Å nei")
         coEvery { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns
             mockBehandling(
@@ -715,22 +717,15 @@ internal class VedtakBehandlingServiceTest(
                 null,
             )
         coEvery {
-            vilkaarsvurderingKlientMock.hentVilkaarsvurdering(
-                behandlingId,
-                any(),
-            )
+            vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
         } returns mockVilkaarsvurdering()
         coEvery {
-            beregningKlientMock.hentBeregningOgAvkorting(
-                behandlingId,
-                any(),
-                SakType.BARNEPENSJON,
-            )
-        } returns
-            BeregningOgAvkorting(
-                beregning = mockBeregning(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId),
-                avkorting = mockAvkorting(),
-            )
+            beregningKlientMock.hentBeregning(any(), any())
+        } returns mockBeregning(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+
+        coEvery {
+            beregningKlientMock.hentAvkorting(behandlingId, any())
+        } returns mockAvkorting()
 
         val opprettetVedtak =
             repository.opprettVedtak(
@@ -764,7 +759,7 @@ internal class VedtakBehandlingServiceTest(
         }
         val returnertVedtakEtterFeiletFatting = repository.hentVedtak(behandlingId)
         Assertions.assertEquals(returnertVedtak, returnertVedtakEtterFeiletFatting)
-    }*/
+    }
 
     @Test
     fun `skal attestere vedtak`() {

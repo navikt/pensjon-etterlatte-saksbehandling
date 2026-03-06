@@ -758,7 +758,7 @@ class VedtakBehandlingService(
                 ) ?: throw GenerellIkkeFunnetException()
             val sak =
                 sakLesDao.hentSak(behandling.sak)
-                    ?: throw GenerellIkkeFunnetException() // TODO: Gå gjennom denne med Trond.
+                    ?: throw GenerellIkkeFunnetException()
 
             val trygdetider =
                 trygdetidKlient.hentTrygdetid(

@@ -28,9 +28,8 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.sakId
-import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.sak.TilgangServiceSjekker
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -39,6 +38,7 @@ fun Route.vedtaksvurderingRoute(
     vedtakService: VedtaksvurderingService,
     vedtakBehandlingService: VedtakBehandlingService,
     rapidService: VedtaksvurderingRapidService,
+    tilgangService: TilgangServiceSjekker,
 ) {
     route("/api/vedtak") {
         val logger = LoggerFactory.getLogger("VedtaksvurderingRoute")
@@ -137,51 +137,59 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/simulering") {
-            logger.info("Henter/oppdaterer vedtak for sinulering (behandling=$behandlingId)")
+            kunSkrivetilgang {
+                logger.info("Henter/oppdaterer vedtak for sinulering (behandling=$behandlingId)")
 
-            vedtakService.hentVedtakMedBehandlingId(behandlingId)?.let {
-                if (!it.underArbeid()) {
-                    return@post call.respond(it.toDto())
+                vedtakService.hentVedtakMedBehandlingId(behandlingId)?.let {
+                    if (!it.underArbeid()) {
+                        return@post call.respond(it.toDto())
+                    }
                 }
-            }
 
-            val vedtak =
-                vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
-            call.respond(vedtak.toDto())
+                val vedtak =
+                    vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+                call.respond(vedtak.toDto())
+            }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/upsert") {
-            logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
-            val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
-            call.respond(nyttVedtak.toDto())
+            kunSkrivetilgang {
+                logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
+                val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+                call.respond(nyttVedtak.toDto())
+            }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/fattvedtak") {
-            logger.info("Fatter vedtak for behandling $behandlingId")
-            val fattetVedtak = vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
-            rapidService.sendToRapid(fattetVedtak)
+            kunSkrivetilgang {
+                logger.info("Fatter vedtak for behandling $behandlingId")
+                val fattetVedtak = vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
+                rapidService.sendToRapid(fattetVedtak)
 
-            call.respond(fattetVedtak.vedtak)
+                call.respond(fattetVedtak.vedtak)
+            }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/attester") {
-            logger.info("Attesterer vedtak for behandling $behandlingId")
-            val (kommentar) = call.receive<AttesterVedtakDto>()
-            val attestert = vedtakBehandlingService.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
+            kunSkrivetilgang {
+                logger.info("Attesterer vedtak for behandling $behandlingId")
+                val (kommentar) = call.receive<AttesterVedtakDto>()
+                val attestert = vedtakBehandlingService.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
 
-            try {
-                rapidService.sendToRapid(attestert)
-            } catch (e: Exception) {
-                logger.error(
-                    "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.id} " +
-                        "Saknr: ${attestert.vedtak.sak.id}. " +
-                        "Det betyr at vi ikke får sendt ut vedtaksbrev og heller ikke utbetalingsoppdrag. " +
-                        "Denne hendelsen må sendes ut manuelt straks.",
-                    e,
-                )
-                throw e
+                try {
+                    rapidService.sendToRapid(attestert)
+                } catch (e: Exception) {
+                    logger.error(
+                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.id} " +
+                            "Saknr: ${attestert.vedtak.sak.id}. " +
+                            "Det betyr at vi ikke får sendt ut vedtaksbrev og heller ikke utbetalingsoppdrag. " +
+                            "Denne hendelsen må sendes ut manuelt straks.",
+                        e,
+                    )
+                    throw e
+                }
+                call.respond(attestert.vedtak)
             }
-            call.respond(attestert.vedtak)
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}/samordning") {
@@ -190,48 +198,57 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/underkjenn") {
-            logger.info("Underkjenner vedtak for behandling $behandlingId")
-            val begrunnelse = call.receive<UnderkjennVedtakDto>()
-            val underkjentVedtak =
-                vedtakBehandlingService.underkjennVedtak(
-                    behandlingId,
-                    brukerTokenInfo,
-                    begrunnelse,
-                )
-            rapidService.sendToRapid(underkjentVedtak)
+            kunSkrivetilgang {
+                logger.info("Underkjenner vedtak for behandling $behandlingId")
+                val begrunnelse = call.receive<UnderkjennVedtakDto>()
+                val underkjentVedtak =
+                    vedtakBehandlingService.underkjennVedtak(
+                        behandlingId,
+                        brukerTokenInfo,
+                        begrunnelse,
+                    )
+                rapidService.sendToRapid(underkjentVedtak)
 
-            call.respond(underkjentVedtak.vedtak)
+                call.respond(underkjentVedtak.vedtak)
+            }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/tilsamordning") {
-            logger.info("Vedtak er til samordning for behandling $behandlingId")
-            val vedtak = vedtakBehandlingService.tilSamordningVedtak(behandlingId, brukerTokenInfo)
-            rapidService.sendToRapid(vedtak)
-            call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
+            kunSkrivetilgang {
+                logger.info("Vedtak er til samordning for behandling $behandlingId")
+                val vedtak = vedtakBehandlingService.tilSamordningVedtak(behandlingId, brukerTokenInfo)
+                rapidService.sendToRapid(vedtak)
+                call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
+            }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/samordne") {
-            logger.info("Behandler samordning for behandling $behandlingId")
-            val skalVentePaaSamordning = vedtakBehandlingService.samordne(behandlingId, brukerTokenInfo)
-            call.respond(HttpStatusCode.OK, mapOf("skalVentePaaSamordning" to skalVentePaaSamordning))
+            kunSkrivetilgang {
+                logger.info("Behandler samordning for behandling $behandlingId")
+                val skalVentePaaSamordning = vedtakBehandlingService.samordne(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK, mapOf("skalVentePaaSamordning" to skalVentePaaSamordning))
+            }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/samordnet") {
-            logger.info("Vedtak ferdig samordning for behandling $behandlingId")
+            kunSkrivetilgang {
+                logger.info("Vedtak ferdig samordning for behandling $behandlingId")
 
-            vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)?.let { vedtak ->
-                rapidService.sendToRapid(vedtak)
-                call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
-            } ?: call.respond(HttpStatusCode.NoContent)
+                vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)?.let { vedtak ->
+                    rapidService.sendToRapid(vedtak)
+                    call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
+                } ?: call.respond(HttpStatusCode.NoContent)
+            }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/iverksett") {
-            logger.info("Iverksetter vedtak for behandling $behandlingId")
-            val vedtak =
-                vedtakBehandlingService.iverksattVedtak(behandlingId) // TODO: Fjernet brukerTokenInfo, sjekk denne.
-            rapidService.sendToRapid(vedtak)
+            kunSkrivetilgang {
+                logger.info("Iverksetter vedtak for behandling $behandlingId")
+                val vedtak = vedtakBehandlingService.iverksattVedtak(behandlingId)
+                rapidService.sendToRapid(vedtak)
 
-            call.respond(HttpStatusCode.OK, vedtak.vedtak)
+                call.respond(HttpStatusCode.OK, vedtak.vedtak)
+            }
         }
 
         get("/loepende/{$SAKID_CALL_PARAMETER}") {
@@ -245,9 +262,11 @@ fun Route.vedtaksvurderingRoute(
         }
 
         patch("/{$BEHANDLINGID_CALL_PARAMETER}/tilbakestill") {
-            logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
-            vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(behandlingId)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
+                vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(behandlingId)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 

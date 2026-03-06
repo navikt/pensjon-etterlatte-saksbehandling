@@ -409,44 +409,44 @@ internal class VedtakBehandlingServiceTest(
 
         (oppdatertVedtak.innhold as VedtakInnhold.Behandling).virkningstidspunkt shouldBe virkningstidspunkt2024
     }
-//
-//    @Test
-//    fun `vedtak for opphoer skal oppdatere opphor fra og med`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = YearMonth.of(2023, 3)
-//        val endretVirkningstidspunkt = YearMonth.of(2023, 4)
-//
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
-//            ) andThen
-//            mockBehandling(
-//                endretVirkningstidspunkt,
-//                behandlingId,
-//                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
-//            )
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns
-//            mockVilkaarsvurdering(
-//                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
-//            )
-//
-//        runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
-//        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
-//
-//        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe endretVirkningstidspunkt
-//    }
+
+    @Test
+    fun `vedtak for opphoer skal oppdatere opphor fra og med`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2023, 3)
+        val endretVirkningstidspunkt = YearMonth.of(2023, 4)
+
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+            ) andThen
+            mockBehandling(
+                endretVirkningstidspunkt,
+                behandlingId,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+            )
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                sakId1,
+                ENHET_1,
+                null,
+                null,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            )
+
+        runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+
+        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe endretVirkningstidspunkt
+    }
 //
 //    @Test
 //    fun `vedtak som oppdateres fra opphoer til endring skal viderefoere tidligere opphor fra og med`() {

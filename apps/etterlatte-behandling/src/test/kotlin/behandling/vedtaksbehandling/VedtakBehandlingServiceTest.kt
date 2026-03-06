@@ -1240,53 +1240,56 @@ internal class VedtakBehandlingServiceTest(
             }
         }
     }
-//
-//    @Test
-//    fun `skal sette vedtak til underkjent`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
-//        val gjeldendeSaksbehandler = saksbehandler
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//        coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-//        coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns true
-//        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//            )
-//        coEvery { behandlingKlientMock.underkjennVedtak(any(), any()) } returns true
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
-//        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-//            BeregningOgAvkorting(
-//                beregning = mockBeregning(virkningstidspunkt, behandlingId),
-//                avkorting = null,
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        val underkjentVedtak =
-//            runBlocking {
-//                repository.opprettVedtak(
-//                    opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId),
-//                )
-//                service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-//                service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())
-//            }
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        underkjentVedtak shouldNotBe null
-//        underkjentVedtak.vedtak.status shouldBe VedtakStatus.RETURNERT
-//
-//        Assertions.assertEquals(VedtakKafkaHendelseHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo1.vedtakhendelse)
-//    }
+
+    @Test
+    fun `skal sette vedtak til underkjent`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
+        val gjeldendeSaksbehandler = saksbehandler
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+        coEvery { behandlingStatusService.sjekkOmKanFatteVedtak(any()) } just runs
+        coEvery { behandlingStatusService.sjekkOmKanReturnereVedtak(any()) } just runs
+        coEvery { behandlingStatusService.settFattetVedtak(any(), any(), any()) } just runs
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt,
+                behandlingId = behandlingId,
+            )
+        coEvery { behandlingService.hentBehandling(any()) } returns mockk()
+        coEvery { behandlingStatusService.settReturnertVedtak(any(), any(), any()) } just runs
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+            mockBeregning(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns null
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        val underkjentVedtak =
+            runBlocking {
+                repository.opprettVedtak(
+                    opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId),
+                )
+                service.fattVedtak(behandlingId = behandlingId, brukerTokenInfo = gjeldendeSaksbehandler)
+                service.underkjennVedtak(
+                    behandlingId = behandlingId,
+                    brukerTokenInfo = attestant,
+                    begrunnelse = underkjennVedtakBegrunnelse(),
+                )
+            }
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        underkjentVedtak shouldNotBe null
+        underkjentVedtak.vedtak.status shouldBe VedtakStatus.RETURNERT
+
+        Assertions.assertEquals(VedtakKafkaHendelseHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo1.vedtakhendelse)
+    }
 //
 //    @Test
 //    fun `skal ikke underkjenne vedtak naar behandling er i ugyldig tilstand`() {

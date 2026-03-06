@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -48,6 +49,7 @@ import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
@@ -864,80 +866,79 @@ internal class VedtakBehandlingServiceTest(
             behandlingStatusService.sjekkOmKanAttestere(any())
         }
     }
-//
-//    @Test
-//    fun `attestering av regulering skal ikke foere til brevutsending`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
-//        val gjeldendeSaksbehandler = saksbehandler
-//        val attestant = attestant
-//
-//        val regulering =
-//            DetaljertBehandling(
-//                id = behandlingId,
-//                sak = sakId1,
-//                sakType = SakType.BARNEPENSJON,
-//                behandlingType = BehandlingType.REVURDERING,
-//                revurderingsaarsak = Revurderingaarsak.REGULERING,
-//                soeker = SOEKER_FOEDSELSNUMMER.value,
-//                status = BehandlingStatus.VILKAARSVURDERT,
-//                virkningstidspunkt =
-//                    Virkningstidspunkt(
-//                        dato = virkningstidspunkt.withMonth(Month.MAY.value),
-//                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
-//                        begrunnelse = "",
-//                        kravdato = null,
-//                    ),
-//                boddEllerArbeidetUtlandet = null,
-//                utlandstilknytning = null,
-//                prosesstype = Prosesstype.MANUELL,
-//                revurderingInfo = null,
-//                vedtaksloesning = Vedtaksloesning.GJENNY,
-//                sendeBrev = false,
-//                opphoerFraOgMed = null,
-//                relatertBehandlingId = null,
-//                tidligereFamiliepleier = null,
-//                opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
-//            )
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//        coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-//        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
-//        coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-//        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns regulering
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
-//        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-//            BeregningOgAvkorting(
-//                beregning = mockBeregning(virkningstidspunkt, behandlingId),
-//                avkorting = null,
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        val attestering =
-//            runBlocking {
-//                repository.opprettVedtak(
-//                    opprettVedtak(
-//                        virkningstidspunkt = virkningstidspunkt,
-//                        behandlingId = behandlingId,
-//                    ),
-//                )
-//                service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-//                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
-//            }
-//
-//        val hendelse = attestering.rapidInfo1
-//
-//        Assertions.assertEquals(hendelse.vedtakhendelse, VedtakKafkaHendelseHendelseType.ATTESTERT)
-//        Assertions.assertEquals(false, hendelse.extraParams[SKAL_SENDE_BREV])
-//    }
+
+    @Test
+    fun `attestering av regulering skal ikke foere til brevutsending`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
+        val gjeldendeSaksbehandler = saksbehandler
+        val attestant = attestant
+
+        val regulering =
+            DetaljertBehandling(
+                id = behandlingId,
+                sak = sakId1,
+                sakType = SakType.BARNEPENSJON,
+                behandlingType = BehandlingType.REVURDERING,
+                revurderingsaarsak = Revurderingaarsak.REGULERING,
+                soeker = SOEKER_FOEDSELSNUMMER.value,
+                status = BehandlingStatus.VILKAARSVURDERT,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        dato = virkningstidspunkt.withMonth(Month.MAY.value),
+                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        begrunnelse = "",
+                        kravdato = null,
+                    ),
+                boddEllerArbeidetUtlandet = null,
+                utlandstilknytning = null,
+                prosesstype = Prosesstype.MANUELL,
+                revurderingInfo = null,
+                vedtaksloesning = Vedtaksloesning.GJENNY,
+                sendeBrev = false,
+                opphoerFraOgMed = null,
+                relatertBehandlingId = null,
+                tidligereFamiliepleier = null,
+                opprinnelse = BehandlingOpprinnelse.AUTOMATISK_JOBB,
+            )
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+        coEvery { behandlingStatusService.sjekkOmKanFatteVedtak(any()) } just runs
+        coEvery { behandlingStatusService.settFattetVedtak(any(), any(), any()) } just runs
+        coEvery { behandlingStatusService.sjekkOmKanAttestere(any()) } just runs
+        coEvery { behandlingStatusService.settAttestertVedtak(any(), any(), any()) } just runs
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns regulering
+        coEvery { behandlingService.hentBehandling(any()) } returns mockk()
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+            mockBeregning(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns null
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        val attestering =
+            runBlocking {
+                repository.opprettVedtak(
+                    opprettVedtak(
+                        virkningstidspunkt = virkningstidspunkt,
+                        behandlingId = behandlingId,
+                    ),
+                )
+                service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
+                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
+            }
+
+        val hendelse = attestering.rapidInfo1
+
+        Assertions.assertEquals(hendelse.vedtakhendelse, VedtakKafkaHendelseHendelseType.ATTESTERT)
+        Assertions.assertEquals(false, hendelse.extraParams[SKAL_SENDE_BREV])
+    }
 //
 //    @Test
 //    fun `skal ikke attestere vedtak naar behandling er i ugyldig tilstand`() {

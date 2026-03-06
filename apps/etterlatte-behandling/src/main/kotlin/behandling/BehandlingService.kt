@@ -479,11 +479,8 @@ internal class BehandlingServiceImpl(
         val avbruttForbehandling = forbehandling.tilAvbrutt(AarsakTilAvbryteForbehandling.ANNET, kommentar)
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(avbruttForbehandling)
-        etteroppgjoerDao.oppdaterEtteroppgjoerStatus(
-            sakId = etteroppgjoer.sakId,
-            inntektsaar = etteroppgjoer.inntektsaar,
-            status = etteroppgjoer.status,
-        )
+        etteroppgjoerDao.lagreEtteroppgjoer(etteroppgjoer)
+
         etteroppgjoerForbehandlingHendelseService.registrerOgSendHendelse(
             etteroppgjoerForbehandling = avbruttForbehandling,
             hendelseType = EtteroppgjoerForbehandlingHendelser.AVBRUTT,

@@ -1189,21 +1189,19 @@ internal class VedtakBehandlingServiceTest(
         ikkeIverksattVedtak.status shouldNotBe VedtakStatus.IVERKSATT
         ikkeIverksattVedtak.status shouldBe VedtakStatus.ATTESTERT
     }
-//
-//    @Test
-//    fun `skal ikke sette vedtak til iverksatt naar vedtak ikke er attestert`() {
-//        val behandlingId = randomUUID()
-//
-//        coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-//
-//        runBlocking {
-//            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-//
-//            assertThrows<VedtakTilstandException> {
-//                service.iverksattVedtak(behandlingId, attestant)
-//            }
-//        }
-//    }
+
+    @Test
+    fun `skal ikke sette vedtak til iverksatt naar vedtak ikke er attestert`() {
+        val behandlingId = randomUUID()
+
+        runBlocking {
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
+
+            assertThrows<VedtakTilstandException> {
+                service.iverksattVedtak(behandlingId)
+            }
+        }
+    }
 //
 //    @Test
 //    fun `skal ikke sette vedtak til iverksatt naar vedtak allerede er satt til iverksatt`() {

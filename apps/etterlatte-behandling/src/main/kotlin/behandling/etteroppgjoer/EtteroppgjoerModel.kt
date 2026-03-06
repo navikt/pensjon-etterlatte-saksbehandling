@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.util.UUID
 
@@ -39,7 +40,7 @@ data class Etteroppgjoer(
     fun kanTilbakestilles() = status in listOf(EtteroppgjoerStatus.UNDER_REVURDERING, EtteroppgjoerStatus.OMGJOERING)
 
     fun tilbakestill(erEndringTilUgunst: Boolean): Etteroppgjoer {
-        krev(kanTilbakestilles()) {
+        sjekk(kanTilbakestilles()) {
             "Kan ikke tilbakestille etteroppgjør for sakId=$sakId: " +
                 "forventet status ${EtteroppgjoerStatus.UNDER_REVURDERING} " +
                 "eller ${EtteroppgjoerStatus.OMGJOERING}, fant $status"

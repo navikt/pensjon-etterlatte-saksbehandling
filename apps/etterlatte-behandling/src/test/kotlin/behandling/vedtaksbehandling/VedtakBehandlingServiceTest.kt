@@ -1290,65 +1290,51 @@ internal class VedtakBehandlingServiceTest(
 
         Assertions.assertEquals(VedtakKafkaHendelseHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo1.vedtakhendelse)
     }
-//
-//    @Test
-//    fun `skal ikke underkjenne vedtak naar behandling er i ugyldig tilstand`() {
-//        val behandlingId = randomUUID()
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//        coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-//        coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns false
-//        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                YearMonth.now(),
-//                behandlingId,
-//            )
-//        coEvery {
-//            beregningKlientMock.hentBeregningOgAvkorting(
-//                any(),
-//                any(),
-//                any(),
-//            )
-//        } returns
-//            BeregningOgAvkorting(
-//                beregning =
-//                    mockk<BeregningDTO>(relaxed = true).also {
-//                        every {
-//                            it.beregningsperioder
-//                        } returns
-//                            listOf(
-//                                Beregningsperiode(
-//                                    datoFOM = YearMonth.of(2023, Month.JANUARY),
-//                                    datoTOM = null,
-//                                    utbetaltBeloep = 100,
-//                                    grunnbelopMnd = 0,
-//                                    grunnbelop = 0,
-//                                    trygdetid = 40,
-//                                ),
-//                            )
-//                    },
-//                avkorting = null,
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        runBlocking {
-//            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-//            service.fattVedtak(behandlingId, saksbehandler)
-//
-//            assertThrows<BehandlingstilstandException> {
-//                service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())
-//            }
-//        }
-//    }
+
+    @Test
+    fun `skal ikke underkjenne vedtak naar behandling er i ugyldig tilstand`() {
+        val behandlingId = randomUUID()
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+        coEvery { behandlingStatusService.sjekkOmKanFatteVedtak(any()) } just runs
+        coEvery { behandlingStatusService.sjekkOmKanReturnereVedtak(any()) } throws
+            BehandlingstilstandException("Behandling i ugyldig tilstand")
+        coEvery { behandlingStatusService.settFattetVedtak(any(), any(), any()) } just runs
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = YearMonth.now(),
+                behandlingId = behandlingId,
+            )
+        coEvery { behandlingService.hentBehandling(any()) } returns mockk()
+        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+            mockBeregning(
+                virkningstidspunkt = YearMonth.now(),
+                behandlingId = behandlingId,
+            )
+        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns null
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking {
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
+            service.fattVedtak(behandlingId = behandlingId, brukerTokenInfo = saksbehandler)
+
+            assertThrows<BehandlingstilstandException> {
+                service.underkjennVedtak(
+                    behandlingId = behandlingId,
+                    brukerTokenInfo = attestant,
+                    begrunnelse = underkjennVedtakBegrunnelse(),
+                )
+            }
+        }
+    }
 //
 //    @Test
 //    fun `skal ikke underkjenne vedtak naar vedtak ikke er fattet`() {

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling.vedtaksbehandling
 
+import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
@@ -33,9 +35,32 @@ class VedtaksvurderingService(
         inntektsaar: Int,
     ): Boolean = repository.harSakUtbetalingForInntektsaar(sakId, inntektsaar, SakType.OMSTILLINGSSTOENAD)
 
+    /**
+     * Henter perioder hvor saken har vært innvilget.
+     * Tar bare med vedtak som er attestert.
+     */
     fun hentInnvilgedePerioder(sakId: SakId): List<InnvilgetPeriode> {
         val vedtak = hentVedtakISak(sakId)
         val tidslinje = Vedtakstidslinje(vedtak)
         return tidslinje.innvilgedePerioder()
+    }
+
+    /**
+     * Henter perioder hvor saken har vært innvilget, fram til og med vedtaket for behandlingen som er angitt.
+     * Tar bare med vedtak som er attestert.
+     */
+    fun hentInnvilgedePerioder(behandlingId: UUID): List<InnvilgetPeriode> {
+        val vedtak =
+            hentVedtakMedBehandlingId(behandlingId)
+                ?: throw NotFoundException("Fant ikke vedtak med behandlingId=$behandlingId")
+        sjekk(vedtak.attestasjon != null) { "Vedtaket må være attestert" }
+        sjekk(vedtak.innhold is VedtakInnhold.Behandling) { "Vedtaket må ha behandling-innhold" }
+
+        val vedtakTilOgMedDetAktuelle =
+            hentVedtakISak(vedtak.sakId)
+                .filter { it.attestasjon != null }
+                .filterNot { it.attestasjon!!.tidspunkt.isAfter(vedtak.attestasjon.tidspunkt) }
+
+        return Vedtakstidslinje(vedtakTilOgMedDetAktuelle).innvilgedePerioder()
     }
 }

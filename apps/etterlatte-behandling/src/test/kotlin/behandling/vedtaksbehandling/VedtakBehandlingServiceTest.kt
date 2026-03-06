@@ -1075,59 +1075,63 @@ internal class VedtakBehandlingServiceTest(
 
         Assertions.assertEquals(VedtakKafkaHendelseHendelseType.IVERKSATT, iverksattVedtak.rapidInfo1.vedtakhendelse)
     }
-//
-//    @Test
-//    fun `skal rulle tilbake vedtak ved iverksatt dersom behandling feiler`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
-//        val gjeldendeSaksbehandler = saksbehandler
-//        val attestant = attestant
-//        coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//        coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-//        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
-//        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//            )
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
-//        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-//            BeregningOgAvkorting(
-//                beregning = mockBeregning(virkningstidspunkt, behandlingId),
-//                avkorting = null,
-//            )
-//
-//        coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } throws RuntimeException("Behandling feilet")
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        runBlocking {
-//            repository.opprettVedtak(
-//                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId),
-//            )
-//            service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-//            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
-//        }
-//
-//        assertThrows<RuntimeException> {
-//            runBlocking {
-//                service.iverksattVedtak(behandlingId, attestant)
-//            }
-//        }
-//        val ikkeIverksattVedtak = repository.hentVedtak(behandlingId)!!
-//        ikkeIverksattVedtak shouldNotBe null
-//        ikkeIverksattVedtak.status shouldNotBe VedtakStatus.IVERKSATT
-//        ikkeIverksattVedtak.status shouldBe VedtakStatus.ATTESTERT
-//    }
+
+    @Test
+    fun `skal rulle tilbake vedtak ved iverksatt dersom behandling feiler`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
+        val gjeldendeSaksbehandler = saksbehandler
+        val attestant = attestant
+        coEvery { behandlingStatusService.sjekkOmKanFatteVedtak(any()) } just runs
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+        coEvery { behandlingStatusService.sjekkOmKanAttestere(any()) } just runs
+        coEvery { behandlingStatusService.settAttestertVedtak(any(), any(), any()) } just runs
+        coEvery { behandlingStatusService.settFattetVedtak(any(), any(), any()) } just runs
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt,
+                behandlingId = behandlingId,
+            )
+        coEvery { behandlingService.hentBehandling(any()) } returns mockk()
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+            mockBeregning(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns null
+
+        coEvery {
+            behandlingStatusService.settIverksattVedtak(
+                any(),
+                any(),
+            )
+        } throws RuntimeException("Behandling feilet")
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId),
+            )
+            service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
+        }
+
+        assertThrows<RuntimeException> {
+            runBlocking {
+                service.iverksattVedtak(behandlingId)
+            }
+        }
+        val ikkeIverksattVedtak = repository.hentVedtak(behandlingId)!!
+        ikkeIverksattVedtak shouldNotBe null
+        ikkeIverksattVedtak.status shouldNotBe VedtakStatus.IVERKSATT
+        ikkeIverksattVedtak.status shouldBe VedtakStatus.ATTESTERT
+    }
 //
 //    @Test
 //    fun `skal rulle tilbake vedtak ved iverksatt dersom behandling returnerer false`() {

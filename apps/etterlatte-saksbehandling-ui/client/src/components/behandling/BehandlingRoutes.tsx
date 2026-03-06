@@ -23,7 +23,10 @@ import { Varselbrev } from '~components/behandling/brev/Varselbrev'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { EtteroppgjoerRevurderingOversikt } from '~components/etteroppgjoer/revurdering/EtteroppgjoerRevurderingOversikt'
+import {
+  EtteroppgjoerOversikt,
+  EtteroppgjoerKontekstType,
+} from '~components/etteroppgjoer/components/EtteroppgjoerForbehandlingOversikt'
 import { DetaljertEtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { useAppSelector } from '~store/Store'
 import { JaNei } from '~shared/types/ISvar'
@@ -65,7 +68,9 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
   etteroppgjoeroversikt: {
     path: 'etteroppgjoeroversikt',
     description: 'Etteroppgjøroversikt',
-    element: (behandling: IBehandlingReducer) => <EtteroppgjoerRevurderingOversikt behandling={behandling} />,
+    element: (behandling: IBehandlingReducer) => (
+      <EtteroppgjoerOversikt kontekst={{ type: EtteroppgjoerKontekstType.REVURDERING, behandling }} />
+    ),
   },
   vilkaarsvurdering: {
     path: 'vilkaarsvurdering',

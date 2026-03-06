@@ -9,7 +9,7 @@ import React, { useState } from 'react'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerUnntakForBehandling, slettUnntakForBehandling } from '~shared/api/aktivitetsplikt'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { setVurderingBehandling } from '~store/reducers/AktivitetspliktBehandlingReducer'
 import { UnntakRedigeringsKnapper } from '~components/aktivitetsplikt/vurdering/unntak/UnntakRedigeringsKnapper'
@@ -29,7 +29,7 @@ export function RedigerbarUnntakBehandling({
 
   const [slettUnntakStatus, slettSpesifiktUnntak, resetSlettStatus] = useApiCall(slettUnntakForBehandling)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

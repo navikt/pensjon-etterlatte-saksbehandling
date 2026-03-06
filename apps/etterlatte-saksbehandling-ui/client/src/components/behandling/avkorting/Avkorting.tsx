@@ -7,7 +7,7 @@ import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtt
 import { oppdaterAvkorting, oppdaterBehandlingsstatus, resetAvkorting } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
@@ -38,7 +38,7 @@ export const Avkorting = () => {
   }
 
   const redigerbar =
-    behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
+    erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
     behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER
 
   useEffect(() => {

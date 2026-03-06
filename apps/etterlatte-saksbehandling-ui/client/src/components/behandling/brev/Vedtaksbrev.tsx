@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/SendTilAttesteringModal'
 import {
-  behandlingErRedigerbar,
+  erBehandlingRedigerbar,
   sisteBehandlingHendelse,
   statusErRedigerbar,
 } from '~components/behandling/felles/utils'
@@ -43,7 +43,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { sakId, soeknadMottattDato } = props.behandling
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     props.behandling.status,
     props.behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

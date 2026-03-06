@@ -162,7 +162,6 @@ fun List<TrygdetidGrunnlag>.normaliser(): List<TrygdetidGrunnlag> {
             if (trygdetidGrunnlag.poengUtAar) {
                 til = til.with(MonthDay.of(12, 31))
             }
-
             // Håndtere at den forrige var et ut år - og at dette hadde en fra i samme år
             if (idx > 0) {
                 val prev = sortertTrygdetidGrunnlag[idx - 1]
@@ -179,6 +178,14 @@ fun List<TrygdetidGrunnlag>.normaliser(): List<TrygdetidGrunnlag> {
                 if (next.poengInnAar && next.periode.til.year == fra.year) {
                     til = LocalDate.of(next.periode.til.year - 1, 12, 31)
                 }
+            }
+            if ((fra != trygdetidGrunnlag.periode.fra || til != trygdetidGrunnlag.periode.til) && fra > til) {
+                throw UgyldigForespoerselException(
+                    "PERIODER_OVERLAPPER",
+                    "På grunn av avhuking for poeng inn eller ut-år overlapper trygdetidsperiodene med hverandre. " +
+                        "Perioden i ${trygdetidGrunnlag.bosted} fra ${trygdetidGrunnlag.periode.fra} til " +
+                        "${trygdetidGrunnlag.periode.til} overlapper med perioden før eller etter.",
+                )
             }
 
             trygdetidGrunnlag.copy(periode = TrygdetidPeriode(fra = fra, til = til.plusDays(1)))
@@ -209,19 +216,23 @@ private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =
         opplysning = this.opplysning,
         kilde =
             when (this.kilde) {
-                is Grunnlagsopplysning.Pdl ->
+                is Grunnlagsopplysning.Pdl -> {
                     OpplysningkildeDto(
                         type = this.kilde.type,
                         tidspunkt = this.kilde.tidspunktForInnhenting.toString(),
                     )
+                }
 
-                is Grunnlagsopplysning.RegelKilde ->
+                is Grunnlagsopplysning.RegelKilde -> {
                     OpplysningkildeDto(
                         type = this.kilde.type,
                         tidspunkt = this.kilde.ts.toString(),
                     )
+                }
 
-                else -> throw Exception("Mangler gyldig kilde for opplysning $id")
+                else -> {
+                    throw Exception("Mangler gyldig kilde for opplysning $id")
+                }
             },
     )
 

@@ -18,23 +18,23 @@ jobs:
       security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # ratchet:actions/checkout@v5
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@c793b717bc78562f491db7b0e93a3a178b099162 # ratchet:github/codeql-action/init@v4
         with:
           languages: java
           queries: security-and-quality
 
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # ratchet:actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # ratchet:gradle/actions/setup-gradle@v5
 
       - name: Assemble
         run: ./gradlew assemble -Dorg.gradle.jvmargs="-Dkotlin.daemon.jvmargs=-Xmx16g" --configuration-cache
@@ -42,13 +42,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@c793b717bc78562f491db7b0e93a3a178b099162 # ratchet:github/codeql-action/analyze@v4
         with:
           upload: false # disable the upload here - we will upload in a different action
           output: sarif-results
 
       - name: filter-sarif
-        uses: advanced-security/filter-sarif@v1
+        uses: advanced-security/filter-sarif@f3b8118a9349d88f7b1c0c488476411145b6270d # ratchet:advanced-security/filter-sarif@v1
         with:
           patterns: |
             -**/*test*.kt
@@ -57,7 +57,7 @@ jobs:
           output: sarif-results/java.sarif
 
       - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@c793b717bc78562f491db7b0e93a3a178b099162 # ratchet:github/codeql-action/upload-sarif@v4
         with:
           sarif_file: sarif-results/java.sarif
           category: "/language:java"
@@ -74,23 +74,23 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # ratchet:actions/checkout@v5
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@c793b717bc78562f491db7b0e93a3a178b099162 # ratchet:github/codeql-action/init@v4
         with:
           languages: javascript
           queries: security-and-quality
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@c793b717bc78562f491db7b0e93a3a178b099162 # ratchet:github/codeql-action/analyze@v4
         with:
           upload: false # disable the upload here - we will upload in a different action
           output: sarif-results
 
       - name: filter-sarif
-        uses: advanced-security/filter-sarif@v1
+        uses: advanced-security/filter-sarif@f3b8118a9349d88f7b1c0c488476411145b6270d # ratchet:advanced-security/filter-sarif@v1
         with:
           patterns: |
             -**/*test*.kt
@@ -98,7 +98,7 @@ jobs:
           output: sarif-results/javascript.sarif
 
       - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@c793b717bc78562f491db7b0e93a3a178b099162 # ratchet:github/codeql-action/upload-sarif@v4
         with:
           sarif_file: sarif-results/javascript.sarif
           category: "/language:javascript"

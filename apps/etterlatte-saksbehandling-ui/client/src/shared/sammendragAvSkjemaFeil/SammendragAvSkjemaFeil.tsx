@@ -7,15 +7,17 @@ interface Props<T extends FieldValues> {
 }
 
 export const SammendragAvSkjemaFeil = <T extends FieldValues>({ errors }: Props<T>) => {
+  if (!Object.keys(errors).length) {
+    return null
+  }
+
   return (
-    !!Object.keys(errors)?.length && (
-      <ErrorSummary>
-        {formaterFieldErrors(errors).map((error) => (
-          <ErrorSummary.Item key={error.name} href={`#${error.name}`}>
-            {error.message}
-          </ErrorSummary.Item>
-        ))}
-      </ErrorSummary>
-    )
+    <ErrorSummary>
+      {formaterFieldErrors(errors).map((error) => (
+        <ErrorSummary.Item key={error.name} href={`#${error.name}`}>
+          {error.message}
+        </ErrorSummary.Item>
+      ))}
+    </ErrorSummary>
   )
 }

@@ -1,6 +1,6 @@
 import { Beregning, OverstyrBeregning } from '~shared/types/Beregning'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { behandlingErRedigerbar } from '../../felles/utils'
+import { erBehandlingRedigerbar } from '../../felles/utils'
 import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import { CalculatorIcon, PlusIcon } from '@navikt/aksel-icons'
 import {
@@ -33,7 +33,7 @@ const OverstyrBeregningGrunnlag = (props: {
   const { behandling, setOverstyrt } = props
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

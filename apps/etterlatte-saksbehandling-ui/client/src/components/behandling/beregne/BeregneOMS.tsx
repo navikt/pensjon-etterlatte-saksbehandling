@@ -1,4 +1,4 @@
-import { behandlingErRedigerbar } from '../felles/utils'
+import { erBehandlingRedigerbar } from '../felles/utils'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
 import React, { useContext, useEffect, useState } from 'react'
@@ -40,7 +40,7 @@ export const BeregneOMS = () => {
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const redigerbar = behandlingErRedigerbar(
+  const redigerbar = erBehandlingRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter

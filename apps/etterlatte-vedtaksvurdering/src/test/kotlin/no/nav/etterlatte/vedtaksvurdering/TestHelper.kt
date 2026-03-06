@@ -119,6 +119,7 @@ fun vedtak(
     revurderingAarsak: Revurderingaarsak? = null,
     status: VedtakStatus = VedtakStatus.OPPRETTET,
     vedtakFattet: VedtakFattet? = null,
+    attestasjon: Attestasjon? = null,
     utbetalingsperioder: List<Utbetalingsperiode>? = null,
 ) = Vedtak(
     id = id,
@@ -129,6 +130,7 @@ fun vedtak(
     behandlingId = behandlingId,
     type = VedtakType.INNVILGELSE,
     vedtakFattet = vedtakFattet,
+    attestasjon = attestasjon,
     innhold =
         VedtakInnhold.Behandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,

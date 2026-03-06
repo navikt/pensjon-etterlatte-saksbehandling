@@ -5,10 +5,7 @@ import { ferdigstillEtteroppgjoerForbehandlingUtenBrev } from '~shared/api/etter
 import { useAppDispatch } from '~store/Store'
 import { Alert, BodyLong, Button, Modal, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
-import {
-  EtteroppgjoerResultatType,
-  kanRedigereEtteroppgjoerForbehandling,
-} from '~shared/types/EtteroppgjoerForbehandling'
+import { EtteroppgjoerResultatType, erForbehandlingRedigerbar } from '~shared/types/EtteroppgjoerForbehandling'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { JaNei } from '~shared/types/ISvar'
 
@@ -19,7 +16,7 @@ export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
     useApiCall(ferdigstillEtteroppgjoerForbehandlingUtenBrev)
 
   const dispatch = useAppDispatch()
-  const erRedigerbar = forbehandling && kanRedigereEtteroppgjoerForbehandling(forbehandling.status)
+  const erRedigerbar = forbehandling && erForbehandlingRedigerbar(forbehandling.status)
 
   function avbryt() {
     setModalOpen(false)

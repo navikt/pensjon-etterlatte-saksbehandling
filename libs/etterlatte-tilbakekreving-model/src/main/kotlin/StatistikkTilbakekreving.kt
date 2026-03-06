@@ -10,6 +10,8 @@ data class StatistikkTilbakekrevingDto(
     val tilbakekreving: TilbakekrevingBehandling,
     val tidspunkt: Tidspunkt,
     val utlandstilknytningType: UtlandstilknytningType?,
+    val saksbehandler: String?,
+    val attestant: String?,
 )
 
 enum class TilbakekrevingHendelseType : EventnameHendelseType {

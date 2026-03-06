@@ -12,8 +12,10 @@ import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingHendelseService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
@@ -48,6 +50,8 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -323,7 +327,9 @@ internal class BehandlingServiceImpl(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
     private val beregningKlient: BeregningKlient,
-    private val etteroppgjoerTempService: EtteroppgjoerTempService,
+    private val etteroppgjoerDao: EtteroppgjoerDao,
+    private val etteroppgjoerForbehandlingDao: EtteroppgjoerForbehandlingDao,
+    private val etteroppgjoerForbehandlingHendelseService: EtteroppgjoerForbehandlingHendelseService,
     private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -448,29 +454,46 @@ internal class BehandlingServiceImpl(
         behandling: Behandling,
         aarsak: AarsakTilAvbrytelse?,
     ) {
-        if (behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER) {
-            logger.info("Tilbakestiller etteroppgjøret ved avbrutt revurdering")
+        if (behandling.revurderingsaarsak() != Revurderingaarsak.ETTEROPPGJOER) return
+        krev(behandling.relatertBehandlingId != null) { "Revurdering mangler forbehandlingId" }
 
-            krev(behandling.relatertBehandlingId != null) {
-                "Revurdering mangler forbehandlingId"
-            }
+        logger.info("Tilbakestiller etteroppgjøret ved avbrutt revurdering")
+        val erEndringTilUgunst = (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST)
 
-            val forbehandlingId = UUID.fromString(behandling.relatertBehandlingId)
-            val forbehandling = etteroppgjoerTempService.hentForbehandling(forbehandlingId)
+        val forbehandlingId = UUID.fromString(behandling.relatertBehandlingId)
+        val forbehandling =
+            etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)
+                ?: throw FantIkkeForbehandling(forbehandlingId)
 
-            etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(
-                forbehandling,
-                aarsak,
-                hentUtlandstilknytningForSak(behandling.sak.id),
+        krev(forbehandling.kanAvbrytesVedTilbakestilling()) {
+            "Kan ikke tilbakestille etteroppgjør for sakId=${forbehandling.sak.id}: forbehandling kan ikke avbrytes"
+        }
+
+        val etteroppgjoer =
+            etteroppgjoerDao
+                .hentEtteroppgjoerForInntektsaar(forbehandling.sak.id, forbehandling.aar)
+                ?.tilbakestill(erEndringTilUgunst)
+                ?: throw InternfeilException("Fant ikke etteroppgjør for sakId=${forbehandling.sak.id} og inntektsaar=${forbehandling.aar}")
+
+        val kommentar = if (erEndringTilUgunst) "Endringen er til ugunst for bruker" else "Revurderingen ble avbrutt"
+        val avbruttForbehandling = forbehandling.tilAvbrutt(AarsakTilAvbryteForbehandling.ANNET, kommentar)
+
+        etteroppgjoerForbehandlingDao.lagreForbehandling(avbruttForbehandling)
+        etteroppgjoerDao.lagreEtteroppgjoer(etteroppgjoer)
+
+        etteroppgjoerForbehandlingHendelseService.registrerOgSendHendelse(
+            etteroppgjoerForbehandling = avbruttForbehandling,
+            hendelseType = EtteroppgjoerForbehandlingHendelser.AVBRUTT,
+            saksbehandler = (Kontekst.get().brukerTokenInfo)?.ident(),
+            utlandstilknytning = hentUtlandstilknytningForSak(behandling.sak.id),
+        )
+
+        if (erEndringTilUgunst) {
+            etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
+                sakId = behandling.sak.id,
+                inntektsAar = forbehandling.aar,
+                merknad = "Opprett ny forbehandling for etteroppgjør ${forbehandling.aar} – revurdering avbrutt pga ugunstig endring",
             )
-
-            if (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST) {
-                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
-                    sakId = behandling.sak.id,
-                    inntektsAar = forbehandling.aar,
-                    merknad = "Opprett ny forbehandling for etteroppgjør ${forbehandling.aar} – revurdering avbrutt pga ugunstig endring",
-                )
-            }
         }
     }
 

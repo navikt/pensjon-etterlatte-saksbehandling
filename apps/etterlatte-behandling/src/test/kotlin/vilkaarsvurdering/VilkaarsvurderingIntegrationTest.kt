@@ -109,7 +109,9 @@ internal class VilkaarsvurderingIntegrationTest(
                 oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagService,
                 beregningKlient = mockk(),
-                etteroppgjoerTempService = mockk(),
+                etteroppgjoerDao = mockk(),
+                etteroppgjoerForbehandlingDao = mockk(),
+                etteroppgjoerForbehandlingHendelseService = mockk(),
                 etteroppgjoerOppgaveService = mockk(),
             )
         behandlingStatus =

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.util.UUID
 
@@ -34,6 +36,18 @@ data class Etteroppgjoer(
     fun erFerdigstilt() = status == EtteroppgjoerStatus.FERDIGSTILT
 
     fun kanOppdateresMedSkatteoppgjoerMottatt(): Boolean = venterPaaSkatteoppgjoer() || mottattSkatteoppgjoer()
+
+    fun kanTilbakestilles() = status in listOf(EtteroppgjoerStatus.UNDER_REVURDERING, EtteroppgjoerStatus.OMGJOERING)
+
+    fun tilbakestill(erEndringTilUgunst: Boolean): Etteroppgjoer {
+        sjekk(kanTilbakestilles()) {
+            "Kan ikke tilbakestille etteroppgjør for sakId=$sakId: " +
+                "forventet status ${EtteroppgjoerStatus.UNDER_REVURDERING} " +
+                "eller ${EtteroppgjoerStatus.OMGJOERING}, fant $status"
+        }
+        val nyStatus = if (erEndringTilUgunst) EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER else EtteroppgjoerStatus.VENTER_PAA_SVAR
+        return copy(status = nyStatus)
+    }
 }
 
 enum class EtteroppgjoerStatus {

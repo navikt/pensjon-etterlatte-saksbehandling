@@ -365,7 +365,7 @@ internal class VedtakBehandlingServiceTest(
     }
 
     @Test
-    fun `skal oppdatere virkningstidspunkt paa vedtak som ikke er fattet`() {
+    fun `skal oppdatere virkningstidspunkt på vedtak som ikke er fattet`() {
         val behandlingId = randomUUID()
         val virkningstidspunkt2023 = VIRKNINGSTIDSPUNKT_JAN_2023
         val virkningstidspunkt2024 = VIRKNINGSTIDSPUNKT_JAN_2024
@@ -411,7 +411,7 @@ internal class VedtakBehandlingServiceTest(
     }
 
     @Test
-    fun `vedtak for opphoer skal oppdatere opphor fra og med`() {
+    fun `vedtak for opphoer skal oppdatere opphør fra og med`() {
         val behandlingId = randomUUID()
         val virkningstidspunkt = YearMonth.of(2023, 3)
         val endretVirkningstidspunkt = YearMonth.of(2023, 4)

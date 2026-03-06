@@ -363,51 +363,52 @@ internal class VedtakBehandlingServiceTest(
             }
         }
     }
-//
-//    @Test
-//    fun `skal oppdatere virkningstidspunkt paa vedtak som ikke er fattet`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt2023 = VIRKNINGSTIDSPUNKT_JAN_2023
-//        val virkningstidspunkt2024 = VIRKNINGSTIDSPUNKT_JAN_2024
-//
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt2024,
-//                behandlingId,
-//            )
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
-//        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-//            BeregningOgAvkorting(
-//                beregning = mockBeregning(virkningstidspunkt2024, behandlingId),
-//                avkorting = mockAvkorting(),
-//            )
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        val oppdatertVedtak =
-//            runBlocking {
-//                val nyttVedtak =
-//                    repository.opprettVedtak(
-//                        opprettVedtak(
-//                            virkningstidspunkt = virkningstidspunkt2023,
-//                            behandlingId = behandlingId,
-//                        ),
-//                    )
-//                (nyttVedtak.innhold as VedtakInnhold.Behandling).virkningstidspunkt shouldBe virkningstidspunkt2023
-//
-//                service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
-//            }
-//
-//        (oppdatertVedtak.innhold as VedtakInnhold.Behandling).virkningstidspunkt shouldBe virkningstidspunkt2024
-//    }
+
+    @Test
+    fun `skal oppdatere virkningstidspunkt paa vedtak som ikke er fattet`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt2023 = VIRKNINGSTIDSPUNKT_JAN_2023
+        val virkningstidspunkt2024 = VIRKNINGSTIDSPUNKT_JAN_2024
+
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt2024,
+                behandlingId = behandlingId,
+            )
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+            mockBeregning(
+                virkningstidspunkt = virkningstidspunkt2024,
+                behandlingId = behandlingId,
+            )
+        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns mockAvkorting()
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        val oppdatertVedtak =
+            runBlocking {
+                val nyttVedtak =
+                    repository.opprettVedtak(
+                        opprettVedtak(
+                            virkningstidspunkt = virkningstidspunkt2023,
+                            behandlingId = behandlingId,
+                        ),
+                    )
+                (nyttVedtak.innhold as VedtakInnhold.Behandling).virkningstidspunkt shouldBe virkningstidspunkt2023
+
+                service.opprettEllerOppdaterVedtak(behandlingId = behandlingId, brukerTokenInfo = saksbehandler)
+            }
+
+        (oppdatertVedtak.innhold as VedtakInnhold.Behandling).virkningstidspunkt shouldBe virkningstidspunkt2024
+    }
 //
 //    @Test
 //    fun `vedtak for opphoer skal oppdatere opphor fra og med`() {

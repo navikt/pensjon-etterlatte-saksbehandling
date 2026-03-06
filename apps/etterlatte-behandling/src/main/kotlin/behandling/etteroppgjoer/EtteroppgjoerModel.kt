@@ -38,17 +38,14 @@ data class Etteroppgjoer(
 
     fun kanTilbakestilles() = status in listOf(EtteroppgjoerStatus.UNDER_REVURDERING, EtteroppgjoerStatus.OMGJOERING)
 
-    fun tilbakestiltStatus(erEndringTilUgunst: Boolean): EtteroppgjoerStatus {
+    fun tilbakestill(erEndringTilUgunst: Boolean): Etteroppgjoer {
         krev(kanTilbakestilles()) {
             "Kan ikke tilbakestille etteroppgjør for sakId=$sakId: " +
                 "forventet status ${EtteroppgjoerStatus.UNDER_REVURDERING} " +
                 "eller ${EtteroppgjoerStatus.OMGJOERING}, fant $status"
         }
-        return if (erEndringTilUgunst) {
-            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
-        } else {
-            EtteroppgjoerStatus.VENTER_PAA_SVAR
-        }
+        val nyStatus = if (erEndringTilUgunst) EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER else EtteroppgjoerStatus.VENTER_PAA_SVAR
+        return copy(status = nyStatus)
     }
 }
 

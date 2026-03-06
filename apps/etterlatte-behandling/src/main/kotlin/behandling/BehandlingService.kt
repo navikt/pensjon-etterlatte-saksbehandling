@@ -470,18 +470,19 @@ internal class BehandlingServiceImpl(
         }
 
         val etteroppgjoer =
-            etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(forbehandling.sak.id, forbehandling.aar)
+            etteroppgjoerDao
+                .hentEtteroppgjoerForInntektsaar(forbehandling.sak.id, forbehandling.aar)
+                ?.tilbakestill(erEndringTilUgunst)
                 ?: throw InternfeilException("Fant ikke etteroppgjør for sakId=${forbehandling.sak.id} og inntektsaar=${forbehandling.aar}")
 
-        val tilbakestiltStatus = etteroppgjoer.tilbakestiltStatus(erEndringTilUgunst)
         val kommentar = if (erEndringTilUgunst) "Endringen er til ugunst for bruker" else "Revurderingen ble avbrutt"
         val avbruttForbehandling = forbehandling.tilAvbrutt(AarsakTilAvbryteForbehandling.ANNET, kommentar)
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(avbruttForbehandling)
         etteroppgjoerDao.oppdaterEtteroppgjoerStatus(
-            sakId = forbehandling.sak.id,
+            sakId = etteroppgjoer.sakId,
             inntektsaar = etteroppgjoer.inntektsaar,
-            status = tilbakestiltStatus,
+            status = etteroppgjoer.status,
         )
         etteroppgjoerForbehandlingHendelseService.registrerOgSendHendelse(
             etteroppgjoerForbehandling = avbruttForbehandling,

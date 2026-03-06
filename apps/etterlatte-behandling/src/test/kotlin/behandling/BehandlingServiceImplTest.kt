@@ -507,11 +507,16 @@ internal class BehandlingServiceImplTest {
                 every { tilAvbrutt(any(), any()) } returns avbruttForbehandling
             }
 
+        val tilbakestiltEtteroppgjoer =
+            mockk<no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer>(relaxed = true) {
+                every { sakId } returns revurdering.sak.id
+                every { inntektsaar } returns 2024
+                every { status } returns no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+            }
+
         val etteroppgjoer =
             mockk<no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer>(relaxed = true) {
-                every { tilbakestiltStatus(true) } returns
-                    no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
-                every { inntektsaar } returns 2024
+                every { tilbakestill(true) } returns tilbakestiltEtteroppgjoer
             }
 
         every { behandlingDaoMock.hentBehandlingerForSak(revurdering.sak.id) } returns listOf(revurdering)

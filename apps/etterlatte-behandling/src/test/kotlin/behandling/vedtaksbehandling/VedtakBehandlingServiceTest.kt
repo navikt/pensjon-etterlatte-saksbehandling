@@ -3,15 +3,18 @@ package no.nav.etterlatte.behandling.vedtaksbehandling
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import no.nav.etterlatte.DatabaseExtension
@@ -23,6 +26,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksbehandling.klienter.SamordningsKlient
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
@@ -42,6 +46,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -1393,485 +1398,536 @@ internal class VedtakBehandlingServiceTest(
         }
     }
 
-//    @Test
-//    fun `tilbakestill vedtak setter status tilbake til returnert`() {
-//        val behandlingId = randomUUID()
-//        runBlocking {
-//            val oppretta =
-//                repository
-//                    .opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-//                    .let {
-//                        repository.fattVedtak(
-//                            behandlingId,
-//                            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
-//                        )
-//                    }
-//            Assertions.assertEquals(oppretta.status, VedtakStatus.FATTET_VEDTAK)
-//            val tilbakestilt = service.tilbakestillIkkeIverksatteVedtak(behandlingId)
-//            Assertions.assertEquals(tilbakestilt!!.status, VedtakStatus.RETURNERT)
-//        }
-//    }
-//
-//    @Test
-//    fun `skal sette utbetaling`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = YearMonth.now()
-//
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//                SakType.BARNEPENSJON,
-//            )
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
-//        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-//            BeregningOgAvkorting(
-//                beregning = mockBeregning(virkningstidspunkt, behandlingId),
-//                avkorting = mockAvkorting(virkningstidspunkt),
-//            )
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-//            val innhold = innhold as VedtakInnhold.Behandling
-//            innhold.utbetalingsperioder.size shouldBe 1
-//            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
-//            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
-//        }
-//
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//                SakType.OMSTILLINGSSTOENAD,
-//            )
-//
-//        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-//            val innhold = innhold as VedtakInnhold.Behandling
-//            innhold.utbetalingsperioder.size shouldBe 1
-//            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(50)
-//            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
-//        }
-//    }
-//
-//    @Test
-//    fun `skal sette utbetaling hvis opphoer`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = YearMonth.now()
-//
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//                SakType.BARNEPENSJON,
-//                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns
-//            mockVilkaarsvurdering(
-//                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
-//            )
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//
-//        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-//            val innhold = innhold as VedtakInnhold.Behandling
-//            innhold.utbetalingsperioder.size shouldBe 1
-//            innhold.utbetalingsperioder[0].beloep shouldBe null
-//            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
-//        }
-//    }
-//
-//    @Test
-//    fun `skal sette utbetaling hvis opphoer etter oppdatert vedtak`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = YearMonth.now()
-//
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//                SakType.BARNEPENSJON,
-//                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns
-//            mockVilkaarsvurdering(
-//                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
-//            )
-//
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//        runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
-//        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-//            val innhold = innhold as VedtakInnhold.Behandling
-//            innhold.utbetalingsperioder.size shouldBe 1
-//            innhold.utbetalingsperioder[0].beloep shouldBe null
-//            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
-//        }
-//    }
-//
-//    @Test
-//    fun `skal sette utbetaling hvis nytt opphoer med eksisterende opphoer fra og med`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = YearMonth.of(2024, 3)
-//
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//                SakType.BARNEPENSJON,
-//                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
-//                opphoerFom = YearMonth.of(2024, 4),
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns
-//            mockVilkaarsvurdering(
-//                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
-//            )
-//
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//
-//        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-//            val innhold = innhold as VedtakInnhold.Behandling
-//            innhold.utbetalingsperioder.size shouldBe 1
-//            innhold.utbetalingsperioder[0].beloep shouldBe null
-//            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
-//        }
-//    }
-//
-//    @Test
-//    fun `skal sette utbetaling endring med eksisterende opphoer fra og med`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = YearMonth.of(2024, 3)
-//        val opphoer = YearMonth.of(2024, 4)
-//
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//                SakType.BARNEPENSJON,
-//                revurderingAarsak = Revurderingaarsak.REGULERING,
-//                opphoerFom = opphoer,
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
-//        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-//            BeregningOgAvkorting(
-//                beregning = mockBeregning(virkningstidspunkt, behandlingId),
-//                avkorting = mockAvkorting(virkningstidspunkt),
-//            )
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//
-//        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-//            val innhold = innhold as VedtakInnhold.Behandling
-//            innhold.utbetalingsperioder.size shouldBe 2
-//            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
-//            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
-//            innhold.utbetalingsperioder[0].periode.tom shouldBe virkningstidspunkt
-//
-//            innhold.utbetalingsperioder[1].beloep shouldBe null
-//            innhold.utbetalingsperioder[1].periode.fom shouldBe opphoer
-//            innhold.utbetalingsperioder[1].periode.tom shouldBe null
-//        }
-//    }
-//
-//    @Test
-//    fun `skal ikke sette vedtak til til_samordning pga ugyldig vedtaksstatus`() {
-//        val behandlingId = randomUUID()
-//
-//        runBlocking {
-//            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.FATTET_VEDTAK))
-//
-//            assertThrows<VedtakTilstandException> {
-//                service.tilSamordningVedtak(behandlingId, attestant)
-//            }
-//
-//            coVerify { behandlingKlientMock wasNot called }
-//        }
-//    }
-//
-//    @Test
-//    fun `skal sette vedtak til til_samordning`() {
-//        val behandlingId = randomUUID()
-//
-//        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-//
-//        runBlocking {
-//            repository.opprettVedtak(
-//                opprettVedtak(
-//                    behandlingId = behandlingId,
-//                    status = VedtakStatus.ATTESTERT,
-//                    soeker = Folkeregisteridentifikator.of("08815997000"),
-//                ),
-//            )
-//
-//            val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
-//
-//            oppdatertVedtak.vedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
-//
-//            coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
-//            coVerify(exactly = 0) {
-//                samordningsKlientMock.samordneVedtak(
-//                    any(),
-//                    EtterbetalingResultat(false, false),
-//                    attestant,
-//                )
-//            }
-//        }
-//    }
-//
-//    @Test
-//    fun `skal rulle tilbake hvis sette vedtak til til_samordning feiler`() {
-//        val behandlingId = randomUUID()
-//
-//        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns false
-//
-//        runBlocking {
-//            repository.opprettVedtak(
-//                opprettVedtak(
-//                    behandlingId = behandlingId,
-//                    status = VedtakStatus.ATTESTERT,
-//                    soeker = Folkeregisteridentifikator.of("08815997000"),
-//                ),
-//            )
-//
-//            assertThrows<VedtakTilSamordningException> {
-//                service.tilSamordningVedtak(behandlingId, attestant)
-//            }
-//        }
-//
-//        val ikkeTilSamordningVedtak = repository.hentVedtak(behandlingId)!!
-//        ikkeTilSamordningVedtak shouldNotBe null
-//        ikkeTilSamordningVedtak.status shouldNotBe VedtakStatus.TIL_SAMORDNING
-//        ikkeTilSamordningVedtak.status shouldBe VedtakStatus.ATTESTERT
-//    }
-//
-//    @Test
-//    fun `skal kalle SAM for aa samordne, ikke oppdatere vedtaksstatus`() {
-//        mockkStatic(Vedtak::erVedtakMedEtterbetaling)
-//        val grunnbeloep = mockk<Grunnbeloep> { every { grunnbeloep } returns 150000 }
-//        val etterbetalingResultat = EtterbetalingResultat(erEtterbetaling = true)
-//        every { any<Vedtak>().erVedtakMedEtterbetaling(repository, grunnbeloep) } returns etterbetalingResultat
-//        coEvery { beregningKlientMock.hentGrunnbeloep(any()) } returns grunnbeloep
-//
-//        val behandlingId = randomUUID()
-//
-//        coEvery { samordningsKlientMock.samordneVedtak(any(), any(), attestant) } returns true
-//
-//        runBlocking {
-//            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.TIL_SAMORDNING))
-//
-//            service.samordne(behandlingId, attestant) shouldBe true
-//
-//            coVerify(exactly = 1) { samordningsKlientMock.samordneVedtak(any(), etterbetalingResultat, attestant) }
-//            coVerify(exactly = 0) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
-//        }
-//
-//        verify { any<Vedtak>().erVedtakMedEtterbetaling(repository, grunnbeloep) }
-//    }
-//
-//    @Test
-//    fun `skal ikke kalle SAM for aa samordne hvis REGULERING`() {
-//        val behandlingId = randomUUID()
-//
-//        runBlocking {
-//            repository.opprettVedtak(
-//                opprettVedtak(
-//                    behandlingId = behandlingId,
-//                    status = VedtakStatus.TIL_SAMORDNING,
-//                    revurderingAarsak = Revurderingaarsak.REGULERING,
-//                ),
-//            )
-//
-//            service.samordne(behandlingId, attestant) shouldBe false
-//
-//            coVerify(exactly = 0) {
-//                samordningsKlientMock.samordneVedtak(
-//                    vedtak = any(),
-//                    etterbetaling = any(),
-//                    brukerTokenInfo = attestant,
-//                )
-//            }
-//        }
-//    }
-//
-//    @Test
-//    fun `skal sette vedtak til samordnet`() {
-//        val behandlingId = randomUUID()
-//
-//        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-//        coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns true
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        runBlocking {
-//            repository.opprettVedtak(
-//                opprettVedtak(
-//                    behandlingId = behandlingId,
-//                    behandlingType = BehandlingType.REVURDERING,
-//                    type = VedtakType.ENDRING,
-//                    status = VedtakStatus.ATTESTERT,
-//                    revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
-//                ),
-//            )
-//            service.tilSamordningVedtak(behandlingId, attestant)
-//            val oppdatertVedtak = service.samordnetVedtak(behandlingId, attestant)!!
-//
-//            oppdatertVedtak.vedtak.status shouldBe VedtakStatus.SAMORDNET
-//
-//            coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
-//            coVerify(exactly = 1) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
-//            coVerify(exactly = 0) { samordningsKlientMock.samordneVedtak(any(), any(), attestant) }
-//        }
-//    }
-//
-//    @Test
-//    fun `skal rulle vedtak tilbake ved feil under setting av vedtak til samordnet`() {
-//        val behandlingId = randomUUID()
-//
-//        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-//        coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns false
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        runBlocking {
-//            repository.opprettVedtak(
-//                opprettVedtak(
-//                    behandlingId = behandlingId,
-//                    behandlingType = BehandlingType.REVURDERING,
-//                    type = VedtakType.ENDRING,
-//                    status = VedtakStatus.ATTESTERT,
-//                    revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
-//                ),
-//            )
-//            service.tilSamordningVedtak(behandlingId, attestant)
-//
-//            assertThrows<VedtakSamordnetException> {
-//                service.samordnetVedtak(behandlingId, attestant)
-//            }
-//        }
-//
-//        val ikkeSamordnetVedtak = repository.hentVedtak(behandlingId)!!
-//        ikkeSamordnetVedtak shouldNotBe null
-//        ikkeSamordnetVedtak.status shouldNotBe VedtakStatus.SAMORDNET
-//        ikkeSamordnetVedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
-//    }
-//
-//    @Test
-//    fun `skal ikke sette vedtak til samordnet pga ugyldig vedtaksstatus for oppdatering`() {
-//        val behandlingId = randomUUID()
-//
-//        repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
-//
-//        assertThrows<VedtakTilstandException> {
-//            service.samordnetVedtak(behandlingId, attestant)
-//        }
-//
-//        coVerify { behandlingKlientMock wasNot called }
-//    }
-//
-//    @Test
-//    fun `skal opprette nytt vedtak og sette riktig regelverk for perioder`() {
-//        val behandlingId = randomUUID()
-//        val virkningstidspunkt = YearMonth.of(2024, Month.APRIL)
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.OMSTILLINGSSTOENAD,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-//            mockBehandling(
-//                virkningstidspunkt,
-//                behandlingId,
-//                saktype = SakType.OMSTILLINGSSTOENAD,
-//            )
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
-//        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-//            BeregningOgAvkorting(
-//                beregning =
-//                    mockBeregning(
-//                        virkningstidspunkt,
-//                        behandlingId,
-//                        beregningsperioder =
-//                            listOf(
-//                                mockBeregningsperiode(
-//                                    fom = YearMonth.of(2024, Month.APRIL),
-//                                    tom = YearMonth.of(2024, Month.APRIL),
-//                                ),
-//                                mockBeregningsperiode(
-//                                    fom = YearMonth.of(2024, Month.MAY),
-//                                    tom = YearMonth.of(2025, Month.JANUARY),
-//                                ),
-//                            ),
-//                    ),
-//                avkorting =
-//                    mockAvkorting(
-//                        avkortetYtelse =
-//                            listOf(
-//                                mockAvkortetYtelse(
-//                                    fom = YearMonth.of(2024, Month.APRIL),
-//                                    tom = YearMonth.of(2024, Month.APRIL),
-//                                ),
-//                                mockAvkortetYtelse(
-//                                    fom = YearMonth.of(2024, Month.MAY),
-//                                    tom = YearMonth.of(2024, Month.DECEMBER),
-//                                ),
-//                                mockAvkortetYtelse(fom = YearMonth.of(2025, Month.JANUARY), tom = null),
-//                            ),
-//                    ),
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        val vedtak =
-//            runBlocking {
-//                service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
-//            }
-//
-//        vedtak shouldNotBe null
-//        vedtak.status shouldBe VedtakStatus.OPPRETTET
-//    }
+    @Test
+    fun `tilbakestill vedtak setter status tilbake til returnert`() {
+        val behandlingId = randomUUID()
+        runBlocking {
+            val oppretta =
+                repository
+                    .opprettVedtak(opprettVedtak(behandlingId = behandlingId))
+                    .let {
+                        repository.fattVedtak(
+                            behandlingId = behandlingId,
+                            vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
+                        )
+                    }
+            Assertions.assertEquals(oppretta.status, VedtakStatus.FATTET_VEDTAK)
+            val tilbakestilt = service.tilbakestillIkkeIverksatteVedtak(behandlingId)
+            Assertions.assertEquals(tilbakestilt!!.status, VedtakStatus.RETURNERT)
+        }
+    }
+
+    @Test
+    fun `skal sette utbetaling`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.now()
+
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt,
+                behandlingId = behandlingId,
+                saktype = SakType.BARNEPENSJON,
+            )
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+            mockBeregning(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId)
+        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns
+            mockAvkorting(virkningstidspunkt)
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt,
+                behandlingId = behandlingId,
+                saktype = SakType.OMSTILLINGSSTOENAD,
+            )
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+
+        with(
+            runBlocking {
+                service.opprettEllerOppdaterVedtak(
+                    behandlingId = behandlingId,
+                    brukerTokenInfo = saksbehandler,
+                )
+            },
+        ) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(50)
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+    }
+
+    @Test
+    fun `skal sette utbetaling hvis opphoer`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.now()
+
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt,
+                behandlingId = behandlingId,
+                saktype = SakType.BARNEPENSJON,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            )
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+
+        with(
+            runBlocking {
+                service.opprettEllerOppdaterVedtak(
+                    behandlingId = behandlingId,
+                    brukerTokenInfo = saksbehandler,
+                )
+            },
+        ) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe null
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+    }
+
+    @Test
+    fun `skal sette utbetaling hvis opphoer etter oppdatert vedtak`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.now()
+
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt,
+                behandlingId = behandlingId,
+                saktype = SakType.BARNEPENSJON,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            )
+
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+        runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+        with(
+            runBlocking {
+                service.opprettEllerOppdaterVedtak(
+                    behandlingId = behandlingId,
+                    brukerTokenInfo = saksbehandler,
+                )
+            },
+        ) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe null
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+    }
+
+    @Test
+    fun `skal sette utbetaling hvis nytt opphoer med eksisterende opphoer fra og med`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2024, 3)
+
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt,
+                behandlingId = behandlingId,
+                saktype = SakType.BARNEPENSJON,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+                opphoerFom = YearMonth.of(2024, 4),
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            )
+
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+
+        with(
+            runBlocking {
+                service.opprettEllerOppdaterVedtak(
+                    behandlingId = behandlingId,
+                    brukerTokenInfo = saksbehandler,
+                )
+            },
+        ) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe null
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+    }
+
+    @Test
+    fun `skal sette utbetaling endring med eksisterende opphoer fra og med`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2024, 3)
+        val opphoer = YearMonth.of(2024, 4)
+
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt,
+                behandlingId = behandlingId,
+                saktype = SakType.BARNEPENSJON,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+                opphoerFom = opphoer,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+            mockBeregning(virkningstidspunkt, behandlingId)
+        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns
+            mockAvkorting(virkningstidspunkt)
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+
+        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 2
+            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+            innhold.utbetalingsperioder[0].periode.tom shouldBe virkningstidspunkt
+
+            innhold.utbetalingsperioder[1].beloep shouldBe null
+            innhold.utbetalingsperioder[1].periode.fom shouldBe opphoer
+            innhold.utbetalingsperioder[1].periode.tom shouldBe null
+        }
+    }
+
+    @Test
+    fun `skal ikke sette vedtak til til_samordning pga ugyldig vedtaksstatus`() {
+        val behandlingId = randomUUID()
+
+        runBlocking {
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.FATTET_VEDTAK))
+
+            assertThrows<VedtakTilstandException> {
+                service.tilSamordningVedtak(behandlingId, attestant)
+            }
+
+            coVerify { behandlingStatusService wasNot Called }
+        }
+    }
+
+    @Test
+    fun `skal sette vedtak til til_samordning`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingStatusService.settTilSamordnetVedtak(any(), any()) } just runs
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    status = VedtakStatus.ATTESTERT,
+                    soeker = Folkeregisteridentifikator.of("08815997000"),
+                ),
+            )
+
+            val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
+
+            oppdatertVedtak.vedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
+
+            coVerify(exactly = 1) { behandlingStatusService.settTilSamordnetVedtak(any(), any()) }
+            coVerify(exactly = 0) {
+                samordningsKlientMock.samordneVedtak(
+                    vedtak = any(),
+                    etterbetaling = EtterbetalingResultat(false, false),
+                    brukerTokenInfo = attestant,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `skal rulle tilbake hvis sette vedtak til til_samordning feiler`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingStatusService.settTilSamordnetVedtak(any(), any()) } throws RuntimeException("Feil ved til samordning")
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    status = VedtakStatus.ATTESTERT,
+                    soeker = Folkeregisteridentifikator.of("08815997000"),
+                ),
+            )
+
+            assertThrows<RuntimeException> {
+                service.tilSamordningVedtak(behandlingId = behandlingId, brukerTokenInfo = attestant)
+            }
+        }
+
+        val ikkeTilSamordningVedtak = repository.hentVedtak(behandlingId)!!
+        ikkeTilSamordningVedtak shouldNotBe null
+        ikkeTilSamordningVedtak.status shouldNotBe VedtakStatus.TIL_SAMORDNING
+        ikkeTilSamordningVedtak.status shouldBe VedtakStatus.ATTESTERT
+    }
+
+    @Test
+    fun `skal kalle SAM for aa samordne, ikke oppdatere vedtaksstatus`() {
+        mockkStatic(Vedtak::erVedtakMedEtterbetaling)
+        val grunnbeloep = mockk<Grunnbeloep> { every { grunnbeloep } returns 150000 }
+        val etterbetalingResultat = EtterbetalingResultat(erEtterbetaling = true)
+        every { any<Vedtak>().erVedtakMedEtterbetaling(repository, grunnbeloep) } returns etterbetalingResultat
+        coEvery { beregningKlientMock.hentGrunnbeloep(any()) } returns grunnbeloep
+
+        val behandlingId = randomUUID()
+
+        coEvery {
+            samordningsKlientMock.samordneVedtak(
+                vedtak = any(),
+                etterbetaling = any(),
+                brukerTokenInfo = attestant,
+            )
+        } returns true
+
+        runBlocking {
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.TIL_SAMORDNING))
+
+            service.samordne(behandlingId, attestant) shouldBe true
+
+            coVerify(exactly = 1) { samordningsKlientMock.samordneVedtak(any(), etterbetalingResultat, attestant) }
+            coVerify(exactly = 0) { behandlingStatusService.settSamordnetVedtak(any(), any()) }
+        }
+
+        verify {
+            any<Vedtak>().erVedtakMedEtterbetaling(
+                vedtaksvurderingRepository = repository,
+                grunnbeloep = grunnbeloep,
+            )
+        }
+    }
+
+    @Test
+    fun `skal ikke kalle SAM for aa samordne hvis REGULERING`() {
+        val behandlingId = randomUUID()
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    status = VedtakStatus.TIL_SAMORDNING,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                ),
+            )
+
+            service.samordne(behandlingId = behandlingId, brukerTokenInfo = attestant) shouldBe false
+
+            coVerify(exactly = 0) {
+                samordningsKlientMock.samordneVedtak(
+                    vedtak = any(),
+                    etterbetaling = any(),
+                    brukerTokenInfo = attestant,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `skal sette vedtak til samordnet`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingStatusService.settTilSamordnetVedtak(any(), any()) } just runs
+        coEvery { behandlingStatusService.settSamordnetVedtak(any(), any()) } just runs
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    type = VedtakType.ENDRING,
+                    status = VedtakStatus.ATTESTERT,
+                    revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
+                ),
+            )
+            service.tilSamordningVedtak(behandlingId, attestant)
+            val oppdatertVedtak = service.samordnetVedtak(behandlingId, attestant)!!
+
+            oppdatertVedtak.vedtak.status shouldBe VedtakStatus.SAMORDNET
+
+            coVerify(exactly = 1) { behandlingStatusService.settTilSamordnetVedtak(any(), any()) }
+            coVerify(exactly = 1) { behandlingStatusService.settSamordnetVedtak(any(), any()) }
+            coVerify(exactly = 0) {
+                samordningsKlientMock.run {
+                    samordneVedtak(
+                        vedtak = any(),
+                        etterbetaling = any(),
+                        brukerTokenInfo = attestant,
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal rulle vedtak tilbake ved feil under setting av vedtak til samordnet`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingStatusService.settTilSamordnetVedtak(any(), any()) } just runs
+        coEvery { behandlingStatusService.settSamordnetVedtak(any(), any()) } throws RuntimeException("Feil ved samordnet")
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    type = VedtakType.ENDRING,
+                    status = VedtakStatus.ATTESTERT,
+                    revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
+                ),
+            )
+            service.tilSamordningVedtak(behandlingId = behandlingId, brukerTokenInfo = attestant)
+
+            assertThrows<RuntimeException> {
+                service.samordnetVedtak(behandlingId = behandlingId, brukerTokenInfo = attestant)
+            }
+        }
+
+        val ikkeSamordnetVedtak = repository.hentVedtak(behandlingId)!!
+        ikkeSamordnetVedtak shouldNotBe null
+        ikkeSamordnetVedtak.status shouldNotBe VedtakStatus.SAMORDNET
+        ikkeSamordnetVedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
+    }
+
+    @Test
+    fun `skal ikke sette vedtak til samordnet pga ugyldig vedtaksstatus for oppdatering`() {
+        val behandlingId = randomUUID()
+
+        repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
+
+        assertThrows<VedtakTilstandException> {
+            service.samordnetVedtak(behandlingId = behandlingId, brukerTokenInfo = attestant)
+        }
+
+        coVerify { behandlingStatusService wasNot Called }
+    }
+
+    @Test
+    fun `skal opprette nytt vedtak og sette riktig regelverk for perioder`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2024, Month.APRIL)
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(
+                virk = virkningstidspunkt,
+                behandlingId = behandlingId,
+                saktype = SakType.OMSTILLINGSSTOENAD,
+            )
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+            mockBeregning(
+                virkningstidspunkt = virkningstidspunkt,
+                behandlingId = behandlingId,
+                beregningsperioder =
+                    listOf(
+                        mockBeregningsperiode(
+                            fom = YearMonth.of(2024, Month.APRIL),
+                            tom = YearMonth.of(2024, Month.APRIL),
+                        ),
+                        mockBeregningsperiode(
+                            fom = YearMonth.of(2024, Month.MAY),
+                            tom = YearMonth.of(2025, Month.JANUARY),
+                        ),
+                    ),
+            )
+        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns
+            mockAvkorting(
+                avkortetYtelse =
+                    listOf(
+                        mockAvkortetYtelse(
+                            fom = YearMonth.of(2024, Month.APRIL),
+                            tom = YearMonth.of(2024, Month.APRIL),
+                        ),
+                        mockAvkortetYtelse(
+                            fom = YearMonth.of(2024, Month.MAY),
+                            tom = YearMonth.of(2024, Month.DECEMBER),
+                        ),
+                        mockAvkortetYtelse(fom = YearMonth.of(2025, Month.JANUARY), tom = null),
+                    ),
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        val vedtak =
+            runBlocking {
+                service.opprettEllerOppdaterVedtak(behandlingId = behandlingId, brukerTokenInfo = saksbehandler)
+            }
+
+        vedtak shouldNotBe null
+        vedtak.status shouldBe VedtakStatus.OPPRETTET
+    }
 
     private fun mockBeregningsperiode(
         fom: YearMonth,

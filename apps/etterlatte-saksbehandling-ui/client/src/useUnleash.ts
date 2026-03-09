@@ -13,7 +13,6 @@ export const enum FeatureToggle {
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
-  trygdetid_fra_pesys = 'trygdetid-fra-pesys',
   aktivitetsplikt_oppgave_unntak_uten_frist = 'aktivitetsplikt-oppgave-unntak-uten-frist',
   aktivitetsplikt_oppgave_unntak_med_frist = 'aktivitetsplikt-oppgave-unntak-med-frist',
   oppgave_til_journalpost = 'oppgave-til-journalpost',
@@ -37,11 +36,6 @@ const beregning_bruk_nye_beregningsregler: Toggle = {
 
 const avslutte_omgjoeringsoppgave: Toggle = {
   togglename: FeatureToggle.avslutte_omgjoeringsoppgave,
-  enabled: false,
-}
-
-const trygdetid_fra_pesys: Toggle = {
-  togglename: FeatureToggle.trygdetid_fra_pesys,
   enabled: false,
 }
 
@@ -99,7 +93,6 @@ const omgjoer_tilbakekreving: Toggle = {
 }
 
 export const unleashStartState: Record<string, Toggle> = {
-  [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:

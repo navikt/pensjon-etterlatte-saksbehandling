@@ -21,6 +21,7 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -53,6 +54,7 @@ internal class SakRoutesTest {
     private val oppgaveService = mockk<OppgaveService>(relaxUnitFun = true)
     private val requestLogger = mockk<BehandlingRequestLogger>()
     private val hendelseDao = mockk<HendelseDao>()
+    private val beregningKlient = mockk<BeregningKlient>()
 
     @BeforeAll
     fun before() {
@@ -209,6 +211,7 @@ internal class SakRoutesTest {
                         oppgaveService,
                         requestLogger,
                         hendelseDao,
+                        beregningKlient,
                     )
                 }
             block(client)

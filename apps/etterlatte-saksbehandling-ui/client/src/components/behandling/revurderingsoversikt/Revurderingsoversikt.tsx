@@ -43,6 +43,8 @@ import { RevurderingKravpakke } from '~components/behandling/revurderingsoversik
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoereOpphoer/ViderefoereOpphoer'
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
+import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
+import { BoddEllerArbeidetUtlandet } from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -165,6 +167,15 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         >
           <GrunnlagForVirkningstidspunkt />
         </Virkningstidspunkt>
+        {behandling.sakType == SakType.OMSTILLINGSSTOENAD &&
+          behandling.revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD && (
+            <>
+              {personopplysninger && (
+                <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />
+              )}
+              <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
+            </>
+          )}
         {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
           <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
         )}

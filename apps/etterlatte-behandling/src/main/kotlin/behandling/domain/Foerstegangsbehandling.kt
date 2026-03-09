@@ -31,7 +31,7 @@ data class Foerstegangsbehandling(
     override val utlandstilknytning: Utlandstilknytning?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     override val soeknadMottattDato: LocalDateTime?,
-    val gyldighetsproeving: GyldighetsResultat?,
+    override val gyldighetsproeving: GyldighetsResultat?,
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
     override val vedtaksloesning: Vedtaksloesning,
     override val sendeBrev: Boolean,
@@ -45,16 +45,18 @@ data class Foerstegangsbehandling(
 
     private fun erFyltUt(): Boolean =
         when (sak.sakType) {
-            SakType.BARNEPENSJON ->
+            SakType.BARNEPENSJON -> {
                 (virkningstidspunkt != null) && (gyldighetsproeving != null) && (kommerBarnetTilgode != null)
+            }
 
-            SakType.OMSTILLINGSSTOENAD ->
+            SakType.OMSTILLINGSSTOENAD -> {
                 (virkningstidspunkt != null) && (gyldighetsproeving != null)
+            }
         }
 
     override fun erSluttbehandling(): Boolean = this.erSluttbehandling
 
-    fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Foerstegangsbehandling =
+    override fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Behandling =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(gyldighetsproeving = gyldighetsResultat)
         }

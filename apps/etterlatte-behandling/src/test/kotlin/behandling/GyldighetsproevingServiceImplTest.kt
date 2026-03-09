@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -36,7 +35,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 internal class GyldighetsproevingServiceImplTest {
@@ -62,51 +60,6 @@ internal class GyldighetsproevingServiceImplTest {
     fun after() {
         confirmVerified(sakSkrivDaoMock, behandlingDaoMock, hendelseDaoMock, behandlingHendelserKafkaProducerMock)
         clearAllMocks()
-    }
-
-    @Test
-    fun hentFoerstegangsbehandling() {
-        val id = UUID.randomUUID()
-
-        every {
-            behandlingDaoMock.hentBehandling(id)
-        } returns
-            Foerstegangsbehandling(
-                id = id,
-                sak =
-                    Sak(
-                        ident = "Ola Olsen",
-                        sakType = SakType.BARNEPENSJON,
-                        id = sakId1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
-                        adressebeskyttelse = null,
-                        erSkjermet = false,
-                    ),
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-                gyldighetsproeving = null,
-                virkningstidspunkt =
-                    Virkningstidspunkt(
-                        YearMonth.of(2022, 1),
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
-                utlandstilknytning = null,
-                boddEllerArbeidetUtlandet = null,
-                kommerBarnetTilgode = null,
-                vedtaksloesning = Vedtaksloesning.GJENNY,
-                sendeBrev = true,
-            )
-
-        every {
-            user.enheter()
-        } returns listOf(Enheter.defaultEnhet.enhetNr)
-
-        behandlingsService.hentFoerstegangsbehandling(id)
-
-        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
 
     @Test
@@ -175,50 +128,5 @@ internal class GyldighetsproevingServiceImplTest {
             behandlingDaoMock.lagreStatus(any())
             behandlingDaoMock.lagreGyldighetsproeving(any(), any())
         }
-    }
-
-    @Test
-    fun hentFoerstegangsbehandlingMedEnhetOgSaksbehandlerHarEnhet() {
-        every {
-            user.enheter()
-        } returns listOf(Enheter.PORSGRUNN.enhetNr)
-
-        val id = UUID.randomUUID()
-
-        every {
-            behandlingDaoMock.hentBehandling(id)
-        } returns
-            Foerstegangsbehandling(
-                id = id,
-                sak =
-                    Sak(
-                        ident = "Ola Olsen",
-                        sakType = SakType.BARNEPENSJON,
-                        id = sakId1,
-                        enhet = Enheter.PORSGRUNN.enhetNr,
-                        adressebeskyttelse = null,
-                        erSkjermet = false,
-                    ),
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-                gyldighetsproeving = null,
-                virkningstidspunkt =
-                    Virkningstidspunkt(
-                        YearMonth.of(2022, 1),
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
-                utlandstilknytning = null,
-                boddEllerArbeidetUtlandet = null,
-                kommerBarnetTilgode = null,
-                vedtaksloesning = Vedtaksloesning.GJENNY,
-                sendeBrev = true,
-            )
-
-        behandlingsService.hentFoerstegangsbehandling(id)
-
-        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
 }

@@ -40,7 +40,6 @@ import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
@@ -445,9 +444,6 @@ internal class ApplicationContext(
     private val etteroppgjoerHendelseService = EtteroppgjoerForbehandlingHendelseService(rapid, hendelseDao, etteroppgjoerForbehandlingDao)
     private val etteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
 
-    val etteroppgjoerTempService =
-        EtteroppgjoerTempService(etteroppgjoerDao, etteroppgjoerForbehandlingDao, etteroppgjoerHendelseService)
-
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
@@ -458,7 +454,9 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagService,
             beregningKlient = beregningKlient,
-            etteroppgjoerTempService = etteroppgjoerTempService,
+            etteroppgjoerDao = etteroppgjoerDao,
+            etteroppgjoerForbehandlingDao = etteroppgjoerForbehandlingDao,
+            etteroppgjoerForbehandlingHendelseService = etteroppgjoerHendelseService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
     val generellBehandlingService =

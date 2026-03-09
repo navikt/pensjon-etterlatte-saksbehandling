@@ -182,6 +182,8 @@ data class EtteroppgjoerForbehandling(
     // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     fun erRevurdering() = kopiertFra != null
 
+    fun kanAvbrytesVedTilbakestilling() = erRedigerbar() && erRevurdering()
+
     fun oppdaterBrukerHarSvart(
         harMottattNyInformasjon: JaNei?,
         endringErTilUgunstForBruker: JaNei?,

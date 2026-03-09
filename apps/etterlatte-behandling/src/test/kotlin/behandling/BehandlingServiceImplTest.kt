@@ -16,8 +16,12 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerTempService
+import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
@@ -87,7 +91,9 @@ internal class BehandlingServiceImplTest {
     private val hendelseDaoMock = mockk<HendelseDao>()
     private val grunnlagService = mockk<GrunnlagService>()
     private val oppgaveServiceMock = mockk<OppgaveService>()
-    private val etteroppgjoerTempService = mockk<EtteroppgjoerTempService>()
+    private val etteroppgjoerDao = mockk<EtteroppgjoerDao>()
+    private val etteroppgjoerForbehandlingDao = mockk<EtteroppgjoerForbehandlingDao>()
+    private val etteroppgjoerForbehandlingHendelseService = mockk<EtteroppgjoerForbehandlingHendelseService>()
     private val etteroppgjoerOppgaveService = mockk<EtteroppgjoerOppgaveService>()
 
     private val behandlingService =
@@ -100,7 +106,9 @@ internal class BehandlingServiceImplTest {
             oppgaveService = oppgaveServiceMock,
             grunnlagService = grunnlagService,
             beregningKlient = mockk(),
-            etteroppgjoerTempService = etteroppgjoerTempService,
+            etteroppgjoerDao = etteroppgjoerDao,
+            etteroppgjoerForbehandlingDao = etteroppgjoerForbehandlingDao,
+            etteroppgjoerForbehandlingHendelseService = etteroppgjoerForbehandlingHendelseService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
 
@@ -255,7 +263,6 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
         every { oppgaveServiceMock.hentOppgaverForSak(any(), any()) } returns listOf(oppgaveKlage)
         every { oppgaveServiceMock.opprettOppgave(any(), any(), any(), any(), any(), any(), any()) } returns oppgaveKlage
-        every { etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(any(), any(), any()) } just runs
 
         every { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
 
@@ -493,10 +500,21 @@ internal class BehandlingServiceImplTest {
                 relatertBehandlingId = forbehandlingId,
             )
 
+        val avbruttForbehandling = mockk<EtteroppgjoerForbehandling>(relaxed = true)
         val forbehandling =
             mockk<EtteroppgjoerForbehandling>(relaxed = true) {
                 every { aar } returns 2024
+                every { sak } returns revurdering.sak
+                every { kanAvbrytesVedTilbakestilling() } returns true
+                every { tilAvbrutt(any(), any()) } returns avbruttForbehandling
             }
+
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = revurdering.sak.id,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.UNDER_REVURDERING,
+            )
 
         every { behandlingDaoMock.hentBehandlingerForSak(revurdering.sak.id) } returns listOf(revurdering)
         every { behandlingDaoMock.hentBehandling(revurdering.id) } returns revurdering
@@ -508,8 +526,11 @@ internal class BehandlingServiceImplTest {
         coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
         every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any(), any()) } just runs
         every { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) } just runs
-        every { etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(any(), any(), any()) } just runs
-        every { etteroppgjoerTempService.hentForbehandling(any()) } returns forbehandling
+        every { etteroppgjoerForbehandlingDao.hentForbehandling(UUID.fromString(forbehandlingId)) } returns forbehandling
+        every { etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(revurdering.sak.id, 2024) } returns etteroppgjoer
+        every { etteroppgjoerForbehandlingDao.lagreForbehandling(any()) } returns 1
+        every { etteroppgjoerDao.lagreEtteroppgjoer(any()) } returns 1
+        every { etteroppgjoerForbehandlingHendelseService.registrerOgSendHendelse(any(), any(), any(), any(), any()) } just runs
 
         behandlingService.avbrytBehandling(
             revurdering.id,
@@ -520,11 +541,8 @@ internal class BehandlingServiceImplTest {
 
         verify(exactly = 1) {
             behandlingDaoMock.avbrytBehandling(revurdering.id, AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST, "kom men tar")
-            etteroppgjoerTempService.tilbakestillEtteroppgjoerVedAvbruttRevurdering(
-                forbehandling,
-                AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST,
-                null,
-            )
+            etteroppgjoerForbehandlingDao.lagreForbehandling(avbruttForbehandling)
+            etteroppgjoerDao.lagreEtteroppgjoer(etteroppgjoer.tilbakestill(true))
 
             etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
                 revurdering.sak.id,

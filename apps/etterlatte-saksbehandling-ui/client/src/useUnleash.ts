@@ -14,7 +14,6 @@ export const enum FeatureToggle {
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
   trygdetid_fra_pesys = 'trygdetid-fra-pesys',
-  opprette_oppfoelgingsoppgave = 'opprette-oppfoelgingsoppgave',
   aktivitetsplikt_oppgave_unntak_uten_frist = 'aktivitetsplikt-oppgave-unntak-uten-frist',
   aktivitetsplikt_oppgave_unntak_med_frist = 'aktivitetsplikt-oppgave-unntak-med-frist',
   oppgave_til_journalpost = 'oppgave-til-journalpost',
@@ -73,10 +72,6 @@ const pensjon_etterlatte_kan_opprette_vedtak_avvist_klage: Toggle = {
   togglename: FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
   enabled: false,
 }
-const opprette_oppfoelgingsoppgave: Toggle = {
-  togglename: FeatureToggle.opprette_oppfoelgingsoppgave,
-  enabled: false,
-}
 
 const aktivitetsplikt_oppgave_unntak_uten_frist: Toggle = {
   togglename: FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist,
@@ -110,7 +105,6 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:
     pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
   [FeatureToggle.overstyr_beregning_knapp]: overstyr_beregning_knapp,
-  [FeatureToggle.opprette_oppfoelgingsoppgave]: opprette_oppfoelgingsoppgave,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist]: aktivitetsplikt_oppgave_unntak_med_frist,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist]: aktivitetsplikt_oppgave_unntak_uten_frist,
   [FeatureToggle.oppgave_til_journalpost]: oppgave_til_journalpost,

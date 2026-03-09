@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
-import no.nav.etterlatte.behandling.vedtaksbehandling.BeregningOgAvkorting
+import no.nav.etterlatte.behandling.vedtaksvurdering.BeregningOgAvkorting
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto

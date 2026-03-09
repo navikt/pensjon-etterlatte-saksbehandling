@@ -757,6 +757,91 @@ internal class DoedshendelseServiceTest {
         lagretBeroert.ektefellerUtenIdent shouldContainExactly listOf(sivilstandUtenIdent).map { it.verdi }
         lagretBeroert.barnUtenIdent shouldContainExactly listOf(personUtenIdent)
     }
+
+    @Test
+    fun `skal ikke opprette gosys-oppgave for barn uten ident som er over 20 aar ved doedsfall`() {
+        val avdoedFnr = avdoed.foedselsnummer.verdi.value
+        val barnOver20 =
+            PersonUtenIdent(
+                RelativPersonrolle.BARN,
+                RelatertPerson(
+                    foedselsdato = avdoed.doedsdato!!.verdi.minusYears(21),
+                    kjoenn = "F",
+                    navn = Navn("Voksen", null, "Barn"),
+                    statsborgerskap = "NOR",
+                ),
+            )
+        every {
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
+                avdoedFnr,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns avdoed.copy(avdoedesBarnUtenIdent = listOf(barnOver20))
+
+        every { dao.hentDoedshendelserForPerson(avdoedFnr) } returns emptyList()
+        every { dao.opprettDoedshendelse(any()) } just runs
+        every { ukjentBeroertDao.hentUkjentBeroert(any()) } returns null
+
+        service.opprettDoedshendelseForBeroertePersoner(
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoedFnr,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            ),
+        )
+
+        coVerify(exactly = 0) { gosysOppgaveKlient.opprettGenerellOppgave(any(), any(), any(), any()) }
+        verify(exactly = 0) { ukjentBeroertDao.lagreUkjentBeroert(any()) }
+    }
+
+    @Test
+    fun `skal opprette gosys-oppgave for barn uten ident som mangler foedselsdato`() {
+        val avdoedFnr = avdoed.foedselsnummer.verdi.value
+        val barnUtenFoedselsdato =
+            PersonUtenIdent(
+                RelativPersonrolle.BARN,
+                RelatertPerson(
+                    foedselsdato = null,
+                    kjoenn = "M",
+                    navn = Navn("Ukjent", null, "Barn"),
+                    statsborgerskap = "NOR",
+                ),
+            )
+        every {
+            pdlTjenesterKlient.hentPdlModellDoedshendelseFlereSaktyper(
+                avdoedFnr,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns avdoed.copy(avdoedesBarnUtenIdent = listOf(barnUtenFoedselsdato))
+
+        coEvery { gosysOppgaveKlient.opprettGenerellOppgave(any(), any(), any(), any()) } returns mockk()
+        every { dao.hentDoedshendelserForPerson(avdoedFnr) } returns emptyList()
+        every { dao.opprettDoedshendelse(any()) } just runs
+        every { ukjentBeroertDao.hentUkjentBeroert(any()) } returns null
+        every { ukjentBeroertDao.lagreUkjentBeroert(any()) } just runs
+
+        service.opprettDoedshendelseForBeroertePersoner(
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoedFnr,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            ),
+        )
+
+        coVerify(exactly = 1) {
+            gosysOppgaveKlient.opprettGenerellOppgave(
+                personident = avdoedFnr,
+                sakType = SakType.BARNEPENSJON,
+                beskrivelse = match { it.contains("barn") },
+                brukerTokenInfo = any(),
+            )
+        }
+        verify(exactly = 1) { ukjentBeroertDao.lagreUkjentBeroert(match { it.barnUtenIdent.contains(barnUtenFoedselsdato) }) }
+    }
 }
 
 val sivilstandUtenIdent =

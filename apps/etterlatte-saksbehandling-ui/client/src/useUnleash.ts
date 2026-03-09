@@ -18,7 +18,6 @@ export const enum FeatureToggle {
   opprette_oppfoelgingsoppgave = 'opprette-oppfoelgingsoppgave',
   aktivitetsplikt_oppgave_unntak_uten_frist = 'aktivitetsplikt-oppgave-unntak-uten-frist',
   aktivitetsplikt_oppgave_unntak_med_frist = 'aktivitetsplikt-oppgave-unntak-med-frist',
-  bytt_til_annen_sak = 'bytt-til-annen-sak',
   oppgave_til_journalpost = 'oppgave-til-journalpost',
   etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
   vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
@@ -100,11 +99,6 @@ const etteroppgjoer_dev_opprett_forbehandling: Toggle = {
   enabled: false,
 }
 
-const bytt_til_annen_sak: Toggle = {
-  togglename: FeatureToggle.bytt_til_annen_sak,
-  enabled: false,
-}
-
 const vis_tilbakestill_etteroppgjoer: Toggle = {
   togglename: FeatureToggle.vis_tilbakestill_etteroppgjoer,
   enabled: false,
@@ -126,7 +120,6 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.opprette_oppfoelgingsoppgave]: opprette_oppfoelgingsoppgave,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist]: aktivitetsplikt_oppgave_unntak_med_frist,
   [FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist]: aktivitetsplikt_oppgave_unntak_uten_frist,
-  [FeatureToggle.bytt_til_annen_sak]: bytt_til_annen_sak,
   [FeatureToggle.oppgave_til_journalpost]: oppgave_til_journalpost,
   [FeatureToggle.etteroppgjoer_dev_opprett_forbehandling]: etteroppgjoer_dev_opprett_forbehandling,
   [FeatureToggle.vis_tilbakestill_etteroppgjoer]: vis_tilbakestill_etteroppgjoer,

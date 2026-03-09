@@ -60,7 +60,6 @@ export const SakOversikt = ({
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const etteroppgjoerDevKnappEnabled = useFeaturetoggle(FeatureToggle.etteroppgjoer_dev_opprett_forbehandling)
-  const byttTilAnnenSakEnabled = useFeaturetoggle(FeatureToggle.bytt_til_annen_sak)
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch, resetOppgaver] = useApiCall(hentOppgaverTilknyttetSak)
   const [gosysOppgaverResult, gosysOppgaverFetch, resetGosysOppgaver] = useApiCall(hentGosysOppgaverForPerson)
@@ -94,7 +93,7 @@ export const SakOversikt = ({
           <HStack gap="4" wrap={false}>
             <Box padding="8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-subtle">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
-              {byttTilAnnenSakEnabled && ekstraSak && (
+              {ekstraSak && (
                 <ByttTilAnnenSak
                   byttSak={() => {
                     trackClick(ClickEvent.BYTT_SAK_SAKOVERSIKT)

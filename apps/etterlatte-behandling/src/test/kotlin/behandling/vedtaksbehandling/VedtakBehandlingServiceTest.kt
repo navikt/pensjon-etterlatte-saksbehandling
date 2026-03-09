@@ -1335,21 +1335,22 @@ internal class VedtakBehandlingServiceTest(
             }
         }
     }
-//
-//    @Test
-//    fun `skal ikke underkjenne vedtak naar vedtak ikke er fattet`() {
-//        val behandlingId = randomUUID()
-//
-//        coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns true
-//
-//        runBlocking {
-//            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-//
-//            assertThrows<VedtakTilstandException> {
-//                service.underkjennVedtak(behandlingId, saksbehandler, underkjennVedtakBegrunnelse())
-//            }
-//        }
-//    }
+
+    @Test
+    fun `skal ikke underkjenne vedtak naar vedtak ikke er fattet`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingStatusService.sjekkOmKanReturnereVedtak(any()) } just runs
+        coEvery { behandlingService.hentBehandling(any()) } returns mockk()
+
+        runBlocking {
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
+
+            assertThrows<VedtakTilstandException> {
+                service.underkjennVedtak(behandlingId, saksbehandler, underkjennVedtakBegrunnelse())
+            }
+        }
+    }
 //
 //    @Test
 //    fun `skal ikke underkjenne vedtak naar vedtak allerede er attestert`() {

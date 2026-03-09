@@ -24,7 +24,6 @@ export const enum FeatureToggle {
   vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
   omgjoer_tilbakekreving = 'omgjoer-tilbakekreving',
   overstyr_netto_brutto_tilbakekreving = 'overstyr-netto-brutto-tilbakekreving',
-  vis_ikke_innvilget_periode = 'vis-ikke-innvilget-periode',
   avslutte_omgjoeringsoppgave = 'avslutte-omgjoeringsoppgave',
   beregning_bruk_nye_beregningsregler = 'beregning_bruk_nye_beregningsregler',
 }
@@ -116,11 +115,6 @@ const omgjoer_tilbakekreving: Toggle = {
   enabled: false,
 }
 
-const vis_ikke_innvilget_periode: Toggle = {
-  togglename: FeatureToggle.vis_ikke_innvilget_periode,
-  enabled: false,
-}
-
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,
@@ -138,7 +132,6 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.vis_tilbakestill_etteroppgjoer]: vis_tilbakestill_etteroppgjoer,
   [FeatureToggle.omgjoer_tilbakekreving]: omgjoer_tilbakekreving,
   [FeatureToggle.overstyr_netto_brutto_tilbakekreving]: overstyr_netto_brutto_tilbakekreving,
-  [FeatureToggle.vis_ikke_innvilget_periode]: vis_ikke_innvilget_periode,
   [FeatureToggle.avslutte_omgjoeringsoppgave]: avslutte_omgjoeringsoppgave,
   [FeatureToggle.beregning_bruk_nye_beregningsregler]: beregning_bruk_nye_beregningsregler,
 }

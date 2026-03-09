@@ -45,7 +45,6 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [visManglendeBeregningsgrunnlag, setVisManglendeBeregningsgrunnlag] = useState(false)
-  const visIkkeInnvilgetPeriode = useFeaturetoggle(FeatureToggle.vis_ikke_innvilget_periode)
   const brukNyeBeregningsregler = useFeaturetoggle(FeatureToggle.beregning_bruk_nye_beregningsregler)
 
   const [hentBeregningsgrunnlagResult, hentBeregningsgrunnlagRequest] = useApiCall(hentBeregningsGrunnlag)
@@ -144,7 +143,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
               />
 
               {brukNyeBeregningsregler && <Sanksjon behandling={behandling} manglerInntektVirkAar={false} />}
-              {brukNyeBeregningsregler && visIkkeInnvilgetPeriode && <IkkeInnvilgetPeriode behandling={behandling} />}
+              {brukNyeBeregningsregler && <IkkeInnvilgetPeriode behandling={behandling} />}
             </>
           ),
         })}

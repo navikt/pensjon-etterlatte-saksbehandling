@@ -5,6 +5,10 @@ export const hentSanksjon = async (behandlingId: string): Promise<ApiResponse<IS
   return apiClient.get(`/beregning/sanksjon/${behandlingId}`)
 }
 
+export const hentSanksjonerForSisteIverksatteBehandling = async (sakId: number): Promise<ApiResponse<ISanksjon[]>> => {
+  return apiClient.get(`/sak/${sakId}/behandlinger/sisteIverksatte/sanksjoner`)
+}
+
 export const lagreSanksjon = async (args: {
   behandlingId: string
   sanksjon: ISanksjonLagre

@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect } from 'react'
 import { HStack, Loader, Tag } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleVedtakISak } from '~shared/api/vedtaksvurdering'
-import { mapResult } from '~shared/api/apiUtils'
+import { isSuccess, mapResult } from '~shared/api/apiUtils'
 import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
 import { formaterDato } from '~utils/formatering/dato'
 import { RecordFillIcon, XMarkIcon } from '@navikt/aksel-icons'
@@ -13,13 +13,40 @@ import {
   ytelseErOpphoert,
   ytelseOpphoersdato,
 } from '~components/person/sakOgBehandling/sakStatusUtils'
+import { hentSanksjonerForSisteIverksatteBehandling } from '~shared/api/sanksjon'
+import { ISanksjon } from '~shared/types/sanksjon'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [vedtakISakResult, vedtakISakFetch, resetVedtakISak] = useApiCall(hentAlleVedtakISak)
+  const [sanksjonerResult, sanksjonerFetch] = useApiCall(hentSanksjonerForSisteIverksatteBehandling)
 
-  const visStatusPaaSisteVedtak = (vedtakISak: VedtakSammendrag[]): ReactNode => {
+  const visStatusPaaSisteVedtak = (vedtakISak: VedtakSammendrag[], sanksjoner: ISanksjon[]): ReactNode => {
     const loependeVedtak = hentLoependeVedtak(vedtakISak)
     const innvilgelsesVedtak = hentInnvilgelseVedtak(vedtakISak)
+
+    if (sanksjoner.length > 0) {
+      return (
+        <>
+          {sanksjoner.map((sanksjon) => {
+            if (!sanksjon.tom) {
+              return (
+                <Tag key={sanksjon.id} variant="warning">
+                  Midlertidig stans fra {formaterDato(sanksjon.fom)}
+                </Tag>
+              )
+            }
+            if (new Date(sanksjon.tom) >= new Date()) {
+              return (
+                <Tag key={sanksjon.id} variant="warning">
+                  Midlertidig stans fra og med {formaterDato(sanksjon.fom)} til og med {formaterDato(sanksjon.tom)}
+                </Tag>
+              )
+            }
+            return null
+          })}
+        </>
+      )
+    }
 
     if (!loependeVedtak) {
       return (
@@ -64,6 +91,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
   useEffect(() => {
     resetVedtakISak()
     vedtakISakFetch(sakId)
+    sanksjonerFetch(sakId)
   }, [sakId])
 
   return (
@@ -72,8 +100,9 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
         pending: <Loader />,
         error: <Tag variant="error">Kunne ikke hente status</Tag>,
         success: (vedtakISak) => {
+          const sanksjoner = isSuccess(sanksjonerResult) ? sanksjonerResult.data : []
           return !!vedtakISak?.length ? (
-            visStatusPaaSisteVedtak(vedtakISak)
+            visStatusPaaSisteVedtak(vedtakISak, sanksjoner)
           ) : (
             <Tag variant="neutral">Ingen vedtak på sak</Tag>
           )

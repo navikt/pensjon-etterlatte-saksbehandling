@@ -968,10 +968,10 @@ internal class VedtakBehandlingServiceTest(
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-            service.fattVedtak(behandlingId, saksbehandler)
+            service.fattVedtak(behandlingId = behandlingId, brukerTokenInfo = saksbehandler)
 
             assertThrows<BehandlingstilstandException> {
-                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
+                service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
             }
         }
     }
@@ -1018,12 +1018,12 @@ internal class VedtakBehandlingServiceTest(
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
-            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-            service.fattVedtak(behandlingId, saksbehandler)
-            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
+            repository.opprettVedtak(opprettVedtak = opprettVedtak(behandlingId = behandlingId))
+            service.fattVedtak(behandlingId = behandlingId, brukerTokenInfo = saksbehandler)
+            service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
 
             assertThrows<VedtakTilstandException> {
-                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
+                service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
             }
         }
     }
@@ -1351,50 +1351,48 @@ internal class VedtakBehandlingServiceTest(
             }
         }
     }
-//
-//    @Test
-//    fun `skal ikke underkjenne vedtak naar vedtak allerede er attestert`() {
-//        val behandlingId = randomUUID()
-//        coEvery { sakLesDao.hentSak(any()) } returns
-//            Sak(
-//                SAKSBEHANDLER_1,
-//                SakType.BARNEPENSJON,
-//                sakId1,
-//                ENHET_1,
-//                null,
-//                null,
-//            )
-//        coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
-//        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
-//        coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-//        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
-//        coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns true
-//        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
-//        coEvery {
-//            behandlingKlientMock.hentBehandling(
-//                any(),
-//                any(),
-//            )
-//        } returns mockBehandling(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId)
-//        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
-//        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-//            BeregningOgAvkorting(
-//                beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
-//                avkorting = null,
-//            )
-//        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-//
-//        runBlocking {
-//            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-//            service.fattVedtak(behandlingId, saksbehandler)
-//            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
-//
-//            assertThrows<VedtakTilstandException> {
-//                service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())
-//            }
-//        }
-//    }
-//
+
+    @Test
+    fun `skal ikke underkjenne vedtak naar vedtak allerede er attestert`() {
+        val behandlingId = randomUUID()
+        coEvery { sakLesDao.hentSak(any()) } returns
+            Sak(
+                ident = SAKSBEHANDLER_1,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId1,
+                enhet = ENHET_1,
+                adressebeskyttelse = null,
+                erSkjermet = null,
+            )
+        coEvery { behandlingStatusService.sjekkOmKanFatteVedtak(any()) } just runs
+        coEvery { behandlingStatusService.settFattetVedtak(any(), any(), any()) } just runs
+        coEvery { behandlingStatusService.sjekkOmKanAttestere(any()) } just runs
+        coEvery { behandlingStatusService.settAttestertVedtak(any(), any(), any()) } just runs
+        coEvery { behandlingStatusService.sjekkOmKanReturnereVedtak(any()) } just runs
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+            mockBehandling(virk = VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId = behandlingId)
+        coEvery { behandlingService.hentBehandling(any()) } returns mockk()
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+            mockBeregning(virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId = behandlingId)
+        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns null
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking {
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
+            service.fattVedtak(behandlingId = behandlingId, brukerTokenInfo = saksbehandler)
+            service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
+
+            assertThrows<VedtakTilstandException> {
+                service.underkjennVedtak(
+                    behandlingId = behandlingId,
+                    brukerTokenInfo = attestant,
+                    begrunnelse = underkjennVedtakBegrunnelse(),
+                )
+            }
+        }
+    }
+
 //    @Test
 //    fun `tilbakestill vedtak setter status tilbake til returnert`() {
 //        val behandlingId = randomUUID()

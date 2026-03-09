@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -234,6 +235,7 @@ internal fun Route.sakWebRoutes(
     oppgaveService: OppgaveService,
     requestLogger: BehandlingRequestLogger,
     hendelseDao: HendelseDao,
+    beregningKlient: BeregningKlient,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -277,6 +279,21 @@ internal fun Route.sakWebRoutes(
                         } ?: throw GenerellIkkeFunnetException()
 
                     call.respond(sisteIverksatteBehandling)
+                }
+
+                get("sisteIverksatte/sanksjoner") {
+                    logger.info("Henter sanksjoner for siste iverksatte behandling for sakId=$sakId")
+
+                    val sisteIverksatteBehandling =
+                        inTransaction {
+                            behandlingService.hentSisteIverksatteBehandling(sakId)
+                        } ?: throw GenerellIkkeFunnetException()
+
+                    val sanksjoner =
+                        beregningKlient.hentSanksjoner(sisteIverksatteBehandling.id, brukerTokenInfo)
+                            ?: emptyList()
+
+                    call.respond(sanksjoner)
                 }
             }
 

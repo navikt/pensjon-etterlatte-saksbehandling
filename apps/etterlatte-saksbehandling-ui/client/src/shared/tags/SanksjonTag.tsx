@@ -17,27 +17,11 @@ export const SanksjonTag = ({ sakId }: Props) => {
     sanksjonerFetch(sakId)
   }, [sakId])
 
-  if (sanksjoner.length > 0) {
-    return (
-      <>
-        {sanksjoner.map((sanksjon) => {
-          if (!sanksjon.tom) {
-            return (
-              <Tag key={sanksjon.id} variant="warning">
-                Midlertidig stans fra {formaterDato(sanksjon.fom)}
-              </Tag>
-            )
-          }
-          if (new Date(sanksjon.tom) >= new Date()) {
-            return (
-              <Tag key={sanksjon.id} variant="warning">
-                Midlertidig stans fra og med {formaterDato(sanksjon.fom)} til og med {formaterDato(sanksjon.tom)}
-              </Tag>
-            )
-          }
-          return null
-        })}
-      </>
-    )
-  }
+  const aktivSanksjon = sanksjoner.find((sanksjon) => {
+    return !sanksjon.tom || new Date(sanksjon.tom) >= new Date()
+  })
+
+  if (!aktivSanksjon) return null
+
+  return <Tag variant="warning">Midlertidig stans fra {formaterDato(aktivSanksjon.fom)}</Tag>
 }

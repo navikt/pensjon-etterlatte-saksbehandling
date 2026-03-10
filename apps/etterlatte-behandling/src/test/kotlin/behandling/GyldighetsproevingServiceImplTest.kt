@@ -9,15 +9,17 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -36,7 +38,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 internal class GyldighetsproevingServiceImplTest {
@@ -62,51 +63,6 @@ internal class GyldighetsproevingServiceImplTest {
     fun after() {
         confirmVerified(sakSkrivDaoMock, behandlingDaoMock, hendelseDaoMock, behandlingHendelserKafkaProducerMock)
         clearAllMocks()
-    }
-
-    @Test
-    fun hentFoerstegangsbehandling() {
-        val id = UUID.randomUUID()
-
-        every {
-            behandlingDaoMock.hentBehandling(id)
-        } returns
-            Foerstegangsbehandling(
-                id = id,
-                sak =
-                    Sak(
-                        ident = "Ola Olsen",
-                        sakType = SakType.BARNEPENSJON,
-                        id = sakId1,
-                        enhet = Enheter.defaultEnhet.enhetNr,
-                        adressebeskyttelse = null,
-                        erSkjermet = false,
-                    ),
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-                gyldighetsproeving = null,
-                virkningstidspunkt =
-                    Virkningstidspunkt(
-                        YearMonth.of(2022, 1),
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
-                utlandstilknytning = null,
-                boddEllerArbeidetUtlandet = null,
-                kommerBarnetTilgode = null,
-                vedtaksloesning = Vedtaksloesning.GJENNY,
-                sendeBrev = true,
-            )
-
-        every {
-            user.enheter()
-        } returns listOf(Enheter.defaultEnhet.enhetNr)
-
-        behandlingsService.hentFoerstegangsbehandling(id)
-
-        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }
 
     @Test
@@ -178,47 +134,85 @@ internal class GyldighetsproevingServiceImplTest {
     }
 
     @Test
-    fun hentFoerstegangsbehandlingMedEnhetOgSaksbehandlerHarEnhet() {
-        every {
-            user.enheter()
-        } returns listOf(Enheter.PORSGRUNN.enhetNr)
-
+    fun `lagreGyldighetsproeving returnerer null for revurdering med annen aarsak enn ny soeknad`() {
         val id = UUID.randomUUID()
+        val revurdering = mockk<Revurdering>()
 
-        every {
-            behandlingDaoMock.hentBehandling(id)
-        } returns
-            Foerstegangsbehandling(
-                id = id,
-                sak =
-                    Sak(
-                        ident = "Ola Olsen",
-                        sakType = SakType.BARNEPENSJON,
-                        id = sakId1,
-                        enhet = Enheter.PORSGRUNN.enhetNr,
-                        adressebeskyttelse = null,
-                        erSkjermet = false,
-                    ),
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-                gyldighetsproeving = null,
-                virkningstidspunkt =
-                    Virkningstidspunkt(
-                        YearMonth.of(2022, 1),
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
-                utlandstilknytning = null,
-                boddEllerArbeidetUtlandet = null,
-                kommerBarnetTilgode = null,
-                vedtaksloesning = Vedtaksloesning.GJENNY,
-                sendeBrev = true,
+        every { behandlingDaoMock.hentBehandling(id) } returns revurdering
+        every { revurdering.type } returns BehandlingType.REVURDERING
+        every { revurdering.revurderingsaarsak } returns Revurderingaarsak.ANNEN
+
+        val resultat =
+            behandlingsService.lagreGyldighetsproeving(
+                id,
+                JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"),
+                Grunnlagsopplysning.Saksbehandler(
+                    "saksbehandler",
+                    naaTid,
+                ),
             )
 
-        behandlingsService.hentFoerstegangsbehandling(id)
+        assertEquals(null, resultat)
 
-        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
+        verify(exactly = 1) {
+            behandlingDaoMock.hentBehandling(id)
+        }
+        verify(exactly = 0) {
+            behandlingDaoMock.lagreStatus(any())
+            behandlingDaoMock.lagreGyldighetsproeving(any(), any())
+        }
+    }
+
+    @Test
+    fun `lagreGyldighetsproeving lagrer og returnerer gyldighetsresultat for revurdering med ny soeknad aarsak`() {
+        val id = UUID.randomUUID()
+        val revurdering = mockk<Revurdering>(relaxed = true)
+
+        every { behandlingDaoMock.hentBehandling(id) } returns revurdering
+        every { revurdering.type } returns BehandlingType.REVURDERING
+        every { revurdering.revurderingsaarsak } returns Revurderingaarsak.NY_SOEKNAD
+        every { revurdering.oppdaterGyldighetsproeving(any()) } returns revurdering
+        every { behandlingDaoMock.lagreGyldighetsproeving(any(), any()) } just Runs
+        every { behandlingDaoMock.lagreStatus(any()) } just Runs
+
+        every {
+            user.enheter()
+        } returns listOf(Enheter.defaultEnhet.enhetNr)
+
+        val forventetResultat =
+            GyldighetsResultat(
+                resultat = VurderingsResultat.OPPFYLT,
+                vurderinger =
+                    listOf(
+                        VurdertGyldighet(
+                            navn = GyldighetsTyper.MANUELL_VURDERING,
+                            resultat = VurderingsResultat.OPPFYLT,
+                            basertPaaOpplysninger =
+                                ManuellVurdering(
+                                    begrunnelse = "begrunnelse",
+                                    kilde = Grunnlagsopplysning.Saksbehandler("saksbehandler", naaTid),
+                                ),
+                        ),
+                    ),
+                vurdertDato = naaTid.toLocalDatetimeNorskTid(),
+            )
+
+        val resultat =
+            behandlingsService.lagreGyldighetsproeving(
+                id,
+                JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"),
+                Grunnlagsopplysning.Saksbehandler(
+                    "saksbehandler",
+                    naaTid,
+                ),
+            )
+
+        assertEquals(forventetResultat, resultat)
+
+        verify(exactly = 1) {
+            behandlingDaoMock.hentBehandling(id)
+            behandlingDaoMock.lagreStatus(any())
+            behandlingDaoMock.lagreGyldighetsproeving(any(), any())
+        }
     }
 }

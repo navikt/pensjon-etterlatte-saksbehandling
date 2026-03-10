@@ -20,6 +20,7 @@ import { Sakshistorikk } from '~components/person/sakOgBehandling/Sakshistorikk'
 import { ENHETER } from '~shared/types/Enhet'
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { AdressebeskyttelseGraderingTag } from '~shared/tags/AdressebeskyttelseGraderingTag'
+import { SanksjonTag } from '~shared/tags/SanksjonTag'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -59,10 +60,9 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
       <Heading size="medium">Saksnummer {sak.id}</Heading>
       <VStack gap="4" align="start">
         <SakTypeTag sakType={sak.sakType} />
-
         <UtenlandstilknytningTypeTag utenlandstilknytningType={sak.utlandstilknytning?.type} />
-
         <SakStatus sakId={sak.id} />
+        <SanksjonTag sakId={sak.id} />
 
         {!!sak.adressebeskyttelse && <AdressebeskyttelseGraderingTag adressebeskyttelse={sak.adressebeskyttelse} />}
       </VStack>

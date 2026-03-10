@@ -172,6 +172,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         oppgaveService = applicationContext.oppgaveService,
         requestLogger = applicationContext.behandlingRequestLogger,
         hendelseDao = applicationContext.hendelseDao,
+        beregningKlient = applicationContext.beregningKlient,
     )
     klageRoutes(
         klageService = applicationContext.klageService,

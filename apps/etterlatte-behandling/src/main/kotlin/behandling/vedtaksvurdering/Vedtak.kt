@@ -10,12 +10,14 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
@@ -125,3 +127,31 @@ class UgyldigAttestantException(
         code = "ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON",
         detail = "Saksbehandler og attestant må være to forskjellige personer (ident=$ident)",
     )
+
+fun Vedtak.toVedtakSammendragDto(): VedtakSammendragDto {
+    val dto =
+        VedtakSammendragDto(
+            id = id.toString(),
+            behandlingId = behandlingId,
+            vedtakType = type,
+            behandlendeSaksbehandler = vedtakFattet?.ansvarligSaksbehandler,
+            datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
+            attesterendeSaksbehandler = attestasjon?.attestant,
+            datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
+            virkningstidspunkt = null,
+            opphoerFraOgMed = null,
+            iverksettelsesTidspunkt = iverksettelsesTidspunkt,
+        )
+    return when (innhold) {
+        is VedtakInnhold.Behandling -> {
+            dto.copy(
+                virkningstidspunkt = innhold.virkningstidspunkt,
+                opphoerFraOgMed = innhold.opphoerFraOgMed,
+            )
+        }
+
+        else -> {
+            dto
+        }
+    }
+}

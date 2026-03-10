@@ -33,7 +33,7 @@ import no.nav.etterlatte.behandling.vedtaksbehandling.behandlingMedBrevRoutes
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.etteroppgjoerSystembrukerVedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.klagevedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.tilbakekrevingvedtakRoute
-import no.nav.etterlatte.behandling.vedtaksvurdering.vedtaksvurderingRoute
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.vedtaksvurderingRoute
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext

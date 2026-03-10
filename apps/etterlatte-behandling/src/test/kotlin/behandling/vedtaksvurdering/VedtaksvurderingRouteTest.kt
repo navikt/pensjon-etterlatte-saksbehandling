@@ -31,6 +31,11 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.klagevedtakRoute
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.vedtaksvurderingRoute
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort

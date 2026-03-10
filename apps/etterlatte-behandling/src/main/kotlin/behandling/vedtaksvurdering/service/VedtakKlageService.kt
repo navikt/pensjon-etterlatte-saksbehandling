@@ -1,6 +1,12 @@
-package no.nav.etterlatte.behandling.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.behandling.vedtaksvurdering.OpprettVedtak
+import no.nav.etterlatte.behandling.vedtaksvurdering.UgyldigAttestantException
+import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
@@ -30,7 +36,7 @@ class VedtakKlageService(
             if (eksisterendeVedtak == null) {
                 vedtaksvurderingRepository.opprettVedtak(
                     OpprettVedtak(
-                        soeker = Folkeregisteridentifikator.of(klage.sak.ident),
+                        soeker = Folkeregisteridentifikator.Companion.of(klage.sak.ident),
                         sakId = klage.sak.id,
                         sakType = klage.sak.sakType,
                         behandlingId = klage.id,
@@ -71,7 +77,7 @@ class VedtakKlageService(
         val fattetVedtak =
             vedtaksvurderingRepository.fattVedtak(
                 klage.id,
-                VedtakFattet(brukerTokenInfo.ident(), klage.sak.enhet, Tidspunkt.now()),
+                VedtakFattet(brukerTokenInfo.ident(), klage.sak.enhet, Tidspunkt.Companion.now()),
             )
 
         vedtaksvurderingRapidService.sendToRapid(vedtakOgRapidFattet(fattetVedtak))
@@ -93,7 +99,7 @@ class VedtakKlageService(
         val attestertVedtak =
             vedtaksvurderingRepository.attesterVedtak(
                 klage.id,
-                Attestasjon(brukerTokenInfo.ident(), klage.sak.enhet, Tidspunkt.now()),
+                Attestasjon(brukerTokenInfo.ident(), klage.sak.enhet, Tidspunkt.Companion.now()),
             )
         try {
             vedtaksvurderingRapidService.sendToRapid(vedtakOgRapidAttestert(attestertVedtak))
@@ -153,7 +159,7 @@ class VedtakKlageService(
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseHendelseType.UNDERKJENT,
                 vedtak = vedtak.toDto(),
-                tekniskTid = Tidspunkt.now(),
+                tekniskTid = Tidspunkt.Companion.now(),
                 behandlingId = vedtak.behandlingId,
             ),
         )

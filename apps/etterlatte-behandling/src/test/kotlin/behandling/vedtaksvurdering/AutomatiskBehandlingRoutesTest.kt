@@ -26,6 +26,9 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.automatiskBehandlingRoutes
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.AutomatiskBehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort

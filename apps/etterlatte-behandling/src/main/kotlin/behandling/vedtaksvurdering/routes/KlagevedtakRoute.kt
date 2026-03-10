@@ -6,7 +6,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.vedtaksvurdering.MismatchingIdException
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakKlageService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering.routes
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
@@ -9,13 +9,18 @@ import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
+import no.nav.etterlatte.behandling.vedtaksvurdering.InnvilgetPeriode
+import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
+import no.nav.etterlatte.behandling.vedtaksvurdering.OppdaterSamordningsmelding
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.toVedtakSammendragDto
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
@@ -294,34 +299,6 @@ fun Route.vedtaksvurderingRoute(
                         call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
                     } ?: call.respond(vedtak.toDto())
             }
-        }
-    }
-}
-
-private fun Vedtak.toVedtakSammendragDto(): VedtakSammendragDto {
-    val dto =
-        VedtakSammendragDto(
-            id = id.toString(),
-            behandlingId = behandlingId,
-            vedtakType = type,
-            behandlendeSaksbehandler = vedtakFattet?.ansvarligSaksbehandler,
-            datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
-            attesterendeSaksbehandler = attestasjon?.attestant,
-            datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
-            virkningstidspunkt = null,
-            opphoerFraOgMed = null,
-            iverksettelsesTidspunkt = iverksettelsesTidspunkt,
-        )
-    return when (innhold) {
-        is VedtakInnhold.Behandling -> {
-            dto.copy(
-                virkningstidspunkt = innhold.virkningstidspunkt,
-                opphoerFraOgMed = innhold.opphoerFraOgMed,
-            )
-        }
-
-        else -> {
-            dto
         }
     }
 }

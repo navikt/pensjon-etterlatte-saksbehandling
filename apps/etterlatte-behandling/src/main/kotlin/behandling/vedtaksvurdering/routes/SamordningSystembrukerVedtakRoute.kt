@@ -8,16 +8,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
-import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakSamordningService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import java.time.LocalDate
 
@@ -51,34 +47,6 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
                 vedtakSamordningService.hentVedtak(vedtakId)
                     ?: throw GenerellIkkeFunnetException()
             call.respond(vedtak)
-        }
-    }
-}
-
-private fun Vedtak.toVedtakSammendragDto(): VedtakSammendragDto {
-    val dto =
-        VedtakSammendragDto(
-            id = id.toString(),
-            behandlingId = behandlingId,
-            vedtakType = type,
-            behandlendeSaksbehandler = vedtakFattet?.ansvarligSaksbehandler,
-            datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
-            attesterendeSaksbehandler = attestasjon?.attestant,
-            datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
-            virkningstidspunkt = null,
-            opphoerFraOgMed = null,
-            iverksettelsesTidspunkt = iverksettelsesTidspunkt,
-        )
-    return when (innhold) {
-        is VedtakInnhold.Behandling -> {
-            dto.copy(
-                virkningstidspunkt = innhold.virkningstidspunkt,
-                opphoerFraOgMed = innhold.opphoerFraOgMed,
-            )
-        }
-
-        else -> {
-            dto
         }
     }
 }

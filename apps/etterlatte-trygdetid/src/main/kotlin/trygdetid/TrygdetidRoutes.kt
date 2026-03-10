@@ -62,7 +62,6 @@ private val logger: Logger = LoggerFactory.getLogger("TrygdetidRoutes")
 enum class TrygdetidToggles(
     val value: String,
 ) : FeatureToggle {
-    TRYGDETID_FRA_PESYS("trygdetid-fra-pesys"),
     OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING("oppdater-beregnet-trygdetid-ved-kopiering"),
     ;
 
@@ -72,7 +71,6 @@ enum class TrygdetidToggles(
 fun Route.trygdetid(
     trygdetidService: TrygdetidService,
     behandlingKlient: BehandlingKlient,
-    featureToggleService: FeatureToggleService,
 ) {
     route("/api/trygdetid_v2") {
         route("/{$BEHANDLINGID_CALL_PARAMETER}") {
@@ -117,21 +115,13 @@ fun Route.trygdetid(
                 }
                 get("/sjekk-pesys-trygdetidsgrunnlag") {
                     withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                        if (featureToggleService.isEnabled(
-                                TrygdetidToggles.TRYGDETID_FRA_PESYS,
-                                defaultValue = false,
+                        logger.info("Sjekker om avdød for behandling $behandlingId har trygdetidsgrunnlag i Pesys for AP og Uføre")
+                        val harTrygdetidsgrunnlagIPesys =
+                            trygdetidService.harTrygdetidsgrunnlagIPesysForApOgUfoere(
+                                behandlingId,
+                                brukerTokenInfo,
                             )
-                        ) {
-                            logger.info("Sjekker om avdød for behandling $behandlingId har trygdetidsgrunnlag i Pesys for AP og Uføre")
-                            val harTrygdetidsgrunnlagIPesys =
-                                trygdetidService.harTrygdetidsgrunnlagIPesysForApOgUfoere(
-                                    behandlingId,
-                                    brukerTokenInfo,
-                                )
-                            call.respond(harTrygdetidsgrunnlagIPesys)
-                        } else {
-                            call.respond(HttpStatusCode.Forbidden)
-                        }
+                        call.respond(harTrygdetidsgrunnlagIPesys)
                     }
                 }
             }
@@ -471,31 +461,39 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto =
             },
         kilde =
             when (kilde) {
-                is Grunnlagsopplysning.Saksbehandler ->
+                is Grunnlagsopplysning.Saksbehandler -> {
                     TrygdetidGrunnlagKildeDto(
                         tidspunkt = kilde.tidspunkt.toString(),
                         ident = kilde.ident,
                     )
+                }
 
-                is Grunnlagsopplysning.Pesys ->
+                is Grunnlagsopplysning.Pesys -> {
                     TrygdetidGrunnlagKildeDto(
                         tidspunkt = kilde.tidspunkt.toString(),
                         ident = kilde.type,
                     )
-                is Grunnlagsopplysning.Ufoeretrygd ->
-                    TrygdetidGrunnlagKildeDto(
-                        tidspunkt = kilde.tidspunkt.toString(),
-                        ident = kilde.type,
-                    )
-                is Grunnlagsopplysning.Alderspensjon ->
-                    TrygdetidGrunnlagKildeDto(
-                        tidspunkt = kilde.tidspunkt.toString(),
-                        ident = kilde.type,
-                    )
+                }
 
-                else -> throw UnsupportedOperationException(
-                    "Kilde for trygdetid maa vaere saksbehandler, Ufoeretrygd, Alderspensjon eller pesys, var $kilde",
-                )
+                is Grunnlagsopplysning.Ufoeretrygd -> {
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.type,
+                    )
+                }
+
+                is Grunnlagsopplysning.Alderspensjon -> {
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.type,
+                    )
+                }
+
+                else -> {
+                    throw UnsupportedOperationException(
+                        "Kilde for trygdetid maa vaere saksbehandler, Ufoeretrygd, Alderspensjon eller pesys, var $kilde",
+                    )
+                }
             },
         begrunnelse = begrunnelse,
         poengInnAar = poengInnAar,

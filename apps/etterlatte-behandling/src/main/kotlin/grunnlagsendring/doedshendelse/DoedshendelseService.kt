@@ -78,10 +78,17 @@ class DoedshendelseService(
         barnUtenIdent: List<PersonUtenIdent>,
         ektefellerUtenIdent: List<Sivilstand>,
     ) {
-        if (barnUtenIdent.size + ektefellerUtenIdent.size > 0) {
+        val maanedenEtterDoedsfall =
+            avdoed.doedsdato!!
+                .verdi
+                .plusMonths(1)
+                .withDayOfMonth(1)
+        val relevanteBarnUtenIdent = barnUtenIdent.filter { it.erUnder20PaaDato(maanedenEtterDoedsfall) }
+
+        if (relevanteBarnUtenIdent.size + ektefellerUtenIdent.size > 0) {
             val msgBeroerte =
                 listOfNotNull(
-                    "barn".takeIf { barnUtenIdent.isNotEmpty() },
+                    "barn".takeIf { relevanteBarnUtenIdent.isNotEmpty() },
                     "ektefelle".takeIf { ektefellerUtenIdent.isNotEmpty() },
                 ).joinToString(" og ")
 
@@ -108,7 +115,7 @@ class DoedshendelseService(
             }
 
             ukjentBeroertDao.lagreUkjentBeroert(
-                UkjentBeroert(avdoed.foedselsnummer.verdi.value, barnUtenIdent, ektefellerUtenIdent),
+                UkjentBeroert(avdoed.foedselsnummer.verdi.value, relevanteBarnUtenIdent, ektefellerUtenIdent),
             )
         }
     }

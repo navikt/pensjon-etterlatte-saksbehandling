@@ -31,7 +31,9 @@ object TrygdetidBeregningService {
 
         val beregnetTrygdetidListe = trygdetidGrunnlag.mapNotNull { it.beregnetTrygdetid }
 
-        if (beregnetTrygdetidListe.isEmpty() && norskPoengaar == null) {
+        // Hvis vi ikke har noe grunnlag eller overstyring av poengår eller yrkesskade har vi ikke
+        // noen trygdetid å beregne
+        if (beregnetTrygdetidListe.isEmpty() && norskPoengaar == null && !yrkesskade) {
             logger.info("Har ingen perioder med beregnet trygdetidsgrunnlag og ingen overstyrt poengår.")
             return null
         }
@@ -71,7 +73,9 @@ object TrygdetidBeregningService {
                 )
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode -> throw Exception("En feil oppstod under regelkjøring")
+            is RegelkjoeringResultat.UgyldigPeriode -> {
+                throw Exception("En feil oppstod under regelkjøring")
+            }
         }
     }
 
@@ -109,7 +113,9 @@ object TrygdetidBeregningService {
                 )
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode -> throw Exception("En feil oppstod under regelkjøring")
+            is RegelkjoeringResultat.UgyldigPeriode -> {
+                throw Exception("En feil oppstod under regelkjøring")
+            }
         }
     }
 }

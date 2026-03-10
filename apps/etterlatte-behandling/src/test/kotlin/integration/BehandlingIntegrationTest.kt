@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlientTest
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
@@ -124,6 +125,7 @@ abstract class BehandlingIntegrationTest {
                 inntektskomponentKlient = InntektskomponentKlientTest(),
                 grunnlagServiceOverride = grunnlagService,
                 sigrunKlient = SigrunKlienTest(),
+                samordningKlient = SamordningsKlientTest(),
             )
     }
 

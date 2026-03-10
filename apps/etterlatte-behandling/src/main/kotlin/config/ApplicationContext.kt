@@ -110,6 +110,16 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServic
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakBehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakEtteroppgjoerService
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakKlageService
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakSamordningService
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakTilbakekrevingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRapidService
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
+import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevKlientImpl
 import no.nav.etterlatte.brev.BrevService
@@ -286,6 +296,14 @@ private fun finnBrukerIdent(): String {
     }
 }
 
+private fun samKlient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("samordnevedtak.azure.scope"),
+    )
+
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler.systemEnv(),
     val config: Config = ConfigFactory.load(),
@@ -344,6 +362,7 @@ internal class ApplicationContext(
         ),
     val arbeidOgInntektKlient: ArbeidOgInntektKlient = ArbeidOgInntektKlient(httpClient(), config.getString("arbeidOgInntekt.url")),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
+    val samordningKlient: SamordningsKlient = SamordningsKlientImpl(config, samKlient(config)),
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
@@ -354,6 +373,8 @@ internal class ApplicationContext(
 
     // Dao
     private val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
+
+    private val vedtaksvurderingRepository = VedtaksvurderingRepository(dataSource)
 
     val hendelseDao = HendelseDao(autoClosingDatabase)
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(autoClosingDatabase)
@@ -400,7 +421,6 @@ internal class ApplicationContext(
     private val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
     private val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
     val kodeverkService = KodeverkService(kodeverkKlient)
-
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
     // Service
@@ -886,6 +906,41 @@ internal class ApplicationContext(
             brevApiKlient = brevApiKlient,
             behandlingService = behandlingService,
             beregningKlient = beregningKlient,
+        )
+
+    val vedtaksvurderingService = VedtaksvurderingService(vedtaksvurderingRepository)
+    val vedtakBehandlingService =
+        VedtakBehandlingService(
+            vedtaksvurderingRepository = vedtaksvurderingRepository,
+            beregningKlient = beregningKlient,
+            vilkaarsvurderingService = vilkaarsvurderingService,
+            behandlingStatusService = behandlingsStatusService,
+            behandlingService = behandlingService,
+            samordningsKlient = samordningKlient,
+            trygdetidKlient = trygdetidKlient,
+            etteroppgjorRevurderingService = etteroppgjoerRevurderingService,
+            sakLesDao = sakLesDao,
+        )
+
+    val vedtaksvurderingRapidService =
+        VedtaksvurderingRapidService(
+            publiser = { key, melding -> rapid.publiser(key.toString(), verdi = melding) },
+        )
+    val vedtakKlageService: VedtakKlageService =
+        VedtakKlageService(
+            vedtaksvurderingRepository = vedtaksvurderingRepository,
+            vedtaksvurderingRapidService = vedtaksvurderingRapidService,
+        )
+    val vedtakSamordningService = VedtakSamordningService(vedtaksvurderingRepository)
+    val vedtakEtteroppgjoerService =
+        VedtakEtteroppgjoerService(
+            repository = vedtaksvurderingRepository,
+            vedtakSamordningService = vedtakSamordningService,
+        )
+    val vedtakTilbakekrevingService: VedtakTilbakekrevingService =
+        VedtakTilbakekrevingService(
+            repository = vedtaksvurderingRepository,
+            featureToggleService = featureToggleService,
         )
 
     // Jobs

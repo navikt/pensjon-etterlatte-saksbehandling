@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevur
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
 import no.nav.etterlatte.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

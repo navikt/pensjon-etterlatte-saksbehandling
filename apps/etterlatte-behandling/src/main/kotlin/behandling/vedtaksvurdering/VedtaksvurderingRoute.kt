@@ -8,9 +8,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -18,18 +18,13 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakslisteEtteroppgjoerRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.sak.TilgangServiceSjekker
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -38,7 +33,6 @@ fun Route.vedtaksvurderingRoute(
     vedtakService: VedtaksvurderingService,
     vedtakBehandlingService: VedtakBehandlingService,
     rapidService: VedtaksvurderingRapidService,
-    tilgangService: TilgangServiceSjekker,
 ) {
     route("/api/vedtak") {
         val logger = LoggerFactory.getLogger("VedtaksvurderingRoute")
@@ -154,9 +148,14 @@ fun Route.vedtaksvurderingRoute(
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/upsert") {
             kunSkrivetilgang {
-                logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
-                val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
-                call.respond(nyttVedtak.toDto())
+                inTransaction {
+                    logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
+                    runBlocking {
+                        val nyttVedtak =
+                            vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+                        call.respond(nyttVedtak.toDto())
+                    }
+                }
             }
         }
 
@@ -299,138 +298,6 @@ fun Route.vedtaksvurderingRoute(
     }
 }
 
-fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamordningService) {
-    route("/api/samordning/vedtak") {
-        post {
-            val sakstype =
-                call.parameters["sakstype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
-                    ?: return@post call.respond(HttpStatusCode.BadRequest, "sakstype ikke angitt")
-            val fomDato =
-                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: return@post call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
-            val fnr = call.receive<FoedselsnummerDTO>().foedselsnummer.let { Folkeregisteridentifikator.of(it) }
-
-            val vedtaksliste =
-                vedtakSamordningService.hentVedtaksliste(
-                    fnr = fnr,
-                    sakType = sakstype,
-                    fomDato = fomDato,
-                )
-            call.respond(vedtaksliste)
-        }
-
-        get("/{vedtakId}") {
-            val vedtakId =
-                krevIkkeNull(call.parameters["vedtakId"]?.toLong()) {
-                    "VedtakId mangler"
-                }
-
-            val vedtak =
-                vedtakSamordningService.hentVedtak(vedtakId)
-                    ?: throw GenerellIkkeFunnetException()
-            call.respond(vedtak)
-        }
-    }
-}
-
-fun Route.etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService: VedtakEtteroppgjoerService) {
-    route("/vedtak/etteroppgjoer/{$SAKID_CALL_PARAMETER}") {
-        post {
-            kunSkrivetilgang {
-                val request = call.receive<VedtakslisteEtteroppgjoerRequest>()
-
-                val vedtaksliste =
-                    vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
-                        sakId = request.sakId,
-                        etteroppgjoersAar = request.etteroppgjoersAar,
-                    )
-                call.respond(vedtaksliste)
-            }
-        }
-    }
-}
-
-fun Route.tilbakekrevingvedtakRoute(service: VedtakTilbakekrevingService) {
-    val logger = LoggerFactory.getLogger("TilbakekrevingsvedtakRoute")
-    route("/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
-        post("/lagre-vedtak") {
-            kunSkrivetilgang {
-                val dto = call.receive<TilbakekrevingVedtakDto>()
-                logger.info("Oppretter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.opprettEllerOppdaterVedtak(dto).toDto())
-            }
-        }
-        post("/fatt-vedtak") {
-            kunSkrivetilgang {
-                val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
-                logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.fattVedtak(dto, brukerTokenInfo).toDto())
-            }
-        }
-        post("/attester-vedtak") {
-            kunSkrivetilgang {
-                val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
-                logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.attesterVedtak(dto, brukerTokenInfo).toDto())
-            }
-        }
-        post("/underkjenn-vedtak") {
-            kunSkrivetilgang {
-                logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
-                call.respond(service.underkjennVedtak(behandlingId).toDto())
-            }
-        }
-        post("/tilbakestill-vedtak") {
-            kunSkrivetilgang {
-                logger.info("Tilbakestiller vedtak fra attestert for tilbakekreving med id=$behandlingId")
-                call.respond(service.tilbakeStillAttestert(behandlingId).toDto())
-            }
-        }
-    }
-}
-
-fun Route.klagevedtakRoute(service: VedtakKlageService) {
-    val logger = LoggerFactory.getLogger("KlagevedtakRoute")
-
-    route("/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
-        post("/upsert") {
-            kunSkrivetilgang {
-                val klage = call.receive<Klage>()
-                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
-                logger.info("Oppretter vedtak for klage med id=$behandlingId")
-
-                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(klage).toDto())
-            }
-        }
-
-        post("/fatt") {
-            kunSkrivetilgang {
-                val klage = call.receive<Klage>()
-                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
-
-                logger.info("Fatter vedtak for klage med id=$behandlingId")
-                call.respond(service.fattVedtak(klage, brukerTokenInfo).toDto())
-            }
-        }
-
-        post("/attester") {
-            kunSkrivetilgang {
-                val klage = call.receive<Klage>()
-                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
-
-                logger.info("Attesterer vedtak for klage med id=$behandlingId")
-                call.respond(service.attesterVedtak(klage, brukerTokenInfo).toDto())
-            }
-        }
-        post("/underkjenn") {
-            kunSkrivetilgang {
-                logger.info("Underkjenner vedtak for klage=$behandlingId")
-                call.respond(service.underkjennVedtak(behandlingId).toDto())
-            }
-        }
-    }
-}
-
 private fun Vedtak.toVedtakSammendragDto(): VedtakSammendragDto {
     val dto =
         VedtakSammendragDto(
@@ -466,17 +333,4 @@ private fun LoependeYtelse.toDto() =
         dato = dato,
         behandlingId = behandlingId,
         sisteLoependeBehandlingId = sisteLoependeBehandlingId,
-    )
-
-data class UnderkjennVedtakDto(
-    val kommentar: String,
-    val valgtBegrunnelse: String,
-)
-
-private class MismatchingIdException(
-    message: String,
-) : ForespoerselException(
-        HttpStatusCode.BadRequest.value,
-        "ID_MISMATCH_MELLOM_PATH_OG_BODY",
-        message,
     )

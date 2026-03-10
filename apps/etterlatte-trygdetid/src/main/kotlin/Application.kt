@@ -29,7 +29,7 @@ class Server(
                         context.sjekkAvvikJobb,
                     ),
             ) {
-                trygdetid(trygdetidService, behandlingKlient, featureToggleService)
+                trygdetid(trygdetidService, behandlingKlient)
                 avtale(avtaleService, behandlingKlient)
             }
         }

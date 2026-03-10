@@ -38,7 +38,6 @@ internal class TrygdetidRoutesTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val trygdetidService = mockk<TrygdetidService>()
-    private val unleashMock = mockk<FeatureToggleService>()
 
     @BeforeEach
     fun setUp() {
@@ -155,7 +154,7 @@ internal class TrygdetidRoutesTest {
     private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
         io.ktor.server.testing.testApplication {
             runServer(mockOAuth2Server) {
-                trygdetid(trygdetidService, behandlingKlient, unleashMock)
+                trygdetid(trygdetidService, behandlingKlient)
             }
             block(this)
         }

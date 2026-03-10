@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.behandling.randomSakId
@@ -119,6 +119,7 @@ fun vedtak(
     revurderingAarsak: Revurderingaarsak? = null,
     status: VedtakStatus = VedtakStatus.OPPRETTET,
     vedtakFattet: VedtakFattet? = null,
+    attestasjon: Attestasjon? = null,
     utbetalingsperioder: List<Utbetalingsperiode>? = null,
 ) = Vedtak(
     id = id,
@@ -129,6 +130,7 @@ fun vedtak(
     behandlingId = behandlingId,
     type = VedtakType.INNVILGELSE,
     vedtakFattet = vedtakFattet,
+    attestasjon = attestasjon,
     innhold =
         VedtakInnhold.Behandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,

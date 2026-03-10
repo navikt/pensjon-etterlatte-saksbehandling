@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.outbox
+package no.nav.etterlatte.behandling.vedtaksvurdering.outbox
 
 import kotliquery.Row
 import kotliquery.queryOf

@@ -39,7 +39,7 @@ export function AktivitetsgradOgUnntakTabell({
   utvidetVisning: (aktivitetEllerUnntak: IAktivitetspliktAktivitetsgrad | IAktivitetspliktUnntak) => React.ReactNode
 }) {
   const aktiviteterOgUnntak = [...aktiviteter, ...unntak]
-  aktiviteterOgUnntak.sort((a, b) => new Date(a.fom).getUTCMilliseconds() - new Date(b.fom).getUTCMilliseconds())
+  aktiviteterOgUnntak.sort((a, b) => new Date(b.fom).getTime() - new Date(a.fom).getTime())
 
   return (
     <VStack gap="4">

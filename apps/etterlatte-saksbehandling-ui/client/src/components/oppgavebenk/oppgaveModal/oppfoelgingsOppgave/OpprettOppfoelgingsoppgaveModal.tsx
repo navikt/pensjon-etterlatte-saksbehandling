@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettOppgave } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { useForm } from 'react-hook-form'
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
@@ -21,8 +20,6 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettel
   const [open, setOpen] = useState(false)
   const [opprettOppgaveStatus, opprettOppgaveApi, resetOpprettOppgaveStatus] = useApiCall(opprettOppgave)
   const saksbehandler = useInnloggetSaksbehandler()
-
-  const kanOppretteOppfoelgingsoppgave = useFeaturetoggle(FeatureToggle.opprette_oppfoelgingsoppgave)
 
   const {
     register,
@@ -59,10 +56,6 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettel
         setOpen(false)
       }
     )
-  }
-
-  if (!kanOppretteOppfoelgingsoppgave) {
-    return null
   }
 
   return (

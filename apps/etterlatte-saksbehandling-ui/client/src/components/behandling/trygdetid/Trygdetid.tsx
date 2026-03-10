@@ -22,7 +22,6 @@ import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { EnigUenigTilbakemelding } from '~shared/tilbakemelding/EnigUenigTilbakemelding'
 import { velgTilbakemeldingClickEventForUtlandsbehandling } from '~utils/analytics'
 
@@ -42,7 +41,6 @@ const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
 
-  const kopierTrygdetidsgrunnlagEnabled = useFeaturetoggle(FeatureToggle.kopier_trygdetidsgrunnlag)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
@@ -138,16 +136,14 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   return (
     <Box paddingInline="16" maxWidth="69rem">
-      {kopierTrygdetidsgrunnlagEnabled &&
-        behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-        redigerbar && (
-          <TrygdetidIAnnenBehandlingMedSammeAvdoede
-            behandlingId={behandling.id}
-            setTrygdetider={setTrygdetider}
-            trygdetider={trygdetider}
-            mapNavn={mapNavn}
-          />
-        )}
+      {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && redigerbar && (
+        <TrygdetidIAnnenBehandlingMedSammeAvdoede
+          behandlingId={behandling.id}
+          setTrygdetider={setTrygdetider}
+          trygdetider={trygdetider}
+          mapNavn={mapNavn}
+        />
+      )}
       <VStack gap="11">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         {landListe && (

@@ -21,7 +21,6 @@ import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGru
 import { ILand } from '~utils/kodeverk'
 import { isFailure, isPending, isSuccess, mapFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch } from '~store/Store'
@@ -49,7 +48,6 @@ export const TrygdetidPerioder = ({
   const [slettTrygdetidResult, slettTrygdetidsgrunnlagRequest] = useApiCall(slettTrygdetidsgrunnlag)
   const dispatch = useAppDispatch()
   const [visLeggTilTrygdetidPeriode, setVisLeggTilTrygdetidPeriode] = useState<boolean>(false)
-  const kanHenteTrygdetidFraPesys = useFeaturetoggle(FeatureToggle.trygdetid_fra_pesys)
   const [sjekkOmAvodedHarTTIPesysStatus, sjekkOmAvdoedHarTTIPesysHent] = useApiCall(
     sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys
   )
@@ -60,10 +58,10 @@ export const TrygdetidPerioder = ({
   const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   useEffect(() => {
-    if (kanHenteTrygdetidFraPesys && erFoerstegangsbehandling) {
+    if (erFoerstegangsbehandling) {
       sjekkOmAvdoedHarTTIPesysHent(behandling.id)
     }
-  }, [kanHenteTrygdetidFraPesys])
+  }, [])
 
   const [hentTTPesysStatus, hentOgOppdaterDataFraPesys] = useApiCall(
     hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon
@@ -162,7 +160,6 @@ export const TrygdetidPerioder = ({
 
       {kanLeggeTilNyPeriode &&
         faktiskTrygdetid &&
-        kanHenteTrygdetidFraPesys &&
         erFoerstegangsbehandling &&
         mapResult(sjekkOmAvodedHarTTIPesysStatus, {
           initial: null,

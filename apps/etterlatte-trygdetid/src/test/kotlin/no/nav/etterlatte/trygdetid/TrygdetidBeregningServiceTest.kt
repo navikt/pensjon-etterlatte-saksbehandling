@@ -47,6 +47,21 @@ class TrygdetidBeregningServiceTest {
     }
 
     @Test
+    fun `kan beregne trygdetid for overstyrt yrkesskade med ingen perioder`() {
+        val beregnetTrygdetid =
+            TrygdetidBeregningService.beregnTrygdetid(
+                trygdetidGrunnlag = emptyList(),
+                foedselsDato = LocalDate.of(1970, 1, 1),
+                doedsDato = LocalDate.of(2020, 1, 1),
+                norskPoengaar = null,
+                yrkesskade = true,
+                nordiskKonvensjon = false,
+            )
+        beregnetTrygdetid shouldNotBe null
+        beregnetTrygdetid?.resultat?.samletTrygdetidNorge shouldBe 40
+    }
+
+    @Test
     fun `skal gi maksimalt 40 aar total trygdetid`() {
         val now = LocalDate.now()
 

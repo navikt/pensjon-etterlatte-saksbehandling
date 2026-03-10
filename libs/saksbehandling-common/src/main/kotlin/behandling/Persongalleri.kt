@@ -3,6 +3,8 @@ package no.nav.etterlatte.libs.common.behandling
 import no.nav.etterlatte.libs.common.person.FolkeregisteridentifikatorValidator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 
 /*
     innsender: Denne brukes til å indikere system eller saksbehandler ident(manuelt opprettet behandling) i tillegg til faktisk innsender(innbygger)
@@ -57,7 +59,12 @@ enum class RelativPersonrolle {
 data class PersonUtenIdent(
     val rolle: RelativPersonrolle,
     val person: RelatertPerson,
-)
+) {
+    fun erUnder20PaaDato(dato: LocalDate): Boolean {
+        val foedselsdato = person.foedselsdato ?: return true
+        return ChronoUnit.YEARS.between(foedselsdato, dato).absoluteValue < 20
+    }
+}
 
 data class RelatertPerson(
     val foedselsdato: LocalDate? = null,

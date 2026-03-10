@@ -316,9 +316,13 @@ class StatistikkService(
             vedtakTidspunkt = null,
             type = "ETTEROPPGJOER_FORBEHANDLING",
             status = etteroppgjoerRad.hendelse.name,
-            resultat = etteroppgjoerRad.resultatType?.name ?: sisteResultat?.name,
+            resultat =
+                when (etteroppgjoerRad.hendelse) {
+                    EtteroppgjoerForbehandlingHendelser.AVBRUTT -> "AVBRUTT"
+                    else -> etteroppgjoerRad.resultatType?.name ?: sisteResultat?.name
+                },
             resultatBegrunnelse = null,
-            behandlingMetode = BehandlingMetode.MANUELL, // TODO: hvis vi setter på automatisering her må vi skille her
+            behandlingMetode = BehandlingMetode.MANUELL, // hvis vi setter på automatisering her må vi skille her
             soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = "GJENNY",
             ansvarligBeslutter = null,

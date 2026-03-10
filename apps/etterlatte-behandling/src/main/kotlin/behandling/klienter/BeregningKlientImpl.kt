@@ -9,7 +9,9 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
@@ -96,6 +98,16 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregningDTO?
+
+    suspend fun hentBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningDTO?
+
+    suspend fun hentAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AvkortingDto?
 }
 
 class BeregningKlientImpl(
@@ -153,6 +165,58 @@ class BeregningKlientImpl(
                 )
         } catch (e: Exception) {
             throw InternfeilException("Kunne ikke hente om behandling hadde overstyrt beregning", e)
+        }
+    }
+
+    override suspend fun hentBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningDTO? {
+        logger.info("Henter beregning for behandling med behandlingId=$behandlingId")
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun hentAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AvkortingDto? {
+        logger.info("Henter avkorting for behandling med behandlingId=$behandlingId")
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/avkorting/$behandlingId/ferdig",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
+                e,
+            )
         }
     }
 

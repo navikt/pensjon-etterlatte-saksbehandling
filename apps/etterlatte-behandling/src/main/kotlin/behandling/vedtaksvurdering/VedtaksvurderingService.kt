@@ -1,0 +1,66 @@
+package no.nav.etterlatte.behandling.vedtaksvurdering
+
+import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
+import org.slf4j.LoggerFactory
+import java.util.UUID
+
+class VedtaksvurderingService(
+    private val repository: VedtaksvurderingRepository,
+) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    fun hentVedtak(vedtakId: Long): Vedtak? {
+        logger.info("Henter vedtak med id=$vedtakId")
+        return repository.hentVedtak(vedtakId)
+    }
+
+    fun hentVedtakMedBehandlingId(behandlingId: UUID): Vedtak? {
+        logger.info("Henter vedtak for behandling med behandlingId=$behandlingId")
+        return repository.hentVedtak(behandlingId)
+    }
+
+    fun hentVedtakISak(sakId: SakId): List<Vedtak> = repository.hentVedtakForSak(sakId)
+
+    fun hentVedtak(fnr: Folkeregisteridentifikator): List<Vedtak> = repository.hentFerdigstilteVedtak(fnr)
+
+    fun hentSakIdMedUtbetalingForInntektsaar(aar: Int): List<SakId> =
+        repository.hentSakIdMedUtbetalingForInntektsaar(aar, SakType.OMSTILLINGSSTOENAD)
+
+    fun harSakUtbetalingForInntektsaar(
+        sakId: SakId,
+        inntektsaar: Int,
+    ): Boolean = repository.harSakUtbetalingForInntektsaar(sakId, inntektsaar, SakType.OMSTILLINGSSTOENAD)
+
+    /**
+     * Henter perioder hvor saken har vært innvilget.
+     * Tar bare med vedtak som er attestert.
+     */
+    fun hentInnvilgedePerioder(sakId: SakId): List<InnvilgetPeriode> {
+        val vedtak = hentVedtakISak(sakId)
+        val tidslinje = Vedtakstidslinje(vedtak)
+        return tidslinje.innvilgedePerioder()
+    }
+
+    /**
+     * Henter perioder hvor saken har vært innvilget, fram til og med vedtaket for behandlingen som er angitt.
+     * Tar bare med vedtak som er attestert.
+     */
+    fun hentInnvilgedePerioder(behandlingId: UUID): List<InnvilgetPeriode> {
+        val vedtak =
+            hentVedtakMedBehandlingId(behandlingId)
+                ?: throw NotFoundException("Fant ikke vedtak med behandlingId=$behandlingId")
+        sjekk(vedtak.attestasjon != null) { "Vedtaket må være attestert" }
+        sjekk(vedtak.innhold is VedtakInnhold.Behandling) { "Vedtaket må ha behandling-innhold" }
+
+        val vedtakTilOgMedDetAktuelle =
+            hentVedtakISak(vedtak.sakId)
+                .filter { it.attestasjon != null }
+                .filterNot { it.attestasjon!!.tidspunkt.isAfter(vedtak.attestasjon.tidspunkt) }
+
+        return Vedtakstidslinje(vedtakTilOgMedDetAktuelle).innvilgedePerioder()
+    }
+}

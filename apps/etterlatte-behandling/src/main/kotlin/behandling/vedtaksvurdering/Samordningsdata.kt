@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import java.time.LocalDate

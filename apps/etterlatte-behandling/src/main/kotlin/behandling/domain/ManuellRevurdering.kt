@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -40,6 +41,7 @@ data class ManuellRevurdering(
     override val sendeBrev: Boolean,
     override val opphoerFraOgMed: YearMonth?,
     override val tidligereFamiliepleier: TidligereFamiliepleier?,
+    override val gyldighetsproeving: GyldighetsResultat? = null,
 ) : Revurdering(
         id = id,
         sak = sak,
@@ -59,6 +61,7 @@ data class ManuellRevurdering(
         relatertBehandlingId = relatertBehandlingId,
         opphoerFraOgMed = opphoerFraOgMed,
         tidligereFamiliepleier = tidligereFamiliepleier,
+        gyldighetsproeving = gyldighetsproeving,
     ) {
     private fun erFyltUt(): Boolean =
         when (sak.sakType) {
@@ -67,6 +70,9 @@ data class ManuellRevurdering(
         }
 
     override fun kopier() = this.copy()
+
+    override fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Behandling =
+        hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(gyldighetsproeving = gyldighetsResultat) }
 
     override fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt) =
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(virkningstidspunkt = virkningstidspunkt) }

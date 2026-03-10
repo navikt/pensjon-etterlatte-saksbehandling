@@ -61,6 +61,7 @@ sealed class Behandling {
     abstract val sendeBrev: Boolean
     abstract val opphoerFraOgMed: YearMonth?
     abstract val tidligereFamiliepleier: TidligereFamiliepleier?
+    abstract val gyldighetsproeving: GyldighetsResultat?
 
     abstract fun erSluttbehandling(): Boolean
 
@@ -88,11 +89,7 @@ sealed class Behandling {
 
     fun erBosattUtland(): Boolean = utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
 
-    fun gyldighetsproeving(): GyldighetsResultat? =
-        when (this) {
-            is Foerstegangsbehandling -> this.gyldighetsproeving
-            else -> null
-        }
+    fun gyldighetsproeving(): GyldighetsResultat? = this.gyldighetsproeving
 
     fun revurderingsaarsak(): Revurderingaarsak? =
         when (this) {
@@ -136,6 +133,12 @@ sealed class Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere tidligere famililiepleier på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av tidligere famililiepleier.",
+        )
+
+    open fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Behandling =
+        throw NotImplementedError(
+            "Kan ikke oppdatere gyldighetsprøving på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av gyldighetsprøving.",
         )
 
     protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {

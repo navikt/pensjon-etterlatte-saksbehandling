@@ -111,6 +111,11 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
 
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
 
+  const erOmsNySoeknad =
+    behandling.sakType === SakType.OMSTILLINGSSTOENAD && revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
+  const erBpNySoeknad =
+    behandling.sakType === SakType.BARNEPENSJON && revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
+
   return (
     <>
       <Box paddingInline="16" paddingBlock="12 4">
@@ -167,18 +172,17 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         >
           <GrunnlagForVirkningstidspunkt />
         </Virkningstidspunkt>
-        {behandling.sakType == SakType.OMSTILLINGSSTOENAD &&
-          behandling.revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD && (
+        {erOmsNySoeknad ||
+          (erBpNySoeknad && (
             <>
               {personopplysninger && (
                 <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />
               )}
               <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
             </>
-          )}
-        {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
-          <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
-        )}
+          ))}
+        {behandling.sakType == SakType.OMSTILLINGSSTOENAD ||
+          (erBpNySoeknad && <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />)}
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">

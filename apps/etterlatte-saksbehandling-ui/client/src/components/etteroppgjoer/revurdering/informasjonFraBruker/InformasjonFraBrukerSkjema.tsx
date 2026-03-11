@@ -89,7 +89,8 @@ export const InformasjonFraBrukerSkjema = ({
             <ControlledRadioGruppe
               name="endringErTilUgunstForBruker"
               control={control}
-              legend="Er endringen til ugunst for bruker?"
+              legend="Er endringen til ugunst for bruker fordi det  er Nav som har oppdaget feilen?"
+              description="Dersom bruker selv har kommet med tilsvar som fører til mer feilutbetaling, blir svaret nei."
               errorVedTomInput="Du må ta stilling til om endringen er til ugunst for bruker"
               readOnly={!erRedigerbar}
               radios={

@@ -318,7 +318,7 @@ data class SakMedBehandlingerOgOppgaver(
     fun somSakMedBehandlinger(): SakMedBehandlinger = SakMedBehandlinger(sak, behandlinger)
 }
 
-internal class BehandlingServiceImpl(
+class BehandlingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,

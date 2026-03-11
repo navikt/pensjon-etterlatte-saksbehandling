@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
@@ -36,7 +36,7 @@ class VedtaksvurderingRapidService(
         extraParams: Map<String, Any> = emptyMap(),
     ) = publiser(
         behandlingId,
-        JsonMessage
+        JsonMessage.Companion
             .newMessage(
                 mapOf(
                     vedtakhendelse.lagParMedEventNameKey(),
@@ -51,7 +51,7 @@ class VedtaksvurderingRapidService(
         parametre: Map<String, Any>,
     ) = publiser(
         UUID.randomUUID(),
-        JsonMessage
+        JsonMessage.Companion
             .newMessage(
                 parametre +
                     hendelsestype.lagParMedEventNameKey(),

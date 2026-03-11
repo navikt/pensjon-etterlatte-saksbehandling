@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandling.vedtaksvurdering.outbox
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException

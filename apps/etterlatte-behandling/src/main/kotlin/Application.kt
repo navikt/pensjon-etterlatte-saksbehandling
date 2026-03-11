@@ -30,6 +30,10 @@ import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.behandling.vedtaksbehandling.behandlingMedBrevRoutes
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.etteroppgjoerSystembrukerVedtakRoute
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.klagevedtakRoute
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.tilbakekrevingvedtakRoute
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.vedtaksvurderingRoute
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
@@ -257,6 +261,16 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         sakGrunnlagRoute(applicationContext.grunnlagService)
         aldersovergangRoutes(applicationContext.nyAldersovergangService)
     }
+
+    vedtaksvurderingRoute(
+        applicationContext.vedtaksvurderingService,
+        applicationContext.vedtakBehandlingService,
+        applicationContext.vedtaksvurderingRapidService,
+    )
+    klagevedtakRoute(vedtakKlageService = applicationContext.vedtakKlageService)
+
+    etteroppgjoerSystembrukerVedtakRoute(applicationContext.vedtakEtteroppgjoerService)
+    tilbakekrevingvedtakRoute(applicationContext.vedtakTilbakekrevingService)
 }
 
 private fun Route.settOppTilganger(

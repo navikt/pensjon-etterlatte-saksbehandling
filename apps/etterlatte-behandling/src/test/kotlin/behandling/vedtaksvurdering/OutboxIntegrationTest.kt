@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxService
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.Vedtakshendelse
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.toEksternApi
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.typeToEksternApi
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType

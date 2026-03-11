@@ -175,11 +175,14 @@ spec:
       value: api://prod-fss.team-inntekt.ikomp/.default
     - name: ARBEID_OG_INNTEKT_URL
       value: https://arbeid-og-inntekt.prod-fss-pub.nais.io
-
     - name: SIGRUN_URL
       value: https://sigrun.prod-fss-pub.nais.io
     - name: SIGRUN_OUTBOUND_SCOPE
       value: api://prod-fss.team-inntekt.sigrun/.default
+    - name: SAMORDNEVEDTAK_URL
+      value: https://sam.prod-fss-pub.nais.io
+    - name: SAMORDNEVEDTAK_AZURE_SCOPE
+      value: api://prod-fss.pensjonsamhandling.sam/.default
 
   envFrom:
     - secret: my-application-unleash-api-token
@@ -214,6 +217,7 @@ spec:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen.prod-fss-pub.nais.io
         - host: arbeid-og-inntekt.prod-fss-pub.nais.io
+        - host: sam.prod-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

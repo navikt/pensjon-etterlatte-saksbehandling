@@ -11,7 +11,7 @@ import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
-import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { IAvkorting } from '~shared/types/IAvkorting'
 import { aarFraDatoString } from '~utils/formatering/dato'
@@ -31,7 +31,6 @@ export const Avkorting = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const brukNyeBeregningsregler = useFeaturetoggle(FeatureToggle.beregning_bruk_nye_beregningsregler)
 
-  const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
   if (!behandling) {
     return null
   }
@@ -68,12 +67,6 @@ export const Avkorting = () => {
           <Heading spacing size="small" level="2">
             Inntektsavkorting
           </Heading>
-          {harInstitusjonsopphold && (
-            <Alert variant="error">
-              Obs! Det er registrert institusjonsopphold i beregningen og dette er ikke støttet sammen med
-              inntektsavkorting, bruk manuel overstyring.
-            </Alert>
-          )}
           <HjemmelLenke tittel="Folketrygdloven § 17-9" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-9" />
           <BodyShort spacing>
             Omstillingsstønaden reduseres med 45 prosent av den gjenlevende sin inntekt som på årsbasis overstiger et

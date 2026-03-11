@@ -1,4 +1,4 @@
-import { BodyShort, Box, Heading } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { erBehandlingRedigerbar, requireNotNull } from '../felles/utils'
@@ -43,6 +43,9 @@ import { RevurderingKravpakke } from '~components/behandling/revurderingsoversik
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoereOpphoer/ViderefoereOpphoer'
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
+import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
+import { BoddEllerArbeidetUtlandet } from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
+import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -109,6 +112,15 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
 
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
 
+  const erOmsNySoeknad =
+    behandling.sakType === SakType.OMSTILLINGSSTOENAD && revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
+  const erBpNySoeknad =
+    behandling.sakType === SakType.BARNEPENSJON && revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
+
+  const ikkeGyldigFremsattSoeknad =
+    behandling.revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD &&
+    behandling.gyldighetsprøving?.resultat !== VurderingsResultat.OPPFYLT
+
   return (
     <>
       <Box paddingInline="16" paddingBlock="12 4">
@@ -165,15 +177,29 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         >
           <GrunnlagForVirkningstidspunkt />
         </Virkningstidspunkt>
+        {(erOmsNySoeknad || erBpNySoeknad) && (
+          <>
+            {personopplysninger && (
+              <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />
+            )}
+            <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
+          </>
+        )}
         {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
           <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
         )}
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar && ikkeGyldigFremsattSoeknad && (
+          <Box paddingInline="16" paddingBlock="6 16" maxWidth="42rem">
+            <Alert variant="warning">Kan ikke gå videre når søknad ikke er gyldig fremsatt. </Alert>
+          </Box>
+        )}
+
         {redigerbar ? (
           <BehandlingHandlingKnapper>
-            <Start disabled={behandling.virkningstidspunkt === null} />
+            <Start disabled={behandling.virkningstidspunkt === null || ikkeGyldigFremsattSoeknad} />
           </BehandlingHandlingKnapper>
         ) : (
           <NesteOgTilbake />

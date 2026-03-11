@@ -29,13 +29,11 @@ data class StatistikkBehandling(
     val prosesstype: Prosesstype,
     val enhet: Enhetsnummer,
     val kilde: Vedtaksloesning,
-    val relatertBehandlingId: String?,
+    val relatertBehandlingId: UUID?,
     val pesysId: Long?,
 ) {
     fun relatertBehandlingIdNonNull(): UUID =
-        UUID.fromString(
-            krevIkkeNull(relatertBehandlingId) { "Behandlingen mangler relatertBehandlingId" },
-        )
+            krevIkkeNull(relatertBehandlingId) { "Behandlingen mangler relatertBehandlingId" }
 }
 
 enum class BehandlingHendelseType : EventnameHendelseType {

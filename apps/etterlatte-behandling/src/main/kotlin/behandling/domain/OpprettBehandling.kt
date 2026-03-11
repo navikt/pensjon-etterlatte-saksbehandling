@@ -28,7 +28,7 @@ data class OpprettBehandling(
     val prosesstype: Prosesstype = Prosesstype.MANUELL,
     val vedtaksloesning: Vedtaksloesning,
     val begrunnelse: String? = null,
-    val relatertBehandlingId: String? = null,
+    val relatertBehandlingId: UUID? = null,
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth? = null,
     val tidligereFamiliepleier: TidligereFamiliepleier? = null,

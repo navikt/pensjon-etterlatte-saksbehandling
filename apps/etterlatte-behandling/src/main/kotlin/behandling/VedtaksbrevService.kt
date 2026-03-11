@@ -159,9 +159,9 @@ class VedtaksbrevService(
             val omsRettUtenTidsbegrensning =
                 vilkaarsvurdering.vilkaar.single {
                     it.hovedvilkaar.type in
-                        listOf(
-                            VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
-                        )
+                            listOf(
+                                VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                            )
                 }
 
             val avdoede = grunnlag.mapAvdoede()
@@ -243,26 +243,25 @@ class VedtaksbrevService(
         }
 
     fun hentKlageForBehandling(
-        relatertBehandlingId: String?,
+        relatertBehandlingId: UUID?,
         behandling: DetaljertBehandling?,
-    ): Klage? =
-        if (behandling?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING && relatertBehandlingId != null) {
+    ): Klage? {
+        if (relatertBehandlingId == null) return null
+        if (behandling?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             try {
-                val klageId = UUID.fromString(relatertBehandlingId)
+                val klageId = relatertBehandlingId
                 klageService.hentKlage(klageId)
             } catch (e: Exception) {
                 logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
                 logger.info(
                     "Kunne ikke finne klage med id=$relatertBehandlingId, denne førstegangsbehandlingen med id=${behandling.id} gjelder ikke omgjøring på grunn av klage",
                 )
-                null
             }
         } else if (behandling?.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
-            val klageId = UUID.fromString(relatertBehandlingId)
-            klageService.hentKlage(klageId)
-        } else {
-            null
+            klageService.hentKlage(relatertBehandlingId)
         }
+        return null
+    }
 }
 
 fun innvilgetMindreEnnFireMndEtterDoedsfall(

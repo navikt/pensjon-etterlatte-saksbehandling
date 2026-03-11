@@ -288,7 +288,7 @@ class BehandlingFactory(
                         if (omgjoeringsOppgave == null) {
                             throw AvslagOmgjoering.HarIkkeOmgjoeringsoppgaveUnderBehandling()
                         }
-                        omgjoeringsOppgave.referanse
+                        omgjoeringsOppgave.referanse.takeIf { it.isNotEmpty() }?.let { UUID.fromString(it) }
                     } else {
                         if (omgjoeringsOppgaver.any { !it.erAvsluttet() }) throw AvslagOmgjoering.AapenOmgjoeringISak()
                         null
@@ -490,7 +490,7 @@ class BehandlingFactory(
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
         opprinnelse: BehandlingOpprinnelse,
-        relatertBehandlingsId: String? = null,
+        relatertBehandlingsId: UUID? = null,
     ): Behandling {
         if (behandlingerUnderBehandling.isNotEmpty()) {
             throw InternfeilException(

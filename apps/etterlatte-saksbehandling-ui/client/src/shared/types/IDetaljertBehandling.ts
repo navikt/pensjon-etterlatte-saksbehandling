@@ -13,7 +13,7 @@ export interface IDetaljertBehandling {
   sakId: number
   sakType: SakType
   sakEnhetId: string
-  relatertBehandlingId: string | null
+  relatertBehandlingId: UUID | null
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   soeknadMottattDato?: string

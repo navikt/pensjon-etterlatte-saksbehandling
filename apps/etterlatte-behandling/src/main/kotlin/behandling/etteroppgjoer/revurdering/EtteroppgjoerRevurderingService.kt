@@ -131,7 +131,7 @@ class EtteroppgjoerRevurderingService(
         return inTransaction {
             kopierFaktiskInntekt(
                 fraForbehandlingId = sisteFerdigstilteForbehandlingId,
-                tilForbehandlingId = UUID.fromString(revurdering.relatertBehandlingId),
+                tilForbehandlingId = revurdering.relatertBehandlingId!!,
                 brukerTokenInfo = brukerTokenInfo,
             )
             krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Klarte ikke å finne revurdering etter opprettelse" }
@@ -176,13 +176,13 @@ class EtteroppgjoerRevurderingService(
 
     private fun hentBehandling(behandlingId: UUID): Behandling =
         (
-            behandlingService.hentBehandling(behandlingId)
-                ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
-        )
+                behandlingService.hentBehandling(behandlingId)
+                    ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
+                )
 
     private fun hentForbehandlingForRevurdering(behandling: Behandling): EtteroppgjoerForbehandling {
         val forbehandlingId =
-            behandling.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
+            behandling.relatertBehandlingId ?: throw UgyldigForespoerselException(
                 "MANGLER_FORBEHANDLING_ID",
                 "Behandling med id=${behandling.id} peker ikke på en gyldig etteroppgjør forbehandling",
             )
@@ -201,7 +201,7 @@ class EtteroppgjoerRevurderingService(
             ?: throw IkkeFunnetException(
                 "MANGLER_BEREGNET_RESULTAT",
                 "Forbehandling med id=${forbehandling.id} til revurdering med id=$behandlingId har " +
-                    "ikke et beregnet resultat for etteroppgjøret.",
+                        "ikke et beregnet resultat for etteroppgjøret.",
             )
     }
 
@@ -241,7 +241,7 @@ class EtteroppgjoerRevurderingService(
             .opprettRevurdering(
                 sakId = sakId,
                 forrigeBehandling = sisteIverksatteBehandling,
-                relatertBehandlingId = forbehandling.id.toString(),
+                relatertBehandlingId = forbehandling.id,
                 persongalleri = persongalleri,
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,

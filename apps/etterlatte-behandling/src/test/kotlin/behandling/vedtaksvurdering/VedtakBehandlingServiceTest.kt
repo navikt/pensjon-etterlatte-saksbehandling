@@ -26,6 +26,11 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilstandException
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VirkningstidspunktEtterOpphoerException
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VirkningstidspunktOgOpphoerFomPaaSammeDatoException
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning

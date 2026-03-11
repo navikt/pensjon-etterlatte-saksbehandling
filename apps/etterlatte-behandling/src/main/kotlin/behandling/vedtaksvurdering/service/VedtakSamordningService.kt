@@ -1,5 +1,9 @@
-package no.nav.etterlatte.behandling.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
+import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
+import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtakstidslinje
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak

@@ -14,6 +14,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.samordningSystembrukerVedtakRoute
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken

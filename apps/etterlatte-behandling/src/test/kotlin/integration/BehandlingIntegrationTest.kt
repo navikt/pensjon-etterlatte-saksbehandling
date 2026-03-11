@@ -8,6 +8,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
+import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -124,6 +125,7 @@ abstract class BehandlingIntegrationTest {
                 inntektskomponentKlient = InntektskomponentKlientTest(),
                 grunnlagServiceOverride = grunnlagService,
                 sigrunKlient = SigrunKlienTest(),
+                samordningKlient = mockk(relaxed = true),
             )
     }
 

@@ -80,7 +80,6 @@ internal class ApplicationContext(
             properties = featureToggleProperties(config),
             brukerIdent = { finnBrukerIdent() },
         ),
-    // Test overrides for klienter
     navAnsattKlientOverride: NavAnsattKlient? = null,
     norg2KlientOverride: Norg2Klient? = null,
     leaderElectionHttpClientOverride: HttpClient? = null,
@@ -109,8 +108,6 @@ internal class ApplicationContext(
     val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
     val dataSource = DataSourceBuilder.createDataSource(env)
     private val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
-
-    // === Moduler ===
 
     private val httpClientFactory = HttpClientFactory(config)
 
@@ -178,9 +175,6 @@ internal class ApplicationContext(
             rapid = rapid,
         )
 
-    // === Delegering til moduler for bakoverkompatibilitet ===
-
-    // DAOs
     val hendelseDao get() = daoModule.hendelseDao
     val kommerBarnetTilGodeDao get() = daoModule.kommerBarnetTilGodeDao
     val aktivitetspliktDao get() = daoModule.aktivitetspliktDao
@@ -234,7 +228,6 @@ internal class ApplicationContext(
     val doedshendelseService get() = serviceModule.doedshendelseService
     val etteroppgjoerOppgaveService get() = serviceModule.etteroppgjoerOppgaveService
     val etteroppgjoerService get() = serviceModule.etteroppgjoerService
-    val etteroppgjoerDataService get() = serviceModule.etteroppgjoerDataService
     val etteroppgjoerForbehandlingService get() = serviceModule.etteroppgjoerForbehandlingService
     val kommerBarnetTilGodeService get() = serviceModule.kommerBarnetTilGodeService
     val aktivitetspliktKopierService get() = serviceModule.aktivitetspliktKopierService
@@ -252,12 +245,10 @@ internal class ApplicationContext(
     val grunnlagsendringshendelseService get() = serviceModule.grunnlagsendringshendelseService
     val behandlingsStatusService get() = serviceModule.behandlingsStatusService
 
-    // High-level services
     val behandlingInfoService get() = highLevelServiceModule.behandlingInfoService
     val bosattUtlandService get() = highLevelServiceModule.bosattUtlandService
     val klageService get() = highLevelServiceModule.klageService
     val omgjoeringKlageRevurderingService get() = highLevelServiceModule.omgjoeringKlageRevurderingService
-    val tilbakekrevingBrevService get() = highLevelServiceModule.tilbakekrevingBrevService
     val etteroppgjoerForbehandlingBrevService get() = highLevelServiceModule.etteroppgjoerForbehandlingBrevService
     val brevService get() = highLevelServiceModule.brevService
     val tilbakekrevingService get() = highLevelServiceModule.tilbakekrevingService
@@ -268,10 +259,8 @@ internal class ApplicationContext(
     val migreringService get() = highLevelServiceModule.migreringService
     val aktivitetspliktOppgaveService get() = highLevelServiceModule.aktivitetspliktOppgaveService
 
-    // Kafka
     val behandlingsHendelser get() = kafkaModule.behandlingsHendelser
 
-    // Job services
     val lesSkatteoppgjoerHendelserJobService get() = jobModule.lesSkatteoppgjoerHendelserJobService
     val oppdaterSkatteoppgjoerIkkeMottattJobService get() = jobModule.oppdaterSkatteoppgjoerIkkeMottattJobService
     val etteroppgjoerSvarfristUtloeptJobService get() = jobModule.etteroppgjoerSvarfristUtloeptJobService
@@ -279,7 +268,6 @@ internal class ApplicationContext(
     val sjekkAdressebeskyttelseJobDao get() = daoModule.sjekkAdressebeskyttelseJobDao
     val aarligInntektsjusteringJobbService get() = jobModule.aarligInntektsjusteringJobbService
 
-    // Inntektsjustering selvbetjening (special case - uses rapid directly)
     val inntektsjusteringSelvbetjeningService by lazy {
         InntektsjusteringSelvbetjeningService(
             oppgaveService = oppgaveService,
@@ -291,10 +279,8 @@ internal class ApplicationContext(
         )
     }
 
-    // Self test
     val selfTestService by lazy { SelfTestService(klientModule.pingableKlienter) }
 
-    // Jobs
     val metrikkerJob get() = jobModule.metrikkerJob
     val uttrekkLoependeYtelseEtter67Job get() = jobModule.uttrekkLoependeYtelseEtter67Job
     val aktivitetspliktOppgaveUnntakUtloeperJob get() = jobModule.aktivitetspliktOppgaveUnntakUtloeperJob

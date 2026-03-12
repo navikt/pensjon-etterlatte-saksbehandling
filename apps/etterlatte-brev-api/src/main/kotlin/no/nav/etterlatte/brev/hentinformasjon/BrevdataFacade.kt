@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -157,7 +158,7 @@ class BrevdataFacade(
         saksbehandlerIdent: String,
         attestantIdent: String?,
         bruker: BrukerTokenInfo,
-        relatertBehandlingId: String?,
+        relatertBehandlingId: UUID?,
         behandling: DetaljertBehandling?,
     ): ForenkletVedtak? =
         when (vedtak?.type) {
@@ -231,25 +232,24 @@ class BrevdataFacade(
         }
 
     suspend fun hentKlageForBehandling(
-        relatertBehandlingId: String?,
+        relatertBehandlingId: UUID?,
         behandling: DetaljertBehandling?,
         bruker: BrukerTokenInfo,
-    ): Klage? =
-        if (behandling?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING && relatertBehandlingId != null) {
+    ): Klage? {
+        if (relatertBehandlingId == null) return null
+        if (behandling?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             try {
-                val klageId = UUID.fromString(relatertBehandlingId)
+                val klageId = relatertBehandlingId
                 behandlingService.hentKlage(klageId, bruker)
             } catch (e: Exception) {
                 logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
                 logger.info(
                     "Kunne ikke finne klage med id=$relatertBehandlingId, denne førstegangsbehandlingen med id=${behandling.id} gjelder ikke omgjøring på grunn av klage",
                 )
-                null
             }
         } else if (behandling?.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
-            val klageId = UUID.fromString(relatertBehandlingId)
-            behandlingService.hentKlage(klageId, bruker)
-        } else {
-            null
+            behandlingService.hentKlage(relatertBehandlingId, bruker)
         }
+        return null
+    }
 }

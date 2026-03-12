@@ -11,6 +11,9 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilstandException
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto

@@ -336,7 +336,7 @@ class AvkortingService(
             when (behandling.revurderingsaarsak) {
                 Revurderingaarsak.ETTEROPPGJOER -> {
                     val forbehandlingId =
-                        behandling.relatertBehandlingId.let { UUID.fromString(it) }
+                        behandling.relatertBehandlingId
                             ?: throw InternfeilException(
                                 "Mangler relatertBehandlingId for revurdering etteroppgjør, " +
                                     "i behandling med id=${behandling.id} i sak=${behandling.sak}",

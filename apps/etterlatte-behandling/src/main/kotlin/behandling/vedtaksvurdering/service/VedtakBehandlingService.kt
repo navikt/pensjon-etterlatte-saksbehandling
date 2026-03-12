@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
@@ -7,7 +7,22 @@ import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
+import no.nav.etterlatte.behandling.vedtaksvurdering.BeregningOgAvkorting
+import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
+import no.nav.etterlatte.behandling.vedtaksvurdering.OppdaterSamordningsmelding
+import no.nav.etterlatte.behandling.vedtaksvurdering.OpprettVedtak
+import no.nav.etterlatte.behandling.vedtaksvurdering.Samordningsvedtak
+import no.nav.etterlatte.behandling.vedtaksvurdering.SamordningsvedtakWrapper
+import no.nav.etterlatte.behandling.vedtaksvurdering.UgyldigAttestantException
+import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakData
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakOgBeregningSammenligner
+import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtakstidslinje
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.behandling.vedtaksvurdering.erVedtakMedEtterbetaling
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
 import no.nav.etterlatte.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

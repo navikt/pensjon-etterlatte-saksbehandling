@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -207,7 +208,7 @@ class BehandlingStatusServiceImpl(
                             val etteroppgjoersAar =
                                 forbehandlingService
                                     .hentForbehandling(
-                                        UUID.fromString(behandling.relatertBehandlingId!!),
+                                        behandling.relatertBehandlingId!!,
                                     ).aar
 
                             genererMerknad(
@@ -419,8 +420,7 @@ class BehandlingStatusServiceImpl(
         if (behandling.type != BehandlingType.REVURDERING || behandling.revurderingsaarsak() != Revurderingaarsak.ETTEROPPGJOER) {
             return
         }
-
-        val forbehandling = forbehandlingService.hentForbehandling(UUID.fromString(behandling.relatertBehandlingId))
+        val forbehandling = forbehandlingService.hentForbehandling(behandling.relatertBehandlingId!!)
         if (forbehandling.erUnderBehandling()) {
             forbehandlingService.ferdigstillRevurderingForbehandling(forbehandling, brukerTokenInfo)
         }

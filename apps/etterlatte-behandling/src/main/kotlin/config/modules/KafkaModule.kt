@@ -10,10 +10,7 @@ class KafkaModule(
     private val rapid: KafkaProdusent<String, String>,
 ) {
     val behandlingsHendelser by lazy { BehandlingsHendelserKafkaProducerImpl(rapid) }
-
     val klageHendelser by lazy { KlageHendelserServiceImpl(rapid) }
-
     val tilbakekrevingHendelserService by lazy { TilbakekrevingHendelserServiceImpl(rapid) }
-
     val doedshendelserProducer by lazy { DoedshendelserKafkaServiceImpl(rapid) }
 }

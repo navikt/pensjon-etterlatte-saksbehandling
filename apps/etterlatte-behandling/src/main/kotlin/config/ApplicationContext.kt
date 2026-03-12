@@ -58,13 +58,11 @@ internal class ApplicationContext(
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
-    private val sporingslogg = Sporingslogg()
-    val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
+    val behandlingRequestLogger = BehandlingRequestLogger(Sporingslogg())
     val dataSource = DataSourceBuilder.createDataSource(env)
     private val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
 
     private val daoModule = DaoModule(autoClosingDatabase, dataSource)
-
     private val kafkaModule = KafkaModule(rapid)
 
     private val klientModule =
@@ -106,23 +104,23 @@ internal class ApplicationContext(
             rapid = rapid,
         )
 
-    // Dao
-    val hendelseDao get() = daoModule.hendelseDao
-    val kommerBarnetTilGodeDao get() = daoModule.kommerBarnetTilGodeDao
-    val aktivitetspliktDao get() = daoModule.aktivitetspliktDao
-    val revurderingDao get() = daoModule.revurderingDao
-    val behandlingDao get() = daoModule.behandlingDao
+    // Dao delegering
     val sakLesDao get() = daoModule.sakLesDao
     val sakSkrivDao get() = daoModule.sakSkrivDao
+    val sakTilgangDao get() = daoModule.sakTilgangDao
+    val hendelseDao get() = daoModule.hendelseDao
+    val behandlingDao get() = daoModule.behandlingDao
+    val behandlingInfoDao get() = daoModule.behandlingInfoDao
+    val revurderingDao get() = daoModule.revurderingDao
+    val kommerBarnetTilGodeDao get() = daoModule.kommerBarnetTilGodeDao
+    val aktivitetspliktDao get() = daoModule.aktivitetspliktDao
     val grunnlagsendringshendelseDao get() = daoModule.grunnlagsendringshendelseDao
     val institusjonsoppholdDao get() = daoModule.institusjonsoppholdDao
     val klageDao get() = daoModule.klageDao
     val tilbakekrevingDao get() = daoModule.tilbakekrevingDao
-    val behandlingInfoDao get() = daoModule.behandlingInfoDao
-    val sakTilgangDao get() = daoModule.sakTilgangDao
     val opplysningDao get() = daoModule.opplysningDao
 
-    // Klient
+    // Klient delegering
     val norg2Klient get() = klientModule.norg2Klient
     val beregningKlient get() = klientModule.beregningKlient
     val vedtakKlient get() = klientModule.vedtakKlient
@@ -134,61 +132,60 @@ internal class ApplicationContext(
     val sigrunKlient get() = klientModule.sigrunKlient
     val arbeidOgInntektKlient get() = klientModule.arbeidOgInntektKlient
 
-    // Services
+    // Service delegering
     val brukerService get() = serviceModule.brukerService
     val saksbehandlerService get() = serviceModule.saksbehandlerService
     val oppgaveService get() = serviceModule.oppgaveService
     val oppgaveKommentarService get() = serviceModule.oppgaveKommentarService
-    val nyAldersovergangService get() = serviceModule.nyAldersovergangService
     val sakTilgang get() = serviceModule.sakTilgang
     val oppdaterTilgangService get() = serviceModule.oppdaterTilgangService
-    val grunnlagService get() = serviceModule.grunnlagService
-    val kodeverkService get() = serviceModule.kodeverkService
     val tilgangService get() = serviceModule.tilgangService
     val sakService get() = serviceModule.sakService
-    val doedshendelseService get() = serviceModule.doedshendelseService
-    val etteroppgjoerOppgaveService get() = serviceModule.etteroppgjoerOppgaveService
-    val etteroppgjoerService get() = serviceModule.etteroppgjoerService
-    val etteroppgjoerForbehandlingService get() = serviceModule.etteroppgjoerForbehandlingService
-    val kommerBarnetTilGodeService get() = serviceModule.kommerBarnetTilGodeService
-    val aktivitetspliktKopierService get() = serviceModule.aktivitetspliktKopierService
-    val revurderingService get() = serviceModule.revurderingService
-    val gyldighetsproevingService get() = serviceModule.gyldighetsproevingService
+    val grunnlagService get() = serviceModule.grunnlagService
+    val kodeverkService get() = serviceModule.kodeverkService
+    val nyAldersovergangService get() = serviceModule.nyAldersovergangService
     val behandlingService get() = serviceModule.behandlingService
+    val behandlingsStatusService get() = serviceModule.behandlingsStatusService
     val vilkaarsvurderingService get() = serviceModule.vilkaarsvurderingService
+    val aldersovergangService get() = serviceModule.aldersovergangService
+    val gyldighetsproevingService get() = serviceModule.gyldighetsproevingService
     val generellBehandlingService get() = serviceModule.generellBehandlingService
     val behandlingMedBrevService get() = serviceModule.behandlingMedBrevService
     val sjekklisteService get() = serviceModule.sjekklisteService
+    val kommerBarnetTilGodeService get() = serviceModule.kommerBarnetTilGodeService
+    val revurderingService get() = serviceModule.revurderingService
     val automatiskRevurderingService get() = serviceModule.automatiskRevurderingService
     val manuellRevurderingService get() = serviceModule.manuellRevurderingService
+    val aktivitetspliktKopierService get() = serviceModule.aktivitetspliktKopierService
     val aktivitetspliktService get() = serviceModule.aktivitetspliktService
     val omregningService get() = serviceModule.omregningService
+    val doedshendelseService get() = serviceModule.doedshendelseService
     val grunnlagsendringshendelseService get() = serviceModule.grunnlagsendringshendelseService
-    val behandlingsStatusService get() = serviceModule.behandlingsStatusService
+    val etteroppgjoerOppgaveService get() = serviceModule.etteroppgjoerOppgaveService
+    val etteroppgjoerService get() = serviceModule.etteroppgjoerService
+    val etteroppgjoerForbehandlingService get() = serviceModule.etteroppgjoerForbehandlingService
     val inntektsjusteringSelvbetjeningService get() = serviceModule.inntektsjusteringSelvbetjeningService
-    val aldersovergangService get() = serviceModule.aldersovergangService
 
-    // High-level services
+    // High level service delegering
     val behandlingInfoService get() = highLevelServiceModule.behandlingInfoService
+    val behandlingFactory get() = highLevelServiceModule.behandlingFactory
     val bosattUtlandService get() = highLevelServiceModule.bosattUtlandService
+    val migreringService get() = highLevelServiceModule.migreringService
     val klageService get() = highLevelServiceModule.klageService
     val omgjoeringKlageRevurderingService get() = highLevelServiceModule.omgjoeringKlageRevurderingService
-    val etteroppgjoerForbehandlingBrevService get() = highLevelServiceModule.etteroppgjoerForbehandlingBrevService
-    val brevService get() = highLevelServiceModule.brevService
     val tilbakekrevingService get() = highLevelServiceModule.tilbakekrevingService
-    val gosysOppgaveService get() = highLevelServiceModule.gosysOppgaveService
-    val behandlingFactory get() = highLevelServiceModule.behandlingFactory
+    val etteroppgjoerForbehandlingBrevService get() = highLevelServiceModule.etteroppgjoerForbehandlingBrevService
     val etteroppgjoerRevurderingService get() = highLevelServiceModule.etteroppgjoerRevurderingService
-    val migreringService get() = highLevelServiceModule.migreringService
+    val brevService get() = highLevelServiceModule.brevService
+    val gosysOppgaveService get() = highLevelServiceModule.gosysOppgaveService
     val aktivitetspliktOppgaveService get() = highLevelServiceModule.aktivitetspliktOppgaveService
 
+    // Kafka delegering
     val behandlingsHendelser get() = kafkaModule.behandlingsHendelser
 
+    // Jobb delegering
     val lesSkatteoppgjoerHendelserJobService get() = jobModule.lesSkatteoppgjoerHendelserJobService
     val aarligInntektsjusteringJobbService get() = jobModule.aarligInntektsjusteringJobbService
-
-    val selfTestService by lazy { SelfTestService(klientModule.pingableKlienter) }
-
     val metrikkerJob get() = jobModule.metrikkerJob
     val uttrekkLoependeYtelseEtter67Job get() = jobModule.uttrekkLoependeYtelseEtter67Job
     val aktivitetspliktOppgaveUnntakUtloeperJob get() = jobModule.aktivitetspliktOppgaveUnntakUtloeperJob
@@ -199,6 +196,9 @@ internal class ApplicationContext(
     val etteroppgjoerSvarfristUtloeptJob get() = jobModule.etteroppgjoerSvarfristUtloeptJob
     val sjekkAdressebeskyttelseJob get() = jobModule.sjekkAdressebeskyttelseJob
     val lesSkatteoppgjoerHendelserJob get() = jobModule.lesSkatteoppgjoerHendelserJob
+
+    // Selftest
+    val selfTestService by lazy { SelfTestService(klientModule.pingableKlienter) }
 
     fun close() {
         (dataSource as HikariDataSource).close()

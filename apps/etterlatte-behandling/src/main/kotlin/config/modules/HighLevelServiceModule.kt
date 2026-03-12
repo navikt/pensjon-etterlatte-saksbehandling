@@ -25,23 +25,32 @@ class HighLevelServiceModule(
     private val serviceModule: ServiceModule,
     private val featureToggleService: FeatureToggleService,
 ) {
-    val bosattUtlandService by lazy {
-        BosattUtlandService(daoModule.bosattUtlandDao)
-    }
-
-    private val klageBrevService by lazy {
-        KlageBrevService(klientModule.brevApiKlient)
-    }
-
-    val migreringService by lazy {
-        MigreringService(serviceModule.behandlingService)
-    }
+    val bosattUtlandService by lazy { BosattUtlandService(daoModule.bosattUtlandDao) }
+    val migreringService by lazy { MigreringService(serviceModule.behandlingService) }
+    private val klageBrevService by lazy { KlageBrevService(klientModule.brevApiKlient) }
 
     val behandlingInfoService by lazy {
         BehandlingInfoService(
             behandlingInfoDao = daoModule.behandlingInfoDao,
             behandlingService = serviceModule.behandlingService,
             behandlingsstatusService = serviceModule.behandlingsStatusService,
+        )
+    }
+
+    val behandlingFactory by lazy {
+        BehandlingFactory(
+            oppgaveService = serviceModule.oppgaveService,
+            grunnlagService = serviceModule.grunnlagService,
+            revurderingService = serviceModule.revurderingService,
+            gyldighetsproevingService = serviceModule.gyldighetsproevingService,
+            sakService = serviceModule.sakService,
+            behandlingDao = daoModule.behandlingDao,
+            hendelseDao = daoModule.hendelseDao,
+            behandlingHendelser = kafkaModule.behandlingsHendelser,
+            kommerBarnetTilGodeService = serviceModule.kommerBarnetTilGodeService,
+            vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
+            behandlingInfoService = behandlingInfoService,
+            tilgangsService = serviceModule.oppdaterTilgangService,
         )
     }
 
@@ -80,6 +89,21 @@ class HighLevelServiceModule(
         )
     }
 
+    val tilbakekrevingService by lazy {
+        TilbakekrevingService(
+            tilbakekrevingDao = daoModule.tilbakekrevingDao,
+            sakDao = daoModule.sakLesDao,
+            hendelseDao = daoModule.hendelseDao,
+            behandlingService = serviceModule.behandlingService,
+            oppgaveService = serviceModule.oppgaveService,
+            vedtakKlient = klientModule.vedtakKlient,
+            brevApiKlient = klientModule.brevApiKlient,
+            brevService = brevService,
+            tilbakekrevingKlient = klientModule.tilbakekrevingKlient,
+            tilbakekrevinghendelser = kafkaModule.tilbakekrevingHendelserService,
+        )
+    }
+
     val etteroppgjoerForbehandlingBrevService by lazy {
         EtteroppgjoerForbehandlingBrevService(
             brevKlient = klientModule.brevKlient,
@@ -100,6 +124,20 @@ class HighLevelServiceModule(
             beregningKlient = klientModule.beregningKlient,
             brevApiKlient = klientModule.brevApiKlient,
             etteroppgjoerService = serviceModule.etteroppgjoerService,
+        )
+    }
+
+    val etteroppgjoerRevurderingService by lazy {
+        EtteroppgjoerRevurderingService(
+            behandlingService = serviceModule.behandlingService,
+            etteroppgjoerService = serviceModule.etteroppgjoerService,
+            etteroppgjoerForbehandlingService = serviceModule.etteroppgjoerForbehandlingService,
+            grunnlagService = serviceModule.grunnlagService,
+            revurderingService = serviceModule.revurderingService,
+            vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
+            trygdetidKlient = klientModule.trygdetidKlient,
+            beregningKlient = klientModule.beregningKlient,
+            etteroppgjoerDataService = serviceModule.etteroppgjoerDataService,
         )
     }
 
@@ -132,21 +170,6 @@ class HighLevelServiceModule(
         )
     }
 
-    val tilbakekrevingService by lazy {
-        TilbakekrevingService(
-            tilbakekrevingDao = daoModule.tilbakekrevingDao,
-            sakDao = daoModule.sakLesDao,
-            hendelseDao = daoModule.hendelseDao,
-            behandlingService = serviceModule.behandlingService,
-            oppgaveService = serviceModule.oppgaveService,
-            vedtakKlient = klientModule.vedtakKlient,
-            brevApiKlient = klientModule.brevApiKlient,
-            brevService = brevService,
-            tilbakekrevingKlient = klientModule.tilbakekrevingKlient,
-            tilbakekrevinghendelser = kafkaModule.tilbakekrevingHendelserService,
-        )
-    }
-
     val gosysOppgaveService by lazy {
         GosysOppgaveServiceImpl(
             gosysOppgaveKlient = klientModule.gosysOppgaveKlient,
@@ -154,37 +177,6 @@ class HighLevelServiceModule(
             saksbehandlerService = serviceModule.saksbehandlerService,
             saksbehandlerInfoDao = daoModule.saksbehandlerInfoDao,
             pdltjeneserKlient = klientModule.pdlTjenesterKlient,
-        )
-    }
-
-    val behandlingFactory by lazy {
-        BehandlingFactory(
-            oppgaveService = serviceModule.oppgaveService,
-            grunnlagService = serviceModule.grunnlagService,
-            revurderingService = serviceModule.revurderingService,
-            gyldighetsproevingService = serviceModule.gyldighetsproevingService,
-            sakService = serviceModule.sakService,
-            behandlingDao = daoModule.behandlingDao,
-            hendelseDao = daoModule.hendelseDao,
-            behandlingHendelser = kafkaModule.behandlingsHendelser,
-            kommerBarnetTilGodeService = serviceModule.kommerBarnetTilGodeService,
-            vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
-            behandlingInfoService = behandlingInfoService,
-            tilgangsService = serviceModule.oppdaterTilgangService,
-        )
-    }
-
-    val etteroppgjoerRevurderingService by lazy {
-        EtteroppgjoerRevurderingService(
-            behandlingService = serviceModule.behandlingService,
-            etteroppgjoerService = serviceModule.etteroppgjoerService,
-            etteroppgjoerForbehandlingService = serviceModule.etteroppgjoerForbehandlingService,
-            grunnlagService = serviceModule.grunnlagService,
-            revurderingService = serviceModule.revurderingService,
-            vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
-            trygdetidKlient = klientModule.trygdetidKlient,
-            beregningKlient = klientModule.beregningKlient,
-            etteroppgjoerDataService = serviceModule.etteroppgjoerDataService,
         )
     }
 

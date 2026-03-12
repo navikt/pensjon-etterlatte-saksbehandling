@@ -55,18 +55,18 @@ class JobModule(
 
     private val saksbehandlerJobService by lazy {
         SaksbehandlerJobService(
-            daoModule.saksbehandlerInfoDao,
-            klientModule.navAnsattKlient,
-            klientModule.entraProxyKlient,
+            saksbehandlerInfoDao = daoModule.saksbehandlerInfoDao,
+            navAnsattKlient = klientModule.navAnsattKlient,
+            entraProxyKlient = klientModule.entraProxyKlient,
         )
     }
 
     private val doedshendelseReminderService by lazy {
         DoedshendelseReminderService(
-            daoModule.doedshendelseDao,
-            serviceModule.behandlingService,
-            serviceModule.oppgaveService,
-            daoModule.sakLesDao,
+            doedshendelseDao = daoModule.doedshendelseDao,
+            behandlingService = serviceModule.behandlingService,
+            oppgaveService = serviceModule.oppgaveService,
+            sakLesDao = daoModule.sakLesDao,
         )
     }
 
@@ -92,6 +92,25 @@ class JobModule(
         )
     }
 
+    private val uttrekkLoependeYtelseEtter67JobService by lazy {
+        UttrekkLoependeYtelseEtter67JobService(
+            vedtakKlient = klientModule.vedtakKlient,
+            sakService = serviceModule.sakService,
+            aldersovergangService = serviceModule.nyAldersovergangService,
+            featureToggleService = featureToggleService,
+        )
+    }
+
+    private val aktivitetspliktOppgaveUnntakUtloeperJobService by lazy {
+        AktivitetspliktOppgaveUnntakUtloeperJobService(
+            aktivitetspliktDao = daoModule.aktivitetspliktDao,
+            aktivitetspliktService = serviceModule.aktivitetspliktService,
+            oppgaveService = serviceModule.oppgaveService,
+            vedtakKlient = klientModule.vedtakKlient,
+            featureToggleService = featureToggleService,
+        )
+    }
+
     val lesSkatteoppgjoerHendelserJobService by lazy {
         LesSkatteoppgjoerHendelserJobService(
             dao = daoModule.skatteoppgjoerHendelserDao,
@@ -101,39 +120,20 @@ class JobModule(
         )
     }
 
-    private val uttrekkLoependeYtelseEtter67JobService by lazy {
-        UttrekkLoependeYtelseEtter67JobService(
-            klientModule.vedtakKlient,
-            serviceModule.sakService,
-            serviceModule.nyAldersovergangService,
-            featureToggleService,
-        )
-    }
-
     val oppdaterSkatteoppgjoerIkkeMottattJobService by lazy {
         OppdaterSkatteoppgjoerIkkeMottattJobService(
-            featureToggleService,
-            serviceModule.etteroppgjoerOppgaveService,
-            serviceModule.etteroppgjoerService,
-            klientModule.vedtakKlient,
+            featureToggleService = featureToggleService,
+            etteroppgjoerOppgaveService = serviceModule.etteroppgjoerOppgaveService,
+            etteroppgjoerService = serviceModule.etteroppgjoerService,
+            vedtakKlient = klientModule.vedtakKlient,
         )
     }
 
     val etteroppgjoerSvarfristUtloeptJobService by lazy {
         EtteroppgjoerSvarfristUtloeptJobService(
-            serviceModule.etteroppgjoerService,
-            serviceModule.oppgaveService,
-            featureToggleService,
-        )
-    }
-
-    private val aktivitetspliktOppgaveUnntakUtloeperJobService by lazy {
-        AktivitetspliktOppgaveUnntakUtloeperJobService(
-            daoModule.aktivitetspliktDao,
-            serviceModule.aktivitetspliktService,
-            serviceModule.oppgaveService,
-            klientModule.vedtakKlient,
-            featureToggleService,
+            etteroppgjoerService = serviceModule.etteroppgjoerService,
+            oppgaveService = serviceModule.oppgaveService,
+            featureToggleService = featureToggleService,
         )
     }
 
@@ -166,19 +166,57 @@ class JobModule(
         )
     }
 
-    // === Jobs ===
-
+    // Jobber
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
-            BehandlingMetrics(
-                daoModule.oppgaveMetrikkerDao,
-                daoModule.behandlingMetrikkerDao,
-                daoModule.gjenopprettingMetrikkerDao,
-            ),
-            { erLeader() },
-            Duration.of(6, ChronoUnit.MINUTES).toMillis(),
+            uthenter =
+                BehandlingMetrics(
+                    oppgaveMetrikkerDao = daoModule.oppgaveMetrikkerDao,
+                    behandlingerMetrikkerDao = daoModule.behandlingMetrikkerDao,
+                    gjenopprettingDao = daoModule.gjenopprettingMetrikkerDao,
+                ),
+            erLeader = { erLeader() },
+            initialDelay = Duration.of(6, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(10, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
+        )
+    }
+
+    val saksbehandlerJob: SaksbehandlerJob by lazy {
+        SaksbehandlerJob(
+            saksbehandlerJobService = saksbehandlerJobService,
+            { erLeader() },
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(20, ChronoUnit.MINUTES),
+            openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
+        )
+    }
+
+    val doedsmeldingerJob: DoedsmeldingJob by lazy {
+        DoedsmeldingJob(
+            doedshendelseService = doedshendelseJobService,
+            erLeader = { erLeader() },
+            initialDelay =
+                if (isProd()) {
+                    Duration.of(3, ChronoUnit.MINUTES).toMillis()
+                } else {
+                    Duration.of(20, ChronoUnit.MINUTES).toMillis()
+                },
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(10, ChronoUnit.HOURS),
+            dataSource = dataSource,
+            sakTilgangDao = daoModule.sakTilgangDao,
+        )
+    }
+
+    val doedsmeldingerReminderJob: DoedsmeldingReminderJob by lazy {
+        DoedsmeldingReminderJob(
+            doedshendelseReminderService = doedshendelseReminderService,
+            erLeader = { erLeader() },
+            initialDelay = Duration.of(4, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
+            dataSource = dataSource,
+            sakTilgangDao = daoModule.sakTilgangDao,
+            openingHours = env.requireEnvValue(JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 
@@ -195,47 +233,10 @@ class JobModule(
 
     val aktivitetspliktOppgaveUnntakUtloeperJob: AktivitetspliktOppgaveUnntakUtloeperJob by lazy {
         AktivitetspliktOppgaveUnntakUtloeperJob(
-            aktivitetspliktOppgaveUnntakUtloeperJobService,
-            { erLeader() },
+            aktivitetspliktOppgaveUnntakUtloeperJobService = aktivitetspliktOppgaveUnntakUtloeperJobService,
+            erLeader = { erLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(1, ChronoUnit.HOURS),
-        )
-    }
-
-    val doedsmeldingerJob: DoedsmeldingJob by lazy {
-        DoedsmeldingJob(
-            doedshendelseJobService,
-            { erLeader() },
-            if (isProd()) {
-                Duration.of(3, ChronoUnit.MINUTES).toMillis()
-            } else {
-                Duration.of(20, ChronoUnit.MINUTES).toMillis()
-            },
-            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(10, ChronoUnit.HOURS),
-            dataSource = dataSource,
-            sakTilgangDao = daoModule.sakTilgangDao,
-        )
-    }
-
-    val doedsmeldingerReminderJob: DoedsmeldingReminderJob by lazy {
-        DoedsmeldingReminderJob(
-            doedshendelseReminderService,
-            { erLeader() },
-            Duration.of(4, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
-            dataSource = dataSource,
-            sakTilgangDao = daoModule.sakTilgangDao,
-            openingHours = env.requireEnvValue(JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS).let { OpeningHours.of(it) },
-        )
-    }
-
-    val saksbehandlerJob: SaksbehandlerJob by lazy {
-        SaksbehandlerJob(
-            saksbehandlerJobService = saksbehandlerJobService,
-            { erLeader() },
-            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(20, ChronoUnit.MINUTES),
-            openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
         )
     }
 
@@ -252,8 +253,8 @@ class JobModule(
 
     val etteroppgjoerSvarfristUtloeptJob: EtteroppgjoerSvarfristUtloeptJob by lazy {
         EtteroppgjoerSvarfristUtloeptJob(
-            etteroppgjoerSvarfristUtloeptJobService,
-            { erLeader() },
+            etteroppgjoerSvarfristUtloeptJobService = etteroppgjoerSvarfristUtloeptJobService,
+            erLeader = { erLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(6, ChronoUnit.MINUTES),
             dataSource = dataSource,

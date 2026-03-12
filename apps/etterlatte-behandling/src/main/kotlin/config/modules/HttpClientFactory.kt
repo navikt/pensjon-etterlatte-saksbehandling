@@ -19,11 +19,11 @@ internal class HttpClientFactory(
             azureAppScope = scope,
         )
 
+    fun navAnsattKlient(): HttpClient = lagKlient(config.getString("navansatt.azure.scope"))
+
     fun pdlKlient(): HttpClient = lagKlient(config.getString("pdl.azure.scope"))
 
     fun skjermingKlient(): HttpClient = lagKlient(config.getString("skjerming.azure.scope"))
-
-    fun navAnsattKlient(): HttpClient = lagKlient(config.getString("navansatt.azure.scope"))
 
     fun klageKlient(): HttpClient = lagKlient(config.getString("klage.azure.scope"))
 

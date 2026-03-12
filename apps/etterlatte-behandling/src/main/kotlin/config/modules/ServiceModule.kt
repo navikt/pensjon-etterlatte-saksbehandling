@@ -52,6 +52,16 @@ class ServiceModule(
     private val rapid: KafkaProdusent<String, String>,
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
+    val kodeverkService by lazy { KodeverkService(klientModule.kodeverkKlient) }
+    val tilgangService by lazy { TilgangServiceSjekkerImpl(daoModule.sakTilgangDao) }
+    val nyAldersovergangService by lazy { AldersovergangService(daoModule.aldersovergangDao) }
+    val gyldighetsproevingService by lazy { GyldighetsproevingServiceImpl(daoModule.behandlingDao) }
+    val behandlingMedBrevService by lazy { BehandlingMedBrevService(daoModule.behandlingMedBrevDao) }
+
+    val sakTilgang: SakTilgang by lazy {
+        SakTilgangImpl(skrivDao = daoModule.sakSkrivDao, lesDao = daoModule.sakLesDao)
+    }
+
     val brukerService: BrukerService by lazy {
         BrukerServiceImpl(pdltjenesterKlient = klientModule.pdlTjenesterKlient, norg2Klient = klientModule.norg2Klient)
     }
@@ -61,6 +71,45 @@ class ServiceModule(
             dao = daoModule.saksbehandlerInfoDao,
             navAnsattKlient = klientModule.navAnsattKlient,
             entraProxyKlient = klientModule.entraProxyKlient,
+        )
+    }
+
+    val oppdaterTilgangService: OppdaterTilgangService by lazy {
+        OppdaterTilgangService(
+            skjermingKlient = klientModule.skjermingKlient,
+            pdltjenesterKlient = klientModule.pdlTjenesterKlient,
+            brukerService = brukerService,
+            oppgaveService = oppgaveService,
+            sakSkrivDao = daoModule.sakSkrivDao,
+            sakTilgang = sakTilgang,
+            sakLesDao = daoModule.sakLesDao,
+            featureToggleService = featureToggleService,
+        )
+    }
+
+    val sakService: SakServiceImpl by lazy {
+        SakServiceImpl(
+            skrivDao = daoModule.sakSkrivDao,
+            lesDao = daoModule.sakLesDao,
+            endringerDao = daoModule.sakendringerDao,
+            skjermingKlient = klientModule.skjermingKlient,
+            brukerService = brukerService,
+            grunnlagService = grunnlagService,
+            krrKlient = klientModule.krrKlient,
+            pdltjenesterKlient = klientModule.pdlTjenesterKlient,
+            featureToggle = featureToggleService,
+            tilgangsService = oppdaterTilgangService,
+            sakTilgang = sakTilgang,
+            aldersovergangService = nyAldersovergangService,
+        )
+    }
+
+    val grunnlagService: GrunnlagService by lazy {
+        grunnlagServiceOverride ?: GrunnlagServiceImpl(
+            pdltjenesterKlient = klientModule.pdlTjenesterKlient,
+            opplysningDao = daoModule.opplysningDao,
+            grunnlagHenter = GrunnlagHenter(klientModule.pdlTjenesterKlient),
+            oppdaterTilgangService = oppdaterTilgangService,
         )
     }
 
@@ -82,157 +131,11 @@ class ServiceModule(
         )
     }
 
-    val nyAldersovergangService by lazy {
-        AldersovergangService(daoModule.aldersovergangDao)
-    }
-
-    val sakTilgang: SakTilgang by lazy {
-        SakTilgangImpl(skrivDao = daoModule.sakSkrivDao, lesDao = daoModule.sakLesDao)
-    }
-
-    val oppdaterTilgangService: OppdaterTilgangService by lazy {
-        OppdaterTilgangService(
-            skjermingKlient = klientModule.skjermingKlient,
-            pdltjenesterKlient = klientModule.pdlTjenesterKlient,
-            brukerService = brukerService,
-            oppgaveService = oppgaveService,
-            sakSkrivDao = daoModule.sakSkrivDao,
-            sakTilgang = sakTilgang,
-            sakLesDao = daoModule.sakLesDao,
-            featureToggleService = featureToggleService,
-        )
-    }
-
-    val grunnlagService: GrunnlagService by lazy {
-        grunnlagServiceOverride ?: GrunnlagServiceImpl(
-            pdltjenesterKlient = klientModule.pdlTjenesterKlient,
-            opplysningDao = daoModule.opplysningDao,
-            grunnlagHenter = GrunnlagHenter(klientModule.pdlTjenesterKlient),
-            oppdaterTilgangService = oppdaterTilgangService,
-        )
-    }
-
-    val kodeverkService by lazy { KodeverkService(klientModule.kodeverkKlient) }
-
-    val tilgangService by lazy { TilgangServiceSjekkerImpl(daoModule.sakTilgangDao) }
-
-    val sakService: SakServiceImpl by lazy {
-        SakServiceImpl(
-            skrivDao = daoModule.sakSkrivDao,
-            lesDao = daoModule.sakLesDao,
-            endringerDao = daoModule.sakendringerDao,
-            skjermingKlient = klientModule.skjermingKlient,
-            brukerService = brukerService,
-            grunnlagService = grunnlagService,
-            krrKlient = klientModule.krrKlient,
-            pdltjenesterKlient = klientModule.pdlTjenesterKlient,
-            featureToggle = featureToggleService,
-            tilgangsService = oppdaterTilgangService,
-            sakTilgang = sakTilgang,
-            aldersovergangService = nyAldersovergangService,
-        )
-    }
-
-    val doedshendelseService by lazy {
-        DoedshendelseService(
-            doedshendelseDao = daoModule.doedshendelseDao,
-            pdlTjenesterKlient = klientModule.pdlTjenesterKlient,
-            gosysOppgaveKlient = klientModule.gosysOppgaveKlient,
-            ukjentBeroertDao = daoModule.ukjentBeroertDao,
-        )
-    }
-
-    val etteroppgjoerOppgaveService by lazy {
-        EtteroppgjoerOppgaveService(oppgaveService)
-    }
-
-    val etteroppgjoerHendelseService by lazy {
-        EtteroppgjoerForbehandlingHendelseService(
-            rapidPubliserer = rapid,
-            hendelseDao = daoModule.hendelseDao,
-            etteroppgjoerForbehandlingDao = daoModule.etteroppgjoerForbehandlingDao,
-        )
-    }
-
-    val etteroppgjoerService: EtteroppgjoerService by lazy {
-        EtteroppgjoerService(
-            dao = daoModule.etteroppgjoerDao,
-            vedtakKlient = klientModule.vedtakKlient,
-            behandlingService = behandlingService,
-            beregningKlient = klientModule.beregningKlient,
-            sigrunKlient = klientModule.sigrunKlient,
-            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
-            hendelseDao = daoModule.hendelseDao,
-        )
-    }
-
-    val etteroppgjoerDataService by lazy {
-        EtteroppgjoerDataService(
-            behandlingService = behandlingService,
-            featureToggleService = featureToggleService,
-            vedtakKlient = klientModule.vedtakKlient,
-            beregningKlient = klientModule.beregningKlient,
-        )
-    }
-
-    private val inntektskomponentService by lazy {
-        InntektskomponentService(
-            klient = klientModule.inntektskomponentKlient,
-            featureToggleService = featureToggleService,
-        )
-    }
-
-    private val pensjonsgivendeInntektService by lazy {
-        PensjonsgivendeInntektService(sigrunKlient = klientModule.sigrunKlient)
-    }
-
-    val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService by lazy {
-        EtteroppgjoerForbehandlingService(
-            dao = daoModule.etteroppgjoerForbehandlingDao,
-            etteroppgjoerService = etteroppgjoerService,
-            sakDao = daoModule.sakLesDao,
-            oppgaveService = oppgaveService,
-            inntektskomponentService = inntektskomponentService,
-            pensjonsgivendeInntektService = pensjonsgivendeInntektService,
-            hendelserService = etteroppgjoerHendelseService,
-            beregningKlient = klientModule.beregningKlient,
-            behandlingService = behandlingService,
-            vedtakKlient = klientModule.vedtakKlient,
-            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
-            etteroppgjoerDataService = etteroppgjoerDataService,
-        )
-    }
-
     val kommerBarnetTilGodeService by lazy {
         KommerBarnetTilGodeService(
             kommerBarnetTilGodeDao = daoModule.kommerBarnetTilGodeDao,
             behandlingDao = daoModule.behandlingDao,
         )
-    }
-
-    val aktivitetspliktKopierService by lazy {
-        AktivitetspliktKopierService(
-            aktivitetspliktAktivitetsgradDao = daoModule.aktivitetspliktAktivitetsgradDao,
-            aktivitetspliktUnntakDao = daoModule.aktivitetspliktUnntakDao,
-        )
-    }
-
-    val revurderingService: RevurderingService by lazy {
-        RevurderingService(
-            oppgaveService = oppgaveService,
-            grunnlagService = grunnlagService,
-            behandlingHendelser = kafkaModule.behandlingsHendelser,
-            behandlingDao = daoModule.behandlingDao,
-            hendelseDao = daoModule.hendelseDao,
-            kommerBarnetTilGodeService = kommerBarnetTilGodeService,
-            revurderingDao = daoModule.revurderingDao,
-            aktivitetspliktDao = daoModule.aktivitetspliktDao,
-            aktivitetspliktKopierService = aktivitetspliktKopierService,
-        )
-    }
-
-    val gyldighetsproevingService by lazy {
-        GyldighetsproevingServiceImpl(behandlingDao = daoModule.behandlingDao)
     }
 
     val behandlingService: BehandlingServiceImpl by lazy {
@@ -262,7 +165,6 @@ class ServiceModule(
     }
 
     val aldersovergangService by lazy {
-        // TOOD: Se på denne importen.
         no.nav.etterlatte.vilkaarsvurdering.service
             .AldersovergangService(vilkaarsvurderingService)
     }
@@ -278,15 +180,40 @@ class ServiceModule(
         )
     }
 
-    val behandlingMedBrevService by lazy {
-        BehandlingMedBrevService(daoModule.behandlingMedBrevDao)
-    }
-
     val sjekklisteService by lazy {
         SjekklisteService(
             dao = daoModule.sjekklisteDao,
             behandlingService = behandlingService,
             oppgaveService = oppgaveService,
+        )
+    }
+
+    val omregningService by lazy {
+        OmregningService(
+            behandlingService = behandlingService,
+            omregningDao = daoModule.omregningDao,
+            oppgaveService = oppgaveService,
+        )
+    }
+
+    val aktivitetspliktKopierService by lazy {
+        AktivitetspliktKopierService(
+            aktivitetspliktAktivitetsgradDao = daoModule.aktivitetspliktAktivitetsgradDao,
+            aktivitetspliktUnntakDao = daoModule.aktivitetspliktUnntakDao,
+        )
+    }
+
+    val revurderingService: RevurderingService by lazy {
+        RevurderingService(
+            oppgaveService = oppgaveService,
+            grunnlagService = grunnlagService,
+            behandlingHendelser = kafkaModule.behandlingsHendelser,
+            behandlingDao = daoModule.behandlingDao,
+            hendelseDao = daoModule.hendelseDao,
+            kommerBarnetTilGodeService = kommerBarnetTilGodeService,
+            revurderingDao = daoModule.revurderingDao,
+            aktivitetspliktDao = daoModule.aktivitetspliktDao,
+            aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
     }
 
@@ -325,11 +252,12 @@ class ServiceModule(
         )
     }
 
-    val omregningService by lazy {
-        OmregningService(
-            behandlingService = behandlingService,
-            omregningDao = daoModule.omregningDao,
-            oppgaveService = oppgaveService,
+    val doedshendelseService by lazy {
+        DoedshendelseService(
+            doedshendelseDao = daoModule.doedshendelseDao,
+            pdlTjenesterKlient = klientModule.pdlTjenesterKlient,
+            gosysOppgaveKlient = klientModule.gosysOppgaveKlient,
+            ukjentBeroertDao = daoModule.ukjentBeroertDao,
         )
     }
 
@@ -348,6 +276,65 @@ class ServiceModule(
             doedshendelseService = doedshendelseService,
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
             tilgangsService = oppdaterTilgangService,
+        )
+    }
+
+    val etteroppgjoerOppgaveService by lazy { EtteroppgjoerOppgaveService(oppgaveService) }
+
+    private val pensjonsgivendeInntektService by lazy {
+        PensjonsgivendeInntektService(sigrunKlient = klientModule.sigrunKlient)
+    }
+
+    private val inntektskomponentService by lazy {
+        InntektskomponentService(
+            klient = klientModule.inntektskomponentKlient,
+            featureToggleService = featureToggleService,
+        )
+    }
+
+    val etteroppgjoerHendelseService by lazy {
+        EtteroppgjoerForbehandlingHendelseService(
+            rapidPubliserer = rapid,
+            hendelseDao = daoModule.hendelseDao,
+            etteroppgjoerForbehandlingDao = daoModule.etteroppgjoerForbehandlingDao,
+        )
+    }
+
+    val etteroppgjoerDataService by lazy {
+        EtteroppgjoerDataService(
+            behandlingService = behandlingService,
+            featureToggleService = featureToggleService,
+            vedtakKlient = klientModule.vedtakKlient,
+            beregningKlient = klientModule.beregningKlient,
+        )
+    }
+
+    val etteroppgjoerService: EtteroppgjoerService by lazy {
+        EtteroppgjoerService(
+            dao = daoModule.etteroppgjoerDao,
+            vedtakKlient = klientModule.vedtakKlient,
+            behandlingService = behandlingService,
+            beregningKlient = klientModule.beregningKlient,
+            sigrunKlient = klientModule.sigrunKlient,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
+            hendelseDao = daoModule.hendelseDao,
+        )
+    }
+
+    val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService by lazy {
+        EtteroppgjoerForbehandlingService(
+            dao = daoModule.etteroppgjoerForbehandlingDao,
+            etteroppgjoerService = etteroppgjoerService,
+            sakDao = daoModule.sakLesDao,
+            oppgaveService = oppgaveService,
+            inntektskomponentService = inntektskomponentService,
+            pensjonsgivendeInntektService = pensjonsgivendeInntektService,
+            hendelserService = etteroppgjoerHendelseService,
+            beregningKlient = klientModule.beregningKlient,
+            behandlingService = behandlingService,
+            vedtakKlient = klientModule.vedtakKlient,
+            etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
+            etteroppgjoerDataService = etteroppgjoerDataService,
         )
     }
 

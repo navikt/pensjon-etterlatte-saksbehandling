@@ -46,13 +46,18 @@ class DaoModule(
     private val autoClosingDatabase: ConnectionAutoclosing,
     private val dataSource: DataSource,
 ) {
+    val sakLesDao by lazy { SakLesDao(autoClosingDatabase) }
+    val sakendringerDao by lazy { SakendringerDao(autoClosingDatabase) }
+    val sakSkrivDao by lazy { SakSkrivDao(sakendringerDao) }
+    val sakTilgangDao by lazy { SakTilgangDao(dataSource) }
+
     val hendelseDao by lazy { HendelseDao(autoClosingDatabase) }
-    val kommerBarnetTilGodeDao by lazy { KommerBarnetTilGodeDao(autoClosingDatabase) }
-    val aktivitetspliktDao by lazy { AktivitetspliktDao(autoClosingDatabase) }
-    val aktivitetspliktAktivitetsgradDao by lazy { AktivitetspliktAktivitetsgradDao(autoClosingDatabase) }
-    val aktivitetspliktUnntakDao by lazy { AktivitetspliktUnntakDao(autoClosingDatabase) }
-    val sjekklisteDao by lazy { SjekklisteDao(autoClosingDatabase) }
     val revurderingDao by lazy { RevurderingDao(autoClosingDatabase) }
+    val kommerBarnetTilGodeDao by lazy { KommerBarnetTilGodeDao(autoClosingDatabase) }
+    val behandlingInfoDao by lazy { BehandlingInfoDao(autoClosingDatabase) }
+    val generellbehandlingDao by lazy { GenerellBehandlingDao(autoClosingDatabase) }
+    val behandlingMedBrevDao by lazy { BehandlingMedBrevDao(autoClosingDatabase) }
+    val sjekklisteDao by lazy { SjekklisteDao(autoClosingDatabase) }
 
     val behandlingDao by lazy {
         BehandlingDao(
@@ -62,44 +67,38 @@ class DaoModule(
         )
     }
 
-    val generellbehandlingDao by lazy { GenerellBehandlingDao(autoClosingDatabase) }
-    val behandlingMedBrevDao by lazy { BehandlingMedBrevDao(autoClosingDatabase) }
-
     private val oppgaveDaoNy by lazy { OppgaveDaoImpl(autoClosingDatabase) }
     val oppgaveDaoEndringer by lazy { OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase) }
     val oppgaveKommentarDao by lazy { OppgaveKommentarDaoImpl(autoClosingDatabase) }
 
-    val sakLesDao by lazy { SakLesDao(autoClosingDatabase) }
-    val sakendringerDao by lazy { SakendringerDao(autoClosingDatabase) }
-    val sakSkrivDao by lazy { SakSkrivDao(sakendringerDao) }
-    val sakTilgangDao by lazy { SakTilgangDao(dataSource) }
-
+    val opplysningDao by lazy { OpplysningDao(dataSource) }
+    val aldersovergangDao by lazy { AldersovergangDao(dataSource) }
     val grunnlagsendringshendelseDao by lazy { GrunnlagsendringshendelseDao(autoClosingDatabase) }
-    val institusjonsoppholdDao by lazy { InstitusjonsoppholdDao(autoClosingDatabase) }
+    val doedshendelseDao by lazy { DoedshendelseDao(autoClosingDatabase) }
+    val ukjentBeroertDao by lazy { UkjentBeroertDao(autoClosingDatabase) }
 
-    val oppgaveMetrikkerDao by lazy { OppgaveMetrikkerDao(dataSource) }
-    val behandlingMetrikkerDao by lazy { BehandlingMetrikkerDao(dataSource) }
-    val gjenopprettingMetrikkerDao by lazy { GjenopprettingMetrikkerDao(dataSource) }
+    val aktivitetspliktDao by lazy { AktivitetspliktDao(autoClosingDatabase) }
+    val aktivitetspliktAktivitetsgradDao by lazy { AktivitetspliktAktivitetsgradDao(autoClosingDatabase) }
+    val aktivitetspliktUnntakDao by lazy { AktivitetspliktUnntakDao(autoClosingDatabase) }
+    val aktivitetspliktBrevDao by lazy { AktivitetspliktBrevDao(autoClosingDatabase) }
+
+    val vilkaarsvurderingDao by lazy { VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao()) }
 
     val klageDao by lazy { KlageDaoImpl(autoClosingDatabase) }
     val tilbakekrevingDao by lazy { TilbakekrevingDao(autoClosingDatabase) }
 
+    val etteroppgjoerDao by lazy { EtteroppgjoerDao(autoClosingDatabase) }
     val etteroppgjoerForbehandlingDao by lazy { EtteroppgjoerForbehandlingDao(autoClosingDatabase) }
     val skatteoppgjoerHendelserDao by lazy { SkatteoppgjoerHendelserDao(autoClosingDatabase) }
-    val etteroppgjoerDao by lazy { EtteroppgjoerDao(autoClosingDatabase) }
 
-    val behandlingInfoDao by lazy { BehandlingInfoDao(autoClosingDatabase) }
+    val institusjonsoppholdDao by lazy { InstitusjonsoppholdDao(autoClosingDatabase) }
     val bosattUtlandDao by lazy { BosattUtlandDao(autoClosingDatabase) }
-    val saksbehandlerInfoDao by lazy { SaksbehandlerInfoDao(autoClosingDatabase) }
-    val aktivitetspliktBrevDao by lazy { AktivitetspliktBrevDao(autoClosingDatabase) }
-    val doedshendelseDao by lazy { DoedshendelseDao(autoClosingDatabase) }
     val omregningDao by lazy { OmregningDao(autoClosingDatabase) }
+    val saksbehandlerInfoDao by lazy { SaksbehandlerInfoDao(autoClosingDatabase) }
 
-    val vilkaarsvurderingDao by lazy { VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao()) }
-    val ukjentBeroertDao by lazy { UkjentBeroertDao(autoClosingDatabase) }
-
-    val aldersovergangDao by lazy { AldersovergangDao(dataSource) }
-    val opplysningDao by lazy { OpplysningDao(dataSource) }
+    val oppgaveMetrikkerDao by lazy { OppgaveMetrikkerDao(dataSource) }
+    val behandlingMetrikkerDao by lazy { BehandlingMetrikkerDao(dataSource) }
+    val gjenopprettingMetrikkerDao by lazy { GjenopprettingMetrikkerDao(dataSource) }
 
     val sjekkAdressebeskyttelseJobDao by lazy { SjekkAdressebeskyttelseJobDao(autoClosingDatabase) }
 }

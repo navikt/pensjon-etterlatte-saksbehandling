@@ -332,7 +332,7 @@ internal class ApplicationContext(
     val trygdetidKlient: TrygdetidKlient = TrygdetidKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     // TODO: Denne trenger egentlig ikke å hete "default" men vi fikser senere.
-    val vedtakKlientDefault: VedtakKlient = VedtakKlientImpl(config, httpClient()),
+    val vedtakKlientOverride: VedtakKlient? = null,
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val brevKlient: BrevKlient = BrevKlientImpl(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
@@ -376,7 +376,7 @@ internal class ApplicationContext(
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
     // TODO: Dette skal komme fra yaml, wip.
-    private val brukNyVedtakKlientInternal: Boolean = false
+    private val brukNyVedtakKlientInternal: Boolean = true
 
     val httpPort by lazy { env.getOrDefault(HTTP_PORT, "8080").toInt() }
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -1063,15 +1063,15 @@ internal class ApplicationContext(
     }
 
     val vedtakKlient: VedtakKlient by lazy {
-        if (brukNyVedtakKlientInternal) {
+        vedtakKlientOverride ?: if (brukNyVedtakKlientInternal) {
             VedtakInternalService(
                 vedtakTilbakekrevingService = vedtakTilbakekrevingService,
                 vedtakKlageService = vedtakKlageService,
-                vedtakBehandlingService = vedtakBehandlingService,
+                vedtakBehandlingService = { vedtakBehandlingService },
                 vedtaksvurderingService = vedtaksvurderingService,
             )
         } else {
-            vedtakKlientDefault
+            VedtakKlientImpl(config, httpClient())
         }
     }
 

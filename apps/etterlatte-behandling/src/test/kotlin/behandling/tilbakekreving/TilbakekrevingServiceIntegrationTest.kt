@@ -106,7 +106,6 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         tilbakekrevingDao = applicationContext.tilbakekrevingDao
         hendelseDao = applicationContext.hendelseDao
         oppgaveService = applicationContext.oppgaveService
-        vedtakKlient = applicationContext.vedtakKlient
     }
 
     @BeforeAll

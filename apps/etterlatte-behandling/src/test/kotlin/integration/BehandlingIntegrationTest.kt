@@ -109,7 +109,7 @@ abstract class BehandlingIntegrationTest {
                 leaderElectionHttpClient = leaderElection(),
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
-                vedtakKlientDefault = vedtakKlient ?: spyk(VedtakKlientTest()),
+                vedtakKlientOverride = vedtakKlient ?: spyk(VedtakKlientTest()),
                 beregningKlient = BeregningKlientTest(),
                 trygdetidKlient = TrygdetidKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),

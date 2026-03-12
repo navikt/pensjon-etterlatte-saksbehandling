@@ -28,7 +28,7 @@ import java.util.UUID
 class VedtakInternalService(
     private val vedtakTilbakekrevingService: VedtakTilbakekrevingService,
     private val vedtakKlageService: VedtakKlageService,
-    private val vedtakBehandlingService: VedtakBehandlingService,
+    private val vedtakBehandlingService: () -> VedtakBehandlingService,
     private val vedtaksvurderingService: VedtaksvurderingService,
 ) : VedtakKlient {
     private val logger = LoggerFactory.getLogger(VedtakInternalService::class.java)
@@ -137,7 +137,7 @@ class VedtakInternalService(
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO {
         logger.info("Sjekker om sak $sakId er løpende på $dato")
-        val loependeYtelse = vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(sakId, dato)
+        val loependeYtelse = vedtakBehandlingService.invoke().sjekkOmVedtakErLoependePaaDato(sakId, dato)
         return loependeYtelse.toDto()
     }
 
@@ -155,6 +155,7 @@ class VedtakInternalService(
     ): List<VedtakSammendragDto> {
         logger.info("Henter iverksatte vedtak for sak=$sakId")
         return vedtakBehandlingService
+            .invoke()
             .hentIverksatteVedtakISak(sakId)
             .map { it.toVedtakSammendragDto() }
     }

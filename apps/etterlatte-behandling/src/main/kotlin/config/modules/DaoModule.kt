@@ -55,7 +55,11 @@ class DaoModule(
     val revurderingDao by lazy { RevurderingDao(autoClosingDatabase) }
 
     val behandlingDao by lazy {
-        BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, autoClosingDatabase)
+        BehandlingDao(
+            kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
+            revurderingDao = revurderingDao,
+            connectionAutoclosing = autoClosingDatabase,
+        )
     }
 
     val generellbehandlingDao by lazy { GenerellBehandlingDao(autoClosingDatabase) }

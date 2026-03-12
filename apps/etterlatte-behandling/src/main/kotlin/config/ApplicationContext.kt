@@ -175,10 +175,10 @@ internal class ApplicationContext(
             rapid = rapid,
         )
 
+    // Dao
     val hendelseDao get() = daoModule.hendelseDao
     val kommerBarnetTilGodeDao get() = daoModule.kommerBarnetTilGodeDao
     val aktivitetspliktDao get() = daoModule.aktivitetspliktDao
-    val aktivitetspliktAktivitetsgradDao get() = daoModule.aktivitetspliktAktivitetsgradDao
     val revurderingDao get() = daoModule.revurderingDao
     val behandlingDao get() = daoModule.behandlingDao
     val sakLesDao get() = daoModule.sakLesDao
@@ -191,19 +191,12 @@ internal class ApplicationContext(
     val sakTilgangDao get() = daoModule.sakTilgangDao
     val opplysningDao get() = daoModule.opplysningDao
 
-    // Klienter
-    val navAnsattKlient get() = klientModule.navAnsattKlient
+    // Klient
     val norg2Klient get() = klientModule.norg2Klient
-    val leaderElectionHttpClient get() = klientModule.leaderElectionHttpClient
     val beregningKlient get() = klientModule.beregningKlient
-    val trygdetidKlient get() = klientModule.trygdetidKlient
-    val gosysOppgaveKlient get() = klientModule.gosysOppgaveKlient
     val vedtakKlient get() = klientModule.vedtakKlient
     val brevApiKlient get() = klientModule.brevApiKlient
     val brevKlient get() = klientModule.brevKlient
-    val klageHttpClient get() = klientModule.klageHttpClient
-    val tilbakekrevingKlient get() = klientModule.tilbakekrevingKlient
-    val pesysKlient get() = klientModule.pesysKlient
     val krrKlient get() = klientModule.krrKlient
     val entraProxyKlient get() = klientModule.entraProxyKlient
     val pdlTjenesterKlient get() = klientModule.pdlTjenesterKlient
@@ -245,6 +238,7 @@ internal class ApplicationContext(
     val grunnlagsendringshendelseService get() = serviceModule.grunnlagsendringshendelseService
     val behandlingsStatusService get() = serviceModule.behandlingsStatusService
 
+    // High-level services
     val behandlingInfoService get() = highLevelServiceModule.behandlingInfoService
     val bosattUtlandService get() = highLevelServiceModule.bosattUtlandService
     val klageService get() = highLevelServiceModule.klageService
@@ -262,10 +256,6 @@ internal class ApplicationContext(
     val behandlingsHendelser get() = kafkaModule.behandlingsHendelser
 
     val lesSkatteoppgjoerHendelserJobService get() = jobModule.lesSkatteoppgjoerHendelserJobService
-    val oppdaterSkatteoppgjoerIkkeMottattJobService get() = jobModule.oppdaterSkatteoppgjoerIkkeMottattJobService
-    val etteroppgjoerSvarfristUtloeptJobService get() = jobModule.etteroppgjoerSvarfristUtloeptJobService
-    val sjekkAdressebeskyttelseJobService get() = jobModule.sjekkAdressebeskyttelseJobService
-    val sjekkAdressebeskyttelseJobDao get() = daoModule.sjekkAdressebeskyttelseJobDao
     val aarligInntektsjusteringJobbService get() = jobModule.aarligInntektsjusteringJobbService
 
     val inntektsjusteringSelvbetjeningService by lazy {

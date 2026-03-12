@@ -86,31 +86,31 @@ class KlientModule(
     }
 
     val norg2Klient: Norg2Klient by lazy {
-        norg2KlientOverride ?: Norg2KlientImpl(standardHttpClient, env.requireEnvValue(NORG2_URL))
+        norg2KlientOverride ?: Norg2KlientImpl(client = standardHttpClient, url = env.requireEnvValue(NORG2_URL))
     }
 
     val beregningKlient: BeregningKlient by lazy {
-        beregningKlientOverride ?: BeregningKlientImpl(config, standardHttpClient)
+        beregningKlientOverride ?: BeregningKlientImpl(config = config, httpClient = standardHttpClient)
     }
 
     val trygdetidKlient: TrygdetidKlient by lazy {
-        trygdetidKlientOverride ?: TrygdetidKlientImpl(config, standardHttpClient)
+        trygdetidKlientOverride ?: TrygdetidKlientImpl(config = config, httpClient = standardHttpClient)
     }
 
     val gosysOppgaveKlient: GosysOppgaveKlient by lazy {
-        gosysOppgaveKlientOverride ?: GosysOppgaveKlientImpl(config, standardHttpClient)
+        gosysOppgaveKlientOverride ?: GosysOppgaveKlientImpl(config = config, httpClient = standardHttpClient)
     }
 
     val vedtakKlient: VedtakKlient by lazy {
-        vedtakKlientOverride ?: VedtakKlientImpl(config, standardHttpClient)
+        vedtakKlientOverride ?: VedtakKlientImpl(config = config, httpClient = standardHttpClient)
     }
 
     val brevApiKlient: BrevApiKlient by lazy {
-        brevApiKlientOverride ?: BrevApiKlientObo(config, httpClientForventSuksess)
+        brevApiKlientOverride ?: BrevApiKlientObo(config = config, client = httpClientForventSuksess)
     }
 
     val brevKlient: BrevKlient by lazy {
-        brevKlientOverride ?: BrevKlientImpl(config, httpClientForventSuksess)
+        brevKlientOverride ?: BrevKlientImpl(config = config, client = httpClientForventSuksess)
     }
 
     val klageHttpClient: HttpClient by lazy {
@@ -118,57 +118,66 @@ class KlientModule(
     }
 
     val klageKlient: KlageKlientImpl by lazy {
-        KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
+        KlageKlientImpl(client = klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
     }
 
     val tilbakekrevingKlient: TilbakekrevingKlient by lazy {
         tilbakekrevingKlientOverride ?: TilbakekrevingKlientImpl(
-            httpClientFactory.tilbakekrevingKlient(),
+            client = httpClientFactory.tilbakekrevingKlient(),
             url = env.requireEnvValue(ETTERLATTE_TILBAKEKREVING_URL),
         )
     }
 
     val pesysKlient: PesysKlient by lazy {
-        pesysKlientOverride ?: PesysKlientImpl(config, standardHttpClient)
+        pesysKlientOverride ?: PesysKlientImpl(config = config, httpClient = standardHttpClient)
     }
 
     val krrKlient: KrrKlient by lazy {
-        krrKlientOverride ?: KrrKlientImpl(httpClientFactory.krrKlient(), url = config.getString("krr.url"))
+        krrKlientOverride ?: KrrKlientImpl(client = httpClientFactory.krrKlient(), url = config.getString("krr.url"))
     }
 
     val entraProxyKlient: EntraProxyKlient by lazy {
-        entraProxyKlientOverride ?: EntraProxyKlientImpl(httpClientFactory.entraProxyKlient(), url = config.getString("entraProxy.url"))
+        entraProxyKlientOverride ?: EntraProxyKlientImpl(
+            client = httpClientFactory.entraProxyKlient(),
+            url = config.getString("entraProxy.url"),
+        )
     }
 
     val pdlTjenesterKlient: PdlTjenesterKlient by lazy {
-        pdlTjenesterKlientOverride ?: PdlTjenesterKlientImpl(config, httpClientFactory.pdlKlient())
+        pdlTjenesterKlientOverride ?: PdlTjenesterKlientImpl(config = config, client = httpClientFactory.pdlKlient())
     }
 
     val kodeverkKlient: KodeverkKlient by lazy {
-        kodeverkKlientOverride ?: KodeverkKlientImpl(config, standardHttpClient)
+        kodeverkKlientOverride ?: KodeverkKlientImpl(config = config, httpKlient = standardHttpClient)
     }
 
     val skjermingKlient: SkjermingKlient by lazy {
-        skjermingKlientOverride ?: SkjermingKlientImpl(httpClientFactory.skjermingKlient(), env.requireEnvValue(SKJERMING_URL))
+        skjermingKlientOverride ?: SkjermingKlientImpl(
+            httpClient = httpClientFactory.skjermingKlient(),
+            url = env.requireEnvValue(SKJERMING_URL),
+        )
     }
 
     val inntektskomponentKlient: InntektskomponentKlient by lazy {
         inntektskomponentKlientOverride ?: InntektskomponentKlientImpl(
-            httpClientFactory.inntektskomponentKlient(),
-            config.getString("inntektskomponenten.url"),
+            httpClient = httpClientFactory.inntektskomponentKlient(),
+            url = config.getString("inntektskomponenten.url"),
         )
     }
 
     val sigrunKlient: SigrunKlient by lazy {
         sigrunKlientOverride ?: SigrunKlientImpl(
-            httpClientFactory.sigrunKlient(),
-            config.getString("sigrun.url"),
-            featureToggleService,
+            httpClient = httpClientFactory.sigrunKlient(),
+            url = config.getString("sigrun.url"),
+            featureToggleService = featureToggleService,
         )
     }
 
     val arbeidOgInntektKlient: ArbeidOgInntektKlient by lazy {
-        arbeidOgInntektKlientOverride ?: ArbeidOgInntektKlient(standardHttpClient, config.getString("arbeidOgInntekt.url"))
+        arbeidOgInntektKlientOverride ?: ArbeidOgInntektKlient(
+            client = standardHttpClient,
+            url = config.getString("arbeidOgInntekt.url"),
+        )
     }
 
     val leaderElectionHttpClient: HttpClient by lazy {

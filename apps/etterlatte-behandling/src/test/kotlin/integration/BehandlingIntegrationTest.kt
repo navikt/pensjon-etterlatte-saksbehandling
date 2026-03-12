@@ -98,6 +98,8 @@ abstract class BehandlingIntegrationTest {
                             "vedtak.resource.url" to "http://localhost",
                             "krr.url" to "http://localhost",
                             "arbeidOgInntekt.url" to "http://localhost",
+                            "azure.app.client.id" to "test-client-id",
+                            "azure.app.jwk" to "test-jwk",
                             "azure.app.well.known.url" to "wellKnownUrl",
                             "brev-api.resource.url" to "http://localhost",
                         ),

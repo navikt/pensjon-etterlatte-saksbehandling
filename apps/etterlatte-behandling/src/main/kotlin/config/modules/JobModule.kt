@@ -53,8 +53,6 @@ class JobModule(
 
     private fun erLeader(): Boolean = leaderElectionKlient.isLeader()
 
-    // === Job Services ===
-
     private val saksbehandlerJobService by lazy {
         SaksbehandlerJobService(
             daoModule.saksbehandlerInfoDao,

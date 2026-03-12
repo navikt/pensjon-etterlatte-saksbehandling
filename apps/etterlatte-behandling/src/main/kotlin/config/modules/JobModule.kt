@@ -43,7 +43,6 @@ class JobModule(
     private val klientModule: KlientModule,
     private val kafkaModule: KafkaModule,
     private val serviceModule: ServiceModule,
-    private val highLevelServiceModule: HighLevelServiceModule,
     private val featureToggleService: FeatureToggleService,
     private val rapid: KafkaProdusent<String, String>,
 ) {

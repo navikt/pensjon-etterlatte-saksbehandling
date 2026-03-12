@@ -102,7 +102,6 @@ internal class ApplicationContext(
             klientModule = klientModule,
             kafkaModule = kafkaModule,
             serviceModule = serviceModule,
-            highLevelServiceModule = highLevelServiceModule,
             featureToggleService = featureToggleService,
             rapid = rapid,
         )

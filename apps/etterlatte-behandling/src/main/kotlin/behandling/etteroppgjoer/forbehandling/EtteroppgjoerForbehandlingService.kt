@@ -395,7 +395,7 @@ class EtteroppgjoerForbehandlingService(
                     dao.lagreForbehandling(it)
                     behandlingService
                         .hentBehandlingerForSak(it.sak.id)
-                        .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id.toString() }
+                        .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id }
                         ?.let { revurdering -> behandlingService.settBeregnet(revurdering.id, brukerTokenInfo) }
                 }
 

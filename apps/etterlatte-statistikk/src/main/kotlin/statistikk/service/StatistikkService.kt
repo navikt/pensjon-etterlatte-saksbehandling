@@ -446,7 +446,7 @@ class StatistikkService(
             revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
             vedtaksloesning = statistikkBehandling.kilde,
             pesysId = statistikkBehandling.pesysId,
-            relatertTil = statistikkBehandling.relatertBehandlingId,
+            relatertTil = statistikkBehandling.relatertBehandlingId.toString(),
         )
     }
 

@@ -103,7 +103,7 @@ class RevurderingDao(
             vedtaksloesning = rs.getString("vedtaksloesning").let { Vedtaksloesning.valueOf(it) },
             revurderingInfo = revurderingInfo,
             begrunnelse = rs.getString("begrunnelse"),
-            relatertBehandlingId = rs.getString("relatert_behandling"),
+            relatertBehandlingId = rs.getString("relatert_behandling")?.let { UUID.fromString(it) },
             sendeBrev = rs.getBoolean("sende_brev"),
             opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
             soeknadMottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")?.toLocalDatetimeUTC(),

@@ -112,7 +112,7 @@ class EtteroppgjoerRevurderingBrevService(
                 behandlingService.hentBehandling(behandlingId) ?: throw InternfeilException("Fant ikke behandlingId=$behandlingId")
             val avkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
             val sisteUtbetaltBeloep = avkorting.perioder.maxBy { it.periode.fom }.ytelseEtterAvkorting
-            krevIkkeNull(behandling.relatertBehandlingId){"Behandling $behandlingId mangler forbehandlingId"}
+            krevIkkeNull(behandling.relatertBehandlingId) { "Behandling $behandlingId mangler forbehandlingId" }
 
             val detaljertForbehandling =
                 etteroppgjoerForbehandlingService.hentDetaljertForbehandling(

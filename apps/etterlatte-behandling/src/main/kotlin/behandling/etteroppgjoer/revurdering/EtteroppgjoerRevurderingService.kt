@@ -176,9 +176,9 @@ class EtteroppgjoerRevurderingService(
 
     private fun hentBehandling(behandlingId: UUID): Behandling =
         (
-                behandlingService.hentBehandling(behandlingId)
-                    ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
-                )
+            behandlingService.hentBehandling(behandlingId)
+                ?: throw IkkeFunnetException("INGEN_BEHANDLING", "Behandling med id=$behandlingId finnes ikke")
+        )
 
     private fun hentForbehandlingForRevurdering(behandling: Behandling): EtteroppgjoerForbehandling {
         val forbehandlingId =
@@ -201,7 +201,7 @@ class EtteroppgjoerRevurderingService(
             ?: throw IkkeFunnetException(
                 "MANGLER_BEREGNET_RESULTAT",
                 "Forbehandling med id=${forbehandling.id} til revurdering med id=$behandlingId har " +
-                        "ikke et beregnet resultat for etteroppgjøret.",
+                    "ikke et beregnet resultat for etteroppgjøret.",
             )
     }
 

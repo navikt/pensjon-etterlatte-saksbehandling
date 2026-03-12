@@ -30,6 +30,7 @@ import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
+import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbetjeningService
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -347,6 +348,17 @@ class ServiceModule(
             doedshendelseService = doedshendelseService,
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
             tilgangsService = oppdaterTilgangService,
+        )
+    }
+
+    val inntektsjusteringSelvbetjeningService by lazy {
+        InntektsjusteringSelvbetjeningService(
+            oppgaveService = oppgaveService,
+            behandlingService = behandlingService,
+            vedtakKlient = klientModule.vedtakKlient,
+            rapid = rapid,
+            featureToggleService = featureToggleService,
+            beregningKlient = klientModule.beregningKlient,
         )
     }
 

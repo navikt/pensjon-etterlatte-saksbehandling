@@ -51,7 +51,6 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 class KlientModule(
     private val config: Config,
     private val env: Miljoevariabler,
-    private val httpClientFactory: HttpClientFactory,
     private val featureToggleService: FeatureToggleService,
     // Test overrides
     navAnsattKlientOverride: NavAnsattKlient? = null,
@@ -75,6 +74,7 @@ class KlientModule(
     sigrunKlientOverride: SigrunKlient? = null,
     arbeidOgInntektKlientOverride: ArbeidOgInntektKlient? = null,
 ) {
+    private val httpClientFactory by lazy { HttpClientFactory(config) }
     private val standardHttpClient: HttpClient by lazy { httpClient() }
     private val httpClientForventSuksess: HttpClient by lazy { httpClient(forventSuksess = true) }
 

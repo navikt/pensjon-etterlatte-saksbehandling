@@ -25,20 +25,24 @@ class HighLevelServiceModule(
     private val serviceModule: ServiceModule,
     private val featureToggleService: FeatureToggleService,
 ) {
-    val behandlingInfoService by lazy {
-        BehandlingInfoService(
-            daoModule.behandlingInfoDao,
-            serviceModule.behandlingService,
-            serviceModule.behandlingsStatusService,
-        )
-    }
-
     val bosattUtlandService by lazy {
-        BosattUtlandService(bosattUtlandDao = daoModule.bosattUtlandDao)
+        BosattUtlandService(daoModule.bosattUtlandDao)
     }
 
     private val klageBrevService by lazy {
         KlageBrevService(klientModule.brevApiKlient)
+    }
+
+    val migreringService by lazy {
+        MigreringService(serviceModule.behandlingService)
+    }
+
+    val behandlingInfoService by lazy {
+        BehandlingInfoService(
+            behandlingInfoDao = daoModule.behandlingInfoDao,
+            behandlingService = serviceModule.behandlingService,
+            behandlingsstatusService = serviceModule.behandlingsStatusService,
+        )
     }
 
     val klageService by lazy {
@@ -68,11 +72,11 @@ class HighLevelServiceModule(
 
     val tilbakekrevingBrevService by lazy {
         TilbakekrevingBrevService(
-            serviceModule.sakService,
-            klientModule.brevKlient,
-            klientModule.brevApiKlient,
-            klientModule.vedtakKlient,
-            serviceModule.grunnlagService,
+            sakService = serviceModule.sakService,
+            brevKlient = klientModule.brevKlient,
+            brevApiKlient = klientModule.brevApiKlient,
+            vedtakKlient = klientModule.vedtakKlient,
+            grunnlagService = serviceModule.grunnlagService,
         )
     }
 
@@ -145,11 +149,11 @@ class HighLevelServiceModule(
 
     val gosysOppgaveService by lazy {
         GosysOppgaveServiceImpl(
-            klientModule.gosysOppgaveKlient,
-            serviceModule.oppgaveService,
-            serviceModule.saksbehandlerService,
-            daoModule.saksbehandlerInfoDao,
-            klientModule.pdlTjenesterKlient,
+            gosysOppgaveKlient = klientModule.gosysOppgaveKlient,
+            oppgaveService = serviceModule.oppgaveService,
+            saksbehandlerService = serviceModule.saksbehandlerService,
+            saksbehandlerInfoDao = daoModule.saksbehandlerInfoDao,
+            pdltjeneserKlient = klientModule.pdlTjenesterKlient,
         )
     }
 
@@ -172,20 +176,16 @@ class HighLevelServiceModule(
 
     val etteroppgjoerRevurderingService by lazy {
         EtteroppgjoerRevurderingService(
-            serviceModule.behandlingService,
-            serviceModule.etteroppgjoerService,
-            serviceModule.etteroppgjoerForbehandlingService,
-            serviceModule.grunnlagService,
-            serviceModule.revurderingService,
-            serviceModule.vilkaarsvurderingService,
-            klientModule.trygdetidKlient,
-            klientModule.beregningKlient,
-            serviceModule.etteroppgjoerDataService,
+            behandlingService = serviceModule.behandlingService,
+            etteroppgjoerService = serviceModule.etteroppgjoerService,
+            etteroppgjoerForbehandlingService = serviceModule.etteroppgjoerForbehandlingService,
+            grunnlagService = serviceModule.grunnlagService,
+            revurderingService = serviceModule.revurderingService,
+            vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
+            trygdetidKlient = klientModule.trygdetidKlient,
+            beregningKlient = klientModule.beregningKlient,
+            etteroppgjoerDataService = serviceModule.etteroppgjoerDataService,
         )
-    }
-
-    val migreringService by lazy {
-        MigreringService(behandlingService = serviceModule.behandlingService)
     }
 
     val aktivitetspliktOppgaveService by lazy {

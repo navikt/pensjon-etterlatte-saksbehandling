@@ -3,30 +3,13 @@ package no.nav.etterlatte.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.arbeidOgInntekt.ArbeidOgInntektKlient
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
-import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentKlient
-import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
-import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
-import no.nav.etterlatte.behandling.klienter.Norg2Klient
-import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
-import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.selftest.SelfTestService
-import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.common.klienter.PesysKlient
-import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.config.modules.DaoModule
 import no.nav.etterlatte.config.modules.HighLevelServiceModule
-import no.nav.etterlatte.config.modules.HttpClientFactory
 import no.nav.etterlatte.config.modules.JobModule
 import no.nav.etterlatte.config.modules.KafkaModule
 import no.nav.etterlatte.config.modules.KlientModule
@@ -34,21 +17,17 @@ import no.nav.etterlatte.config.modules.ServiceModule
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbetjeningService
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
-import no.nav.etterlatte.kodeverk.KodeverkKlient
-import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 
 private fun featureToggleProperties(config: Config) =
@@ -58,13 +37,7 @@ private fun featureToggleProperties(config: Config) =
         apiKey = config.getString("funksjonsbrytere.unleash.token"),
     )
 
-private fun finnBrukerIdent(): String {
-    val kontekst = Kontekst.get()
-    return when (kontekst) {
-        null -> Fagsaksystem.EY.navn
-        else -> Kontekst.get().AppUser.name()
-    }
-}
+private fun finnBrukerIdent(): String = Kontekst.get()?.AppUser?.name() ?: Fagsaksystem.EY.navn
 
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler.systemEnv(),
@@ -80,26 +53,7 @@ internal class ApplicationContext(
             properties = featureToggleProperties(config),
             brukerIdent = { finnBrukerIdent() },
         ),
-    navAnsattKlientOverride: NavAnsattKlient? = null,
-    norg2KlientOverride: Norg2Klient? = null,
-    leaderElectionHttpClientOverride: HttpClient? = null,
-    beregningKlientOverride: BeregningKlient? = null,
-    trygdetidKlientOverride: TrygdetidKlient? = null,
-    gosysOppgaveKlientOverride: GosysOppgaveKlient? = null,
-    vedtakKlientOverride: VedtakKlient? = null,
-    brevApiKlientOverride: BrevApiKlient? = null,
-    brevKlientOverride: BrevKlient? = null,
-    klageHttpClientOverride: HttpClient? = null,
-    tilbakekrevingKlientOverride: TilbakekrevingKlient? = null,
-    pesysKlientOverride: PesysKlient? = null,
-    krrKlientOverride: KrrKlient? = null,
-    entraProxyKlientOverride: EntraProxyKlient? = null,
-    pdlTjenesterKlientOverride: PdlTjenesterKlient? = null,
-    kodeverkKlientOverride: KodeverkKlient? = null,
-    skjermingKlientOverride: SkjermingKlient? = null,
-    inntektskomponentKlientOverride: InntektskomponentKlient? = null,
-    sigrunKlientOverride: SigrunKlient? = null,
-    arbeidOgInntektKlientOverride: ArbeidOgInntektKlient? = null,
+    klientModuleOverride: KlientModule? = null,
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
@@ -109,38 +63,15 @@ internal class ApplicationContext(
     val dataSource = DataSourceBuilder.createDataSource(env)
     private val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
 
-    private val httpClientFactory = HttpClientFactory(config)
-
     private val daoModule = DaoModule(autoClosingDatabase, dataSource)
 
     private val kafkaModule = KafkaModule(rapid)
 
     private val klientModule =
-        KlientModule(
+        klientModuleOverride ?: KlientModule(
             config = config,
             env = env,
-            httpClientFactory = httpClientFactory,
             featureToggleService = featureToggleService,
-            navAnsattKlientOverride = navAnsattKlientOverride,
-            norg2KlientOverride = norg2KlientOverride,
-            leaderElectionHttpClientOverride = leaderElectionHttpClientOverride,
-            beregningKlientOverride = beregningKlientOverride,
-            trygdetidKlientOverride = trygdetidKlientOverride,
-            gosysOppgaveKlientOverride = gosysOppgaveKlientOverride,
-            vedtakKlientOverride = vedtakKlientOverride,
-            brevApiKlientOverride = brevApiKlientOverride,
-            brevKlientOverride = brevKlientOverride,
-            klageHttpClientOverride = klageHttpClientOverride,
-            tilbakekrevingKlientOverride = tilbakekrevingKlientOverride,
-            pesysKlientOverride = pesysKlientOverride,
-            krrKlientOverride = krrKlientOverride,
-            entraProxyKlientOverride = entraProxyKlientOverride,
-            pdlTjenesterKlientOverride = pdlTjenesterKlientOverride,
-            kodeverkKlientOverride = kodeverkKlientOverride,
-            skjermingKlientOverride = skjermingKlientOverride,
-            inntektskomponentKlientOverride = inntektskomponentKlientOverride,
-            sigrunKlientOverride = sigrunKlientOverride,
-            arbeidOgInntektKlientOverride = arbeidOgInntektKlientOverride,
         )
 
     private val serviceModule =
@@ -198,11 +129,8 @@ internal class ApplicationContext(
     val brevApiKlient get() = klientModule.brevApiKlient
     val brevKlient get() = klientModule.brevKlient
     val krrKlient get() = klientModule.krrKlient
-    val entraProxyKlient get() = klientModule.entraProxyKlient
     val pdlTjenesterKlient get() = klientModule.pdlTjenesterKlient
-    val kodeverkKlient get() = klientModule.kodeverkKlient
     val skjermingKlient get() = klientModule.skjermingKlient
-    val inntektskomponentKlient get() = klientModule.inntektskomponentKlient
     val sigrunKlient get() = klientModule.sigrunKlient
     val arbeidOgInntektKlient get() = klientModule.arbeidOgInntektKlient
 
@@ -237,6 +165,8 @@ internal class ApplicationContext(
     val omregningService get() = serviceModule.omregningService
     val grunnlagsendringshendelseService get() = serviceModule.grunnlagsendringshendelseService
     val behandlingsStatusService get() = serviceModule.behandlingsStatusService
+    val inntektsjusteringSelvbetjeningService get() = serviceModule.inntektsjusteringSelvbetjeningService
+    val aldersovergangService get() = serviceModule.aldersovergangService
 
     // High-level services
     val behandlingInfoService get() = highLevelServiceModule.behandlingInfoService
@@ -247,7 +177,6 @@ internal class ApplicationContext(
     val brevService get() = highLevelServiceModule.brevService
     val tilbakekrevingService get() = highLevelServiceModule.tilbakekrevingService
     val gosysOppgaveService get() = highLevelServiceModule.gosysOppgaveService
-    val aldersovergangService get() = serviceModule.aldersovergangService
     val behandlingFactory get() = highLevelServiceModule.behandlingFactory
     val etteroppgjoerRevurderingService get() = highLevelServiceModule.etteroppgjoerRevurderingService
     val migreringService get() = highLevelServiceModule.migreringService
@@ -257,17 +186,6 @@ internal class ApplicationContext(
 
     val lesSkatteoppgjoerHendelserJobService get() = jobModule.lesSkatteoppgjoerHendelserJobService
     val aarligInntektsjusteringJobbService get() = jobModule.aarligInntektsjusteringJobbService
-
-    val inntektsjusteringSelvbetjeningService by lazy {
-        InntektsjusteringSelvbetjeningService(
-            oppgaveService = oppgaveService,
-            behandlingService = behandlingService,
-            vedtakKlient = vedtakKlient,
-            rapid = rapid,
-            featureToggleService = featureToggleService,
-            beregningKlient = beregningKlient,
-        )
-    }
 
     val selfTestService by lazy { SelfTestService(klientModule.pingableKlienter) }
 

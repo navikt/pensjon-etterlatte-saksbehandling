@@ -4,7 +4,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
-class HttpClientFactory(
+internal class HttpClientFactory(
     private val config: Config,
 ) {
     private val azureAppClientId: String = config.getString("azure.app.client.id")

@@ -25,13 +25,13 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
-class VedtakKlientInternal(
+class VedtakInternalService(
     private val vedtakTilbakekrevingService: VedtakTilbakekrevingService,
     private val vedtakKlageService: VedtakKlageService,
     private val vedtakBehandlingService: VedtakBehandlingService,
     private val vedtaksvurderingService: VedtaksvurderingService,
 ) : VedtakKlient {
-    private val logger = LoggerFactory.getLogger(VedtakKlientInternal::class.java)
+    private val logger = LoggerFactory.getLogger(VedtakInternalService::class.java)
 
     override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,

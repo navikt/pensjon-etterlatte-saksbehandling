@@ -90,6 +90,7 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlientImpl
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -330,7 +331,8 @@ internal class ApplicationContext(
     val beregningKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val trygdetidKlient: TrygdetidKlient = TrygdetidKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
-    val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
+    // TODO: Denne trenger egentlig ikke å hete "default" men vi fikser senere.
+    val vedtakKlientDefault: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val brevKlient: BrevKlient = BrevKlientImpl(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
@@ -373,6 +375,9 @@ internal class ApplicationContext(
     val samordningKlient: SamordningsKlient = SamordningsKlientImpl(config, samKlient(config)),
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
+    // TODO: Dette skal komme fra yaml, wip.
+    private val brukNyVedtakKlientInternal: Boolean = false
+
     val httpPort by lazy { env.getOrDefault(HTTP_PORT, "8080").toInt() }
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
     private val sporingslogg by lazy { Sporingslogg() }
@@ -1055,6 +1060,19 @@ internal class ApplicationContext(
             repository = vedtaksvurderingRepository,
             featureToggleService = featureToggleService,
         )
+    }
+
+    val vedtakKlient: VedtakKlient by lazy {
+        if (brukNyVedtakKlientInternal) {
+            VedtakInternalService(
+                vedtakTilbakekrevingService = vedtakTilbakekrevingService,
+                vedtakKlageService = vedtakKlageService,
+                vedtakBehandlingService = vedtakBehandlingService,
+                vedtaksvurderingService = vedtaksvurderingService,
+            )
+        } else {
+            vedtakKlientDefault
+        }
     }
 
     val metrikkerJob: MetrikkerJob by lazy {

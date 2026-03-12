@@ -135,7 +135,7 @@ abstract class BehandlingIntegrationTest {
                         skjermingKlientOverride = skjermingKlient ?: SkjermingKlientTest(),
                         inntektskomponentKlientOverride = InntektskomponentKlientTest(),
                         sigrunKlientOverride = SigrunKlienTest(),
-                        // TODO :samordningKlient = mockk(relaxed = true),
+                        samordningKlientOverride = mockk(relaxed = true),
                     ),
                 grunnlagServiceOverride = grunnlagService,
             )

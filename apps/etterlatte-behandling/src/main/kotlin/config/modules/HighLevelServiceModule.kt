@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.klage.KlageServiceImpl
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.revurdering.OmgjoeringKlageRevurderingService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.TilbakekrevingBrevService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -67,6 +68,20 @@ class HighLevelServiceModule(
             klageService = klageService,
             behandlingDao = daoModule.behandlingDao,
             grunnlagService = serviceModule.grunnlagService,
+        )
+    }
+
+    val vedtakBehandlingService by lazy {
+        VedtakBehandlingService(
+            vedtaksvurderingRepository = daoModule.vedtaksvurderingRepository,
+            beregningKlient = klientModule.beregningKlient,
+            vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
+            behandlingStatusService = serviceModule.behandlingsStatusService,
+            behandlingService = serviceModule.behandlingService,
+            samordningsKlient = klientModule.samordningKlient,
+            trygdetidKlient = klientModule.trygdetidKlient,
+            etteroppgjorRevurderingService = etteroppgjoerRevurderingService,
+            sakLesDao = daoModule.sakLesDao,
         )
     }
 

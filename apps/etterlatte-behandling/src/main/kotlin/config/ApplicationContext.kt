@@ -39,14 +39,6 @@ private fun featureToggleProperties(config: Config) =
 
 private fun finnBrukerIdent(): String = Kontekst.get()?.AppUser?.name() ?: Fagsaksystem.EY.navn
 
-private fun samKlient(config: Config) =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("samordnevedtak.azure.scope"),
-    )
-
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler.systemEnv(),
     val config: Config = ConfigFactory.load(),
@@ -62,7 +54,6 @@ internal class ApplicationContext(
             brukerIdent = { finnBrukerIdent() },
         ),
     klientModuleOverride: KlientModule? = null,
-    val samordningKlient: SamordningsKlient = SamordningsKlientImpl(config, samKlient(config)),
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()

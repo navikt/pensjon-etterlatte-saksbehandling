@@ -29,6 +29,8 @@ import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
+import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
+import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevKlientImpl
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -45,6 +47,7 @@ import no.nav.etterlatte.krr.KrrKlientImpl
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 
@@ -73,6 +76,7 @@ class KlientModule(
     inntektskomponentKlientOverride: InntektskomponentKlient? = null,
     sigrunKlientOverride: SigrunKlient? = null,
     arbeidOgInntektKlientOverride: ArbeidOgInntektKlient? = null,
+    samordningKlientOverride: SamordningsKlient? = null,
 ) {
     private val httpClientFactory by lazy { HttpClientFactory(config) }
     private val standardHttpClient: HttpClient by lazy { httpClient() }
@@ -83,6 +87,18 @@ class KlientModule(
             httpClientFactory.navAnsattKlient(),
             env.requireEnvValue(NAVANSATT_URL),
         ).also { it.asyncPing() }
+    }
+
+    val samordningKlient: SamordningsKlient by lazy {
+        samordningKlientOverride ?: SamordningsKlientImpl(
+            config = config,
+            httpClient = httpClientClientCredentials(
+                azureAppClientId = config.getString("azure.app.client.id"),
+                azureAppJwk = config.getString("azure.app.jwk"),
+                azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                azureAppScope = config.getString("samordnevedtak.azure.scope"),
+            ),
+        )
     }
 
     val norg2Klient: Norg2Klient by lazy {

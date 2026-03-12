@@ -91,6 +91,7 @@ internal class ApplicationContext(
             kafkaModule = kafkaModule,
             serviceModule = serviceModule,
             featureToggleService = featureToggleService,
+            rapid = rapid,
         )
 
     private val jobModule =
@@ -181,6 +182,12 @@ internal class ApplicationContext(
     val etteroppgjoerRevurderingService get() = highLevelServiceModule.etteroppgjoerRevurderingService
     val migreringService get() = highLevelServiceModule.migreringService
     val aktivitetspliktOppgaveService get() = highLevelServiceModule.aktivitetspliktOppgaveService
+    val vedtaksvurderingService get() = highLevelServiceModule.vedtaksvurderingService
+    val vedtakBehandlingService get() = highLevelServiceModule.vedtakBehandlingService
+    val vedtaksvurderingRapidService get() = highLevelServiceModule.vedtaksvurderingRapidService
+    val vedtakKlageService get() = highLevelServiceModule.vedtakKlageService
+    val vedtakEtteroppgjoerService get() = highLevelServiceModule.vedtakEtteroppgjoerService
+    val vedtakTilbakekrevingService get() = highLevelServiceModule.vedtakTilbakekrevingService
 
     val behandlingsHendelser get() = kafkaModule.behandlingsHendelser
 

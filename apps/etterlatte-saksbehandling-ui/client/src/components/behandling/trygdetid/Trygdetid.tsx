@@ -7,7 +7,7 @@ import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt, erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
@@ -54,7 +54,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [behandlingsIdMangler, setBehandlingsIdMangler] = useState(false)
   const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
   const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
-  const [erOmgjoeringAvAvslag, setErOmgjoeringAvAvslag] = useState(false)
 
   const behandlingRedigerbar = erBehandlingRedigerbar(
     behandling.status,
@@ -123,9 +122,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     fetchAlleLand(null, (landListe: ILand[]) => {
       setLandListe(sorterLand(landListe))
     })
-    fetchErOmgjoeringAvAvslag(behandling.id, (erOmgjoering) => {
-      setErOmgjoeringAvAvslag(erOmgjoering)
-    })
+    fetchErOmgjoeringAvAvslag(behandling.id)
   }, [])
 
   if (harPilotTrygdetid) {
@@ -258,13 +255,18 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
             />
           </Box>
         )}
-        {isFailureHandler({
-          apiResult: hentErOmgjoeringAvAvslagResult,
-          errorMessage: 'En feil har oppstått ved henting av hvorvidt behandlingen er en omgjoering av avslag',
+        {mapResult(hentErOmgjoeringAvAvslagResult, {
+          error: (error) => (
+            <ApiErrorAlert>
+              En feil har oppstått ved henting av hvorvidt behandlingen er en omgjoering av avslag: {error.detail}
+            </ApiErrorAlert>
+          ),
+          success: (erOmgjoeringAvslag) =>
+            vedtaksresultat === 'avslag' &&
+            erOmgjoeringAvslag && (
+              <SkalSendeBrev behandling={behandling} behandlingRedigerbart={behandlingRedigerbar} />
+            ),
         })}
-        {erOmgjoeringAvAvslag && vedtaksresultat === 'avslag' && (
-          <SkalSendeBrev behandling={behandling} behandlingRedigerbart={behandlingRedigerbar} />
-        )}
       </VStack>
     </Box>
   )

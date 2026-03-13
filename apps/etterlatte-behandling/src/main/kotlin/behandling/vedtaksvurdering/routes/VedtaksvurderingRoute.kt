@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -167,9 +166,13 @@ fun Route.vedtaksvurderingRoute(
         post("/{$BEHANDLINGID_CALL_PARAMETER}/fattvedtak") {
             kunSkrivetilgang {
                 logger.info("Fatter vedtak for behandling $behandlingId")
-                val fattetVedtak = vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
+                val fattetVedtak =
+                    inTransaction {
+                        runBlocking {
+                            vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
+                        }
+                    }
                 rapidService.sendToRapid(fattetVedtak)
-
                 call.respond(fattetVedtak.vedtak)
             }
         }

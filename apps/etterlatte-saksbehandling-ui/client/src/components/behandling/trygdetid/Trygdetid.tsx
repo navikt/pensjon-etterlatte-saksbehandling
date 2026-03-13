@@ -47,7 +47,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
-  const [, fetchErOmgjoeringAvAvslag] = useApiCall(hentErOmgjoeringAvAvslag)
+  const [hentErOmgjoeringAvAvslagResult, fetchErOmgjoeringAvAvslag] = useApiCall(hentErOmgjoeringAvAvslag)
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
   const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
@@ -258,6 +258,10 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
             />
           </Box>
         )}
+        {isFailureHandler({
+          apiResult: hentErOmgjoeringAvAvslagResult,
+          errorMessage: 'En feil har oppstått ved henting av hvorvidt behandlingen er en omgjoering av avslag',
+        })}
         {erOmgjoeringAvAvslag && vedtaksresultat === 'avslag' && (
           <SkalSendeBrev behandling={behandling} behandlingRedigerbart={behandlingRedigerbar} />
         )}

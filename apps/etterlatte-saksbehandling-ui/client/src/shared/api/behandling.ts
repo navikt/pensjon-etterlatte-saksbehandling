@@ -256,5 +256,5 @@ export const slettAnnenForelder = async (args: { behandlingId: string }): Promis
 }
 
 export const hentErOmgjoeringAvAvslag = async (behandlingId: string): Promise<ApiResponse<boolean>> => {
-  return apiClient.get(`/behandling/${behandlingId}/er-omgjoering-av-avslaag`)
+  return apiClient.get(`/behandling/${behandlingId}/er-omgjoering-av-avslag`)
 }

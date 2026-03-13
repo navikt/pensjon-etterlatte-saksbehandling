@@ -299,7 +299,7 @@ interface BehandlingService {
 
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
 
-    fun erOmgjoeringAvAvslaaattFoerstegangsbehandling(behandlingId: UUID): Boolean
+    fun erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId: UUID): Boolean
 
     fun settBeregnet(
         behandlingId: UUID,
@@ -1076,7 +1076,7 @@ internal class BehandlingServiceImpl(
 
     override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
 
-    override fun erOmgjoeringAvAvslaaattFoerstegangsbehandling(behandlingId: UUID): Boolean {
+    override fun erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId: UUID): Boolean {
         val behandling = hentBehandlingForId(behandlingId) ?: return false
 
         if (behandling !is Foerstegangsbehandling) {

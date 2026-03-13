@@ -108,10 +108,10 @@ internal fun Route.behandlingRoutes(
             call.respond(status)
         }
 
-        get("er-omgjoering-av-avslaag") {
+        get("er-omgjoering-av-avslag") {
             val erOmgjoeringAvAvslag =
                 inTransaction {
-                    behandlingService.erOmgjoeringAvAvslaaattFoerstegangsbehandling(behandlingId)
+                    behandlingService.erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId)
                 }
             call.respond(erOmgjoeringAvAvslag)
         }

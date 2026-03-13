@@ -1,18 +1,18 @@
-import express, { NextFunction, Request, Response } from 'express'
+import express, {NextFunction, Request, Response} from 'express'
 import path from 'path'
-import { ApiConfig, appConf, ClientConfig } from './config/config'
-import { authenticateUser } from './middleware/auth'
-import { logger } from './monitoring/logger'
-import { tokenMiddleware } from './middleware/getOboToken'
-import { proxy } from './middleware/proxy'
-import { loggerRouter } from './routers/loggerRouter'
+import {ApiConfig, appConf, ClientConfig} from './config/config'
+import {authenticateUser} from './middleware/auth'
+import {logger} from './monitoring/logger'
+import {tokenMiddleware} from './middleware/getOboToken'
+import {proxy} from './middleware/proxy'
+import {loggerRouter} from './routers/loggerRouter'
 import prometheus from './monitoring/prometheus'
-import { githubRouter } from './routers/githubRouter'
-import { unleashRouter } from './routers/unleashRouter'
-import { requestLoggerMiddleware } from './middleware/logging'
-import { createProxyMiddleware } from 'http-proxy-middleware'
-import { selftestRouter } from './routers/selftestRouter'
-import { randomUUID } from 'crypto'
+import {githubRouter} from './routers/githubRouter'
+import {unleashRouter} from './routers/unleashRouter'
+import {requestLoggerMiddleware} from './middleware/logging'
+import {createProxyMiddleware} from 'http-proxy-middleware'
+import {selftestRouter} from './routers/selftestRouter'
+import {randomUUID} from 'crypto'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -100,9 +100,9 @@ app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiC
 
 const vedtakIBehandlingFeatureToggle = process.env['VEDTAK_I_BEHANDLING'] == 'true'
 if (vedtakIBehandlingFeatureToggle) {
-  app.use('/api/vedtak', tokenMiddleware(ApiConfig.vedtak.scope), proxy(ApiConfig.vedtak.url))
-} else {
   app.use('/api/vedtak', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
+} else {
+  app.use('/api/vedtak', tokenMiddleware(ApiConfig.vedtak.scope), proxy(ApiConfig.vedtak.url))
 }
 
 app.use('/api/trygdetid', tokenMiddleware(ApiConfig.trygdetid.scope), proxy(ApiConfig.trygdetid.url))

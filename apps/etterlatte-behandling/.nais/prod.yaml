@@ -180,6 +180,8 @@ spec:
       value: https://sigrun.prod-fss-pub.nais.io
     - name: SIGRUN_OUTBOUND_SCOPE
       value: api://prod-fss.team-inntekt.sigrun/.default
+    - name: BRUK_NY_VEDTAK_KLIENT
+      value: "false"
 
   envFrom:
     - secret: my-application-unleash-api-token

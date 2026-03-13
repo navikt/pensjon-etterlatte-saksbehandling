@@ -165,6 +165,8 @@ spec:
       value: api://dev-fss.team-inntekt.sigrun-q2/.default
     - name: ARBEID_OG_INNTEKT_URL
       value: https://arbeid-og-inntekt-q2.dev-fss-pub.nais.io
+    - name: BRUK_NY_VEDTAK_KLIENT
+      value: "true"
 
   envFrom:
     - secret: my-application-unleash-api-token

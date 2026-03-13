@@ -7,6 +7,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.EnvKey.BRUK_NY_VEDTAK_KLIENT
 import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
 import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
 import no.nav.etterlatte.EnvKey.HTTP_PORT
@@ -209,6 +210,7 @@ import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
 import java.time.temporal.ChronoUnit
+import javax.sql.DataSource
 
 private fun pdlHttpClient(config: Config) =
     httpClientClientCredentials(
@@ -375,8 +377,7 @@ internal class ApplicationContext(
     val samordningKlient: SamordningsKlient = SamordningsKlientImpl(config, samKlient(config)),
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
-    // TODO: Dette skal komme fra yaml, wip.
-    private val brukNyVedtakKlientInternal: Boolean = true
+    private val brukNyVedtakKlientInternal: Boolean = env[BRUK_NY_VEDTAK_KLIENT]?.toBoolean() ?: false
 
     val httpPort by lazy { env.getOrDefault(HTTP_PORT, "8080").toInt() }
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }

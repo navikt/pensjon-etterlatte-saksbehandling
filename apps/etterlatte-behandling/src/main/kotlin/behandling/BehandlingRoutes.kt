@@ -108,6 +108,14 @@ internal fun Route.behandlingRoutes(
             call.respond(status)
         }
 
+        get("er-omgjoering-av-avslaat") {
+            val erOmgjoeringAvAvslag =
+                inTransaction {
+                    behandlingService.erOmgjoeringAvAvslaaattFoerstegangsbehandling(behandlingId)
+                }
+            call.respond(erOmgjoeringAvAvslag)
+        }
+
         post("/gyldigfremsatt") {
             kunSkrivetilgang {
                 val body = call.receive<JaNeiMedBegrunnelse>()
@@ -416,6 +424,7 @@ internal fun Route.behandlingRoutes(
                         inTransaction { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
                 ) {
                     is DetaljertBehandling -> call.respond(behandling)
+
                     else -> throw IkkeFunnetException(
                         "FANT_IKKE_BEHANDLING",
                         "Fant ikke behandling med id=$behandlingId",

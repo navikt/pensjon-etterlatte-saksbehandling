@@ -254,3 +254,7 @@ export const redigerAnnenForelder = async (args: {
 export const slettAnnenForelder = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
   return apiClient.delete(`/behandling/${args.behandlingId}/annen-forelder`)
 }
+
+export const hentErOmgjoeringAvAvslag = async (behandlingId: string): Promise<ApiResponse<boolean>> => {
+  return apiClient.get(`/behandling/${behandlingId}/er-omgjoering-av-avslaat`)
+}

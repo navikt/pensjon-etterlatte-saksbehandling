@@ -9,7 +9,7 @@ import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/B
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { behandlingErIverksatt } from '~components/behandling/felles/utils'
+import { behandlingErIverksatt, erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
 import { EnkelPersonTrygdetid } from '~components/behandling/trygdetid/EnkelPersonTrygdetid'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
@@ -18,12 +18,14 @@ import { formaterNavn } from '~shared/types/Person'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { TrygdetidMelding } from '~components/behandling/trygdetid/components/TrygdetidMelding'
-import { hentAlleLand } from '~shared/api/behandling'
+import { hentAlleLand, hentErOmgjoeringAvAvslag } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
 import { EnigUenigTilbakemelding } from '~shared/tilbakemelding/EnigUenigTilbakemelding'
 import { velgTilbakemeldingClickEventForUtlandsbehandling } from '~utils/analytics'
+import { SkalSendeBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 interface Props {
   redigerbar: boolean
@@ -40,16 +42,25 @@ const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[
 
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
+  const [, fetchErOmgjoeringAvAvslag] = useApiCall(hentErOmgjoeringAvAvslag)
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
   const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
   const [behandlingsIdMangler, setBehandlingsIdMangler] = useState(false)
   const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
   const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
+  const [erOmgjoeringAvAvslag, setErOmgjoeringAvAvslag] = useState(false)
+
+  const behandlingRedigerbar = erBehandlingRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   const personopplysninger = usePersonopplysninger()
 
@@ -111,6 +122,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     fetchTrygdetider(behandling.id)
     fetchAlleLand(null, (landListe: ILand[]) => {
       setLandListe(sorterLand(landListe))
+    })
+    fetchErOmgjoeringAvAvslag(behandling.id, (erOmgjoering) => {
+      setErOmgjoeringAvAvslag(erOmgjoering)
     })
   }, [])
 
@@ -243,6 +257,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
               behandlingId={behandling.id}
             />
           </Box>
+        )}
+        {erOmgjoeringAvAvslag && vedtaksresultat === 'avslag' && (
+          <SkalSendeBrev behandling={behandling} behandlingRedigerbart={behandlingRedigerbar} />
         )}
       </VStack>
     </Box>

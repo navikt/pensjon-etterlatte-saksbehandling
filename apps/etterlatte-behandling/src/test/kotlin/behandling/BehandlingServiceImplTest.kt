@@ -1156,18 +1156,35 @@ internal class BehandlingServiceImplTest {
         verify(exactly = 1) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
     }
 
-//    @Test
-//    fun `Kan ikke endre send brev førstegangsbehandling revurdering`() {
-//        nyKontekstMedBruker(mockSaksbehandler())
-//        val behandlingId = UUID.randomUUID()
-//        every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
-//        every { behandlingDaoMock.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = sakId1)
-//        assertThrows<KanIkkeEndreSendeBrevForFoerstegangsbehandling> {
-//            behandlingService.endreSkalSendeBrev(behandlingId, true)
-//        }
-//
-//        verify(exactly = 0) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
-//    }
+    @Test
+    fun `Kan ikke endre send brev førstegangsbehandling som ikke er omgjoering av avslag`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+        val behandlingId = UUID.randomUUID()
+        val behandling = foerstegangsbehandling(id = behandlingId, sakId = sakId1)
+        every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
+        every { behandlingDaoMock.hentBehandling(behandlingId) } returns behandling
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns listOf(behandling)
+        assertThrows<KanIkkeEndreSendeBrevForFoerstegangsbehandling> {
+            behandlingService.endreSkalSendeBrev(behandlingId, true)
+        }
+
+        verify(exactly = 0) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
+    }
+
+    @Test
+    fun `Kan endre send brev førstegangsbehandling som er omgjoering av avslag`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+        val behandlingId = UUID.randomUUID()
+        val behandling = foerstegangsbehandling(id = behandlingId, sakId = sakId1)
+        val avslaattBehandling = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.AVSLAG)
+        every { behandlingDaoMock.lagreSendeBrev(behandlingId, false) } just runs
+        every { behandlingDaoMock.hentBehandling(behandlingId) } returns behandling
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns listOf(behandling, avslaattBehandling)
+
+        behandlingService.endreSkalSendeBrev(behandlingId, false)
+
+        verify(exactly = 1) { behandlingDaoMock.lagreSendeBrev(behandlingId, false) }
+    }
 
     @Test
     fun `Kan lagre annen forelder`() {

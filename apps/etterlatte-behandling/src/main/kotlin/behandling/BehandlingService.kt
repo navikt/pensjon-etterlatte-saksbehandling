@@ -773,7 +773,11 @@ internal class BehandlingServiceImpl(
             }
             when (behandling!!.type) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+                    if (erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId)) {
+                        behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
+                    } else {
+                        throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+                    }
                 }
 
                 BehandlingType.REVURDERING -> {

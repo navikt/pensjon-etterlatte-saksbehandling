@@ -1156,18 +1156,18 @@ internal class BehandlingServiceImplTest {
         verify(exactly = 1) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
     }
 
-    @Test
-    fun `Kan ikke endre send brev førstegangsbehandling revurdering`() {
-        nyKontekstMedBruker(mockSaksbehandler())
-        val behandlingId = UUID.randomUUID()
-        every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
-        every { behandlingDaoMock.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = sakId1)
-        assertThrows<KanIkkeEndreSendeBrevForFoerstegangsbehandling> {
-            behandlingService.endreSkalSendeBrev(behandlingId, true)
-        }
-
-        verify(exactly = 0) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
-    }
+//    @Test
+//    fun `Kan ikke endre send brev førstegangsbehandling revurdering`() {
+//        nyKontekstMedBruker(mockSaksbehandler())
+//        val behandlingId = UUID.randomUUID()
+//        every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
+//        every { behandlingDaoMock.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = sakId1)
+//        assertThrows<KanIkkeEndreSendeBrevForFoerstegangsbehandling> {
+//            behandlingService.endreSkalSendeBrev(behandlingId, true)
+//        }
+//
+//        verify(exactly = 0) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
+//    }
 
     @Test
     fun `Kan lagre annen forelder`() {

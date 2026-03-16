@@ -17,15 +17,19 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.MaanederMedGammelSanksjonIAvkorting
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -443,6 +447,34 @@ class AvkortingService(
             if (virkningstidspunkt != YearMonth.of(virkningstidspunkt.year, 1)) {
                 throw NyeAarMedInntektMaaStarteIJanuar()
             }
+        }
+    }
+
+    fun harAvkortingMedSanksjonGamleRegler(
+        behandlingId: UUID,
+        inntektsaar: Int,
+    ): MaanederMedGammelSanksjonIAvkorting {
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
+        val aarsoppgjoerInntektsaar =
+            avkorting.aarsoppgjoer.singleOrNull { it.aar == inntektsaar }
+                ?: throw UgyldigForespoerselException(
+                    "MANGLER_AVKORTING_INNTEKTSAAR",
+                    "Det er ingen avkorting for $inntektsaar i behandling med id $behandlingId",
+                )
+        val maaneder =
+            aarsoppgjoerInntektsaar.avkortetYtelse
+                .filter { it.sanksjon != null && it.ytelseFoerAvkorting > 0 }
+                .flatMap { maanederIPeriodeInnenforAaret(it.periode) }
+        return MaanederMedGammelSanksjonIAvkorting(
+            harGammelBeregningMedSanksjon = maaneder.isNotEmpty(),
+            maanederMedGammelBeregning = maaneder,
+        )
+    }
+
+    private fun maanederIPeriodeInnenforAaret(periode: Periode): Iterable<YearMonth> {
+        val tom = periode.tom ?: YearMonth.of(periode.fom.year, Month.DECEMBER)
+        return (periode.fom.month.value..tom.month.value).map {
+            YearMonth.of(periode.fom.year, it)
         }
     }
 }

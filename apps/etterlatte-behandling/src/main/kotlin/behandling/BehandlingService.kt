@@ -318,7 +318,7 @@ data class SakMedBehandlingerOgOppgaver(
     fun somSakMedBehandlinger(): SakMedBehandlinger = SakMedBehandlinger(sak, behandlinger)
 }
 
-internal class BehandlingServiceImpl(
+class BehandlingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
@@ -517,7 +517,7 @@ internal class BehandlingServiceImpl(
             val omgjoeringsoppgaveForKlage =
                 oppgaveService
                     .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
-                    .find { it.referanse == behandling.relatertBehandlingId .toString()}
+                    .find { it.referanse == behandling.relatertBehandlingId.toString() }
                     ?: throw InternfeilException(
                         "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
                             "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",

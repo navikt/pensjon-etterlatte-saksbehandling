@@ -110,7 +110,7 @@ abstract class BehandlingIntegrationTest {
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 vedtakKlientOverride = vedtakKlient ?: spyk(VedtakKlientTest()),
-                beregningKlient = BeregningKlientTest(),
+                beregningKlient = spyk(BeregningKlientTest()),
                 trygdetidKlient = TrygdetidKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),

@@ -6,6 +6,7 @@ import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.beInstanceOf
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
@@ -55,7 +56,7 @@ internal class VedtaksvurderingRepositoryTest(
 
     @BeforeAll
     fun beforeAll() {
-        repository = VedtaksvurderingRepository(dataSource)
+        repository = VedtaksvurderingRepository(ConnectionAutoclosingTest(dataSource))
     }
 
     @AfterEach

@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotliquery.TransactionalSession
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilstandException
 import no.nav.etterlatte.common.Enheter
@@ -192,12 +191,7 @@ class VedtakTilbakekrevingServiceTest {
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
-        every { repo.inTransaction<Vedtak>(any()) } answers
-            {
-                val block = firstArg<VedtaksvurderingRepository.(TransactionalSession) -> Vedtak>()
-                repo.block(mockk())
-            }
-        every { repo.attesterVedtak(any(), any(), any()) } returns attestertVedtak
+        every { repo.attesterVedtak(any(), any()) } returns attestertVedtak
 
         val vedtak = service.attesterVedtak(attesterDto, saksbehandler)
 
@@ -215,7 +209,6 @@ class VedtakTilbakekrevingServiceTest {
                     it.attestant shouldBe saksbehandler.ident
                     it.attesterendeEnhet shouldBe attesterDto.enhet
                 },
-                any(),
             )
         }
     }

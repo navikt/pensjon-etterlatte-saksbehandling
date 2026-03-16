@@ -17,6 +17,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
@@ -110,7 +111,7 @@ internal class VedtakBehandlingServiceTest(
     fun beforeAll() {
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
-        repository = spyk(VedtaksvurderingRepository(dataSource))
+        repository = spyk(VedtaksvurderingRepository(ConnectionAutoclosingTest(dataSource)))
         service =
             VedtakBehandlingService(
                 vedtaksvurderingRepository = repository,

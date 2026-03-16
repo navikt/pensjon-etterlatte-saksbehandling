@@ -108,21 +108,15 @@ class VedtakTilbakekrevingService(
         // Behandling sender ut hendelse om attestert vedtak selv for å unngå at brev blir sendt selv om
         // tilbakekrevingsvedtak feiler.
 
-        return repository.inTransaction { tx ->
-            val attestertVedtak =
-                repository.attesterVedtak(
-                    tilbakekrevingId,
-                    Attestasjon(
-                        attestant = brukerTokenInfo.ident(),
-                        attesterendeEnhet = tilbakekrevingVedtakData.enhet,
-                        // Blir ikke brukt for egen now() brukes i db.
-                        tidspunkt = Tidspunkt.now(),
-                    ),
-                    tx,
-                )
-
-            attestertVedtak
-        }
+        return repository.attesterVedtak(
+            tilbakekrevingId,
+            Attestasjon(
+                attestant = brukerTokenInfo.ident(),
+                attesterendeEnhet = tilbakekrevingVedtakData.enhet,
+                // Blir ikke brukt for egen now() brukes i db.
+                tidspunkt = Tidspunkt.now(),
+            ),
+        )
     }
 
     fun tilbakeStillAttestert(behandlingId: UUID): Vedtak {
@@ -132,11 +126,9 @@ class VedtakTilbakekrevingService(
             }
         verifiserGyldigVedtakStatus(vedtak.behandlingId, listOf(VedtakStatus.ATTESTERT))
 
-        return repository.inTransaction { tx ->
-            repository.tilbakestillTilbakekrevingsvedtak(tilbakekrevingId = behandlingId, tx)
-            krevIkkeNull(repository.hentVedtak(behandlingId, tx)) {
-                "Tilbakekrevingen vi akkurat tilbakestilte fins ikke lengre"
-            }
+        repository.tilbakestillTilbakekrevingsvedtak(tilbakekrevingId = behandlingId)
+        return krevIkkeNull(repository.hentVedtak(behandlingId)) {
+            "Tilbakekrevingen vi akkurat tilbakestilte fins ikke lengre"
         }
     }
 

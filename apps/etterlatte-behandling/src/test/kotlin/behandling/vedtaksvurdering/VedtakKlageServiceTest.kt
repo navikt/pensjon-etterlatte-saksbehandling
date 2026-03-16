@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
@@ -49,7 +50,7 @@ import javax.sql.DataSource
 internal class VedtakKlageServiceTest(
     dataSource: DataSource,
 ) {
-    private val vedtaksvurderingRepository = VedtaksvurderingRepository(dataSource)
+    private val vedtaksvurderingRepository = VedtaksvurderingRepository(ConnectionAutoclosingTest(dataSource))
     private val vedtaksvurderingRapidService = mockk<VedtaksvurderingRapidService>()
     private val vedtakKlageService = VedtakKlageService(vedtaksvurderingRepository, vedtaksvurderingRapidService)
 

@@ -210,7 +210,6 @@ import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import javax.sql.DataSource
 
 private fun pdlHttpClient(config: Config) =
     httpClientClientCredentials(
@@ -387,7 +386,7 @@ internal class ApplicationContext(
 
     private val autoClosingDatabase by lazy { ConnectionAutoclosingImpl(dataSource) }
 
-    private val vedtaksvurderingRepository by lazy { VedtaksvurderingRepository(dataSource) }
+    private val vedtaksvurderingRepository by lazy { VedtaksvurderingRepository(autoClosingDatabase) }
 
     val hendelseDao by lazy { HendelseDao(autoClosingDatabase) }
     val kommerBarnetTilGodeDao by lazy { KommerBarnetTilGodeDao(autoClosingDatabase) }
@@ -1068,7 +1067,7 @@ internal class ApplicationContext(
             VedtakInternalService(
                 vedtakTilbakekrevingService = vedtakTilbakekrevingService,
                 vedtakKlageService = vedtakKlageService,
-                vedtakBehandlingService = { vedtakBehandlingService },
+                vedtakBehandlingServiceProvider = { vedtakBehandlingService },
                 vedtaksvurderingService = vedtaksvurderingService,
             )
         } else {

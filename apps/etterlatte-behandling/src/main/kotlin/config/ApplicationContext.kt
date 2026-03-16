@@ -7,7 +7,6 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.EnvKey.BRUK_NY_VEDTAK_KLIENT
 import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
 import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
 import no.nav.etterlatte.EnvKey.HTTP_PORT
@@ -91,7 +90,6 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlientImpl
-import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -112,16 +110,6 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServic
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
-import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
-import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlientImpl
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilbakekrevingService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevKlientImpl
 import no.nav.etterlatte.brev.BrevService
@@ -291,20 +279,12 @@ private fun inntektskomponentKlient(config: Config) =
     )
 
 private fun finnBrukerIdent(): String {
-    val kontekst by lazy { Kontekst.get() }
+    val kontekst = Kontekst.get()
     return when (kontekst) {
         null -> Fagsaksystem.EY.navn
         else -> Kontekst.get().AppUser.name()
     }
 }
-
-private fun samKlient(config: Config) =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("samordnevedtak.azure.scope"),
-    )
 
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler.systemEnv(),
@@ -332,8 +312,7 @@ internal class ApplicationContext(
     val beregningKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val trygdetidKlient: TrygdetidKlient = TrygdetidKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
-    // TODO: Denne trenger egentlig ikke å hete "default" men vi fikser senere.
-    val vedtakKlientOverride: VedtakKlient? = null,
+    val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val brevKlient: BrevKlient = BrevKlientImpl(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
@@ -344,11 +323,7 @@ internal class ApplicationContext(
         ),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
-    val entraProxyKlient: EntraProxyKlient =
-        EntraProxyKlientImpl(
-            entraProxyKlient(config),
-            url = config.getString("entraProxy.url"),
-        ),
+    val entraProxyKlient: EntraProxyKlient = EntraProxyKlientImpl(entraProxyKlient(config), url = config.getString("entraProxy.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
     val skjermingKlient: SkjermingKlient =
@@ -367,110 +342,86 @@ internal class ApplicationContext(
             config.getString("sigrun.url"),
             featureToggleService,
         ),
-    val arbeidOgInntektKlient: ArbeidOgInntektKlient =
-        ArbeidOgInntektKlient(
-            httpClient(),
-            config.getString("arbeidOgInntekt.url"),
-        ),
+    val arbeidOgInntektKlient: ArbeidOgInntektKlient = ArbeidOgInntektKlient(httpClient(), config.getString("arbeidOgInntekt.url")),
     val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
-    val samordningKlient: SamordningsKlient = SamordningsKlientImpl(config, samKlient(config)),
     grunnlagServiceOverride: GrunnlagService? = null,
 ) {
-    private val brukNyVedtakKlientInternal: Boolean = env[BRUK_NY_VEDTAK_KLIENT]?.toBoolean() ?: false
-
-    val httpPort by lazy { env.getOrDefault(HTTP_PORT, "8080").toInt() }
+    val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
-    private val sporingslogg by lazy { Sporingslogg() }
-    val behandlingRequestLogger by lazy { BehandlingRequestLogger(sporingslogg) }
-    val dataSource by lazy { DataSourceBuilder.createDataSource(env) }
+    private val sporingslogg = Sporingslogg()
+    val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
+    val dataSource = DataSourceBuilder.createDataSource(env)
 
-    private val autoClosingDatabase by lazy { ConnectionAutoclosingImpl(dataSource) }
+    // Dao
+    private val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
 
-    private val vedtaksvurderingRepository by lazy { VedtaksvurderingRepository(autoClosingDatabase) }
-
-    val hendelseDao by lazy { HendelseDao(autoClosingDatabase) }
-    val kommerBarnetTilGodeDao by lazy { KommerBarnetTilGodeDao(autoClosingDatabase) }
-    val aktivitetspliktDao by lazy { AktivitetspliktDao(autoClosingDatabase) }
-    val aktivitetspliktAktivitetsgradDao by lazy { AktivitetspliktAktivitetsgradDao(autoClosingDatabase) }
-    private val aktivitetspliktUnntakDao by lazy { AktivitetspliktUnntakDao(autoClosingDatabase) }
-    private val sjekklisteDao by lazy { SjekklisteDao(autoClosingDatabase) }
-    val revurderingDao by lazy { RevurderingDao(autoClosingDatabase) }
-    val behandlingDao by lazy { BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, autoClosingDatabase) }
-    private val generellbehandlingDao by lazy { GenerellBehandlingDao(autoClosingDatabase) }
-    private val behandlingMedBrevDao by lazy { BehandlingMedBrevDao(autoClosingDatabase) }
-    private val oppgaveDaoNy by lazy { OppgaveDaoImpl(autoClosingDatabase) }
-    private val oppgaveDaoEndringer by lazy { OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase) }
-    private val oppgaveKommentarDao by lazy { OppgaveKommentarDaoImpl(autoClosingDatabase) }
-    val sakLesDao by lazy { SakLesDao(autoClosingDatabase) }
-    private val sakendringerDao by lazy { SakendringerDao(autoClosingDatabase) }
-    val sakSkrivDao by lazy { SakSkrivDao(sakendringerDao) }
-    val grunnlagsendringshendelseDao by lazy {
+    val hendelseDao = HendelseDao(autoClosingDatabase)
+    val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(autoClosingDatabase)
+    val aktivitetspliktDao = AktivitetspliktDao(autoClosingDatabase)
+    val aktivitetspliktAktivitetsgradDao = AktivitetspliktAktivitetsgradDao(autoClosingDatabase)
+    private val aktivitetspliktUnntakDao = AktivitetspliktUnntakDao(autoClosingDatabase)
+    private val sjekklisteDao = SjekklisteDao(autoClosingDatabase)
+    val revurderingDao = RevurderingDao(autoClosingDatabase)
+    val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, autoClosingDatabase)
+    private val generellbehandlingDao = GenerellBehandlingDao(autoClosingDatabase)
+    private val behandlingMedBrevDao = BehandlingMedBrevDao(autoClosingDatabase)
+    private val oppgaveDaoNy = OppgaveDaoImpl(autoClosingDatabase)
+    private val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
+    private val oppgaveKommentarDao = OppgaveKommentarDaoImpl(autoClosingDatabase)
+    val sakLesDao = SakLesDao(autoClosingDatabase)
+    private val sakendringerDao = SakendringerDao(autoClosingDatabase)
+    val sakSkrivDao = SakSkrivDao(sakendringerDao)
+    val grunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao(
             autoClosingDatabase,
         )
-    }
-    val institusjonsoppholdDao by lazy { InstitusjonsoppholdDao(autoClosingDatabase) }
-    private val oppgaveMetrikkerDao by lazy { OppgaveMetrikkerDao(dataSource) }
-    private val behandlingMetrikkerDao by lazy { BehandlingMetrikkerDao(dataSource) }
-    private val gjenopprettingMetrikkerDao by lazy { GjenopprettingMetrikkerDao(dataSource) }
-    val klageDao by lazy { KlageDaoImpl(autoClosingDatabase) }
-    val tilbakekrevingDao by lazy { TilbakekrevingDao(autoClosingDatabase) }
-    private val etteroppgjoerForbehandlingDao by lazy { EtteroppgjoerForbehandlingDao(autoClosingDatabase) }
-    private val skatteoppgjoerHendelserDao by lazy { SkatteoppgjoerHendelserDao(autoClosingDatabase) }
-    private val etteroppgjoerDao by lazy { EtteroppgjoerDao(autoClosingDatabase) }
-    val behandlingInfoDao by lazy { BehandlingInfoDao(autoClosingDatabase) }
-    private val bosattUtlandDao by lazy { BosattUtlandDao(autoClosingDatabase) }
-    private val saksbehandlerInfoDao by lazy { SaksbehandlerInfoDao(autoClosingDatabase) }
-    private val aktivitetspliktBrevDao by lazy { AktivitetspliktBrevDao(autoClosingDatabase) }
-    private val doedshendelseDao by lazy { DoedshendelseDao(autoClosingDatabase) }
-    private val omregningDao by lazy { OmregningDao(autoClosingDatabase) }
-    val sakTilgangDao by lazy { SakTilgangDao(dataSource) }
-    private val vilkaarsvurderingDao by lazy { VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao()) }
-    private val ukjentBeroertDao by lazy { UkjentBeroertDao(autoClosingDatabase) }
+    val institusjonsoppholdDao = InstitusjonsoppholdDao(autoClosingDatabase)
+    private val oppgaveMetrikkerDao = OppgaveMetrikkerDao(dataSource)
+    private val behandlingMetrikkerDao = BehandlingMetrikkerDao(dataSource)
+    private val gjenopprettingMetrikkerDao = GjenopprettingMetrikkerDao(dataSource)
+    val klageDao = KlageDaoImpl(autoClosingDatabase)
+    val tilbakekrevingDao = TilbakekrevingDao(autoClosingDatabase)
+    private val etteroppgjoerForbehandlingDao = EtteroppgjoerForbehandlingDao(autoClosingDatabase)
+    private val skatteoppgjoerHendelserDao = SkatteoppgjoerHendelserDao(autoClosingDatabase)
+    private val etteroppgjoerDao = EtteroppgjoerDao(autoClosingDatabase)
+    val behandlingInfoDao = BehandlingInfoDao(autoClosingDatabase)
+    private val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
+    private val saksbehandlerInfoDao = SaksbehandlerInfoDao(autoClosingDatabase)
+    private val aktivitetspliktBrevDao = AktivitetspliktBrevDao(autoClosingDatabase)
+    private val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
+    private val omregningDao = OmregningDao(autoClosingDatabase)
+    val sakTilgangDao = SakTilgangDao(dataSource)
+    private val vilkaarsvurderingDao = VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao())
+    private val ukjentBeroertDao = UkjentBeroertDao(autoClosingDatabase)
 
-    private val leaderElectionKlient by lazy { LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient) }
+    // Klient
+    private val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
-    private val klageKlient by lazy {
-        KlageKlientImpl(
-            klageHttpClient,
-            url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL),
-        )
-    }
-    private val deodshendelserProducer by lazy { DoedshendelserKafkaServiceImpl(rapid) }
-    val kodeverkService by lazy { KodeverkService(kodeverkKlient) }
-    val behandlingsHendelser by lazy { BehandlingsHendelserKafkaProducerImpl(rapid) }
+    private val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
+    private val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
+    val kodeverkService = KodeverkService(kodeverkKlient)
 
-    private val klageHendelser by lazy { KlageHendelserServiceImpl(rapid) }
-    private val tilbakekrevingHendelserService by lazy { TilbakekrevingHendelserServiceImpl(rapid) }
-    val saksbehandlerService: SaksbehandlerService by lazy {
-        SaksbehandlerServiceImpl(
-            saksbehandlerInfoDao,
-            navAnsattKlient,
-            entraProxyKlient,
-        )
-    }
-    val oppgaveService by lazy {
-        OppgaveService(
-            oppgaveDaoEndringer,
-            sakLesDao,
-            hendelseDao,
-            behandlingsHendelser,
-            saksbehandlerService,
-        )
-    }
-    val oppgaveKommentarService by lazy { OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao) }
+    val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
-    private val aldersovergangDao by lazy { AldersovergangDao(dataSource) }
+    // Service
+    private val klageHendelser = KlageHendelserServiceImpl(rapid)
+    private val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
+    val saksbehandlerService: SaksbehandlerService =
+        SaksbehandlerServiceImpl(saksbehandlerInfoDao, navAnsattKlient, entraProxyKlient)
+    val oppgaveService =
+        OppgaveService(oppgaveDaoEndringer, sakLesDao, hendelseDao, behandlingsHendelser, saksbehandlerService)
+    val oppgaveKommentarService = OppgaveKommentarService(oppgaveKommentarDao, oppgaveService, sakLesDao)
 
-    val opplysningDao by lazy { OpplysningDao(dataSource) }
+    private val aldersovergangDao = AldersovergangDao(dataSource)
 
-    val nyAldersovergangService by lazy {
+    val opplysningDao = OpplysningDao(dataSource)
+
+    val nyAldersovergangService =
         no.nav.etterlatte.grunnlag.aldersovergang
             .AldersovergangService(aldersovergangDao)
-    }
 
-    val sakTilgang: SakTilgang by lazy { SakTilgangImpl(sakSkrivDao, sakLesDao) }
-    val oppdaterTilgangService by lazy {
+    val sakTilgang: SakTilgang = SakTilgangImpl(sakSkrivDao, sakLesDao)
+    val oppdaterTilgangService =
         OppdaterTilgangService(
             skjermingKlient = skjermingKlient,
             pdltjenesterKlient = pdlTjenesterKlient,
@@ -481,27 +432,19 @@ internal class ApplicationContext(
             sakLesDao = sakLesDao,
             featureToggleService = featureToggleService,
         )
-    }
 
-    val grunnlagService: GrunnlagService by lazy {
+    val grunnlagService: GrunnlagService =
         grunnlagServiceOverride ?: GrunnlagServiceImpl(
             pdlTjenesterKlient,
             opplysningDao,
             GrunnlagHenter(pdlTjenesterKlient),
             oppdaterTilgangService,
         )
-    }
 
-    private val etteroppgjoerHendelseService by lazy {
-        EtteroppgjoerForbehandlingHendelseService(
-            rapid,
-            hendelseDao,
-            etteroppgjoerForbehandlingDao,
-        )
-    }
-    private val etteroppgjoerOppgaveService by lazy { EtteroppgjoerOppgaveService(oppgaveService) }
+    private val etteroppgjoerHendelseService = EtteroppgjoerForbehandlingHendelseService(rapid, hendelseDao, etteroppgjoerForbehandlingDao)
+    private val etteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
 
-    val behandlingService by lazy {
+    val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
@@ -516,8 +459,7 @@ internal class ApplicationContext(
             etteroppgjoerForbehandlingHendelseService = etteroppgjoerHendelseService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
-    }
-    val generellBehandlingService by lazy {
+    val generellBehandlingService =
         GenerellBehandlingService(
             generellbehandlingDao,
             oppgaveService,
@@ -526,17 +468,16 @@ internal class ApplicationContext(
             hendelseDao,
             saksbehandlerInfoDao,
         )
-    }
-    val behandlingMedBrevService by lazy {
+    val behandlingMedBrevService =
         BehandlingMedBrevService(
             behandlingMedBrevDao,
         )
-    }
-    val kommerBarnetTilGodeService by lazy { KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao) }
-    val sjekklisteService by lazy { SjekklisteService(sjekklisteDao, behandlingService, oppgaveService) }
+    val kommerBarnetTilGodeService =
+        KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
+    val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
-    private val klageBrevService by lazy { KlageBrevService(brevApiKlient) }
-    val klageService by lazy {
+    private val klageBrevService = KlageBrevService(brevApiKlient)
+    val klageService =
         KlageServiceImpl(
             klageDao = klageDao,
             sakDao = sakLesDao,
@@ -549,16 +490,11 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             klageBrevService = klageBrevService,
         )
-    }
 
-    val aktivitetspliktKopierService by lazy {
-        AktivitetspliktKopierService(
-            aktivitetspliktAktivitetsgradDao,
-            aktivitetspliktUnntakDao,
-        )
-    }
+    val aktivitetspliktKopierService =
+        AktivitetspliktKopierService(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao)
 
-    val revurderingService by lazy {
+    val revurderingService =
         RevurderingService(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagService,
@@ -570,8 +506,7 @@ internal class ApplicationContext(
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
-    }
-    val automatiskRevurderingService by lazy {
+    val automatiskRevurderingService =
         AutomatiskRevurderingService(
             revurderingService,
             behandlingService,
@@ -579,8 +514,7 @@ internal class ApplicationContext(
             vedtakKlient,
             beregningKlient,
         )
-    }
-    val manuellRevurderingService by lazy {
+    val manuellRevurderingService =
         ManuellRevurderingService(
             revurderingService = revurderingService,
             behandlingService = behandlingService,
@@ -588,8 +522,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
         )
-    }
-    val omgjoeringKlageRevurderingService by lazy {
+    val omgjoeringKlageRevurderingService =
         OmgjoeringKlageRevurderingService(
             revurderingService = revurderingService,
             oppgaveService = oppgaveService,
@@ -597,9 +530,8 @@ internal class ApplicationContext(
             behandlingDao = behandlingDao,
             grunnlagService = grunnlagService,
         )
-    }
 
-    val aktivitetspliktService by lazy {
+    val aktivitetspliktService =
         AktivitetspliktService(
             aktivitetspliktDao = aktivitetspliktDao,
             aktivitetspliktAktivitetsgradDao = aktivitetspliktAktivitetsgradDao,
@@ -612,24 +544,21 @@ internal class ApplicationContext(
             aktivitetspliktKopierService = aktivitetspliktKopierService,
             featureToggleService = featureToggleService,
         )
-    }
-    val gyldighetsproevingService by lazy {
+    val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
             behandlingDao = behandlingDao,
         )
-    }
 
-    val omregningService by lazy {
+    val omregningService =
         OmregningService(
             behandlingService = behandlingService,
             omregningDao = omregningDao,
             oppgaveService = oppgaveService,
         )
-    }
 
-    val tilgangService by lazy { TilgangServiceSjekkerImpl(sakTilgangDao) }
+    val tilgangService = TilgangServiceSjekkerImpl(sakTilgangDao)
 
-    private val externalServices: List<Pingable> by lazy {
+    private val externalServices: List<Pingable> =
         listOf(
             entraProxyKlient,
             navAnsattKlient,
@@ -638,10 +567,9 @@ internal class ApplicationContext(
             klageKlient,
             tilbakekrevingKlient,
         )
-    }
-    val selfTestService by lazy { SelfTestService(externalServices) }
+    val selfTestService = SelfTestService(externalServices)
 
-    val sakService by lazy {
+    val sakService =
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
@@ -656,9 +584,8 @@ internal class ApplicationContext(
             sakTilgang,
             nyAldersovergangService,
         )
-    }
 
-    val etteroppgjoerService by lazy {
+    val etteroppgjoerService =
         EtteroppgjoerService(
             dao = etteroppgjoerDao,
             vedtakKlient = vedtakKlient,
@@ -668,27 +595,13 @@ internal class ApplicationContext(
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             hendelseDao = hendelseDao,
         )
-    }
 
-    val etteroppgjoerDataService by lazy {
-        EtteroppgjoerDataService(
-            behandlingService,
-            featureToggleService,
-            vedtakKlient,
-            beregningKlient,
-        )
-    }
+    val etteroppgjoerDataService = EtteroppgjoerDataService(behandlingService, featureToggleService, vedtakKlient, beregningKlient)
 
-    val doedshendelseService by lazy {
-        DoedshendelseService(
-            doedshendelseDao,
-            pdlTjenesterKlient,
-            gosysOppgaveKlient,
-            ukjentBeroertDao,
-        )
-    }
+    val doedshendelseService =
+        DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, gosysOppgaveKlient, ukjentBeroertDao)
 
-    val inntektsjusteringSelvbetjeningService by lazy {
+    val inntektsjusteringSelvbetjeningService =
         InntektsjusteringSelvbetjeningService(
             oppgaveService = oppgaveService,
             behandlingService = behandlingService,
@@ -697,22 +610,19 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             beregningKlient = beregningKlient,
         )
-    }
 
-    private val inntektskomponentService by lazy {
+    private val inntektskomponentService =
         InntektskomponentService(
             klient = inntektskomponentKlient,
             featureToggleService = featureToggleService,
         )
-    }
 
-    private val pensjonsgivendeInntektService: PensjonsgivendeInntektService by lazy {
+    private val pensjonsgivendeInntektService: PensjonsgivendeInntektService =
         PensjonsgivendeInntektService(
             sigrunKlient = sigrunKlient,
         )
-    }
 
-    val etteroppgjoerForbehandlingService by lazy {
+    val etteroppgjoerForbehandlingService =
         EtteroppgjoerForbehandlingService(
             dao = etteroppgjoerForbehandlingDao,
             etteroppgjoerService = etteroppgjoerService,
@@ -727,9 +637,8 @@ internal class ApplicationContext(
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             etteroppgjoerDataService = etteroppgjoerDataService,
         )
-    }
 
-    val aarligInntektsjusteringJobbService by lazy {
+    val aarligInntektsjusteringJobbService =
         AarligInntektsjusteringJobbService(
             omregningService = omregningService,
             sakService = sakService,
@@ -745,15 +654,9 @@ internal class ApplicationContext(
             aldersovergangService = nyAldersovergangService,
             etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
         )
-    }
 
-    private val grunnlagsendringsHendelseFilter by lazy {
-        GrunnlagsendringsHendelseFilter(
-            vedtakKlient,
-            behandlingService,
-        )
-    }
-    val grunnlagsendringshendelseService by lazy {
+    private val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
+    val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
@@ -765,17 +668,10 @@ internal class ApplicationContext(
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
             tilgangsService = oppdaterTilgangService,
         )
-    }
 
-    private val doedshendelseReminderJob by lazy {
-        DoedshendelseReminderService(
-            doedshendelseDao,
-            behandlingService,
-            oppgaveService,
-            sakLesDao,
-        )
-    }
-    private val doedshendelseJobService by lazy {
+    private val doedshendelseReminderJob =
+        DoedshendelseReminderService(doedshendelseDao, behandlingService, oppgaveService, sakLesDao)
+    private val doedshendelseJobService =
         DoedshendelseJobService(
             doedshendelseDao = doedshendelseDao,
             doedshendelseKontrollpunktService =
@@ -795,9 +691,8 @@ internal class ApplicationContext(
             pdlTjenesterKlient = pdlTjenesterKlient,
             krrKlient = krrKlient,
         )
-    }
 
-    val behandlingsStatusService by lazy {
+    val behandlingsStatusService =
         BehandlingStatusServiceImpl(
             behandlingDao,
             behandlingService,
@@ -811,19 +706,12 @@ internal class ApplicationContext(
             etteroppgjoerForbehandlingService,
             grunnlagService,
         )
-    }
 
-    val behandlingInfoService by lazy {
-        BehandlingInfoService(
-            behandlingInfoDao,
-            behandlingService,
-            behandlingsStatusService,
-        )
-    }
+    val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)
 
-    val bosattUtlandService by lazy { BosattUtlandService(bosattUtlandDao = bosattUtlandDao) }
+    val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
 
-    val tilbakekrevingBrevService by lazy {
+    val tilbakekrevingBrevService =
         TilbakekrevingBrevService(
             sakService,
             brevKlient,
@@ -831,18 +719,16 @@ internal class ApplicationContext(
             vedtakKlient,
             grunnlagService,
         )
-    }
 
-    val lesSkatteoppgjoerHendelserJobService by lazy {
+    val lesSkatteoppgjoerHendelserJobService =
         LesSkatteoppgjoerHendelserJobService(
             dao = skatteoppgjoerHendelserDao,
             sigrunKlient = sigrunKlient,
             etteroppgjoerService = etteroppgjoerService,
             sakService = sakService,
         )
-    }
 
-    private val etteroppgjoerRevurderingBrevService by lazy {
+    private val etteroppgjoerRevurderingBrevService =
         EtteroppgjoerRevurderingBrevService(
             grunnlagService = grunnlagService,
             vedtakKlient = vedtakKlient,
@@ -853,18 +739,16 @@ internal class ApplicationContext(
             brevApiKlient = brevApiKlient,
             etteroppgjoerService = etteroppgjoerService,
         )
-    }
 
-    private val uttrekkLoependeYtelseEtter67JobService by lazy {
+    private val uttrekkLoependeYtelseEtter67JobService =
         UttrekkLoependeYtelseEtter67JobService(
             vedtakKlient,
             sakService,
             nyAldersovergangService,
             featureToggleService,
         )
-    }
 
-    val etteroppgjoerForbehandlingBrevService by lazy {
+    val etteroppgjoerForbehandlingBrevService =
         EtteroppgjoerForbehandlingBrevService(
             brevKlient = brevKlient,
             grunnlagService = grunnlagService,
@@ -872,18 +756,16 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
         )
-    }
 
-    val vilkaarsvurderingService by lazy {
+    val vilkaarsvurderingService =
         VilkaarsvurderingService(
             vilkaarsvurderingDao,
             behandlingService,
             grunnlagService,
             behandlingsStatusService,
         )
-    }
 
-    private val vedtaksbrevService by lazy {
+    private val vedtaksbrevService =
         VedtaksbrevService(
             grunnlagService = grunnlagService,
             vedtakKlient = vedtakKlient,
@@ -897,9 +779,8 @@ internal class ApplicationContext(
             klageService = klageService,
             kodeverkService = kodeverkService,
         )
-    }
 
-    val brevService by lazy {
+    val brevService =
         BrevService(
             behandlingMedBrevService = behandlingMedBrevService,
             behandlingService = behandlingService,
@@ -910,9 +791,8 @@ internal class ApplicationContext(
             etteroppgjoerRevurderingBrevService = etteroppgjoerRevurderingBrevService,
             vedtaksbrevService = vedtaksbrevService,
         )
-    }
 
-    val tilbakekrevingService by lazy {
+    val tilbakekrevingService =
         TilbakekrevingService(
             tilbakekrevingDao = tilbakekrevingDao,
             sakDao = sakLesDao,
@@ -925,34 +805,26 @@ internal class ApplicationContext(
             tilbakekrevingKlient = tilbakekrevingKlient,
             tilbakekrevinghendelser = tilbakekrevingHendelserService,
         )
-    }
 
-    private val saksbehandlerJobService by lazy {
-        SaksbehandlerJobService(
-            saksbehandlerInfoDao,
-            navAnsattKlient,
-            entraProxyKlient,
-        )
-    }
+    private val saksbehandlerJobService =
+        SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, entraProxyKlient)
 
-    val oppdaterSkatteoppgjoerIkkeMottattJobService by lazy {
+    val oppdaterSkatteoppgjoerIkkeMottattJobService =
         OppdaterSkatteoppgjoerIkkeMottattJobService(
             featureToggleService,
             etteroppgjoerOppgaveService,
             etteroppgjoerService,
             vedtakKlient,
         )
-    }
 
-    val etteroppgjoerSvarfristUtloeptJobService by lazy {
+    val etteroppgjoerSvarfristUtloeptJobService =
         EtteroppgjoerSvarfristUtloeptJobService(
             etteroppgjoerService,
             oppgaveService,
             featureToggleService,
         )
-    }
 
-    private val aktivitetspliktOppgaveUnntakUtloeperJobService by lazy {
+    private val aktivitetspliktOppgaveUnntakUtloeperJobService =
         AktivitetspliktOppgaveUnntakUtloeperJobService(
             aktivitetspliktDao,
             aktivitetspliktService,
@@ -960,9 +832,8 @@ internal class ApplicationContext(
             vedtakKlient,
             featureToggleService,
         )
-    }
 
-    val gosysOppgaveService by lazy {
+    val gosysOppgaveService =
         GosysOppgaveServiceImpl(
             gosysOppgaveKlient,
             oppgaveService,
@@ -970,10 +841,9 @@ internal class ApplicationContext(
             saksbehandlerInfoDao,
             pdlTjenesterKlient,
         )
-    }
-    val aldersovergangService by lazy { AldersovergangService(vilkaarsvurderingService) }
+    val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
 
-    val behandlingFactory by lazy {
+    val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagService,
@@ -988,9 +858,8 @@ internal class ApplicationContext(
             behandlingInfoService = behandlingInfoService,
             tilgangsService = oppdaterTilgangService,
         )
-    }
 
-    val etteroppgjoerRevurderingService by lazy {
+    val etteroppgjoerRevurderingService =
         EtteroppgjoerRevurderingService(
             behandlingService,
             etteroppgjoerService,
@@ -1002,15 +871,13 @@ internal class ApplicationContext(
             beregningKlient,
             etteroppgjoerDataService,
         )
-    }
 
-    val migreringService by lazy {
+    val migreringService =
         MigreringService(
             behandlingService = behandlingService,
         )
-    }
 
-    val aktivitetspliktOppgaveService by lazy {
+    val aktivitetspliktOppgaveService =
         AktivitetspliktOppgaveService(
             aktivitetspliktService = aktivitetspliktService,
             oppgaveService = oppgaveService,
@@ -1020,61 +887,8 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             beregningKlient = beregningKlient,
         )
-    }
 
-    val vedtaksvurderingService by lazy { VedtaksvurderingService(vedtaksvurderingRepository) }
-    val vedtakBehandlingService by lazy {
-        VedtakBehandlingService(
-            vedtaksvurderingRepository = vedtaksvurderingRepository,
-            beregningKlient = beregningKlient,
-            vilkaarsvurderingService = vilkaarsvurderingService,
-            behandlingStatusService = behandlingsStatusService,
-            behandlingService = behandlingService,
-            samordningsKlient = samordningKlient,
-            trygdetidKlient = trygdetidKlient,
-            etteroppgjorRevurderingService = etteroppgjoerRevurderingService,
-            sakLesDao = sakLesDao,
-        )
-    }
-
-    val vedtaksvurderingRapidService by lazy {
-        VedtaksvurderingRapidService(
-            publiser = { key, melding -> rapid.publiser(key.toString(), verdi = melding) },
-        )
-    }
-    val vedtakKlageService: VedtakKlageService by lazy {
-        VedtakKlageService(
-            vedtaksvurderingRepository = vedtaksvurderingRepository,
-            vedtaksvurderingRapidService = vedtaksvurderingRapidService,
-        )
-    }
-    val vedtakSamordningService by lazy { VedtakSamordningService(vedtaksvurderingRepository) }
-    val vedtakEtteroppgjoerService by lazy {
-        VedtakEtteroppgjoerService(
-            repository = vedtaksvurderingRepository,
-            vedtakSamordningService = vedtakSamordningService,
-        )
-    }
-    val vedtakTilbakekrevingService: VedtakTilbakekrevingService by lazy {
-        VedtakTilbakekrevingService(
-            repository = vedtaksvurderingRepository,
-            featureToggleService = featureToggleService,
-        )
-    }
-
-    val vedtakKlient: VedtakKlient by lazy {
-        vedtakKlientOverride ?: if (brukNyVedtakKlientInternal) {
-            VedtakInternalService(
-                vedtakTilbakekrevingService = vedtakTilbakekrevingService,
-                vedtakKlageService = vedtakKlageService,
-                vedtakBehandlingServiceProvider = { vedtakBehandlingService },
-                vedtaksvurderingService = vedtaksvurderingService,
-            )
-        } else {
-            VedtakKlientImpl(config, httpClient())
-        }
-    }
-
+    // Jobs
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, gjenopprettingMetrikkerDao),

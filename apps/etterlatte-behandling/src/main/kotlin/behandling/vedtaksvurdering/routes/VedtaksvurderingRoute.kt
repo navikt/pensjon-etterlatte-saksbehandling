@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -55,6 +56,7 @@ fun Route.vedtaksvurderingRoute(
 
         post("/sak/{$SAKID_CALL_PARAMETER}/samordning/melding") {
             val oppdatering = call.receive<OppdaterSamordningsmelding>()
+
             logger.info("Oppdaterer samordningsmelding=${oppdatering.samId}, sak=$sakId")
             inTransaction { runBlocking { vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo) } }
             rapidService.sendGenerellHendelse(
@@ -89,6 +91,7 @@ fun Route.vedtaksvurderingRoute(
                 krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) {
                     "Inntektsaar mangler"
                 }
+
             logger.info("Sjekker om sak $sakId har utbetaling for inntektsår $inntektsaar")
             val harUtbetaling = inTransaction { vedtakService.harSakUtbetalingForInntektsaar(sakId, inntektsaar) }
             call.respond(mapOf("harUtbetaling" to harUtbetaling))
@@ -165,6 +168,7 @@ fun Route.vedtaksvurderingRoute(
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak = inTransaction { runBlocking { vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo) } }
                 rapidService.sendToRapid(fattetVedtak)
+
                 call.respond(fattetVedtak.vedtak)
             }
         }
@@ -211,6 +215,7 @@ fun Route.vedtaksvurderingRoute(
                         }
                     }
                 rapidService.sendToRapid(underkjentVedtak)
+
                 call.respond(underkjentVedtak.vedtak)
             }
         }
@@ -249,6 +254,7 @@ fun Route.vedtaksvurderingRoute(
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
                 val vedtak = inTransaction { vedtakBehandlingService.iverksattVedtak(behandlingId) }
                 rapidService.sendToRapid(vedtak)
+
                 call.respond(HttpStatusCode.OK, vedtak.vedtak)
             }
         }
@@ -257,6 +263,7 @@ fun Route.vedtaksvurderingRoute(
             val dato =
                 call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
                     ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
+
             logger.info("Sjekker om sak har løpende for vedtak $sakId på dato $dato")
             val loependeYtelse = inTransaction { vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(sakId, dato) }
             call.respond(loependeYtelse.toDto())
@@ -284,6 +291,7 @@ fun Route.vedtaksvurderingRoute(
                     krevIkkeNull(call.parameters["vedtakId"]?.toLong()) {
                         "VedtakId mangler"
                     }
+
                 val vedtak =
                     inTransaction {
                         vedtakService.hentVedtak(vedtakId)

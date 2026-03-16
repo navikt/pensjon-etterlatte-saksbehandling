@@ -1,6 +1,6 @@
-import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
-import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
-import { JaNei } from '~shared/types/ISvar'
+import {useEtteroppgjoerForbehandling} from '~store/reducers/EtteroppgjoerReducer'
+import {BodyShort, Heading, Label, VStack} from '@navikt/ds-react'
+import {JaNei} from '~shared/types/ISvar'
 
 export const InformasjonFraBrukerVisning = () => {
   const { forbehandling } = useEtteroppgjoerForbehandling()
@@ -13,7 +13,7 @@ export const InformasjonFraBrukerVisning = () => {
       </VStack>
       {!!forbehandling.endringErTilUgunstForBruker && (
         <VStack gap="2">
-          <Label>Er endringen til ugunst for bruker?</Label>
+          <Label>Er endringen til ugunst for bruker fordi det er Nav som har oppdaget feilen?</Label>
           <BodyShort>{forbehandling.endringErTilUgunstForBruker === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
         </VStack>
       )}

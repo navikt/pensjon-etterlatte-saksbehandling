@@ -212,7 +212,7 @@ class BehandlingDao(
                     .getString("tidligere_familiepleier")
                     ?.let { objectMapper.readValue(it) },
             erSluttbehandling = rs.getBoolean("omgjoering_sluttbehandling"),
-            relatertBehandlingId = rs.getString("relatert_behandling"),
+            relatertBehandlingId = rs.getString("relatert_behandling")?.let { UUID.fromString(it) },
         )
     }
 
@@ -261,7 +261,7 @@ class BehandlingDao(
                     stmt.setString(12, prosesstype.toString())
                     stmt.setString(13, vedtaksloesning.toString())
                     stmt.setString(14, begrunnelse)
-                    stmt.setString(15, relatertBehandlingId)
+                    stmt.setObject(15, relatertBehandlingId)
                     stmt.setBoolean(16, sendeBrev)
                     stmt.setString(17, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
                     stmt.setJsonb(18, tidligereFamiliepleier)

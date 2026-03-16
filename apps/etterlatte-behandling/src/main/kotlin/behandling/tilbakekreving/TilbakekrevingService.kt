@@ -440,7 +440,7 @@ class TilbakekrevingService(
         oppgaveService.tilAttestering(
             referanse = tilbakekreving.id.toString(),
             type = OppgaveType.TILBAKEKREVING,
-            merknad = "Tilbakekreving kan attesteres",
+            merknad = "Tilbakekreving behandlet av ${saksbehandler.ident} kan attesteres",
         )
 
         oppdatertTilbakekreving

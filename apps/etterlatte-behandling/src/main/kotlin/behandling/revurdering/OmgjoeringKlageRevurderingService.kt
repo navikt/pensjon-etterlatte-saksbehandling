@@ -82,7 +82,7 @@ class OmgjoeringKlageRevurderingService(
                 virkningstidspunkt = behandlingSomOmgjoeres.virkningstidspunkt,
                 begrunnelse = "Omgjøring på grunn av klage",
                 saksbehandlerIdent = saksbehandler.ident,
-                relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id.toString(),
+                relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id,
                 opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
             ).oppdater()
             .also {

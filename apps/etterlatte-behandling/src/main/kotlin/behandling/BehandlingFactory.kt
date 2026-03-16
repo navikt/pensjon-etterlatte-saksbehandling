@@ -220,13 +220,17 @@ class BehandlingFactory(
                         },
                     merknad =
                         when (kilde) {
-                            Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
-                            else ->
+                            Vedtaksloesning.GJENOPPRETTA -> {
+                                "Manuell gjenopprettelse av opphørt sak i Pesys"
+                            }
+
+                            else -> {
                                 opprettMerknad(
                                     request.sak,
                                     persongalleri,
                                     behandling.id,
                                 )
+                            }
                         },
                     gruppeId = persongalleri.avdoed.firstOrNull(),
                     soeknadMottattDato = behandling.soeknadMottattDato,
@@ -288,7 +292,7 @@ class BehandlingFactory(
                         if (omgjoeringsOppgave == null) {
                             throw AvslagOmgjoering.HarIkkeOmgjoeringsoppgaveUnderBehandling()
                         }
-                        omgjoeringsOppgave.referanse
+                        omgjoeringsOppgave.referanse.takeIf { it.isNotEmpty() }?.let { UUID.fromString(it) }
                     } else {
                         if (omgjoeringsOppgaver.any { !it.erAvsluttet() }) throw AvslagOmgjoering.AapenOmgjoeringISak()
                         null
@@ -490,7 +494,7 @@ class BehandlingFactory(
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
         opprinnelse: BehandlingOpprinnelse,
-        relatertBehandlingsId: String? = null,
+        relatertBehandlingsId: UUID? = null,
     ): Behandling {
         if (behandlingerUnderBehandling.isNotEmpty()) {
             throw InternfeilException(

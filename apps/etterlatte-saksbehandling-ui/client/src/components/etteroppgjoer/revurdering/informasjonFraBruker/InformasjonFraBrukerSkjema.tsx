@@ -1,19 +1,19 @@
-import { Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
-import { FieldErrors, useForm } from 'react-hook-form'
-import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
+import {Box, Button, HStack, Radio, Textarea, VStack} from '@navikt/ds-react'
+import {FieldErrors, useForm} from 'react-hook-form'
+import {IInformasjonFraBruker} from '~shared/types/EtteroppgjoerForbehandling'
 import {
   addDetaljertEtteroppgjoerForbehandling,
   useEtteroppgjoerForbehandling,
 } from '~store/reducers/EtteroppgjoerReducer'
-import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentEtteroppgjoerForbehandling, lagreInformasjonFraBruker } from '~shared/api/etteroppgjoer'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { isPending } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppDispatch } from '~store/Store'
-import { JaNei } from '~shared/types/ISvar'
-import { Dispatch, SetStateAction } from 'react'
+import {ControlledRadioGruppe} from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import {useApiCall} from '~shared/hooks/useApiCall'
+import {hentEtteroppgjoerForbehandling, lagreInformasjonFraBruker} from '~shared/api/etteroppgjoer'
+import {IDetaljertBehandling} from '~shared/types/IDetaljertBehandling'
+import {isPending} from '~shared/api/apiUtils'
+import {isFailureHandler} from '~shared/api/IsFailureHandler'
+import {useAppDispatch} from '~store/Store'
+import {JaNei} from '~shared/types/ISvar'
+import {Dispatch, SetStateAction} from 'react'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -89,7 +89,8 @@ export const InformasjonFraBrukerSkjema = ({
             <ControlledRadioGruppe
               name="endringErTilUgunstForBruker"
               control={control}
-              legend="Er endringen til ugunst for bruker?"
+              legend="Er endringen til ugunst for bruker fordi det  er Nav som har oppdaget feilen?"
+              description="Dersom bruker selv har kommet med tilsvar som fører til mer feilutbetaling, blir svaret nei."
               errorVedTomInput="Du må ta stilling til om endringen er til ugunst for bruker"
               readOnly={!erRedigerbar}
               radios={

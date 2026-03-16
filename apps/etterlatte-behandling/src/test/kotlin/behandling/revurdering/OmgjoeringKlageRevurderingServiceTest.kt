@@ -203,7 +203,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
         val revurderingOmgjoering =
             inTransaction { revurderingService.opprettOmgjoeringKlage(sak.id, oppgaveForOmgjoering.id, saksbehandler) }
 
-        assertEquals(revurderingOmgjoering.relatertBehandlingId, klage.id.toString())
+        assertEquals(revurderingOmgjoering.relatertBehandlingId, klage.id)
         assertEquals(revurderingOmgjoering.revurderingsaarsak, Revurderingaarsak.OMGJOERING_ETTER_KLAGE)
 
         inTransaction { applicationContext.behandlingService.avbrytBehandling(revurderingOmgjoering.id, saksbehandler) }

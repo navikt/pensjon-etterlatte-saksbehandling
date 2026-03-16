@@ -395,7 +395,7 @@ class EtteroppgjoerForbehandlingService(
                     dao.lagreForbehandling(it)
                     behandlingService
                         .hentBehandlingerForSak(it.sak.id)
-                        .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id.toString() }
+                        .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id }
                         ?.let { revurdering -> behandlingService.settBeregnet(revurdering.id, brukerTokenInfo) }
                 }
 
@@ -499,12 +499,15 @@ class EtteroppgjoerForbehandlingService(
         val sisteVedtakMedAvkorting = etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe)
         val avkorting =
             runBlocking {
-                beregningKlient.hentBeregningOgAvkorting(
+                beregningKlient.hentAvkorting(
                     sisteVedtakMedAvkorting.behandlingId,
                     brukerTokenInfo,
                 )
             }
-        val perioderForEtteroppgjoeret = avkorting.perioder.filter { it.periode.fom.year == inntektsaar }
+                ?: throw InternfeilException(
+                    "Kunne ikke finne avkorting for siste iverksatte behandling med avkorting (${sisteIverksatteBehandling.id}) i sak ${sak.id}",
+                )
+        val perioderForEtteroppgjoeret = avkorting.avkortetYtelse.filter { it.fom.year == inntektsaar }
         if (perioderForEtteroppgjoeret.isEmpty()) {
             throw InternfeilException(
                 "Kunne ikke finne avkortingsperioder for etteroppgjørsåret $inntektsaar i sak ${sak.id}. " +

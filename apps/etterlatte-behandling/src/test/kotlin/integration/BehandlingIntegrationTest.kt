@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.config.modules.KlientModule
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
@@ -61,6 +62,21 @@ abstract class BehandlingIntegrationTest {
         mockOAuth2Server.start()
         val props = dbExtension.properties()
 
+        val testConfig =
+            ConfigFactory.parseMap(
+                mapOf(
+                    "pdltjenester.url" to "http://localhost",
+                    "grunnlag.resource.url" to "http://localhost",
+                    "vedtak.resource.url" to "http://localhost",
+                    "krr.url" to "http://localhost",
+                    "arbeidOgInntekt.url" to "http://localhost",
+                    "azure.app.client.id" to "test-client-id",
+                    "azure.app.jwk" to "test-jwk",
+                    "azure.app.well.known.url" to "wellKnownUrl",
+                    "brev-api.resource.url" to "http://localhost",
+                ),
+            )
+
         var systemEnv = Miljoevariabler.systemEnv()
         mapOf(
             KafkaKey.KAFKA_RAPID_TOPIC to "test",
@@ -88,44 +104,40 @@ abstract class BehandlingIntegrationTest {
             EnvKey.ETTERLATTE_MIGRERING_URL to "http://localhost",
             TestEnvKey.OPPGAVE_SCOPE to "scope",
         ).forEach { i -> systemEnv = systemEnv.append(i.key, { i.value }) }
+
         applicationContext =
             ApplicationContext(
                 env = systemEnv,
-                config =
-                    ConfigFactory.parseMap(
-                        mapOf(
-                            "pdltjenester.url" to "http://localhost",
-                            "grunnlag.resource.url" to "http://localhost",
-                            "vedtak.resource.url" to "http://localhost",
-                            "krr.url" to "http://localhost",
-                            "arbeidOgInntekt.url" to "http://localhost",
-                            "azure.app.well.known.url" to "wellKnownUrl",
-                            "brev-api.resource.url" to "http://localhost",
-                        ),
-                    ),
+                config = testConfig,
                 rapid = testProdusent ?: TestProdusent(),
                 featureToggleService = featureToggleService,
-                skjermingKlient = skjermingKlient ?: SkjermingKlientTest(),
-                leaderElectionHttpClient = leaderElection(),
-                navAnsattKlient = NavAnsattKlientTest(),
-                norg2Klient = norg2Klient ?: Norg2KlientTest(),
+                klientModuleOverride =
+                    KlientModule(
+                        config = testConfig,
+                        env = systemEnv,
+                        featureToggleService = featureToggleService,
+                        navAnsattKlientOverride = NavAnsattKlientTest(),
+                        norg2KlientOverride = norg2Klient ?: Norg2KlientTest(),
+                        leaderElectionHttpClientOverride = leaderElection(),
+                        beregningKlientOverride = spyk(BeregningKlientTest()),
+                        trygdetidKlientOverride = TrygdetidKlientTest(),
+                        gosysOppgaveKlientOverride = GosysOppgaveKlientTest(),
+                        brevApiKlientOverride = brevApiKlient ?: BrevApiKlientTest(),
+                        brevKlientOverride = brevKlient ?: BrevKlientTest(),
+                        klageHttpClientOverride = klageHttpClientTest(),
+                        tilbakekrevingKlientOverride = tilbakekrevingKlient ?: TilbakekrevingKlientTest(),
+                        pesysKlientOverride = PesysKlientTest(),
+                        krrKlientOverride = KrrklientTest(),
+                        entraProxyKlientOverride = EntraProxyKlientTest(),
+                        pdlTjenesterKlientOverride = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
+                        kodeverkKlientOverride = KodeverkKlientTest(),
+                        skjermingKlientOverride = skjermingKlient ?: SkjermingKlientTest(),
+                        inntektskomponentKlientOverride = InntektskomponentKlientTest(),
+                        sigrunKlientOverride = SigrunKlienTest(),
+                        samordningKlientOverride = mockk(relaxed = true),
+                    ),
                 vedtakKlientOverride = vedtakKlient ?: spyk(VedtakKlientTest()),
-                beregningKlient = spyk(BeregningKlientTest()),
-                trygdetidKlient = TrygdetidKlientTest(),
-                gosysOppgaveKlient = GosysOppgaveKlientTest(),
-                brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),
-                brevKlient = brevKlient ?: BrevKlientTest(),
-                klageHttpClient = klageHttpClientTest(),
-                tilbakekrevingKlient = tilbakekrevingKlient ?: TilbakekrevingKlientTest(),
-                pesysKlient = PesysKlientTest(),
-                krrKlient = KrrklientTest(),
-                entraProxyKlient = EntraProxyKlientTest(),
-                pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
-                kodeverkKlient = KodeverkKlientTest(),
-                inntektskomponentKlient = InntektskomponentKlientTest(),
                 grunnlagServiceOverride = grunnlagService,
-                sigrunKlient = SigrunKlienTest(),
-                samordningKlient = mockk(relaxed = true),
             )
     }
 

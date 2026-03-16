@@ -131,7 +131,7 @@ class EtteroppgjoerRevurderingService(
         return inTransaction {
             kopierFaktiskInntekt(
                 fraForbehandlingId = sisteFerdigstilteForbehandlingId,
-                tilForbehandlingId = UUID.fromString(revurdering.relatertBehandlingId),
+                tilForbehandlingId = revurdering.relatertBehandlingId!!,
                 brukerTokenInfo = brukerTokenInfo,
             )
             krevIkkeNull(revurderingService.hentBehandling(revurdering.id)) { "Klarte ikke å finne revurdering etter opprettelse" }
@@ -182,7 +182,7 @@ class EtteroppgjoerRevurderingService(
 
     private fun hentForbehandlingForRevurdering(behandling: Behandling): EtteroppgjoerForbehandling {
         val forbehandlingId =
-            behandling.relatertBehandlingId?.parseUuid() ?: throw UgyldigForespoerselException(
+            behandling.relatertBehandlingId ?: throw UgyldigForespoerselException(
                 "MANGLER_FORBEHANDLING_ID",
                 "Behandling med id=${behandling.id} peker ikke på en gyldig etteroppgjør forbehandling",
             )
@@ -241,7 +241,7 @@ class EtteroppgjoerRevurderingService(
             .opprettRevurdering(
                 sakId = sakId,
                 forrigeBehandling = sisteIverksatteBehandling,
-                relatertBehandlingId = forbehandling.id.toString(),
+                relatertBehandlingId = forbehandling.id,
                 persongalleri = persongalleri,
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,

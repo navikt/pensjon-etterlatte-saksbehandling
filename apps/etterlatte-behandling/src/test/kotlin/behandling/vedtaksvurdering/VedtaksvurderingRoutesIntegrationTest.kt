@@ -72,6 +72,7 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun beforeAll() {
         startServer(
             featureToggleService = DummyFeatureToggleService(),
+
         ).also {
             resetDatabase()
         }

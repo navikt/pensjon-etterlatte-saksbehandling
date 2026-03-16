@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
@@ -34,6 +35,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import java.util.UUID
 import kotlin.math.absoluteValue
@@ -44,6 +46,7 @@ class TilbakekrevingBrevService(
     private val brevApiKlient: BrevApiKlient,
     private val vedtakKlient: VedtakKlient,
     private val grunnlagService: GrunnlagService,
+    private val oppgaveService: OppgaveService,
 ) {
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
@@ -131,10 +134,16 @@ class TilbakekrevingBrevService(
 
             val verge = hentVergeForSak(sak.sakType, null, grunnlag)
             val soeker = grunnlag.mapSoeker(null)
-
-            val innloggetSaksbehandlerIdent = bruker.ident() // TODO bør ikke være nødvendig for kun vedtaksbrev?
-            val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
-            val attestantIdent = vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent
+            val oppgaveForTilbakekreving =
+                oppgaveService
+                    .hentOppgaverForReferanse(behandlingId.toString())
+                    .singleOrNull { it.type == OppgaveType.TILBAKEKREVING }
+            val (saksbehandlerIdent, attestantIdent) =
+                hentSaksbehandlerOgAttestantForVedtak(
+                    vedtakDto = vedtak,
+                    oppgaveForBehandling = oppgaveForTilbakekreving,
+                    brukerTokenInfo = bruker,
+                )
 
             BrevRequest(
                 sak = sak,

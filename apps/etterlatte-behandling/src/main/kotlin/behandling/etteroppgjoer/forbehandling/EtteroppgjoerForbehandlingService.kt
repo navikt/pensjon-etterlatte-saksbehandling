@@ -498,7 +498,13 @@ class EtteroppgjoerForbehandlingService(
         val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sak.id, brukerTokenInfo)
         val sisteVedtakMedAvkorting = etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe)
         val avkortingMedGamleRegler =
-            runBlocking { beregningKlient.harAvkortingMedSanksjonGamleRegler(sisteVedtakMedAvkorting.behandlingId, brukerTokenInfo) }
+            runBlocking {
+                beregningKlient.harAvkortingMedSanksjonGamleRegler(
+                    sisteVedtakMedAvkorting.behandlingId,
+                    inntektsaar,
+                    brukerTokenInfo,
+                )
+            }
         if (avkortingMedGamleRegler.harGammelBeregningMedSanksjon) {
             throw UgyldigForespoerselException(
                 "SANKSJON_GAMLE_REGLER",

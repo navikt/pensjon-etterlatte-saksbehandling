@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.uuid
@@ -78,6 +79,21 @@ fun Route.avkorting(
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter ferdig avkorting med behandlingId=$it")
                 call.respond(avkortingService.hentFullfoertAvkorting(it, brukerTokenInfo))
+            }
+        }
+
+        /*
+         * ser om det er avkortet med sanksjon og gamle regler for beregning av sanksjon i den aktuelle behandlingen
+         */
+        get("har-sanksjon-gamle-regler") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter komplett historisk avkorting med behandlingId=$behandlingId")
+                val inntektsaar =
+                    call.parameters["inntektsaar"]?.toInt() ?: throw UgyldigForespoerselException(
+                        "MANGLER_INNTEKTSAAR",
+                        "inntektsaar er obligatorisk",
+                    )
+                call.respond(avkortingService.harAvkortingMedSanksjonGamleRegler(behandlingId, inntektsaar))
             }
         }
 
@@ -154,7 +170,11 @@ fun Route.avkorting(
         route("etteroppgjoer") {
             post("hent") {
                 val request = call.receive<EtteroppgjoerBeregnetAvkortingRequest>()
-                withBehandlingId(behandlingId = request.forbehandling, behandlingTilgangsSjekk = behandlingKlient, skrivetilgang = false) {
+                withBehandlingId(
+                    behandlingId = request.forbehandling,
+                    behandlingTilgangsSjekk = behandlingKlient,
+                    skrivetilgang = false,
+                ) {
                     logger.info(
                         "Henter avkorting for siste iverksatte behandling for etteroppgjør år=${request.aar} id=${request.sisteIverksatteBehandling}",
                     )
@@ -172,7 +192,11 @@ fun Route.avkorting(
 
             post("beregn-faktisk-inntekt") {
                 val request = call.receive<EtteroppgjoerBeregnFaktiskInntektRequest>()
-                withBehandlingId(behandlingId = request.forbehandlingId, behandlingTilgangsSjekk = behandlingKlient, skrivetilgang = true) {
+                withBehandlingId(
+                    behandlingId = request.forbehandlingId,
+                    behandlingTilgangsSjekk = behandlingKlient,
+                    skrivetilgang = true,
+                ) {
                     logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
                     etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
                     val resultat =

@@ -220,13 +220,17 @@ class BehandlingFactory(
                         },
                     merknad =
                         when (kilde) {
-                            Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
-                            else ->
+                            Vedtaksloesning.GJENOPPRETTA -> {
+                                "Manuell gjenopprettelse av opphørt sak i Pesys"
+                            }
+
+                            else -> {
                                 opprettMerknad(
                                     request.sak,
                                     persongalleri,
                                     behandling.id,
                                 )
+                            }
                         },
                     gruppeId = persongalleri.avdoed.firstOrNull(),
                     soeknadMottattDato = behandling.soeknadMottattDato,

@@ -159,9 +159,9 @@ class VedtaksbrevService(
             val omsRettUtenTidsbegrensning =
                 vilkaarsvurdering.vilkaar.single {
                     it.hovedvilkaar.type in
-                            listOf(
-                                VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
-                            )
+                        listOf(
+                            VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                        )
                 }
 
             val avdoede = grunnlag.mapAvdoede()

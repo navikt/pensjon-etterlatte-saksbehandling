@@ -8,17 +8,14 @@ import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevur
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.BeregningOgAvkorting
-import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.behandling.vedtaksvurdering.OppdaterSamordningsmelding
 import no.nav.etterlatte.behandling.vedtaksvurdering.OpprettVedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.SamordningsvedtakWrapper
-import no.nav.etterlatte.behandling.vedtaksvurdering.UgyldigAttestantException
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakData
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakOgBeregningSammenligner
-import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtakstidslinje
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.behandling.vedtaksvurdering.erVedtakMedEtterbetaling
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
@@ -64,7 +61,6 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -81,18 +77,6 @@ class VedtakBehandlingService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun sjekkOmVedtakErLoependePaaDato(
-        sakId: SakId,
-        dato: LocalDate,
-    ): LoependeYtelse {
-        logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
-        val alleVedtakForSak =
-            vedtaksvurderingRepository
-                .hentVedtakForSak(sakId)
-                .filter { it.vedtakFattet != null && it.attestasjon != null }
-        return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
-    }
-
     fun opprettEllerOppdaterVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -102,6 +86,7 @@ class VedtakBehandlingService(
         if (vedtak != null) {
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
+
         val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider, etteroppgjoerResultat) =
             runBlocking {
                 hentDataForVedtak(behandlingId, brukerTokenInfo)
@@ -223,7 +208,7 @@ class VedtakBehandlingService(
 
         behandlingStatusService.sjekkOmKanAttestere(behandlingId)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
-        attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
+        sjekkAttestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
         val (detaljertBehandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
 
@@ -497,22 +482,6 @@ class VedtakBehandlingService(
         krevIkkeNull(vedtaksvurderingRepository.hentVedtak(behandlingId)) {
             "Vedtak for behandling $behandlingId finnes ikke"
         }
-
-    private fun verifiserGyldigVedtakStatus(
-        gjeldendeStatus: VedtakStatus,
-        forventetStatus: List<VedtakStatus>,
-    ) {
-        if (gjeldendeStatus !in forventetStatus) throw VedtakTilstandException(gjeldendeStatus, forventetStatus)
-    }
-
-    private fun attestantHarAnnenIdentEnnSaksbehandler(
-        ansvarligSaksbehandler: String,
-        innloggetBrukerTokenInfo: BrukerTokenInfo,
-    ) {
-        if (innloggetBrukerTokenInfo.erSammePerson(ansvarligSaksbehandler)) {
-            throw UgyldigAttestantException(innloggetBrukerTokenInfo.ident())
-        }
-    }
 
     private fun opprettVedtak(
         behandling: DetaljertBehandling,
@@ -836,22 +805,10 @@ class VedtakBehandlingService(
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? =
         vedtaksvurderingRepository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
-    fun hentIverksatteVedtakISak(sakId: SakId): List<Vedtak> =
-        vedtaksvurderingRepository
-            .hentVedtakForSak(sakId)
-            .filter { it.status == VedtakStatus.IVERKSATT }
-
     private fun Vedtak.isRegulering() =
         this.innhold is VedtakInnhold.Behandling &&
             Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
-
-    fun hentVedtakForBehandling(behandlingId: UUID): Vedtak? = vedtaksvurderingRepository.hentVedtak(behandlingId)
 }
-
-class VedtakTilstandException(
-    gjeldendeStatus: VedtakStatus,
-    forventetStatus: List<VedtakStatus>,
-) : Exception("Vedtak har status $gjeldendeStatus, men forventet status $forventetStatus")
 
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(

@@ -185,6 +185,8 @@ spec:
       value: api://prod-fss.pensjonsamhandling.sam/.default
     - name: BRUK_NY_VEDTAK_KLIENT
       value: "false"
+    - name: BRUK_VEDTAK_REPOSITORY_KLIENT
+      value: "false"
 
   envFrom:
     - secret: my-application-unleash-api-token

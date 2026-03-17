@@ -29,6 +29,7 @@ import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.brev.BrevKlient
@@ -81,9 +82,10 @@ class KlientModule(
     private val standardHttpClient: HttpClient by lazy { httpClient() }
     private val httpClientForventSuksess: HttpClient by lazy { httpClient(forventSuksess = true) }
 
-    internal fun vedtakKlient() : VedtakKlient {
-        return VedtakKlientImpl(config, httpClient())
-    }
+    internal fun vedtakKlient(): VedtakKlient = VedtakKlientImpl(config, httpClient())
+
+    internal fun vedtaksvurderingRepositoryKlient(): VedtaksvurderingRepositoryKlient =
+        VedtaksvurderingRepositoryKlient(config, httpClient())
 
     val navAnsattKlient: NavAnsattKlient by lazy {
         navAnsattKlientOverride ?: NavAnsattKlientImpl(
@@ -95,12 +97,13 @@ class KlientModule(
     val samordningKlient: SamordningsKlient by lazy {
         samordningKlientOverride ?: SamordningsKlientImpl(
             config = config,
-            httpClient = httpClientClientCredentials(
-                azureAppClientId = config.getString("azure.app.client.id"),
-                azureAppJwk = config.getString("azure.app.jwk"),
-                azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-                azureAppScope = config.getString("samordnevedtak.azure.scope"),
-            ),
+            httpClient =
+                httpClientClientCredentials(
+                    azureAppClientId = config.getString("azure.app.client.id"),
+                    azureAppJwk = config.getString("azure.app.jwk"),
+                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                    azureAppScope = config.getString("samordnevedtak.azure.scope"),
+                ),
         )
     }
 

@@ -16,7 +16,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakData
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakOgBeregningSammenligner
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.behandling.vedtaksvurdering.erVedtakMedEtterbetaling
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
@@ -65,7 +65,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 class VedtakBehandlingService(
-    private val vedtaksvurderingRepository: VedtaksvurderingRepository,
+    private val vedtaksvurderingRepository: VedtaksvurderingRepositoryOperasjoner,
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val behandlingStatusService: BehandlingStatusService,

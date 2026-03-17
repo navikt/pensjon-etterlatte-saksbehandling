@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandling.vedtaksvurdering.service
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtakstidslinje
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -17,7 +17,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtakSamordningService(
-    private val repository: VedtaksvurderingRepository,
+    private val repository: VedtaksvurderingRepositoryOperasjoner,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

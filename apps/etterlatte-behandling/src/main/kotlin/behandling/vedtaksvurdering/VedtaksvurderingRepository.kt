@@ -41,8 +41,8 @@ private val logger = LoggerFactory.getLogger(DataSource::class.java)
 
 class VedtaksvurderingRepository(
     private val connection: ConnectionAutoclosing,
-) {
-    fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak =
+) : VedtaksvurderingRepositoryOperasjoner {
+    override fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak =
         connection.hentKotliquerySession { session ->
             val innholdParams =
                 when (opprettVedtak.innhold) {
@@ -104,7 +104,7 @@ class VedtaksvurderingRepository(
                 ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
         }
 
-    fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak =
+    override fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak =
         connection.hentKotliquerySession { session ->
             val paramMap =
                 when (oppdatertVedtak.innhold) {
@@ -164,7 +164,7 @@ class VedtaksvurderingRepository(
                 ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
         }
 
-    fun hentVedtak(vedtakId: Long): Vedtak? =
+    override fun hentVedtak(vedtakId: Long): Vedtak? =
         connection.hentKotliquerySession { session ->
             session.hent(
                 queryString = """
@@ -182,7 +182,7 @@ class VedtaksvurderingRepository(
             }
         }
 
-    fun hentVedtak(behandlingId: UUID): Vedtak? =
+    override fun hentVedtak(behandlingId: UUID): Vedtak? =
         connection.hentKotliquerySession { session ->
             session.hent(
                 queryString = """
@@ -200,7 +200,7 @@ class VedtaksvurderingRepository(
             }
         }
 
-    fun hentVedtakForSak(sakId: SakId): List<Vedtak> =
+    override fun hentVedtakForSak(sakId: SakId): List<Vedtak> =
         connection.hentKotliquerySession { session ->
             val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
@@ -218,9 +218,9 @@ class VedtaksvurderingRepository(
             }
         }
 
-    fun hentSakIdMedUtbetalingForInntektsaar(
+    override fun hentSakIdMedUtbetalingForInntektsaar(
         inntektsaar: Int,
-        sakType: SakType? = null,
+        sakType: SakType?,
     ): List<SakId> {
         val hentVedtak =
             """
@@ -247,7 +247,7 @@ class VedtaksvurderingRepository(
         }
     }
 
-    fun harSakUtbetalingForInntektsaar(
+    override fun harSakUtbetalingForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
         sakType: SakType,
@@ -273,9 +273,9 @@ class VedtaksvurderingRepository(
             ) { true } ?: false
         }
 
-    fun hentFerdigstilteVedtak(
+    override fun hentFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
-        sakType: SakType? = null,
+        sakType: SakType?,
     ): List<Vedtak> {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
@@ -305,7 +305,7 @@ class VedtaksvurderingRepository(
         }
     }
 
-    fun hentAvkortetYtelsePerioder(vedtakIds: Set<Long>): List<AvkortetYtelsePeriode> =
+    override fun hentAvkortetYtelsePerioder(vedtakIds: Set<Long>): List<AvkortetYtelsePeriode> =
         connection.hentKotliquerySession { session ->
             val idArray = session.connection.underlying.createArrayOf("bigint", vedtakIds.toTypedArray())
             session.hentListe(
@@ -314,7 +314,7 @@ class VedtaksvurderingRepository(
             ) { it.toAvkortetYtelsePeriode() }
         }
 
-    fun fattVedtak(
+    override fun fattVedtak(
         behandlingId: UUID,
         vedtakFattet: VedtakFattet,
     ): Vedtak =
@@ -339,7 +339,7 @@ class VedtaksvurderingRepository(
                 .let { hentVedtakNonNull(behandlingId) }
         }
 
-    fun attesterVedtak(
+    override fun attesterVedtak(
         behandlingId: UUID,
         attestasjon: Attestasjon,
     ): Vedtak =
@@ -378,7 +378,7 @@ class VedtaksvurderingRepository(
             hentVedtakNonNull(behandlingId)
         }
 
-    fun underkjennVedtak(behandlingId: UUID): Vedtak =
+    override fun underkjennVedtak(behandlingId: UUID): Vedtak =
         connection.hentKotliquerySession { session ->
             session
                 .oppdater(
@@ -396,7 +396,7 @@ class VedtaksvurderingRepository(
             hentVedtakNonNull(behandlingId)
         }
 
-    fun tilSamordningVedtak(behandlingId: UUID): Vedtak =
+    override fun tilSamordningVedtak(behandlingId: UUID): Vedtak =
         connection.hentKotliquerySession { session ->
             session
                 .oppdater(
@@ -409,7 +409,7 @@ class VedtaksvurderingRepository(
             hentVedtakNonNull(behandlingId)
         }
 
-    fun samordnetVedtak(behandlingId: UUID): Vedtak =
+    override fun samordnetVedtak(behandlingId: UUID): Vedtak =
         connection.hentKotliquerySession { session ->
             session
                 .oppdater(
@@ -422,7 +422,7 @@ class VedtaksvurderingRepository(
             hentVedtakNonNull(behandlingId)
         }
 
-    fun iverksattVedtak(behandlingId: UUID): Vedtak =
+    override fun iverksattVedtak(behandlingId: UUID): Vedtak =
         connection.hentKotliquerySession { session ->
             session
                 .oppdater(
@@ -442,7 +442,7 @@ class VedtaksvurderingRepository(
             hentVedtakNonNull(behandlingId)
         }
 
-    fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? {
+    override fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? {
         val hentVedtak = hentVedtak(behandlingId)
         if (hentVedtak?.status != VedtakStatus.FATTET_VEDTAK) {
             return null
@@ -468,28 +468,30 @@ class VedtaksvurderingRepository(
         }
     }
 
-    fun lagreManuellBehandlingSamordningsmelding(
+    override fun lagreManuellBehandlingSamordningsmelding(
         oppdatering: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = connection.hentKotliquerySession { session ->
-        session.opprett(
-            query = """
-                    INSERT INTO samordning_manuell (opprettet_av, vedtakId, samId, refusjonskrav, kommentar) 
+    ) {
+        connection.hentKotliquerySession { session ->
+            session.opprett(
+                query = """
+                    INSERT INTO samordning_manuell (opprettet_av, vedtakId, samId, refusjonskrav, kommentar)
                     VALUES (:opprettetAv, :vedtakId, :samId, :refusjonskrav, :kommentar)
                     """,
-            params =
-                mapOf(
-                    "opprettetAv" to brukerTokenInfo.ident(),
-                    "vedtakId" to oppdatering.vedtakId,
-                    "samId" to oppdatering.samId,
-                    "refusjonskrav" to oppdatering.refusjonskrav,
-                    "kommentar" to oppdatering.kommentar,
-                ),
-            loggtekst = "Lagt til innslag for manuell behandling av samordningsmelding",
-        )
+                params =
+                    mapOf(
+                        "opprettetAv" to brukerTokenInfo.ident(),
+                        "vedtakId" to oppdatering.vedtakId,
+                        "samId" to oppdatering.samId,
+                        "refusjonskrav" to oppdatering.refusjonskrav,
+                        "kommentar" to oppdatering.kommentar,
+                    ),
+                loggtekst = "Lagt til innslag for manuell behandling av samordningsmelding",
+            )
+        }
     }
 
-    fun slettManuellBehandlingSamordningsmelding(samId: Long) =
+    override fun slettManuellBehandlingSamordningsmelding(samId: Long) {
         connection.hentKotliquerySession { session ->
             session.oppdater(
                 query = "DELETE FROM samordning_manuell WHERE samId = :samId",
@@ -497,20 +499,22 @@ class VedtaksvurderingRepository(
                 loggtekst = "Sletter innslag for manuell samordning pga feil ved ekstern oppdatering",
             )
         }
+    }
 
-    fun tilbakestillTilbakekrevingsvedtak(tilbakekrevingId: UUID) =
+    override fun tilbakestillTilbakekrevingsvedtak(tilbakekrevingId: UUID) {
         connection.hentKotliquerySession { session ->
             session.oppdater(
                 query =
                     """
-                    UPDATE vedtak 
-                    SET vedtakstatus = 'FATTET_VEDTAK', attestertvedtakenhet = null, attestant = null, datoattestert = null 
+                    UPDATE vedtak
+                    SET vedtakstatus = 'FATTET_VEDTAK', attestertvedtakenhet = null, attestant = null, datoattestert = null
                     WHERE behandlingId = :behandlingId AND type = 'TILBAKEKREVING' AND vedtakstatus = 'ATTESTERT'
                     """.trimIndent(),
                 params = mapOf("behandlingId" to tilbakekrevingId),
                 loggtekst = "Tilbakestiller tilbakerkreving fra attestert siden den feilet mot tilbakekrevingskomponenten",
             )
         }
+    }
 
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =
         krevIkkeNull(hentVedtak(behandlingId)) { "Fant ikke vedtak for behandling $behandlingId" }

@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling.klienter
 
 import no.nav.etterlatte.behandling.vedtaksvurdering.InnvilgetPeriode
 import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
@@ -28,13 +27,9 @@ import java.util.UUID
 class VedtakInternalService(
     private val vedtakTilbakekrevingService: VedtakTilbakekrevingService,
     private val vedtakKlageService: VedtakKlageService,
-    private val vedtakBehandlingServiceProvider: () -> VedtakBehandlingService, // For å komme rundt sirkulære avh. (midlertidig)
     private val vedtaksvurderingService: VedtaksvurderingService,
 ) : VedtakKlient {
     private val logger = LoggerFactory.getLogger(VedtakInternalService::class.java)
-
-    private val vedtakBehandlingService: VedtakBehandlingService
-        get() = vedtakBehandlingServiceProvider.invoke()
 
     override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
@@ -140,7 +135,7 @@ class VedtakInternalService(
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO {
         logger.info("Sjekker om sak $sakId er løpende på $dato")
-        val loependeYtelse = vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(sakId, dato)
+        val loependeYtelse = vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(sakId, dato)
         return loependeYtelse.toDto()
     }
 
@@ -157,7 +152,7 @@ class VedtakInternalService(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto> {
         logger.info("Henter iverksatte vedtak for sak=$sakId")
-        return vedtakBehandlingService
+        return vedtaksvurderingService
             .hentIverksatteVedtakISak(sakId)
             .map { it.toVedtakSammendragDto() }
     }

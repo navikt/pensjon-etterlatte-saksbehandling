@@ -44,7 +44,7 @@ fun Route.vedtaksvurderingRoute(
 
         get("/sak/{$SAKID_CALL_PARAMETER}/iverksatte") {
             logger.info("Henter iverksatte vedtak for sak $sakId")
-            val iverksatteVedtak = inTransaction { vedtakBehandlingService.hentIverksatteVedtakISak(sakId) }
+            val iverksatteVedtak = inTransaction { vedtakService.hentIverksatteVedtakISak(sakId) }
             call.respond(iverksatteVedtak.map { it.toVedtakSammendragDto() })
         }
 
@@ -265,7 +265,7 @@ fun Route.vedtaksvurderingRoute(
                     ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
             logger.info("Sjekker om sak har løpende for vedtak $sakId på dato $dato")
-            val loependeYtelse = inTransaction { vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(sakId, dato) }
+            val loependeYtelse = inTransaction { vedtakService.sjekkOmVedtakErLoependePaaDato(sakId, dato) }
             call.respond(loependeYtelse.toDto())
         }
 

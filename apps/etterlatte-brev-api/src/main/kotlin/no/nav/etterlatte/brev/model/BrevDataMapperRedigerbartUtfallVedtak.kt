@@ -183,7 +183,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             SakType.OMSTILLINGSSTOENAD -> {
                 when (vedtakType) {
                     VedtakType.INNVILGELSE -> {
-                        omstillingsstoenadInnvilgelse(
+                        omstillingsstoenadInnvilgelseRedigerbart(
                             brukerTokenInfo,
                             behandlingId,
                             virkningstidspunkt!!,
@@ -207,7 +207,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             }
 
                             Revurderingaarsak.NY_SOEKNAD -> {
-                                omstillingsstoenadInnvilgelse(
+                                omstillingsstoenadInnvilgelseRedigerbart(
                                     brukerTokenInfo,
                                     behandlingId,
                                     virkningstidspunkt!!,
@@ -355,7 +355,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         )
     }
 
-    private suspend fun omstillingsstoenadInnvilgelse(
+    private suspend fun omstillingsstoenadInnvilgelseRedigerbart(
         bruker: BrukerTokenInfo,
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,

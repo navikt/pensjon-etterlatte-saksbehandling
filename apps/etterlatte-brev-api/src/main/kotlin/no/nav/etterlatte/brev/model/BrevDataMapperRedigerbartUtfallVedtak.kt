@@ -195,23 +195,39 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     }
 
                     VedtakType.ENDRING -> {
-                        if (revurderingaarsak != null && revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
-                            aarligInntektsjusteringRedigerbart(
-                                brukerTokenInfo,
-                                behandlingId,
-                                virkningstidspunkt!!,
-                                sakType,
-                                vedtakType,
-                            )
-                        } else {
-                            omstillingsstoenadEndring(
-                                brukerTokenInfo,
-                                behandlingId,
-                                virkningstidspunkt!!,
-                                sakType,
-                                vedtakType,
-                                revurderingaarsak,
-                            )
+                        when (revurderingaarsak) {
+                            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {
+                                aarligInntektsjusteringRedigerbart(
+                                    brukerTokenInfo,
+                                    behandlingId,
+                                    virkningstidspunkt!!,
+                                    sakType,
+                                    vedtakType,
+                                )
+                            }
+
+                            Revurderingaarsak.NY_SOEKNAD -> {
+                                omstillingsstoenadInnvilgelse(
+                                    brukerTokenInfo,
+                                    behandlingId,
+                                    virkningstidspunkt!!,
+                                    sakType,
+                                    avdoede,
+                                    vedtakType,
+                                    klage,
+                                )
+                            }
+
+                            else -> {
+                                omstillingsstoenadEndring(
+                                    brukerTokenInfo,
+                                    behandlingId,
+                                    virkningstidspunkt!!,
+                                    sakType,
+                                    vedtakType,
+                                    revurderingaarsak,
+                                )
+                            }
                         }
                     }
 

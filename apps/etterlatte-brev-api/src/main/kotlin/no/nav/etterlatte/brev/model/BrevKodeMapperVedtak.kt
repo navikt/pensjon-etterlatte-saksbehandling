@@ -84,6 +84,7 @@ class BrevKodeMapperVedtak {
                     VedtakType.ENDRING -> {
                         when (request.revurderingaarsak) {
                             Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK
+                            Revurderingaarsak.NY_SOEKNAD -> Brevkoder.OMS_INNVILGELSE
                             else -> Brevkoder.OMS_REVURDERING
                         }
                     }

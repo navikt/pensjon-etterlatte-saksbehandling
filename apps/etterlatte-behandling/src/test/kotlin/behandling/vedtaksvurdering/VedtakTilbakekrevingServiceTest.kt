@@ -7,10 +7,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilbakekrevingService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilstandException
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -108,7 +108,7 @@ class VedtakTilbakekrevingServiceTest {
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.FATTET_VEDTAK)
 
-        assertThrows<VedtakTilstandException> {
+        assertThrows<InternfeilException> {
             service.opprettEllerOppdaterVedtak(dto)
         }
 
@@ -150,7 +150,7 @@ class VedtakTilbakekrevingServiceTest {
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.FATTET_VEDTAK)
 
-        assertThrows<VedtakTilstandException> {
+        assertThrows<InternfeilException> {
             service.fattVedtak(dto, saksbehandler)
         }
         verify { repo.hentVedtak(dto.tilbakekrevingId) }
@@ -222,7 +222,7 @@ class VedtakTilbakekrevingServiceTest {
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.ATTESTERT)
 
-        assertThrows<VedtakTilstandException> {
+        assertThrows<InternfeilException> {
             service.attesterVedtak(dto, saksbehandler)
         }
         verify { repo.hentVedtak(dto.tilbakekrevingId) }
@@ -271,7 +271,7 @@ class VedtakTilbakekrevingServiceTest {
         val tilbakekrevingId = UUID.randomUUID()
         every { repo.hentVedtak(tilbakekrevingId) } returns vedtak(status = VedtakStatus.ATTESTERT)
 
-        assertThrows<VedtakTilstandException> {
+        assertThrows<InternfeilException> {
             service.underkjennVedtak(tilbakekrevingId)
         }
         verify { repo.hentVedtak(tilbakekrevingId) }

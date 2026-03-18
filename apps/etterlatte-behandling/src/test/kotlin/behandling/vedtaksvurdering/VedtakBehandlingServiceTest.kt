@@ -29,7 +29,6 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilstandException
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VirkningstidspunktEtterOpphoerException
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VirkningstidspunktOgOpphoerFomPaaSammeDatoException
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
@@ -49,6 +48,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -325,7 +325,7 @@ internal class VedtakBehandlingServiceTest(
                 ),
             )
 
-            assertThrows<VedtakTilstandException> {
+            assertThrows<InternfeilException> {
                 service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
             }
         }
@@ -695,7 +695,7 @@ internal class VedtakBehandlingServiceTest(
                 ),
             )
 
-            assertThrows<VedtakTilstandException> {
+            assertThrows<InternfeilException> {
                 service.fattVedtak(behandlingId, saksbehandler)
             }
         }
@@ -997,7 +997,7 @@ internal class VedtakBehandlingServiceTest(
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
-            assertThrows<VedtakTilstandException> {
+            assertThrows<InternfeilException> {
                 service.attesterVedtak(behandlingId, KOMMENTAR, saksbehandler)
             }
         }
@@ -1033,7 +1033,7 @@ internal class VedtakBehandlingServiceTest(
             service.fattVedtak(behandlingId = behandlingId, brukerTokenInfo = saksbehandler)
             service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
 
-            assertThrows<VedtakTilstandException> {
+            assertThrows<InternfeilException> {
                 service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
             }
         }
@@ -1208,7 +1208,7 @@ internal class VedtakBehandlingServiceTest(
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
-            assertThrows<VedtakTilstandException> {
+            assertThrows<InternfeilException> {
                 service.iverksattVedtak(behandlingId)
             }
         }
@@ -1246,7 +1246,7 @@ internal class VedtakBehandlingServiceTest(
             service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
             service.iverksattVedtak(behandlingId)
 
-            assertThrows<VedtakTilstandException> {
+            assertThrows<InternfeilException> {
                 service.iverksattVedtak(behandlingId)
             }
         }
@@ -1357,7 +1357,7 @@ internal class VedtakBehandlingServiceTest(
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
-            assertThrows<VedtakTilstandException> {
+            assertThrows<InternfeilException> {
                 service.underkjennVedtak(behandlingId, saksbehandler, underkjennVedtakBegrunnelse())
             }
         }
@@ -1394,7 +1394,7 @@ internal class VedtakBehandlingServiceTest(
             service.fattVedtak(behandlingId = behandlingId, brukerTokenInfo = saksbehandler)
             service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
 
-            assertThrows<VedtakTilstandException> {
+            assertThrows<InternfeilException> {
                 service.underkjennVedtak(
                     behandlingId = behandlingId,
                     brukerTokenInfo = attestant,
@@ -1668,7 +1668,7 @@ internal class VedtakBehandlingServiceTest(
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.FATTET_VEDTAK))
 
-            assertThrows<VedtakTilstandException> {
+            assertThrows<InternfeilException> {
                 service.tilSamordningVedtak(behandlingId, attestant)
             }
 
@@ -1866,7 +1866,7 @@ internal class VedtakBehandlingServiceTest(
 
         repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
 
-        assertThrows<VedtakTilstandException> {
+        assertThrows<InternfeilException> {
             service.samordnetVedtak(behandlingId = behandlingId, brukerTokenInfo = attestant)
         }
 

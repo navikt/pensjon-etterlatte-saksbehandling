@@ -45,6 +45,7 @@ import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbe
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
 import no.nav.etterlatte.sak.SakServiceImpl
@@ -438,7 +439,10 @@ class ServiceModule(
     }
 
     val vedtakKlient: VedtakKlient by lazy {
-        val brukNyVedtakKlientInternal: Boolean = env[BRUK_NY_VEDTAK_KLIENT]?.toBoolean() ?: false
+        val brukNyVedtakKlientInternal: Boolean =
+            env[BRUK_NY_VEDTAK_KLIENT]?.toBoolean() ?: throw InternfeilException(
+                "Fant ikke miljøvariabel: $BRUK_NY_VEDTAK_KLIENT",
+            )
 
         vedtakKlientOverride ?: if (brukNyVedtakKlientInternal) {
             VedtakInternalService(

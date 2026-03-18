@@ -35,7 +35,7 @@ export const Search = () => {
     }
     if (gyldigInputSakId) {
       finnSak(searchInput, (sak) => {
-        navigate('/person', { state: { fnr: sak.ident } })
+        navigate(`/person/${sak.id}`)
       })
       return
     }

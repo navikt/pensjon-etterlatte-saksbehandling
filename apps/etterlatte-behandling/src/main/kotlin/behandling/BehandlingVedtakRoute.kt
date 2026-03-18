@@ -42,7 +42,6 @@ internal fun Route.behandlingVedtakRoute(
                 inTransaction {
                     behandlingsstatusService.settFattetVedtak(behandling, vedtak, brukerTokenInfo)
 
-                    // TODO Dette mangler i behandling (VedtakBehandlingService)
                     if (vedtak.vedtakType == VedtakType.OPPHOER) {
                         behandlingService.lagreOpphoerFom(
                             behandling.id,

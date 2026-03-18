@@ -13,7 +13,6 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilstandException
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
@@ -30,6 +29,7 @@ import no.nav.etterlatte.libs.common.behandling.KlageVedtak
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -155,7 +155,7 @@ internal class VedtakKlageServiceTest(
         vedtakKlageService.fattVedtak(klage, saksbehandler)
         vedtaksvurderingRepository.iverksattVedtak(klage.id)
 
-        assertThrows<VedtakTilstandException> {
+        assertThrows<InternfeilException> {
             vedtakKlageService.attesterVedtak(klage, attestant)
         }
         val slot = slot<VedtakOgRapid>()
@@ -207,7 +207,7 @@ internal class VedtakKlageServiceTest(
         val klageId = UUID.randomUUID()
         vedtaksvurderingRepository.opprettVedtak(opprettVedtak(behandlingId = klageId))
 
-        assertThrows<VedtakTilstandException> {
+        assertThrows<InternfeilException> {
             vedtakKlageService.underkjennVedtak(klageId)
         }
     }

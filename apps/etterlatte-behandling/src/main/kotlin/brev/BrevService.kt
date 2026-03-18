@@ -88,6 +88,7 @@ class BrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         val behandling = behandlingService.hentBehandling(behandlingId)
+
         val vedtak = vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo)
 
         return when (behandling?.type) {
@@ -98,7 +99,8 @@ class BrevService(
 
             else -> {
                 // revurdering
-                behandling?.revurderingsaarsak() == Revurderingaarsak.NY_SOEKNAD
+                behandling?.sak?.sakType == SakType.OMSTILLINGSSTOENAD &&
+                    behandling.revurderingsaarsak() == Revurderingaarsak.NY_SOEKNAD
             }
         }
     }

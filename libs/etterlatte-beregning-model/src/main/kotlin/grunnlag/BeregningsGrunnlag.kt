@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnla
 import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
+import java.time.YearMonth
 import java.util.UUID
 
 data class BeregningsGrunnlag(
@@ -15,4 +16,10 @@ data class BeregningsGrunnlag(
     val beregningsMetodeFlereAvdoede: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>> = emptyList(),
     val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
     val kunEnJuridiskForelder: GrunnlagMedPeriode<TomVerdi>? = null,
+    val vedtaksperioder: List<Vedtaksperiode>? = null,
+)
+
+data class Vedtaksperiode(
+    val fraOgMed: YearMonth,
+    val tilOgMed: YearMonth? = null,
 )

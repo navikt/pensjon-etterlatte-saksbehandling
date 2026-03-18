@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning.grunnlag
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
+import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -10,6 +11,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
 import org.postgresql.util.PGobject
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -22,9 +24,20 @@ class BeregningsGrunnlagRepository(
                 queryOf(
                     statement = finnBeregningsGrunnlag,
                     paramMap = mapOf("behandlings_id" to id),
-                ).map { it.asBeregningsGrunnlag() }.asSingle,
+                ).map { it.asBeregningsGrunnlag(finnVedtaksperioder(id, session)) }.asSingle,
             )
         }
+
+    private fun finnVedtaksperioder(
+        behandlingId: UUID,
+        session: Session,
+    ): List<Vedtaksperiode> =
+        session.run(
+            queryOf(
+                statement = finnVedtaksperioderQuery,
+                paramMap = mapOf("behandling_id" to behandlingId),
+            ).map { it.asVedtaksperiode() }.asList,
+        )
 
     fun lagreBeregningsGrunnlag(beregningsGrunnlag: BeregningsGrunnlag): Boolean {
         val query =
@@ -33,6 +46,10 @@ class BeregningsGrunnlagRepository(
             } else {
                 oppdaterGrunnlagQuery
             }
+
+        if (beregningsGrunnlag.vedtaksperioder != null) {
+            lagreVedtaksperioder(beregningsGrunnlag, beregningsGrunnlag.vedtaksperioder)
+        }
 
         val count =
             using(sessionOf(dataSource)) { session ->
@@ -53,7 +70,9 @@ class BeregningsGrunnlagRepository(
                                     ),
                                 "kilde" to beregningsGrunnlag.kilde.toJson(),
                                 "beregnings_metode_flere_avdoede" to
-                                    beregningsGrunnlag.beregningsMetodeFlereAvdoede.takeIf { it.isNotEmpty() }?.somJsonb(),
+                                    beregningsGrunnlag.beregningsMetodeFlereAvdoede
+                                        .takeIf { it.isNotEmpty() }
+                                        ?.somJsonb(),
                                 "kun_en_juridisk_forelder" to
                                     beregningsGrunnlag.kunEnJuridiskForelder?.somJsonb(),
                             ),
@@ -62,6 +81,36 @@ class BeregningsGrunnlagRepository(
             }
 
         return count > 0
+    }
+
+    private fun lagreVedtaksperioder(
+        beregningsGrunnlag: BeregningsGrunnlag,
+        vedtaksperioder: List<Vedtaksperiode>?,
+    ) {
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    statement = slettVedtaksperioderQuery,
+                    paramMap =
+                        mapOf<String, Any?>(
+                            "behandling_id" to beregningsGrunnlag.behandlingId,
+                        ),
+                ).asUpdate,
+            )
+            vedtaksperioder!!.forEach { periode ->
+                session.run(
+                    queryOf(
+                        statement = lagreVedtaksperioderQuery,
+                        paramMap =
+                            mapOf<String, Any?>(
+                                "behandling_id" to beregningsGrunnlag.behandlingId,
+                                "fra_og_med" to periode.fraOgMed.toString(),
+                                "til_og_med" to periode.tilOgMed?.toString(),
+                            ),
+                    ).asUpdate,
+                )
+            }
+        }
     }
 
     fun finnOverstyrBeregningGrunnlagForBehandling(id: UUID): List<OverstyrBeregningGrunnlagDao> =
@@ -150,6 +199,26 @@ class BeregningsGrunnlagRepository(
             WHERE behandlings_id = :behandlings_id
             """.trimMargin()
 
+        val lagreVedtaksperioderQuery =
+            """
+                INSERT INTO vedtaksperioder(
+                behandling_id,
+                fra_og_med,
+                til_og_med
+            )
+            VALUES (
+                :behandling_id,
+                :fra_og_med,
+                :til_og_med
+            )    
+            """.trimIndent()
+
+        val slettVedtaksperioderQuery =
+            """
+            DELETE FROM vedtaksperioder
+            WHERE behandling_id = :behandling_id
+            """.trimIndent()
+
         val finnBeregningsGrunnlag =
             """
             SELECT
@@ -162,6 +231,17 @@ class BeregningsGrunnlagRepository(
                 kun_en_juridisk_forelder
             FROM beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
+            """.trimIndent()
+
+        val finnVedtaksperioderQuery =
+            """
+            SELECT
+                id,
+                behandling_id,
+                fra_og_med,
+                til_og_med
+            FROM vedtaksperioder
+            WHERE behandling_id = :behandling_id
             """.trimIndent()
 
         val finnOverstyrBeregningGrunnlagForBehandling =
@@ -242,7 +322,7 @@ inline fun <reified T> T.somJsonb(): PGobject {
     return jsonObject
 }
 
-private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag =
+private fun Row.asBeregningsGrunnlag(vedtaksperioder: List<Vedtaksperiode>): BeregningsGrunnlag =
     BeregningsGrunnlag(
         behandlingId = this.uuid("behandlings_id"),
         soeskenMedIBeregning =
@@ -269,6 +349,19 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag =
         kunEnJuridiskForelder =
             this.stringOrNull("kun_en_juridisk_forelder")?.let {
                 objectMapper.readValue(it)
+            },
+        vedtaksperioder = vedtaksperioder.takeIf { it.isNotEmpty() },
+    )
+
+private fun Row.asVedtaksperiode(): Vedtaksperiode =
+    Vedtaksperiode(
+        fraOgMed =
+            this.string("fra_og_med").let {
+                YearMonth.parse(it)
+            },
+        tilOgMed =
+            this.stringOrNull("til_og_med")?.let {
+                YearMonth.parse(it)
             },
     )
 

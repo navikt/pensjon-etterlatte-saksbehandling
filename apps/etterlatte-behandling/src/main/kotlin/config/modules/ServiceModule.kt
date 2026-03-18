@@ -427,19 +427,21 @@ class ServiceModule(
     }
 
     val vedtakKlient: VedtakKlient by lazy {
-        val brukNyVedtakKlientInternal: Boolean =
-            env[BRUK_NY_VEDTAK_KLIENT]?.toBoolean() ?: throw InternfeilException(
-                "Fant ikke miljøvariabel: $BRUK_NY_VEDTAK_KLIENT",
-            )
+        vedtakKlientOverride ?: run {
+            val brukNyVedtakKlientInternal: Boolean =
+                env[BRUK_NY_VEDTAK_KLIENT]?.toBoolean() ?: throw InternfeilException(
+                    "Fant ikke miljøvariabel: $BRUK_NY_VEDTAK_KLIENT",
+                )
 
-        vedtakKlientOverride ?: if (brukNyVedtakKlientInternal) {
-            VedtakInternalService(
-                vedtakTilbakekrevingService = vedtakTilbakekrevingService,
-                vedtakKlageService = vedtakKlageService,
-                vedtaksvurderingService = vedtaksvurderingService,
-            )
-        } else {
-            klientModule.vedtakKlient()
+            if (brukNyVedtakKlientInternal) {
+                VedtakInternalService(
+                    vedtakTilbakekrevingService = vedtakTilbakekrevingService,
+                    vedtakKlageService = vedtakKlageService,
+                    vedtaksvurderingService = vedtaksvurderingService,
+                )
+            } else {
+                klientModule.vedtakKlient()
+            }
         }
     }
 }

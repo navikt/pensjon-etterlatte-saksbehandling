@@ -650,8 +650,6 @@ class VedtakBehandlingService(
 
                         if (revurderingaarsak == Revurderingaarsak.ETTEROPPGJOER && resultatIngenEndring) {
                             VedtakType.INGEN_ENDRING
-                        } else if (revurderingaarsak == Revurderingaarsak.NY_SOEKNAD) {
-                            VedtakType.INNVILGELSE
                         } else {
                             VedtakType.ENDRING
                         }

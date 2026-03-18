@@ -88,7 +88,6 @@ class BrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         val behandling = behandlingService.hentBehandling(behandlingId)
-
         val vedtak = vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo)
 
         return when (behandling?.type) {

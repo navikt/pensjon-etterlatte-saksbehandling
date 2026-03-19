@@ -497,20 +497,32 @@ class EtteroppgjoerForbehandlingService(
         // Avkorting for etteroppgjørsåret har ingen sanksjoner som er beregnet med gamle avkortingsregler
         val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sak.id, brukerTokenInfo)
         val sisteVedtakMedAvkorting = etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe)
-        val avkortingMedGamleRegler =
+        val avkorting =
             runBlocking {
-                beregningKlient.harAvkortingMedSanksjonGamleRegler(
+                beregningKlient.hentAvkorting(
                     sisteVedtakMedAvkorting.behandlingId,
-                    inntektsaar,
                     brukerTokenInfo,
                 )
             }
-        if (avkortingMedGamleRegler.harGammelBeregningMedSanksjon) {
+                ?: throw InternfeilException(
+                    "Kunne ikke finne avkorting for siste iverksatte behandling med avkorting (${sisteIverksatteBehandling.id}) i sak ${sak.id}",
+                )
+        val perioderForEtteroppgjoeret = avkorting.avkortetYtelse.filter { it.fom.year == inntektsaar }
+        if (perioderForEtteroppgjoeret.isEmpty()) {
+            throw InternfeilException(
+                "Kunne ikke finne avkortingsperioder for etteroppgjørsåret $inntektsaar i sak ${sak.id}. " +
+                    "Siste iverksatte vedtak med avkorting (behandlingId=${sisteVedtakMedAvkorting.behandlingId}) " +
+                    "har ingen perioder for etteroppgjørsåret.",
+            )
+        }
+
+        val harPerioderMedSanksjonOgBeregnetYtelse =
+            perioderForEtteroppgjoeret.any { it.sanksjon != null && it.ytelseFoerAvkorting > 0 }
+        if (harPerioderMedSanksjonOgBeregnetYtelse) {
             throw UgyldigForespoerselException(
                 "SANKSJON_GAMLE_REGLER",
                 "Eksisterende avkorting i etteroppgjørsåret ($inntektsaar) har " +
-                    "sanksjoner som er beregnet med gamle regler for avkorting, i månedene " +
-                    "${avkortingMedGamleRegler.maanederMedGammelBeregning.joinToString()}. For at etteroppgjøret " +
+                    "sanksjoner som er beregnet med gamle regler for avkorting. For at etteroppgjøret " +
                     "skal bli riktig må behandlingen revurderes fra første virk med de nye reglene før " +
                     "etteroppgjøret kan påstartes.",
             )

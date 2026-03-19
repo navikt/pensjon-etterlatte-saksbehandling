@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.revurdering
 
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -25,6 +26,7 @@ class OmgjoeringKlageRevurderingService(
     private val klageService: KlageService,
     private val behandlingDao: BehandlingDao,
     private val grunnlagService: GrunnlagService,
+    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
 ) {
     fun opprettOmgjoeringKlage(
         sakId: SakId,
@@ -61,15 +63,29 @@ class OmgjoeringKlageRevurderingService(
                 ?.behandlingId
                 ?.let { UUID.fromString(it) }
                 ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
+
         val behandlingSomOmgjoeres =
             behandlingDao.hentBehandling(behandlingSomOmgjoeresId)
                 ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
 
-        val persongalleri = grunnlagService.hentPersongalleri(sakId)
+        val persongalleri = krevIkkeNull(grunnlagService.hentPersongalleri(sakId)) { "Persongalleri mangler for sak=$sakId" }
+
+        val etteroppgjoer =
+            behandlingSomOmgjoeres.relatertBehandlingId?.let {
+                etteroppgjoerForbehandlingService.hentForbehandling(it)
+            } != null
+
+        val revurderingsAarsak =
+            if (etteroppgjoer) {
+                Revurderingaarsak.ETTEROPPGJOER
+            } else {
+                Revurderingaarsak.OMGJOERING_ETTER_KLAGE
+            }
+
         return revurderingService
             .opprettRevurdering(
                 sakId = sakId,
-                persongalleri = krevIkkeNull(persongalleri) { "Persongalleri mangler for sak=$sakId" },
+                persongalleri = persongalleri,
                 forrigeBehandling = behandlingSomOmgjoeres,
                 mottattDato =
                     klagenViOmgjoerPaaGrunnAv.innkommendeDokument
@@ -78,7 +94,7 @@ class OmgjoeringKlageRevurderingService(
                         ?.toString(),
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
-                revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+                revurderingAarsak = revurderingsAarsak,
                 virkningstidspunkt = behandlingSomOmgjoeres.virkningstidspunkt,
                 begrunnelse = "Omgjøring på grunn av klage",
                 saksbehandlerIdent = saksbehandler.ident,

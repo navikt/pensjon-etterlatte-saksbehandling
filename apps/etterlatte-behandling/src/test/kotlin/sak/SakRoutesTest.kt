@@ -5,6 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
@@ -28,16 +29,19 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -187,6 +191,69 @@ internal class SakRoutesTest {
         }
     }
 
+    @Test
+    fun `hent sakid fra fnr foretrekker omstillingsstoenad`() {
+        val fnr = KONTANT_FOT.value
+        val omsSak =
+            Sak(
+                fnr,
+                SakType.OMSTILLINGSSTOENAD,
+                SakId(10L),
+                Enheter.defaultEnhet.enhetNr,
+                null,
+                false,
+            )
+
+        every { sakService.finnSak(fnr, SakType.OMSTILLINGSSTOENAD) } returns omsSak
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/personer/sakid") {
+                    header(HttpHeaders.Authorization, "Bearer $systemToken")
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                }
+
+            assertEquals(200, response.status.value)
+            assertTrue(response.bodyAsText().contains("10"))
+        }
+
+        verify(exactly = 1) { sakService.finnSak(fnr, SakType.OMSTILLINGSSTOENAD) }
+        verify(exactly = 0) { sakService.finnSak(fnr, SakType.BARNEPENSJON) }
+    }
+
+    @Test
+    fun `hent sakid fra fnr fallbacker til barnepensjon`() {
+        val fnr = KONTANT_FOT.value
+        val bpSak =
+            Sak(
+                fnr,
+                SakType.BARNEPENSJON,
+                SakId(20L),
+                Enheter.defaultEnhet.enhetNr,
+                null,
+                false,
+            )
+
+        every { sakService.finnSak(fnr, SakType.OMSTILLINGSSTOENAD) } returns null
+        every { sakService.finnSak(fnr, SakType.BARNEPENSJON) } returns bpSak
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/personer/sakid") {
+                    header(HttpHeaders.Authorization, "Bearer $systemToken")
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                }
+
+            assertEquals(200, response.status.value)
+            assertTrue(response.bodyAsText().contains("20"))
+        }
+
+        verify(exactly = 1) { sakService.finnSak(fnr, SakType.OMSTILLINGSSTOENAD) }
+        verify(exactly = 1) { sakService.finnSak(fnr, SakType.BARNEPENSJON) }
+    }
+
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
@@ -219,4 +286,5 @@ internal class SakRoutesTest {
     }
 
     private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+    private val systemToken: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
 }

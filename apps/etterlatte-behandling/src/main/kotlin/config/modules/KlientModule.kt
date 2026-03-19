@@ -62,7 +62,6 @@ class KlientModule(
     beregningKlientOverride: BeregningKlient? = null,
     trygdetidKlientOverride: TrygdetidKlient? = null,
     gosysOppgaveKlientOverride: GosysOppgaveKlient? = null,
-    vedtakKlientOverride: VedtakKlient? = null,
     brevApiKlientOverride: BrevApiKlient? = null,
     brevKlientOverride: BrevKlient? = null,
     klageHttpClientOverride: HttpClient? = null,
@@ -81,6 +80,10 @@ class KlientModule(
     private val httpClientFactory by lazy { HttpClientFactory(config) }
     private val standardHttpClient: HttpClient by lazy { httpClient() }
     private val httpClientForventSuksess: HttpClient by lazy { httpClient(forventSuksess = true) }
+
+    internal fun vedtakKlient() : VedtakKlient {
+        return VedtakKlientImpl(config, httpClient())
+    }
 
     val navAnsattKlient: NavAnsattKlient by lazy {
         navAnsattKlientOverride ?: NavAnsattKlientImpl(
@@ -115,10 +118,6 @@ class KlientModule(
 
     val gosysOppgaveKlient: GosysOppgaveKlient by lazy {
         gosysOppgaveKlientOverride ?: GosysOppgaveKlientImpl(config = config, httpClient = standardHttpClient)
-    }
-
-    val vedtakKlient: VedtakKlient by lazy {
-        vedtakKlientOverride ?: VedtakKlientImpl(config = config, httpClient = standardHttpClient)
     }
 
     val brevApiKlient: BrevApiKlient by lazy {

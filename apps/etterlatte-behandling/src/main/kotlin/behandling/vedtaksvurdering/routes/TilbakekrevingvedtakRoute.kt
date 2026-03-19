@@ -7,6 +7,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilbakekrevingService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
@@ -23,33 +24,53 @@ fun Route.tilbakekrevingvedtakRoute(service: VedtakTilbakekrevingService) {
             kunSkrivetilgang {
                 val dto = call.receive<TilbakekrevingVedtakDto>()
                 logger.info("Oppretter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.opprettEllerOppdaterVedtak(dto).toDto())
+                call.respond(
+                    inTransaction {
+                        service.opprettEllerOppdaterVedtak(dto).toDto()
+                    },
+                )
             }
         }
         post("/fatt-vedtak") {
             kunSkrivetilgang {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.fattVedtak(dto, brukerTokenInfo).toDto())
+                call.respond(
+                    inTransaction {
+                        service.fattVedtak(dto, brukerTokenInfo).toDto()
+                    },
+                )
             }
         }
         post("/attester-vedtak") {
             kunSkrivetilgang {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.attesterVedtak(dto, brukerTokenInfo).toDto())
+                call.respond(
+                    inTransaction {
+                        service.attesterVedtak(dto, brukerTokenInfo).toDto()
+                    },
+                )
             }
         }
         post("/underkjenn-vedtak") {
             kunSkrivetilgang {
                 logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
-                call.respond(service.underkjennVedtak(behandlingId).toDto())
+                call.respond(
+                    inTransaction {
+                        service.underkjennVedtak(behandlingId).toDto()
+                    },
+                )
             }
         }
         post("/tilbakestill-vedtak") {
             kunSkrivetilgang {
                 logger.info("Tilbakestiller vedtak fra attestert for tilbakekreving med id=$behandlingId")
-                call.respond(service.tilbakeStillAttestert(behandlingId).toDto())
+                call.respond(
+                    inTransaction {
+                        service.tilbakeStillAttestert(behandlingId).toDto()
+                    },
+                )
             }
         }
     }

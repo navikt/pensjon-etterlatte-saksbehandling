@@ -102,7 +102,7 @@ class JobModule(
 
     private val uttrekkLoependeYtelseEtter67JobService by lazy {
         UttrekkLoependeYtelseEtter67JobService(
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
             sakService = serviceModule.sakService,
             aldersovergangService = serviceModule.nyAldersovergangService,
             featureToggleService = featureToggleService,
@@ -114,7 +114,7 @@ class JobModule(
             featureToggleService = featureToggleService,
             etteroppgjoerOppgaveService = serviceModule.etteroppgjoerOppgaveService,
             etteroppgjoerService = serviceModule.etteroppgjoerService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
         )
     }
 
@@ -131,7 +131,7 @@ class JobModule(
             aktivitetspliktDao = daoModule.aktivitetspliktDao,
             aktivitetspliktService = serviceModule.aktivitetspliktService,
             oppgaveService = serviceModule.oppgaveService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
             featureToggleService = featureToggleService,
         )
     }
@@ -153,7 +153,7 @@ class JobModule(
             sakService = serviceModule.sakService,
             behandlingService = serviceModule.behandlingService,
             revurderingService = serviceModule.revurderingService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
             grunnlagService = serviceModule.grunnlagService,
             beregningKlient = klientModule.beregningKlient,
             pdlTjenesterKlient = klientModule.pdlTjenesterKlient,

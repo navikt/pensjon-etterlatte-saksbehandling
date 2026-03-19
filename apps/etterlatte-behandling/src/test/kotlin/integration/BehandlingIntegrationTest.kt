@@ -119,10 +119,9 @@ abstract class BehandlingIntegrationTest {
                         navAnsattKlientOverride = NavAnsattKlientTest(),
                         norg2KlientOverride = norg2Klient ?: Norg2KlientTest(),
                         leaderElectionHttpClientOverride = leaderElection(),
-                        beregningKlientOverride = BeregningKlientTest(),
+                        beregningKlientOverride = spyk(BeregningKlientTest()),
                         trygdetidKlientOverride = TrygdetidKlientTest(),
                         gosysOppgaveKlientOverride = GosysOppgaveKlientTest(),
-                        vedtakKlientOverride = vedtakKlient ?: spyk(VedtakKlientTest()),
                         brevApiKlientOverride = brevApiKlient ?: BrevApiKlientTest(),
                         brevKlientOverride = brevKlient ?: BrevKlientTest(),
                         klageHttpClientOverride = klageHttpClientTest(),
@@ -137,6 +136,7 @@ abstract class BehandlingIntegrationTest {
                         sigrunKlientOverride = SigrunKlienTest(),
                         samordningKlientOverride = mockk(relaxed = true),
                     ),
+                vedtakKlientOverride = vedtakKlient ?: spyk(VedtakKlientTest()),
                 grunnlagServiceOverride = grunnlagService,
             )
     }

@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC

@@ -2,8 +2,9 @@ package no.nav.etterlatte.behandling.vedtaksvurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -29,35 +30,20 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.database.Transactions
-import no.nav.etterlatte.libs.database.hent
-import no.nav.etterlatte.libs.database.hentListe
-import no.nav.etterlatte.libs.database.oppdater
-import no.nav.etterlatte.libs.database.opprett
-import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
+private val logger = LoggerFactory.getLogger(DataSource::class.java)
+
 class VedtaksvurderingRepository(
-    private val datasource: DataSource,
-) : Transactions<VedtaksvurderingRepository> {
-    companion object {
-        fun using(datasource: DataSource): VedtaksvurderingRepository = VedtaksvurderingRepository(datasource)
-    }
-
-    override fun <T> inTransaction(block: VedtaksvurderingRepository.(TransactionalSession) -> T): T =
-        datasource.transaction(true) {
-            this.block(it)
-        }
-
-    fun opprettVedtak(
-        opprettVedtak: OpprettVedtak,
-        tx: TransactionalSession? = null,
-    ): Vedtak =
-        tx.session {
+    private val connection: ConnectionAutoclosing,
+) {
+    fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak =
+        connection.hentKotliquerySession { session ->
             val innholdParams =
                 when (opprettVedtak.innhold) {
                     is VedtakInnhold.Tilbakekreving -> {
@@ -102,28 +88,24 @@ class VedtaksvurderingRepository(
                     "vedtakstatus" to opprettVedtak.status.name,
                     "type" to opprettVedtak.type.name,
                 ) + innholdParams,
-            ).let { query -> this.run(query.asUpdateAndReturnGeneratedKey) }
+            ).let { query -> session.run(query.asUpdateAndReturnGeneratedKey) }
                 ?.let { vedtakId ->
                     if (opprettVedtak.innhold is VedtakInnhold.Behandling) {
-                        opprettUtbetalingsperioder(vedtakId, opprettVedtak.innhold.utbetalingsperioder, this)
+                        opprettUtbetalingsperioder(vedtakId, opprettVedtak.innhold.utbetalingsperioder)
                         opprettVedtak.innhold.avkorting?.let {
                             opprettAvkortetYtelsePerioder(
                                 vedtakId,
                                 deserialize<AvkortingDto>(it.toString()).avkortetYtelse,
-                                this,
                             )
                         }
                     }
                 } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
-            return@session hentVedtak(opprettVedtak.behandlingId, this)
+            return@hentKotliquerySession hentVedtak(opprettVedtak.behandlingId)
                 ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
         }
 
-    fun oppdaterVedtak(
-        oppdatertVedtak: Vedtak,
-        tx: TransactionalSession? = null,
-    ): Vedtak =
-        tx.session {
+    fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak =
+        connection.hentKotliquerySession { session ->
             val paramMap =
                 when (oppdatertVedtak.innhold) {
                     is VedtakInnhold.Behandling -> {
@@ -165,30 +147,26 @@ class VedtaksvurderingRepository(
                         WHERE behandlingId = :behandlingid
                         """,
                 paramMap = paramMap,
-            ).let { query -> this.run(query.asUpdate) }
+            ).let { query -> session.run(query.asUpdate) }
 
             if (oppdatertVedtak.innhold is VedtakInnhold.Behandling) {
-                slettUtbetalingsperioder(oppdatertVedtak.id, this)
-                opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.innhold.utbetalingsperioder, this)
-                slettAvkortetYtelsePerioder(oppdatertVedtak.id, this)
+                slettUtbetalingsperioder(oppdatertVedtak.id)
+                opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.innhold.utbetalingsperioder)
+                slettAvkortetYtelsePerioder(oppdatertVedtak.id)
                 oppdatertVedtak.innhold.avkorting?.let {
                     opprettAvkortetYtelsePerioder(
                         oppdatertVedtak.id,
                         deserialize<AvkortingDto>(it.toString()).avkortetYtelse,
-                        this,
                     )
                 }
             }
-            return@session hentVedtak(oppdatertVedtak.behandlingId, this)
+            return@hentKotliquerySession hentVedtak(oppdatertVedtak.behandlingId)
                 ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
         }
 
-    fun hentVedtak(
-        vedtakId: Long,
-        tx: TransactionalSession? = null,
-    ): Vedtak? =
-        tx.session {
-            hent(
+    fun hentVedtak(vedtakId: Long): Vedtak? =
+        connection.hentKotliquerySession { session ->
+            session.hent(
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
@@ -198,18 +176,15 @@ class VedtaksvurderingRepository(
             WHERE id = :vedtakId
             """,
                 params = mapOf("vedtakId" to vedtakId),
-            ) {
-                val utbetalingsperioder = hentUtbetalingsPerioder(vedtakId, this)
-                it.toVedtak(utbetalingsperioder)
+            ) { row ->
+                val utbetalingsperioder = hentUtbetalingsPerioder(vedtakId)
+                row.toVedtak(utbetalingsperioder)
             }
         }
 
-    fun hentVedtak(
-        behandlingId: UUID,
-        tx: TransactionalSession? = null,
-    ): Vedtak? =
-        tx.session {
-            hent(
+    fun hentVedtak(behandlingId: UUID): Vedtak? =
+        connection.hentKotliquerySession { session ->
+            session.hent(
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
@@ -220,16 +195,14 @@ class VedtaksvurderingRepository(
             """,
                 params = mapOf("behandlingId" to behandlingId),
             ) {
-                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
+                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"))
                 it.toVedtak(utbetalingsperioder)
             }
         }
 
-    fun hentVedtakForSak(
-        sakId: SakId,
-        tx: TransactionalSession? = null,
-    ): List<Vedtak> {
-        val hentVedtak = """
+    fun hentVedtakForSak(sakId: SakId): List<Vedtak> =
+        connection.hentKotliquerySession { session ->
+            val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, datoiverksatt, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
@@ -237,20 +210,17 @@ class VedtaksvurderingRepository(
             FROM vedtak  
             WHERE sakId = :sakId
             """
-        return tx.session {
-            hentListe(
+            session.hentListe(
                 queryString = hentVedtak,
                 params = { mapOf("sakId" to sakId.sakId) },
             ) {
                 it.toVedtak(emptyList())
             }
         }
-    }
 
     fun hentSakIdMedUtbetalingForInntektsaar(
         inntektsaar: Int,
         sakType: SakType? = null,
-        tx: TransactionalSession? = null,
     ): List<SakId> {
         val hentVedtak =
             """
@@ -261,8 +231,8 @@ class VedtaksvurderingRepository(
             AND vedtakstatus = :vedtakStatus
             """.trimIndent()
 
-        return tx.session {
-            hentListe(
+        return connection.hentKotliquerySession { session ->
+            session.hentListe(
                 queryString = hentVedtak,
                 params = {
                     mapOf(
@@ -281,10 +251,9 @@ class VedtaksvurderingRepository(
         sakId: SakId,
         inntektsaar: Int,
         sakType: SakType,
-        tx: TransactionalSession? = null,
     ): Boolean =
-        tx.session {
-            hent(
+        connection.hentKotliquerySession { session ->
+            session.hent(
                 queryString = """
                     SELECT 1 FROM vedtak v
                     JOIN utbetalingsperiode u ON v.id = u.vedtakid
@@ -307,7 +276,6 @@ class VedtaksvurderingRepository(
     fun hentFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
         sakType: SakType? = null,
-        tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
@@ -321,8 +289,8 @@ class VedtaksvurderingRepository(
               )
             ${if (sakType == null) "" else "AND saktype = :saktype"}
             """
-        return tx.session {
-            hentListe(
+        return connection.hentKotliquerySession { session ->
+            session.hentListe(
                 queryString = hentVedtak,
                 params = {
                     mapOf(
@@ -331,19 +299,16 @@ class VedtaksvurderingRepository(
                     )
                 },
             ) {
-                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
+                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"))
                 it.toVedtak(utbetalingsperioder)
             }
         }
     }
 
-    fun hentAvkortetYtelsePerioder(
-        vedtakIds: Set<Long>,
-        tx: TransactionalSession? = null,
-    ): List<AvkortetYtelsePeriode> =
-        tx.session {
-            val idArray = this.connection.underlying.createArrayOf("bigint", vedtakIds.toTypedArray())
-            hentListe(
+    fun hentAvkortetYtelsePerioder(vedtakIds: Set<Long>): List<AvkortetYtelsePeriode> =
+        connection.hentKotliquerySession { session ->
+            val idArray = session.connection.underlying.createArrayOf("bigint", vedtakIds.toTypedArray())
+            session.hentListe(
                 queryString = "SELECT * FROM avkortet_ytelse_periode WHERE vedtakid = ANY (:vedtakIds)",
                 params = { mapOf("vedtakIds" to idArray) },
             ) { it.toAvkortetYtelsePeriode() }
@@ -352,54 +317,54 @@ class VedtaksvurderingRepository(
     fun fattVedtak(
         behandlingId: UUID,
         vedtakFattet: VedtakFattet,
-        tx: TransactionalSession? = null,
     ): Vedtak =
-        tx.session {
-            oppdater(
-                query = """
+        connection.hentKotliquerySession { session ->
+            session
+                .oppdater(
+                    query = """
                 UPDATE vedtak 
                 SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, datoFattet = now(), 
                     vedtakstatus = :vedtakstatus  
                 WHERE behandlingId = :behandlingId
                 """,
-                params =
-                    mapOf(
-                        "saksbehandlerId" to vedtakFattet.ansvarligSaksbehandler,
-                        "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet.enhetNr,
-                        "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
-                        "behandlingId" to behandlingId,
-                    ),
-                loggtekst = "Fatter vedtak for behandling $behandlingId",
-            ).also { krev(it == 1) { "Vedtak ble ikke oppdatert etter fatting behandlingid: $behandlingId" } }
-                .let { hentVedtakNonNull(behandlingId, this) }
+                    params =
+                        mapOf(
+                            "saksbehandlerId" to vedtakFattet.ansvarligSaksbehandler,
+                            "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet.enhetNr,
+                            "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
+                            "behandlingId" to behandlingId,
+                        ),
+                    loggtekst = "Fatter vedtak for behandling $behandlingId",
+                ).also { krev(it == 1) { "Vedtak ble ikke oppdatert etter fatting behandlingid: $behandlingId" } }
+                .let { hentVedtakNonNull(behandlingId) }
         }
 
     fun attesterVedtak(
         behandlingId: UUID,
         attestasjon: Attestasjon,
-        tx: TransactionalSession? = null,
     ): Vedtak =
-        tx.session {
-            oppdater(
-                query = """
+        connection.hentKotliquerySession { session ->
+            session
+                .oppdater(
+                    query = """
                 UPDATE vedtak 
                 SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = now(), 
                     vedtakstatus = :vedtakstatus 
                 WHERE behandlingId = :behandlingId
                 """,
-                params =
-                    mapOf(
-                        "attestant" to attestasjon.attestant,
-                        "attestertVedtakEnhet" to attestasjon.attesterendeEnhet.enhetNr,
-                        "vedtakstatus" to VedtakStatus.ATTESTERT.name,
-                        "behandlingId" to behandlingId,
-                    ),
-                loggtekst = "Attesterer vedtak $behandlingId",
-            ).also {
-                krev(it == 1) { "Vedtak ble ikke oppdatert etter attestering behandlingid: $behandlingId" }
-            }
+                    params =
+                        mapOf(
+                            "attestant" to attestasjon.attestant,
+                            "attestertVedtakEnhet" to attestasjon.attesterendeEnhet.enhetNr,
+                            "vedtakstatus" to VedtakStatus.ATTESTERT.name,
+                            "behandlingId" to behandlingId,
+                        ),
+                    loggtekst = "Attesterer vedtak $behandlingId",
+                ).also {
+                    krev(it == 1) { "Vedtak ble ikke oppdatert etter attestering behandlingid: $behandlingId" }
+                }
 
-            opprett(
+            session.opprett(
                 query = """
                     INSERT INTO outbox_vedtakshendelse (vedtakId, type) 
                     SELECT v.id, 'ATTESTERT'
@@ -410,113 +375,104 @@ class VedtaksvurderingRepository(
                 loggtekst = "Lagt til innslag for attestert vedtak i outbox",
             )
 
-            return@session hentVedtakNonNull(behandlingId, this)
+            hentVedtakNonNull(behandlingId)
         }
 
-    fun underkjennVedtak(
-        behandlingId: UUID,
-        tx: TransactionalSession? = null,
-    ): Vedtak =
-        tx.session {
-            oppdater(
-                """
+    fun underkjennVedtak(behandlingId: UUID): Vedtak =
+        connection.hentKotliquerySession { session ->
+            session
+                .oppdater(
+                    """
             UPDATE vedtak 
             SET attestant = null, datoAttestert = null, attestertVedtakEnhet = null, saksbehandlerId = null, 
                 datoFattet = null, fattetVedtakEnhet = null, vedtakstatus = :vedtakstatus 
             WHERE behandlingId = :behandlingId
             """,
-                params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
-                loggtekst = "Underkjenner vedtak for behandling $behandlingId",
-            ).also {
-                krev(it == 1) { "Vedtak ble ikke oppdatert etter underkjenning behandlingid: $behandlingId" }
-            }
-            return@session hentVedtakNonNull(behandlingId, this)
+                    params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
+                    loggtekst = "Underkjenner vedtak for behandling $behandlingId",
+                ).also {
+                    krev(it == 1) { "Vedtak ble ikke oppdatert etter underkjenning behandlingid: $behandlingId" }
+                }
+            hentVedtakNonNull(behandlingId)
         }
 
-    fun tilSamordningVedtak(
-        behandlingId: UUID,
-        tx: TransactionalSession? = null,
-    ): Vedtak =
-        tx.session {
-            oppdater(
-                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
-                params = mapOf("vedtakstatus" to VedtakStatus.TIL_SAMORDNING.name, "behandlingId" to behandlingId),
-                loggtekst = "Lagrer til_samordning vedtak",
-            ).also {
-                krev(it == 1) { "Vedtak ble ikke oppdatert etter satt til samordning behandlingid: $behandlingId" }
-            }
-            return@session hentVedtakNonNull(behandlingId, this)
+    fun tilSamordningVedtak(behandlingId: UUID): Vedtak =
+        connection.hentKotliquerySession { session ->
+            session
+                .oppdater(
+                    query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+                    params = mapOf("vedtakstatus" to VedtakStatus.TIL_SAMORDNING.name, "behandlingId" to behandlingId),
+                    loggtekst = "Lagrer til_samordning vedtak",
+                ).also {
+                    krev(it == 1) { "Vedtak ble ikke oppdatert etter satt til samordning behandlingid: $behandlingId" }
+                }
+            hentVedtakNonNull(behandlingId)
         }
 
-    fun samordnetVedtak(
-        behandlingId: UUID,
-        tx: TransactionalSession? = null,
-    ): Vedtak =
-        tx.session {
-            oppdater(
-                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
-                params = mapOf("vedtakstatus" to VedtakStatus.SAMORDNET.name, "behandlingId" to behandlingId),
-                loggtekst = "Lagrer samordnet vedtak",
-            ).also {
-                krev(it == 1) { "Vedtak ble ikke oppdatert etter samordnet behandlingid: $behandlingId" }
-            }
-            return@session hentVedtakNonNull(behandlingId, this)
+    fun samordnetVedtak(behandlingId: UUID): Vedtak =
+        connection.hentKotliquerySession { session ->
+            session
+                .oppdater(
+                    query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+                    params = mapOf("vedtakstatus" to VedtakStatus.SAMORDNET.name, "behandlingId" to behandlingId),
+                    loggtekst = "Lagrer samordnet vedtak",
+                ).also {
+                    krev(it == 1) { "Vedtak ble ikke oppdatert etter samordnet behandlingid: $behandlingId" }
+                }
+            hentVedtakNonNull(behandlingId)
         }
 
-    fun iverksattVedtak(
-        behandlingId: UUID,
-        tx: TransactionalSession? = null,
-    ): Vedtak =
-        tx.session {
-            oppdater(
-                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus, datoiverksatt = :datoiverksatt WHERE behandlingId = :behandlingId",
-                params =
-                    mapOf(
-                        "vedtakstatus" to VedtakStatus.IVERKSATT.name,
-                        "behandlingId" to behandlingId,
-                        "datoiverksatt" to Tidspunkt.now().toNorskTid(),
-                    ),
-                loggtekst = "Lagrer iverksatt vedtak",
-            ).also {
-                krev(it == 1) { "Vedtak ble ikke oppdatert etter iverksatt behandlingid: $behandlingId" }
-            }
-            return@session hentVedtakNonNull(behandlingId, this)
+    fun iverksattVedtak(behandlingId: UUID): Vedtak =
+        connection.hentKotliquerySession { session ->
+            session
+                .oppdater(
+                    query =
+                        "UPDATE vedtak SET vedtakstatus = :vedtakstatus, datoiverksatt = :datoiverksatt " +
+                            "WHERE behandlingId = :behandlingId",
+                    params =
+                        mapOf(
+                            "vedtakstatus" to VedtakStatus.IVERKSATT.name,
+                            "behandlingId" to behandlingId,
+                            "datoiverksatt" to Tidspunkt.now().toNorskTid(),
+                        ),
+                    loggtekst = "Lagrer iverksatt vedtak",
+                ).also {
+                    krev(it == 1) { "Vedtak ble ikke oppdatert etter iverksatt behandlingid: $behandlingId" }
+                }
+            hentVedtakNonNull(behandlingId)
         }
 
-    fun tilbakestillIkkeIverksatteVedtak(
-        behandlingId: UUID,
-        tx: TransactionalSession? = null,
-    ): Vedtak? {
-        val hentVedtak = hentVedtak(behandlingId, tx)
+    fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? {
+        val hentVedtak = hentVedtak(behandlingId)
         if (hentVedtak?.status != VedtakStatus.FATTET_VEDTAK) {
             return null
         }
-        return tx.session {
-            oppdater(
-                query = """
+        return connection.hentKotliquerySession { session ->
+            session
+                .oppdater(
+                    query = """
                 UPDATE vedtak 
                 SET vedtakstatus = :vedtakstatus 
                 WHERE behandlingId = :behandlingId
                 """,
-                params =
-                    mapOf(
-                        "vedtakstatus" to VedtakStatus.RETURNERT.name,
-                        "behandlingId" to behandlingId,
-                    ),
-                loggtekst = "Returnerer vedtak $behandlingId",
-            ).also {
-                krev(it == 1) { "Vedtak ble ikke oppdatert returnert/tilbakestilt behandlingid: $behandlingId" }
-            }
-            return@session hentVedtakNonNull(behandlingId, this)
+                    params =
+                        mapOf(
+                            "vedtakstatus" to VedtakStatus.RETURNERT.name,
+                            "behandlingId" to behandlingId,
+                        ),
+                    loggtekst = "Returnerer vedtak $behandlingId",
+                ).also {
+                    krev(it == 1) { "Vedtak ble ikke oppdatert returnert/tilbakestilt behandlingid: $behandlingId" }
+                }
+            hentVedtakNonNull(behandlingId)
         }
     }
 
     fun lagreManuellBehandlingSamordningsmelding(
         oppdatering: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
-        tx: TransactionalSession? = null,
-    ) = tx.session {
-        opprett(
+    ) = connection.hentKotliquerySession { session ->
+        session.opprett(
             query = """
                     INSERT INTO samordning_manuell (opprettet_av, vedtakId, samId, refusjonskrav, kommentar) 
                     VALUES (:opprettetAv, :vedtakId, :samId, :refusjonskrav, :kommentar)
@@ -533,37 +489,31 @@ class VedtaksvurderingRepository(
         )
     }
 
-    fun slettManuellBehandlingSamordningsmelding(
-        samId: Long,
-        tx: TransactionalSession? = null,
-    ) = tx.session {
-        oppdater(
-            query = "DELETE FROM samordning_manuell WHERE samId = :samId",
-            params = mapOf("samId" to samId),
-            loggtekst = "Sletter innslag for manuell samordning pga feil ved ekstern oppdatering",
-        )
-    }
+    fun slettManuellBehandlingSamordningsmelding(samId: Long) =
+        connection.hentKotliquerySession { session ->
+            session.oppdater(
+                query = "DELETE FROM samordning_manuell WHERE samId = :samId",
+                params = mapOf("samId" to samId),
+                loggtekst = "Sletter innslag for manuell samordning pga feil ved ekstern oppdatering",
+            )
+        }
 
-    fun tilbakestillTilbakekrevingsvedtak(
-        tilbakekrevingId: UUID,
-        tx: TransactionalSession? = null,
-    ) = tx.session {
-        oppdater(
-            query =
-                """
-                UPDATE vedtak 
-                SET vedtakstatus = 'FATTET_VEDTAK', attestertvedtakenhet = null, attestant = null, datoattestert = null 
-                WHERE behandlingId = :behandlingId AND type = 'TILBAKEKREVING' AND vedtakstatus = 'ATTESTERT'
-                """.trimIndent(),
-            params = mapOf("behandlingId" to tilbakekrevingId),
-            loggtekst = "Tilbakestiller tilbakerkreving fra attestert siden den feilet mot tilbakekrevingskomponenten",
-        )
-    }
+    fun tilbakestillTilbakekrevingsvedtak(tilbakekrevingId: UUID) =
+        connection.hentKotliquerySession { session ->
+            session.oppdater(
+                query =
+                    """
+                    UPDATE vedtak 
+                    SET vedtakstatus = 'FATTET_VEDTAK', attestertvedtakenhet = null, attestant = null, datoattestert = null 
+                    WHERE behandlingId = :behandlingId AND type = 'TILBAKEKREVING' AND vedtakstatus = 'ATTESTERT'
+                    """.trimIndent(),
+                params = mapOf("behandlingId" to tilbakekrevingId),
+                loggtekst = "Tilbakestiller tilbakerkreving fra attestert siden den feilet mot tilbakekrevingskomponenten",
+            )
+        }
 
-    private fun hentVedtakNonNull(
-        behandlingId: UUID,
-        tx: TransactionalSession? = null,
-    ): Vedtak = krevIkkeNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
+    private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =
+        krevIkkeNull(hentVedtak(behandlingId)) { "Fant ikke vedtak for behandling $behandlingId" }
 
     private fun Row.toUtbetalingsperiode() =
         Utbetalingsperiode(
@@ -652,92 +602,132 @@ class VedtaksvurderingRepository(
                 },
         )
 
-    private fun hentUtbetalingsPerioder(
-        vedtakId: Long,
-        tx: TransactionalSession? = null,
-    ): List<Utbetalingsperiode> =
-        tx.session {
-            hentListe(
+    private fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> =
+        connection.hentKotliquerySession { session ->
+            session.hentListe(
                 queryString = "SELECT * FROM utbetalingsperiode WHERE vedtakid = :vedtakid",
                 params = { mapOf("vedtakid" to vedtakId) },
             ) { it.toUtbetalingsperiode() }
         }
 
-    private fun slettAvkortetYtelsePerioder(
-        vedtakId: Long,
-        tx: TransactionalSession,
-    ) = queryOf(
-        statement = """
+    private fun slettAvkortetYtelsePerioder(vedtakId: Long) =
+        connection.hentKotliquerySession { session ->
+            queryOf(
+                statement = """
                 DELETE FROM avkortet_ytelse_periode
                 WHERE vedtakid = :vedtakid
                 """,
-        paramMap =
-            mapOf(
-                "vedtakid" to vedtakId,
-            ),
-    ).let { query -> tx.run(query.asUpdate) }
+                paramMap =
+                    mapOf(
+                        "vedtakid" to vedtakId,
+                    ),
+            ).let { query -> session.run(query.asUpdate) }
+        }
 
     private fun opprettAvkortetYtelsePerioder(
         vedtakId: Long,
         avkortetYtelse: List<AvkortetYtelseDto>,
-        tx: TransactionalSession,
-    ) = tx.batchPreparedNamedStatement(
-        statement = """
+    ) = connection.hentKotliquerySession { session ->
+        session.batchPreparedNamedStatement(
+            statement = """
                     INSERT INTO avkortet_ytelse_periode(vedtakid, datofom, datotom, type, ytelseFoer, ytelseEtter) 
                     VALUES (:vedtakid, :datofom, :datotom, :type, :ytelseFoer, :ytelseEtter)
                     """,
-        params =
-            avkortetYtelse.map {
-                mapOf(
-                    "vedtakid" to vedtakId,
-                    "datofom" to it.fom.atDay(1).let(Date::valueOf),
-                    "datotom" to it.tom?.atEndOfMonth()?.let(Date::valueOf),
-                    "type" to it.type,
-                    "ytelseFoer" to it.ytelseFoerAvkorting,
-                    "ytelseEtter" to it.ytelseEtterAvkorting,
-                )
-            },
-    )
+            params =
+                avkortetYtelse.map {
+                    mapOf(
+                        "vedtakid" to vedtakId,
+                        "datofom" to it.fom.atDay(1).let(Date::valueOf),
+                        "datotom" to it.tom?.atEndOfMonth()?.let(Date::valueOf),
+                        "type" to it.type,
+                        "ytelseFoer" to it.ytelseFoerAvkorting,
+                        "ytelseEtter" to it.ytelseEtterAvkorting,
+                    )
+                },
+        )
+    }
 
-    private fun slettUtbetalingsperioder(
-        vedtakId: Long,
-        tx: TransactionalSession,
-    ) = queryOf(
-        statement = """
+    private fun slettUtbetalingsperioder(vedtakId: Long) =
+        connection.hentKotliquerySession { session ->
+            queryOf(
+                statement = """
                 DELETE FROM utbetalingsperiode
                 WHERE vedtakid = :vedtakid
                 """,
-        paramMap =
-            mapOf(
-                "vedtakid" to vedtakId,
-            ),
-    ).let { query -> tx.run(query.asUpdate) }
+                paramMap =
+                    mapOf(
+                        "vedtakid" to vedtakId,
+                    ),
+            ).let { query -> session.run(query.asUpdate) }
+        }
 
     private fun opprettUtbetalingsperioder(
         vedtakId: Long,
         utbetalingsperioder: List<Utbetalingsperiode>,
-        tx: TransactionalSession,
     ) = utbetalingsperioder.forEach {
-        queryOf(
-            statement = """
+        connection.hentKotliquerySession { session ->
+            queryOf(
+                statement = """
                     INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep, regelverk) 
                     VALUES (:vedtakid, :datofom, :datotom, :type, :beloep, :regelverk)
                     """,
-            paramMap =
-                mapOf(
-                    "vedtakid" to vedtakId,
-                    "datofom" to
-                        it.periode.fom
-                            .atDay(1)
-                            .let(Date::valueOf),
-                    "datotom" to
-                        it.periode.tom
-                            ?.atEndOfMonth()
-                            ?.let(Date::valueOf),
-                    "type" to it.type.name,
-                    "beloep" to it.beloep,
-                    "regelverk" to it.regelverk.name,
-                ),
-        ).let { query -> tx.run(query.asUpdate) }
+                paramMap =
+                    mapOf(
+                        "vedtakid" to vedtakId,
+                        "datofom" to
+                            it.periode.fom
+                                .atDay(1)
+                                .let(Date::valueOf),
+                        "datotom" to
+                            it.periode.tom
+                                ?.atEndOfMonth()
+                                ?.let(Date::valueOf),
+                        "type" to it.type.name,
+                        "beloep" to it.beloep,
+                        "regelverk" to it.regelverk.name,
+                    ),
+            ).let { query -> session.run(query.asUpdate) }
+        }
     }
+}
+
+private fun <T> Session.hent(
+    queryString: String,
+    params: Map<String, Any> = mapOf(),
+    converter: (r: Row) -> T,
+) = queryOf(statement = queryString, paramMap = params)
+    .let { query -> this.run(query.map { row -> converter.invoke(row) }.asSingle) }
+
+private fun <T> Session.hentListe(
+    queryString: String,
+    params: () -> Map<String, Any?> = { mapOf() },
+    converter: (r: Row) -> T,
+): List<T> =
+    queryOf(statement = queryString, paramMap = params.invoke())
+        .let { query ->
+            this.run(
+                query
+                    .map { row -> converter.invoke(row) }
+                    .asList,
+            )
+        }
+
+private fun Session.oppdater(
+    query: String,
+    params: Map<String, Any?>,
+    loggtekst: String,
+) = queryOf(statement = query, paramMap = params)
+    .also { logger.info(loggtekst) }
+    .let { this.run(it.asUpdate) }
+
+private fun Session.opprett(
+    query: String,
+    params: Map<String, Any?>,
+    loggtekst: String,
+) = this.let { tx ->
+    queryOf(
+        statement = query,
+        paramMap = params,
+    ).also { logger.info(loggtekst) }
+        .let { tx.run(it.asExecute) }
 }

@@ -49,12 +49,12 @@ export const Person = () => {
   useSidetittel('Personoversikt')
 
   const { sakId } = useParams()
-  const [sakIdentResult, hentSakForIdent] = useApiCall(hentSak)
+  const [sakIdentResponse, hentSakForIdent] = useApiCall(hentSak)
 
   const [search, setSearch] = useSearchParams()
   const locationState = usePersonLocationState(search.get('key'))
 
-  const fnrFraSak = isSuccess(sakIdentResult) ? sakIdentResult.data.ident : undefined
+  const fnrFraSak = isSuccess(sakIdentResponse) ? sakIdentResponse.data.ident : undefined
   const fnr = fnrFraSak ?? locationState?.fnr
 
   const [foretrukketSak, setForetrukketSak] = useState<number | undefined>()
@@ -89,7 +89,7 @@ export const Person = () => {
     }
   }, [fnr])
 
-  if (sakId && isPending(sakIdentResult)) {
+  if (sakId && isPending(sakIdentResponse)) {
     return <Spinner label="Henter sak..." />
   }
 

@@ -98,7 +98,8 @@ class BrevService(
 
             else -> {
                 // revurdering
-                behandling?.revurderingsaarsak() == Revurderingaarsak.NY_SOEKNAD
+                behandling?.sak?.sakType == SakType.OMSTILLINGSSTOENAD &&
+                    behandling.revurderingsaarsak() == Revurderingaarsak.NY_SOEKNAD
             }
         }
     }

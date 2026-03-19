@@ -96,7 +96,7 @@ class DaoModule(
     val doedshendelseDao by lazy { DoedshendelseDao(autoClosingDatabase) }
     val omregningDao by lazy { OmregningDao(autoClosingDatabase) }
 
-    val vedtaksvurderingRepository by lazy { VedtaksvurderingRepository(dataSource) }
+    val vedtaksvurderingRepository by lazy { VedtaksvurderingRepository(autoClosingDatabase) }
 
     val vilkaarsvurderingDao by lazy { VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao()) }
     val ukjentBeroertDao by lazy { UkjentBeroertDao(autoClosingDatabase) }

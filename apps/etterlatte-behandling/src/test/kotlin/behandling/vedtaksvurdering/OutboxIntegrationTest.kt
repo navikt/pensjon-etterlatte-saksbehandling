@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.vedtaksvurdering
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxItemType
@@ -33,7 +34,7 @@ class OutboxIntegrationTest(
     private val dataSource: DataSource,
 ) {
     private val testProdusent = TestProdusent<UUID, String>()
-    private val vedtaksvurderingRepository = VedtaksvurderingRepository(dataSource)
+    private val vedtaksvurderingRepository = VedtaksvurderingRepository(ConnectionAutoclosingTest(dataSource))
     private val vedtaksvurderingService = VedtaksvurderingService(vedtaksvurderingRepository)
     private val outboxRepository = OutboxRepository(dataSource)
     private val outboxService = OutboxService(outboxRepository, vedtaksvurderingService, testProdusent::publiser)

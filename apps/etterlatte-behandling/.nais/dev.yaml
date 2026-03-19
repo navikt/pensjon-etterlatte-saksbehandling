@@ -169,6 +169,8 @@ spec:
       value: https://sam-q2.dev-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://dev-fss.pensjonsamhandling.sam-q2/.default
+    - name: BRUK_NY_VEDTAK_KLIENT
+      value: "false"
 
   envFrom:
     - secret: my-application-unleash-api-token

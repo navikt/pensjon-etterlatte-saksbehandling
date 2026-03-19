@@ -17,6 +17,7 @@ import java.util.UUID
 class AutomatiskBehandlingService(
     private val service: VedtakBehandlingService,
     private val oppgaveService: OppgaveService,
+    private val vedtaksvurderingService: VedtaksvurderingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -52,7 +53,7 @@ class AutomatiskBehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
         logger.info("Håndterer behandling $behandlingId")
-        val vedtak = service.hentVedtakForBehandling(behandlingId)
+        val vedtak = vedtaksvurderingService.hentVedtakMedBehandlingId(behandlingId)
         if (vedtak != null) {
             logger.warn(
                 "Skal opprette og fatte vedtak, men har allerede et vedtak for behandlingen" +

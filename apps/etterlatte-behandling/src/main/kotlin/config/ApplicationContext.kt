@@ -6,6 +6,7 @@ import com.zaxxer.hikari.HikariDataSource
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.selftest.SelfTestService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.config.modules.DaoModule
@@ -55,6 +56,7 @@ internal class ApplicationContext(
         ),
     klientModuleOverride: KlientModule? = null,
     grunnlagServiceOverride: GrunnlagService? = null,
+    vedtakKlientOverride: VedtakKlient? = null,
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -74,14 +76,16 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
         )
 
-    private val serviceModule =
+    private val serviceModule: ServiceModule =
         ServiceModule(
             daoModule = daoModule,
             klientModule = klientModule,
             kafkaModule = kafkaModule,
             featureToggleService = featureToggleService,
             rapid = rapid,
+            env = env,
             grunnlagServiceOverride = grunnlagServiceOverride,
+            vedtakKlientOverride = vedtakKlientOverride,
         )
 
     private val highLevelServiceModule =
@@ -91,7 +95,6 @@ internal class ApplicationContext(
             kafkaModule = kafkaModule,
             serviceModule = serviceModule,
             featureToggleService = featureToggleService,
-            rapid = rapid,
         )
 
     private val jobModule =
@@ -125,7 +128,6 @@ internal class ApplicationContext(
     // Klient
     val norg2Klient get() = klientModule.norg2Klient
     val beregningKlient get() = klientModule.beregningKlient
-    val vedtakKlient get() = klientModule.vedtakKlient
     val brevApiKlient get() = klientModule.brevApiKlient
     val brevKlient get() = klientModule.brevKlient
     val krrKlient get() = klientModule.krrKlient
@@ -181,12 +183,13 @@ internal class ApplicationContext(
     val etteroppgjoerRevurderingService get() = highLevelServiceModule.etteroppgjoerRevurderingService
     val migreringService get() = highLevelServiceModule.migreringService
     val aktivitetspliktOppgaveService get() = highLevelServiceModule.aktivitetspliktOppgaveService
-    val vedtaksvurderingService get() = highLevelServiceModule.vedtaksvurderingService
+    val vedtaksvurderingService get() = serviceModule.vedtaksvurderingService
     val vedtakBehandlingService get() = highLevelServiceModule.vedtakBehandlingService
-    val vedtaksvurderingRapidService get() = highLevelServiceModule.vedtaksvurderingRapidService
-    val vedtakKlageService get() = highLevelServiceModule.vedtakKlageService
-    val vedtakEtteroppgjoerService get() = highLevelServiceModule.vedtakEtteroppgjoerService
-    val vedtakTilbakekrevingService get() = highLevelServiceModule.vedtakTilbakekrevingService
+    val vedtaksvurderingRapidService get() = serviceModule.vedtaksvurderingRapidService
+    val vedtakKlageService get() = serviceModule.vedtakKlageService
+    val vedtakEtteroppgjoerService get() = serviceModule.vedtakEtteroppgjoerService
+    val vedtakTilbakekrevingService get() = serviceModule.vedtakTilbakekrevingService
+    val vedtakKlient get() = serviceModule.vedtakKlient
 
     val behandlingsHendelser get() = kafkaModule.behandlingsHendelser
 

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering
 
 import io.kotest.matchers.shouldBe
+import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -13,6 +14,10 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.asContextElement
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.samordningSystembrukerVedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningService
@@ -31,10 +36,12 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -47,10 +54,17 @@ import java.util.UUID
 class SamordningsvedtakRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private val vedtakSamordningService: VedtakSamordningService = mockk()
+    private lateinit var context: Context
 
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
+    }
+
+    @BeforeEach
+    fun setup() {
+        nyKontekstMedBrukerOgDatabaseContext(mockk(relaxed = true), DatabaseContextTest(mockk(relaxed = true)))
+        context = Kontekst.get()
     }
 
     @AfterEach
@@ -68,12 +82,7 @@ class SamordningsvedtakRouteTest {
         coEvery { vedtakSamordningService.hentVedtak(1234) } returns
             samordningVedtak()
 
-        testApplication {
-            val client =
-                runServer(mockOAuth2Server) {
-                    samordningSystembrukerVedtakRoute(vedtakSamordningService)
-                }
-
+        withTestApplication { client ->
             val response =
                 client.get("/api/samordning/vedtak/1234") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -91,12 +100,7 @@ class SamordningsvedtakRouteTest {
         val fnr = Folkeregisteridentifikator.of(FNR_2)
         coEvery { vedtakSamordningService.hentVedtaksliste(sakType = SakType.OMSTILLINGSSTOENAD, fomDato = fomDate, fnr = fnr) } returns
             listOf(samordningVedtak())
-        testApplication {
-            val client =
-                runServer(mockOAuth2Server) {
-                    samordningSystembrukerVedtakRoute(vedtakSamordningService)
-                }
-
+        withTestApplication { client ->
             val response =
                 client.post("/api/samordning/vedtak?sakstype=${SakType.OMSTILLINGSSTOENAD}&fomDato=$fomDate") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -106,6 +110,17 @@ class SamordningsvedtakRouteTest {
 
             response.status shouldBe HttpStatusCode.OK
             coVerify { vedtakSamordningService.hentVedtaksliste(sakType = SakType.OMSTILLINGSSTOENAD, fomDato = fomDate, fnr = fnr) }
+        }
+    }
+
+    private fun withTestApplication(function: suspend (HttpClient) -> Unit) {
+        testApplication(Kontekst.asContextElement(context)) {
+            val client =
+                runServer(mockOAuth2Server) {
+                    samordningSystembrukerVedtakRoute(vedtakSamordningService)
+                }
+
+            function.invoke(client)
         }
     }
 

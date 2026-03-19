@@ -9,6 +9,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -29,11 +30,13 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
             val fnr = call.receive<FoedselsnummerDTO>().foedselsnummer.let { Folkeregisteridentifikator.of(it) }
 
             val vedtaksliste =
-                vedtakSamordningService.hentVedtaksliste(
-                    fnr = fnr,
-                    sakType = sakstype,
-                    fomDato = fomDato,
-                )
+                inTransaction {
+                    vedtakSamordningService.hentVedtaksliste(
+                        fnr = fnr,
+                        sakType = sakstype,
+                        fomDato = fomDato,
+                    )
+                }
             call.respond(vedtaksliste)
         }
 
@@ -44,7 +47,9 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
                 }
 
             val vedtak =
-                vedtakSamordningService.hentVedtak(vedtakId)
+                inTransaction {
+                    vedtakSamordningService.hentVedtak(vedtakId)
+                }
                     ?: throw GenerellIkkeFunnetException()
             call.respond(vedtak)
         }

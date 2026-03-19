@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.vedtaksvurdering.OpprettVedtak
-import no.nav.etterlatte.behandling.vedtaksvurdering.UgyldigAttestantException
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
@@ -93,7 +92,7 @@ class VedtakKlageService(
             vedtaksvurderingRepository.hentVedtak(klage.id)
                 ?: throw NotFoundException("Fant ikke vedtak for klage med id=${klage.id}")
 
-        sjekkAttestantHarAnnenIdentEnnDenSomFattet(eksisterendeVedtak, brukerTokenInfo)
+        sjekkAttestantHarAnnenIdentEnnSaksbehandler(eksisterendeVedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
         verifiserGyldigVedtakStatus(eksisterendeVedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
 
         val attestertVedtak =
@@ -163,20 +162,4 @@ class VedtakKlageService(
                 behandlingId = vedtak.behandlingId,
             ),
         )
-
-    private fun verifiserGyldigVedtakStatus(
-        gjeldendeStatus: VedtakStatus,
-        forventetStatus: List<VedtakStatus>,
-    ) {
-        if (gjeldendeStatus !in forventetStatus) throw VedtakTilstandException(gjeldendeStatus, forventetStatus)
-    }
-
-    private fun sjekkAttestantHarAnnenIdentEnnDenSomFattet(
-        vedtak: Vedtak,
-        attestant: BrukerTokenInfo,
-    ) {
-        if (attestant.erSammePerson(vedtak.vedtakFattet!!.ansvarligSaksbehandler)) {
-            throw UgyldigAttestantException(attestant.ident())
-        }
-    }
 }

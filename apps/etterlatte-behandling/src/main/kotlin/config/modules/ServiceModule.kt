@@ -1,5 +1,6 @@
 package no.nav.etterlatte.config.modules
 
+import no.nav.etterlatte.EnvKey.BRUK_NY_VEDTAK_KLIENT
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BrukerService
@@ -15,6 +16,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
@@ -22,6 +25,12 @@ import no.nav.etterlatte.behandling.revurdering.ManuellRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilbakekrevingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.GrunnlagService
@@ -33,6 +42,8 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbetjeningService
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kodeverk.KodeverkService
+import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
 import no.nav.etterlatte.sak.SakServiceImpl
@@ -50,7 +61,9 @@ class ServiceModule(
     private val kafkaModule: KafkaModule,
     private val featureToggleService: FeatureToggleService,
     private val rapid: KafkaProdusent<String, String>,
+    private val env: Miljoevariabler,
     grunnlagServiceOverride: GrunnlagService? = null,
+    vedtakKlientOverride: VedtakKlient? = null,
 ) {
     val brukerService: BrukerService by lazy {
         BrukerServiceImpl(pdltjenesterKlient = klientModule.pdlTjenesterKlient, norg2Klient = klientModule.norg2Klient)
@@ -157,7 +170,7 @@ class ServiceModule(
     val etteroppgjoerService: EtteroppgjoerService by lazy {
         EtteroppgjoerService(
             dao = daoModule.etteroppgjoerDao,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = vedtakKlient,
             behandlingService = behandlingService,
             beregningKlient = klientModule.beregningKlient,
             sigrunKlient = klientModule.sigrunKlient,
@@ -170,7 +183,7 @@ class ServiceModule(
         EtteroppgjoerDataService(
             behandlingService = behandlingService,
             featureToggleService = featureToggleService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = vedtakKlient,
             beregningKlient = klientModule.beregningKlient,
         )
     }
@@ -197,7 +210,7 @@ class ServiceModule(
             hendelserService = etteroppgjoerHendelseService,
             beregningKlient = klientModule.beregningKlient,
             behandlingService = behandlingService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = vedtakKlient,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             etteroppgjoerDataService = etteroppgjoerDataService,
         )
@@ -295,7 +308,7 @@ class ServiceModule(
             revurderingService = revurderingService,
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = vedtakKlient,
             beregningKlient = klientModule.beregningKlient,
         )
     }
@@ -334,7 +347,7 @@ class ServiceModule(
     }
 
     private val grunnlagsendringsHendelseFilter by lazy {
-        GrunnlagsendringsHendelseFilter(vedtakKlient = klientModule.vedtakKlient, behandlingService = behandlingService)
+        GrunnlagsendringsHendelseFilter(vedtakKlient = vedtakKlient, behandlingService = behandlingService)
     }
 
     val grunnlagsendringshendelseService: GrunnlagsendringshendelseService by lazy {
@@ -355,7 +368,7 @@ class ServiceModule(
         InntektsjusteringSelvbetjeningService(
             oppgaveService = oppgaveService,
             behandlingService = behandlingService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = vedtakKlient,
             rapid = rapid,
             featureToggleService = featureToggleService,
             beregningKlient = klientModule.beregningKlient,
@@ -376,5 +389,59 @@ class ServiceModule(
             forbehandlingService = etteroppgjoerForbehandlingService,
             grunnlagService = grunnlagService,
         )
+    }
+
+    val vedtaksvurderingService by lazy {
+        VedtaksvurderingService(daoModule.vedtaksvurderingRepository)
+    }
+
+    val vedtaksvurderingRapidService by lazy {
+        VedtaksvurderingRapidService(
+            publiser = { key, melding -> rapid.publiser(key.toString(), verdi = melding) },
+        )
+    }
+
+    val vedtakKlageService by lazy {
+        VedtakKlageService(
+            vedtaksvurderingRepository = daoModule.vedtaksvurderingRepository,
+            vedtaksvurderingRapidService = vedtaksvurderingRapidService,
+        )
+    }
+
+    val vedtakTilbakekrevingService by lazy {
+        VedtakTilbakekrevingService(
+            repository = daoModule.vedtaksvurderingRepository,
+            featureToggleService = featureToggleService,
+        )
+    }
+
+    private val vedtakSamordningService by lazy {
+        VedtakSamordningService(daoModule.vedtaksvurderingRepository)
+    }
+
+    val vedtakEtteroppgjoerService by lazy {
+        VedtakEtteroppgjoerService(
+            repository = daoModule.vedtaksvurderingRepository,
+            vedtakSamordningService = vedtakSamordningService,
+        )
+    }
+
+    val vedtakKlient: VedtakKlient by lazy {
+        vedtakKlientOverride ?: run {
+            val brukNyVedtakKlientInternal: Boolean =
+                env[BRUK_NY_VEDTAK_KLIENT]?.toBoolean() ?: throw InternfeilException(
+                    "Fant ikke miljøvariabel: $BRUK_NY_VEDTAK_KLIENT",
+                )
+
+            if (brukNyVedtakKlientInternal) {
+                VedtakInternalService(
+                    vedtakTilbakekrevingService = vedtakTilbakekrevingService,
+                    vedtakKlageService = vedtakKlageService,
+                    vedtaksvurderingService = vedtaksvurderingService,
+                )
+            } else {
+                klientModule.vedtakKlient()
+            }
+        }
     }
 }

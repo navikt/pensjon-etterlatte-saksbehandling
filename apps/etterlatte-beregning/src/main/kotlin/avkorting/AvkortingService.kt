@@ -450,17 +450,35 @@ class AvkortingService(
         }
     }
 
-    fun harAvkortingMedSanksjonGamleRegler(
+    suspend fun harAvkortingMedSanksjonGamleRegler(
         behandlingId: UUID,
         inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
     ): MaanederMedGammelSanksjonIAvkorting {
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
-        val aarsoppgjoerInntektsaar =
+
+        val aarsoppgjoerInntektsaarEksisterende =
             avkorting.aarsoppgjoer.singleOrNull { it.aar == inntektsaar }
-                ?: throw UgyldigForespoerselException(
+
+        val aarsoppgjoerInntektsaar =
+            if (aarsoppgjoerInntektsaarEksisterende == null) {
+                val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+                val alleVedtak = vedtakKlient.hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(behandling.sak, brukerTokenInfo)
+                avkortingReparerAarsoppgjoeret
+                    .hentAvkortingMedReparertAarsoppgjoer(
+                        avkorting = avkorting,
+                        iverksatteVedtakPaaSak = alleVedtak,
+                        innvilgedePerioder = innvilgedePerioder,
+                    ).aarsoppgjoer
+                    .singleOrNull { it.aar == inntektsaar } ?: throw UgyldigForespoerselException(
                     "MANGLER_AVKORTING_INNTEKTSAAR",
                     "Det er ingen avkorting for $inntektsaar i behandling med id $behandlingId",
                 )
+            } else {
+                aarsoppgjoerInntektsaarEksisterende
+            }
+
         val maaneder =
             aarsoppgjoerInntektsaar.avkortetYtelse
                 .filter { it.sanksjon != null && it.ytelseFoerAvkorting > 0 }

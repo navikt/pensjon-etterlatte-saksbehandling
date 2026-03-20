@@ -127,6 +127,10 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         Etteroppgjør for {forbehandling.aar}
       </Heading>
 
+      {forbehandling.klageOmgjoering && (
+        <Alert variant="info">Dette etteroppgjøret er opprettet som en del av en klageomgjøring</Alert>
+      )}
+
       <Inntektsopplysninger forbehandling={forbehandling} />
 
       {erRevurdering && (

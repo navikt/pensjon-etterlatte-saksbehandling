@@ -170,7 +170,7 @@ spec:
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://dev-fss.pensjonsamhandling.sam-q2/.default
     - name: BRUK_NY_VEDTAK_KLIENT
-      value: "false"
+      value: "true"
     - name: BRUK_VEDTAK_REPOSITORY_KLIENT
       value: "true"
 

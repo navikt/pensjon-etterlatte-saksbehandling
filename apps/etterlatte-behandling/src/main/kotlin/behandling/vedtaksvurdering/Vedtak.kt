@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -20,6 +18,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID

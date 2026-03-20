@@ -1,12 +1,12 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import tools.jackson.databind.JsonNode
 
 class OpplysningsgrunnlagMapper(
     private val grunnlaghendelser: List<OpplysningDao.GrunnlagHendelse>,

@@ -13,8 +13,8 @@ dependencies {
 
     implementation(libs.etterlatte.common)
     implementation(libs.logging.logstashlogbackencoder) {
-        exclude("com.fasterxml.jackson.core")
-        exclude("com.fasterxml.jackson.dataformat")
+        exclude("tools.jackson.core")
+        exclude("tools.jackson.dataformat")
     }
     testFixturesImplementation(libs.etterlatte.common)
     implementation(libs.logging.logbackclassic)

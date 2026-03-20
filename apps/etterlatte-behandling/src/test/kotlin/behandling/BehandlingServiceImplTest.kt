@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
@@ -76,6 +75,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
+import tools.jackson.databind.JsonNode
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime

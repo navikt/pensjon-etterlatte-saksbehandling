@@ -1,6 +1,5 @@
 package no.nav.etterlatte.statistikk.river
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 class AvbruttOpprettetBehandlinghendelseRiver(
     rapidsConnection: RapidsConnection,
@@ -45,7 +45,7 @@ class AvbruttOpprettetBehandlinghendelseRiver(
         context: MessageContext,
     ) = try {
         val behandling: StatistikkBehandling =
-            objectMapper.treeToValue(packet[STATISTIKKBEHANDLING_RIVER_KEY])
+            objectMapper.readValue(packet[STATISTIKKBEHANDLING_RIVER_KEY].toString())
         val hendelse: BehandlingHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
         val tekniskTid = parseTekniskTid(packet, logger)
 

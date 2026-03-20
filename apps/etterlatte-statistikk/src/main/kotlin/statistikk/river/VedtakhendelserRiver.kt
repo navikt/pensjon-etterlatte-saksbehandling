@@ -1,6 +1,5 @@
 package no.nav.etterlatte.statistikk.river
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -16,6 +15,7 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 class VedtakhendelserRiver(
     rapidsConnection: RapidsConnection,
@@ -48,7 +48,7 @@ class VedtakhendelserRiver(
         val tekniskTid = parseTekniskTid(packet, logger)
         service
             .registrerStatistikkForVedtak(
-                objectMapper.treeToValue(packet["vedtak"]),
+                objectMapper.readValue(packet["vedtak"].toString()),
                 vedtakshendelse,
                 tekniskTid,
             ).also { (sakRad, stoenadRad) ->

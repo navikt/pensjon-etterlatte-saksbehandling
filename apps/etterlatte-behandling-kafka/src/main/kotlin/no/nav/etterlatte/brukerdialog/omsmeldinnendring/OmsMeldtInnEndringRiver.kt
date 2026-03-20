@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brukerdialog.omsmeldinnendring
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -23,6 +22,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 internal class OmsMeldtInnEndringRiver(
@@ -114,7 +114,7 @@ internal class OmsMeldtInnEndringRiver(
     }
 
     private fun JsonMessage.omsMeldtInnEndringer(): OmsMeldtInnEndring =
-        objectMapper.treeToValue<OmsMeldtInnEndring>(this[OmsMeldtInnEndringHendelseKeys.INNHOLD_KEY])
+        objectMapper.readValue<OmsMeldtInnEndring>(this[OmsMeldtInnEndringHendelseKeys.INNHOLD_KEY].toString())
 
     private fun mapEndringTilLesbarString(omsEndring: OmsEndring): String =
         when (omsEndring) {

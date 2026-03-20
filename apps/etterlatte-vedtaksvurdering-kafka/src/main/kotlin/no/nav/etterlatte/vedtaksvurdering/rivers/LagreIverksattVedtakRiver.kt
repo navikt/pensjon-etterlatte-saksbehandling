@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vedtaksvurdering.rivers
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -12,6 +11,7 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 internal class LagreIverksattVedtakRiver(
     rapidsConnection: RapidsConnection,
@@ -42,6 +42,7 @@ internal class LagreIverksattVedtakRiver(
                                 "Kan derfor ikke lagre at vedtaket er iverksatt. Utbetaling: $respons",
                         )
                 }
+
                 // Her kan vi haandtere utbetalingsproblemer om vi oensker
                 else -> {}
             }

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.ktor.ktor.ktorobo
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
@@ -28,6 +27,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.navConsumerId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 
 class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,

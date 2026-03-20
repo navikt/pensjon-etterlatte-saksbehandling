@@ -1,6 +1,5 @@
 package no.nav.etterlatte.common.klienter
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -10,7 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import io.mockk.mockk
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
@@ -123,7 +122,6 @@ internal class PdlTjenesterKlientTest {
                 expectSuccess = true
                 install(ContentNegotiation) {
                     jackson {
-                        registerModule(JavaTimeModule())
                     }
                 }
             }

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.trygdetid
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -50,6 +48,8 @@ import no.nav.etterlatte.trygdetid.klienter.Trygdetidsgrunnlag
 import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
 import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlient
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 import java.util.UUID

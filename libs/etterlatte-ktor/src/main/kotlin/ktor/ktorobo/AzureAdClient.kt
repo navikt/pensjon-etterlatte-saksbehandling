@@ -1,9 +1,7 @@
 package no.nav.etterlatte.libs.ktor.ktor.ktorobo
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.Expiry
@@ -19,13 +17,15 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.Parameters
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.JacksonConverter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.ktor.client.ClientCallLogging
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -36,10 +36,7 @@ internal val defaultHttpClient =
     HttpClient {
         expectSuccess = true
         install(ContentNegotiation) {
-            jackson {
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            }
+            register(ContentType.Application.Json, JacksonConverter(objectMapper))
         }
         install(ClientCallLogging)
     }

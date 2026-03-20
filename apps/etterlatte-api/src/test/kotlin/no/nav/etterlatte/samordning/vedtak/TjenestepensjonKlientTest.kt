@@ -10,7 +10,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import io.mockk.clearAllMocks
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -42,7 +42,9 @@ class TjenestepensjonKlientTest {
                         respond("{\"tpNr\": []}", headers = headers)
                     }
 
-                    else -> error(request.url.fullPath)
+                    else -> {
+                        error(request.url.fullPath)
+                    }
                 }
             }
 
@@ -64,7 +66,9 @@ class TjenestepensjonKlientTest {
                         respond("{\"tpNr\": [ \"3010\", \"4100\" ]}", headers = headers)
                     }
 
-                    else -> error(request.url.fullPath)
+                    else -> {
+                        error(request.url.fullPath)
+                    }
                 }
             }
 

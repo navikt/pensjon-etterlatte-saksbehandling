@@ -1,7 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -39,6 +37,8 @@ import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.jetbrains.annotations.TestOnly
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 interface GrunnlagService {
@@ -628,46 +628,70 @@ private fun Grunnlagsopplysning<JsonNode>.asPersonopplysning(): Personopplysning
         id = this.id,
         kilde = this.kilde.tilGenerellKilde(),
         opplysningType = this.opplysningType,
-        opplysning = objectMapper.treeToValue(opplysning, Person::class.java),
+        opplysning = objectMapper.readValue(opplysning.toString(), Person::class.java),
     )
 
 private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
     when (this) {
-        is Grunnlagsopplysning.Pdl ->
+        is Grunnlagsopplysning.Pdl -> {
             GenerellKilde(
                 type = this.type,
                 tidspunkt = this.tidspunktForInnhenting,
                 detalj = this.registersReferanse,
             )
+        }
 
-        is Grunnlagsopplysning.Persondata ->
+        is Grunnlagsopplysning.Persondata -> {
             GenerellKilde(
                 type = this.type,
                 tidspunkt = this.tidspunktForInnhenting,
                 detalj = this.registersReferanse,
             )
+        }
 
-        is Grunnlagsopplysning.Gjenoppretting -> GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
-        is Grunnlagsopplysning.Pesys -> GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
-        is Grunnlagsopplysning.Privatperson ->
+        is Grunnlagsopplysning.Gjenoppretting -> {
+            GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
+        }
+
+        is Grunnlagsopplysning.Pesys -> {
+            GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
+        }
+
+        is Grunnlagsopplysning.Privatperson -> {
             GenerellKilde(
                 type = this.type,
                 tidspunkt = this.mottatDato,
                 detalj = this.fnr,
             )
+        }
 
-        is Grunnlagsopplysning.RegelKilde -> GenerellKilde(type = this.type, tidspunkt = this.ts)
-        is Grunnlagsopplysning.Saksbehandler ->
+        is Grunnlagsopplysning.RegelKilde -> {
+            GenerellKilde(type = this.type, tidspunkt = this.ts)
+        }
+
+        is Grunnlagsopplysning.Saksbehandler -> {
             GenerellKilde(
                 type = this.type,
                 tidspunkt = this.tidspunkt,
                 detalj = this.ident,
             )
+        }
 
-        is Grunnlagsopplysning.UkjentInnsender -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
-        is Grunnlagsopplysning.Gjenny -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
-        is Grunnlagsopplysning.Alderspensjon -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
-        is Grunnlagsopplysning.Ufoeretrygd -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.UkjentInnsender -> {
+            GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        }
+
+        is Grunnlagsopplysning.Gjenny -> {
+            GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        }
+
+        is Grunnlagsopplysning.Alderspensjon -> {
+            GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        }
+
+        is Grunnlagsopplysning.Ufoeretrygd -> {
+            GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        }
     }
 
 data class GrunnlagsopplysningerPersonPdl(

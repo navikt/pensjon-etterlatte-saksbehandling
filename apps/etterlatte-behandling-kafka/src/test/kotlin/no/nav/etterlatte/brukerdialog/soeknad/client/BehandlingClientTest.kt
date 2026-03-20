@@ -1,7 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad.client
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -11,7 +9,7 @@ import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sakId1
@@ -22,6 +20,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 internal class BehandlingClientTest {
@@ -32,7 +31,7 @@ internal class BehandlingClientTest {
 
         val behandlingClient = createBehandlingClient(requestList, behandlingId)
         val hendelseJson = objectMapper.readTree(javaClass.getResource("/behandlingsbehov/barnepensjon.json")!!.readText())
-        val soeknad = objectMapper.treeToValue<Barnepensjon>(hendelseJson[FordelerFordelt.skjemaInfoKey])
+        val soeknad = objectMapper.readValue<Barnepensjon>(hendelseJson[FordelerFordelt.skjemaInfoKey].toString())
         val hentetSaksid =
             behandlingClient.opprettBehandling(
                 sakId1,

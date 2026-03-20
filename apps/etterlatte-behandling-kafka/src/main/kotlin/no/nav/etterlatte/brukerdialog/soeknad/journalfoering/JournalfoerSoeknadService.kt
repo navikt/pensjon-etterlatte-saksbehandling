@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad.journalfoering
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brukerdialog.soeknad.pdf.PdfGeneratorKlient
@@ -8,6 +7,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -115,7 +115,7 @@ class JournalfoerSoeknadService(
     ): DokumentVariant.OriginalJson {
         logger.info("Oppretter original JSON for søknad (id=$soeknadId)")
 
-        val skjemaInfoBytes = jacksonObjectMapper().writeValueAsBytes(soeknad.toJsonNode())
+        val skjemaInfoBytes = objectMapper.writeValueAsBytes(soeknad.toJsonNode())
 
         return DokumentVariant.OriginalJson(encoder.encodeToString(skjemaInfoBytes))
     }
@@ -132,7 +132,10 @@ class JournalfoerSoeknadService(
                 pdfgenKlient.genererPdf(soeknad, template)
             }.let {
                 when (it) {
-                    is RetryResult.Success -> DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    is RetryResult.Success -> {
+                        DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    }
+
                     is RetryResult.Failure -> {
                         logger.error("Kunne ikke opprette PDF for søknad med id=$soeknadId")
                         throw it.samlaExceptions()

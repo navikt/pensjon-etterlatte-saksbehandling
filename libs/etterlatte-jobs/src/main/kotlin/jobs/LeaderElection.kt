@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.jobs
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -21,7 +20,7 @@ open class LeaderElection(
     private val httpClient: HttpClient = HttpClient(),
 ) {
     private val logger = LoggerFactory.getLogger(LeaderElection::class.java)
-    private val objectMapper = jacksonObjectMapper()
+    private val objectMapper = no.nav.etterlatte.libs.common.objectMapper
 
     open fun hostName(): String? = InetAddress.getLocalHost().hostName
 

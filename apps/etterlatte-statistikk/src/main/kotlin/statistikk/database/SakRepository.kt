@@ -1,6 +1,5 @@
 package no.nav.etterlatte.statistikk.database
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
@@ -15,6 +14,7 @@ import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.domain.SoeknadFormat
+import tools.jackson.module.kotlin.readValue
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet

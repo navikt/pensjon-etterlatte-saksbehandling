@@ -106,10 +106,10 @@ internal class VedtakAttestertRiver(
                 avkortingEtter = bigDecimal(packet, AVKORTING_ETTER),
                 vedtakBeloepFoer = bigDecimal(packet, VEDTAK_BELOEP_FOER),
                 vedtakBeloepEtter = bigDecimal(packet, VEDTAK_BELOEP_ETTER),
-                vedtakOpphoerFoer = deserialize(packet[VEDTAK_OPPHOER_FOER].toJson()),
-                vedtakOpphoerEtter = deserialize(packet[VEDTAK_OPPHOER_ETTER].toJson()),
-                innvilgedePerioderFoer = deserialize(packet[INNVILGEDE_PERIODER_FOER].toJson()),
-                innvilgedePerioderEtter = deserialize(packet[INNVILGEDE_PERIODER_ETTER].toJson()),
+                vedtakOpphoerFoer = deserialize(packet[VEDTAK_OPPHOER_FOER].toString()),
+                vedtakOpphoerEtter = deserialize(packet[VEDTAK_OPPHOER_ETTER].toString()),
+                innvilgedePerioderFoer = deserialize(packet[INNVILGEDE_PERIODER_FOER].toString()),
+                innvilgedePerioderEtter = deserialize(packet[INNVILGEDE_PERIODER_ETTER].toString()),
             )
 
         behandlingService.lagreFullfoertKjoering(request)

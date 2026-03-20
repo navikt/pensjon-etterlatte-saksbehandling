@@ -1,6 +1,5 @@
 package no.nav.etterlatte.sanksjon
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
@@ -9,6 +8,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.transaction
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID

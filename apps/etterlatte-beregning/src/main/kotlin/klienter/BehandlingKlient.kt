@@ -1,6 +1,5 @@
 package no.nav.etterlatte.klienter
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -26,6 +25,7 @@ import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 interface BehandlingKlient :
@@ -120,7 +120,10 @@ class BehandlingKlientImpl(
                 )
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente behandling med behandlingId=$behandlingId",
@@ -152,7 +155,10 @@ class BehandlingKlientImpl(
                 )
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente foersteVirkningsdato med saksId=$sakId",
@@ -182,7 +188,10 @@ class BehandlingKlientImpl(
                 )
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente siste iverksatte behandling på sak med id=$sakId",

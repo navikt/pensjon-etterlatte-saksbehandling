@@ -1,7 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -21,6 +19,8 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 class GrunnlagHendelserRiver(
@@ -49,7 +49,7 @@ class GrunnlagHendelserRiver(
         val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
 
         val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
-            objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
+            objectMapper.readValue(packet[OPPLYSNING_KEY].toString())!!
 
         val fnr = packet[FNR_KEY].textValue()
         if (fnr == null) {

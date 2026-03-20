@@ -1,11 +1,5 @@
 package no.nav.etterlatte.utbetaling.simulering
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -25,6 +19,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
 import org.slf4j.LoggerFactory
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.deser.std.StdScalarDeserializer
+import tools.jackson.databind.module.SimpleModule
+import tools.jackson.module.kotlin.readValue
 import java.io.IOException
 import java.time.Duration
 
@@ -32,9 +32,10 @@ private typealias RequestWrapper = no.nav.system.os.tjenester.simulerfpservice.s
 private typealias ResponseWrapper = no.nav.system.os.tjenester.simulerfpservice.simulerfpservicegrensesnitt.SimulerBeregningResponse
 
 fun simuleringObjectMapper(): ObjectMapper =
-    objectMapper
-        .copy()
-        .registerModule(StringTrimModule())
+    (objectMapper as tools.jackson.databind.json.JsonMapper)
+        .rebuild()
+        .addModule(StringTrimModule())
+        .build()
 
 class SimuleringOsKlient(
     config: Config,

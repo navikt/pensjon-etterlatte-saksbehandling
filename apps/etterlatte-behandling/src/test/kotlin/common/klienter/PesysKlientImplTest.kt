@@ -1,10 +1,10 @@
 package common.klienter
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 class PesysKlientImplTest {

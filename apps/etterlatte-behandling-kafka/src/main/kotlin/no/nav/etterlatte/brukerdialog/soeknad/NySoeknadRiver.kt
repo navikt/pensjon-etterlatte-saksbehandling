@@ -1,7 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad
 
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -31,6 +29,8 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.sikkerLogg
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.DatabindException
+import tools.jackson.module.kotlin.readValue
 
 internal class NySoeknadRiver(
     rapidsConnection: RapidsConnection,
@@ -100,16 +100,16 @@ internal class NySoeknadRiver(
                     .any { it.status in BehandlingStatus.underBehandling() }
 
             if (harBehandlingUnderArbeid) {
-                /**
+                /*
                  * Opprett oppgave for tilleggsinformasjon
                  * Sett fordelt til false slik at det ikke opprettes ny behandling.
-                 **/
+                 */
                 opprettOppgaveTilleggsinformasjon(sak.id, journalpostResponse.journalpostId)
                 context.publish(packet.oppdaterMed(sak.id, false, journalpostResponse).toJson())
             } else {
                 context.publish(packet.oppdaterMed(sak.id, true, journalpostResponse).toJson())
             }
-        } catch (e: JsonMappingException) {
+        } catch (e: DatabindException) {
             sikkerLogg.error("Feil under deserialisering", e)
             logger.error("Feil under deserialisering av søknad (id=$soeknadId). Se sikkerlogg for detaljer.")
             throw e
@@ -119,11 +119,11 @@ internal class NySoeknadRiver(
         }
     }
 
-    /**
+    /*
      * Oppretter en oppgave i stedet for ny behandling dersom det allerede finnes en pågående behandling.
      * På denne måten unngår vi duplikate behandlinger i tilfeller der sluttbruker bruker ny søknad for
      * å sende tilleggsinformasjon.
-     **/
+     */
     private fun opprettOppgaveTilleggsinformasjon(
         sakId: SakId,
         journalpostId: String,
@@ -185,7 +185,7 @@ internal class NySoeknadRiver(
             this[GyldigSoeknadVurdert.dokarkivReturKey] = journalpostResponse
         }
 
-    private fun JsonMessage.soeknad() = objectMapper.treeToValue<InnsendtSoeknad>(this[SoeknadInnsendt.skjemaInfoKey])
+    private fun JsonMessage.soeknad() = objectMapper.readValue<InnsendtSoeknad>(this[SoeknadInnsendt.skjemaInfoKey].toString())
 
     private fun JsonMessage.soeknadId(): Long {
         val longValue = get(SoeknadInnsendt.lagretSoeknadIdKey).longValue()

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.vedtaksvurdering
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -18,6 +16,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -58,7 +58,7 @@ data class Vedtak(
             iverksettelsesTidspunkt = iverksettelsesTidspunkt,
             innhold =
                 when (innhold) {
-                    is VedtakInnhold.Behandling ->
+                    is VedtakInnhold.Behandling -> {
                         VedtakInnholdDto.VedtakBehandlingDto(
                             virkningstidspunkt = innhold.virkningstidspunkt,
                             behandling =
@@ -70,11 +70,13 @@ data class Vedtak(
                             utbetalingsperioder = innhold.utbetalingsperioder,
                             opphoerFraOgMed = innhold.opphoerFraOgMed,
                         )
+                    }
 
-                    is VedtakInnhold.Tilbakekreving ->
+                    is VedtakInnhold.Tilbakekreving -> {
                         VedtakInnholdDto.VedtakTilbakekrevingDto(
                             tilbakekreving = innhold.tilbakekreving,
                         )
+                    }
 
                     is VedtakInnhold.Klage -> {
                         VedtakInnholdDto.Klage(

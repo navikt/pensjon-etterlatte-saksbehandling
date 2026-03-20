@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.klienter
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.ktor.client.HttpClient
@@ -11,7 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.common.Enheter
@@ -64,21 +63,23 @@ class Norg2KlientTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/arbeidsfordeling/enheter/bestmatch" ->
+                            "/arbeidsfordeling/enheter/bestmatch" -> {
                                 respond(
                                     jsonRespons,
                                     HttpStatusCode.OK,
                                     defaultHeaders,
                                 )
+                            }
 
-                            else -> error("Unhandled ${request.url.fullPath}")
+                            else -> {
+                                error("Unhandled ${request.url.fullPath}")
+                            }
                         }
                     }
                 }
                 expectSuccess = true
                 install(ContentNegotiation) {
                     jackson {
-                        registerModule(JavaTimeModule())
                     }
                 }
             }

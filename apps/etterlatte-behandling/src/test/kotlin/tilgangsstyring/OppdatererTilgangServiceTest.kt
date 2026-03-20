@@ -1,6 +1,5 @@
 package no.nav.etterlatte.tilgangsstyring
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.confirmVerified
@@ -46,6 +45,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import tools.jackson.databind.JsonNode
 import java.security.SecureRandom
 import java.time.LocalDate
 import java.util.UUID
@@ -198,16 +198,25 @@ class OppdatererTilgangServiceTest {
             AdressebeskyttelseGradering.entries
                 .map {
                     when (it) {
-                        AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND ->
+                        AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
                             Pair(
                                 it,
                                 Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr,
                             )
+                        }
 
-                        AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Pair(it, Enheter.STRENGT_FORTROLIG.enhetNr)
+                        AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
+                            Pair(it, Enheter.STRENGT_FORTROLIG.enhetNr)
+                        }
+
                         // er en virtuell enhet som vi ikke vet hva er
-                        AdressebeskyttelseGradering.FORTROLIG -> Pair(it, Enhetsnummer("1234"))
-                        AdressebeskyttelseGradering.UGRADERT -> Pair(it, Enheter.STEINKJER.enhetNr)
+                        AdressebeskyttelseGradering.FORTROLIG -> {
+                            Pair(it, Enhetsnummer("1234"))
+                        }
+
+                        AdressebeskyttelseGradering.UGRADERT -> {
+                            Pair(it, Enheter.STEINKJER.enhetNr)
+                        }
                     }
                 }.filter {
                     it.first.harAdressebeskyttelse()

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.behandling
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -24,6 +23,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 class GrunnlagmapperTest {

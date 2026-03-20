@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vedtaksvurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
@@ -36,6 +35,7 @@ import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import tools.jackson.module.kotlin.readValue
 import java.sql.Date
 import java.time.YearMonth
 import java.util.UUID

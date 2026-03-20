@@ -1,10 +1,5 @@
 package no.nav.etterlatte.tilbakekreving.klienter
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonSerializer
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.module.SimpleModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -42,6 +37,11 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsperi
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.LoggerFactory
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.ValueSerializer
+import tools.jackson.databind.module.SimpleModule
 import java.math.BigDecimal
 import java.time.LocalDate
 import javax.xml.datatype.DatatypeFactory
@@ -59,9 +59,10 @@ class TilbakekrevingskomponentenKlient(
 ) {
     // Egen objectmapper for å fjerne timestamp fra xml-datoer da dette ikke blir riktig mot tilbakekrevingskomponenten
     private val tilbakekrevingObjectMapper: ObjectMapper =
-        objectMapper.copy().registerModule(
-            CustomXMLGregorianCalendarModule(),
-        )
+        (objectMapper as tools.jackson.databind.json.JsonMapper)
+            .rebuild()
+            .addModule(CustomXMLGregorianCalendarModule())
+            .build()
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg = sikkerlogger()
@@ -328,6 +329,7 @@ class TilbakekrevingskomponentenKlient(
                 sikkerLogg.error(err, kv("response", response.toJson()))
                 throw TilbakekrevingskomponentenFeil(err)
             }
+
             Alvorlighetsgrad.SQL_FEIL -> {
                 val err = "Tilbakekrevingsvedtak feilet med alvorlighetsgrad $alvorlighetsgrad"
                 sikkerLogg.error(err, kv("response", response.toJson()))
@@ -381,11 +383,11 @@ private class CustomXMLGregorianCalendarModule : SimpleModule() {
     init {
         addSerializer(
             XMLGregorianCalendar::class.java,
-            object : JsonSerializer<XMLGregorianCalendar>() {
+            object : ValueSerializer<XMLGregorianCalendar>() {
                 override fun serialize(
                     value: XMLGregorianCalendar?,
                     gen: JsonGenerator?,
-                    ser: SerializerProvider?,
+                    ser: SerializationContext?,
                 ) {
                     if (value != null) {
                         gen?.writeString(

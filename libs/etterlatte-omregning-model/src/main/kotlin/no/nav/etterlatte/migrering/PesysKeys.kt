@@ -10,7 +10,7 @@ const val KILDE_KEY = "kilde"
 const val FIKS_BREV_MIGRERING = "fiksBrevMigrering"
 
 var JsonMessage.pesysId: PesysId
-    get() = objectMapper.treeToValue(this[PESYS_ID_KEY], PesysId::class.java)
+    get() = objectMapper.readValue(this[PESYS_ID_KEY].toString(), PesysId::class.java)
     set(name) {
         this[PESYS_ID_KEY] = name
     }

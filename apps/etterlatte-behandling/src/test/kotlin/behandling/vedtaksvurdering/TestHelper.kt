@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
@@ -21,6 +20,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import tools.jackson.databind.node.ObjectNode
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth

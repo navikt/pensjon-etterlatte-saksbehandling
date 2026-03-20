@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
@@ -32,6 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.sql.Date
 import java.time.YearMonth
 import java.util.UUID

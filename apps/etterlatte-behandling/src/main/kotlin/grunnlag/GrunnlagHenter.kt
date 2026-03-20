@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -20,6 +19,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 class GrunnlagHenter(

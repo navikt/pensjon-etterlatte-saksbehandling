@@ -1,6 +1,5 @@
 package no.nav.etterlatte.avkorting
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
@@ -22,6 +21,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth

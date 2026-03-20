@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.opplysningerfrasoknad.uthenter.Opplysningsuthenter
@@ -41,7 +42,7 @@ internal class StartUthentingFraSoeknadRiver(
     ) {
         val opplysninger =
             opplysningsuthenter.lagOpplysningsListe(
-                packet[GyldigSoeknadVurdert.skjemaInfoKey],
+                objectMapper.readTree(packet[GyldigSoeknadVurdert.skjemaInfoKey].toString()),
                 SoeknadType.valueOf(packet[GyldigSoeknadVurdert.skjemaInfoTypeKey].textValue()),
             )
 

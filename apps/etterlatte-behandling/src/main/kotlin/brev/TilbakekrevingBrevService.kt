@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -35,6 +34,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakService
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 import kotlin.math.absoluteValue
 

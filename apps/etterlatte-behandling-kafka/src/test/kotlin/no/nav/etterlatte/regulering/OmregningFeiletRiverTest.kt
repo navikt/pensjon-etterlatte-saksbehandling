@@ -74,7 +74,7 @@ internal class OmregningFeiletRiverTest {
         Assertions.assertEquals("OmregningKjoering", kjoering.captured)
         Assertions.assertEquals(sakId, sakIdSlot.captured)
         Assertions.assertEquals(KjoeringStatus.FEILA, status.captured)
-        Assertions.assertEquals("feilmelding".toJson(), begrunnelse.captured)
+        Assertions.assertEquals("feilmelding", begrunnelse.captured)
         Assertions.assertEquals(corrId, corrIdSlot.captured)
         Assertions.assertEquals("feilende steg", feilendeSteg.captured)
     }

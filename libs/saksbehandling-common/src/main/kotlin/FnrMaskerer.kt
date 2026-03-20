@@ -1,9 +1,9 @@
 package no.nav.etterlatte.libs.common.person.logg
 
-import com.fasterxml.jackson.core.JsonStreamContext
 import net.logstash.logback.mask.ValueMasker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import tools.jackson.core.TokenStreamContext
 
 /*
     Denne brukes i logback.xml for å anonymisere fnr som randomly havner i loggene
@@ -17,7 +17,7 @@ private val fnrRegex = Regex("\\b\\d{11}\\b")
 
 class FnrMasker : ValueMasker {
     override fun mask(
-        context: JsonStreamContext,
+        context: TokenStreamContext,
         value: Any,
     ): Any {
         if (value is CharSequence) {

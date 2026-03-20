@@ -40,7 +40,7 @@ var JsonMessage.feilendeSteg: String
     }
 
 var JsonMessage.feilmelding: String
-    get() = this[FEILMELDING_KEY].toJson()
+    get() = this[FEILMELDING_KEY].asText()
     set(name) {
         this[FEILMELDING_KEY] = name
     }

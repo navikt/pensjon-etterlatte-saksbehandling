@@ -1,6 +1,5 @@
 package no.nav.etterlatte.testdata.features.egendefinert
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
@@ -18,6 +17,7 @@ import no.nav.etterlatte.producer
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.testdata.JsonMessage
 import no.nav.etterlatte.testdata.kunEtterlatte
+import tools.jackson.module.kotlin.readValue
 
 object EgendefinertMeldingFeature : TestDataFeature {
     override val beskrivelse: String
@@ -59,7 +59,7 @@ object EgendefinertMeldingFeature : TestDataFeature {
                             val jsonNode = objectMapper.readTree(json)
                             jsonNode.get(HENDELSE_DATA_KEY).let {
                                 // Sjekker at vi kan parse egendefinert melding som OmregningData
-                                objectMapper.treeToValue<OmregningData>(it)
+                                objectMapper.readValue<OmregningData>(it.toString())
                             }
                         }
 

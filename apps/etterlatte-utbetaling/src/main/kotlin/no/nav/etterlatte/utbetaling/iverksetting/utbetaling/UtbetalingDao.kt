@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.param
@@ -20,6 +19,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 import javax.sql.DataSource
 

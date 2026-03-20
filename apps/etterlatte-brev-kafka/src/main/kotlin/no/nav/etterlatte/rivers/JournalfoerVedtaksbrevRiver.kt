@@ -49,7 +49,7 @@ internal class JournalfoerVedtaksbrevRiver(
             val vedtak =
                 VedtakTilJournalfoering(
                     vedtakId = packet["vedtak.id"].asLong(),
-                    sak = deserialize(packet["vedtak.sak"].toJson()),
+                    sak = deserialize(packet["vedtak.sak"].toString()),
                     behandlingId = hentBehandlingId(packet),
                     ansvarligEnhet = Enhetsnummer(packet["vedtak.vedtakFattet.ansvarligEnhet"].asText()),
                     saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText(),

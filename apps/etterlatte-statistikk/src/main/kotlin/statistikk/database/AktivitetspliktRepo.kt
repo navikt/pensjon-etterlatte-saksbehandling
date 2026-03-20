@@ -1,6 +1,5 @@
 package no.nav.etterlatte.statistikk.database
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import tools.jackson.module.kotlin.readValue
 import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.YearMonth

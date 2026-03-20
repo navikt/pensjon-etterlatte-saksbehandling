@@ -1,16 +1,12 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.michaelbull.result.get
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -73,13 +69,12 @@ import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
 import no.nav.security.token.support.v3.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 private val env = Miljoevariabler.systemEnv()
 
-val objectMapper: ObjectMapper =
-    jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+val objectMapper: ObjectMapper = jacksonObjectMapper()
 
 val logger: Logger = LoggerFactory.getLogger("testdata")
 val localDevelopment = env[DEV].toBoolean()

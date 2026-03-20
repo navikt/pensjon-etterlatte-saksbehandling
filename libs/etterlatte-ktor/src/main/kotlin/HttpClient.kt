@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.ktor
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
@@ -13,13 +12,14 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessageBuilder
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.ktor.client.ClientCallLogging
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
+import tools.jackson.databind.ObjectMapper
 
 fun httpClientClientCredentials(
     azureAppClientId: String,

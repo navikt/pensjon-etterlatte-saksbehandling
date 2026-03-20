@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 class VilkaarsvurderingKlientException(
@@ -52,7 +52,10 @@ class BehandlingVilkaarsvurderingKlient(
                 )
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw VilkaarsvurderingKlientException(
                         "Klarte ikke hente vilkårsvurdering for behandling med behandlingId=$behandlingId",

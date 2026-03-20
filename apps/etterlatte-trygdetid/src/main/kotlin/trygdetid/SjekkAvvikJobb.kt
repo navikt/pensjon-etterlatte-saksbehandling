@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.sync.Mutex
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -18,6 +17,7 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResulta
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.trygdetid.avtale.AvtaleRepository
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.time.Duration
 import java.util.Timer
 import java.util.UUID

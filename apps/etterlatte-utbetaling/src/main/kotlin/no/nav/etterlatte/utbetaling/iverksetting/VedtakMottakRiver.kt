@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -23,6 +22,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 data class KunneIkkeLeseVedtakException(
@@ -121,7 +121,7 @@ class VedtakMottakRiver(
 
     private fun lesVedtak(packet: JsonMessage): Utbetalingsvedtak =
         try {
-            val vedtak: VedtakDto = objectMapper.readValue(packet["vedtak"].toJson())
+            val vedtak: VedtakDto = objectMapper.readValue(packet["vedtak"].toString())
             Utbetalingsvedtak.fra(vedtak)
         } catch (e: Exception) {
             throw KunneIkkeLeseVedtakException(e)

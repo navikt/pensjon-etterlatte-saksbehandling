@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.regler.beregning
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -46,6 +45,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth

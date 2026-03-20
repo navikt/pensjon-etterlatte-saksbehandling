@@ -1,7 +1,5 @@
 package behandling.etteroppgjoer
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.TextNode
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.equals.shouldNotBeEqual
@@ -45,6 +43,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.StringNode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
@@ -397,9 +397,9 @@ class EtteroppgjoerForbehandlingDaoTest(
                 tidspunktBeregnet = Tidspunkt.now(),
                 regelresultat =
                     mapOf(
-                        InntektskomponentenFilter.ETTEROPPGJOER_LOENN to TextNode("test"),
-                        InntektskomponentenFilter.ETTEROPPGJOER_AFP to TextNode("test"),
-                        InntektskomponentenFilter.ETTEROPPGJOER_OMS to TextNode("test"),
+                        InntektskomponentenFilter.ETTEROPPGJOER_LOENN to StringNode("test"),
+                        InntektskomponentenFilter.ETTEROPPGJOER_AFP to StringNode("test"),
+                        InntektskomponentenFilter.ETTEROPPGJOER_OMS to StringNode("test"),
                     ),
             ),
         )

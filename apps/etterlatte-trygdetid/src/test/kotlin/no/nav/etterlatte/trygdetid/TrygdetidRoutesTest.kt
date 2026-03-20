@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid
 
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.get
@@ -31,6 +30,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.module.kotlin.jacksonTypeRef
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

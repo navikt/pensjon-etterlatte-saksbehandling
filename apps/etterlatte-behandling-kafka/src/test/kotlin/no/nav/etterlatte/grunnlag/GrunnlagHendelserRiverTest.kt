@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
@@ -23,6 +22,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -56,16 +56,15 @@ internal class GrunnlagHendelserRiverTest {
     @Test
     fun `Ny personopplysning sendes til grunnlag`() {
         val melding =
-            JsonMessage
-                .newMessage(
-                    mapOf(
-                        EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
-                        OPPLYSNING_KEY to listOf(nyOpplysning),
-                        FNR_KEY to fnr,
-                        SAK_ID_KEY to 1,
-                        BEHANDLING_ID_KEY to UUID.randomUUID(),
-                    ),
-                ).toJson()
+            objectMapper.writeValueAsString(
+                mapOf(
+                    EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
+                    OPPLYSNING_KEY to listOf(nyOpplysning),
+                    FNR_KEY to fnr,
+                    SAK_ID_KEY to 1,
+                    BEHANDLING_ID_KEY to UUID.randomUUID(),
+                ),
+            )
 
         inspector.sendTestMessage(melding)
 
@@ -88,16 +87,15 @@ internal class GrunnlagHendelserRiverTest {
     @Test
     fun `Ny saksopplysning sendes til grunnlag`() {
         val melding =
-            JsonMessage
-                .newMessage(
-                    mapOf(
-                        EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
-                        OPPLYSNING_KEY to listOf(nyOpplysning),
-                        // UTEN fnr for å trigge lagring til saksnivå
-                        SAK_ID_KEY to 1,
-                        BEHANDLING_ID_KEY to UUID.randomUUID(),
-                    ),
-                ).toJson()
+            objectMapper.writeValueAsString(
+                mapOf(
+                    EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
+                    OPPLYSNING_KEY to listOf(nyOpplysning),
+                    // UTEN fnr for å trigge lagring til saksnivå
+                    SAK_ID_KEY to 1,
+                    BEHANDLING_ID_KEY to UUID.randomUUID(),
+                ),
+            )
 
         inspector.sendTestMessage(melding)
 

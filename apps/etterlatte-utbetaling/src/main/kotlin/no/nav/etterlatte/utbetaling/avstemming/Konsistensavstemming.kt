@@ -1,9 +1,5 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Kjoereplan
@@ -11,6 +7,10 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.ser.std.StdSerializer
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -52,22 +52,22 @@ internal class OppdragForKonsistensavstemmingSerializer :
     override fun serialize(
         value: OppdragForKonsistensavstemming,
         gen: JsonGenerator,
-        provider: SerializerProvider,
+        provider: SerializationContext,
     ) {
         gen.writeStartObject()
 
-        gen.writeObjectFieldStart("sakId")
-        gen.writeObjectField("value", value.sakId.value)
+        gen.writeObjectPropertyStart("sakId")
+        gen.writePOJOProperty("value", value.sakId.value)
         gen.writeEndObject()
 
-        gen.writeObjectField("sakType", value.sakType.name)
+        gen.writePOJOProperty("sakType", value.sakType.name)
 
-        gen.writeObjectFieldStart("fnr")
-        gen.writeObjectField("value", value.fnr.value)
+        gen.writeObjectPropertyStart("fnr")
+        gen.writePOJOProperty("value", value.fnr.value)
         gen.writeEndObject()
 
-        gen.writeArrayFieldStart("utbetalingslinjer")
-        value.utbetalingslinjer.forEach { gen.writeObject(it) }
+        gen.writeArrayPropertyStart("utbetalingslinjer")
+        value.utbetalingslinjer.forEach { gen.writePOJO(it) }
         gen.writeEndArray()
         gen.writeEndObject()
     }
@@ -81,35 +81,35 @@ internal class OppdragslinjeForKonsistensavstemmingSerializer :
     override fun serialize(
         value: OppdragslinjeForKonsistensavstemming,
         gen: JsonGenerator,
-        provider: SerializerProvider,
+        provider: SerializationContext,
     ) {
         gen.writeStartObject()
-        gen.writeObjectFieldStart("id")
-        gen.writeObjectField("value", value.id.value)
+        gen.writeObjectPropertyStart("id")
+        gen.writePOJOProperty("value", value.id.value)
         gen.writeEndObject()
 
-        gen.writeStringField("opprettet", value.opprettet.toString())
-        gen.writeStringField("fraOgMed", value.fraOgMed.toString())
-        gen.writeStringField("tilOgMed", value.tilOgMed?.toString())
+        gen.writeStringProperty("opprettet", value.opprettet.toString())
+        gen.writeStringProperty("fraOgMed", value.fraOgMed.toString())
+        gen.writeStringProperty("tilOgMed", value.tilOgMed?.toString())
 
         value.forrigeUtbetalingslinjeId?.let {
-            gen.writeObjectFieldStart("forrigeUtbetalingslinjeId")
-            gen.writeNumberField("value", it.value)
+            gen.writeObjectPropertyStart("forrigeUtbetalingslinjeId")
+            gen.writeNumberProperty("value", it.value)
             gen.writeEndObject()
         }
-            ?: gen.writeNullField("forrigeUtbetalingslinjeId")
+            ?: gen.writeNullProperty("forrigeUtbetalingslinjeId")
 
-        gen.writeNumberField("beloep", value.beloep)
+        gen.writeNumberProperty("beloep", value.beloep)
 
-        gen.writeArrayFieldStart("attestanter")
+        gen.writeArrayPropertyStart("attestanter")
         value.attestanter.forEach {
             gen.writeStartObject()
-            gen.writeStringField("value", it.value)
+            gen.writeStringProperty("value", it.value)
             gen.writeEndObject()
         }
         gen.writeEndArray()
 
-        gen.writeStringField("kjoereplan", value.kjoereplan.name)
+        gen.writeStringProperty("kjoereplan", value.kjoereplan.name)
 
         gen.writeEndObject()
     }

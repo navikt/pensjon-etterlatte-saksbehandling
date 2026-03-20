@@ -10,7 +10,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.behandling.sakId1
@@ -143,14 +143,17 @@ internal class TilbakekrevingskomponentenKlientTest {
             engine {
                 addHandler { request ->
                     when {
-                        request.url.fullPath == url && request.method == method ->
+                        request.url.fullPath == url && request.method == method -> {
                             respond(
                                 response.toJson(),
                                 HttpStatusCode.OK,
                                 headersOf("Content-Type" to listOf(ContentType.Application.Json.toString())),
                             )
+                        }
 
-                        else -> error("Unhandled ${request.url.fullPath}")
+                        else -> {
+                            error("Unhandled ${request.url.fullPath}")
+                        }
                     }
                 }
             }

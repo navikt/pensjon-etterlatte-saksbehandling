@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.ktor
 
-import com.fasterxml.jackson.databind.JsonMappingException
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -50,6 +49,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.databind.DatabindException
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -214,7 +214,10 @@ class RestModuleTest {
         assertFalse(Exception("Hello").erDeserialiseringsException())
         assertFalse(Exception("Hello", OutOfMemoryError()).erDeserialiseringsException())
 
-        val jacksonException = JsonMappingException.from(objectMapper.deserializationContext, "Error")
+        val jacksonException =
+            objectMapper.createParser("{}").use {
+                DatabindException.from(it, "Error")
+            }
         val wrappedException = java.lang.RuntimeException("Err", jacksonException)
 
         assertTrue(jacksonException.erDeserialiseringsException())

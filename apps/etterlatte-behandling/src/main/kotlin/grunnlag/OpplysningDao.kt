@@ -1,7 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -14,6 +12,8 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 import java.sql.ResultSet
 import java.sql.Types.VARCHAR
 import java.time.YearMonth

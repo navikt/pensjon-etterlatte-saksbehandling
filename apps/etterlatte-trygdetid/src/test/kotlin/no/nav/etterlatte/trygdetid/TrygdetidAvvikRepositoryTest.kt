@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotliquery.queryOf
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
+import tools.jackson.module.kotlin.readValue
 import java.time.Period
 import java.util.UUID
 import javax.sql.DataSource

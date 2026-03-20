@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
@@ -49,6 +48,7 @@ import no.nav.etterlatte.libs.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.node.ObjectNode
 import java.time.Duration
 import java.time.YearMonth
 import java.util.UUID

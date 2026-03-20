@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.hentinformasjon
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
@@ -32,6 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 data class PersonerISakOgSak(

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.hentinformasjon
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -53,6 +52,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.time.YearMonth
 import java.util.UUID
 

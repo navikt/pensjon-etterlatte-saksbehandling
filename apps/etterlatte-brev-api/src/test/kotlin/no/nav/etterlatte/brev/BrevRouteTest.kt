@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -50,6 +49,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 import kotlin.random.Random
 

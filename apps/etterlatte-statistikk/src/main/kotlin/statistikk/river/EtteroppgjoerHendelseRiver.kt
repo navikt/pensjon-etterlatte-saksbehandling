@@ -1,7 +1,6 @@
 package no.nav.etterlatte.statistikk.river
 
 import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -18,6 +17,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 class EtteroppgjoerHendelseRiver(
     rapidsConnection: RapidsConnection,
@@ -44,11 +44,11 @@ class EtteroppgjoerHendelseRiver(
             val hendelse: EtteroppgjoerForbehandlingHendelser = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
             val tekniskTid = parseTekniskTid(packet, logger)
             val statistikkDto: EtteroppgjoerForbehandlingStatistikkDto =
-                objectMapper.treeToValue(packet[ETTEROPPGJOER_STATISTIKK_RIVER_KEY])
+                objectMapper.readValue(packet[ETTEROPPGJOER_STATISTIKK_RIVER_KEY].toString())
             val resultat: BeregnetEtteroppgjoerResultatDto? =
                 when (val resultatNode = packet[ETTEROPPGJOER_RESULTAT_RIVER_KEY]) {
                     is NullNode -> null
-                    else -> objectMapper.treeToValue(resultatNode)
+                    else -> objectMapper.readValue(resultatNode.toString())
                 }
 
             statistikkService.registrerEtteroppgjoerHendelse(

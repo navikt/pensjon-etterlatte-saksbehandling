@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.ints.shouldBeExactly
@@ -13,7 +12,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.EntraEnhet
 import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
@@ -97,21 +96,23 @@ class BrukerEnhetTilgangTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/api/v1/enhet/ansatt/$ident" ->
+                            "/api/v1/enhet/ansatt/$ident" -> {
                                 respond(
                                     respons.toJson(),
                                     HttpStatusCode.OK,
                                     defaultHeaders,
                                 )
+                            }
 
-                            else -> error("Unhandled ${request.url.fullPath}")
+                            else -> {
+                                error("Unhandled ${request.url.fullPath}")
+                            }
                         }
                     }
                 }
                 expectSuccess = true
                 install(ContentNegotiation) {
                     jackson {
-                        registerModule(JavaTimeModule())
                     }
                 }
             }

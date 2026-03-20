@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt.vurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktVurderingOpprettetDato
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
@@ -17,6 +16,7 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate

@@ -18,14 +18,15 @@ dependencies {
     implementation(libs.logging.slf4japi)
     implementation(libs.logging.logbackclassic)
     implementation(libs.logging.logstashlogbackencoder) {
-        exclude("com.fasterxml.jackson.core")
-        exclude("com.fasterxml.jackson.dataformat")
+        exclude("tools.jackson.core")
+        exclude("tools.jackson.dataformat")
     }
 
     // Testing
     testImplementation(libs.test.mockk)
     testImplementation(libs.test.jupiter.api)
     testImplementation(libs.test.jupiter.params)
+    testImplementation(kotlin("test"))
     testRuntimeOnly(libs.test.jupiter.engine)
 }
 

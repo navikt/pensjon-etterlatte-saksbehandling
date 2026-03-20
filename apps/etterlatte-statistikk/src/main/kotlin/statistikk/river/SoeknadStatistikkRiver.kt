@@ -2,7 +2,6 @@ package no.nav.etterlatte.statistikk.river
 
 import com.fasterxml.jackson.databind.node.MissingNode
 import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -17,6 +16,7 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 class SoeknadStatistikkRiver(
     rapidsConnection: RapidsConnection,

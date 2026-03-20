@@ -1,6 +1,5 @@
 package no.nav.etterlatte.opplysningerfrasoknad
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -25,6 +24,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.Month
 
@@ -126,8 +126,8 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
     companion object {
         val opplysninger =
             Opplysningsuthenter().lagOpplysningsListe(
-                objectMapper.treeToValue(
-                    objectMapper.readTree(lagMelding())!!["@skjema_info"],
+                objectMapper.readValue(
+                    objectMapper.readTree(lagMelding())!!["@skjema_info"].toString(),
                 ),
                 SoeknadType.OMSTILLINGSSTOENAD,
             )

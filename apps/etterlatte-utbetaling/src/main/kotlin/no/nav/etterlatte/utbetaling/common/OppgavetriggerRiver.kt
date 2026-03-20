@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.common
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -12,6 +11,7 @@ import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 enum class OekonomiHendelserType : EventnameHendelseType {
     OKONOMI_VEDTAK_OPPGAVE,
@@ -37,7 +37,7 @@ class OppgavetriggerRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val oppgave: Oppgave = objectMapper.readValue(packet["oppgave"].toJson())
+        val oppgave: Oppgave = objectMapper.readValue(packet["oppgave"].toString())
         try {
             when (oppgave.oppgavetype) {
                 Oppgavetype.START_GRENSESNITTAVSTEMMING -> {

@@ -38,8 +38,8 @@ dependencies {
     api(libs.kotlin.result)
 
     implementation(libs.logging.logstashlogbackencoder) {
-        exclude("com.fasterxml.jackson.core")
-        exclude("com.fasterxml.jackson.dataformat")
+        exclude("tools.jackson.core")
+        exclude("tools.jackson.dataformat")
     }
 
     implementation(libs.metrics.micrometer.prometheus)

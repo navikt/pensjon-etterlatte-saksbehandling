@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.spyk
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -361,8 +361,8 @@ class ApplicationIntegrationTest {
 
         return Pair(
             message[EVENT_NAME_KEY].asText(),
-            objectMapper.treeToValue(
-                message[UTBETALING_RESPONSE],
+            objectMapper.readValue(
+                message[UTBETALING_RESPONSE].toString(),
             ),
         )
     }

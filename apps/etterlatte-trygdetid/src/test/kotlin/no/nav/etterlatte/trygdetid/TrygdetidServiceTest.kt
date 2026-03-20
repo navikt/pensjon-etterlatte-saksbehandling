@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
@@ -70,6 +69,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.Period
 import java.util.UUID

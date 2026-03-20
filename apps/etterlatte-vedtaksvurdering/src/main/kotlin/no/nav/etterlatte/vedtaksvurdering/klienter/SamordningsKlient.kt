@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vedtaksvurdering.klienter
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -26,6 +25,7 @@ import no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 interface SamordningsKlient {
@@ -147,6 +147,7 @@ internal fun Vedtak.tilSamordneRequest(etterbetaling: EtterbetalingResultat): Sa
     val innhold =
         when (this.innhold) {
             is VedtakInnhold.Behandling -> this.innhold
+
             is VedtakInnhold.Tilbakekreving, is VedtakInnhold.Klage -> throw SamordneVedtakBehandlingUgyldigForespoerselException(
                 "Tilbakekreving skal ikke gjennom samordning",
             )

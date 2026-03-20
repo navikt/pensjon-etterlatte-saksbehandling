@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -71,6 +70,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import tools.jackson.module.kotlin.readValue
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME

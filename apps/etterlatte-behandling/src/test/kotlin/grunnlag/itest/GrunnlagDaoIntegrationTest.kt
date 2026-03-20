@@ -1,7 +1,5 @@
 package no.nav.etterlatte.grunnlag.itest
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.clearAllMocks
 import io.mockk.spyk
 import io.mockk.verify
@@ -54,6 +52,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -108,7 +108,7 @@ internal class GrunnlagDaoIntegrationTest(
                 .finnHendelserIGrunnlag(sakId1)
                 .first()
                 .opplysning
-                .let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }
+                .let { objectMapper.readValue<SoeknadMottattDato>(it.opplysning.toString()) }
                 .mottattDato,
         )
     }

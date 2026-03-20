@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -20,6 +19,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.ktor.navConsumerId
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

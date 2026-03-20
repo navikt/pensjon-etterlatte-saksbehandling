@@ -1,7 +1,5 @@
 package no.nav.etterlatte.opplysningerfrasoknad
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
@@ -14,6 +12,8 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 import java.io.FileNotFoundException
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -32,10 +32,12 @@ internal class StartUthentingFraSoeknadRiverTest {
     @Test
     fun `skal lese inn melding og lage message med opplysninger`() {
         val soknad: JsonNode =
-            objectMapper.treeToValue(
-                objectMapper.readTree(
-                    javaClass.getResource("/opplysningerfrasoeknad/barnepensjon_trenger_behandling.json")!!.readText(),
-                )!!["@skjema_info"],
+            objectMapper.readValue(
+                objectMapper
+                    .readTree(
+                        javaClass.getResource("/opplysningerfrasoeknad/barnepensjon_trenger_behandling.json")!!.readText(),
+                    )!!["@skjema_info"]
+                    .toString(),
             )
         val opplysninger =
             Opplysningsuthenter().lagOpplysningsListe(

@@ -10,7 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
@@ -30,7 +30,7 @@ class VedtakvurderingKlientTest {
         val client =
             createHttpClient { request ->
                 when (request.url.fullPath) {
-                    "/api/samordning/vedtak/$vedtakId" ->
+                    "/api/samordning/vedtak/$vedtakId" -> {
                         respond(
                             vedtak(
                                 sakstype = SakType.OMSTILLINGSSTOENAD,
@@ -38,8 +38,11 @@ class VedtakvurderingKlientTest {
                             HttpStatusCode.OK,
                             defaultHeaders,
                         )
+                    }
 
-                    else -> error("Unhandled ${request.url.fullPath}")
+                    else -> {
+                        error("Unhandled ${request.url.fullPath}")
+                    }
                 }
             }
         val vedtaksvurderingKlient = VedtaksvurderingSamordningKlient(config, client)
@@ -56,7 +59,7 @@ class VedtakvurderingKlientTest {
         val client =
             createHttpClient { request ->
                 when (request.url.fullPath) {
-                    "/api/samordning/vedtak?sakstype=$sakType&fomDato=$fomDato" ->
+                    "/api/samordning/vedtak?sakstype=$sakType&fomDato=$fomDato" -> {
                         respond(
                             listOf(
                                 vedtak(
@@ -66,8 +69,11 @@ class VedtakvurderingKlientTest {
                             HttpStatusCode.OK,
                             defaultHeaders,
                         )
+                    }
 
-                    else -> error("Unhandled ${request.url.fullPath}")
+                    else -> {
+                        error("Unhandled ${request.url.fullPath}")
+                    }
                 }
             }
 

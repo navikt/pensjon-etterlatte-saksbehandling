@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.MonthDay
 import java.time.Period

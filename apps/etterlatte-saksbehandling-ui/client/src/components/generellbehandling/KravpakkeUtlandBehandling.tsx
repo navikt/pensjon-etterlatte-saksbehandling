@@ -162,7 +162,7 @@ const KravpakkeUtlandBehandling = (props: {
     <HStack height="100%" minHeight="100vh" wrap={false}>
       <Box width="100%" style={{ whiteSpace: 'pre-wrap' }}>
         <div style={{ maxWidth: '55rem', margin: 'auto' }}>
-          <Box paddingInline="16" paddingBlock="16 4">
+          <Box paddingInline="space-64" paddingBlock="space-64 space-16">
             <Heading spacing size="large" level="1">
               Kravpakke til utland
             </Heading>
@@ -172,7 +172,7 @@ const KravpakkeUtlandBehandling = (props: {
               utfyllende informasjon.
             </p>
           </Box>
-          <Box padding="4" borderRadius="small">
+          <Box padding="space-16" borderRadius="small">
             <div>
               {utlandsBehandling.tilknyttetBehandling ? (
                 <div>
@@ -184,7 +184,7 @@ const KravpakkeUtlandBehandling = (props: {
                     success: (avdoed) => (
                       <>
                         <h3>Informasjon om avdøde</h3>
-                        <VStack gap="4">
+                        <VStack gap="space-16">
                           <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
                           <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
                         </VStack>
@@ -470,7 +470,7 @@ const KravpakkeUtlandBehandling = (props: {
               apiResult: avbrytbehandlingStatus,
               errorMessage: 'Kunne ikke avbryte generell behandling utland',
             })}
-            <HStack gap="2" justify="end">
+            <HStack gap="space-8" justify="end">
               {redigerbar && (
                 <>
                   <Button onClick={() => avbrytBehandling()} loading={isPending(avbrytbehandlingStatus)}>

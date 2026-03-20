@@ -41,7 +41,6 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
       <Button variant="tertiary" onClick={aapneModal} icon={<ArchiveIcon aria-hidden />} size="small">
         Arkiver hendelse
       </Button>
-
       <Modal
         open={open}
         onClose={() => setOpen(false)}
@@ -57,7 +56,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
           />
         ) : (
           <Modal.Body>
-            <VStack gap="4">
+            <VStack gap="space-16">
               <BodyShort>
                 I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
                 revurdering ikke er nødvendig.
@@ -84,7 +83,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
                 }
               })}
 
-              <HStack gap="2" justify="end">
+              <HStack gap="space-8" justify="end">
                 <Button
                   variant="secondary"
                   onClick={() => {

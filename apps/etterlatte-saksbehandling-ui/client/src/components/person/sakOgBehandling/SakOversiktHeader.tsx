@@ -56,9 +56,9 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
   }, [sak, fnr, behandlinger])
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Heading size="medium">Saksnummer {sak.id}</Heading>
-      <VStack gap="4" align="start">
+      <VStack gap="space-16" align="start">
         <SakTypeTag sakType={sak.sakType} />
         <UtenlandstilknytningTypeTag utenlandstilknytningType={sak.utlandstilknytning?.type} />
         <SakStatus sakId={sak.id} />
@@ -66,8 +66,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
 
         {!!sak.adressebeskyttelse && <AdressebeskyttelseGraderingTag adressebeskyttelse={sak.adressebeskyttelse} />}
       </VStack>
-
-      <HStack gap="4" wrap={false} align="center">
+      <HStack gap="space-16" wrap={false} align="center">
         <LocationPinIcon aria-hidden width="1.75rem" height="1.75rem" />
         <BodyShort>
           Navkontor:{' '}
@@ -78,23 +77,21 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
           })}
         </BodyShort>
       </HStack>
-      <HStack gap="4" wrap={false} align="center">
+      <HStack gap="space-16" wrap={false} align="center">
         <Buildings3Icon aria-hidden width="1.75rem" height="1.75rem" />
         <BodyShort>Enhet: {ENHETER[sak.enhet] ?? sak.enhet}</BodyShort>
         {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
           <EndreEnhet sakId={sak.id} gjeldendeEnhet={sak.enhet} />
         )}
       </HStack>
-
       <ReadMore header="Historikk" onClick={() => trackClick(ClickEvent.VIS_SAKSHISTORIKK)}>
         <Sakshistorikk sakId={sak.id} />
       </ReadMore>
-
       {mapResult(flyktningResult, {
         success: (data) =>
           !!data?.erFlyktning && (
             <>
-              <Box paddingBlock="3" borderWidth="1 0 0 0" borderColor="border-subtle">
+              <Box paddingBlock="space-12" borderWidth="1 0 0 0" borderColor="border-subtle">
                 <Alert variant="info" size="small" inline>
                   Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
                   {formaterDato(data.virkningstidspunkt)}
@@ -107,7 +104,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
         success: (data) =>
           data.migrertYrkesskadefordel && (
             <>
-              <Box paddingBlock="3" borderWidth="1 0 0 0" borderColor="border-subtle">
+              <Box paddingBlock="space-12" borderWidth="1 0 0 0" borderColor="border-subtle">
                 <Alert variant="info" size="small" inline>
                   Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
                 </Alert>
@@ -115,7 +112,6 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
             </>
           ),
       })}
-
       {!behandlinger.length && <OpprettSaksgrunnlag sak={sak} />}
     </VStack>
   )

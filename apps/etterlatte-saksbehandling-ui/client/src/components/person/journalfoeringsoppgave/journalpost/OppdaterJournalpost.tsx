@@ -49,14 +49,11 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
       <Heading size="medium" spacing>
         Journalføringsoppgave
       </Heading>
-
       <Alert variant="info">
         Journalpost må ferdigstilles eller overføres til annet tema før selve oppgaven kan behandles
       </Alert>
-
       <br />
-
-      <VStack gap="4">
+      <VStack gap="space-16">
         <Info label="Kanal/kilde" tekst={journalpost.kanal} />
         <Info
           label="Registrert dato"
@@ -64,15 +61,12 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
         />
         <Info label="Status" tekst={formaterJournalpostStatus(journalpost.journalstatus)} />
       </VStack>
-
       <br />
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <Heading size="medium" spacing>
           Gjelder
         </Heading>
       </Box>
-
       <FormWrapper $column={true}>
         <EndreTema journalpost={journalpost} oppdater={(kode) => setJournalpost({ ...journalpost, tema: kode.term })} />
 
@@ -114,8 +108,8 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
                 kobleTilSak={(nySak) => setJournalpost({ ...journalpost, sak: nySak })}
               />
 
-              <VStack gap="2">
-                <HStack gap="2" justify="center">
+              <VStack gap="space-8">
+                <HStack gap="space-8" justify="center">
                   <LagreJournalpostModal journalpost={journalpost} oppgaveId={oppgaveId} />
                   <JournalfoerJournalpostModal journalpost={journalpost} sak={sakMedBehandling.sak} />
                 </HStack>

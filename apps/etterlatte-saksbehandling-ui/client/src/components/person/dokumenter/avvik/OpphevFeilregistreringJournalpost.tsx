@@ -27,22 +27,19 @@ export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Alert variant="info">Du opphever nå status feilregistrert på journalposten</Alert>
-
-      <Box borderWidth="1" padding="4" borderRadius="medium" borderColor="border-subtle">
-        <VStack gap="4">
+      <Box borderWidth="1" padding="space-16" borderRadius="medium" borderColor="border-subtle">
+        <VStack gap="space-16">
           <Info label="Sakstype" tekst={journalpost.sak?.sakstype || '-'} />
           <Info label="FagsakId" tekst={journalpost.sak?.fagsakId || '-'} />
           <Info label="Fagsaksystem" tekst={journalpost.sak?.fagsaksystem || '-'} />
           <Info label="Tema" tekst={journalpost.sak?.tema || '-'} />
         </VStack>
       </Box>
-
       {mapFailure(opphevFeilregistreringStatus, (error) => (
         <ApiErrorAlert>{error.detail}</ApiErrorAlert>
       ))}
-
       <HStack justify="end">
         <Button onClick={opphevFeilregistrering} loading={isPending(opphevFeilregistreringStatus)}>
           Opphev feilregistrering

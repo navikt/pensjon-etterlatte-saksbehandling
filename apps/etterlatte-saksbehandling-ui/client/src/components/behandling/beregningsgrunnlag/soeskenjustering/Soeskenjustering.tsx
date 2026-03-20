@@ -156,14 +156,14 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Heading level="3" size="small">
         Søskenjustering
       </Heading>
       {manglendeSoesken.length > 0 && !skjulManglendeSoesken && (
         <div style={{ maxWidth: '40rem' }}>
           <Alert variant="warning">
-            <VStack gap="4">
+            <VStack gap="space-16">
               <BodyShort>
                 Den lagrede søskenjusteringen har ikke med alle avdødes barn. For å få riktig søskenjustering må de
                 manglende søskene legges til periodene.
@@ -208,7 +208,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
             ))}
           </UstiletListe>
           {redigerbar && (
-            <HStack gap="4" align="center">
+            <HStack gap="space-16" align="center">
               <Button
                 size="small"
                 variant="secondary"

@@ -78,8 +78,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
         errorMessage: 'En feil oppsto ved henting av data',
         apiResult: hentetAktivitetspliktOppfoelgingStatus,
       })}
-
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Heading spacing size="large" level="1">
           Oppfølging av aktivitet
         </Heading>
@@ -87,8 +86,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
           <strong>Avdødes dødsdato: </strong> {avdoedesDoedsdato ? formaterDato(avdoedesDoedsdato) : 'Fant ingen dato'}
         </BodyShort>
       </Box>
-
-      <VStack gap="10" paddingInline="16" paddingBlock="8">
+      <VStack gap="space-40" paddingInline="space-64" paddingBlock="space-32">
         <VStack maxWidth="42.5rem">
           <Heading level="1" spacing size="medium">
             Gjenlevende sin situasjon
@@ -200,8 +198,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
           </Box>
         )}
       </VStack>
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <BehandlingHandlingKnapper>
           <Button variant="primary" onClick={() => erFerdigUtfylt()}>
             {handlinger.NESTE.navn}

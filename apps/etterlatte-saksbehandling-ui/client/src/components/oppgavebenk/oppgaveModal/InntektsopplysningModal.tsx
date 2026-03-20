@@ -47,7 +47,6 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
       <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
         Se oppgave
       </Button>
-
       <Modal
         open={open}
         aria-labelledby="modal-heading"
@@ -56,16 +55,16 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
         header={{ heading: 'Ny inntektsopplysning' }}
       >
         <Modal.Body>
-          <VStack gap="4">
-            <HStack gap="8">
-              <VStack gap="2">
-                <HStack gap="1" align="center">
+          <VStack gap="space-16">
+            <HStack gap="space-32">
+              <VStack gap="space-8">
+                <HStack gap="space-4" align="center">
                   <FilePlusIcon fontSize="1.5rem" /> <Label>Opprettet</Label>
                 </HStack>
                 <BodyShort>{formaterDato(oppgave.opprettet)}</BodyShort>
               </VStack>
-              <VStack gap="2">
-                <HStack gap="1" align="center">
+              <VStack gap="space-8">
+                <HStack gap="space-4" align="center">
                   <CalendarIcon fontSize="1.5rem" /> <Label>Frist</Label>
                 </HStack>
                 <BodyShort>{formaterDato(oppgave.frist)}</BodyShort>
@@ -78,7 +77,7 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
                   {mapResult(hentJournalpostResult, {
                     pending: <Spinner label="Henter journalpost" />,
                     success: (journalpost) => (
-                      <VStack gap="4">
+                      <VStack gap="space-16">
                         <List
                           as="ol"
                           title="Mottatt inntektsopplysning for neste år"
@@ -111,7 +110,7 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
                           <List.Item>Ferdigstill denne oppgaven.</List.Item>
                         </List>
 
-                        <VStack gap="2" maxWidth="20rem">
+                        <VStack gap="space-8" maxWidth="20rem">
                           <Heading size="small">Ferdigstill oppgave</Heading>
                           <Textarea
                             label="Beskrivelse (valgfritt)"
@@ -126,7 +125,7 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
               ) : (
                 <Alert variant="warning">Du må tildele deg oppgaven for å endre den</Alert>
               ))}
-            <HStack gap="4" justify="space-between">
+            <HStack gap="space-16" justify="space-between">
               <Button variant="tertiary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillOppgaveResult)}>
                 Avbryt
               </Button>

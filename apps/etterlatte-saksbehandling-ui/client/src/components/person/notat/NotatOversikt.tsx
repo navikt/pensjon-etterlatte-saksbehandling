@@ -39,11 +39,11 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
   }
 
   if (isFailure(sakResult)) {
-    return <Box padding="8">{feilkodehaandtering(sakResult.error)}</Box>
+    return <Box padding="space-32">{feilkodehaandtering(sakResult.error)}</Box>
   }
 
   return (
-    <Box padding="8">
+    <Box padding="space-32">
       {mapResult(notatStatus, {
         pending: <Spinner label="Henter notater for sak ..." />,
         error: () => <ApiErrorAlert>Feil ved henting av notater...</ApiErrorAlert>,
@@ -79,7 +79,7 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
                     </Table.DataCell>
                     <Table.DataCell>{formaterDatoMedKlokkeslett(notat.opprettet)}</Table.DataCell>
                     <Table.DataCell>
-                      <HStack gap="4" justify="end">
+                      <HStack gap="space-16" justify="end">
                         {!!notat.journalpostId ? (
                           <>
                             <Button
@@ -113,9 +113,7 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
           </Table>
         ),
       })}
-
       <br />
-
       {mapSuccess(sakResult, ({ sak }) => (
         <NyttNotatModal sakId={sak.id} leggTilNotat={(notat) => setNotater([...notater, notat])} />
       ))}

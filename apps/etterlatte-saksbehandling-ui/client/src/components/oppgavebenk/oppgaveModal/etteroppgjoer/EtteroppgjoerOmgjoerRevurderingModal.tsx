@@ -38,7 +38,6 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
       <Button variant="secondary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
         Omgjør
       </Button>
-
       <Modal
         open={open}
         aria-labelledby="modal-heading"
@@ -47,7 +46,7 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
         header={{ heading: 'Omgjør revurdering - etteroppgjør' }}
       >
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-16">
             <BodyShort>
               I tilfeller hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du omgjøre revurderingen uten
               å måtte behandle etteroppgjøret på nytt via ny forbehandling.
@@ -58,7 +57,7 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
             ))}
 
             <HStack justify="end">
-              <HStack gap="4">
+              <HStack gap="space-16">
                 <Button size="small" onClick={() => setOpen(false)} variant="secondary">
                   Nei
                 </Button>

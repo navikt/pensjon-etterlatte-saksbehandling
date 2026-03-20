@@ -31,7 +31,7 @@ export const TidligereFamiliepleier = ({
       ]}
       status={statusIkon(behandling.tidligereFamiliepleier)}
     >
-      <VStack gap="4" marginBlock="3" marginInline="0" maxWidth="41rem">
+      <VStack gap="space-16" marginBlock="space-12" marginInline="space-0" maxWidth="41rem">
         <BodyShort>
           Tidligere familiepleier kan innvilges når det har vært nødvendig med tilsyn og pleie av en nærstående i minst
           fem år, og det ikke er mulig å forsørge seg selv etter at pleieforholdet er opphørt.
@@ -56,7 +56,13 @@ export const TidligereFamiliepleier = ({
           </List>
         </ReadMore>
       </VStack>
-      <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+      <Box
+        paddingInline="space-12 space-0"
+        minWidth="18.75rem"
+        width="10rem"
+        borderWidth="0 0 0 2"
+        borderColor="border-subtle"
+      >
         {vurdert && (
           <TidligereFamiliepleierVurdering
             redigerbar={redigerbar}

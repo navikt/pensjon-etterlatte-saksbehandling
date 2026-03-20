@@ -58,21 +58,19 @@ const TrygdetidVisning = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Heading spacing size="large" level="1">
           Trygdetid
         </Heading>
         <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
-
       <Trygdetid
         redigerbar={redigerbar}
         behandling={behandling}
         vedtaksresultat={vedtaksresultat}
         virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
       />
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
         {isFailureHandler({
           apiResult: oppdaterStatusResult,
           errorMessage: 'Kunne ikke oppdatere trygdetid status',

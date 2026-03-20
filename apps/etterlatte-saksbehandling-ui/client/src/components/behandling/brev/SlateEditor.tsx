@@ -27,12 +27,12 @@ export default function SlateEditor({ value, onChange, readonly, editKey = '' }:
         {!readonly && (
           <Box
             background="bg-subtle"
-            paddingInline="4"
-            paddingBlock="2"
+            paddingInline="space-16"
+            paddingBlock="space-8"
             borderWidth="0 0 1 0"
             borderColor="border-subtle"
           >
-            <HStack gap="4">
+            <HStack gap="space-16">
               <BlockButton format="heading-two" icon="H2" />
               <BlockButton format="heading-three" icon="H3" />
               <BlockButton format="bulleted-list" icon={<BulletListIcon title="a11y-title" fontSize="1.5rem" />} />

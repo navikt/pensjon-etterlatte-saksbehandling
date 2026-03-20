@@ -29,7 +29,7 @@ export default function SluttBehandlingOmgjoering({
   }, [])
 
   return (
-    <Box marginBlock="10 0" maxWidth="1200px">
+    <Box marginBlock="space-40 space-0" maxWidth="1200px">
       {mapResult(sluttbehandlingStatus, {
         success: (sluttbehandlingUtland) => (
           <Sluttbehandling

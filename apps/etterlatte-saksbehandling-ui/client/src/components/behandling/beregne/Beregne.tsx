@@ -20,7 +20,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Heading spacing size="large" level="1">
           Beregning og vedtak
         </Heading>

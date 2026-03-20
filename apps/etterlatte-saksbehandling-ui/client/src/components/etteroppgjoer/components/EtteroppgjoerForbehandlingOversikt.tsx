@@ -122,13 +122,11 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
   }
 
   return (
-    <VStack gap="10" paddingInline="16" paddingBlock="16 4">
+    <VStack gap="space-40" paddingInline="space-64" paddingBlock="space-64 space-16">
       <Heading size="xlarge" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
-
       <Inntektsopplysninger forbehandling={forbehandling} />
-
       {erRevurdering && (
         <RevurderingSpesifikkeSeksjoner
           behandling={kontekst.behandling}
@@ -137,43 +135,37 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
           setValideringFeilmelding={setValideringFeilmelding}
         />
       )}
-
       {forbehandling.harVedtakAvTypeOpphoer && (
         <OpphoerSkyldesDoedsfall
           erRedigerbar={erRedigerbar}
           setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerDoedsfallErrors}
         />
       )}
-
       {!doedsfallIEtteroppgjoersaaret && !forbehandlingSkalAvsluttes && (
         <FastsettFaktiskInntekt
           erRedigerbar={erRedigerbartFaktiskInntekt}
           setFastsettFaktiskInntektSkjemaErrors={setFaktiskInntektErrors}
         />
       )}
-
       {visBeregnetResultat && (
         <>
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
         </>
       )}
-
       <Box maxWidth="42.5rem">
-        <VStack gap="8">
+        <VStack gap="space-32">
           {informasjonFraBrukerErrors && <SammendragAvSkjemaFeil errors={informasjonFraBrukerErrors} />}
           {opphoerDoedsfallErrors && <SammendragAvSkjemaFeil errors={opphoerDoedsfallErrors} />}
           {faktiskInntektErrors && <SammendragAvSkjemaFeil errors={faktiskInntektErrors} />}
           {valideringFeilmelding && <Alert variant="error">{valideringFeilmelding}</Alert>}
         </VStack>
       </Box>
-
       {!erRevurdering && doedsfallIEtteroppgjoersaaret && (
         <Alert size="small" variant="info">
           Siden bruker er død i etteroppgjørsåret, skal etteroppgjøret ferdigstilles uten brev og endringer.
         </Alert>
       )}
-
       {erRevurdering ? (
         <RevurderingNavigasjon
           behandling={kontekst.behandling}
@@ -242,9 +234,9 @@ function RevurderingNavigasjon({
   onNesteSteg: () => void
 }) {
   return (
-    <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+    <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="space-32 space-64">
       <HStack width="100%" justify="center">
-        <VStack gap="4" align="center">
+        <VStack gap="space-16" align="center">
           {forbehandling.endringErTilUgunstForBruker === JaNei.JA ? (
             <AvsluttEtteroppgjoerRevurderingModal
               behandling={behandling}
@@ -280,7 +272,7 @@ function ForbehandlingNavigasjon({
     forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
 
   return (
-    <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+    <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="space-32 space-64">
       <HStack width="100%" justify="center">
         {ferdigstillUtenBrev ? (
           <FerdigstillEtteroppgjoerForbehandlingUtenBrev />

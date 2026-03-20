@@ -169,7 +169,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         )}
       <HStack wrap={false}>
         <SidebarBox paddingInline="16" paddingBlock="16 4">
-          <VStack gap="4">
+          <VStack gap="space-16">
             <Heading spacing size="large" level="1">
               Vedtaksbrev
             </Heading>
@@ -225,8 +225,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         {isFailureHandler({ apiResult: hentBrevStatus, errorMessage: 'Feil ved henting av brev' })}
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
       </HStack>
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <SjekklisteValideringErrorSummary />
 
         <BehandlingHandlingKnapper>

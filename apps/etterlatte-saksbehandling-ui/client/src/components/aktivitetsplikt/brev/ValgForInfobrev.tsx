@@ -111,9 +111,9 @@ export const ValgForInfobrev = () => {
   }, [skalsendebrev])
 
   return (
-    <Box paddingInline="16" paddingBlock="16" maxWidth="120rem">
-      <VStack gap="4" maxWidth="30rem">
-        <HStack gap="4" align="center">
+    <Box paddingInline="space-64" paddingBlock="space-64" maxWidth="120rem">
+      <VStack gap="space-16" maxWidth="30rem">
+        <HStack gap="space-16" align="center">
           <Heading level="1" size="large">
             Valg for infobrev
           </Heading>
@@ -131,7 +131,7 @@ export const ValgForInfobrev = () => {
         )}
         {redigeres ? (
           <form onSubmit={handleSubmit(lagreBrevutfall)}>
-            <VStack gap="4">
+            <VStack gap="space-16">
               <ControlledRadioGruppe
                 name="skalSendeBrev"
                 control={control}
@@ -212,9 +212,9 @@ export const ValgForInfobrev = () => {
             </VStack>
           </form>
         ) : (
-          <VStack gap="4">
+          <VStack gap="space-16">
             {!!brevdata && (
-              <HStack gap="4">
+              <HStack gap="space-16">
                 <Info label="Skal sende brev" tekst={brevdata.skalSendeBrev ? JaNeiRec.JA : JaNeiRec.NEI} />
                 {!brevdata.skalSendeBrev && brevdata.begrunnelse && (
                   <Info label="Begrunnelse" tekst={brevdata.begrunnelse} />
@@ -293,8 +293,8 @@ function NesteEllerOpprettBrevValg({ gammelFlyt }: NesteEllerOpprettBrevValgProp
   }
 
   return (
-    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-      <HStack gap="4" justify="center">
+    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <HStack gap="space-16" justify="center">
         <Button
           variant="secondary"
           onClick={() => {

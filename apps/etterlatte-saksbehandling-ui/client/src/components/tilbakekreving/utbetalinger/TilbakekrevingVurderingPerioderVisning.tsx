@@ -28,7 +28,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
   )
 
   return (
-    <Box paddingBlock="8" paddingInline="16 8">
+    <Box paddingBlock="space-32" paddingInline="space-64 space-32">
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
@@ -91,8 +91,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
           })}
         </Table.Body>
       </Table>
-
-      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-48 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <HStack justify="center">
           <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>
             Neste

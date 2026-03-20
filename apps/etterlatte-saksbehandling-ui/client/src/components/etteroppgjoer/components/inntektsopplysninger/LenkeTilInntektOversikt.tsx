@@ -18,8 +18,8 @@ export function LenkeTilInntektOversikt() {
   return (
     <Box
       borderWidth="2"
-      paddingInline="4"
-      paddingBlock="3"
+      paddingInline="space-16"
+      paddingBlock="space-12"
       maxWidth="fit-content"
       background="bg-default"
       borderRadius="4"
@@ -33,7 +33,7 @@ export function LenkeTilInntektOversikt() {
           </Alert>
         ),
         success: ({ url }) => (
-          <HStack gap="2">
+          <HStack gap="space-8">
             <Tag variant="alt3" size="small">
               Ai
             </Tag>

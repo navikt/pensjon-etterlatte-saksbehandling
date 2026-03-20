@@ -39,21 +39,18 @@ export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandl
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Heading spacing size="large" level="1">
           Søknadsoversikt
         </Heading>
       </Box>
-
-      <Box paddingInline="20 0" paddingBlock="8 8" maxWidth="70rem">
+      <Box paddingInline="space-80 space-0" paddingBlock="space-32 space-32" maxWidth="70rem">
         <SoeknadInformasjon behandling={behandling} />
       </Box>
-
-      <Box paddingBlock="4" borderWidth="0 0 1 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16" borderWidth="0 0 1 0" borderColor="border-subtle">
         <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
       </Box>
-
-      <Box paddingBlock="8" paddingInline="16 8">
+      <Box paddingBlock="space-32" paddingInline="space-64 space-32">
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
 
         {personopplysninger && (
@@ -95,8 +92,7 @@ export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandl
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
       </Box>
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             {soeknadsoversiktErFerdigUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}

@@ -95,17 +95,17 @@ export function TilbakekrevingOppsummering({
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Heading level="1" size="large">
           Oppsummering
         </Heading>
       </Box>
-      <Box paddingBlock="8" paddingInline="16 8">
+      <Box paddingBlock="space-32" paddingInline="space-64 space-32">
         <TilbakekrevingVurderingOppsummering behandling={behandling} />
         {harPerioderMedOverstyringAvNettoBrutto(behandling) && (
-          <Box marginBlock="10 0" maxWidth="45rem">
+          <Box marginBlock="space-40 space-0" maxWidth="45rem">
             <Alert variant="info">
-              <VStack gap="4">
+              <VStack gap="space-16">
                 <BodyLong>
                   Det er lagt inn overstyring av netto tilbakekrevingsbeløp til brutto tilbakekreving av kun
                   nettobeløpet. Det må lages en oppgave til NØP for å få postert skattebeløpet manuelt etter
@@ -129,7 +129,7 @@ export function TilbakekrevingOppsummering({
         )}
 
         <div style={{ marginTop: '3rem' }}>
-          <VStack gap="6">
+          <VStack gap="space-24">
             <ControlledRadioGruppe
               name="skalSendeBrev"
               control={control}
@@ -161,8 +161,7 @@ export function TilbakekrevingOppsummering({
           error: (error) => <TilbakekrevingValideringsfeil error={error} />,
         })}
       </Box>
-
-      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-48 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <HStack justify="center">
           {!isPending(lagreSkalSendeBrevStatus) && (
             <>

@@ -22,9 +22,8 @@ export const SamordningSak = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
   }, [sakResult])
 
   return (
-    <Box padding="8">
+    <Box padding="space-32">
       <Heading size="medium">Samordningsmeldinger</Heading>
-
       {mapResult(samordningdataStatus, {
         success: (data) => (
           <SamordningTabell fnr={fnr} sakId={sakId!} samordningsdata={data} refresh={() => hent(sakId!)} />

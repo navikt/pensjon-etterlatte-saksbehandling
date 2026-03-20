@@ -43,11 +43,16 @@ export const EndreAvsenderMottaker = ({
       <Heading size="small" spacing>
         Avsender/mottaker
       </Heading>
-
       {rediger ? (
-        <Box background="bg-subtle" padding="4" borderColor="border-subtle" borderWidth="1" borderRadius="medium">
-          <VStack gap="8">
-            <VStack gap="4">
+        <Box
+          background="bg-subtle"
+          padding="space-16"
+          borderColor="border-subtle"
+          borderWidth="1"
+          borderRadius="medium"
+        >
+          <VStack gap="space-32">
+            <VStack gap="space-16">
               <TextField
                 {...register('id')}
                 label="ID"
@@ -88,7 +93,7 @@ export const EndreAvsenderMottaker = ({
               />
             </VStack>
 
-            <VStack gap="4">
+            <VStack gap="space-16">
               <Label>Har du ikke fødselsnummeret?</Label>
               <PersonSoekModal
                 velgPerson={({ id, navn }) => {
@@ -102,7 +107,7 @@ export const EndreAvsenderMottaker = ({
 
           <br />
 
-          <HStack gap="4" justify="end">
+          <HStack gap="space-16" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">
               Avbryt
             </Button>

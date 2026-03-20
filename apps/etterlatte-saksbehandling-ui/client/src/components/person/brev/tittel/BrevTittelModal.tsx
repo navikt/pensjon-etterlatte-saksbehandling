@@ -52,7 +52,6 @@ export const BrevTittelModal = ({ nyTittel, setNyTittel, brevId, sakId }: Props)
         icon={<DocPencilIcon title="Endre tittel" />}
         size="small"
       />
-
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Endre tittel">
         <form onSubmit={handleSubmit((data) => lagre(data))}>
           <Modal.Body>
@@ -77,7 +76,7 @@ export const BrevTittelModal = ({ nyTittel, setNyTittel, brevId, sakId }: Props)
           </Modal.Body>
 
           <Modal.Footer>
-            <HStack gap="4" justify="end">
+            <HStack gap="space-16" justify="end">
               <Button variant="secondary" type="button" disabled={isPending(status)} onClick={avbryt}>
                 Avbryt
               </Button>

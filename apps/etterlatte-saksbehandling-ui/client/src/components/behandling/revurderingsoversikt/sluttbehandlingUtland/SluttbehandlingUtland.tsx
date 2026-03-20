@@ -96,7 +96,7 @@ export default function SluttbehandlingUtland({
   }
 
   return (
-    <Box marginBlock="10 0" maxWidth="1200px">
+    <Box marginBlock="space-40 space-0" maxWidth="1200px">
       <Heading level="2" size="medium">
         Sluttbehandling ved mottatt info utland
       </Heading>
@@ -106,11 +106,9 @@ export default function SluttbehandlingUtland({
         gjøres en vurdering av rettigheter og trygdeavtale etter man har mottatt nødvendig dokumentasjon fra utenlandske
         trygdemyndigheter
       </BodyShort>
-
       <Heading level="2" size="medium" style={{ marginTop: '4rem' }}>
         Informasjon fra utsendelse av kravpakke
       </Heading>
-
       {mapResult(kravpakkeStatus, {
         pending: <Spinner label="Henter kravpakke" />,
         error: (error) => (
@@ -119,7 +117,7 @@ export default function SluttbehandlingUtland({
         success: ({ avdoed, kravpakke }) => (
           <>
             {kravpakke.innhold ? (
-              <VStack gap="4">
+              <VStack gap="space-16">
                 <Info label="Kravpakke gjelder" tekst={formaterNavn(avdoed)} />
                 <Info tekst={formaterKravpakkeLand(kravpakke.innhold, alleLandKodeverk)} label="Kravpakke sendt til" />
                 <Info label="Dokumenttyper og dato sendt" tekst={visDatoerForSendteDokumenter(kravpakke.innhold)} />
@@ -135,7 +133,6 @@ export default function SluttbehandlingUtland({
           </>
         ),
       })}
-
       {!!feilkoder?.size ? (
         <ErrorSummary
           style={{ marginTop: '10rem' }}
@@ -206,7 +203,6 @@ export default function SluttbehandlingUtland({
         Historikk{' '}
         {visHistorikk ? <ChevronUpIcon className="dropdownIcon" /> : <ChevronDownIcon className="dropdownIcon" />}
       </Button>
-
       {visHistorikk &&
         mapResult(hentRevurderingerForSakMedAarsakStatus, {
           pending: <Spinner label="Henter historikk" />,

@@ -55,10 +55,10 @@ export default function GenerellOppgave() {
   }
 
   return (
-    <VStack padding="8" gap="8" width="40rem">
+    <VStack padding="space-32" gap="space-32" width="40rem">
       {skalViseSide && (
         <form onSubmit={handleSubmit(opprett)}>
-          <VStack gap="4">
+          <VStack gap="space-16">
             <Heading size="large">Opprett generell oppgave</Heading>
 
             <TextField
@@ -93,7 +93,6 @@ export default function GenerellOppgave() {
           </VStack>
         </form>
       )}
-
       {!skalViseSide && <Alert variant="error">Denne funksjonen er ikke tilgjengelig for denne brukerrollen.</Alert>}
     </VStack>
   )

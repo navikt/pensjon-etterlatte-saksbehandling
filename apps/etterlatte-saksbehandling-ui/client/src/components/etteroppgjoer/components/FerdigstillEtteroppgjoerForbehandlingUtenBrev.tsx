@@ -49,7 +49,7 @@ export function FerdigstillEtteroppgjoerForbehandlingUtenBrev() {
       </div>
       <Modal open={modalOpen} onClose={avbryt} header={{ heading: 'Ferdigstill etteroppgjør uten brev' }}>
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-16">
             {etterbetalingTilDoedsbo ? (
               <BodyLong>
                 Siden etteroppgjøret viser etterbetaling og opphøret skyldes dødsfall etter etteroppgjørsåret, skal

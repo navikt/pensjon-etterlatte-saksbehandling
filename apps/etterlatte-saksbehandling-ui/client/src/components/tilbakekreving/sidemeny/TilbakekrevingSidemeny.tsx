@@ -66,7 +66,7 @@ export function TilbakekrevingSidemeny() {
         <div>
           <SakTypeTag sakType={tilbakekreving.sak.sakType} />
         </div>
-        <Box marginBlock="4">
+        <Box marginBlock="space-16">
           <Label size="small">Saksbehandler</Label>
           {mapApiResult(
             oppgaveResult,
@@ -90,7 +90,7 @@ export function TilbakekrevingSidemeny() {
         </div>
 
         {tilbakekreving.omgjoeringAvId && (
-          <VStack gap="2" marginBlock="4">
+          <VStack gap="space-8" marginBlock="space-16">
             <Label size="medium">Tilbakekrevingen er en omgjøring</Label>
 
             <Link href={lenkeTilTilbakekrevingMedId(tilbakekreving.omgjoeringAvId)}>Åpne forrige tilbakekreving</Link>
@@ -99,7 +99,6 @@ export function TilbakekrevingSidemeny() {
 
         <SettPaaVent oppgave={oppgave} />
       </SidebarPanel>
-
       {kanAttestere && (
         <>
           {mapApiResult(
@@ -120,7 +119,6 @@ export function TilbakekrevingSidemeny() {
           )}
         </>
       )}
-
       {tilbakekreving?.sak.ident && <DokumentlisteLiten fnr={tilbakekreving.sak.ident} />}
     </Sidebar>
   )

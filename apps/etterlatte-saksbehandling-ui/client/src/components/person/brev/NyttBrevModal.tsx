@@ -179,7 +179,6 @@ export const NyttBrevModal = ({
       >
         {modalButtonlabel}
       </Button>
-
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Header>
           <Heading size="medium" id="modal-heading">
@@ -189,7 +188,7 @@ export const NyttBrevModal = ({
 
         <form onSubmit={handleSubmit(opprettBrev)}>
           <Modal.Body>
-            <VStack gap="4">
+            <VStack gap="space-16">
               <Select
                 error={errors?.type?.message}
                 label="Type"
@@ -354,7 +353,7 @@ export const NyttBrevModal = ({
           </Modal.Body>
 
           <Modal.Footer>
-            <HStack gap="4" justify="end">
+            <HStack gap="space-16" justify="end">
               <Button variant="secondary" type="button" disabled={isPending(opprettBrevStatus)} onClick={avbryt}>
                 Avbryt
               </Button>

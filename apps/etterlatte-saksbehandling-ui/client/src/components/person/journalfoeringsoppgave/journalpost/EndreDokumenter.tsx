@@ -59,11 +59,17 @@ const Dokument = ({
   return (
     <div key={dokument.dokumentInfoId}>
       {rediger ? (
-        <Box background="bg-subtle" padding="4" borderColor="border-subtle" borderWidth="1" borderRadius="medium">
-          <VStack gap="4">
+        <Box
+          background="bg-subtle"
+          padding="space-16"
+          borderColor="border-subtle"
+          borderWidth="1"
+          borderRadius="medium"
+        >
+          <VStack gap="space-16">
             <TextField label="Dokumenttittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} />
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-16" justify="end">
               <Button variant="tertiary" onClick={avbryt} size="small">
                 Avbryt
               </Button>
@@ -82,7 +88,6 @@ const Dokument = ({
           </Button>
         </InputFlexRow>
       )}
-
       <br />
       {!dokument.tittel && (
         <Alert variant="warning" size="small">

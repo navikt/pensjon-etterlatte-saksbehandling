@@ -17,7 +17,6 @@ export const NotatVisningModal = ({ notat }: { notat: Notat }) => {
       <Button variant="primary" onClick={open} size="small" icon={<EyeIcon aria-hidden />}>
         Vis
       </Button>
-
       <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Body>
           <Heading size="small" spacing>
@@ -27,7 +26,7 @@ export const NotatVisningModal = ({ notat }: { notat: Notat }) => {
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" align="center">
+          <HStack gap="space-16" align="center">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
               Lukk
             </Button>

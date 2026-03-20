@@ -92,9 +92,8 @@ export default function BehandleJournalfoeringOppgave() {
         <StatusBar ident={oppgave?.fnr} />
         <NavigerTilbakeMeny to="/">Tilbake til oppgavebenken</NavigerTilbakeMeny>
       </StickyToppMeny>
-
       <HStack height="100%" minHeight="100vh" wrap={false}>
-        <Box padding="8" minWidth="40rem">
+        <Box padding="space-32" minWidth="40rem">
           {mapResult(journalpostStatus, {
             pending: <Spinner label="Laster journalpost..." />,
             success: (journalpost) =>

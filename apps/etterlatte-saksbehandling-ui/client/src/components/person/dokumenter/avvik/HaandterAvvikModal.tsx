@@ -38,19 +38,24 @@ export const HaandterAvvikModal = ({
         icon={<CogRotationIcon title="Håndter avvik" />}
         onClick={() => setIsOpen(true)}
       />
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" width="medium">
         <Modal.Header>
           <Heading size="medium">Håndter avvik på journalpost</Heading>
         </Modal.Header>
 
         <Modal.Body>
-          <Box borderWidth="1" padding="4" borderRadius="medium" borderColor="border-subtle" background="bg-subtle">
+          <Box
+            borderWidth="1"
+            padding="space-16"
+            borderRadius="medium"
+            borderColor="border-subtle"
+            background="bg-subtle"
+          >
             <Heading size="xsmall" spacing>
               Journalpostdetaljer
             </Heading>
 
-            <VStack gap="4">
+            <VStack gap="space-16">
               <Info label="Journalpost ID" tekst={journalpost.journalpostId} />
               <Info label="Bruker" tekst={`${journalpost.bruker?.id || '-'} (${journalpost.bruker?.type})`} />
               <Info label="Sakstype" tekst={journalpost.sak?.sakstype || '-'} />

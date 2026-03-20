@@ -47,7 +47,6 @@ export default function NyttBrev() {
           </NavigerTilbakeMeny>
         </>
       ))}
-
       {mapApiResult(
         brevStatus,
         <Spinner label="Henter brev ..." />,
@@ -56,7 +55,7 @@ export default function NyttBrev() {
         ),
         (brev) => (
           <HStack height="100%" minHeight="100vh" wrap={false}>
-            <VStack gap="4" margin="4" minWidth="30rem">
+            <VStack gap="space-16" margin="space-16" minWidth="30rem">
               <BrevTittel
                 brevId={brev.id}
                 sakId={brev.sakId}
@@ -65,8 +64,8 @@ export default function NyttBrev() {
                 manueltBrev={brev.spraak !== Spraak.NB}
               />
 
-              <Box padding="4" borderWidth="1" borderRadius="small">
-                <VStack gap="2" justify="space-between">
+              <Box padding="space-16" borderWidth="1" borderRadius="small">
+                <VStack gap="space-8" justify="space-between">
                   <Heading level="2" size="medium">
                     Språk / målform
                   </Heading>
@@ -90,7 +89,7 @@ export default function NyttBrev() {
             </Box>
             <Box minWidth="30rem">
               <BrevStatusPanel brev={brev} />
-              <Box padding="4" borderRadius="small">
+              <Box padding="space-16" borderRadius="small">
                 <Heading spacing level="2" size="medium">
                   Handlinger
                 </Heading>

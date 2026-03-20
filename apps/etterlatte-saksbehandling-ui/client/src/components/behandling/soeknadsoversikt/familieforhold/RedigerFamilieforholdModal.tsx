@@ -82,7 +82,6 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
       >
         Rediger familieforhold
       </Button>
-
       <Modal open={isOpen} onClose={avbryt} aria-label="Rediger familieforhold">
         <Modal.Header>
           <Heading size="medium" spacing>
@@ -91,10 +90,10 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
         </Modal.Header>
         <Modal.Body>
           <FormWrapper $column={true}>
-            <Box padding="4" borderWidth="1" borderRadius="small">
-              <VStack gap="4" align="start">
+            <Box padding="space-16" borderWidth="1" borderRadius="small">
+              <VStack gap="space-16" align="start">
                 {avdoedListe.fields?.map((field, index) => (
-                  <HStack gap="2" key={field.id} align="end">
+                  <HStack gap="space-8" key={field.id} align="end">
                     <Box width="20rem">
                       <TextField
                         {...register(`avdoede.${index}.fnr`, {
@@ -126,10 +125,10 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
               </VStack>
             </Box>
 
-            <Box padding="4" borderWidth="1" borderRadius="small">
-              <VStack gap="4" align="start">
+            <Box padding="space-16" borderWidth="1" borderRadius="small">
+              <VStack gap="space-16" align="start">
                 {gjenlevendeListe.fields?.map((field, index) => (
-                  <HStack gap="2" key={field.id} align="end">
+                  <HStack gap="space-8" key={field.id} align="end">
                     <Box width="20rem">
                       <TextField
                         {...register(`gjenlevende.${index}.fnr`, {
@@ -172,7 +171,7 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" justify="end">
+          <HStack gap="space-16" justify="end">
             <Button variant="secondary" onClick={avbryt} disabled={isPending(status)}>
               Avbryt
             </Button>

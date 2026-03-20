@@ -111,7 +111,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   if (!currentRouteErGyldig()) {
     return (
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Alert variant="error">
           Varselbrev er ugyldig for denne behandlingen med {props.behandling.status} id: {props.behandling.id} mangler
           kanskje vilkårsvurdering?
@@ -122,7 +122,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   if (!props.behandling.sendeBrev) {
     return (
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Alert variant="info">Det skal ikke sendes varselbrev for denne behandlingen.</Alert>
       </Box>
     )
@@ -138,7 +138,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
     <>
       <BrevContent>
         <Sidebar>
-          <Box paddingInline="16" paddingBlock="16 4">
+          <Box paddingInline="space-64" paddingBlock="space-64 space-16">
             <Heading spacing size="large" level="1">
               Varselbrev
             </Heading>
@@ -177,8 +177,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
         {isFailureHandler({ apiResult: hentBrevStatus, errorMessage: 'Feil ved henting av brev' })}
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
       </BrevContent>
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button

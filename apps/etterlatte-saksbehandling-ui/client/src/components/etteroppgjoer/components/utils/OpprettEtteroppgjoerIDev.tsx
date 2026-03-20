@@ -15,8 +15,8 @@ export const OpprettEtteroppgjoerIDev = ({ sakId }: Props) => {
   const [status, opprettFetch] = useApiCall(finnOgOpprettEtteroppgjoer)
 
   return (
-    <Box background="surface-subtle" padding="5">
-      <VStack gap="4">
+    <Box background="surface-subtle" padding="space-20">
+      <VStack gap="space-16">
         <Heading size="small">Finn og opprett etteroppgjør (kun i dev)</Heading>
         {status.status === 'error' && <ApiErrorAlert>{status.error.detail}</ApiErrorAlert>}
 

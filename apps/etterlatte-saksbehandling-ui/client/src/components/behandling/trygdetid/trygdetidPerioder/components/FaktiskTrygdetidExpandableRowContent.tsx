@@ -9,7 +9,7 @@ export const FaktiskTrygdetidExpandableRowContent = ({
   trygdetidPeriode: ITrygdetidGrunnlag
 }) => {
   return (
-    <HStack gap="8">
+    <HStack gap="space-32">
       <Box maxWidth="7rem">
         <Label>Begrunnelse</Label>
         <TekstMedMellomrom>{trygdetidPeriode.begrunnelse}</TekstMedMellomrom>

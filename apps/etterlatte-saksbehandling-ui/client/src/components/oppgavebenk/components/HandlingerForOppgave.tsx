@@ -121,7 +121,7 @@ export const HandlingerForOppgave = ({
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && referanse && (
-            <HStack gap="4">
+            <HStack gap="space-16">
               <Button size="small" href={`/behandling/${referanse}`} as="a">
                 Gå til revurdering
               </Button>

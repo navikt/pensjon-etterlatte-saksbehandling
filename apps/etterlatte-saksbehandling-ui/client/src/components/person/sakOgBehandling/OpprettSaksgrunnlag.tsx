@@ -35,7 +35,6 @@ export const OpprettSaksgrunnlag = ({ sak }: { sak: ISakMedUtlandstilknytning })
           Opprett saksgrunnlag
         </Button>
       </div>
-
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Opprett sak">
         {mapResult(grunnlagFinnesResult, {
           pending: <Spinner label="Sjekker om grunnlag kan opprettes..." />,
@@ -43,10 +42,10 @@ export const OpprettSaksgrunnlag = ({ sak }: { sak: ISakMedUtlandstilknytning })
           success: (grunnlagFinnes) =>
             grunnlagFinnes ? (
               <Modal.Body>
-                <VStack gap="4">
+                <VStack gap="space-16">
                   <Alert variant="warning">Grunnlag finnes allerede for denne saken!</Alert>
 
-                  <HStack gap="4" justify="end">
+                  <HStack gap="space-16" justify="end">
                     <Button variant="secondary" onClick={avbryt}>
                       Lukk
                     </Button>
@@ -75,7 +74,7 @@ export const OpprettSaksgrunnlag = ({ sak }: { sak: ISakMedUtlandstilknytning })
                 </Modal.Body>
 
                 <Modal.Footer>
-                  <HStack gap="4" justify="end">
+                  <HStack gap="space-16" justify="end">
                     <Button
                       variant="secondary"
                       type="button"

@@ -46,7 +46,6 @@ export default function FullfoerKlageModal({ oppgave, klageRequest, journalpost 
       <Button variant="primary" onClick={() => setOpen(true)}>
         Ferdigstill
       </Button>
-
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Body>
           <Heading size="medium" id="modal-heading" spacing>
@@ -66,7 +65,7 @@ export default function FullfoerKlageModal({ oppgave, klageRequest, journalpost 
               Klage opprettet for bruker med fødselsnummer {oppgave.fnr}. Du blir straks sendt til oppgavebenken.
             </Alert>
           ) : (
-            <HStack gap="4" justify="center">
+            <HStack gap="space-16" justify="center">
               <Button
                 variant="secondary"
                 onClick={() => setOpen(false)}

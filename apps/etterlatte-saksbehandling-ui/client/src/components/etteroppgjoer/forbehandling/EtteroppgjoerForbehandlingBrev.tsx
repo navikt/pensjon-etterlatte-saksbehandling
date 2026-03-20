@@ -90,7 +90,7 @@ export function EtteroppgjoerForbehandlingBrev() {
         }}
       >
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-16">
             <ConfirmationPanel
               name="BekreftSettOverBrev"
               checked={bekreftetSettOverBrev}
@@ -128,13 +128,13 @@ export function EtteroppgjoerForbehandlingBrev() {
         </Modal.Footer>
       </Modal>
       <Box minWidth="30rem" maxWidth="40rem" borderColor="border-subtle" borderWidth="0 1 0 0">
-        <VStack gap="4" margin="16">
+        <VStack gap="space-16" margin="space-64">
           <Heading level="1" size="large">
             {erVarselbrev ? 'Forhåndsvarsel' : 'Informasjonsbrev'}
           </Heading>
 
           {kanRedigeres && (
-            <Box marginBlock="0 2">
+            <Box marginBlock="space-0 space-8">
               <Alert variant="info" size="small">
                 Husk å se over redigerbart innhold i brevet slik at det er tilpasset brukers situasjon og inntekt.
               </Alert>
@@ -184,8 +184,8 @@ export function EtteroppgjoerForbehandlingBrev() {
           pending: <Spinner label="Laster brev" />,
         })}
 
-        <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
-          <HStack width="100%" justify="center" gap="6">
+        <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="space-32 space-64">
+          <HStack width="100%" justify="center" gap="space-24">
             <div>
               <Button
                 as={Link}

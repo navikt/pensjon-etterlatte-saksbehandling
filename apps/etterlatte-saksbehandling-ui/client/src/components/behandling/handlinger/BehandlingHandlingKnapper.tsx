@@ -5,8 +5,8 @@ import { HStack, VStack } from '@navikt/ds-react'
 
 export const BehandlingHandlingKnapper = ({ children }: { children: ReactNode }) => {
   return (
-    <VStack gap="4">
-      <HStack gap="4" justify="center">
+    <VStack gap="space-16">
+      <HStack gap="space-16" justify="center">
         <Tilbake />
         {children}
       </HStack>

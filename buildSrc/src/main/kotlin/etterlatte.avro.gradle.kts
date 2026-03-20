@@ -1,36 +1,12 @@
-// Idl er deprecated i avro-compiler 1.12.1, men erstatningen (IdlReader) finnes ikke ennå.
-// Fjern suppress når vi oppgraderer til en versjon med IdlReader.
-@file:Suppress("DEPRECATION")
-
-import org.apache.avro.compiler.idl.Idl
-import org.apache.avro.compiler.specific.SpecificCompiler
-import org.apache.avro.generic.GenericData.StringType
+import no.nav.etterlatte.GenerateAvroJava
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 
-val avroSourceDir = file("src/main/avro")
 val avroOutputDir = layout.buildDirectory.dir("generated-main-avro-java")
 
-val generateAvroJava by tasks.registering {
+val generateAvroJava by tasks.registering(GenerateAvroJava::class) {
     description = "Generates Java classes from Avro IDL (.avdl) files"
-    inputs.dir(avroSourceDir)
-    outputs.dir(avroOutputDir)
-
-    doLast {
-        val outDir = avroOutputDir.get().asFile
-        if (outDir.exists()) {
-            outDir.deleteRecursively()
-        }
-        outDir.mkdirs()
-
-        fileTree(avroSourceDir).matching { include("**/*.avdl") }.files.forEach { avdlFile ->
-            Idl(avdlFile).use { idl ->
-                val protocol = idl.CompilationUnit()
-                val compiler = SpecificCompiler(protocol)
-                compiler.setStringType(StringType.String)
-                compiler.compileToDestination(avdlFile, outDir)
-            }
-        }
-    }
+    sourceDir.set(file("src/main/avro"))
+    outputDir.set(avroOutputDir)
 }
 
 pluginManager.withPlugin("java") {

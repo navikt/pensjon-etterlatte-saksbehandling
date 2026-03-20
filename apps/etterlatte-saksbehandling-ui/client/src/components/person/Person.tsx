@@ -20,7 +20,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSak, hentSakMedBehandlnger } from '~shared/api/sak'
 import Spinner from '~shared/Spinner'
-import { isPending, isSuccess, Result, transformResult } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapSuccess, Result, transformResult } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
@@ -54,7 +54,7 @@ export const Person = () => {
   const [search, setSearch] = useSearchParams()
   const locationState = usePersonLocationState(search.get('key'))
 
-  const fnrFraSak = isSuccess(sakIdentResult) ? sakIdentResult.data.ident : undefined
+  const fnrFraSak = mapSuccess(sakIdentResult, (sak) => sak.ident)
   const fnr = fnrFraSak ?? locationState?.fnr
 
   const [foretrukketSak, setForetrukketSak] = useState<number | undefined>()

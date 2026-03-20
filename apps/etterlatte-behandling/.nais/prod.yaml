@@ -184,9 +184,9 @@ spec:
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://prod-fss.pensjonsamhandling.sam/.default
     - name: BRUK_NY_VEDTAK_KLIENT
-      value: "false"
+      value: nei
     - name: BRUK_VEDTAK_REPOSITORY_KLIENT
-      value: "false"
+      value: nei
 
   envFrom:
     - secret: my-application-unleash-api-token

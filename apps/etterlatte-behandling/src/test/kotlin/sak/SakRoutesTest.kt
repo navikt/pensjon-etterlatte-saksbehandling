@@ -194,49 +194,28 @@ internal class SakRoutesTest {
     @Test
     fun `hent sakid fra fnr foretrekker omstillingsstoenad`() {
         val fnr = KONTANT_FOT.value
-        val omsSak =
-            Sak(
-                fnr,
-                SakType.OMSTILLINGSSTOENAD,
-                SakId(10L),
-                Enheter.defaultEnhet.enhetNr,
-                null,
-                false,
-            )
 
-        every { sakService.finnSak(fnr, SakType.OMSTILLINGSSTOENAD) } returns omsSak
-
-        withTestApplication { client ->
-            val response =
-                client.post("/api/personer/sakid") {
-                    header(HttpHeaders.Authorization, "Bearer $systemToken")
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                }
-
-            assertEquals(200, response.status.value)
-            assertTrue(response.bodyAsText().contains("10"))
-        }
-
-        verify(exactly = 1) { sakService.finnSak(fnr, SakType.OMSTILLINGSSTOENAD) }
-        verify(exactly = 0) { sakService.finnSak(fnr, SakType.BARNEPENSJON) }
-    }
-
-    @Test
-    fun `hent sakid fra fnr fallbacker til barnepensjon`() {
-        val fnr = KONTANT_FOT.value
         val bpSak =
             Sak(
                 fnr,
                 SakType.BARNEPENSJON,
-                SakId(20L),
+                SakId(1234L),
                 Enheter.defaultEnhet.enhetNr,
                 null,
                 false,
             )
 
-        every { sakService.finnSak(fnr, SakType.OMSTILLINGSSTOENAD) } returns null
-        every { sakService.finnSak(fnr, SakType.BARNEPENSJON) } returns bpSak
+        val omsSak =
+            Sak(
+                fnr,
+                SakType.OMSTILLINGSSTOENAD,
+                SakId(4321L),
+                Enheter.defaultEnhet.enhetNr,
+                null,
+                false,
+            )
+
+        every { sakService.finnSaker(fnr) } returns listOf(bpSak, omsSak)
 
         withTestApplication { client ->
             val response =
@@ -247,11 +226,10 @@ internal class SakRoutesTest {
                 }
 
             assertEquals(200, response.status.value)
-            assertTrue(response.bodyAsText().contains("20"))
+            assertTrue(response.bodyAsText().contains("4321"))
         }
 
-        verify(exactly = 1) { sakService.finnSak(fnr, SakType.OMSTILLINGSSTOENAD) }
-        verify(exactly = 1) { sakService.finnSak(fnr, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { sakService.finnSaker(fnr) }
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {

@@ -409,10 +409,9 @@ internal fun Route.sakWebRoutes(
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val sakId =
                         inTransaction {
-                            sakService
-                                .finnSak(fnr.value, SakType.OMSTILLINGSSTOENAD)
-                                ?.id
-                                ?: sakService.finnSak(fnr.value, SakType.BARNEPENSJON)?.id
+                            val saker = sakService.finnSaker(fnr.value)
+                            val prioriterOmsOverBp = saker.sortedBy { if (it.sakType == SakType.OMSTILLINGSSTOENAD) 0 else 1 }
+                            prioriterOmsOverBp.firstOrNull()?.id
                         } ?: throw PersonManglerSak()
 
                     call.respond(SakIdDto(sakId))

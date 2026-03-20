@@ -246,6 +246,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
         behandlingDao = applicationContext.behandlingDao,
         grunnlagService = grunnlagService,
         etteroppgjoerForbehandlingService = applicationContext.etteroppgjoerForbehandlingService,
+        etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
     )
 
     private fun behandlingFactory() =

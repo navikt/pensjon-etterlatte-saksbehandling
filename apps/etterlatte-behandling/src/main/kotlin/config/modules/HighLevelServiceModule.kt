@@ -69,6 +69,7 @@ class HighLevelServiceModule(
             behandlingDao = daoModule.behandlingDao,
             grunnlagService = serviceModule.grunnlagService,
             etteroppgjoerForbehandlingService = serviceModule.etteroppgjoerForbehandlingService,
+            etteroppgjoerRevurderingService = serviceModule.etteroppgjoerRevurderingService,
         )
     }
 

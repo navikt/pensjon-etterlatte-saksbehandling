@@ -1,4 +1,3 @@
-import {logger} from "../monitoring/logger";
 
 interface IAppConf {
   port: string | number
@@ -7,12 +6,7 @@ interface IAppConf {
 
 export const appConf: IAppConf = {
   port: process.env.PORT || 8080,
-  brukVedtaksroutesIBehandling: hentToggle()
-}
-
-function hentToggle() {
-  logger.info(`hentToggle fra verdi: |${process.env.BRUK_VEDTAKSROUTES_I_BEHANDLING}|`)
-  return process.env.BRUK_VEDTAKSROUTES_I_BEHANDLING === 'true'
+  brukVedtaksroutesIBehandling: (process.env.BRUK_VEDTAKSROUTES_I_BEHANDLING === "true")
 }
 
 export const AdConfig = {

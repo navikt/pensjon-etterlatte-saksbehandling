@@ -17,6 +17,9 @@ val generateAvroJava by tasks.registering {
 
     doLast {
         val outDir = avroOutputDir.get().asFile
+        if (outDir.exists()) {
+            outDir.deleteRecursively()
+        }
         outDir.mkdirs()
 
         fileTree(avroSourceDir).matching { include("**/*.avdl") }.files.forEach { avdlFile ->

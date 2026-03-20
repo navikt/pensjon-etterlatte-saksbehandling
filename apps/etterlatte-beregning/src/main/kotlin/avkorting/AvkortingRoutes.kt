@@ -93,7 +93,7 @@ fun Route.avkorting(
                         "MANGLER_INNTEKTSAAR",
                         "inntektsaar er obligatorisk",
                     )
-                call.respond(avkortingService.harAvkortingMedSanksjonGamleRegler(behandlingId, inntektsaar))
+                call.respond(avkortingService.harAvkortingMedSanksjonGamleRegler(behandlingId, inntektsaar, brukerTokenInfo))
             }
         }
 

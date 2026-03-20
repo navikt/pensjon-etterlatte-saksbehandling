@@ -395,7 +395,7 @@ class ServiceModule(
 
     val vedtaksvurderingRepositoryOperasjoner: VedtaksvurderingRepositoryOperasjoner by lazy {
         // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
-        val brukVedtakRepositoryKlient: Boolean = env[BRUK_VEDTAK_REPOSITORY_KLIENT] == "true"
+        val brukVedtakRepositoryKlient: Boolean = env[BRUK_VEDTAK_REPOSITORY_KLIENT] == "ja"
 
         if (brukVedtakRepositoryKlient) {
             klientModule.vedtaksvurderingRepositoryKlient()
@@ -442,7 +442,7 @@ class ServiceModule(
     val vedtakKlient: VedtakKlient by lazy {
         vedtakKlientOverride ?: run {
             // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
-            val brukNyVedtakKlientInternal: Boolean = env[BRUK_NY_VEDTAK_KLIENT] == "true"
+            val brukNyVedtakKlientInternal: Boolean = env[BRUK_NY_VEDTAK_KLIENT] == "ja"
 
             if (brukNyVedtakKlientInternal) {
                 VedtakInternalService(

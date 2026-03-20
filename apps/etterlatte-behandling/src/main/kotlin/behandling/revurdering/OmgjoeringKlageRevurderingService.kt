@@ -27,7 +27,6 @@ class OmgjoeringKlageRevurderingService(
     private val klageService: KlageService,
     private val behandlingDao: BehandlingDao,
     private val grunnlagService: GrunnlagService,
-    private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
     private val etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
 ) {
     fun opprettOmgjoeringKlage(
@@ -73,10 +72,7 @@ class OmgjoeringKlageRevurderingService(
         val persongalleri =
             krevIkkeNull(grunnlagService.hentPersongalleri(sakId)) { "Persongalleri mangler for sak=$sakId" }
 
-        val etteroppgjoer =
-            behandlingSomOmgjoeres.relatertBehandlingId?.let {
-                etteroppgjoerForbehandlingService.hentForbehandling(it)
-            } != null
+        val etteroppgjoer = behandlingSomOmgjoeres.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER
 
         val revurdering =
             if (etteroppgjoer) {

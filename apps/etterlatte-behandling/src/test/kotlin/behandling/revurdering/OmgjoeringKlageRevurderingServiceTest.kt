@@ -245,7 +245,6 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
         klageService = applicationContext.klageService,
         behandlingDao = applicationContext.behandlingDao,
         grunnlagService = grunnlagService,
-        etteroppgjoerForbehandlingService = applicationContext.etteroppgjoerForbehandlingService,
         etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
     )
 

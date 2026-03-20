@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.avro)
     id("etterlatte.common")
+    id("etterlatte.avro")
 }
 repositories {
     maven("https://packages.confluent.io/maven/")
@@ -26,6 +26,3 @@ dependencies {
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
     testImplementation(testFixtures((project(":libs:etterlatte-kafka"))))
 }
-
-tasks.named("compileKotlin").configure { dependsOn(":apps:etterlatte-hendelser-pdl:generateAvroJava") }
-tasks.named("compileTestKotlin").configure { dependsOn(":apps:etterlatte-hendelser-pdl:generateAvroJava") }

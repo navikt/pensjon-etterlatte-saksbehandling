@@ -1,6 +1,5 @@
 
 plugins {
-    alias(libs.plugins.avro)
     id("etterlatte.common")
 }
 

@@ -39,7 +39,6 @@ data class EtteroppgjoerForbehandling(
     val opphoerSkyldesDoedsfall: JaNei?,
     val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
     val mottattSkatteoppgjoer: Boolean = false,
-    val klageOmgjoering: UUID? = null,
 ) {
     companion object {
         fun opprett(

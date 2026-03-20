@@ -9,7 +9,6 @@ import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { hentRevurderingerForSakMedAarsak, lagreRevurderingInfo } from '~shared/api/revurdering'
-import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon, ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
 import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
@@ -180,8 +179,8 @@ export default function SluttbehandlingUtland({
           {visLagretOk ? (
             <div style={{ minWidth: '148px', minHeight: '24px' }}>
               <CheckmarkCircleIcon
-                color={AWhite}
-                stroke={AWhite}
+                color="#fff"
+                stroke="#fff"
                 aria-hidden="true"
                 style={{
                   width: '1.8rem',

@@ -49,7 +49,7 @@ export const SidebarPanel = styled.div<{ $border?: boolean }>`
 `
 
 const CollapsibleSidebar = styled.div<{ $collapsed: boolean }>`
-  background: var(--a-white);
+  background: #fff;
   border-left: 1px solid var(--ax-border-neutral-subtle);
   min-width: ${(props) => (props.$collapsed ? '50px' : '20%')};
 `

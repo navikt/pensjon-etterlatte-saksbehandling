@@ -1,3 +1,5 @@
+import {logger} from "../monitoring/logger";
+
 interface IAppConf {
   port: string | number
   brukVedtaksroutesIBehandling: boolean
@@ -9,7 +11,7 @@ export const appConf: IAppConf = {
 }
 
 function hentToggle() {
-  console.log(`hentToggle fra verdi: |${process.env.BRUK_VEDTAKSROUTES_I_BEHANDLING}|`)
+  logger.info(`hentToggle fra verdi: |${process.env.BRUK_VEDTAKSROUTES_I_BEHANDLING}|`)
   return process.env.BRUK_VEDTAKSROUTES_I_BEHANDLING === 'true'
 }
 

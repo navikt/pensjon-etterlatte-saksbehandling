@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common
 
+import tools.jackson.core.StreamWriteFeature
 import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.MapperFeature
@@ -27,6 +28,7 @@ val objectMapper: ObjectMapper =
         .enable(MapperFeature.CAN_OVERRIDE_ACCESS_MODIFIERS)
         .enable(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS)
         .disable(DateTimeFeature.ONE_BASED_MONTHS)
+        .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
         .build()
 
 fun serialize(value: Any): String = objectMapper.writeValueAsString(value)

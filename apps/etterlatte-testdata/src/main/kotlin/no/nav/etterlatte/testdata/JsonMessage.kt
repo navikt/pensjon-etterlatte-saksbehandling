@@ -8,15 +8,15 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ArrayNode
 import tools.jackson.databind.node.ObjectNode
-import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.net.InetAddress
+import no.nav.etterlatte.libs.common.objectMapper as sharedObjectMapper
 
 // Stripped down version of JsonMessage from rapids and rivers
 open class JsonMessage(
     originalMessage: String,
 ) {
     companion object {
-        private val objectMapper = jacksonObjectMapper()
+        private val objectMapper = sharedObjectMapper
 
         private const val READ_COUNT_KEY = "system_read_count"
         private const val PARTICIPATING_SERVICES_KEY = "system_participating_services"

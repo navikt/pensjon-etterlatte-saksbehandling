@@ -69,12 +69,10 @@ import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
 import no.nav.security.token.support.v3.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.module.kotlin.jacksonObjectMapper
 
 private val env = Miljoevariabler.systemEnv()
 
-val objectMapper: ObjectMapper = jacksonObjectMapper()
+val objectMapper = no.nav.etterlatte.libs.common.objectMapper
 
 val logger: Logger = LoggerFactory.getLogger("testdata")
 val localDevelopment = env[DEV].toBoolean()

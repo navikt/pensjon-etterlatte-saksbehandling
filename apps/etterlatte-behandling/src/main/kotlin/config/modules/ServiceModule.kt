@@ -394,8 +394,8 @@ class ServiceModule(
     }
 
     val vedtaksvurderingRepositoryOperasjoner: VedtaksvurderingRepositoryOperasjoner by lazy {
-        println("EnvVar for BRUK_VEDTAK_REPOSITORY_KLIENT: ${env[BRUK_VEDTAK_REPOSITORY_KLIENT] == "sann"}")
-        val brukVedtakRepositoryKlient: Boolean = env[BRUK_VEDTAK_REPOSITORY_KLIENT]?.toBoolean() ?: false
+        // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
+        val brukVedtakRepositoryKlient: Boolean = env[BRUK_VEDTAK_REPOSITORY_KLIENT] == "true"
 
         if (brukVedtakRepositoryKlient) {
             klientModule.vedtaksvurderingRepositoryKlient()
@@ -441,11 +441,8 @@ class ServiceModule(
 
     val vedtakKlient: VedtakKlient by lazy {
         vedtakKlientOverride ?: run {
-            println("EnvVar for BRUK_NY_VEDTAK_KLIENT: ${env[BRUK_NY_VEDTAK_KLIENT] == "sann"}")
-            val brukNyVedtakKlientInternal: Boolean =
-                env[BRUK_NY_VEDTAK_KLIENT]?.toBoolean() ?: throw InternfeilException(
-                    "Fant ikke miljøvariabel: $BRUK_NY_VEDTAK_KLIENT",
-                )
+            // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
+            val brukNyVedtakKlientInternal: Boolean = env[BRUK_NY_VEDTAK_KLIENT] == "true"
 
             if (brukNyVedtakKlientInternal) {
                 VedtakInternalService(

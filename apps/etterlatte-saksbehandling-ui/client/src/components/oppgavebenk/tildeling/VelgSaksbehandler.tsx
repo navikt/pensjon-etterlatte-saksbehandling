@@ -187,7 +187,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                           <Table.Row
                             key={`${oppgave.id}-${oppgave.gruppeId}`}
                             style={
-                              oppgave.id === oppgaveId ? { backgroundColor: 'var(--a-surface-selected)' } : undefined
+                              oppgave.id === oppgaveId ? { backgroundColor: 'var(--ax-bg-accent-soft)' } : undefined
                             }
                           >
                             <Table.DataCell>

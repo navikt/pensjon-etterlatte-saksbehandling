@@ -28,7 +28,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import { ExternalLinkIcon, PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
-import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
@@ -45,6 +44,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import { NavigateFunction } from 'react-router-dom'
+import { Accent600 } from '@navikt/ds-tokens/js'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -294,7 +294,7 @@ const KravpakkeUtlandBehandling = (props: {
 
               <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
                 Gå til RINA for å opprette kravpakke til utlandet
-                <ExternalLinkIcon fill={ABlue500} aria-hidden />
+                <ExternalLinkIcon fill={Accent600} aria-hidden />
               </LenkeMargin>
               <TextField
                 label="Saksnummer RINA"

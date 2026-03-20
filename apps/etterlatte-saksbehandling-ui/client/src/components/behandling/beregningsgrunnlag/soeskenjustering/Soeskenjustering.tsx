@@ -16,10 +16,10 @@ import {
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
-import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { Success600 } from '@navikt/ds-tokens/js'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -221,7 +221,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
               <Button type="submit" onClick={handleSubmit(ferdigstillForm)} size="small">
                 Lagre søskenjustering
               </Button>
-              {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
+              {visOkLagret && <CheckmarkCircleIcon color={Success600} />}
             </HStack>
           )}
         </form>

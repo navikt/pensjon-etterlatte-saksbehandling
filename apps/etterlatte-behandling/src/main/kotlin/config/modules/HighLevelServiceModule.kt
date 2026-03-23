@@ -92,6 +92,7 @@ class HighLevelServiceModule(
             brevApiKlient = klientModule.brevApiKlient,
             vedtakKlient = serviceModule.vedtakKlient,
             grunnlagService = serviceModule.grunnlagService,
+            oppgaveService = serviceModule.oppgaveService,
         )
     }
 

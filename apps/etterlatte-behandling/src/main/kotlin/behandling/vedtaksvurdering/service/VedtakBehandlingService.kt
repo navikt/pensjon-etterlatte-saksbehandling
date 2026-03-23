@@ -160,6 +160,8 @@ class VedtakBehandlingService(
                 ).also { fattetVedtak ->
                     val behandling =
                         behandlingService.hentBehandling(behandlingId) ?: throw GenerellIkkeFunnetException()
+                    val opphoerFraOgMed = (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed
+
                     behandlingStatusService.settFattetVedtak(
                         behandling = behandling,
                         vedtak =
@@ -176,10 +178,19 @@ class VedtakBehandlingService(
                                         saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
                                     ),
                                 vedtakType = fattetVedtak.type,
-                                opphoerFraOgMed = (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed,
+                                opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         brukerTokenInfo = brukerTokenInfo,
                     )
+                    if (vedtak.type == VedtakType.OPPHOER) {
+                        behandlingService.lagreOpphoerFom(
+                            behandling.id,
+                            opphoerFraOgMed ?: throw UgyldigForespoerselException(
+                                code = "MANGLER_OPPHOER_FOM",
+                                detail = "Vedtak for ${behandling.id} mangler opphør fra og med dato",
+                            ),
+                        )
+                    }
                 }
 
         beregningOgAvkorting?.let {

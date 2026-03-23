@@ -164,7 +164,7 @@ class EtteroppgjoerRevurderingService(
         }
 
         val forbehandling = hentForbehandlingForRevurdering(behandling)
-        if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
+        if (klageId == null && forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
             throw IkkeTillattException(
                 "FORBEHANDLING_IKKE_AVBRUTT",
                 "Etteroppgjør forbehandling med id=${forbehandling.id} er ikke avbrutt og kan ikke omgjoeres",

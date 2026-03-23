@@ -303,6 +303,14 @@ fun Route.etteroppgjoerRoutes(
                         call.respond(HttpStatusCode.OK)
                     }
                 }
+
+                get("bruker-siste-inntekter") {
+                    val brukerSisteInntekter =
+                        inTransaction {
+                            forbehandlingService.forbehandlingBrukerSisteInntekter(forbehandlingId)
+                        }
+                    call.respond(brukerSisteInntekter)
+                }
             }
 
             post("bulk") {

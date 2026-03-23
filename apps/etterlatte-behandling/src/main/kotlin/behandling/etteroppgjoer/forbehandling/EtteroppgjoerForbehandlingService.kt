@@ -127,6 +127,20 @@ class EtteroppgjoerForbehandlingService(
         return ferdigstillForbehandling(forbehandling, brukerTokenInfo)
     }
 
+    fun forbehandlingBrukerSisteInntekter(id: UUID): Boolean {
+        val forbehandling = hentForbehandling(id)
+        try {
+            sjekkAtViBrukerSisteInntekter(forbehandling)
+            return true
+        } catch (e: Exception) {
+            logger.info(
+                "Forbehandling=${forbehandling.id} har ikke oppdatert til de siste inntektene",
+                e,
+            )
+            return false
+        }
+    }
+
     fun avbrytForbehandling(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

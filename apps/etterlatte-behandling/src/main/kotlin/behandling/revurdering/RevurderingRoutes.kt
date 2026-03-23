@@ -119,13 +119,11 @@ internal fun Route.revurderingRoutes(
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     medBody<OpprettOmgjoeringKlageRequest> {
                         val revurdering =
-                            inTransaction {
-                                omgjoeringKlageRevurderingService.opprettOmgjoeringKlage(
-                                    sakId,
-                                    it.oppgaveIdOmgjoering,
-                                    saksbehandler,
-                                )
-                            }
+                            omgjoeringKlageRevurderingService.opprettOmgjoeringKlage(
+                                sakId,
+                                it.oppgaveIdOmgjoering,
+                                saksbehandler,
+                            )
                         call.respond(revurdering)
                     }
                 }

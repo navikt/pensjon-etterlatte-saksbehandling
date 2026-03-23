@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.auto
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -294,7 +295,16 @@ class BeregningsGrunnlagService(
             throw RuntimeException("Eksisterende grunnlag funnet for $behandlingId")
         }
 
-        val nyttGrunnlag = forrigeGrunnlag.copy(behandlingId = behandlingId)
+        val vedtaksperioder =
+            runBlocking {
+                hentVedtaksperioderForSak(behandling.sak, brukerTokenInfo)
+            }
+
+        val nyttGrunnlag =
+            forrigeGrunnlag.copy(
+                behandlingId = behandlingId,
+                vedtaksperioder = vedtaksperioder.takeIf { it.isNotEmpty() },
+            )
         beregningsGrunnlagRepository.lagreBeregningsGrunnlag(nyttGrunnlag)
 
         dupliserOverstyrBeregningGrunnlag(behandlingId, forrigeBehandlingId)
@@ -529,6 +539,21 @@ class BeregningsGrunnlagService(
             }
         }
     }
+
+    suspend fun hentVedtaksperioderForSak(
+        sakId: no.nav.etterlatte.libs.common.sak.SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Vedtaksperiode> {
+        logger.info("Henter vedtaksperioder for sak $sakId")
+        val innvilgedePerioder = vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo)
+        return innvilgedePerioder.map { it.tilVedtaksperiode() }
+    }
+
+    private fun InnvilgetPeriodeDto.tilVedtaksperiode(): Vedtaksperiode =
+        Vedtaksperiode(
+            fraOgMed = this.periode.fom,
+            tilOgMed = this.periode.tom,
+        )
 }
 
 class OverstyrtBeregningUgyldigTrygdetid(

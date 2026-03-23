@@ -33,6 +33,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
+import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -477,6 +479,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
@@ -516,6 +519,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { sanksjonService.kopierSanksjon(any(), any()) } just Runs
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every {
@@ -556,6 +560,7 @@ internal class BeregningsGrunnlagServiceTest {
         val overstyrBeregningGrunnlagDao = mockk<OverstyrBeregningGrunnlagDao>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every {
@@ -1435,6 +1440,127 @@ internal class BeregningsGrunnlagServiceTest {
                 virkRevurdering,
                 mockk(relaxed = true),
             )
+        }
+    }
+
+    @Test
+    fun `skal inkludere vedtaksperioder fra innvilgede perioder ved duplisering av grunnlag`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+        val omregningsId = randomUUID()
+        val behandlingsId = randomUUID()
+        val slot = slot<BeregningsGrunnlag>()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(
+                    periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 6)),
+                    vedtak = emptyList(),
+                ),
+                InnvilgetPeriodeDto(
+                    periode = Periode(YearMonth.of(2023, 9), null),
+                    vedtak = emptyList(),
+                ),
+            )
+
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId) } returns
+            BeregningsGrunnlag(
+                behandlingsId,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                BeregningsMetode.BEST.toGrunnlag(),
+                emptyList(),
+            )
+
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        runBlocking {
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
+        }
+
+        slot.captured.vedtaksperioder.let { perioder ->
+            assertNotNull(perioder)
+            perioder!!.size shouldBe 2
+            perioder[0].fraOgMed shouldBe YearMonth.of(2023, 1)
+            perioder[0].tilOgMed shouldBe YearMonth.of(2023, 6)
+            perioder[1].fraOgMed shouldBe YearMonth.of(2023, 9)
+            perioder[1].tilOgMed shouldBe null
+        }
+    }
+
+    @Test
+    fun `skal sette vedtaksperioder til null hvis ingen innvilgede perioder`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+        val omregningsId = randomUUID()
+        val behandlingsId = randomUUID()
+        val slot = slot<BeregningsGrunnlag>()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId) } returns
+            BeregningsGrunnlag(
+                behandlingsId,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                BeregningsMetode.BEST.toGrunnlag(),
+                emptyList(),
+            )
+
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        runBlocking {
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
+        }
+
+        slot.captured.vedtaksperioder shouldBe null
+    }
+
+    @Test
+    fun `skal inkludere én vedtaksperiode når det ikke er hull`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+        val omregningsId = randomUUID()
+        val behandlingsId = randomUUID()
+        val slot = slot<BeregningsGrunnlag>()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(
+                    periode = Periode(YearMonth.of(2023, 1), null),
+                    vedtak = emptyList(),
+                ),
+            )
+
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId) } returns
+            BeregningsGrunnlag(
+                behandlingsId,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                BeregningsMetode.BEST.toGrunnlag(),
+                emptyList(),
+            )
+
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        runBlocking {
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
+        }
+
+        slot.captured.vedtaksperioder.let { perioder ->
+            assertNotNull(perioder)
+            perioder!!.size shouldBe 1
+            perioder[0].fraOgMed shouldBe YearMonth.of(2023, 1)
+            perioder[0].tilOgMed shouldBe null
         }
     }
 

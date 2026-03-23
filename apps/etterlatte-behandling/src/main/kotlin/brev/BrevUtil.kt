@@ -8,11 +8,14 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.hentVerger
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.route.logger
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sikkerLogg
 
 fun hentVergeForSak(
@@ -67,4 +70,40 @@ fun hentVergeForSak(
     } else {
         null
     }
+}
+
+data class SaksbehandlerOgAttestantBrev(
+    val saksbehandlerIdent: String,
+    val attestantIdent: String?,
+)
+
+/**
+ * Både attestant og saksbehandler til brev følger samme prioritert rekkefølge:
+ *  1. bruk det som er lagret på vedtaket
+ *  2. bruk det som er saksbehandler for behandlingsoppgaven
+ *  3. bruk innlogget bruker (kun for saksbehandler)
+ *
+ *  Siden saksbehandler er obligatorisk mens attestant ikke er det sender vi ikke
+ *  med en attestant med mindre vi er "sikre" på at det er en riktig ident for
+ *  brevet.
+ */
+fun hentSaksbehandlerOgAttestantForVedtak(
+    vedtakDto: VedtakDto,
+    oppgaveForBehandling: OppgaveIntern?,
+    brukerTokenInfo: BrukerTokenInfo,
+): SaksbehandlerOgAttestantBrev {
+    val saksbehandlerFraVedtak = vedtakDto.vedtakFattet?.ansvarligSaksbehandler
+    val saksbehandlerFraOppgave = oppgaveForBehandling?.saksbehandler?.ident
+    val saksbehandlerFraToken = brukerTokenInfo.ident()
+    val saksbehandler =
+        listOf(saksbehandlerFraVedtak, saksbehandlerFraOppgave, saksbehandlerFraToken).firstNotNullOf { it }
+
+    val attestantFraVedtak = vedtakDto.attestasjon?.attestant
+    val attestantFraOppgave = oppgaveForBehandling?.saksbehandler?.ident?.takeIf { oppgaveForBehandling.erAttestering() }
+    val attestant = listOf(attestantFraVedtak, attestantFraOppgave).firstOrNull { it != null }
+
+    return SaksbehandlerOgAttestantBrev(
+        saksbehandlerIdent = saksbehandler,
+        attestantIdent = attestant,
+    )
 }

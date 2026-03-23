@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.util.UUID

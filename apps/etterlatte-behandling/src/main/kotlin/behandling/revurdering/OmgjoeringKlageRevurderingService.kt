@@ -2,7 +2,10 @@ package no.nav.etterlatte.behandling.revurdering
 
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
+import no.nav.etterlatte.behandling.klage.KlageFeatureToggle
 import no.nav.etterlatte.behandling.klage.KlageService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
@@ -25,6 +28,8 @@ class OmgjoeringKlageRevurderingService(
     private val klageService: KlageService,
     private val behandlingDao: BehandlingDao,
     private val grunnlagService: GrunnlagService,
+    private val etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun opprettOmgjoeringKlage(
         sakId: SakId,
@@ -61,72 +66,94 @@ class OmgjoeringKlageRevurderingService(
                 ?.behandlingId
                 ?.let { UUID.fromString(it) }
                 ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
+
         val behandlingSomOmgjoeres =
             behandlingDao.hentBehandling(behandlingSomOmgjoeresId)
                 ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
 
-        val persongalleri = grunnlagService.hentPersongalleri(sakId)
-        return revurderingService
-            .opprettRevurdering(
-                sakId = sakId,
-                persongalleri = krevIkkeNull(persongalleri) { "Persongalleri mangler for sak=$sakId" },
-                forrigeBehandling = behandlingSomOmgjoeres,
-                mottattDato =
-                    klagenViOmgjoerPaaGrunnAv.innkommendeDokument
-                        ?.mottattDato
-                        ?.atStartOfDay()
-                        ?.toString(),
-                prosessType = Prosesstype.MANUELL,
-                kilde = Vedtaksloesning.GJENNY,
-                revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                virkningstidspunkt = behandlingSomOmgjoeres.virkningstidspunkt,
-                begrunnelse = "Omgjøring på grunn av klage",
-                saksbehandlerIdent = saksbehandler.ident,
-                relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id,
-                opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
-            ).oppdater()
-            .also {
+        val persongalleri =
+            krevIkkeNull(grunnlagService.hentPersongalleri(sakId)) { "Persongalleri mangler for sak=$sakId" }
+
+        val etteroppgjoer = behandlingSomOmgjoeres.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER
+
+        // TODO: fjerne etter testing
+        val kanOmgjoereEtteroppgjoer =
+            featureToggleService.isEnabled(
+                KlageFeatureToggle.KanOmgjoereEtteroppgjoer,
+                false,
+            )
+
+        val revurdering =
+            if (kanOmgjoereEtteroppgjoer && etteroppgjoer) {
+                etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(
+                    behandlingId = behandlingSomOmgjoeresId,
+                    klageId = klageId,
+                    brukerTokenInfo = saksbehandler,
+                )
+            } else {
+                revurderingService
+                    .opprettRevurdering(
+                        sakId = sakId,
+                        persongalleri = persongalleri,
+                        forrigeBehandling = behandlingSomOmgjoeres,
+                        mottattDato =
+                            klagenViOmgjoerPaaGrunnAv.innkommendeDokument
+                                ?.mottattDato
+                                ?.atStartOfDay()
+                                ?.toString(),
+                        prosessType = Prosesstype.MANUELL,
+                        kilde = Vedtaksloesning.GJENNY,
+                        revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+                        virkningstidspunkt = behandlingSomOmgjoeres.virkningstidspunkt,
+                        begrunnelse = "Omgjøring på grunn av klage",
+                        saksbehandlerIdent = saksbehandler.ident,
+                        relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id,
+                        opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
+                    ).oppdater()
+            }.also {
                 oppgaveService.ferdigstillOppgaveUnderBehandling(
                     referanse = klagenViOmgjoerPaaGrunnAv.id.toString(),
                     type = OppgaveType.OMGJOERING,
                     saksbehandler = saksbehandler,
                 )
             }
+
+        return revurdering
     }
-}
 
-sealed class FeilIOmgjoering {
-    class IngenOmgjoeringsoppgave :
-        UgyldigForespoerselException("INGEN_OMGJOERINGSOPPGAVE", "Mottok ikke en gyldig omgjøringsoppgave")
+    sealed class FeilIOmgjoering {
+        class IngenOmgjoeringsoppgave :
+            UgyldigForespoerselException("INGEN_OMGJOERINGSOPPGAVE", "Mottok ikke en gyldig omgjøringsoppgave")
 
-    class OmgjoeringsOppgaveLukket(
-        oppgave: OppgaveIntern,
-    ) : UgyldigForespoerselException(
-            "OMGJOERINGSOPPGAVE_LUKKET",
-            "Oppgaven ${oppgave.id} har status ${oppgave.status}.",
-        )
+        class OmgjoeringsOppgaveLukket(
+            oppgave: OppgaveIntern,
+        ) : UgyldigForespoerselException(
+                "OMGJOERINGSOPPGAVE_LUKKET",
+                "Oppgaven ${oppgave.id} har status ${oppgave.status}.",
+            )
 
-    class OppgaveOgSakErForskjellig(
-        sakId: SakId,
-        oppgave: OppgaveIntern,
-    ) : UgyldigForespoerselException(
-            "SAK_I_OPPGAVE_MATCHER_IKKE",
-            "Saken det skal omgjøres i har id=$sakId, men omgjøringsoppgaven er i sak med id=${oppgave.sakId}",
-        )
+        class OppgaveOgSakErForskjellig(
+            sakId: SakId,
+            oppgave: OppgaveIntern,
+        ) : UgyldigForespoerselException(
+                "SAK_I_OPPGAVE_MATCHER_IKKE",
+                "Saken det skal omgjøres i har id=$sakId, men omgjøringsoppgaven er i sak med id=${oppgave.sakId}",
+            )
 
-    class SaksbehandlerHarIkkeOppgaven(
-        saksbehandler: Saksbehandler,
-        omgjoeringsoppgave: OppgaveIntern,
-    ) : UgyldigForespoerselException(
-            "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
-            "Saksbehandler med ident=${saksbehandler.ident} er ikke saksbehandler i oppgaven med " +
-                "id=$omgjoeringsoppgave (saksbehandler i oppgaven er ${omgjoeringsoppgave.saksbehandler?.ident}).",
-        )
+        class SaksbehandlerHarIkkeOppgaven(
+            saksbehandler: Saksbehandler,
+            omgjoeringsoppgave: OppgaveIntern,
+        ) : UgyldigForespoerselException(
+                "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
+                "Saksbehandler med ident=${saksbehandler.ident} er ikke saksbehandler i oppgaven med " +
+                    "id=$omgjoeringsoppgave (saksbehandler i oppgaven er ${omgjoeringsoppgave.saksbehandler?.ident}).",
+            )
 
-    class ManglerBehandlingForOmgjoering(
-        klage: Klage,
-    ) : InternfeilException(
-            "Klagen med id=${klage.id} har laget en omgjøringsoppgave men vi finner ikke behandlingen som skal omgjøres." +
-                " Noe galt har skjedd i ferdigstillingen av denne klagen, eller dette er ikke et behandlingsvedtak.",
-        )
+        class ManglerBehandlingForOmgjoering(
+            klage: Klage,
+        ) : InternfeilException(
+                "Klagen med id=${klage.id} har laget en omgjøringsoppgave men vi finner ikke behandlingen som skal omgjøres." +
+                    " Noe galt har skjedd i ferdigstillingen av denne klagen, eller dette er ikke et behandlingsvedtak.",
+            )
+    }
 }

@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
+import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -423,6 +424,28 @@ class ServiceModule(
         VedtakEtteroppgjoerService(
             repository = daoModule.vedtaksvurderingRepository,
             vedtakSamordningService = vedtakSamordningService,
+        )
+    }
+
+    val trygdetidKlient by lazy {
+        klientModule.trygdetidKlient
+    }
+
+    val beregningKlient by lazy {
+        klientModule.beregningKlient
+    }
+
+    val etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService by lazy {
+        EtteroppgjoerRevurderingService(
+            behandlingService = behandlingService,
+            etteroppgjoerService = etteroppgjoerService,
+            etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
+            grunnlagService = grunnlagService,
+            revurderingService = revurderingService,
+            vilkaarsvurderingService = vilkaarsvurderingService,
+            trygdetidKlient = trygdetidKlient,
+            beregningKlient = beregningKlient,
+            etteroppgjoerDataService = etteroppgjoerDataService,
         )
     }
 

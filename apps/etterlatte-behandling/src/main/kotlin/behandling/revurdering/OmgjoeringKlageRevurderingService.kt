@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.klage.KlageFeatureToggle
 import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -36,43 +37,50 @@ class OmgjoeringKlageRevurderingService(
         oppgaveIdOmgjoering: UUID,
         saksbehandler: Saksbehandler,
     ): Revurdering {
-        val omgjoeringsoppgave = oppgaveService.hentOppgave(oppgaveIdOmgjoering)
-        if (omgjoeringsoppgave.type != OppgaveType.OMGJOERING) {
-            throw FeilIOmgjoering.IngenOmgjoeringsoppgave()
-        }
-        if (omgjoeringsoppgave.status.erAvsluttet()) {
-            throw FeilIOmgjoering.OmgjoeringsOppgaveLukket(omgjoeringsoppgave)
-        }
-        if (omgjoeringsoppgave.sakId != sakId) {
-            throw FeilIOmgjoering.OppgaveOgSakErForskjellig(sakId, omgjoeringsoppgave)
-        }
-        if (omgjoeringsoppgave.saksbehandler?.ident != saksbehandler.ident) {
-            throw FeilIOmgjoering.SaksbehandlerHarIkkeOppgaven(saksbehandler, omgjoeringsoppgave)
-        }
-
+        val omgjoeringsoppgave =
+            inTransaction {
+                val omgjoeringsoppgave = oppgaveService.hentOppgave(oppgaveIdOmgjoering)
+                if (omgjoeringsoppgave.type != OppgaveType.OMGJOERING) {
+                    throw FeilIOmgjoering.IngenOmgjoeringsoppgave()
+                }
+                if (omgjoeringsoppgave.status.erAvsluttet()) {
+                    throw FeilIOmgjoering.OmgjoeringsOppgaveLukket(omgjoeringsoppgave)
+                }
+                if (omgjoeringsoppgave.sakId != sakId) {
+                    throw FeilIOmgjoering.OppgaveOgSakErForskjellig(sakId, omgjoeringsoppgave)
+                }
+                if (omgjoeringsoppgave.saksbehandler?.ident != saksbehandler.ident) {
+                    throw FeilIOmgjoering.SaksbehandlerHarIkkeOppgaven(saksbehandler, omgjoeringsoppgave)
+                }
+                omgjoeringsoppgave
+            }
         val klageId = UUID.fromString(omgjoeringsoppgave.referanse)
-        val klagenViOmgjoerPaaGrunnAv =
-            klageService.hentKlage(klageId)
-                ?: throw InternfeilException(
-                    "Omgjøringsoppgaven med id=${omgjoeringsoppgave.id} peker på en " +
-                        "klageId=${omgjoeringsoppgave.referanse} som vi ikke finner. " +
-                        "Her har noe blitt koblet feil, og må ryddes opp i.",
-                )
+        val (klagenViOmgjoerPaaGrunnAv, behandlingSomOmgjoeres, persongalleri) =
+            inTransaction {
+                val klagenViOmgjoerPaaGrunnAv =
+                    klageService.hentKlage(klageId)
+                        ?: throw InternfeilException(
+                            "Omgjøringsoppgaven med id=${omgjoeringsoppgave.id} peker på en " +
+                                "klageId=${omgjoeringsoppgave.referanse} som vi ikke finner. " +
+                                "Her har noe blitt koblet feil, og må ryddes opp i.",
+                        )
 
-        val behandlingSomOmgjoeresId =
-            klagenViOmgjoerPaaGrunnAv.formkrav
-                ?.formkrav
-                ?.vedtaketKlagenGjelder
-                ?.behandlingId
-                ?.let { UUID.fromString(it) }
-                ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
+                val behandlingSomOmgjoeresId =
+                    klagenViOmgjoerPaaGrunnAv.formkrav
+                        ?.formkrav
+                        ?.vedtaketKlagenGjelder
+                        ?.behandlingId
+                        ?.let { UUID.fromString(it) }
+                        ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
 
-        val behandlingSomOmgjoeres =
-            behandlingDao.hentBehandling(behandlingSomOmgjoeresId)
-                ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
+                val behandlingSomOmgjoeres =
+                    behandlingDao.hentBehandling(behandlingSomOmgjoeresId)
+                        ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
 
-        val persongalleri =
-            krevIkkeNull(grunnlagService.hentPersongalleri(sakId)) { "Persongalleri mangler for sak=$sakId" }
+                val persongalleri =
+                    krevIkkeNull(grunnlagService.hentPersongalleri(sakId)) { "Persongalleri mangler for sak=$sakId" }
+                Triple(klagenViOmgjoerPaaGrunnAv, behandlingSomOmgjoeres, persongalleri)
+            }
 
         val etteroppgjoer = behandlingSomOmgjoeres.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER
 
@@ -86,36 +94,40 @@ class OmgjoeringKlageRevurderingService(
         val revurdering =
             if (kanOmgjoereEtteroppgjoer && etteroppgjoer) {
                 etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(
-                    behandlingId = behandlingSomOmgjoeresId,
+                    behandlingId = behandlingSomOmgjoeres.id,
                     klageId = klageId,
                     brukerTokenInfo = saksbehandler,
                 )
             } else {
-                revurderingService
-                    .opprettRevurdering(
-                        sakId = sakId,
-                        persongalleri = persongalleri,
-                        forrigeBehandling = behandlingSomOmgjoeres,
-                        mottattDato =
-                            klagenViOmgjoerPaaGrunnAv.innkommendeDokument
-                                ?.mottattDato
-                                ?.atStartOfDay()
-                                ?.toString(),
-                        prosessType = Prosesstype.MANUELL,
-                        kilde = Vedtaksloesning.GJENNY,
-                        revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                        virkningstidspunkt = behandlingSomOmgjoeres.virkningstidspunkt,
-                        begrunnelse = "Omgjøring på grunn av klage",
-                        saksbehandlerIdent = saksbehandler.ident,
-                        relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id,
-                        opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
-                    ).oppdater()
+                inTransaction {
+                    revurderingService
+                        .opprettRevurdering(
+                            sakId = sakId,
+                            persongalleri = persongalleri,
+                            forrigeBehandling = behandlingSomOmgjoeres,
+                            mottattDato =
+                                klagenViOmgjoerPaaGrunnAv.innkommendeDokument
+                                    ?.mottattDato
+                                    ?.atStartOfDay()
+                                    ?.toString(),
+                            prosessType = Prosesstype.MANUELL,
+                            kilde = Vedtaksloesning.GJENNY,
+                            revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+                            virkningstidspunkt = behandlingSomOmgjoeres.virkningstidspunkt,
+                            begrunnelse = "Omgjøring på grunn av klage",
+                            saksbehandlerIdent = saksbehandler.ident,
+                            relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id,
+                            opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
+                        ).oppdater()
+                }
             }.also {
-                oppgaveService.ferdigstillOppgaveUnderBehandling(
-                    referanse = klagenViOmgjoerPaaGrunnAv.id.toString(),
-                    type = OppgaveType.OMGJOERING,
-                    saksbehandler = saksbehandler,
-                )
+                inTransaction {
+                    oppgaveService.ferdigstillOppgaveUnderBehandling(
+                        referanse = klagenViOmgjoerPaaGrunnAv.id.toString(),
+                        type = OppgaveType.OMGJOERING,
+                        saksbehandler = saksbehandler,
+                    )
+                }
             }
 
         return revurdering

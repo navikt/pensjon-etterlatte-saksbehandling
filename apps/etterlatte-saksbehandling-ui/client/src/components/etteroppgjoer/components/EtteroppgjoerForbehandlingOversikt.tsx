@@ -104,8 +104,11 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
     beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
     forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
 
+  const relevantInformasjonFraBrukerErrors =
+    forbehandling.endringErTilUgunstForBruker === JaNei.JA ? informasjonFraBrukerErrors : undefined
+
   const validerOgNaviger = (naviger: () => void) => {
-    if (opphoerDoedsfallErrors || informasjonFraBrukerErrors || faktiskInntektErrors) {
+    if (opphoerDoedsfallErrors || relevantInformasjonFraBrukerErrors || faktiskInntektErrors) {
       return
     }
 

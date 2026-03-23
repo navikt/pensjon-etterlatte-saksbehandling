@@ -9,7 +9,6 @@ import {
   OpphoerSkyldesDoedsfallSkjema,
 } from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
 import {
-  BeregnetEtteroppgjoerResultatDto,
   EtteroppgjoerForbehandling,
   EtteroppgjoerResultatType,
   IInformasjonFraBruker,
@@ -95,10 +94,15 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
   const erRedigerbar = erRedigerbart(kontekst, forbehandling, innloggetSaksbehandler.skriveEnheter)
   const erRedigerbartFaktiskInntekt = kanRedigereFaktiskInntekt(erRedigerbar, kontekst, forbehandling)
   const forbehandlingSkalAvsluttes = erRevurdering && forbehandling.endringErTilUgunstForBruker === JaNei.JA
+  const visDoedsfallInfoForForbehandling = !erRevurdering && doedsfallIEtteroppgjoersaaret
 
   const visBeregnetResultat = erRevurdering
     ? forbehandling.endringErTilUgunstForBruker !== JaNei.JA
     : !!beregnetEtteroppgjoerResultat && !doedsfallIEtteroppgjoersaaret
+
+  const ferdigstillUtenBrev =
+    beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
+    forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
 
   const validerOgNaviger = (naviger: () => void) => {
     if (opphoerDoedsfallErrors || informasjonFraBrukerErrors || faktiskInntektErrors) {
@@ -119,6 +123,28 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
       setValideringFeilmelding('')
       naviger()
     }
+  }
+
+  function navigasjon() {
+    if (ferdigstillUtenBrev) {
+      return <FerdigstillEtteroppgjoerForbehandlingUtenBrev />
+    }
+    if (erRevurdering) {
+      return (
+        <RevurderingNavigasjon
+          behandling={kontekst.behandling}
+          forbehandling={forbehandling}
+          onNesteSteg={() => validerOgNaviger(next)}
+        />
+      )
+    }
+    return (
+      <ForbehandlingNavigasjon
+        onNesteSteg={() =>
+          validerOgNaviger(() => navigate(`/etteroppgjoer/${forbehandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`))
+        }
+      />
+    )
   }
 
   return (
@@ -157,10 +183,10 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
       )}
 
       {visBeregnetResultat && (
-        <>
+        <VStack gap="4">
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
-        </>
+        </VStack>
       )}
 
       <Box maxWidth="42.5rem">
@@ -172,28 +198,17 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         </VStack>
       </Box>
 
-      {!erRevurdering && doedsfallIEtteroppgjoersaaret && (
+      {visDoedsfallInfoForForbehandling && (
         <Alert size="small" variant="info">
           Siden bruker er død i etteroppgjørsåret, skal etteroppgjøret ferdigstilles uten brev og endringer.
         </Alert>
       )}
 
-      {erRevurdering ? (
-        <RevurderingNavigasjon
-          behandling={kontekst.behandling}
-          forbehandling={forbehandling}
-          onNesteSteg={() => validerOgNaviger(next)}
-        />
-      ) : (
-        <ForbehandlingNavigasjon
-          forbehandling={forbehandling}
-          beregnetEtteroppgjoerResultat={beregnetEtteroppgjoerResultat}
-          doedsfallIEtteroppgjoersaaret={doedsfallIEtteroppgjoersaaret}
-          onNesteSteg={() =>
-            validerOgNaviger(() => navigate(`/etteroppgjoer/${forbehandling.id}/${EtteroppjoerForbehandlingSteg.BREV}`))
-          }
-        />
-      )}
+      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+        <HStack width="100%" justify="center">
+          {navigasjon()}
+        </HStack>
+      </Box>
     </VStack>
   )
 }
@@ -246,54 +261,26 @@ function RevurderingNavigasjon({
   onNesteSteg: () => void
 }) {
   return (
-    <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
-      <HStack width="100%" justify="center">
-        <VStack gap="4" align="center">
-          {forbehandling.endringErTilUgunstForBruker === JaNei.JA ? (
-            <AvsluttEtteroppgjoerRevurderingModal
-              behandling={behandling}
-              beskrivelseAvUgunst={forbehandling.beskrivelseAvUgunst}
-            />
-          ) : (
-            <div>
-              <Button type="button" onClick={onNesteSteg}>
-                Neste side
-              </Button>
-            </div>
-          )}
-          <AvbrytBehandling />
-        </VStack>
-      </HStack>
-    </Box>
+    <VStack gap="4" align="center">
+      {forbehandling.endringErTilUgunstForBruker === JaNei.JA ? (
+        <AvsluttEtteroppgjoerRevurderingModal
+          behandling={behandling}
+          beskrivelseAvUgunst={forbehandling.beskrivelseAvUgunst}
+        />
+      ) : (
+        <Button type="button" variant="primary" onClick={onNesteSteg}>
+          Neste side
+        </Button>
+      )}
+      <AvbrytBehandling />
+    </VStack>
   )
 }
 
-function ForbehandlingNavigasjon({
-  forbehandling,
-  beregnetEtteroppgjoerResultat,
-  doedsfallIEtteroppgjoersaaret,
-  onNesteSteg,
-}: {
-  forbehandling: EtteroppgjoerForbehandling
-  beregnetEtteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto | undefined
-  doedsfallIEtteroppgjoersaaret: boolean
-  onNesteSteg: () => void
-}) {
-  const ferdigstillUtenBrev =
-    beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
-    forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
-
+function ForbehandlingNavigasjon({ onNesteSteg }: { onNesteSteg: () => void }) {
   return (
-    <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
-      <HStack width="100%" justify="center">
-        {ferdigstillUtenBrev ? (
-          <FerdigstillEtteroppgjoerForbehandlingUtenBrev />
-        ) : doedsfallIEtteroppgjoersaaret ? null : (
-          <Button type="button" onClick={onNesteSteg}>
-            Gå til brev
-          </Button>
-        )}
-      </HStack>
-    </Box>
+    <Button type="button" variant="primary" onClick={onNesteSteg}>
+      Gå til brev
+    </Button>
   )
 }

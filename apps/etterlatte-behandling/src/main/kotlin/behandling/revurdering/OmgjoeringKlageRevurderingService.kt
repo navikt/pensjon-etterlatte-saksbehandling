@@ -2,9 +2,10 @@ package no.nav.etterlatte.behandling.revurdering
 
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
+import no.nav.etterlatte.behandling.klage.KlageFeatureToggle
 import no.nav.etterlatte.behandling.klage.KlageService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
@@ -28,6 +29,7 @@ class OmgjoeringKlageRevurderingService(
     private val behandlingDao: BehandlingDao,
     private val grunnlagService: GrunnlagService,
     private val etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun opprettOmgjoeringKlage(
         sakId: SakId,
@@ -74,8 +76,15 @@ class OmgjoeringKlageRevurderingService(
 
         val etteroppgjoer = behandlingSomOmgjoeres.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER
 
+        // TODO: fjerne etter testing
+        val kanOmgjoereEtteroppgjoer =
+            featureToggleService.isEnabled(
+                KlageFeatureToggle.KanOmgjoereEtteroppgjoer,
+                false,
+            )
+
         val revurdering =
-            if (etteroppgjoer) {
+            if (kanOmgjoereEtteroppgjoer && etteroppgjoer) {
                 etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(
                     behandlingId = behandlingSomOmgjoeresId,
                     klageId = klageId,

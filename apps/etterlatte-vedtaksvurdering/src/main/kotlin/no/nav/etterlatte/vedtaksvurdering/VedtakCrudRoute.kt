@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
@@ -54,117 +55,155 @@ fun Route.vedtakCrudRoute(
 ) {
     route("/intern/vedtak-crud") {
         post("/opprett") {
-            val opprettVedtak = call.receive<OpprettVedtak>()
-            val vedtak = repository.opprettVedtak(opprettVedtak)
-            call.respond(vedtak)
+            kunSystembruker {
+                val opprettVedtak = call.receive<OpprettVedtak>()
+                val vedtak = repository.opprettVedtak(opprettVedtak)
+                call.respond(vedtak)
+            }
         }
 
         put("/oppdater") {
-            val vedtak = call.receive<Vedtak>()
-            val oppdatert = repository.oppdaterVedtak(vedtak)
-            call.respond(oppdatert)
+            kunSystembruker {
+                val vedtak = call.receive<Vedtak>()
+                val oppdatert = repository.oppdaterVedtak(vedtak)
+                call.respond(oppdatert)
+            }
         }
 
         get("/behandling/{behandlingId}") {
-            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-            val vedtak = repository.hentVedtak(behandlingId)
-            if (vedtak != null) {
-                call.respond(vedtak)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+            kunSystembruker {
+                val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+                val vedtak = repository.hentVedtak(behandlingId)
+                if (vedtak != null) {
+                    call.respond(vedtak)
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
 
         get("/{vedtakId}") {
-            val vedtakId = krevIkkeNull(call.parameters["vedtakId"]?.toLong()) { "vedtakId mangler" }
-            val vedtak = repository.hentVedtak(vedtakId)
-            if (vedtak != null) {
-                call.respond(vedtak)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+            kunSystembruker {
+                val vedtakId = krevIkkeNull(call.parameters["vedtakId"]?.toLong()) { "vedtakId mangler" }
+                val vedtak = repository.hentVedtak(vedtakId)
+                if (vedtak != null) {
+                    call.respond(vedtak)
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
 
         get("/sak/{sakId}") {
-            val sakId = SakId(krevIkkeNull(call.parameters["sakId"]?.toLong()) { "sakId mangler" })
-            val vedtak = repository.hentVedtakForSak(sakId)
-            call.respond(vedtak)
+            kunSystembruker {
+                val sakId = SakId(krevIkkeNull(call.parameters["sakId"]?.toLong()) { "sakId mangler" })
+                val vedtak = repository.hentVedtakForSak(sakId)
+                call.respond(vedtak)
+            }
         }
 
         post("/behandling/{behandlingId}/fatt") {
-            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-            val request = call.receive<FattVedtakCrudRequest>()
-            val vedtak = repository.fattVedtak(behandlingId = behandlingId, vedtakFattet = request.vedtakFattet)
-            call.respond(vedtak)
+            kunSystembruker {
+                val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+                val request = call.receive<FattVedtakCrudRequest>()
+                val vedtak = repository.fattVedtak(behandlingId = behandlingId, vedtakFattet = request.vedtakFattet)
+                call.respond(vedtak)
+            }
         }
 
         post("/behandling/{behandlingId}/attester") {
-            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-            val request = call.receive<AttesterVedtakCrudRequest>()
-            val vedtak = repository.attesterVedtak(behandlingId = behandlingId, attestasjon = request.attestasjon)
-            call.respond(vedtak)
+            kunSystembruker {
+                val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+                val request = call.receive<AttesterVedtakCrudRequest>()
+                val vedtak = repository.attesterVedtak(behandlingId = behandlingId, attestasjon = request.attestasjon)
+                call.respond(vedtak)
+            }
         }
 
         post("/behandling/{behandlingId}/underkjenn") {
-            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-            val vedtak = repository.underkjennVedtak(behandlingId)
-            call.respond(vedtak)
+            kunSystembruker {
+                val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+                val vedtak = repository.underkjennVedtak(behandlingId)
+                call.respond(vedtak)
+            }
         }
 
         post("/behandling/{behandlingId}/til-samordning") {
-            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-            val vedtak = repository.tilSamordningVedtak(behandlingId)
-            call.respond(vedtak)
+            kunSystembruker {
+                val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+                val vedtak = repository.tilSamordningVedtak(behandlingId)
+                call.respond(vedtak)
+            }
         }
 
         post("/behandling/{behandlingId}/samordnet") {
-            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-            val vedtak = repository.samordnetVedtak(behandlingId)
-            call.respond(vedtak)
+            kunSystembruker {
+                val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+                val vedtak = repository.samordnetVedtak(behandlingId)
+                call.respond(vedtak)
+            }
         }
 
         post("/behandling/{behandlingId}/iverksatt") {
-            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-            val vedtak = repository.iverksattVedtak(behandlingId)
-            call.respond(vedtak)
+            kunSystembruker {
+                val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+                val vedtak = repository.iverksattVedtak(behandlingId)
+                call.respond(vedtak)
+            }
         }
 
         patch("/behandling/{behandlingId}/tilbakestill") {
-            val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-            val vedtak = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
-            if (vedtak != null) {
-                call.respond(vedtak)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+            kunSystembruker {
+                val behandlingId = UUID.fromString(call.parameters["behandlingId"])
+                val vedtak = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
+                if (vedtak != null) {
+                    call.respond(vedtak)
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
 
         post("/ferdigstilte") {
-            val request = call.receive<HentFerdigstilteVedtakRequest>()
-            val fnr = Folkeregisteridentifikator.of(request.fnr)
-            val vedtak = repository.hentFerdigstilteVedtak(fnr = fnr, sakType = request.sakType)
-            call.respond(vedtak)
+            kunSystembruker {
+                val request = call.receive<HentFerdigstilteVedtakRequest>()
+                val fnr = Folkeregisteridentifikator.of(request.fnr)
+                val vedtak = repository.hentFerdigstilteVedtak(fnr = fnr, sakType = request.sakType)
+                call.respond(vedtak)
+            }
         }
 
         get("/sak-utbetaling/{inntektsaar}") {
-            val inntektsaar = krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) { "inntektsaar mangler" }
-            val sakType = call.parameters["sakType"]?.let { SakType.valueOf(it) }
-            val sakIder = repository.hentSakIdMedUtbetalingForInntektsaar(inntektsaar = inntektsaar, sakType = sakType)
-            call.respond(sakIder)
+            kunSystembruker {
+                val inntektsaar = krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) { "inntektsaar mangler" }
+                val sakType = call.parameters["sakType"]?.let { SakType.valueOf(it) }
+                val sakIder =
+                    repository.hentSakIdMedUtbetalingForInntektsaar(inntektsaar = inntektsaar, sakType = sakType)
+                call.respond(sakIder)
+            }
         }
 
         get("/sak/{sakId}/har-utbetaling/{inntektsaar}/{sakType}") {
-            val sakId = SakId(krevIkkeNull(call.parameters["sakId"]?.toLong()) { "sakId mangler" })
-            val inntektsaar = krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) { "inntektsaar mangler" }
-            val sakType = SakType.valueOf(krevIkkeNull(call.parameters["sakType"]) { "sakType mangler" })
-            val harUtbetaling = repository.harSakUtbetalingForInntektsaar(sakId = sakId, inntektsaar = inntektsaar, sakType = sakType)
-            call.respond(mapOf("harUtbetaling" to harUtbetaling))
+            kunSystembruker {
+                val sakId = SakId(krevIkkeNull(call.parameters["sakId"]?.toLong()) { "sakId mangler" })
+                val inntektsaar = krevIkkeNull(call.parameters["inntektsaar"]?.toInt()) { "inntektsaar mangler" }
+                val sakType = SakType.valueOf(krevIkkeNull(call.parameters["sakType"]) { "sakType mangler" })
+                val harUtbetaling =
+                    repository.harSakUtbetalingForInntektsaar(
+                        sakId = sakId,
+                        inntektsaar = inntektsaar,
+                        sakType = sakType,
+                    )
+                call.respond(mapOf("harUtbetaling" to harUtbetaling))
+            }
         }
 
         post("/avkortet-ytelse") {
-            val request = call.receive<HentAvkortetYtelsePerioderRequest>()
-            val perioder = repository.hentAvkortetYtelsePerioder(request.vedtakIds)
-            call.respond(perioder)
+            kunSystembruker {
+                val request = call.receive<HentAvkortetYtelsePerioderRequest>()
+                val perioder = repository.hentAvkortetYtelsePerioder(request.vedtakIds)
+                call.respond(perioder)
+            }
         }
 
         post("/samordning-manuell") {
@@ -183,15 +222,19 @@ fun Route.vedtakCrudRoute(
         }
 
         delete("/samordning-manuell/{samId}") {
-            val samId = krevIkkeNull(call.parameters["samId"]?.toLong()) { "samId mangler" }
-            repository.slettManuellBehandlingSamordningsmelding(samId)
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                val samId = krevIkkeNull(call.parameters["samId"]?.toLong()) { "samId mangler" }
+                repository.slettManuellBehandlingSamordningsmelding(samId)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/tilbakestill-tilbakekreving/{tilbakekrevingId}") {
-            val tilbakekrevingId = UUID.fromString(call.parameters["tilbakekrevingId"])
-            repository.tilbakestillTilbakekrevingsvedtak(tilbakekrevingId)
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                val tilbakekrevingId = UUID.fromString(call.parameters["tilbakekrevingId"])
+                repository.tilbakestillTilbakekrevingsvedtak(tilbakekrevingId)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

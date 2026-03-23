@@ -46,7 +46,7 @@ class Server(
                 etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService, behandlingKlient)
                 tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 klagevedtakRoute(vedtakKlageService, behandlingKlient)
-                vedtakCrudRoute(repository)
+                vedtakCrudRoute(repository, behandlingKlient)
             }
         }
 

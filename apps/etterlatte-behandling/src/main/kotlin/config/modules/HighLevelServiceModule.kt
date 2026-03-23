@@ -68,6 +68,8 @@ class HighLevelServiceModule(
             klageService = klageService,
             behandlingDao = daoModule.behandlingDao,
             grunnlagService = serviceModule.grunnlagService,
+            etteroppgjoerRevurderingService = serviceModule.etteroppgjoerRevurderingService,
+            featureToggleService = featureToggleService,
         )
     }
 

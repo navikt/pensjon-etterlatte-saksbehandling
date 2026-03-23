@@ -48,6 +48,7 @@ export interface EtteroppgjoerForbehandling {
   opphoerSkyldesDoedsfall?: JaNei
   opphoerSkyldesDoedsfallIEtteroppgjoersaar?: JaNei
   mottattSkatteoppgjoer: boolean
+  klageOmgjoering?: string
 }
 
 export interface DetaljertEtteroppgjoerForbehandling {

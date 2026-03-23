@@ -1,7 +1,7 @@
 import { IDetaljertBehandling, ITidligereFamiliepleier } from '~shared/types/IDetaljertBehandling'
 import { SoeknadVurdering } from '../SoeknadVurdering'
 import { useState } from 'react'
-import { BodyShort, Box, Button, List, ReadMore, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, List, ReadMore, VStack, Heading } from '@navikt/ds-react'
 import { TidligereFamiliepleierVurdering } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleierVurdering'
 
 const statusIkon = (tidligereFamiliepleier: ITidligereFamiliepleier | null) => {
@@ -38,22 +38,31 @@ export const TidligereFamiliepleier = ({
         </BodyShort>
 
         <ReadMore header="Les mer om hvilke vilkår som må oppfylles">
-          <List as="ul" title="For å ha rett til ytelsen må tidligere familiepleier">
-            <List.Item>være medlem i trygden og ha vært det i minst fem år</List.Item>
-            <List.Item>være ugift og ha vært ugift i minst fem år under pleieforholdet</List.Item>
-            <List.Item>
-              ha vært ute av stand til å forsørge seg selv med eget arbeid på grunn av pleieforholdet
-            </List.Item>
-            <List.Item>ikke hatt mulighet for å forsørge seg selv etter at pleieforholdet opphørte</List.Item>
-            <List.Item>ikke ha tilstrekkelige midler til livsopphold</List.Item>
-          </List>
-          <List as="ul" title="I tillegg er det et krav at">
-            <List.Item>pleieforholdet må ha vart i minst fem år</List.Item>
-            <List.Item>
-              den som er pleid må ha mottatt pensjon fra folketrygden eller vært medlem i trygden i minst fem år frem
-              til pleieforholdet opphørte
-            </List.Item>
-          </List>
+          <VStack gap="space-16">
+            <Heading as="h3" size="small">
+              For å ha rett til ytelsen må tidligere familiepleier
+            </Heading>
+            <List data-aksel-migrated-v8 as="ul">
+              <List.Item>være medlem i trygden og ha vært det i minst fem år</List.Item>
+              <List.Item>være ugift og ha vært ugift i minst fem år under pleieforholdet</List.Item>
+              <List.Item>
+                ha vært ute av stand til å forsørge seg selv med eget arbeid på grunn av pleieforholdet
+              </List.Item>
+              <List.Item>ikke hatt mulighet for å forsørge seg selv etter at pleieforholdet opphørte</List.Item>
+              <List.Item>ikke ha tilstrekkelige midler til livsopphold</List.Item>
+            </List>
+
+            <Heading as="h3" size="small">
+              I tillegg er det et krav at
+            </Heading>
+            <List as="ul">
+              <List.Item>pleieforholdet må ha vart i minst fem år</List.Item>
+              <List.Item>
+                den som er pleid må ha mottatt pensjon fra folketrygden eller vært medlem i trygden i minst fem år frem
+                til pleieforholdet opphørte
+              </List.Item>
+            </List>
+          </VStack>
         </ReadMore>
       </VStack>
       <Box

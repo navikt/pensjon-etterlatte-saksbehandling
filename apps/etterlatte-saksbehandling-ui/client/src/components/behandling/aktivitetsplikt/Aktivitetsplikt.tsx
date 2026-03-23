@@ -168,14 +168,16 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
           {behandling.behandlingType === IBehandlingsType.REVURDERING && (
             <BodyLong spacing>
               Kopier inn i vurderingen over det alternativet som gjelder:
-              <List>
-                <List.Item>Ja, har sendt oppgave om at bruker har omstillingsstønad og trenger oppfølging</List.Item>
-                <List.Item>
-                  Ja, har sendt oppgave om at bruker har omstillingsstønad, vi ser at hen er under oppfølging, og at de
-                  må informere oss hvis brukers situasjon endrer seg
-                </List.Item>
-                <List.Item>Nei, unødvendig å sende oppgave</List.Item>
-              </List>
+              <Box marginBlock="space-16" asChild>
+                <List>
+                  <List.Item>Ja, har sendt oppgave om at bruker har omstillingsstønad og trenger oppfølging</List.Item>
+                  <List.Item>
+                    Ja, har sendt oppgave om at bruker har omstillingsstønad, vi ser at hen er under oppfølging, og at
+                    de må informere oss hvis brukers situasjon endrer seg
+                  </List.Item>
+                  <List.Item>Nei, unødvendig å sende oppgave</List.Item>
+                </List>
+              </Box>
             </BodyLong>
           )}
           <div>

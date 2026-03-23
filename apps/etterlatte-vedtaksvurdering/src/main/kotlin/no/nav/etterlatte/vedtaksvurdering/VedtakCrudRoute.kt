@@ -16,7 +16,9 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.util.UUID
 
 data class FattVedtakCrudRequest(
@@ -38,6 +40,7 @@ data class HentAvkortetYtelsePerioderRequest(
 
 data class LagreManuellSamordningsmeldingCrudRequest(
     val oppdatering: OppdaterSamordningsmelding,
+    val sakId: SakId,
     val saksbehandlerIdent: String,
 )
 
@@ -45,7 +48,10 @@ data class HentSakIdMedUtbetalingRequest(
     val sakType: SakType? = null,
 )
 
-fun Route.vedtakCrudRoute(repository: VedtaksvurderingRepository) {
+fun Route.vedtakCrudRoute(
+    repository: VedtaksvurderingRepository,
+    behandlingKlient: BehandlingKlient,
+) {
     route("/intern/vedtak-crud") {
         post("/opprett") {
             val opprettVedtak = call.receive<OpprettVedtak>()
@@ -163,10 +169,16 @@ fun Route.vedtakCrudRoute(repository: VedtaksvurderingRepository) {
 
         post("/samordning-manuell") {
             val request = call.receive<LagreManuellSamordningsmeldingCrudRequest>()
-            repository.lagreManuellBehandlingSamordningsmelding(
-                oppdatering = request.oppdatering,
-                brukerTokenInfo = brukerTokenInfo,
-            )
+            withSakId(
+                sakId = request.sakId,
+                sakTilgangsSjekk = behandlingKlient,
+                skrivetilgang = true,
+            ) {
+                repository.lagreManuellBehandlingSamordningsmelding(
+                    oppdatering = request.oppdatering,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            }
             call.respond(HttpStatusCode.OK)
         }
 

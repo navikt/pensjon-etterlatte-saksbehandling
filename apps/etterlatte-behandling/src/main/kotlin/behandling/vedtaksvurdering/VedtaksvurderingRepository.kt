@@ -470,6 +470,7 @@ class VedtaksvurderingRepository(
 
     override fun lagreManuellBehandlingSamordningsmelding(
         oppdatering: OppdaterSamordningsmelding,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         connection.hentKotliquerySession { session ->

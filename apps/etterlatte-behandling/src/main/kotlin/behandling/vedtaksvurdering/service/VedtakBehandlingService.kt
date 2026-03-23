@@ -448,9 +448,10 @@ class VedtakBehandlingService(
 
     suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        vedtaksvurderingRepository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
+        vedtaksvurderingRepository.lagreManuellBehandlingSamordningsmelding(samordningmelding, sakId, brukerTokenInfo)
 
         try {
             samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)

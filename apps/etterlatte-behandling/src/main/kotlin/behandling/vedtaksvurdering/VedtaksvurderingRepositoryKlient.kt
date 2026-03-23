@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -229,16 +230,19 @@ class VedtaksvurderingRepositoryKlient(
 
     override fun lagreManuellBehandlingSamordningsmelding(
         oppdatering: OppdaterSamordningsmelding,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         runBlocking {
             try {
                 logger.info("Lagrer manuell samordningsmelding via klient")
+
                 post<Map<String, Any>>(
                     url = "$baseUrl/samordning-manuell",
                     body =
                         LagreManuellSamordningsmeldingCrudRequest(
                             oppdatering = oppdatering,
+                            sakId = sakId,
                             saksbehandlerIdent = brukerTokenInfo.ident(),
                         ),
                     brukerTokenInfoOverride = brukerTokenInfo,
@@ -362,10 +366,11 @@ data class HentAvkortetYtelsePerioderRequest(
 
 data class LagreManuellSamordningsmeldingCrudRequest(
     val oppdatering: OppdaterSamordningsmelding,
+    val sakId: SakId,
     val saksbehandlerIdent: String,
 )
 
 class VedtaksvurderingRepositoryKlientException(
     override val message: String,
     override val cause: Throwable,
-) : Exception(message, cause)
+) : InternfeilException(message, cause)

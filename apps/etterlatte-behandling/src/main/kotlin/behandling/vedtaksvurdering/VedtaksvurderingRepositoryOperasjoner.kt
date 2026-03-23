@@ -60,6 +60,7 @@ interface VedtaksvurderingRepositoryOperasjoner {
 
     fun lagreManuellBehandlingSamordningsmelding(
         oppdatering: OppdaterSamordningsmelding,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     )
 

@@ -14,16 +14,9 @@ import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.revurdering.OmgjoeringKlageRevurderingService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilbakekrevingService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.TilbakekrevingBrevService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
 
 class HighLevelServiceModule(
@@ -32,7 +25,6 @@ class HighLevelServiceModule(
     private val kafkaModule: KafkaModule,
     private val serviceModule: ServiceModule,
     private val featureToggleService: FeatureToggleService,
-    private val rapid: KafkaProdusent<String, String>,
 ) {
     val bosattUtlandService by lazy {
         BosattUtlandService(daoModule.bosattUtlandDao)
@@ -63,7 +55,7 @@ class HighLevelServiceModule(
             oppgaveService = serviceModule.oppgaveService,
             klageKlient = klientModule.klageKlient,
             klageHendelser = kafkaModule.klageHendelser,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
             featureToggleService = featureToggleService,
             klageBrevService = klageBrevService,
         )
@@ -98,7 +90,7 @@ class HighLevelServiceModule(
             sakService = serviceModule.sakService,
             brevKlient = klientModule.brevKlient,
             brevApiKlient = klientModule.brevApiKlient,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
             grunnlagService = serviceModule.grunnlagService,
             oppgaveService = serviceModule.oppgaveService,
         )
@@ -117,7 +109,7 @@ class HighLevelServiceModule(
     val etteroppgjoerRevurderingBrevService by lazy {
         EtteroppgjoerRevurderingBrevService(
             grunnlagService = serviceModule.grunnlagService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
             brevKlient = klientModule.brevKlient,
             behandlingService = serviceModule.behandlingService,
             etteroppgjoerForbehandlingService = serviceModule.etteroppgjoerForbehandlingService,
@@ -130,7 +122,7 @@ class HighLevelServiceModule(
     private val vedtaksbrevService by lazy {
         VedtaksbrevService(
             grunnlagService = serviceModule.grunnlagService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
             brevKlient = klientModule.brevKlient,
             behandlingService = serviceModule.behandlingService,
             beregningKlient = klientModule.beregningKlient,
@@ -148,7 +140,7 @@ class HighLevelServiceModule(
             behandlingMedBrevService = serviceModule.behandlingMedBrevService,
             behandlingService = serviceModule.behandlingService,
             brevApiKlient = klientModule.brevApiKlient,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
             tilbakekrevingBrevService = tilbakekrevingBrevService,
             etteroppgjoerForbehandlingBrevService = etteroppgjoerForbehandlingBrevService,
             etteroppgjoerRevurderingBrevService = etteroppgjoerRevurderingBrevService,
@@ -163,7 +155,7 @@ class HighLevelServiceModule(
             hendelseDao = daoModule.hendelseDao,
             behandlingService = serviceModule.behandlingService,
             oppgaveService = serviceModule.oppgaveService,
-            vedtakKlient = klientModule.vedtakKlient,
+            vedtakKlient = serviceModule.vedtakKlient,
             brevApiKlient = klientModule.brevApiKlient,
             brevService = brevService,
             tilbakekrevingKlient = klientModule.tilbakekrevingKlient,
@@ -221,41 +213,6 @@ class HighLevelServiceModule(
             brevApiKlient = klientModule.brevApiKlient,
             behandlingService = serviceModule.behandlingService,
             beregningKlient = klientModule.beregningKlient,
-        )
-    }
-
-    val vedtaksvurderingService by lazy {
-        VedtaksvurderingService(daoModule.vedtaksvurderingRepository)
-    }
-
-    val vedtaksvurderingRapidService by lazy {
-        VedtaksvurderingRapidService(
-            publiser = { key, melding -> rapid.publiser(key.toString(), verdi = melding) },
-        )
-    }
-
-    val vedtakKlageService by lazy {
-        VedtakKlageService(
-            vedtaksvurderingRepository = daoModule.vedtaksvurderingRepository,
-            vedtaksvurderingRapidService = vedtaksvurderingRapidService,
-        )
-    }
-
-    private val vedtakSamordningService by lazy {
-        VedtakSamordningService(daoModule.vedtaksvurderingRepository)
-    }
-
-    val vedtakEtteroppgjoerService by lazy {
-        VedtakEtteroppgjoerService(
-            repository = daoModule.vedtaksvurderingRepository,
-            vedtakSamordningService = vedtakSamordningService,
-        )
-    }
-
-    val vedtakTilbakekrevingService by lazy {
-        VedtakTilbakekrevingService(
-            repository = daoModule.vedtaksvurderingRepository,
-            featureToggleService = featureToggleService,
         )
     }
 }

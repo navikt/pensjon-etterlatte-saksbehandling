@@ -67,6 +67,11 @@ data class AvkortingDto(
     val avkortetYtelse: List<AvkortetYtelseDto>,
 )
 
+data class MaanederMedGammelSanksjonIAvkorting(
+    val harGammelBeregningMedSanksjon: Boolean,
+    val maanederMedGammelBeregning: List<YearMonth>,
+)
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class AvkortingGrunnlagDto {
     abstract val id: UUID

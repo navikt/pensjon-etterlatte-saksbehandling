@@ -83,6 +83,16 @@ kan det ikke sendes passord ved opprettelse av database-kobling.
 
 **OBS:** Ved bruk av proxy til lokal kjøring må du passe på å ikke endre på Flyway-scripts i prosjektet.
 
+
+#### Kopiere database fra dev-gcp til lokal database
+
+Vi har et skript `clone-dev-db.sh` som lar deg klone en database i dev-gcp til din lokale postgresnholdet i lokal database med innhold fra dev-gcp.
+Du trenger psql først, og en mulighet er `brew install postgresql`. 
+For å klone behandling-databasen (hvor 5439 er porten hvor lokal DB for behandling kan nås):
+```
+sh clone-dev-db.sh -d sakogbehandlinger -p 5439 -u trond.valen@nav.no
+```
+
 ### Tilgang for saksbehandler i dev
 
 For tilgang til Gjenny i dev må saksbehandler være medlem av følgende AD-grupper:

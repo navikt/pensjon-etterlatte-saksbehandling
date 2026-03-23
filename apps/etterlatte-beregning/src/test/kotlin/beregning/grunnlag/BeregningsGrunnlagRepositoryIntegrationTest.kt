@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -67,6 +68,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
             )
         val beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag()
         val kunEnJuridiskForelder = GrunnlagMedPeriode(TomVerdi, LocalDate.of(2022, 8, 1), null)
+        val vedtaksperioder =
+            listOf(
+                Vedtaksperiode(YearMonth.of(2022, 8), YearMonth.of(2022, 10)),
+                Vedtaksperiode(YearMonth.of(2022, 11), null),
+            )
 
         repository.lagreBeregningsGrunnlag(
             BeregningsGrunnlag(
@@ -86,6 +92,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                 ),
                 soeskenMedIBeregning,
                 kunEnJuridiskForelder,
+                vedtaksperioder,
             ),
         )
 
@@ -97,6 +104,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
         assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals(beregningsMetode, result?.beregningsMetode)
         assertEquals(kunEnJuridiskForelder, result?.kunEnJuridiskForelder)
+        assertEquals(vedtaksperioder, result?.vedtaksperioder)
     }
 
     @Test
@@ -122,6 +130,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                 ),
                 institusjonsoppholdBeregningsgrunnlag,
                 beregningsMetode,
+                vedtaksperioder = null,
             ),
         )
 
@@ -131,6 +140,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
 
         assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals(beregningsMetode, result?.beregningsMetode)
+        assertEquals(null, result?.vedtaksperioder)
     }
 
     @Test
@@ -293,7 +303,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                     GrunnlagMedPeriode(
                         fom = LocalDate.of(2022, 8, 1),
                         tom = null,
-                        data = BeregningsmetodeForAvdoed(AVDOED_FOEDSELSNUMMER.value, BeregningsMetode.BEST.toGrunnlag()),
+                        data =
+                            BeregningsmetodeForAvdoed(
+                                AVDOED_FOEDSELSNUMMER.value,
+                                BeregningsMetode.BEST.toGrunnlag(),
+                            ),
                     ),
                 ),
                 oppdatertSoeskenMedIBeregning,

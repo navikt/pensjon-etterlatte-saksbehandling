@@ -69,6 +69,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
+import no.nav.etterlatte.libs.common.beregning.MaanederMedGammelSanksjonIAvkorting
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
@@ -236,6 +237,12 @@ class BeregningKlientTest :
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AvkortingDto? = null
+
+    override suspend fun harAvkortingMedSanksjonGamleRegler(
+        behandlingId: UUID,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): MaanederMedGammelSanksjonIAvkorting = MaanederMedGammelSanksjonIAvkorting(false, emptyList())
 }
 
 class TrygdetidKlientTest : TrygdetidKlient {

@@ -141,6 +141,24 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
+    fun oppdaterSisteInntekter(
+        forbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info(
+            "Oppdaterer siste inntekter for forbehandling=$forbehandlingId",
+        )
+
+        val forbehandling = hentForbehandling(forbehandlingId)
+        hentOgLagreAInntektOgPgi(forbehandling.sak, forbehandling)
+        hendelserService.registrerOgSendHendelse(
+            etteroppgjoerForbehandling = forbehandling,
+            hendelseType = EtteroppgjoerForbehandlingHendelser.OPPDATERT_INNTEKT,
+            saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
+            utlandstilknytning = hentUtlandstilknytning(forbehandling),
+        )
+    }
+
     fun avbrytForbehandling(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

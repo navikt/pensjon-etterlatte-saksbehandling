@@ -311,6 +311,16 @@ fun Route.etteroppgjoerRoutes(
                         }
                     call.respond(brukerSisteInntekter)
                 }
+
+                post("oppdater-siste-inntekter") {
+                    kunSkrivetilgang {
+                        inTransaction {
+                            forbehandlingService.oppdaterSisteInntekter(forbehandlingId, brukerTokenInfo)
+                        }
+
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
             }
 
             post("bulk") {

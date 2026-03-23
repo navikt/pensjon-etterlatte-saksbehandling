@@ -1,6 +1,7 @@
 package no.nav.etterlatte.config.modules
 
 import no.nav.etterlatte.EnvKey.BRUK_NY_VEDTAK_KLIENT
+import no.nav.etterlatte.EnvKey.BRUK_VEDTAK_REPOSITORY_KLIENT
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BrukerService
@@ -26,6 +27,7 @@ import no.nav.etterlatte.behandling.revurdering.ManuellRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningService
@@ -392,8 +394,19 @@ class ServiceModule(
         )
     }
 
+    val vedtaksvurderingRepositoryOperasjoner: VedtaksvurderingRepositoryOperasjoner by lazy {
+        // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
+        val brukVedtakRepositoryKlient: Boolean = env[BRUK_VEDTAK_REPOSITORY_KLIENT] == "ja"
+
+        if (brukVedtakRepositoryKlient) {
+            klientModule.vedtaksvurderingRepositoryKlient()
+        } else {
+            daoModule.vedtaksvurderingRepository
+        }
+    }
+
     val vedtaksvurderingService by lazy {
-        VedtaksvurderingService(daoModule.vedtaksvurderingRepository)
+        VedtaksvurderingService(vedtaksvurderingRepositoryOperasjoner)
     }
 
     val vedtaksvurderingRapidService by lazy {
@@ -404,25 +417,25 @@ class ServiceModule(
 
     val vedtakKlageService by lazy {
         VedtakKlageService(
-            vedtaksvurderingRepository = daoModule.vedtaksvurderingRepository,
+            vedtaksvurderingRepository = vedtaksvurderingRepositoryOperasjoner,
             vedtaksvurderingRapidService = vedtaksvurderingRapidService,
         )
     }
 
     val vedtakTilbakekrevingService by lazy {
         VedtakTilbakekrevingService(
-            repository = daoModule.vedtaksvurderingRepository,
+            repository = vedtaksvurderingRepositoryOperasjoner,
             featureToggleService = featureToggleService,
         )
     }
 
     private val vedtakSamordningService by lazy {
-        VedtakSamordningService(daoModule.vedtaksvurderingRepository)
+        VedtakSamordningService(vedtaksvurderingRepositoryOperasjoner)
     }
 
     val vedtakEtteroppgjoerService by lazy {
         VedtakEtteroppgjoerService(
-            repository = daoModule.vedtaksvurderingRepository,
+            repository = vedtaksvurderingRepositoryOperasjoner,
             vedtakSamordningService = vedtakSamordningService,
         )
     }
@@ -451,10 +464,8 @@ class ServiceModule(
 
     val vedtakKlient: VedtakKlient by lazy {
         vedtakKlientOverride ?: run {
-            val brukNyVedtakKlientInternal: Boolean =
-                env[BRUK_NY_VEDTAK_KLIENT]?.toBoolean() ?: throw InternfeilException(
-                    "Fant ikke miljøvariabel: $BRUK_NY_VEDTAK_KLIENT",
-                )
+            // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
+            val brukNyVedtakKlientInternal: Boolean = env[BRUK_NY_VEDTAK_KLIENT] == "ja"
 
             if (brukNyVedtakKlientInternal) {
                 VedtakInternalService(

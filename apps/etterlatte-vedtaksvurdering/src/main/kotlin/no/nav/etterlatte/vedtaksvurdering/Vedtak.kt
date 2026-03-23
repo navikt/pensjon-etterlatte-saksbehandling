@@ -1,5 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -58,7 +60,7 @@ data class Vedtak(
             iverksettelsesTidspunkt = iverksettelsesTidspunkt,
             innhold =
                 when (innhold) {
-                    is VedtakInnhold.Behandling ->
+                    is VedtakInnhold.Behandling -> {
                         VedtakInnholdDto.VedtakBehandlingDto(
                             virkningstidspunkt = innhold.virkningstidspunkt,
                             behandling =
@@ -70,11 +72,13 @@ data class Vedtak(
                             utbetalingsperioder = innhold.utbetalingsperioder,
                             opphoerFraOgMed = innhold.opphoerFraOgMed,
                         )
+                    }
 
-                    is VedtakInnhold.Tilbakekreving ->
+                    is VedtakInnhold.Tilbakekreving -> {
                         VedtakInnholdDto.VedtakTilbakekrevingDto(
                             tilbakekreving = innhold.tilbakekreving,
                         )
+                    }
 
                     is VedtakInnhold.Klage -> {
                         VedtakInnholdDto.Klage(
@@ -87,6 +91,12 @@ data class Vedtak(
     fun underArbeid(): Boolean = status in listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT)
 }
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "innholdType")
+@JsonSubTypes(
+    JsonSubTypes.Type(VedtakInnhold.Behandling::class, name = "BEHANDLING"),
+    JsonSubTypes.Type(VedtakInnhold.Tilbakekreving::class, name = "TILBAKEKREVING"),
+    JsonSubTypes.Type(VedtakInnhold.Klage::class, name = "KLAGE"),
+)
 sealed interface VedtakInnhold {
     data class Behandling(
         val behandlingType: BehandlingType,

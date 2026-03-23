@@ -75,7 +75,7 @@ class HighLevelServiceModule(
 
     val vedtakBehandlingService by lazy {
         VedtakBehandlingService(
-            vedtaksvurderingRepository = daoModule.vedtaksvurderingRepository,
+            vedtaksvurderingRepository = serviceModule.vedtaksvurderingRepositoryOperasjoner,
             beregningKlient = klientModule.beregningKlient,
             vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
             behandlingStatusService = serviceModule.behandlingsStatusService,

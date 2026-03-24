@@ -321,7 +321,8 @@ class StatistikkService(
                     EtteroppgjoerForbehandlingHendelser.AVBRUTT -> "AVBRUTT"
                     else -> etteroppgjoerRad.resultatType?.name ?: sisteResultat?.name
                 },
-            resultatBegrunnelse = null,
+            resultatBegrunnelse =
+                if (statistikkDto.forbehandling.klageOmgjoering != null) "OMGJOERING_ETTER_KLAGE" else null,
             behandlingMetode = BehandlingMetode.MANUELL, // hvis vi setter på automatisering her må vi skille her
             soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = "GJENNY",

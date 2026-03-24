@@ -31,6 +31,7 @@ data class EtteroppgjoerForbehandlingDto(
     val beskrivelseAvUgunst: String?,
     // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     val kopiertFra: UUID? = null,
+    val klageOmgjoering: UUID? = null,
 )
 
 enum class EtteroppgjoerHendelser : EventnameHendelseType {

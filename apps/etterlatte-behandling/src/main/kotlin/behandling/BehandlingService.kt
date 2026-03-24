@@ -299,6 +299,8 @@ interface BehandlingService {
 
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
 
+    fun erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId: UUID): Boolean
+
     fun settBeregnet(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -771,7 +773,11 @@ class BehandlingServiceImpl(
             }
             when (behandling!!.type) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+                    if (erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId)) {
+                        behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
+                    } else {
+                        throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+                    }
                 }
 
                 BehandlingType.REVURDERING -> {
@@ -1073,6 +1079,22 @@ class BehandlingServiceImpl(
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
 
     override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
+
+    override fun erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId: UUID): Boolean {
+        val behandling = hentBehandlingForId(behandlingId) ?: return false
+
+        if (behandling !is Foerstegangsbehandling) {
+            return false
+        }
+
+        val alleBehandlingerISak = behandlingDao.hentBehandlingerForSak(behandling.sak.id)
+        val avslaatteFoerstegangsbehandlinger =
+            alleBehandlingerISak
+                .filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING && it.status == BehandlingStatus.AVSLAG }
+                .filter { it.id != behandlingId }
+
+        return avslaatteFoerstegangsbehandlinger.isNotEmpty()
+    }
 
     override fun settBeregnet(
         behandlingId: UUID,

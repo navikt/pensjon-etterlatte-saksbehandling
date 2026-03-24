@@ -7,7 +7,7 @@ import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
 import { oppdaterStatus } from '~shared/api/trygdetid'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -18,11 +18,14 @@ import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
+import { fattVedtak } from '~shared/api/vedtaksvurdering'
 
 const TrygdetidVisning = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const [visAttesteringsmodalOpen, setVisAttesteringsmodalOpen] = useState(false)
 
   const redigerbar = erBehandlingRedigerbar(
     behandling.status,
@@ -43,9 +46,15 @@ const TrygdetidVisning = (props: { behandling: IBehandlingReducer }) => {
     )
   }
 
+  const skalSendeBrev = behandling.sendeBrev
+
   const sjekkGyldighetOgOppdaterStatus = () => {
     if (vedtaksresultat === 'avslag') {
-      next()
+      if (skalSendeBrev) {
+        next()
+      } else {
+        setVisAttesteringsmodalOpen(true)
+      }
     } else {
       oppdaterStatusRequest(behandling.id, (result) => {
         if (result.statusOppdatert) {
@@ -80,13 +89,21 @@ const TrygdetidVisning = (props: { behandling: IBehandlingReducer }) => {
 
         {redigerbar ? (
           <BehandlingHandlingKnapper>
-            <Button
-              variant="primary"
-              loading={isPending(oppdaterStatusResult)}
-              onClick={sjekkGyldighetOgOppdaterStatus}
-            >
-              {handlinger.NESTE.navn}
-            </Button>
+            {visAttesteringsmodalOpen ? (
+              <SendTilAttesteringModal
+                behandlingId={behandling.id}
+                fattVedtakApi={fattVedtak}
+                validerKanSendeTilAttestering={() => true}
+              />
+            ) : (
+              <Button
+                variant="primary"
+                loading={isPending(oppdaterStatusResult)}
+                onClick={sjekkGyldighetOgOppdaterStatus}
+              >
+                {skalSendeBrev ? handlinger.NESTE.navn : handlinger.FATT_VEDTAK.navn}
+              </Button>
+            )}
           </BehandlingHandlingKnapper>
         ) : (
           <NesteOgTilbake />

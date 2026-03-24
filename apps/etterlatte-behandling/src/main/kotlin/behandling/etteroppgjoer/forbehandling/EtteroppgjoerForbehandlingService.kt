@@ -609,6 +609,7 @@ class EtteroppgjoerForbehandlingService(
     fun kopierOgLagreNyForbehandling(
         forbehandlingId: UUID,
         sakId: SakId,
+        klageId: UUID?,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
@@ -627,6 +628,7 @@ class EtteroppgjoerForbehandlingService(
                 sisteIverksatteBehandlingId = sisteIverksatteBehandling.behandlingId,
                 brevId = null,
                 varselbrevSendt = null,
+                klageOmgjoering = klageId,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

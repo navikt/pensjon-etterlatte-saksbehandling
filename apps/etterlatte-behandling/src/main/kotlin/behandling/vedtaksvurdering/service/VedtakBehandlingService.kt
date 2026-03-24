@@ -16,7 +16,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakData
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakOgBeregningSammenligner
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.behandling.vedtaksvurdering.erVedtakMedEtterbetaling
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
@@ -65,7 +65,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 class VedtakBehandlingService(
-    private val vedtaksvurderingRepository: VedtaksvurderingRepository,
+    private val vedtaksvurderingRepository: VedtaksvurderingRepositoryOperasjoner,
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val behandlingStatusService: BehandlingStatusService,
@@ -160,6 +160,8 @@ class VedtakBehandlingService(
                 ).also { fattetVedtak ->
                     val behandling =
                         behandlingService.hentBehandling(behandlingId) ?: throw GenerellIkkeFunnetException()
+                    val opphoerFraOgMed = (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed
+
                     behandlingStatusService.settFattetVedtak(
                         behandling = behandling,
                         vedtak =
@@ -176,10 +178,19 @@ class VedtakBehandlingService(
                                         saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
                                     ),
                                 vedtakType = fattetVedtak.type,
-                                opphoerFraOgMed = (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed,
+                                opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         brukerTokenInfo = brukerTokenInfo,
                     )
+                    if (vedtak.type == VedtakType.OPPHOER) {
+                        behandlingService.lagreOpphoerFom(
+                            behandling.id,
+                            opphoerFraOgMed ?: throw UgyldigForespoerselException(
+                                code = "MANGLER_OPPHOER_FOM",
+                                detail = "Vedtak for ${behandling.id} mangler opphør fra og med dato",
+                            ),
+                        )
+                    }
                 }
 
         beregningOgAvkorting?.let {
@@ -437,9 +448,10 @@ class VedtakBehandlingService(
 
     suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        vedtaksvurderingRepository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
+        vedtaksvurderingRepository.lagreManuellBehandlingSamordningsmelding(samordningmelding, sakId, brukerTokenInfo)
 
         try {
             samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)

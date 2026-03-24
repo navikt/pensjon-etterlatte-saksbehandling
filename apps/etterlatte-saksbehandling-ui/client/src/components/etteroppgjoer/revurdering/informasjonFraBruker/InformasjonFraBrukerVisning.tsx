@@ -1,6 +1,6 @@
-import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
-import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
-import { JaNei } from '~shared/types/ISvar'
+import {useEtteroppgjoerForbehandling} from '~store/reducers/EtteroppgjoerReducer'
+import {BodyShort, Heading, Label, VStack} from '@navikt/ds-react'
+import {JaNei} from '~shared/types/ISvar'
 
 export const InformasjonFraBrukerVisning = () => {
   const { forbehandling } = useEtteroppgjoerForbehandling()

@@ -87,10 +87,10 @@ internal fun Route.revurderingRoutes(
                         logger.info("Oppretter revurdering på sakId=$sakId for etteroppgjøret ${it.inntektsaar}")
                         val revurdering =
                             etteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering(
-                                sakId,
-                                it.inntektsaar,
-                                it.opprinnelse,
-                                saksbehandler,
+                                sakId = sakId,
+                                inntektsaar = it.inntektsaar,
+                                opprinnelse = it.opprinnelse,
+                                brukerTokenInfo = saksbehandler,
                             )
 
                         call.respond(revurdering.id)
@@ -119,13 +119,11 @@ internal fun Route.revurderingRoutes(
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     medBody<OpprettOmgjoeringKlageRequest> {
                         val revurdering =
-                            inTransaction {
-                                omgjoeringKlageRevurderingService.opprettOmgjoeringKlage(
-                                    sakId,
-                                    it.oppgaveIdOmgjoering,
-                                    saksbehandler,
-                                )
-                            }
+                            omgjoeringKlageRevurderingService.opprettOmgjoeringKlage(
+                                sakId,
+                                it.oppgaveIdOmgjoering,
+                                saksbehandler,
+                            )
                         call.respond(revurdering)
                     }
                 }

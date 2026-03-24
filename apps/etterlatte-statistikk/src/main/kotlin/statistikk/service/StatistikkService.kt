@@ -322,7 +322,7 @@ class StatistikkService(
                     else -> etteroppgjoerRad.resultatType?.name ?: sisteResultat?.name
                 },
             resultatBegrunnelse =
-                if (statistikkDto.forbehandling.klageOmgjoering != null) "OMGJOERING_ETTER_KLAGE" else null,
+                if (statistikkDto.forbehandling.klageOmgjoering != null) Revurderingaarsak.OMGJOERING_ETTER_KLAGE.name else null,
             behandlingMetode = BehandlingMetode.MANUELL, // hvis vi setter på automatisering her må vi skille her
             soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = "GJENNY",
@@ -738,7 +738,7 @@ class StatistikkService(
                 etteroppgjoerService
                     .hentNyesteRad(behandling.relatertBehandlingIdNonNull())
                     ?.klageOmgjoering
-                    ?.let { "OMGJOERING_ETTER_KLAGE" }
+                    ?.let { Revurderingaarsak.OMGJOERING_ETTER_KLAGE.name }
             }
 
             else -> {

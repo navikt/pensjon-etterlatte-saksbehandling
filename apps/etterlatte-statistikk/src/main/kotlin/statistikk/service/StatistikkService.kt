@@ -416,7 +416,7 @@ class StatistikkService(
             type = vedtakInnhold.behandling.type.name,
             status = hendelse.name,
             resultat = utledBehandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling)?.name,
-            resultatBegrunnelse = null,
+            resultatBegrunnelse = utledBehandlingResultatBegrunnelse(statistikkBehandling),
             behandlingMetode =
                 hentBehandlingMetode(
                     vedtak.attestasjon,
@@ -731,6 +731,20 @@ class StatistikkService(
         }
         return fellesRad
     }
+
+    internal fun utledBehandlingResultatBegrunnelse(behandling: StatistikkBehandling): String? =
+        when (behandling.revurderingsaarsak) {
+            Revurderingaarsak.ETTEROPPGJOER -> {
+                etteroppgjoerService
+                    .hentNyesteRad(behandling.relatertBehandlingIdNonNull())
+                    ?.klageOmgjoering
+                    ?.let { "OMGJOERING_ETTER_KLAGE" }
+            }
+
+            else -> {
+                null
+            }
+        }
 
     internal fun utledBehandlingResultatFraVedtak(
         vedtak: VedtakDto,

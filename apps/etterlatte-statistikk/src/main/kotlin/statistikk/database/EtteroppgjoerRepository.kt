@@ -42,7 +42,7 @@ class EtteroppgjoerRepository(
                     INSERT INTO etteroppgjoer_statistikk (forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                     opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
                     rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type,
-                    summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering)
+                    summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering, klage_omgjoering)
                     values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 )
@@ -65,6 +65,7 @@ class EtteroppgjoerRepository(
             statement.setJsonb(17, rad.summerteInntekter)
             statement.setJsonb(18, rad.pensjonsgivendeInntekt)
             statement.setNullableBoolean(19, rad.tilknyttetRevurdering)
+            statement.setNullableBoolean(20, rad.klageOmgjoering)
             statement.executeUpdate()
         }
     }
@@ -149,6 +150,7 @@ private fun ResultSet.tilEtteroppgjoerRad(): EtteroppgjoerRad =
         summerteInntekter = getString("summerte_inntekter")?.let { objectMapper.readValue(it) },
         pensjonsgivendeInntekt = getString("pensjonsgivende_inntekter")?.let { objectMapper.readValue(it) },
         tilknyttetRevurdering = getBoolean("tilknyttet_revurdering").takeUnless { wasNull() },
+        klageOmgjoering = getBoolean("klage_omgjoering").takeUnless { wasNull() },
     )
 
 data class EtteroppgjoerRad(
@@ -173,6 +175,7 @@ data class EtteroppgjoerRad(
     val etterbetalingGrense: Double?,
     val resultatType: EtteroppgjoerResultatType?,
     val tilknyttetRevurdering: Boolean?,
+    val klageOmgjoering: Boolean?,
 ) {
     companion object {
         fun fraHendelseOgDto(
@@ -202,6 +205,7 @@ data class EtteroppgjoerRad(
                 summerteInntekter = statistikkDto.summerteInntekter,
                 pensjonsgivendeInntekt = statistikkDto.pensjonsgivendeInntekt,
                 tilknyttetRevurdering = statistikkDto.tilknyttetRevurdering,
+                klageOmgjoering = statistikkDto.forbehandling.klageOmgjoering?.let { true },
             )
     }
 }

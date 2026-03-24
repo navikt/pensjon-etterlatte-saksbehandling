@@ -44,6 +44,7 @@ internal class VedtakhendelserRiverTest {
             fnrSoesken = emptyList(),
             anvendtTrygdetid = "",
             nettoYtelse = "",
+            ytelseFoerAvkorting = null,
             beregningType = "",
             anvendtSats = "",
             behandlingId = UUID.randomUUID(),

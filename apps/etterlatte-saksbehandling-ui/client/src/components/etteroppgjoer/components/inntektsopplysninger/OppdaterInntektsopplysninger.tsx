@@ -10,7 +10,6 @@ import { isPending, mapResult } from '~shared/api/apiUtils'
 import { Alert, Button, VStack } from '@navikt/ds-react'
 import { useDispatch } from 'react-redux'
 import { addDetaljertEtteroppgjoerForbehandling, resetEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
-import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
@@ -68,7 +67,6 @@ export const OppdaterInntektsopplysninger = ({ forbehandling, erRedigerbar }: Pr
                   </div>
 
                   {mapResult(oppdaterInntekterResult, {
-                    pending: <Spinner label="Henter inntektsopplysningene på nytt..." />,
                     error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
                   })}
                 </VStack>

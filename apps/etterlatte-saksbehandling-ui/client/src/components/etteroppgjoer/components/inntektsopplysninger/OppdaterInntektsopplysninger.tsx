@@ -1,13 +1,18 @@
 import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { erInntektsopplysningerOppdaterte, oppdaterInntektsopplysninger } from '~shared/api/etteroppgjoer'
+import {
+  erInntektsopplysningerOppdaterte,
+  hentEtteroppgjoerForbehandling,
+  oppdaterInntektsopplysninger,
+} from '~shared/api/etteroppgjoer'
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { Alert, Button } from '@navikt/ds-react'
+import { Alert, Button, VStack } from '@navikt/ds-react'
 import { useDispatch } from 'react-redux'
-import { resetEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
+import { addDetaljertEtteroppgjoerForbehandling, resetEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 interface Props {
   erRedigerbar: boolean
@@ -19,52 +24,57 @@ export const OppdaterInntektsopplysninger = ({ forbehandling, erRedigerbar }: Pr
     erInntektsopplysningerOppdaterte
   )
   const [oppdaterInntekterResult, oppdaterInntekterFetch] = useApiCall(oppdaterInntektsopplysninger)
+  const hentEtteroppgjoerForbehandlingRequest = useApiCall(hentEtteroppgjoerForbehandling)[1]
   const dispatch = useDispatch()
+  const visOppdaterInntekt = useFeaturetoggle(FeatureToggle.oppdater_inntekt_forbehandling)
 
   useEffect(() => {
     erInntekterOppdaterteReset()
-    if (forbehandling.mottattSkatteoppgjoer && erRedigerbar) {
-      // TODO: stemmer sjekk mottattSkatteoppgjoer her?
+    if (forbehandling.mottattSkatteoppgjoer && erRedigerbar && visOppdaterInntekt) {
+      // TODO: stemmer det av vi bør sjekke mot mottattSkatteoppgjoer her?
       erInntekterOppdaterteFetch({ forbehandlingId: forbehandling.id })
     }
-  }, [])
+  }, [visOppdaterInntekt])
 
-  console.log(erInntekterOppdaterteResult)
+  function oppdaterForbehandling() {
+    dispatch(resetEtteroppgjoer())
+    hentEtteroppgjoerForbehandlingRequest(forbehandling.id, (etteroppgjoerForbehandling) => {
+      dispatch(addDetaljertEtteroppgjoerForbehandling(etteroppgjoerForbehandling))
+    })
+  }
 
   function hentInntekterPaaNytt() {
     oppdaterInntekterFetch({ forbehandlingId: forbehandling.id }, () => {
-      dispatch(resetEtteroppgjoer())
+      oppdaterForbehandling()
     })
   }
 
   return (
     <>
-      {mapResult(erInntekterOppdaterteResult, {
-        success: (erOppdatert) => (
-          <>
-            {erOppdatert === false && (
-              <>
-                <Alert variant="warning">
-                  Inntektsopplysningene fra Skatt eller A-inntekt er utdaterte.{' '}
-                  <Button onClick={hentInntekterPaaNytt} loading={isPending(oppdaterInntekterResult)}>
-                    Hent inntektene på nytt
-                  </Button>
-                </Alert>
+      {visOppdaterInntekt &&
+        mapResult(erInntekterOppdaterteResult, {
+          success: (erOppdatert) => (
+            <>
+              {erOppdatert === false && (
+                <VStack gap="space-8">
+                  <Alert variant="warning" inline>
+                    Inntektsopplysningene er utdaterte.
+                  </Alert>
+                  <div>
+                    <Button onClick={hentInntekterPaaNytt} loading={isPending(oppdaterInntekterResult)}>
+                      Hent inntektene på nytt
+                    </Button>
+                  </div>
 
-                {mapResult(oppdaterInntekterResult, {
-                  pending: <Spinner label="Henter inntekter på nytt..." />,
-                  error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-                  success: () => (
-                    <Alert variant="success" inline>
-                      Oppdaterte inntekter
-                    </Alert>
-                  ),
-                })}
-              </>
-            )}
-          </>
-        ),
-      })}
+                  {mapResult(oppdaterInntekterResult, {
+                    pending: <Spinner label="Henter inntekter på nytt..." />,
+                    error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                  })}
+                </VStack>
+              )}
+            </>
+          ),
+        })}
     </>
   )
 }

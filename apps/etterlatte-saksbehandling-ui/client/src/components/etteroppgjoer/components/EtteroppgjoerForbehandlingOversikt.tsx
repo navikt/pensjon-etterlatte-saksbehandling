@@ -30,7 +30,6 @@ import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import Spinner from '~shared/Spinner'
 import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
-import { OppdaterInntektsopplysninger } from './inntektsopplysninger/OppdaterInntektsopplysninger'
 
 export enum EtteroppgjoerKontekstType {
   FORBEHANDLING = 'FORBEHANDLING',
@@ -158,8 +157,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         <Alert variant="info">Dette etteroppgjøret er opprettet som en del av en klageomgjøring</Alert>
       )}
 
-      <Inntektsopplysninger forbehandling={forbehandling} />
-      <OppdaterInntektsopplysninger forbehandling={forbehandling} erRedigerbar={erRedigerbar} />
+      <Inntektsopplysninger forbehandling={forbehandling} erRedigerbar={erRedigerbar} />
 
       {erRevurdering && (
         <RevurderingSpesifikkeSeksjoner

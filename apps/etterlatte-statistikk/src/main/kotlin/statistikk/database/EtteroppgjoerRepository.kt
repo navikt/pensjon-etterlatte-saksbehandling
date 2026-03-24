@@ -43,7 +43,7 @@ class EtteroppgjoerRepository(
                     opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
                     rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type,
                     summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering, klage_omgjoering)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 )
             statement.setObject(1, rad.forbehandlingId)

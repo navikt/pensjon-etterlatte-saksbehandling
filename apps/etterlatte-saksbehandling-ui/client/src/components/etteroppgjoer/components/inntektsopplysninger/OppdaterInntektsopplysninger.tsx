@@ -27,11 +27,11 @@ export const OppdaterInntektsopplysninger = ({ forbehandling, erRedigerbar }: Pr
   const hentEtteroppgjoerForbehandlingRequest = useApiCall(hentEtteroppgjoerForbehandling)[1]
   const dispatch = useDispatch()
   const visOppdaterInntekt = useFeaturetoggle(FeatureToggle.oppdater_inntekt_forbehandling)
+  const kanOppdatereInntekter = forbehandling.mottattSkatteoppgjoer && erRedigerbar
 
   useEffect(() => {
     erInntekterOppdaterteReset()
-    if (forbehandling.mottattSkatteoppgjoer && erRedigerbar && visOppdaterInntekt) {
-      // TODO: stemmer det av vi bør sjekke mot mottattSkatteoppgjoer her?
+    if (visOppdaterInntekt && kanOppdatereInntekter) {
       erInntekterOppdaterteFetch({ forbehandlingId: forbehandling.id })
     }
   }, [visOppdaterInntekt])
@@ -52,6 +52,7 @@ export const OppdaterInntektsopplysninger = ({ forbehandling, erRedigerbar }: Pr
   return (
     <>
       {visOppdaterInntekt &&
+        kanOppdatereInntekter &&
         mapResult(erInntekterOppdaterteResult, {
           success: (erOppdatert) => (
             <>
@@ -62,12 +63,12 @@ export const OppdaterInntektsopplysninger = ({ forbehandling, erRedigerbar }: Pr
                   </Alert>
                   <div>
                     <Button onClick={hentInntekterPaaNytt} loading={isPending(oppdaterInntekterResult)}>
-                      Hent inntektene på nytt
+                      Hent inntektsopplysningene på nytt
                     </Button>
                   </div>
 
                   {mapResult(oppdaterInntekterResult, {
-                    pending: <Spinner label="Henter inntekter på nytt..." />,
+                    pending: <Spinner label="Henter inntektsopplysningene på nytt..." />,
                     error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
                   })}
                 </VStack>

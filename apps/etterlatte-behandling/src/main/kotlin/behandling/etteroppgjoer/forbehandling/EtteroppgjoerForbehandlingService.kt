@@ -129,16 +129,15 @@ class EtteroppgjoerForbehandlingService(
 
     fun forbehandlingBrukerSisteInntekter(id: UUID): Boolean {
         val forbehandling = hentForbehandling(id)
-        try {
+
+        return runCatching {
             sjekkAtViBrukerSisteInntekter(forbehandling)
-            return true
-        } catch (e: Exception) {
+        }.onFailure { e ->
             logger.info(
                 "Forbehandling=${forbehandling.id} har ikke oppdatert til de siste inntektene",
                 e,
             )
-            return false
-        }
+        }.isSuccess
     }
 
     fun oppdaterSisteInntekter(

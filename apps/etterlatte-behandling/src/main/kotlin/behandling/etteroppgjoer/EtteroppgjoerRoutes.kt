@@ -304,7 +304,7 @@ fun Route.etteroppgjoerRoutes(
                     }
                 }
 
-                get("bruker-siste-inntekter") {
+                get("er-siste-inntekter-oppdaterte") {
                     val brukerSisteInntekter =
                         inTransaction {
                             forbehandlingService.forbehandlingBrukerSisteInntekter(forbehandlingId)

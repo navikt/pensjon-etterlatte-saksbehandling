@@ -30,6 +30,7 @@ import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import Spinner from '~shared/Spinner'
 import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
+import { OppdaterInntektsopplysninger } from './inntektsopplysninger/OppdaterInntektsopplysninger'
 
 export enum EtteroppgjoerKontekstType {
   FORBEHANDLING = 'FORBEHANDLING',
@@ -158,6 +159,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
       )}
 
       <Inntektsopplysninger forbehandling={forbehandling} />
+      <OppdaterInntektsopplysninger forbehandling={forbehandling} erRedigerbar={erRedigerbar} />
 
       {erRevurdering && (
         <RevurderingSpesifikkeSeksjoner

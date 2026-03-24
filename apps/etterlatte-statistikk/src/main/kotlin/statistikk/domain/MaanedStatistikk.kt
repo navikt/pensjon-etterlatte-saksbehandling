@@ -98,10 +98,6 @@ class MaanedStatistikk(
                 if (erOpphoer) {
                     return@mapNotNull null
                 }
-                val nettoYtelse =
-                    aktuellBeregning?.utbetaltBeloep
-                        ?: sisteVedtak.nettoYtelse?.toInt()
-                        ?: 0
 
                 val avkortingData =
                     sisteVedtak.avkorting?.let { avkorting ->
@@ -115,7 +111,17 @@ class MaanedStatistikk(
                             aarsinntekt,
                             aktuellAvkorting?.sanksjonertYtelse?.sanksjonType,
                             aktuellAvkorting?.ytelseFoerAvkorting,
+                            aktuellAvkorting?.ytelseEtterAvkorting,
                         )
+                    }
+
+                val nettoYtelse =
+                    if (sisteVedtak.sakYtelse == SakType.OMSTILLINGSSTOENAD.name && avkortingData?.ytelseEtterAvkorting != null) {
+                        avkortingData.ytelseEtterAvkorting
+                    } else {
+                        aktuellBeregning?.utbetaltBeloep
+                            ?: sisteVedtak.nettoYtelse?.toInt()
+                            ?: 0
                     }
 
                 val aktivitetForMaaned =
@@ -155,7 +161,7 @@ class MaanedStatistikk(
                         fnrSoesken = aktuellBeregning?.soeskenFlokk ?: sisteVedtak.fnrSoesken,
                         anvendtTrygdetid = aktuellBeregning?.trygdetid?.toString() ?: sisteVedtak.anvendtTrygdetid,
                         nettoYtelse = nettoYtelse.toString(),
-                        ytelseFoerAvkorting = avkortingData?.ytelseFoerAvkorting.toString(),
+                        ytelseFoerAvkorting = avkortingData?.ytelseFoerAvkorting?.toString(),
                         avkortingsbeloep = avkortingData?.avkortingsbeloep.toString(),
                         aarsinntekt = avkortingData?.aarsinntekt.toString(),
                         beregningType = sisteVedtak.beregningType,
@@ -229,4 +235,5 @@ data class AvkortingData(
     val aarsinntekt: Int?,
     val sanksjon: SanksjonType?,
     val ytelseFoerAvkorting: Int?,
+    val ytelseEtterAvkorting: Int?,
 )

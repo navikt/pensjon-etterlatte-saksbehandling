@@ -169,6 +169,7 @@ class EtteroppgjoerRevurderingBrevService(
                         rettsgebyrBeloep = Kroner(beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                         harOpphoer = detaljertForbehandling.forbehandling.harVedtakAvTypeOpphoer ?: etteroppgjoer.harOpphoer,
                         mottattSkatteoppgjoer = detaljertForbehandling.forbehandling.mottattSkatteoppgjoer,
+                        klageOmgjoering = detaljertForbehandling.forbehandling.klageOmgjoering != null,
                     ),
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(

@@ -41,7 +41,7 @@ class StoenadRepository(
                 .prepareStatement(
                     """
                     SELECT id, fnrSoeker, fnrForeldre, 
-                        fnrSoesken, anvendtTrygdetid, nettoYtelse, ytelseFoerAvkorting, beregningType, anvendtSats, 
+                        fnrSoesken, anvendtTrygdetid, nettoYtelse, ytelse_foer_avkorting, beregningType, anvendtSats, 
                         behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                         vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, 
                         virkningstidspunkt, utbetalingsdato, kilde, pesysid, sakYtelsesgruppe, opphoerFom, vedtaksperioder
@@ -77,7 +77,7 @@ class StoenadRepository(
                 .prepareStatement(
                     """
                     INSERT INTO maaned_stoenad(
-                        fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, ytelseFoerAvkorting,
+                        fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, ytelse_foer_avkorting,
                         beregningType, anvendtSats, 
                         behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                         vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
@@ -137,7 +137,7 @@ class StoenadRepository(
                     .prepareStatement(
                         """
                         INSERT INTO stoenad(
-                            fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, ytelseFoerAvkorting,
+                            fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, ytelse_foer_avkorting,
                             beregningType, anvendtSats, 
                             behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                             vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland,
@@ -290,7 +290,7 @@ private fun ResultSet.asStoenadRad(): StoenadRad =
         fnrSoesken = objectMapper.readValue(getString("fnrSoesken"), Array<String>::class.java).toList(),
         anvendtTrygdetid = getString("anvendtTrygdetid"),
         nettoYtelse = getString("nettoYtelse"),
-        ytelseFoerAvkorting = getString("ytelseFoerAvkorting"),
+        ytelseFoerAvkorting = getString("ytelse_foer_avkorting"),
         beregningType = getString("beregningType"),
         anvendtSats = getString("anvendtSats"),
         behandlingId = getObject("behandlingId") as UUID,

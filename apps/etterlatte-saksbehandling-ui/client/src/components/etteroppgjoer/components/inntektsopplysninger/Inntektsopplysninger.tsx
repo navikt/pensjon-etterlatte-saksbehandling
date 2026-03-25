@@ -6,8 +6,14 @@ import { OpplysningerFraAInntektSummert } from '~components/etteroppgjoer/compon
 import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { formaterDato } from '~utils/formatering/dato'
 import React from 'react'
+import { OppdaterInntektsopplysninger } from './OppdaterInntektsopplysninger'
 
-export const Inntektsopplysninger = ({ forbehandling }: { forbehandling: EtteroppgjoerForbehandling }) => {
+interface Props {
+  forbehandling: EtteroppgjoerForbehandling
+  erRedigerbar: boolean
+}
+
+export const Inntektsopplysninger = ({ forbehandling, erRedigerbar }: Props) => {
   const { opplysninger } = useEtteroppgjoerForbehandling()
 
   const mottattSkatteOppgjoer = forbehandling.mottattSkatteoppgjoer
@@ -39,6 +45,8 @@ export const Inntektsopplysninger = ({ forbehandling }: { forbehandling: Etterop
           <Heading size="large" level="2">
             Inntektsopplysninger
           </Heading>
+
+          <OppdaterInntektsopplysninger forbehandling={forbehandling} erRedigerbar={erRedigerbar} />
 
           {opplysninger.summertPgi && (
             <OpplysningerFraSkatteetaten inntektFraSkatteetatenSummert={opplysninger.summertPgi} />

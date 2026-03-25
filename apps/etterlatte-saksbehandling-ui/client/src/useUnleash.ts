@@ -22,6 +22,7 @@ export const enum FeatureToggle {
   overstyr_netto_brutto_tilbakekreving = 'overstyr-netto-brutto-tilbakekreving',
   avslutte_omgjoeringsoppgave = 'avslutte-omgjoeringsoppgave',
   beregning_bruk_nye_beregningsregler = 'beregning_bruk_nye_beregningsregler',
+  oppdater_inntekt_forbehandling = 'oppdater-inntekt-forbehandling',
 }
 
 export interface Toggle {
@@ -92,6 +93,11 @@ const omgjoer_tilbakekreving: Toggle = {
   enabled: false,
 }
 
+const oppdater_inntekt_forbehandling: Toggle = {
+  togglename: FeatureToggle.oppdater_inntekt_forbehandling,
+  enabled: false,
+}
+
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,
@@ -107,6 +113,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.overstyr_netto_brutto_tilbakekreving]: overstyr_netto_brutto_tilbakekreving,
   [FeatureToggle.avslutte_omgjoeringsoppgave]: avslutte_omgjoeringsoppgave,
   [FeatureToggle.beregning_bruk_nye_beregningsregler]: beregning_bruk_nye_beregningsregler,
+  [FeatureToggle.oppdater_inntekt_forbehandling]: oppdater_inntekt_forbehandling,
 }
 
 export const Unleashcontext = createContext<{

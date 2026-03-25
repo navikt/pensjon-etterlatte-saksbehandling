@@ -14,7 +14,7 @@ val WAY_INTO_THE_FUTURE: YearMonth = YearMonth.of(2999, Month.DECEMBER)
 val OMS_START_YTELSE: YearMonth = YearMonth.of(2024, Month.JANUARY)
 
 internal fun Vedtak.erVedtakMedEtterbetaling(
-    vedtaksvurderingRepository: VedtaksvurderingRepository,
+    vedtaksvurderingRepository: VedtaksvurderingRepositoryOperasjoner,
     grunnbeloep: Grunnbeloep,
     clock: Clock = norskKlokke(),
 ): EtterbetalingResultat {

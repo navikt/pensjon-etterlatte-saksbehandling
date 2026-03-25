@@ -68,12 +68,14 @@ class HighLevelServiceModule(
             klageService = klageService,
             behandlingDao = daoModule.behandlingDao,
             grunnlagService = serviceModule.grunnlagService,
+            etteroppgjoerRevurderingService = serviceModule.etteroppgjoerRevurderingService,
+            featureToggleService = featureToggleService,
         )
     }
 
     val vedtakBehandlingService by lazy {
         VedtakBehandlingService(
-            vedtaksvurderingRepository = daoModule.vedtaksvurderingRepository,
+            vedtaksvurderingRepository = serviceModule.vedtaksvurderingRepositoryOperasjoner,
             beregningKlient = klientModule.beregningKlient,
             vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
             behandlingStatusService = serviceModule.behandlingsStatusService,
@@ -92,6 +94,7 @@ class HighLevelServiceModule(
             brevApiKlient = klientModule.brevApiKlient,
             vedtakKlient = serviceModule.vedtakKlient,
             grunnlagService = serviceModule.grunnlagService,
+            oppgaveService = serviceModule.oppgaveService,
         )
     }
 

@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevDao
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
@@ -96,7 +97,7 @@ class DaoModule(
     val doedshendelseDao by lazy { DoedshendelseDao(autoClosingDatabase) }
     val omregningDao by lazy { OmregningDao(autoClosingDatabase) }
 
-    val vedtaksvurderingRepository by lazy { VedtaksvurderingRepository(autoClosingDatabase) }
+    val vedtaksvurderingRepository: VedtaksvurderingRepositoryOperasjoner by lazy { VedtaksvurderingRepository(autoClosingDatabase) }
 
     val vilkaarsvurderingDao by lazy { VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao()) }
     val ukjentBeroertDao by lazy { UkjentBeroertDao(autoClosingDatabase) }

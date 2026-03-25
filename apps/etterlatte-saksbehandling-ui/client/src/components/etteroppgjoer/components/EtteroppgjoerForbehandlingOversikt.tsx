@@ -104,8 +104,11 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
     beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
     forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
 
+  const relevantInformasjonFraBrukerErrors =
+    forbehandling.endringErTilUgunstForBruker === JaNei.JA ? informasjonFraBrukerErrors : undefined
+
   const validerOgNaviger = (naviger: () => void) => {
-    if (opphoerDoedsfallErrors || informasjonFraBrukerErrors || faktiskInntektErrors) {
+    if (opphoerDoedsfallErrors || relevantInformasjonFraBrukerErrors || faktiskInntektErrors) {
       return
     }
 
@@ -152,6 +155,10 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
       <Heading size="xlarge" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
+
+      {forbehandling.klageOmgjoering && (
+        <Alert variant="info">Dette etteroppgjøret er opprettet som en del av en klageomgjøring</Alert>
+      )}
 
       <Inntektsopplysninger forbehandling={forbehandling} />
 

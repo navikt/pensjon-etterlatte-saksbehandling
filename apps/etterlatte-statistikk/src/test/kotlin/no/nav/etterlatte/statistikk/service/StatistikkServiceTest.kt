@@ -478,6 +478,7 @@ class StatistikkServiceTest {
                 tilbakekrevingGrense = 0.1,
                 etterbetalingGrense = 2.3,
                 tilknyttetRevurdering = false,
+                klageOmgjoering = null,
             )
         return etteroppgjoerRad
     }

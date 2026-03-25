@@ -58,6 +58,7 @@ class EtteroppgjoerRepositoryTest(
                         naeringsinntekt = 1,
                     ),
                 tilknyttetRevurdering = true,
+                klageOmgjoering = null,
             )
         val repo = EtteroppgjoerRepository(dataSource)
         repo.lagreEtteroppgjoerRad(rad)
@@ -89,6 +90,7 @@ class EtteroppgjoerRepositoryTest(
                 etterbetalingGrense = null,
                 resultatType = null,
                 tilknyttetRevurdering = null,
+                klageOmgjoering = null,
             )
         val repo = EtteroppgjoerRepository(dataSource)
         repo.lagreEtteroppgjoerRad(rad)

@@ -31,6 +31,7 @@ data class EtteroppgjoerForbehandlingDto(
     val beskrivelseAvUgunst: String?,
     // hvis vi oppretter en kopi av forbehandling for å bruke i en revurdering
     val kopiertFra: UUID? = null,
+    val klageOmgjoering: UUID? = null,
 )
 
 enum class EtteroppgjoerHendelser : EventnameHendelseType {
@@ -53,6 +54,7 @@ enum class EtteroppgjoerForbehandlingHendelser(
     BEREGNET(false),
     FERDIGSTILT(true),
     AVBRUTT(true),
+    OPPDATERT_INNTEKT(false),
     ;
 
     override fun lagEventnameForType(): String = "ETTEROPPGJOER_FORBEHANDLING:${this.name}"

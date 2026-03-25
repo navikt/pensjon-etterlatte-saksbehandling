@@ -321,7 +321,8 @@ class StatistikkService(
                     EtteroppgjoerForbehandlingHendelser.AVBRUTT -> "AVBRUTT"
                     else -> etteroppgjoerRad.resultatType?.name ?: sisteResultat?.name
                 },
-            resultatBegrunnelse = null,
+            resultatBegrunnelse =
+                if (statistikkDto.forbehandling.klageOmgjoering != null) Revurderingaarsak.OMGJOERING_ETTER_KLAGE.name else null,
             behandlingMetode = BehandlingMetode.MANUELL, // hvis vi setter på automatisering her må vi skille her
             soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = "GJENNY",
@@ -415,7 +416,7 @@ class StatistikkService(
             type = vedtakInnhold.behandling.type.name,
             status = hendelse.name,
             resultat = utledBehandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling)?.name,
-            resultatBegrunnelse = null,
+            resultatBegrunnelse = utledBehandlingResultatBegrunnelse(statistikkBehandling),
             behandlingMetode =
                 hentBehandlingMetode(
                     vedtak.attestasjon,
@@ -736,6 +737,20 @@ class StatistikkService(
         }
         return fellesRad
     }
+
+    internal fun utledBehandlingResultatBegrunnelse(behandling: StatistikkBehandling): String? =
+        when (behandling.revurderingsaarsak) {
+            Revurderingaarsak.ETTEROPPGJOER -> {
+                etteroppgjoerService
+                    .hentNyesteRad(behandling.relatertBehandlingIdNonNull())
+                    ?.klageOmgjoering
+                    ?.let { Revurderingaarsak.OMGJOERING_ETTER_KLAGE.name }
+            }
+
+            else -> {
+                null
+            }
+        }
 
     internal fun utledBehandlingResultatFraVedtak(
         vedtak: VedtakDto,

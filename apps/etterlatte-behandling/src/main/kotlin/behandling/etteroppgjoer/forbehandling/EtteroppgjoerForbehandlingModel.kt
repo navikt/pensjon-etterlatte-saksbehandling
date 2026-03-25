@@ -156,6 +156,7 @@ data class EtteroppgjoerForbehandling(
             endringErTilUgunstForBruker = endringErTilUgunstForBruker,
             beskrivelseAvUgunst = beskrivelseAvUgunst,
             varselbrevSendt = varselbrevSendt,
+            klageOmgjoering = klageOmgjoering,
         )
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)

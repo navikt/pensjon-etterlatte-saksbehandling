@@ -62,7 +62,8 @@ export const OppdaterInntektsopplysninger = ({ forbehandling, erRedigerbar }: Pr
               {erOppdatert === false && (
                 <VStack gap="space-8">
                   <Alert variant="warning" inline>
-                    Inntektsopplysningene er utdaterte.
+                    Det er nye opplysninger om inntekt fra Skatteetaten og a-ordningen. Hent inn nye
+                    inntektsopplysninger og vurder saken på nytt.
                   </Alert>
                   {erRedigerbar && (
                     <div>

@@ -1,4 +1,4 @@
-import { EtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
+import { EtteroppgjoerForbehandling, EtteroppgjoerForbehandlingStatus } from '~shared/types/EtteroppgjoerForbehandling'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -25,15 +25,20 @@ export const OppdaterInntektsopplysninger = ({ forbehandling, erRedigerbar }: Pr
   const [oppdaterInntekterResult, oppdaterInntekterFetch] = useApiCall(oppdaterInntektsopplysninger)
   const hentEtteroppgjoerForbehandlingRequest = useApiCall(hentEtteroppgjoerForbehandling)[1]
   const dispatch = useDispatch()
-  const visOppdaterInntekt = useFeaturetoggle(FeatureToggle.oppdater_inntekt_forbehandling)
-  const kanOppdatereInntekter = forbehandling.mottattSkatteoppgjoer && erRedigerbar
+
+  const visOppdatertInntektToggle = useFeaturetoggle(FeatureToggle.oppdater_inntekt_forbehandling)
+  const erBehandlingenFerdig = [
+    EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
+    EtteroppgjoerForbehandlingStatus.AVBRUTT,
+  ].includes(forbehandling.status)
+  const visOppdaterInntekt = visOppdatertInntektToggle && forbehandling.mottattSkatteoppgjoer && !erBehandlingenFerdig
 
   useEffect(() => {
-    erInntekterOppdaterteReset()
-    if (visOppdaterInntekt && kanOppdatereInntekter) {
+    if (visOppdaterInntekt) {
+      erInntekterOppdaterteReset()
       erInntekterOppdaterteFetch({ forbehandlingId: forbehandling.id })
     }
-  }, [visOppdaterInntekt])
+  }, [visOppdatertInntektToggle])
 
   function oppdaterForbehandling() {
     dispatch(resetEtteroppgjoer())
@@ -51,7 +56,6 @@ export const OppdaterInntektsopplysninger = ({ forbehandling, erRedigerbar }: Pr
   return (
     <>
       {visOppdaterInntekt &&
-        kanOppdatereInntekter &&
         mapResult(erInntekterOppdaterteResult, {
           success: (erOppdatert) => (
             <>
@@ -60,11 +64,13 @@ export const OppdaterInntektsopplysninger = ({ forbehandling, erRedigerbar }: Pr
                   <Alert variant="warning" inline>
                     Inntektsopplysningene er utdaterte.
                   </Alert>
-                  <div>
-                    <Button onClick={hentInntekterPaaNytt} loading={isPending(oppdaterInntekterResult)}>
-                      Hent inntektsopplysningene på nytt
-                    </Button>
-                  </div>
+                  {erRedigerbar && (
+                    <div>
+                      <Button onClick={hentInntekterPaaNytt} loading={isPending(oppdaterInntekterResult)}>
+                        Hent inntektsopplysningene på nytt
+                      </Button>
+                    </div>
+                  )}
 
                   {mapResult(oppdaterInntekterResult, {
                     error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,

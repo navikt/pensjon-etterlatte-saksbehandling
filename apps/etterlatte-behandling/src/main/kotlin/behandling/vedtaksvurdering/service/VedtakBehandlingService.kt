@@ -8,18 +8,15 @@ import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevur
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.BeregningOgAvkorting
-import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.behandling.vedtaksvurdering.OppdaterSamordningsmelding
 import no.nav.etterlatte.behandling.vedtaksvurdering.OpprettVedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.SamordningsvedtakWrapper
-import no.nav.etterlatte.behandling.vedtaksvurdering.UgyldigAttestantException
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakData
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakOgBeregningSammenligner
-import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtakstidslinje
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.behandling.vedtaksvurdering.erVedtakMedEtterbetaling
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
@@ -64,12 +61,11 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
 class VedtakBehandlingService(
-    private val vedtaksvurderingRepository: VedtaksvurderingRepository,
+    private val vedtaksvurderingRepository: VedtaksvurderingRepositoryOperasjoner,
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val behandlingStatusService: BehandlingStatusService,
@@ -81,19 +77,7 @@ class VedtakBehandlingService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun sjekkOmVedtakErLoependePaaDato(
-        sakId: SakId,
-        dato: LocalDate,
-    ): LoependeYtelse {
-        logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
-        val alleVedtakForSak =
-            vedtaksvurderingRepository
-                .hentVedtakForSak(sakId)
-                .filter { it.vedtakFattet != null && it.attestasjon != null }
-        return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
-    }
-
-    suspend fun opprettEllerOppdaterVedtak(
+    fun opprettEllerOppdaterVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Vedtak {
@@ -102,9 +86,11 @@ class VedtakBehandlingService(
         if (vedtak != null) {
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider, etteroppgjoerResultat) =
-            hentDataForVedtak(behandlingId, brukerTokenInfo)
 
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider, etteroppgjoerResultat) =
+            runBlocking {
+                hentDataForVedtak(behandlingId, brukerTokenInfo)
+            }
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
@@ -162,18 +148,20 @@ class VedtakBehandlingService(
         )
 
         val fattetVedtak =
-            vedtaksvurderingRepository.inTransaction { tx ->
-                fattVedtak(
-                    behandlingId,
-                    VedtakFattet(
-                        saksbehandler,
-                        sak.enhet,
-                        Tidspunkt.now(),
-                    ),
-                    tx,
+            vedtaksvurderingRepository
+                .fattVedtak(
+                    behandlingId = behandlingId,
+                    vedtakFattet =
+                        VedtakFattet(
+                            ansvarligSaksbehandler = saksbehandler,
+                            ansvarligEnhet = sak.enhet,
+                            tidspunkt = Tidspunkt.now(),
+                        ),
                 ).also { fattetVedtak ->
                     val behandling =
                         behandlingService.hentBehandling(behandlingId) ?: throw GenerellIkkeFunnetException()
+                    val opphoerFraOgMed = (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed
+
                     behandlingStatusService.settFattetVedtak(
                         behandling = behandling,
                         vedtak =
@@ -190,12 +178,20 @@ class VedtakBehandlingService(
                                         saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
                                     ),
                                 vedtakType = fattetVedtak.type,
-                                opphoerFraOgMed = (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed,
+                                opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         brukerTokenInfo = brukerTokenInfo,
                     )
+                    if (vedtak.type == VedtakType.OPPHOER) {
+                        behandlingService.lagreOpphoerFom(
+                            behandling.id,
+                            opphoerFraOgMed ?: throw UgyldigForespoerselException(
+                                code = "MANGLER_OPPHOER_FOM",
+                                detail = "Vedtak for ${behandling.id} mangler opphør fra og med dato",
+                            ),
+                        )
+                    }
                 }
-            }
 
         beregningOgAvkorting?.let {
             VedtakOgBeregningSammenligner.sammenlign(it, fattetVedtak)
@@ -223,46 +219,41 @@ class VedtakBehandlingService(
 
         behandlingStatusService.sjekkOmKanAttestere(behandlingId)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
-        attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
+        sjekkAttestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
-        val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (detaljertBehandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
 
         val attestertVedtak =
-            vedtaksvurderingRepository.inTransaction { tx ->
-                val attestertVedtak =
-                    vedtaksvurderingRepository.attesterVedtak(
-                        behandlingId,
-                        Attestasjon(
-                            attestant,
-                            sak.enhet,
-                            Tidspunkt.now(),
-                        ),
-                        tx,
-                    )
-                val behandling = behandlingService.hentBehandling(behandlingId) ?: throw GenerellIkkeFunnetException()
-                behandlingStatusService.settAttestertVedtak(
-                    brukerTokenInfo = brukerTokenInfo,
-                    vedtak =
-                        VedtakEndringDTO(
-                            sakIdOgReferanse =
-                                SakIdOgReferanse(
-                                    sakId = attestertVedtak.sakId,
-                                    referanse = attestertVedtak.behandlingId.toString(),
-                                ),
-                            vedtakHendelse =
-                                VedtakHendelse(
-                                    vedtakId = attestertVedtak.id,
-                                    inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
-                                    saksbehandler = attestertVedtak.attestasjon.attestant,
-                                    kommentar = kommentar,
-                                ),
-                            vedtakType = attestertVedtak.type,
-                        ),
-                    behandling = behandling,
-                )
+            vedtaksvurderingRepository.attesterVedtak(
+                behandlingId,
+                Attestasjon(
+                    attestant,
+                    sak.enhet,
+                    Tidspunkt.now(),
+                ),
+            )
 
-                attestertVedtak
-            }
+        val behandling = behandlingService.hentBehandling(behandlingId) ?: throw GenerellIkkeFunnetException()
+        behandlingStatusService.settAttestertVedtak(
+            brukerTokenInfo = brukerTokenInfo,
+            vedtak =
+                VedtakEndringDTO(
+                    sakIdOgReferanse =
+                        SakIdOgReferanse(
+                            sakId = attestertVedtak.sakId,
+                            referanse = attestertVedtak.behandlingId.toString(),
+                        ),
+                    vedtakHendelse =
+                        VedtakHendelse(
+                            vedtakId = attestertVedtak.id,
+                            inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
+                            saksbehandler = attestertVedtak.attestasjon.attestant,
+                            kommentar = kommentar,
+                        ),
+                    vedtakType = attestertVedtak.type,
+                ),
+            behandling = behandling,
+        )
 
         return VedtakOgRapid(
             attestertVedtak.toDto(),
@@ -273,9 +264,9 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
                 extraParams =
                     mapOf(
-                        SKAL_SENDE_BREV to behandling.sendeBrev,
-                        KILDE_KEY to behandling.vedtaksloesning,
-                        REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
+                        SKAL_SENDE_BREV to detaljertBehandling.sendeBrev,
+                        KILDE_KEY to detaljertBehandling.vedtaksloesning,
+                        REVURDERING_AARSAK to detaljertBehandling.revurderingsaarsak.toString(),
                     ),
             ),
         )
@@ -293,30 +284,25 @@ class VedtakBehandlingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
 
         val underkjentTid = Tidspunkt.now()
-        val underkjentVedtak =
-            vedtaksvurderingRepository.inTransaction { tx ->
-                val underkjentVedtak = vedtaksvurderingRepository.underkjennVedtak(behandlingId, tx)
-                val behandling = behandlingService.hentBehandling(behandlingId) ?: throw GenerellIkkeFunnetException()
-                behandlingStatusService.settReturnertVedtak(
-                    behandling = behandling,
-                    vedtak =
-                        VedtakEndringDTO(
-                            sakIdOgReferanse = SakIdOgReferanse(vedtak.sakId, behandlingId.toString()),
-                            vedtakHendelse =
-                                VedtakHendelse(
-                                    vedtakId = underkjentVedtak.id,
-                                    inntruffet = underkjentTid,
-                                    saksbehandler = brukerTokenInfo.ident(),
-                                    kommentar = begrunnelse.kommentar,
-                                    valgtBegrunnelse = begrunnelse.valgtBegrunnelse,
-                                ),
-                            vedtakType = underkjentVedtak.type,
+        val underkjentVedtak = vedtaksvurderingRepository.underkjennVedtak(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId) ?: throw GenerellIkkeFunnetException()
+        behandlingStatusService.settReturnertVedtak(
+            behandling = behandling,
+            vedtak =
+                VedtakEndringDTO(
+                    sakIdOgReferanse = SakIdOgReferanse(vedtak.sakId, behandlingId.toString()),
+                    vedtakHendelse =
+                        VedtakHendelse(
+                            vedtakId = underkjentVedtak.id,
+                            inntruffet = underkjentTid,
+                            saksbehandler = brukerTokenInfo.ident(),
+                            kommentar = begrunnelse.kommentar,
+                            valgtBegrunnelse = begrunnelse.valgtBegrunnelse,
                         ),
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-
-                underkjentVedtak
-            }
+                    vedtakType = underkjentVedtak.type,
+                ),
+            brukerTokenInfo = brukerTokenInfo,
+        )
 
         return VedtakOgRapid(
             vedtaksvurderingRepository.hentVedtak(behandlingId)!!.toDto(),
@@ -339,19 +325,17 @@ class VedtakBehandlingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT))
 
         val tilSamordningVedtakLocal =
-            vedtaksvurderingRepository.inTransaction { tx ->
-                vedtaksvurderingRepository
-                    .tilSamordningVedtak(behandlingId, tx = tx)
-                    .also {
-                        behandlingStatusService.settTilSamordnetVedtak(
-                            behandlingId,
-                            VedtakHendelse(
-                                vedtakId = it.id,
-                                inntruffet = Tidspunkt.now(),
-                            ),
-                        )
-                    }
-            }
+            vedtaksvurderingRepository
+                .tilSamordningVedtak(behandlingId)
+                .also {
+                    behandlingStatusService.settTilSamordnetVedtak(
+                        behandlingId,
+                        VedtakHendelse(
+                            vedtakId = it.id,
+                            inntruffet = Tidspunkt.now(),
+                        ),
+                    )
+                }
 
         val tilSamordning =
             RapidInfo(
@@ -396,19 +380,17 @@ class VedtakBehandlingService(
         when (vedtak.status) {
             VedtakStatus.TIL_SAMORDNING -> {
                 val samordnetVedtakLocal =
-                    vedtaksvurderingRepository.inTransaction { tx ->
-                        vedtaksvurderingRepository
-                            .samordnetVedtak(behandlingId, tx = tx)
-                            .also {
-                                behandlingStatusService.settSamordnetVedtak(
-                                    behandlingId,
-                                    VedtakHendelse(
-                                        vedtakId = it.id,
-                                        inntruffet = Tidspunkt.now(),
-                                    ),
-                                )
-                            }
-                    }
+                    vedtaksvurderingRepository
+                        .samordnetVedtak(behandlingId)
+                        .also {
+                            behandlingStatusService.settSamordnetVedtak(
+                                behandlingId,
+                                VedtakHendelse(
+                                    vedtakId = it.id,
+                                    inntruffet = Tidspunkt.now(),
+                                ),
+                            )
+                        }
 
                 return VedtakOgRapid(
                     samordnetVedtakLocal.toDto(),
@@ -466,9 +448,10 @@ class VedtakBehandlingService(
 
     suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        vedtaksvurderingRepository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
+        vedtaksvurderingRepository.lagreManuellBehandlingSamordningsmelding(samordningmelding, sakId, brukerTokenInfo)
 
         try {
             samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
@@ -484,20 +467,16 @@ class VedtakBehandlingService(
 
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT, VedtakStatus.SAMORDNET))
         val iverksattVedtak =
-            vedtaksvurderingRepository.inTransaction { tx ->
-                val iverksattVedtakLocal =
-                    vedtaksvurderingRepository.iverksattVedtak(behandlingId, tx = tx).also {
-                        runBlocking {
-                            behandlingStatusService.settIverksattVedtak(
-                                behandlingId,
-                                VedtakHendelse(
-                                    vedtakId = it.id,
-                                    inntruffet = Tidspunkt.now(),
-                                ),
-                            )
-                        }
-                    }
-                iverksattVedtakLocal
+            vedtaksvurderingRepository.iverksattVedtak(behandlingId).also {
+                runBlocking {
+                    behandlingStatusService.settIverksattVedtak(
+                        behandlingId,
+                        VedtakHendelse(
+                            vedtakId = it.id,
+                            inntruffet = Tidspunkt.now(),
+                        ),
+                    )
+                }
             }
 
         return VedtakOgRapid(
@@ -515,22 +494,6 @@ class VedtakBehandlingService(
         krevIkkeNull(vedtaksvurderingRepository.hentVedtak(behandlingId)) {
             "Vedtak for behandling $behandlingId finnes ikke"
         }
-
-    private fun verifiserGyldigVedtakStatus(
-        gjeldendeStatus: VedtakStatus,
-        forventetStatus: List<VedtakStatus>,
-    ) {
-        if (gjeldendeStatus !in forventetStatus) throw VedtakTilstandException(gjeldendeStatus, forventetStatus)
-    }
-
-    private fun attestantHarAnnenIdentEnnSaksbehandler(
-        ansvarligSaksbehandler: String,
-        innloggetBrukerTokenInfo: BrukerTokenInfo,
-    ) {
-        if (innloggetBrukerTokenInfo.erSammePerson(ansvarligSaksbehandler)) {
-            throw UgyldigAttestantException(innloggetBrukerTokenInfo.ident())
-        }
-    }
 
     private fun opprettVedtak(
         behandling: DetaljertBehandling,
@@ -854,22 +817,10 @@ class VedtakBehandlingService(
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? =
         vedtaksvurderingRepository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
-    fun hentIverksatteVedtakISak(sakId: SakId): List<Vedtak> =
-        vedtaksvurderingRepository
-            .hentVedtakForSak(sakId)
-            .filter { it.status == VedtakStatus.IVERKSATT }
-
     private fun Vedtak.isRegulering() =
         this.innhold is VedtakInnhold.Behandling &&
             Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
-
-    fun hentVedtakForBehandling(behandlingId: UUID): Vedtak? = vedtaksvurderingRepository.hentVedtak(behandlingId)
 }
-
-class VedtakTilstandException(
-    gjeldendeStatus: VedtakStatus,
-    forventetStatus: List<VedtakStatus>,
-) : Exception("Vedtak har status $gjeldendeStatus, men forventet status $forventetStatus")
 
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(

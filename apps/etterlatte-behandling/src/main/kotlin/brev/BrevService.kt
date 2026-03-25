@@ -90,9 +90,18 @@ class BrevService(
         val behandling = behandlingService.hentBehandling(behandlingId)
         val vedtak = vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo)
 
-        return behandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
-            behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD &&
-            vedtak?.type == VedtakType.INNVILGELSE
+        return when (behandling?.type) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD &&
+                    vedtak?.type == VedtakType.INNVILGELSE
+            }
+
+            else -> {
+                // revurdering
+                behandling?.sak?.sakType == SakType.OMSTILLINGSSTOENAD &&
+                    behandling.revurderingsaarsak() == Revurderingaarsak.NY_SOEKNAD
+            }
+        }
     }
 
     private fun isRevurderingEtteroppgjoerVedtak(behandlingId: UUID): Boolean {

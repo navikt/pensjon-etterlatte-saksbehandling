@@ -348,7 +348,12 @@ fun Route.etteroppgjoerRoutes(
 
                     sjekkEtteroppgjoerEnabled(featureToggleService)
                     val behandling =
-                        etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, saksbehandler)
+                        inTransaction {
+                            etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(
+                                behandlingId = behandlingId,
+                                brukerTokenInfo = saksbehandler,
+                            )
+                        }
                     call.respond(behandling)
                 }
             }

@@ -5,7 +5,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.AutomatiskBehandlingService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -23,7 +25,16 @@ fun Route.automatiskBehandlingRoutes(automatiskBehandlingService: AutomatiskBeha
             kunSkrivetilgang {
                 logger.info("Håndterer behandling $behandlingId")
                 val nyttVedtak =
-                    automatiskBehandlingService.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, MigreringKjoringVariant.FULL_KJORING)
+                    inTransaction {
+                        runBlocking {
+                            automatiskBehandlingService.vedtakStegvis(
+                                behandlingId = behandlingId,
+                                sakId = sakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                                kjoringVariant = MigreringKjoringVariant.FULL_KJORING,
+                            )
+                        }
+                    }
                 call.respond(nyttVedtak)
             }
         }
@@ -32,7 +43,12 @@ fun Route.automatiskBehandlingRoutes(automatiskBehandlingService: AutomatiskBeha
             kunSkrivetilgang {
                 val kjoringVariant = call.receive<MigreringKjoringVariant>()
                 logger.info("Håndterer behandling $behandlingId med kjøringsvariant ${kjoringVariant.name}")
-                val nyttVedtak = automatiskBehandlingService.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, kjoringVariant)
+                val nyttVedtak =
+                    inTransaction {
+                        runBlocking {
+                            automatiskBehandlingService.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, kjoringVariant)
+                        }
+                    }
                 call.respond(nyttVedtak)
             }
         }

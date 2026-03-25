@@ -10,6 +10,7 @@ import no.nav.etterlatte.vedtaksvurdering.etteroppgjoerSystembrukerVedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.klagevedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.samordningSystembrukerVedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
+import no.nav.etterlatte.vedtaksvurdering.vedtakCrudRoute
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 
 fun main() {
@@ -45,6 +46,7 @@ class Server(
                 etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService, behandlingKlient)
                 tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 klagevedtakRoute(vedtakKlageService, behandlingKlient)
+                vedtakCrudRoute(repository, behandlingKlient)
             }
         }
 

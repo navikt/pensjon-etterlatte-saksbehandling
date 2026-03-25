@@ -6,7 +6,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbehandlingDto
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeForbehandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -112,7 +111,7 @@ class EtteroppgjoerRevurderingBrevService(
                 behandlingService.hentBehandling(behandlingId) ?: throw InternfeilException("Fant ikke behandlingId=$behandlingId")
             val avkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
             val sisteUtbetaltBeloep = avkorting.perioder.maxBy { it.periode.fom }.ytelseEtterAvkorting
-            krevIkkeNull(behandling.relatertBehandlingId){"Behandling $behandlingId mangler forbehandlingId"}
+            krevIkkeNull(behandling.relatertBehandlingId) { "Behandling $behandlingId mangler forbehandlingId" }
 
             val detaljertForbehandling =
                 etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
@@ -170,6 +169,7 @@ class EtteroppgjoerRevurderingBrevService(
                         rettsgebyrBeloep = Kroner(beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                         harOpphoer = detaljertForbehandling.forbehandling.harVedtakAvTypeOpphoer ?: etteroppgjoer.harOpphoer,
                         mottattSkatteoppgjoer = detaljertForbehandling.forbehandling.mottattSkatteoppgjoer,
+                        klageOmgjoering = detaljertForbehandling.forbehandling.klageOmgjoering != null,
                     ),
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(

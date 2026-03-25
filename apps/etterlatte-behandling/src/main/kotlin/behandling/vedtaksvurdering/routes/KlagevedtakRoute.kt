@@ -7,6 +7,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.vedtaksvurdering.MismatchingIdException
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -24,7 +25,11 @@ fun Route.klagevedtakRoute(vedtakKlageService: VedtakKlageService) {
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
                 logger.info("Oppretter vedtak for klage med id=$behandlingId")
 
-                call.respond(vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage).toDto())
+                call.respond(
+                    inTransaction {
+                        vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage).toDto()
+                    },
+                )
             }
         }
 
@@ -34,7 +39,11 @@ fun Route.klagevedtakRoute(vedtakKlageService: VedtakKlageService) {
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
 
                 logger.info("Fatter vedtak for klage med id=$behandlingId")
-                call.respond(vedtakKlageService.fattVedtak(klage, brukerTokenInfo).toDto())
+                call.respond(
+                    inTransaction {
+                        vedtakKlageService.fattVedtak(klage, brukerTokenInfo).toDto()
+                    },
+                )
             }
         }
 
@@ -44,13 +53,21 @@ fun Route.klagevedtakRoute(vedtakKlageService: VedtakKlageService) {
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
 
                 logger.info("Attesterer vedtak for klage med id=$behandlingId")
-                call.respond(vedtakKlageService.attesterVedtak(klage, brukerTokenInfo).toDto())
+                call.respond(
+                    inTransaction {
+                        vedtakKlageService.attesterVedtak(klage, brukerTokenInfo).toDto()
+                    },
+                )
             }
         }
         post("/underkjenn") {
             kunSkrivetilgang {
                 logger.info("Underkjenner vedtak for klage=$behandlingId")
-                call.respond(vedtakKlageService.underkjennVedtak(behandlingId).toDto())
+                call.respond(
+                    inTransaction {
+                        vedtakKlageService.underkjennVedtak(behandlingId).toDto()
+                    },
+                )
             }
         }
     }

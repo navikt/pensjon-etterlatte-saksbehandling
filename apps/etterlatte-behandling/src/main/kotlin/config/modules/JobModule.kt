@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobService
+import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxJob
 import no.nav.etterlatte.config.JobbKeys.JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS
 import no.nav.etterlatte.config.JobbKeys.JOBB_METRIKKER_OPENING_HOURS
 import no.nav.etterlatte.config.JobbKeys.JOBB_SAKSBEHANDLER_OPENING_HOURS
@@ -286,6 +287,15 @@ class JobModule(
             dataSource = dataSource,
             sakTilgangDao = daoModule.sakTilgangDao,
             featureToggleService = featureToggleService,
+        )
+    }
+
+    val outboxJob: OutboxJob by lazy {
+        OutboxJob(
+            erLeader = { erLeader() },
+            outboxService = serviceModule.outboxService,
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(1, ChronoUnit.MINUTES),
         )
     }
 }

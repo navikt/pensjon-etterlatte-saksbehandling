@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevDao
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
+import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxRepository
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
@@ -106,4 +107,6 @@ class DaoModule(
     val opplysningDao by lazy { OpplysningDao(dataSource) }
 
     val sjekkAdressebeskyttelseJobDao by lazy { SjekkAdressebeskyttelseJobDao(autoClosingDatabase) }
+
+    val outboxRepository by lazy { OutboxRepository(dataSource) }
 }

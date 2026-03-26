@@ -20,7 +20,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
-import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC_VEDTAK
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_VEDTAKSHENDELSER_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
@@ -44,15 +44,15 @@ private fun finnBrukerIdent(): String = Kontekst.get()?.AppUser?.name() ?: Fagsa
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler.systemEnv(),
     val config: Config = ConfigFactory.load(),
-    val rapid: KafkaProdusent<String, String> =
+    rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
             GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_RAPID_TOPIC))
         } else {
             TestProdusent()
         },
-    val rapidVedtak: KafkaProdusent<String, String> =
+    rapidVedtak: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
-            GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_RAPID_TOPIC_VEDTAK))
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_VEDTAKSHENDELSER_TOPIC))
         } else {
             TestProdusent()
         },

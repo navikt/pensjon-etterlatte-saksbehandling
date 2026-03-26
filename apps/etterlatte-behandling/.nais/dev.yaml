@@ -85,6 +85,8 @@ spec:
       value: "07-18"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: KAFKA_VEDTAKSHENDELSER_TOPIC
+      value: etterlatte.vedtakshendelser
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: ETTERLATTE_PDLTJENESTER_URL

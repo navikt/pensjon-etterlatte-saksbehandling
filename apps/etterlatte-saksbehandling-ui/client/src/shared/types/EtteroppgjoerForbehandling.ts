@@ -49,6 +49,8 @@ export interface EtteroppgjoerForbehandling {
   opphoerSkyldesDoedsfallIEtteroppgjoersaar?: JaNei
   mottattSkatteoppgjoer: boolean
   klageOmgjoering?: string
+  aktivitetspliktOverholdt?: JaNei
+  aktivitetspliktBegrunnelse?: string
 }
 
 export interface DetaljertEtteroppgjoerForbehandling {
@@ -103,6 +105,11 @@ export interface IInformasjonFraBruker {
   harMottattNyInformasjon: JaNei
   endringErTilUgunstForBruker?: JaNei
   beskrivelseAvUgunst?: string
+}
+
+export interface Aktivitetsplikt {
+  aktivitetspliktOverholdt: JaNei
+  begrunnelse: string
 }
 
 export interface FaktiskInntekt {

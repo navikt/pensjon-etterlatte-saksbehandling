@@ -11,6 +11,8 @@ import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
+import no.nav.etterlatte.beregning.regler.beregning
+import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.etteroppgjoer
 import no.nav.etterlatte.beregning.regler.inntektsavkorting
@@ -115,6 +117,66 @@ internal class AvkortingTest {
                         ),
                     ),
             )
+
+        @Test
+        fun `legg til ny ytelse før avkorting håndterer beregningsperiode ut av rekkefølge`() {
+            val eksisterende =
+                listOf(
+                    YtelseFoerAvkorting(
+                        beregning = 22241,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.FEBRUARY),
+                                tom = YearMonth.of(2024, Month.APRIL),
+                            ),
+                        beregningsreferanse = UUID.randomUUID(),
+                    ),
+                    YtelseFoerAvkorting(
+                        beregning = 22241,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.MAY),
+                                tom = YearMonth.of(2024, Month.AUGUST),
+                            ),
+                        beregningsreferanse = UUID.randomUUID(),
+                    ),
+                    YtelseFoerAvkorting(
+                        beregning = 22241,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.SEPTEMBER),
+                                tom = null,
+                            ),
+                        beregningsreferanse = UUID.randomUUID(),
+                    ),
+                )
+            val nyBeregning =
+                beregning(
+                    beregningId = UUID.randomUUID(),
+                    beregninger =
+                        listOf(
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2025, Month.MAY),
+                                datoTOM = YearMonth.of(2026, Month.FEBRUARY),
+                                utbetaltBeloep = 24405,
+                            ),
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2024, Month.FEBRUARY),
+                                datoTOM = YearMonth.of(2024, Month.APRIL),
+                                utbetaltBeloep = 22241,
+                            ),
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2024, Month.MAY),
+                                datoTOM = YearMonth.of(2025, Month.APRIL),
+                                utbetaltBeloep = 23255,
+                            ),
+                        ),
+                    overstyrBeregning = null,
+                )
+            val nyListeYtelseFoerAvkorting = eksisterende.leggTilNyeBeregninger(nyBeregning)
+            val listeFraBeregning = nyBeregning.mapTilYtelseFoerAvkorting()
+            assertEquals(nyListeYtelseFoerAvkorting, listeFraBeregning)
+        }
 
         @Test
         fun `flater ut inntekter fra alle årsoppgjør`() {

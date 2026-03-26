@@ -79,7 +79,7 @@ class TrygdetidKlientImpl(
                     Resource(clientId, "$resourceUrl/api/trygdetid_v2/$behandlingId"),
                     brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> resource.response.let { deserialize(it.toString()) } },
+                    success = { resource -> resource.response?.let { deserialize(it.toString()) } ?: emptyList() },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (re: ResponseException) {

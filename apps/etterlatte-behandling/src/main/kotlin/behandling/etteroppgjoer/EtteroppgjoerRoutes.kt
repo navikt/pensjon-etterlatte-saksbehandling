@@ -305,6 +305,24 @@ fun Route.etteroppgjoerRoutes(
                     }
                 }
 
+                get("er-siste-inntekter-oppdaterte") {
+                    val brukerSisteInntekter =
+                        inTransaction {
+                            forbehandlingService.forbehandlingBrukerSisteInntekter(forbehandlingId)
+                        }
+                    call.respond(brukerSisteInntekter)
+                }
+
+                post("oppdater-siste-inntekter") {
+                    kunSkrivetilgang {
+                        inTransaction {
+                            forbehandlingService.oppdaterSisteInntekter(forbehandlingId, brukerTokenInfo)
+                        }
+
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+
                 post("aktivitetsplikt") {
                     kunSkrivetilgang {
                         val request = call.receive<AktivitetspliktRequest>()

@@ -56,6 +56,7 @@ enum class EtteroppgjoerForbehandlingHendelser(
     BEREGNET(false),
     FERDIGSTILT(true),
     AVBRUTT(true),
+    OPPDATERT_INNTEKT(false),
     ;
 
     override fun lagEventnameForType(): String = "ETTEROPPGJOER_FORBEHANDLING:${this.name}"

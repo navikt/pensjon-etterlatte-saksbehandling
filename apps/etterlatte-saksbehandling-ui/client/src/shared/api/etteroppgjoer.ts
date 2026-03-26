@@ -112,6 +112,14 @@ export const lagreAktivitetsplikt = async (args: { forbehandlingId: string; akti
   })
 }
 
+export const erInntektsopplysningerOppdaterte = async (args: { forbehandlingId: string }) => {
+  return apiClient.get(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/er-siste-inntekter-oppdaterte`)
+}
+
+export const oppdaterInntektsopplysninger = async (args: { forbehandlingId: string }) => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/oppdater-siste-inntekter`, {})
+}
+
 export const ferdigstillEtteroppgjoerForbehandlingMedBrev = async (args: {
   forbehandlingId: string
 }): Promise<ApiResponse<unknown>> => {

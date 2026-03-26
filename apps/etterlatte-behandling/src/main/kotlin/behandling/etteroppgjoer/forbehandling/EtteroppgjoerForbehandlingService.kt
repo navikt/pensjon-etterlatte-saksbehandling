@@ -127,6 +127,37 @@ class EtteroppgjoerForbehandlingService(
         return ferdigstillForbehandling(forbehandling, brukerTokenInfo)
     }
 
+    fun forbehandlingBrukerSisteInntekter(id: UUID): Boolean {
+        val forbehandling = hentForbehandling(id)
+
+        return runCatching {
+            sjekkAtViBrukerSisteInntekter(forbehandling)
+        }.onFailure { e ->
+            logger.info(
+                "Forbehandling=${forbehandling.id} har ikke oppdatert til de siste inntektene",
+                e,
+            )
+        }.isSuccess
+    }
+
+    fun oppdaterSisteInntekter(
+        forbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info(
+            "Oppdaterer siste inntekter for forbehandling=$forbehandlingId",
+        )
+
+        val forbehandling = hentForbehandling(forbehandlingId)
+        hentOgLagreAInntektOgPgi(forbehandling.sak, forbehandling)
+        hendelserService.registrerOgSendHendelse(
+            etteroppgjoerForbehandling = forbehandling,
+            hendelseType = EtteroppgjoerForbehandlingHendelser.OPPDATERT_INNTEKT,
+            saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
+            utlandstilknytning = hentUtlandstilknytning(forbehandling),
+        )
+    }
+
     fun avbrytForbehandling(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

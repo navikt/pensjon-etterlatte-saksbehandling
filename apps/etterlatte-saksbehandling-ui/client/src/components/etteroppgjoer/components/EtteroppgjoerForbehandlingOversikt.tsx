@@ -169,7 +169,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         <Alert variant="info">Dette etteroppgjøret er opprettet som en del av en klageomgjøring</Alert>
       )}
 
-      <Inntektsopplysninger forbehandling={forbehandling} />
+      <Inntektsopplysninger forbehandling={forbehandling} erRedigerbar={erRedigerbar} />
 
       <AktivitetspliktSpørsmål erRedigerbar={erRedigerbar} setAktivitetspliktSkjemaErrors={setAktivitetspliktErrors} />
 

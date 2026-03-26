@@ -30,7 +30,7 @@ class VedtaksvurderingBehandlingKlient(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto> {
-        logger.info("Henter iverksatte vedtak for sak: sakId fra etterlatte-behandling")
+        logger.info("Henter iverksatte vedtak for sak: $sakId fra etterlatte-behandling")
 
         return retry<List<VedtakSammendragDto>> {
             downstreamResourceClient

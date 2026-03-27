@@ -323,7 +323,7 @@ fun Route.etteroppgjoerRoutes(
                     }
                 }
 
-                post("aktivitetsplikt") {
+                post("lagre-aktivitetsplikt") {
                     kunSkrivetilgang {
                         val request = call.receive<AktivitetspliktRequest>()
 

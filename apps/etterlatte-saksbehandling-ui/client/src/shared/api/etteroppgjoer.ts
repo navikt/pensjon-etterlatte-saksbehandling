@@ -107,7 +107,7 @@ export const lagreOmOpphoerSkyldesDoedsfall = async (args: {
 }
 
 export const lagreAktivitetsplikt = async (args: { forbehandlingId: string; aktivitetsplikt: Aktivitetsplikt }) => {
-  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/aktivitetsplikt`, {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/lagre-aktivitetsplikt`, {
     ...args.aktivitetsplikt,
   })
 }

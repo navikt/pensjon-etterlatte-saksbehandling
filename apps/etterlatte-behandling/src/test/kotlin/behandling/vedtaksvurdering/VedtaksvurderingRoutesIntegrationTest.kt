@@ -22,6 +22,8 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxItemType
+import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxRepository
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -72,7 +74,6 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun beforeAll() {
         startServer(
             featureToggleService = DummyFeatureToggleService(),
-
         ).also {
             resetDatabase()
         }
@@ -189,7 +190,8 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
             response.status shouldBe HttpStatusCode.OK
         }
         inTransaction {
-            with(vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)!!) {
+            val vedtak = vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)
+            with(vedtak!!) {
                 type shouldBe VedtakType.INNVILGELSE
                 vedtakFattet?.ansvarligSaksbehandler shouldBe saksbehandlerIdent
                 attestasjon?.attestant shouldBe attestantIdent
@@ -198,6 +200,12 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 vedtakInnhold.virkningstidspunkt shouldBe virkningstidspunkt
                 vedtakInnhold.opphoerFraOgMed shouldBe null
             }
+            val upublisertEksternVedtakshendelse =
+                OutboxRepository(applicationContext.dataSource)
+                    .hentUpubliserte()
+                    .single()
+            upublisertEksternVedtakshendelse.vedtakId shouldBe vedtak.id
+            upublisertEksternVedtakshendelse.type shouldBe OutboxItemType.ATTESTERT
         }
     }
 

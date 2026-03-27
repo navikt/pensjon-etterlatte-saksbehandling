@@ -28,6 +28,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
+import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningService
@@ -46,7 +47,6 @@ import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbe
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
 import no.nav.etterlatte.sak.SakServiceImpl
@@ -477,5 +477,13 @@ class ServiceModule(
                 klientModule.vedtakKlient()
             }
         }
+    }
+
+    val outboxService: OutboxService by lazy {
+        OutboxService(
+            outboxRepository = daoModule.outboxRepository,
+            vedtaksvurderingService = vedtaksvurderingService,
+            vedtakshendelseEksternProdusent = kafkaModule.vedtakshendelserEksternProdusent,
+        )
     }
 }

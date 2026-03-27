@@ -16,5 +16,5 @@ spec:
     retentionHours: 168  # -1 means unlimited
   acl:
     - team: etterlatte
-      application: etterlatte-vedtaksvurdering
+      application: etterlatte-behandling
       access: readwrite

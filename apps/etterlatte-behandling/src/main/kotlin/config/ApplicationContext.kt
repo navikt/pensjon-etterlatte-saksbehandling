@@ -20,6 +20,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
+import no.nav.etterlatte.kafka.KafkaKey.KAFKA_VEDTAKSHENDELSER_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
@@ -49,6 +50,12 @@ internal class ApplicationContext(
         } else {
             TestProdusent()
         },
+    rapidVedtak: KafkaProdusent<String, String> =
+        if (appIsInGCP()) {
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_VEDTAKSHENDELSER_TOPIC))
+        } else {
+            TestProdusent()
+        },
     val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(
             properties = featureToggleProperties(config),
@@ -67,7 +74,7 @@ internal class ApplicationContext(
 
     private val daoModule = DaoModule(autoClosingDatabase, dataSource)
 
-    private val kafkaModule = KafkaModule(rapid)
+    private val kafkaModule = KafkaModule(rapid, rapidVedtak)
 
     private val klientModule =
         klientModuleOverride ?: KlientModule(
@@ -208,6 +215,7 @@ internal class ApplicationContext(
     val etteroppgjoerSvarfristUtloeptJob get() = jobModule.etteroppgjoerSvarfristUtloeptJob
     val sjekkAdressebeskyttelseJob get() = jobModule.sjekkAdressebeskyttelseJob
     val lesSkatteoppgjoerHendelserJob get() = jobModule.lesSkatteoppgjoerHendelserJob
+    val outboxJob get() = jobModule.outboxJob
 
     fun close() {
         (dataSource as HikariDataSource).close()

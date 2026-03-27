@@ -84,6 +84,7 @@ class LocalKafkaConfig(
 }
 
 enum class KafkaKey : EnvEnum {
+    KAFKA_VEDTAKSHENDELSER_TOPIC,
     KAFKA_RAPID_TOPIC,
     KAFKA_BROKERS,
     KAFKA_TRUSTSTORE_PATH,

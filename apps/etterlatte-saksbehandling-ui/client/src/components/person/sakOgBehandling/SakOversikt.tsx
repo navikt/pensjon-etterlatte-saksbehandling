@@ -91,7 +91,7 @@ export const SakOversikt = ({
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger, ekstraSak }) => (
           <HStack gap="space-16" wrap={false}>
-            <Box padding="space-32" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-subtle">
+            <Box padding="space-32" minWidth="25rem" borderWidth="0 1 0 0" borderColor="neutral-subtle">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
               {ekstraSak && (
                 <ByttTilAnnenSak

@@ -90,7 +90,7 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
         </Modal.Header>
         <Modal.Body>
           <FormWrapper $column={true}>
-            <Box padding="space-16" borderWidth="1" borderRadius="small">
+            <Box padding="space-16" borderWidth="1" borderRadius="2">
               <VStack gap="space-16" align="start">
                 {avdoedListe.fields?.map((field, index) => (
                   <HStack gap="space-8" key={field.id} align="end">
@@ -125,7 +125,7 @@ export const RedigerFamilieforholdModal = ({ behandling, personopplysninger }: P
               </VStack>
             </Box>
 
-            <Box padding="space-16" borderWidth="1" borderRadius="small">
+            <Box padding="space-16" borderWidth="1" borderRadius="2">
               <VStack gap="space-16" align="start">
                 {gjenlevendeListe.fields?.map((field, index) => (
                   <HStack gap="space-8" key={field.id} align="end">

@@ -78,13 +78,7 @@ export const EndreBruker = ({
         Bruker
       </Heading>
       {rediger ? (
-        <Box
-          background="bg-subtle"
-          padding="space-16"
-          borderColor="border-subtle"
-          borderWidth="1"
-          borderRadius="medium"
-        >
+        <Box background="neutral-soft" padding="space-16" borderColor="neutral-subtle" borderWidth="1" borderRadius="4">
           <VStack gap="space-32">
             <VStack gap="space-16">
               <TextField

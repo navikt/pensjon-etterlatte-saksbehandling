@@ -30,8 +30,8 @@ export const Inntektsopplysninger = ({ forbehandling }: { forbehandling: Etterop
       <Box
         paddingInline="space-24"
         paddingBlock="space-16"
-        background="surface-action-subtle"
-        borderColor="border-action"
+        background="accent-soft"
+        borderColor="accent"
         borderWidth="0 0 0 4"
       >
         <VStack gap="space-32">

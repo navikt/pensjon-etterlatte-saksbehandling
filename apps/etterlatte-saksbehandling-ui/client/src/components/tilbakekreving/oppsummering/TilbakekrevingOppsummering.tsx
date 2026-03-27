@@ -161,7 +161,7 @@ export function TilbakekrevingOppsummering({
           error: (error) => <TilbakekrevingValideringsfeil error={error} />,
         })}
       </Box>
-      <Box paddingBlock="space-48 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-48 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <HStack justify="center">
           {!isPending(lagreSkalSendeBrevStatus) && (
             <>

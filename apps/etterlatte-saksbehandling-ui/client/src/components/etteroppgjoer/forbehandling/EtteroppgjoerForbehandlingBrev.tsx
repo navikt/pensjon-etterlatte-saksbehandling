@@ -127,7 +127,7 @@ export function EtteroppgjoerForbehandlingBrev() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <Box minWidth="30rem" maxWidth="40rem" borderColor="border-subtle" borderWidth="0 1 0 0">
+      <Box minWidth="30rem" maxWidth="40rem" borderColor="neutral-subtle" borderWidth="0 1 0 0">
         <VStack gap="space-16" margin="space-64">
           <Heading level="1" size="large">
             {erVarselbrev ? 'Forhåndsvarsel' : 'Informasjonsbrev'}
@@ -184,7 +184,7 @@ export function EtteroppgjoerForbehandlingBrev() {
           pending: <Spinner label="Laster brev" />,
         })}
 
-        <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="space-32 space-64">
+        <Box borderWidth="1 0 0 0" borderColor="neutral-subtle" paddingBlock="space-32 space-64">
           <HStack width="100%" justify="center" gap="space-24">
             <div>
               <Button

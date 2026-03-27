@@ -21,9 +21,9 @@ export function LenkeTilInntektOversikt() {
       paddingInline="space-16"
       paddingBlock="space-12"
       maxWidth="fit-content"
-      background="bg-default"
+      background="default"
       borderRadius="4"
-      borderColor="border-on-inverted"
+      borderColor="neutral-subtle"
     >
       {mapResult(urlForInntektOversiktResult, {
         pending: <Loader />,

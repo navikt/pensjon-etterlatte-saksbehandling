@@ -4,7 +4,7 @@ import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 
 export default function BrevStatusPanel({ brev }: { brev: IBrev }) {
   return (
-    <Box padding="space-16" borderWidth="1" borderRadius="small" style={{ margin: '1rem' }}>
+    <Box padding="space-16" borderWidth="1" borderRadius="2" style={{ margin: '1rem' }}>
       <Heading size="medium" spacing>
         Oversikt
       </Heading>

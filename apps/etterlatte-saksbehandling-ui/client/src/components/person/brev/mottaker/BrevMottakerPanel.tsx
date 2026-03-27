@@ -93,7 +93,7 @@ export function BrevMottakerPanel({
   }
 
   return (
-    <Box padding="space-16" borderWidth="1" borderRadius="small">
+    <Box padding="space-16" borderWidth="1" borderRadius="2">
       {mapResult(soeker, {
         initial: kanRedigeres && mottaker.type === MottakerType.HOVED && (
           <Box marginBlock="space-0 space-8">
@@ -158,7 +158,7 @@ export function BrevMottakerPanel({
       {!!mottaker.bestillingId && (
         <Box
           borderWidth="1 0 0 0"
-          borderColor="border-subtle"
+          borderColor="neutral-subtle"
           paddingBlock="space-16 space-0"
           marginBlock="space-16 space-0"
         >
@@ -168,7 +168,7 @@ export function BrevMottakerPanel({
       )}
       <Box
         borderWidth="1 0 0 0"
-        borderColor="border-subtle"
+        borderColor="neutral-subtle"
         paddingBlock="space-16 space-0"
         marginBlock="space-16 space-0"
       >

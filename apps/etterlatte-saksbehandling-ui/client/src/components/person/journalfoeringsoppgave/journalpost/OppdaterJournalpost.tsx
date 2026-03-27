@@ -62,7 +62,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak, oppgaveId }: Prop
         <Info label="Status" tekst={formaterJournalpostStatus(journalpost.journalstatus)} />
       </VStack>
       <br />
-      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <Heading size="medium" spacing>
           Gjelder
         </Heading>

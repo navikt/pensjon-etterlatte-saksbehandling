@@ -199,7 +199,7 @@ export const Resultat = (props: Props) => {
           </OppdatertGrunnlagAlert>
         )}
       </Box>
-      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar && vilkaarsvurdering.isGrunnlagUtdatert && (
           <OppdatertGrunnlagAlert variant="warning">
             OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />

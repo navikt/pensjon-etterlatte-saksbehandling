@@ -141,7 +141,7 @@ const ForventetInntektDetaljer = ({
 
   return (
     <div>
-      <Box borderWidth="0 0 1 0" borderColor="border-subtle" marginBlock="space-0 space-16">
+      <Box borderWidth="0 0 1 0" borderColor="neutral-subtle" marginBlock="space-0 space-16">
         <HStack gap="space-80">
           <VStack minWidth="15rem">
             <HStack gap="space-4">
@@ -163,7 +163,7 @@ const ForventetInntektDetaljer = ({
           </VStack>
         </HStack>
       </Box>
-      <Box borderWidth="0 0 1 0" borderColor="border-subtle" marginBlock="space-0 space-16">
+      <Box borderWidth="0 0 1 0" borderColor="neutral-subtle" marginBlock="space-0 space-16">
         <HStack gap="space-80">
           <VStack minWidth="15rem">
             <HStack gap="space-4">
@@ -198,7 +198,7 @@ const ForventetInntektDetaljer = ({
 const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrunnlag: FaktiskInntektGrunnlag }) => {
   return (
     <div>
-      <Box borderWidth="0 0 1 0" borderColor="border-subtle" marginBlock="space-0 space-16">
+      <Box borderWidth="0 0 1 0" borderColor="neutral-subtle" marginBlock="space-0 space-16">
         <HStack gap="space-80">
           <VStack minWidth="15rem">
             <Label>Lønnsinntekt</Label>
@@ -213,7 +213,7 @@ const FaktiskInntektDetaljer = ({ faktiskInntektGrunnlag }: { faktiskInntektGrun
           </VStack>
         </HStack>
       </Box>
-      <Box borderWidth="0 0 1 0" borderColor="border-subtle" marginBlock="space-0 space-16">
+      <Box borderWidth="0 0 1 0" borderColor="neutral-subtle" marginBlock="space-0 space-16">
         <HStack gap="space-80">
           <VStack minWidth="15rem">
             <Label>AFP</Label>

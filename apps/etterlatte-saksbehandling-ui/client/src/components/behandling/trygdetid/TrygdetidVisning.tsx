@@ -70,7 +70,7 @@ const TrygdetidVisning = (props: { behandling: IBehandlingReducer }) => {
         vedtaksresultat={vedtaksresultat}
         virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
       />
-      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {isFailureHandler({
           apiResult: oppdaterStatusResult,
           errorMessage: 'Kunne ikke oppdatere trygdetid status',

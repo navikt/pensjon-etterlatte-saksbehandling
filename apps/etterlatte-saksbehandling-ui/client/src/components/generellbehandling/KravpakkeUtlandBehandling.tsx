@@ -172,7 +172,7 @@ const KravpakkeUtlandBehandling = (props: {
               utfyllende informasjon.
             </p>
           </Box>
-          <Box padding="space-16" borderRadius="small">
+          <Box padding="space-16" borderRadius="2">
             <div>
               {utlandsBehandling.tilknyttetBehandling ? (
                 <div>

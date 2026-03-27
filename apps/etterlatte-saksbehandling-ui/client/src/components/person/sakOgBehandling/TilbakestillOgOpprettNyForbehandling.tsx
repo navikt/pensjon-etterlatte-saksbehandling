@@ -22,7 +22,7 @@ export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
   return (
     <Box marginBlock="space-20 space-0">
       <VStack gap="space-16">
-        <Box background="surface-subtle" padding="space-20">
+        <Box background="neutral-soft" padding="space-20">
           <InlineMessage status="warning">
             I tilfelle forbehandling, eller etteroppgjøret er ferdigstilt med feil informasjon, kan etteroppgjøret
             tilbakestilles og ny forbehandling opprettes.

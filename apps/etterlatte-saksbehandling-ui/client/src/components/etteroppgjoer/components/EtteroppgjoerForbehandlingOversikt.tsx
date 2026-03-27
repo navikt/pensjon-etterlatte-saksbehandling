@@ -234,7 +234,7 @@ function RevurderingNavigasjon({
   onNesteSteg: () => void
 }) {
   return (
-    <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="space-32 space-64">
+    <Box borderWidth="1 0 0 0" borderColor="neutral-subtle" paddingBlock="space-32 space-64">
       <HStack width="100%" justify="center">
         <VStack gap="space-16" align="center">
           {forbehandling.endringErTilUgunstForBruker === JaNei.JA ? (
@@ -272,7 +272,7 @@ function ForbehandlingNavigasjon({
     forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
 
   return (
-    <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="space-32 space-64">
+    <Box borderWidth="1 0 0 0" borderColor="neutral-subtle" paddingBlock="space-32 space-64">
       <HStack width="100%" justify="center">
         {ferdigstillUtenBrev ? (
           <FerdigstillEtteroppgjoerForbehandlingUtenBrev />

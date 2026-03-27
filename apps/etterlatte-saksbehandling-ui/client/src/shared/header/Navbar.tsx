@@ -7,8 +7,8 @@ export const Navbar = ({ children }: { children: ReactNode }) => (
     paddingBlock="space-12"
     paddingInline="space-20"
     borderWidth="0 0 1 0"
-    borderColor="border-subtle"
-    background="surface-subtle"
+    borderColor="neutral-subtle"
+    background="neutral-soft"
   >
     {children}
   </Box>

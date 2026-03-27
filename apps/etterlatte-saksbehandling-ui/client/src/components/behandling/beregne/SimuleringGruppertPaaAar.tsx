@@ -10,7 +10,7 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
   return (
     <>
       {aarMedPerioder.map((aar) => (
-        <Box key={aar.aarstall} maxWidth="70rem" background="surface-subtle" padding="space-20">
+        <Box key={aar.aarstall} maxWidth="70rem" background="neutral-soft" padding="space-20">
           <Heading level="3" size="small">
             Resultat av simulering i {aar.aarstall}
           </Heading>

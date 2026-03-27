@@ -86,7 +86,7 @@ class OmgjoeringKlageRevurderingService(
 
         val revurdering =
             if (etteroppgjoer) {
-                etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(
+                etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurderingEtterKlage(
                     behandlingId = behandlingSomOmgjoeres.id,
                     klageId = klageId,
                     brukerTokenInfo = saksbehandler,

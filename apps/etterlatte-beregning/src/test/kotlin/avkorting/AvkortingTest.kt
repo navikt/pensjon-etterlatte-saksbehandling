@@ -18,9 +18,14 @@ import no.nav.etterlatte.beregning.regler.etteroppgjoer
 import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -484,6 +489,107 @@ internal class AvkortingTest {
                         spesifikasjon shouldBe forventetInntekt.spesifikasjon
                     }
                 }
+            }
+
+            @Test
+            fun `skal håndtere at ytelse før avkorting kan inneholde perioder fra før årsoppgjøret med nye regler avkorting`() {
+                val aarsoppgjoer2026 =
+                    AarsoppgjoerLoepende(
+                        id = UUID.randomUUID(),
+                        aar = 2026,
+                        fom = YearMonth.of(2026, Month.JANUARY),
+                        ytelseFoerAvkorting =
+                            listOf(
+                                YtelseFoerAvkorting(
+                                    beregning = 10_000,
+                                    periode =
+                                        Periode(
+                                            fom = YearMonth.of(2025, Month.SEPTEMBER),
+                                            tom = YearMonth.of(2026, Month.MARCH),
+                                        ),
+                                    beregningsreferanse = UUID.randomUUID(),
+                                ),
+                                YtelseFoerAvkorting(
+                                    beregning = 10_000,
+                                    periode =
+                                        Periode(
+                                            fom = YearMonth.of(2026, Month.APRIL),
+                                            tom = null,
+                                        ),
+                                    beregningsreferanse = UUID.randomUUID(),
+                                ),
+                            ),
+                        inntektsavkorting =
+                            listOf(
+                                Inntektsavkorting(
+                                    grunnlag =
+                                        ForventetInntekt(
+                                            id = UUID.randomUUID(),
+                                            periode =
+                                                Periode(
+                                                    fom = YearMonth.of(2026, Month.JANUARY),
+                                                    tom = null,
+                                                ),
+                                            inntektTom = 0,
+                                            fratrekkInnAar = 0,
+                                            inntektUtlandTom = 0,
+                                            fratrekkInnAarUtland = 0,
+                                            innvilgaMaaneder = 0,
+                                            spesifikasjon = "inntekt",
+                                            kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                                            overstyrtInnvilgaMaanederAarsak = null,
+                                            overstyrtInnvilgaMaanederBegrunnelse = null,
+                                            inntektInnvilgetPeriode =
+                                                BenyttetInntektInnvilgetPeriode(
+                                                    verdi = 0,
+                                                    tidspunkt = Tidspunkt.now(),
+                                                    regelResultat = "{}".toJsonNode(),
+                                                    kilde =
+                                                        Grunnlagsopplysning.RegelKilde(
+                                                            ts = Tidspunkt.now(),
+                                                            versjon = "1",
+                                                            navn = "regel",
+                                                        ),
+                                                ),
+                                            maanederInnvilget = null,
+                                            maanederInnvilgetRegelResultat = null,
+                                        ),
+                                ),
+                            ),
+                        avkortetYtelse = emptyList(),
+                    )
+                val eksisterendeAvkorting =
+                    Avkorting(
+                        aarsoppgjoer = listOf(aarsoppgjoer2026),
+                    )
+
+                val nyttGrunnlagFom = YearMonth.of(2026, Month.APRIL)
+                val nyAvkorting =
+                    eksisterendeAvkorting.oppdaterMedInntektsgrunnlag(
+                        nyttGrunnlag =
+                            AvkortingGrunnlagLagreDto(
+                                id = UUID.randomUUID(),
+                                inntektTom = 250_000,
+                                fratrekkInnAar = 0,
+                                inntektUtlandTom = 0,
+                                fratrekkInnAarUtland = 0,
+                                spesifikasjon = "inntekt",
+                                fom = nyttGrunnlagFom,
+                                overstyrtInnvilgaMaaneder = null,
+                            ),
+                        bruker = HardkodaSystembruker.omregning,
+                        opphoerFom = null,
+                        aldersovergang = null,
+                        brukNyeReglerAvkorting = true,
+                    )
+                val nyttGrunnlag =
+                    nyAvkorting.aarsoppgjoer
+                        .single()
+                        .inntektsavkorting()
+                        .single { it.grunnlag.periode.fom == YearMonth.of(2026, Month.APRIL) }
+
+                assertEquals(12, nyttGrunnlag.grunnlag.innvilgaMaaneder)
+                assertEquals(12, nyttGrunnlag.grunnlag.maanederInnvilget?.count { it.innvilget })
             }
 
             @Test

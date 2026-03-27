@@ -1267,6 +1267,12 @@ fun finnAntallInnvilgaMaanederForAar(
                     "TOM: $tom, aldersovergang: $aldersovergang",
                     "Til og med for året (hvis noen)",
                 ),
+            fomAar =
+                FaktumNode(
+                    fom.year,
+                    kilde = "FOM-dato for årsoppgjøret",
+                    beskrivelse = "Året vi utleder innvilgede måneder for",
+                ),
         )
     val antallInvilgedeMaaneder =
         erMaanederForAaretInnvilget.anvend(

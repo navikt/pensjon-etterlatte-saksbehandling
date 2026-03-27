@@ -17,6 +17,7 @@ import java.time.YearMonth
 data class MaanederInnvilgetGrunnlag(
     val beregningsperioder: FaktumNode<List<YtelseFoerAvkorting>>,
     val tilOgMed: FaktumNode<YearMonth?>,
+    val fomAar: FaktumNode<Int>,
 )
 
 val perioderMedYtelse =
@@ -32,6 +33,14 @@ val tilOgMed =
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "En til-og-med-dato satt for året",
         finnFaktum = MaanederInnvilgetGrunnlag::tilOgMed,
+        finnFelt = { it },
+    )
+
+val fomAar =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Året vi jobber med innvilget periode i",
+        finnFaktum = MaanederInnvilgetGrunnlag::fomAar,
         finnFelt = { it },
     )
 
@@ -71,11 +80,7 @@ val alleMaanederIAaret =
         OMS_GYLDIG_FRA,
         "Gir en liste av alle månedene i året",
         RegelReferanse("MAANEDER-I-AARET", "1.0"),
-    ) benytter perioderMedYtelse med { perioder ->
-        val aar =
-            perioder
-                .first()
-                .periode.fom.year
+    ) benytter fomAar med { aar ->
         (1..12).map { YearMonth.of(aar, it) }
     }
 

@@ -378,12 +378,12 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(resultat)
             }
 
-            post("/omgjoer") {
+            post("/omgjoer-avbrutt-revurdering") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
 
                     sjekkEtteroppgjoerEnabled(featureToggleService)
                     val behandling =
-                        etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(
+                        etteroppgjoerRevurderingService.omgjoerAvbruttEtteroppgjoerRevurdering(
                             behandlingId = behandlingId,
                             brukerTokenInfo = saksbehandler,
                         )

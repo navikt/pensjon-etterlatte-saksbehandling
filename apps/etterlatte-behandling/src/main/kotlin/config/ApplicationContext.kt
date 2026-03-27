@@ -44,7 +44,7 @@ private fun finnBrukerIdent(): String = Kontekst.get()?.AppUser?.name() ?: Fagsa
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler.systemEnv(),
     val config: Config = ConfigFactory.load(),
-    rapid: KafkaProdusent<String, String> =
+    val rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
             GcpKafkaConfig.fromEnv(env).standardProducer(env.requireEnvValue(KAFKA_RAPID_TOPIC))
         } else {

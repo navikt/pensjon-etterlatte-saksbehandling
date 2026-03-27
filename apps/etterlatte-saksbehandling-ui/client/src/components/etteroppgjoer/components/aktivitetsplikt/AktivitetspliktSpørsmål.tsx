@@ -173,10 +173,12 @@ export const AktivitetspliktSpørsmål = ({ erRedigerbar, setAktivitetspliktSkje
         )}
 
         {forbehandling.aktivitetspliktOverholdt === JaNei.NEI && (
-          <Alert variant="warning">
-            Aktivitetsplikten er ikke overholdt. Etteroppgjøret kan ikke gjennomføres før aktivitetsplikten for
-            etteroppgjørsåret er vurdert på nytt.
-          </Alert>
+          <Box maxWidth="42.5rem">
+            <Alert variant="warning">
+              Aktivitetsplikten er ikke overholdt. Etteroppgjøret kan ikke gjennomføres før aktivitetsplikten for
+              etteroppgjørsåret er vurdert på nytt.
+            </Alert>
+          </Box>
         )}
       </VStack>
     </form>

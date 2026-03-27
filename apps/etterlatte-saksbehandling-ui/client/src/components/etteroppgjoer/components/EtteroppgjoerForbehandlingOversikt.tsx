@@ -8,7 +8,7 @@ import {
   OpphoerSkyldesDoedsfall,
   OpphoerSkyldesDoedsfallSkjema,
 } from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
-import { AktivitetspliktSpørsmål } from '~components/etteroppgjoer/components/aktivitetsplikt/Aktivitetsplikt'
+import { AktivitetspliktSpørsmål } from '~components/etteroppgjoer/components/aktivitetsplikt/AktivitetspliktSpørsmål'
 import {
   EtteroppgjoerForbehandling,
   EtteroppgjoerResultatType,
@@ -171,8 +171,6 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
 
       <Inntektsopplysninger forbehandling={forbehandling} erRedigerbar={erRedigerbar} />
 
-      <AktivitetspliktSpørsmål erRedigerbar={erRedigerbar} setAktivitetspliktSkjemaErrors={setAktivitetspliktErrors} />
-
       {erRevurdering && (
         <RevurderingSpesifikkeSeksjoner
           behandling={kontekst.behandling}
@@ -195,6 +193,8 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
           setFastsettFaktiskInntektSkjemaErrors={setFaktiskInntektErrors}
         />
       )}
+
+      <AktivitetspliktSpørsmål erRedigerbar={erRedigerbar} setAktivitetspliktSkjemaErrors={setAktivitetspliktErrors} />
 
       {visBeregnetResultat && (
         <VStack gap="4">

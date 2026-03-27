@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Label, Link, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Label, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { FieldErrors, useForm } from 'react-hook-form'
 import { PencilIcon } from '@navikt/aksel-icons'
 import {
@@ -59,13 +59,14 @@ export const AktivitetspliktSpørsmål = ({ erRedigerbar, setAktivitetspliktSkje
   return (
     <form>
       <VStack gap="4">
-        <Heading size="large">Aktivitetsplikt</Heading>
-        <BodyShort>
-          Vurder om aktivitetsplikten er overholdt i etteroppgjørsåret.{' '}
-          <Link href="https://lovdata.no/pro/lov/1997-02-28-19/§17-7" target="_blank">
-            Se folketrygdloven § 17-7
-          </Link>
-        </BodyShort>
+        <Heading size="large">Vurder aktivitetsplikt</Heading>
+        <Box maxWidth="60rem">
+          <BodyShort>
+            Vurder om brukeren har oppfylt aktivitetsplikten i etteroppgjørsåret. Hvis aktivitetsplikten ikke er
+            oppfylt, skal etteroppgjøret avbrytes. Saken må deretter tas opp til ny vurdering og ferdigstilles før
+            etteroppgjøret for dette året kan gjennomføres.
+          </BodyShort>
+        </Box>
 
         {skjemaErAapent && erRedigerbar ? (
           <VStack gap="4">

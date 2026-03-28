@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.VilkaartypePair
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
+import no.nav.etterlatte.vilkaarsvurdering.toDto
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
@@ -48,6 +49,15 @@ class VilkaarsvurderingService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = repository.hent(behandlingId)
+
+    fun hentVilkaarsvurderingDto(behandlingId: UUID) =
+        hentVilkaarsvurdering(behandlingId)
+            ?.let { vilkaarsvurdering ->
+                toDto(
+                    vilkaarsvurdering = vilkaarsvurdering,
+                    behandlingGrunnlagVersjon = hentBehandlingensGrunnlag(behandlingId).metadata.versjon,
+                )
+            }
 
     fun erMigrertYrkesskadefordel(behandlingId: UUID): Boolean {
         val hentBehandling = behandlingService.hentBehandling(behandlingId)!!
@@ -167,15 +177,17 @@ class VilkaarsvurderingService(
 
             val vilkaar =
                 when {
-                    behandling.revurderingsaarsak() == Revurderingaarsak.REGULERING ->
+                    behandling.revurderingsaarsak() == Revurderingaarsak.REGULERING -> {
                         tidligereVilkaarsvurdering.vilkaar.kopier()
+                    }
 
-                    else ->
+                    else -> {
                         oppdaterVilkaar(
                             kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(kopierKunVilkaarGjeldendeAvdoede),
                             behandling = behandling,
                             virkningstidspunkt = virkningstidspunkt,
                         )
+                    }
                 }
 
             val nyVilkaarsvurdering =
@@ -341,23 +353,26 @@ class VilkaarsvurderingService(
         sakType: SakType,
     ): List<Vilkaar> =
         when (sakType) {
-            SakType.BARNEPENSJON ->
+            SakType.BARNEPENSJON -> {
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING,
                     BehandlingType.REVURDERING,
-                    ->
+                    -> {
                         if (virkningstidspunkt.erPaaNyttRegelverk()) {
                             BarnepensjonVilkaar2024.inngangsvilkaar()
                         } else {
                             BarnepensjonVilkaar1967.inngangsvilkaar()
                         }
+                    }
                 }
+            }
 
-            SakType.OMSTILLINGSSTOENAD ->
+            SakType.OMSTILLINGSSTOENAD -> {
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING -> OmstillingstoenadVilkaar.inngangsvilkaar()
                     BehandlingType.REVURDERING -> OmstillingstoenadVilkaar.loependevilkaar()
                 }
+            }
         }
 
     fun sjekkGyldighetOgOppdaterBehandlingStatus(

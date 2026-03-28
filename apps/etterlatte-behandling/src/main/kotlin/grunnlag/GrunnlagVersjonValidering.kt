@@ -4,7 +4,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.BeregningOgAvkorting
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.slf4j.LoggerFactory
 
@@ -12,7 +12,7 @@ object GrunnlagVersjonValidering {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun validerVersjon(
-        vilkaarsvurdering: Vilkaarsvurdering?,
+        vilkaarsvurdering: VilkaarsvurderingDto?,
         beregningOgAvkorting: BeregningOgAvkorting?,
         trygdetider: List<TrygdetidDto>,
         behandling: DetaljertBehandling,

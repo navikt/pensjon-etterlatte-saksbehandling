@@ -95,7 +95,7 @@ jobs:
           echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build-and-publish.outputs.digest }}" >> $GITHUB_ENV
       - name: Generate SBOM, attest and sign image
         id: attest-sign
-        uses: nais/attest-sign@4026aea21c05a2c711a00bced0d9bb5fc944fcf6 # ratchet:nais/attest-sign@v1
+        uses: nais/attest-sign@9f718bc53c1379a59982d425d1e7456f632af881 # ratchet:nais/attest-sign@v2.0.4
         env:
           TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
         with:

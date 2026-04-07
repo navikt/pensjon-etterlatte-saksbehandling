@@ -111,7 +111,7 @@ class EtteroppgjoerRepository(
                     """
                     SELECT DISTINCT ON (sak_id) id, forbehandling_id, sak_id, aar, hendelse, forbehandling_status, 
                       opprettet, maaneder_ytelse, teknisk_tid, utbetalt_stoenad, ny_brutto_stoenad, differanse, 
-                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type, summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering
+                      rettsgebyr, rettsgebyr_gyldig_fra, tilbakekreving_grense, etterbetaling_grense, resultat_type, summerte_inntekter, pensjonsgivende_inntekter, tilknyttet_revurdering, klage_omgjoering
                     FROM etteroppgjoer_statistikk
                     WHERE teknisk_tid >= ? AND teknisk_tid < ?
                     AND tilknyttet_revurdering = TRUE

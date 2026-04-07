@@ -1,6 +1,6 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
 import java.time.LocalDate
 
 class VedtakEtteroppgjoerService(
-    private val repository: VedtaksvurderingRepository,
+    private val repository: VedtaksvurderingRepositoryOperasjoner,
     private val vedtakSamordningService: VedtakSamordningService,
 ) {
     fun hentVedtakslisteIEtteroppgjoersAar(

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -91,6 +93,12 @@ data class Vedtak(
     fun underArbeid(): Boolean = status in listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT)
 }
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "innholdType")
+@JsonSubTypes(
+    JsonSubTypes.Type(VedtakInnhold.Behandling::class, name = "BEHANDLING"),
+    JsonSubTypes.Type(VedtakInnhold.Tilbakekreving::class, name = "TILBAKEKREVING"),
+    JsonSubTypes.Type(VedtakInnhold.Klage::class, name = "KLAGE"),
+)
 sealed interface VedtakInnhold {
     data class Behandling(
         val behandlingType: BehandlingType,

@@ -92,6 +92,7 @@ object EtteroppgjoerBrevData {
         val rettsgebyrBeloep: Kroner,
         val harOpphoer: Boolean,
         val mottattSkatteoppgjoer: Boolean,
+        val klageOmgjoering: Boolean,
     ) : BrevFastInnholdData() {
         override val type: String = "OMS_EO_VEDTAK"
 

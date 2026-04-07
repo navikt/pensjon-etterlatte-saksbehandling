@@ -98,7 +98,11 @@ app.use('/api/pdltjenester', tokenMiddleware(ApiConfig.pdltjenester.scope), prox
 
 app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url))
 
-app.use('/api/vedtak', tokenMiddleware(ApiConfig.vedtak.scope), proxy(ApiConfig.vedtak.url))
+if (appConf.brukVedtaksroutesIBehandling) {
+  app.use('/api/vedtak', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
+} else {
+  app.use('/api/vedtak', tokenMiddleware(ApiConfig.vedtak.scope), proxy(ApiConfig.vedtak.url))
+}
 
 app.use('/api/trygdetid', tokenMiddleware(ApiConfig.trygdetid.scope), proxy(ApiConfig.trygdetid.url))
 

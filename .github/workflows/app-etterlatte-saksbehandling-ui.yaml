@@ -59,7 +59,7 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
       - name: Build and publish Docker image
-        uses: nais/docker-build-push@ae613eff6f44f0323476eda1c3994a7c518761c3 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@078e460885ed0424b60d45ce9220b4be1748be9d # ratchet:nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: etterlatte
@@ -78,7 +78,7 @@ jobs:
       id-token: write
     steps:
       - name: NAIS login
-        uses: nais/login@e7cf2c159677dc7c7d599feff5f808f2bf59c7cf # ratchet:nais/login@v0
+        uses: nais/login@c88ada9ce583928e1c84d2fd5c45cfacdd18d5de # ratchet:nais/login@v0
         id: login
         with:
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
@@ -91,7 +91,7 @@ jobs:
           echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build.outputs.digest }}" >> $GITHUB_ENV
       - name: Generate SBOM, attest and sign image
         id: attest-sign
-        uses: nais/attest-sign@4026aea21c05a2c711a00bced0d9bb5fc944fcf6 # ratchet:nais/attest-sign@v1
+        uses: nais/attest-sign@9f718bc53c1379a59982d425d1e7456f632af881 # ratchet:nais/attest-sign@v2.0.4
         env:
           TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
         with:

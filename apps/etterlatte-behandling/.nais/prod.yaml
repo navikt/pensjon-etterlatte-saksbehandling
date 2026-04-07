@@ -96,6 +96,8 @@ spec:
       value: "07-18"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
+    - name: KAFKA_VEDTAKSHENDELSER_TOPIC
+      value: etterlatte.vedtakshendelser
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
       value: latest
@@ -184,7 +186,9 @@ spec:
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://prod-fss.pensjonsamhandling.sam/.default
     - name: BRUK_NY_VEDTAK_KLIENT
-      value: "false"
+      value: nei
+    - name: BRUK_VEDTAK_REPOSITORY_KLIENT
+      value: nei
 
   envFrom:
     - secret: my-application-unleash-api-token

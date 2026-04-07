@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -153,6 +154,7 @@ class VedtaksbrevService(
 
             val etterbetaling = behandlingInfoService.hentEtterbetaling(behandlingId)?.toEtterbetalingDTO()
             val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+            krev(trygdetid.isNotEmpty()) { "Klarte ikke hente trygdetid for å generere vedtaksbrev" }
 
             val erTidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true
 

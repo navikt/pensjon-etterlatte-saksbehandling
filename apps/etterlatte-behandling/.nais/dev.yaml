@@ -85,6 +85,8 @@ spec:
       value: "07-18"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: KAFKA_VEDTAKSHENDELSER_TOPIC
+      value: etterlatte.vedtakshendelser
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: ETTERLATTE_PDLTJENESTER_URL
@@ -170,7 +172,9 @@ spec:
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://dev-fss.pensjonsamhandling.sam-q2/.default
     - name: BRUK_NY_VEDTAK_KLIENT
-      value: "false"
+      value: ja
+    - name: BRUK_VEDTAK_REPOSITORY_KLIENT
+      value: ja
 
   envFrom:
     - secret: my-application-unleash-api-token
@@ -229,6 +233,7 @@ spec:
         - application: etterlatte-utbetaling
         - application: etterlatte-api
         - application: etterlatte-hendelser-ufoere
+        - application: gjenlevende-bs-sak-frontend
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: nais
           cluster: dev-gcp

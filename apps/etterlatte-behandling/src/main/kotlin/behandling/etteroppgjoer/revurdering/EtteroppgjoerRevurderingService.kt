@@ -56,6 +56,7 @@ class EtteroppgjoerRevurderingService(
         sakId: SakId,
         inntektsaar: Int,
         opprinnelse: BehandlingOpprinnelse,
+        klageId: UUID? = null,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val etteroppgjoer =
@@ -80,19 +81,21 @@ class EtteroppgjoerRevurderingService(
 
                 val revurdering =
                     opprettRevurdering(
-                        sakId,
-                        sisteIverksatteBehandlingMedAvkorting,
-                        sisteFerdigstilteForbehandlingId,
-                        opprinnelse,
-                        if (vedtakMedGjeldendeOpphoer != null) {
-                            OpphoerFraTidligereBehandling(
-                                vedtakMedGjeldendeOpphoer.opphoersdato()!!,
-                                vedtakMedGjeldendeOpphoer.behandlingId,
-                            )
-                        } else {
-                            null
-                        },
-                        brukerTokenInfo,
+                        sakId = sakId,
+                        sisteIverksatteBehandling = sisteIverksatteBehandlingMedAvkorting,
+                        sisteFerdigstilteForbehandlingId = sisteFerdigstilteForbehandlingId,
+                        opprinnelse = opprinnelse,
+                        opphoerFraTidligereBehandling =
+                            if (vedtakMedGjeldendeOpphoer != null) {
+                                OpphoerFraTidligereBehandling(
+                                    vedtakMedGjeldendeOpphoer.opphoersdato()!!,
+                                    vedtakMedGjeldendeOpphoer.behandlingId,
+                                )
+                            } else {
+                                null
+                            },
+                        klageId = klageId,
+                        brukerTokenInfo = brukerTokenInfo,
                     )
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
@@ -102,9 +105,9 @@ class EtteroppgjoerRevurderingService(
                 )
 
                 etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                    sakId,
-                    etteroppgjoer.inntektsaar,
-                    EtteroppgjoerStatus.UNDER_REVURDERING,
+                    sakId = sakId,
+                    inntektsaar = etteroppgjoer.inntektsaar,
+                    status = EtteroppgjoerStatus.UNDER_REVURDERING,
                 )
 
                 revurdering to sisteIverksatteBehandlingMedAvkorting
@@ -138,14 +141,14 @@ class EtteroppgjoerRevurderingService(
         }
     }
 
-    fun omgjoerEtteroppgjoerRevurdering(
+    fun omgjoerAvbruttEtteroppgjoerRevurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Behandling {
+    ): Revurdering {
         val (behandling, forbehandling) =
             inTransaction {
-                val behandling =
-                    hentBehandling(behandlingId)
+                val behandling = hentBehandling(behandlingId)
+
                 if (behandling.status != BehandlingStatus.AVBRUTT) {
                     throw IkkeTillattException(
                         "BEHANDLING_IKKE_AVBRUTT",
@@ -171,7 +174,49 @@ class EtteroppgjoerRevurderingService(
                 behandling to forbehandling
             }
 
-        return opprettEtteroppgjoerRevurdering(behandling.sak.id, forbehandling.aar, behandling.opprinnelse, brukerTokenInfo)
+        return opprettEtteroppgjoerRevurdering(
+            sakId = behandling.sak.id,
+            inntektsaar = forbehandling.aar,
+            opprinnelse = behandling.opprinnelse,
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    fun omgjoerEtteroppgjoerRevurderingEtterKlage(
+        behandlingId: UUID,
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Revurdering {
+        val (behandling, forbehandling) =
+            inTransaction {
+                val behandling = hentBehandling(behandlingId)
+
+                if (behandling.status != BehandlingStatus.IVERKSATT) {
+                    throw IkkeTillattException(
+                        "BEHANDLING_IKKE_FERDIGSTILT",
+                        "Revurdering med id=${behandling.id} er ikke iverksatt og kan ikke omgjoeres med klageId=$klageId",
+                    )
+                }
+
+                val forbehandling = hentForbehandlingForRevurdering(behandling)
+
+                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                    forbehandling.sak.id,
+                    forbehandling.aar,
+                    EtteroppgjoerStatus.OMGJOERING,
+                    EtteroppgjoerHendelser.OMGJOERING,
+                )
+
+                behandling to forbehandling
+            }
+
+        return opprettEtteroppgjoerRevurdering(
+            sakId = behandling.sak.id,
+            inntektsaar = forbehandling.aar,
+            opprinnelse = behandling.opprinnelse,
+            brukerTokenInfo = brukerTokenInfo,
+            klageId = klageId,
+        )
     }
 
     private fun hentBehandling(behandlingId: UUID): Behandling =
@@ -211,12 +256,14 @@ class EtteroppgjoerRevurderingService(
         sisteFerdigstilteForbehandlingId: UUID,
         opprinnelse: BehandlingOpprinnelse,
         opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling?,
+        klageId: UUID? = null,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val forbehandling =
             etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(
                 sisteFerdigstilteForbehandlingId,
                 sakId,
+                klageId,
                 brukerTokenInfo,
             )
 

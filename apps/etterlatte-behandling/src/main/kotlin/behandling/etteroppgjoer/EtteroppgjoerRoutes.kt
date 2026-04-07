@@ -303,6 +303,24 @@ fun Route.etteroppgjoerRoutes(
                         call.respond(HttpStatusCode.OK)
                     }
                 }
+
+                get("er-siste-inntekter-oppdaterte") {
+                    val brukerSisteInntekter =
+                        inTransaction {
+                            forbehandlingService.forbehandlingBrukerSisteInntekter(forbehandlingId)
+                        }
+                    call.respond(brukerSisteInntekter)
+                }
+
+                post("oppdater-siste-inntekter") {
+                    kunSkrivetilgang {
+                        inTransaction {
+                            forbehandlingService.oppdaterSisteInntekter(forbehandlingId, brukerTokenInfo)
+                        }
+
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
             }
 
             post("bulk") {
@@ -343,12 +361,16 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(resultat)
             }
 
-            post("/omgjoer") {
+            post("/omgjoer-avbrutt-revurdering") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
 
                     sjekkEtteroppgjoerEnabled(featureToggleService)
                     val behandling =
-                        etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(behandlingId, saksbehandler)
+                        etteroppgjoerRevurderingService.omgjoerAvbruttEtteroppgjoerRevurdering(
+                            behandlingId = behandlingId,
+                            brukerTokenInfo = saksbehandler,
+                        )
+
                     call.respond(behandling)
                 }
             }

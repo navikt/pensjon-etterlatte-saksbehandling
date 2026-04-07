@@ -177,6 +177,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery {
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
         } returns listOf(mockVedtak(idForrigeIverksatt, VedtakType.INNVILGELSE))
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(idRevurdering) } returns null
         every { repository.finnBeregningsGrunnlag(idForrigeIverksatt) } returns
             BeregningsGrunnlag(
@@ -436,6 +437,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk(relaxed = true)
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,
@@ -472,6 +474,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk(relaxed = true)
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,

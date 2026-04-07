@@ -252,31 +252,32 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
         beregnetDato = base.beregnetDato,
         grunnlagMetadata = base.grunnlagMetadata,
         beregningsperioder =
-            beregningsperioder.map {
-                Beregningsperiode(
-                    id = it.id,
-                    datoFOM = it.datoFOM,
-                    datoTOM = it.datoTOM,
-                    utbetaltBeloep = it.utbetaltBeloep,
-                    soeskenFlokk = it.soeskenFlokk,
-                    institusjonsopphold = it.institusjonsopphold,
-                    grunnbelopMnd = it.grunnbelopMnd,
-                    grunnbelop = it.grunnbelop,
-                    trygdetid = it.trygdetid,
-                    trygdetidForIdent = it.trygdetidForIdent,
-                    beregningsMetode = it.beregningsMetode,
-                    samletNorskTrygdetid = it.samletNorskTrygdetid,
-                    samletTeoretiskTrygdetid = it.samletTeoretiskTrygdetid,
-                    broek = it.broek,
-                    avdoedeForeldre = it.avdoedeForeldre,
-                    regelResultat = it.regelResultat,
-                    regelVersjon = it.regelVersjon,
-                    regelverk = it.regelverk,
-                    kilde = it.kilde,
-                    kunEnJuridiskForelder = it.kunEnJuridiskForelder,
-                    harForeldreloessats = it.harForeldreloessats,
-                )
-            },
+            beregningsperioder
+                .map {
+                    Beregningsperiode(
+                        id = it.id,
+                        datoFOM = it.datoFOM,
+                        datoTOM = it.datoTOM,
+                        utbetaltBeloep = it.utbetaltBeloep,
+                        soeskenFlokk = it.soeskenFlokk,
+                        institusjonsopphold = it.institusjonsopphold,
+                        grunnbelopMnd = it.grunnbelopMnd,
+                        grunnbelop = it.grunnbelop,
+                        trygdetid = it.trygdetid,
+                        trygdetidForIdent = it.trygdetidForIdent,
+                        beregningsMetode = it.beregningsMetode,
+                        samletNorskTrygdetid = it.samletNorskTrygdetid,
+                        samletTeoretiskTrygdetid = it.samletTeoretiskTrygdetid,
+                        broek = it.broek,
+                        avdoedeForeldre = it.avdoedeForeldre,
+                        regelResultat = it.regelResultat,
+                        regelVersjon = it.regelVersjon,
+                        regelverk = it.regelverk,
+                        kilde = it.kilde,
+                        kunEnJuridiskForelder = it.kunEnJuridiskForelder,
+                        harForeldreloessats = it.harForeldreloessats,
+                    )
+                }.sortedBy { it.datoFOM },
         overstyrBeregning = null,
     )
 }

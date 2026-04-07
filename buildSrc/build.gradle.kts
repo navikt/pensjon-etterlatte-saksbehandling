@@ -15,6 +15,7 @@ repositories {
 dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
+    implementation("org.apache.avro:avro-compiler:1.12.1")
 }
 
 tasks {

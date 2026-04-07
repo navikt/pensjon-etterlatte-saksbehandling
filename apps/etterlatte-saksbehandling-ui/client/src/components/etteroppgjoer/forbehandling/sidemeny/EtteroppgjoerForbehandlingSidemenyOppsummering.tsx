@@ -10,6 +10,7 @@ export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
 
   const forbehandlingErFerdigstilt = forbehandling.status === EtteroppgjoerForbehandlingStatus.FERDIGSTILT
   const forbehandlingErAvbrutt = forbehandling.status === EtteroppgjoerForbehandlingStatus.AVBRUTT
+  const forbheandlingErKlage = forbehandling.klageOmgjoering
 
   return (
     <SidebarPanel $border>
@@ -25,6 +26,12 @@ export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
           {forbehandlingErAvbrutt && (
             <Heading size="xsmall" style={{ color: 'var(--ax-danger-500)' }}>
               Avbrutt
+            </Heading>
+          )}
+
+          {forbheandlingErKlage && (
+            <Heading size="xsmall" style={{ color: 'var(--a-yellow-400)' }}>
+              Omgjøring pga klage
             </Heading>
           )}
         </VStack>

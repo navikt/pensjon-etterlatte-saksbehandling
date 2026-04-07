@@ -59,7 +59,7 @@ jobs:
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
       - name: Build and publish Docker image
-        uses: nais/docker-build-push@ae613eff6f44f0323476eda1c3994a7c518761c3 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@078e460885ed0424b60d45ce9220b4be1748be9d # ratchet:nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: etterlatte

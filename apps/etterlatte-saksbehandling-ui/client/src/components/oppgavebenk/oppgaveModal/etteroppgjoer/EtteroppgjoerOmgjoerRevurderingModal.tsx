@@ -6,7 +6,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
-import { omgjoerEtteroppgjoerRevurdering as omgjoerEtteroppgjoerRevurderingApi } from '~shared/api/etteroppgjoer'
+import { omgjoerAvbruttEtteroppgjoerRevurdering as omgjoerEtteroppgjoerRevurderingApi } from '~shared/api/etteroppgjoer'
 
 type Props = {
   behandlingId: string

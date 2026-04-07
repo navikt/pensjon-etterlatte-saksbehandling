@@ -70,10 +70,6 @@ class VedtakMottakRiver(
         try {
             val vedtak: Utbetalingsvedtak = lesVedtak(packet).also { vedtakId = it.vedtakId }
             logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
-            if (vedtakId == 68905L) {
-                // Denne har allerede blitt lest
-                return
-            }
 
             when (val resultat = utbetalingService.iverksettUtbetaling(vedtak)) {
                 is SendtTilOppdrag -> {

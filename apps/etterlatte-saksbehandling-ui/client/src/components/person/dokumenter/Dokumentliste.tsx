@@ -101,7 +101,7 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
             {isPending(dokumenter) && (
               <Table.Row>
                 <Table.DataCell colSpan={100}>
-                  <Spinner margin="0" label="Henter dokumenter" />
+                  <Spinner margin="space-0" label="Henter dokumenter" />
                 </Table.DataCell>
               </Table.Row>
             )}

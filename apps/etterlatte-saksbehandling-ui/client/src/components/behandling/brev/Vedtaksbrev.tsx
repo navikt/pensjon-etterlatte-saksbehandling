@@ -168,7 +168,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           <BrevutfallModal behandling={behandling} onLagre={hentBrevPaaNytt} setVis={setVisBrevutfall} />
         )}
       <HStack wrap={false}>
-        <SidebarBox paddingInline="16" paddingBlock="16 4">
+        <SidebarBox paddingInline="space-64" paddingBlock="space-64 space-16">
           <VStack gap="space-16">
             <Heading spacing size="large" level="1">
               Vedtaksbrev

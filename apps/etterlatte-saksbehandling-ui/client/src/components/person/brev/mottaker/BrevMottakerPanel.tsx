@@ -102,7 +102,7 @@ export function BrevMottakerPanel({
             </Alert>
           </Box>
         ),
-        pending: <Spinner label="Henter eventuelle verger" margin="0" />,
+        pending: <Spinner label="Henter eventuelle verger" margin="space-0" />,
         error: () =>
           kanRedigeres && (
             <Box marginBlock="space-0 space-8">

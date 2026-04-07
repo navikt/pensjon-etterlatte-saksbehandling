@@ -241,7 +241,7 @@ export const HandlingerForOppgave = ({
             Opprett revurdering
           </Button>
         ),
-        pending: <Spinner label="Oppretter ..." margin="0" />,
+        pending: <Spinner label="Oppretter ..." margin="space-0" />,
         error: (error) => <ApiErrorAlert>{error?.detail ?? 'Ukjent feil'}</ApiErrorAlert>,
       })
     case Oppgavetype.OPPFOELGING:

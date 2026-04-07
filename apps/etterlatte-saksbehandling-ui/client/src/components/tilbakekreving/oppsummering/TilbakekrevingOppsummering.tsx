@@ -111,13 +111,13 @@ export function TilbakekrevingOppsummering({
                   nettobeløpet. Det må lages en oppgave til NØP for å få postert skattebeløpet manuelt etter
                   overstyringen.
                 </BodyLong>
-                <VStack gap="2">
+                <VStack gap="space-8">
                   <Label>Merknad</Label>
                   <BodyShort>Barnepensjon - se vedtak om netto tilbakekreving i Gjenny [dato]</BodyShort>
                   <BodyShort>Skatt kr [skattebeløp] må posteres manuelt.</BodyShort>
                 </VStack>
 
-                <VStack gap="2">
+                <VStack gap="space-8">
                   <Label>Tema</Label>
                   <BodyShort>Økonomi</BodyShort>
                 </VStack>
@@ -125,11 +125,11 @@ export function TilbakekrevingOppsummering({
                   <Label>Oppgavetype</Label>
                   <BodyShort>Vurder henvendelse</BodyShort>
                 </VStack>
-                <VStack gap="2">
+                <VStack gap="space-8">
                   <Label>Gjelder</Label>
                   <BodyShort>Tilbakekreving</BodyShort>
                 </VStack>
-                <VStack gap="2">
+                <VStack gap="space-8">
                   <Label>Prioritet</Label>
                   <BodyShort>Høy</BodyShort>
                 </VStack>

@@ -49,12 +49,18 @@ jobs:
       - name: License check top level
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn install --frozen-lockfile && yarn lisenssjekk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Install and build client
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Install and build server
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Run tests
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test

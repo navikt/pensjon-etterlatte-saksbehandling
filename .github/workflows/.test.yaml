@@ -54,8 +54,7 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # ratchet:actions/setup-node@v6
         with:
           node-version: '24.x'
-          cache: 'yarn'
-          cache-dependency-path: apps/${{ github.workflow }}/client/yarn.lock
+          registry-url: 'https://npm.pkg.github.com'
       - name: Install client
         working-directory: apps/${{ github.workflow }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build

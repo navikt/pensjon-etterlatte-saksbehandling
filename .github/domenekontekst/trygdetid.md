@@ -7,7 +7,6 @@ Håndterer og beregner trygdetid for avdøde – dvs. perioder med opptjening i 
 - Registrere og validere trygdetidsperioder (manuelt eller importert fra Pesys)
 - Beregne faktisk og fremtidig trygdetid
 - Håndtere utenlandsavtaler som teller med i trygdetiden
-- Sjekke avvik mot Pesys (bakgrunnsjobb)
 
 ## Sentrale begreper
 
@@ -23,7 +22,6 @@ Håndterer og beregner trygdetid for avdøde – dvs. perioder med opptjening i 
 - `TrygdetidService` – hoved-API for opprettelse, henting og oppdatering
 - `TrygdetidBeregningService` – beregner total trygdetid fra grunnlag
 - `AvtaleService` – håndterer utenlandsavtaler
-- `SjekkAvvikJobb` – bakgrunnsjobb som sammenligner med Pesys
 
 ## Avhengigheter
 

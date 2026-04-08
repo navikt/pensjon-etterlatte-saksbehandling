@@ -94,7 +94,8 @@ Gjennomføres i to steg etter at skatteoppgjøret for et ytelsesår er ferdig:
 **Steg 1 – Forbehandling / varselbrev**
 - Data hentes fra Skatteetaten og a-inntekt
 - Saksbehandler fastsetter riktig inntekt for det aktuelle året
-- Hvis inntekten stemte godt nok: varselbrev sendes, ingen revurdering
+- Hvis inntekten stemte godt nok skal informasjonsbrev sendes, ingen revurdering med mindre bruker kommer med ny informasjon
+- Hvis inntekten ikke stemte blir det et varselbrev, og det skal gjøres en revurdering
 
 **Steg 2 – Revurdering med vedtak** (hvis avvik)
 - Revurdering med årsak `ETTEROPPGJOER` opprettes

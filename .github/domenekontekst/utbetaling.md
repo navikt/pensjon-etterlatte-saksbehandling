@@ -8,17 +8,20 @@ Oversetter iverksatte vedtak til utbetalinger i Oppdragssystemet (OS), håndtere
 - Sende utbetalinger til Oppdrag via IBM MQ
 - Motta og tolke kvitteringer fra Oppdrag
 - Daglig grensesnittavstemming mot Oppdrag
+- Ca. månedlig konsistensavstemming mot Oppdrag
 - Simulere utbetalinger for forhåndsvisning
 
 ## Sentrale begreper
 
-| Begrep | Forklaring |
-|---|---|
-| `Utbetaling` | Én utbetalingstransaksjon med status og linjer |
-| `Utbetalingslinje` | Enkeltlinje i oppdraget (type `UTBETALING` eller `OPPHOER`) |
-| `Utbetalingsstatus` | `SENDT` → `MOTTATT` → `GODKJENT` / `AVVIST` / `GODKJENT_MED_FEIL` |
-| `Iverksetting` | Prosessen med å konvertere vedtak til utbetalingsoppdrag |
-| `Grensesnittsavstemming` | Daglig batch-kontroll av samsvar mellom systemer |
+| Begrep                   | Forklaring                                                        |
+|--------------------------|-------------------------------------------------------------------|
+| `Utbetaling`             | Én utbetalingstransaksjon med status og linjer                    |
+| `Utbetalingslinje`       | Enkeltlinje i oppdraget (type `UTBETALING` eller `OPPHOER`)       |
+| `Utbetalingsstatus`      | `SENDT` → `MOTTATT` → `GODKJENT` / `AVVIST` / `GODKJENT_MED_FEIL` |
+| `Iverksetting`           | Prosessen med å konvertere vedtak til utbetalingsoppdrag          |
+| `Grensesnittsavstemming` | Daglig batch-kontroll av samsvar mellom systemer                  |
+| `Konsistensavstemming`   | Ca. månedlig kontroll av alle løpende utbetalinger fra systemet   |
+
 
 ## Nøkkelklasser
 
@@ -27,6 +30,7 @@ Oversetter iverksatte vedtak til utbetalinger i Oppdragssystemet (OS), håndtere
 - `KvitteringMottaker` – poller MQ-kø for kvitteringer fra Oppdrag
 - `GrensesnittsavstemmingService` – daglig avstemmingsjobb
 - `SimuleringOsService` – simulerer utbetaling mot Oppdrag
+- `KonsistensavstemmingServic` - månedlig avstemmingsjobb
 
 ## Avhengigheter
 

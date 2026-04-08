@@ -2,7 +2,7 @@
 
 ## Oversikt
 
-Monorepo for NAVs saksbehandlingssystem for etterlatteytelser, som dekker to ytelsestyper:
+Monorepo for Navs saksbehandlingssystem for etterlatteytelser, som dekker to ytelsestyper:
 - **Barnepensjon (BP)**
 - **Omstillingsstønad (OMS)**
 

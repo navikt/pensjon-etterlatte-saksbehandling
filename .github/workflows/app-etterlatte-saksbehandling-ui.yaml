@@ -42,8 +42,7 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # ratchet:actions/setup-node@v6
         with:
           node-version: '24.x'
-          cache: 'yarn'
-          cache-dependency-path: apps/${{ env.APP_NAME }}/client/yarn.lock
+          registry-url: "https://npm.pkg.github.com"
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@9e7def61550737ba68c62d34a32dd31792e3f429 # ratchet:rlespinasse/github-slug-action@v5
       - name: License check top level

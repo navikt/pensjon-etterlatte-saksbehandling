@@ -703,7 +703,7 @@ internal class VilkaarsvurderingServiceTest(
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe behandlingId
-        toDto(vilkaarsvurdering, 0L).isYrkesskade() shouldBe false
+        vilkaarsvurdering.toDto(0L).isYrkesskade() shouldBe false
     }
 
     @Test
@@ -736,7 +736,7 @@ internal class VilkaarsvurderingServiceTest(
 
         oppdatertVilkaarsvurdering shouldNotBe null
         oppdatertVilkaarsvurdering!!.behandlingId shouldBe behandlingId
-        toDto(oppdatertVilkaarsvurdering, 0L).isYrkesskade() shouldBe true
+        oppdatertVilkaarsvurdering.toDto(0L).isYrkesskade() shouldBe true
     }
 
     @Test

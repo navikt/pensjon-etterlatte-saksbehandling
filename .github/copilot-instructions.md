@@ -144,3 +144,41 @@ For Colima (i stedet for Docker Desktop):
 export DOCKER_HOST=unix://${HOME}/.colima/default/docker.sock
 export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 ```
+
+
+## Sentrale domenebegreper
+
+- **Sak** = én ytelsestype for én person (unik per person + saktype)
+- **Behandling** = én endringsbehandling på en sak (`FØRSTEGANGSBEHANDLING` eller `REVURDERING`)
+- **Vedtak** = det juridiske resultatet av en behandling (innvilgelse, avslag, opphor, endring)
+- **Iverksetting** = utføring av vedtak: utbetaling opprettes, brev sendes, eksterne systemer varsles
+- **Omregning** = automatisk revurdering (G-regulering, årlig inntektsjustering, aldersovergang)
+- **Etteroppgjør** = årlig oppgjør etter skattefastsetting (kun OMS) – to steg: varselbrev + revurdering
+
+### BP vs. OMS
+
+- **BP** er enklere: ren beregning uten inntektsjustering
+- **OMS** har mer kompleksitet: avkorting (inntektsreduksjon), aktivitetsplikt, etteroppgjør, samordning mot Pesys
+
+## Ufravikelige regler
+
+Følgende regler skal **aldri** brytes, uansett kontekst:
+
+1. **Flyway-migrasjoner som er kjørt i produksjon skal aldri endres** – opprett nye migrasjoner for å rette feil
+2. **Ingen app skal skrive direkte til en annen apps database** – all kommunikasjon skjer via REST eller Kafka
+3. **Iverksatte eller attesterte behandlinger skal aldri endres** – opprett ny revurdering i stedet
+4. **`etterlatte-behandling` er autoriteten for tilgangskontroll** – andre apper kaller behandling for å sjekke tilgang
+5. **Grunnlagsdata skal hentes fra `etterlatte-behandling`** via `GrunnlagKlient`, ikke direkte fra PDL eller andre kilder
+
+## Arkitekturprinsipper
+
+- `-kafka`-apper er separate deployments som isolerer meldingskonsum fra REST-appenes tilgjengelighet
+- Intern kommunikasjon skjer via **Rapids-en** (intern Kafka-topic) og REST (Azure AD-autentisert)
+- `etterlatte.vedtakshendelser` er en **ekstern** topic for deling med andre Nav-systemer – ikke for intern bruk
+- Ingen DI-rammeverk: manuell wiring via `ApplicationContext`-klasse i hver app
+- On-behalf-of HTTP-kall bruker `DownstreamResourceClient`, maskin-til-maskin bruker `httpClientClientCredentials`
+
+## Teknisk gjeld å kjenne til
+
+- **brev-api** har gammel brevflyt (brev-api bygger brevdata selv) vs. ny strukturert brevflyt (behandling bygger brevdata). Nye brevtyper skal alltid bruke ny flyt. Unngå endringer i gammel flyt.
+- **avkorting med restanse** (OMS beregning) er genuint komplekst – ikke forsøk å forenkle

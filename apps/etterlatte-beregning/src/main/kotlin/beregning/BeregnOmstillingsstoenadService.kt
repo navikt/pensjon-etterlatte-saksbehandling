@@ -5,6 +5,7 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Vedtaksperioder
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
@@ -55,6 +56,7 @@ enum class BeregningToggles(
     val value: String,
 ) : FeatureToggle {
     BEREGNING_BRUK_NYE_BEREGNINGSREGLER("beregning_bruk_nye_beregningsregler"),
+    BEREGN_OVER_FLERE_PERIODER("beregn_over_flere_perioder"),
     ;
 
     override fun key(): String = this.value
@@ -111,7 +113,26 @@ class BeregnOmstillingsstoenadService(
             )
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
+                if (featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, false)) {
+                    beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
+                } else {
+                    when (val perioder = beregningsgrunnlag.vedtaksperioder) {
+                        null -> {
+                            beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
+                        }
+
+                        else -> {
+                            beregnOmstillingsstoenadPerioder(
+                                behandling.id,
+                                grunnlag,
+                                omstillingstoenadGrunnlag,
+                                virkningstidspunkt,
+                                tilDato = tilDato,
+                                vedtaksperioder = perioder,
+                            )
+                        }
+                    }
+                }
             }
 
             BehandlingType.REVURDERING -> {
@@ -126,7 +147,32 @@ class BeregnOmstillingsstoenadService(
 
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.OPPFYLT -> {
-                        beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
+                        if (featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, false)) {
+                            beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
+                        } else {
+                            when (val perioder = beregningsgrunnlag.vedtaksperioder) {
+                                null -> {
+                                    beregnOmstillingsstoenad(
+                                        behandling.id,
+                                        grunnlag,
+                                        omstillingstoenadGrunnlag,
+                                        virkningstidspunkt,
+                                        tilDato,
+                                    )
+                                }
+
+                                else -> {
+                                    beregnOmstillingsstoenadPerioder(
+                                        behandling.id,
+                                        grunnlag,
+                                        omstillingstoenadGrunnlag,
+                                        virkningstidspunkt,
+                                        tilDato = tilDato,
+                                        vedtaksperioder = perioder,
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
@@ -135,6 +181,51 @@ class BeregnOmstillingsstoenadService(
                 }
             }
         }
+    }
+
+    private fun beregnOmstillingsstoenadPerioder(
+        behandlingId: UUID,
+        grunnlag: Grunnlag,
+        beregningsgrunnlag: PeriodisertOmstillingstoenadGrunnlag,
+        virkningstidspunkt: YearMonth,
+        vedtaksperioder: Vedtaksperioder,
+        tilDato: LocalDate? = null,
+    ): Beregning {
+        if (vedtaksperioder.perioder.none {
+                it.fom <= virkningstidspunkt && (it.tom ?: virkningstidspunkt) >= virkningstidspunkt
+            }
+        ) {
+            throw UgyldigForespoerselException(
+                "VIRK_STARTER_UTENFOR_VEDTAKSPERIODE",
+                "Kan ikke beregne en ytelse med virkningstidspunkt fra $virkningstidspunkt, " +
+                    "siden det er utenfor vedtaksperiodene",
+            )
+        }
+
+        val relevantePerioderForBeregning =
+            vedtaksperioder.perioder.filter {
+                (it.tom ?: virkningstidspunkt) >= virkningstidspunkt
+            }
+        val alleBeregninger =
+            relevantePerioderForBeregning.map { periode ->
+                val virkForBeregningIPeriode =
+                    if (periode.fom > virkningstidspunkt) {
+                        periode.fom
+                    } else {
+                        virkningstidspunkt
+                    }
+                beregnOmstillingsstoenad(
+                    behandlingId = behandlingId,
+                    grunnlag = grunnlag,
+                    beregningsgrunnlag = beregningsgrunnlag,
+                    virkningstidspunkt = virkForBeregningIPeriode,
+                    tilDato = periode.tom?.atEndOfMonth() ?: tilDato,
+                )
+            }
+        val allePerioder = alleBeregninger.flatMap { it.beregningsperioder }
+        return alleBeregninger.first().copy(
+            beregningsperioder = allePerioder,
+        )
     }
 
     private fun beregnOmstillingsstoenad(

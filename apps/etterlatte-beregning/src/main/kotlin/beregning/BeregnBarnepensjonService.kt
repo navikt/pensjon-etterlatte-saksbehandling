@@ -19,6 +19,7 @@ import no.nav.etterlatte.beregning.regler.finnAnvendtRegelverkBarnepensjon
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.finnAvdodeForeldre
 import no.nav.etterlatte.beregning.regler.finnHarForeldreloessats
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -58,6 +59,7 @@ class BeregnBarnepensjonService(
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
     private val anvendtTrygdetidRepository: AnvendtTrygdetidRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -162,28 +164,43 @@ class BeregnBarnepensjonService(
 
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                when (val perioder = beregningsGrunnlag.vedtaksperioder) {
-                    null -> {
-                        beregnBarnepensjon(
-                            behandling.id,
-                            grunnlag,
-                            barnepensjonGrunnlag,
-                            trygdetidListe,
-                            virkningstidspunkt,
-                            tilDato = tilDato,
-                        )
-                    }
+                if (featureToggleService.isEnabled(
+                        BeregningToggles.BEREGN_OVER_FLERE_PERIODER,
+                        false,
+                    )
+                ) {
+                    beregnBarnepensjon(
+                        behandling.id,
+                        grunnlag,
+                        barnepensjonGrunnlag,
+                        trygdetidListe,
+                        virkningstidspunkt,
+                        tilDato = tilDato,
+                    )
+                } else {
+                    when (val perioder = beregningsGrunnlag.vedtaksperioder) {
+                        null -> {
+                            beregnBarnepensjon(
+                                behandling.id,
+                                grunnlag,
+                                barnepensjonGrunnlag,
+                                trygdetidListe,
+                                virkningstidspunkt,
+                                tilDato = tilDato,
+                            )
+                        }
 
-                    else -> {
-                        beregnBarnepensjonPerioder(
-                            behandling.id,
-                            grunnlag,
-                            barnepensjonGrunnlag,
-                            trygdetidListe,
-                            virkningstidspunkt,
-                            tilDato = tilDato,
-                            vedtaksperioder = perioder,
-                        )
+                        else -> {
+                            beregnBarnepensjonPerioder(
+                                behandling.id,
+                                grunnlag,
+                                barnepensjonGrunnlag,
+                                trygdetidListe,
+                                virkningstidspunkt,
+                                tilDato = tilDato,
+                                vedtaksperioder = perioder,
+                            )
+                        }
                     }
                 }
             }
@@ -195,28 +212,43 @@ class BeregnBarnepensjonService(
 
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.OPPFYLT -> {
-                        when (val perioder = beregningsGrunnlag.vedtaksperioder) {
-                            null -> {
-                                beregnBarnepensjon(
-                                    behandling.id,
-                                    grunnlag,
-                                    barnepensjonGrunnlag,
-                                    trygdetidListe,
-                                    virkningstidspunkt,
-                                    tilDato = tilDato,
-                                )
-                            }
+                        if (featureToggleService.isEnabled(
+                                BeregningToggles.BEREGN_OVER_FLERE_PERIODER,
+                                false,
+                            )
+                        ) {
+                            beregnBarnepensjon(
+                                behandling.id,
+                                grunnlag,
+                                barnepensjonGrunnlag,
+                                trygdetidListe,
+                                virkningstidspunkt,
+                                tilDato = tilDato,
+                            )
+                        } else {
+                            when (val perioder = beregningsGrunnlag.vedtaksperioder) {
+                                null -> {
+                                    beregnBarnepensjon(
+                                        behandling.id,
+                                        grunnlag,
+                                        barnepensjonGrunnlag,
+                                        trygdetidListe,
+                                        virkningstidspunkt,
+                                        tilDato = tilDato,
+                                    )
+                                }
 
-                            else -> {
-                                beregnBarnepensjonPerioder(
-                                    behandling.id,
-                                    grunnlag,
-                                    barnepensjonGrunnlag,
-                                    trygdetidListe,
-                                    virkningstidspunkt,
-                                    tilDato = tilDato,
-                                    vedtaksperioder = perioder,
-                                )
+                                else -> {
+                                    beregnBarnepensjonPerioder(
+                                        behandling.id,
+                                        grunnlag,
+                                        barnepensjonGrunnlag,
+                                        trygdetidListe,
+                                        virkningstidspunkt,
+                                        tilDato = tilDato,
+                                        vedtaksperioder = perioder,
+                                    )
+                                }
                             }
                         }
                     }

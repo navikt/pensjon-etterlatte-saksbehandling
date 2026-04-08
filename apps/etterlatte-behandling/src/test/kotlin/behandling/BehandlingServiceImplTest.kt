@@ -241,7 +241,7 @@ internal class BehandlingServiceImplTest {
         val revurderingbehandling =
             revurdering(
                 sakId = sakId1,
-                relatertBehandlingId = relatertBehandlingsId.toString(),
+                relatertBehandlingId = relatertBehandlingsId,
                 revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
             )
 
@@ -285,7 +285,7 @@ internal class BehandlingServiceImplTest {
         nyKontekstMedBruker(mockSaksbehandler())
 
         val relatertBehandlingsId = UUID.randomUUID()
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1, relatertBehandlingId = relatertBehandlingsId.toString())
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1, relatertBehandlingId = relatertBehandlingsId)
 
         val oppgaveKlage = mockOppgaveIntern(relatertBehandlingsId)
 
@@ -492,7 +492,7 @@ internal class BehandlingServiceImplTest {
     fun `avbryt revurdering for etteroppgjoer tilbakestiller ogsaa etteroppgjoeret`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val forbehandlingId = UUID.randomUUID().toString()
+        val forbehandlingId = UUID.randomUUID()
         val revurdering =
             revurdering(
                 sakId = randomSakId(),
@@ -526,7 +526,7 @@ internal class BehandlingServiceImplTest {
         coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
         every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any(), any()) } just runs
         every { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) } just runs
-        every { etteroppgjoerForbehandlingDao.hentForbehandling(UUID.fromString(forbehandlingId)) } returns forbehandling
+        every { etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId) } returns forbehandling
         every { etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(revurdering.sak.id, 2024) } returns etteroppgjoer
         every { etteroppgjoerForbehandlingDao.lagreForbehandling(any()) } returns 1
         every { etteroppgjoerDao.lagreEtteroppgjoer(any()) } returns 1
@@ -1157,16 +1157,33 @@ internal class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `Kan ikke endre send brev førstegangsbehandling revurdering`() {
+    fun `Kan ikke endre send brev førstegangsbehandling som ikke er omgjoering av avslag`() {
         nyKontekstMedBruker(mockSaksbehandler())
         val behandlingId = UUID.randomUUID()
+        val behandling = foerstegangsbehandling(id = behandlingId, sakId = sakId1)
         every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
-        every { behandlingDaoMock.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = sakId1)
+        every { behandlingDaoMock.hentBehandling(behandlingId) } returns behandling
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns listOf(behandling)
         assertThrows<KanIkkeEndreSendeBrevForFoerstegangsbehandling> {
             behandlingService.endreSkalSendeBrev(behandlingId, true)
         }
 
         verify(exactly = 0) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
+    }
+
+    @Test
+    fun `Kan endre send brev førstegangsbehandling som er omgjoering av avslag`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+        val behandlingId = UUID.randomUUID()
+        val behandling = foerstegangsbehandling(id = behandlingId, sakId = sakId1)
+        val avslaattBehandling = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.AVSLAG)
+        every { behandlingDaoMock.lagreSendeBrev(behandlingId, false) } just runs
+        every { behandlingDaoMock.hentBehandling(behandlingId) } returns behandling
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns listOf(behandling, avslaattBehandling)
+
+        behandlingService.endreSkalSendeBrev(behandlingId, false)
+
+        verify(exactly = 1) { behandlingDaoMock.lagreSendeBrev(behandlingId, false) }
     }
 
     @Test

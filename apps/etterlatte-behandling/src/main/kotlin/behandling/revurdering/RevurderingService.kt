@@ -160,7 +160,7 @@ class RevurderingService(
         begrunnelse: String?,
         saksbehandlerIdent: String?,
         opprinnelse: BehandlingOpprinnelse,
-        relatertBehandlingId: String? = null,
+        relatertBehandlingId: UUID? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
         opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling? = null,

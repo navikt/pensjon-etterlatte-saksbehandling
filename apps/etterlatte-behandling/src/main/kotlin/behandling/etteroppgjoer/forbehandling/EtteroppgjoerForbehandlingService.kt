@@ -127,6 +127,37 @@ class EtteroppgjoerForbehandlingService(
         return ferdigstillForbehandling(forbehandling, brukerTokenInfo)
     }
 
+    fun forbehandlingBrukerSisteInntekter(id: UUID): Boolean {
+        val forbehandling = hentForbehandling(id)
+
+        return runCatching {
+            sjekkAtViBrukerSisteInntekter(forbehandling)
+        }.onFailure { e ->
+            logger.info(
+                "Forbehandling=${forbehandling.id} har ikke oppdatert til de siste inntektene",
+                e,
+            )
+        }.isSuccess
+    }
+
+    fun oppdaterSisteInntekter(
+        forbehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info(
+            "Oppdaterer siste inntekter for forbehandling=$forbehandlingId",
+        )
+
+        val forbehandling = hentForbehandling(forbehandlingId)
+        hentOgLagreAInntektOgPgi(forbehandling.sak, forbehandling)
+        hendelserService.registrerOgSendHendelse(
+            etteroppgjoerForbehandling = forbehandling,
+            hendelseType = EtteroppgjoerForbehandlingHendelser.OPPDATERT_INNTEKT,
+            saksbehandler = (brukerTokenInfo as? Saksbehandler)?.ident,
+            utlandstilknytning = hentUtlandstilknytning(forbehandling),
+        )
+    }
+
     fun avbrytForbehandling(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -395,7 +426,7 @@ class EtteroppgjoerForbehandlingService(
                     dao.lagreForbehandling(it)
                     behandlingService
                         .hentBehandlingerForSak(it.sak.id)
-                        .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id.toString() }
+                        .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id }
                         ?.let { revurdering -> behandlingService.settBeregnet(revurdering.id, brukerTokenInfo) }
                 }
 
@@ -497,32 +528,20 @@ class EtteroppgjoerForbehandlingService(
         // Avkorting for etteroppgjørsåret har ingen sanksjoner som er beregnet med gamle avkortingsregler
         val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sak.id, brukerTokenInfo)
         val sisteVedtakMedAvkorting = etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe)
-        val avkorting =
+        val avkortingMedGamleRegler =
             runBlocking {
-                beregningKlient.hentAvkorting(
+                beregningKlient.harAvkortingMedSanksjonGamleRegler(
                     sisteVedtakMedAvkorting.behandlingId,
+                    inntektsaar,
                     brukerTokenInfo,
                 )
             }
-                ?: throw InternfeilException(
-                    "Kunne ikke finne avkorting for siste iverksatte behandling med avkorting (${sisteIverksatteBehandling.id}) i sak ${sak.id}",
-                )
-        val perioderForEtteroppgjoeret = avkorting.avkortetYtelse.filter { it.fom.year == inntektsaar }
-        if (perioderForEtteroppgjoeret.isEmpty()) {
-            throw InternfeilException(
-                "Kunne ikke finne avkortingsperioder for etteroppgjørsåret $inntektsaar i sak ${sak.id}. " +
-                    "Siste iverksatte vedtak med avkorting (behandlingId=${sisteVedtakMedAvkorting.behandlingId}) " +
-                    "har ingen perioder for etteroppgjørsåret.",
-            )
-        }
-
-        val harPerioderMedSanksjonOgBeregnetYtelse =
-            perioderForEtteroppgjoeret.any { it.sanksjon != null && it.ytelseFoerAvkorting > 0 }
-        if (harPerioderMedSanksjonOgBeregnetYtelse) {
+        if (avkortingMedGamleRegler.harGammelBeregningMedSanksjon) {
             throw UgyldigForespoerselException(
                 "SANKSJON_GAMLE_REGLER",
                 "Eksisterende avkorting i etteroppgjørsåret ($inntektsaar) har " +
-                    "sanksjoner som er beregnet med gamle regler for avkorting. For at etteroppgjøret " +
+                    "sanksjoner som er beregnet med gamle regler for avkorting, i månedene " +
+                    "${avkortingMedGamleRegler.maanederMedGammelBeregning.joinToString()}. For at etteroppgjøret " +
                     "skal bli riktig må behandlingen revurderes fra første virk med de nye reglene før " +
                     "etteroppgjøret kan påstartes.",
             )
@@ -621,6 +640,7 @@ class EtteroppgjoerForbehandlingService(
     fun kopierOgLagreNyForbehandling(
         forbehandlingId: UUID,
         sakId: SakId,
+        klageId: UUID?,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
@@ -639,6 +659,7 @@ class EtteroppgjoerForbehandlingService(
                 sisteIverksatteBehandlingId = sisteIverksatteBehandling.behandlingId,
                 brevId = null,
                 varselbrevSendt = null,
+                klageOmgjoering = klageId,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

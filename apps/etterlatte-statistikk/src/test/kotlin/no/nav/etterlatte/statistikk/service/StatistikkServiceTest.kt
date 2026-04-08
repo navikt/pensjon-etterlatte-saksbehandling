@@ -438,7 +438,7 @@ class StatistikkServiceTest {
         val revurdering =
             behandling(
                 revurderingsaarsak = Revurderingaarsak.ETTEROPPGJOER,
-                relatertBehandlingId = forbehandlingId.toString(),
+                relatertBehandlingId = forbehandlingId,
             )
         val etteroppgjoerRad = etteroppgjoerRad(forbehandlingId, resultatTypeEtteroppgjoer)
         every { etteroppgjoerService.hentNyesteRad(forbehandlingId) } returns etteroppgjoerRad
@@ -478,6 +478,7 @@ class StatistikkServiceTest {
                 tilbakekrevingGrense = 0.1,
                 etterbetalingGrense = 2.3,
                 tilknyttetRevurdering = false,
+                klageOmgjoering = null,
             )
         return etteroppgjoerRad
     }
@@ -593,7 +594,7 @@ fun behandling(
     soeker: String = "12312312312",
     avdoed: List<String>? = null,
     revurderingsaarsak: Revurderingaarsak? = null,
-    relatertBehandlingId: String? = null,
+    relatertBehandlingId: UUID? = null,
 ) = StatistikkBehandling(
     id = id,
     sak = Sak(soeker, sakType, sakId, Enheter.defaultEnhet.enhetNr, null, null),

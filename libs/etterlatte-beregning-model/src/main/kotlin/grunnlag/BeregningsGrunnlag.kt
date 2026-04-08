@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.periode.Periode
+import java.time.YearMonth
 import java.util.UUID
 
 data class BeregningsGrunnlag(
@@ -17,28 +17,28 @@ data class BeregningsGrunnlag(
     val beregningsMetodeFlereAvdoede: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>> = emptyList(),
     val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
     val kunEnJuridiskForelder: GrunnlagMedPeriode<TomVerdi>? = null,
-    val vedtaksperioder: Vedtaksperioder?,
+    val vedtaksperioder: List<Vedtaksperiode>? = null,
 )
 
-data class Vedtaksperioder(
-    val perioder: List<Periode>,
-) {
-    init {
-        sjekk(perioder.isNotEmpty()) {
-            "Må ha perioder"
-        }
-        val perioderFoerSistePeriode = perioder.dropLast(1)
-        sjekk(perioderFoerSistePeriode.none { it.tom == null }) {
-            "Kun siste periode kan være åpen"
-        }
+data class Vedtaksperiode(
+    val fraOgMed: YearMonth,
+    val tilOgMed: YearMonth? = null,
+)
 
-        val perioderErIRiktigRekkefoelge =
-            perioder
-                .zipWithNext()
-                .all { (first, second) -> first.tom != null && second.fom > first.tom }
+fun List<Vedtaksperiode>.validerVedtaksperioder() {
+    sjekk(isNotEmpty()) {
+        "Må ha perioder"
+    }
+    val perioderFoerSistePeriode = dropLast(1)
+    sjekk(perioderFoerSistePeriode.none { it.tilOgMed == null }) {
+        "Kun siste periode kan være åpen"
+    }
 
-        sjekk(perioderErIRiktigRekkefoelge) {
-            "Perioder ikke i riktig rekkefølge / overlapper"
-        }
+    val perioderErIRiktigRekkefoelge =
+        zipWithNext()
+            .all { (first, second) -> first.tilOgMed != null && second.fraOgMed > first.tilOgMed }
+
+    sjekk(perioderErIRiktigRekkefoelge) {
+        "Perioder ikke i riktig rekkefølge / overlapper"
     }
 }

@@ -38,7 +38,7 @@ data class Foerstegangsbehandling(
     override val opphoerFraOgMed: YearMonth? = null,
     override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
     val erSluttbehandling: Boolean = false,
-    override val relatertBehandlingId: String? = null,
+    override val relatertBehandlingId: UUID? = null,
     override val opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.UKJENT,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING

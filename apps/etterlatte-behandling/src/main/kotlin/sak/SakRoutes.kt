@@ -405,6 +405,19 @@ internal fun Route.sakWebRoutes(
         }
 
         route("/personer/") {
+            post("/sakid") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val sakId =
+                        inTransaction {
+                            val saker = sakService.finnSaker(fnr.value)
+                            val prioriterOmsOverBp = saker.sortedBy { if (it.sakType == SakType.OMSTILLINGSSTOENAD) 0 else 1 }
+                            prioriterOmsOverBp.firstOrNull()?.id
+                        } ?: throw PersonManglerSak()
+
+                    call.respond(SakIdDto(sakId))
+                }
+            }
+
             post("/navkontor") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val navkontor = sakService.finnNavkontorForPerson(fnr.value)
@@ -501,4 +514,8 @@ data class OppdaterIdentRequest(
 
 data class SakerDto(
     val saker: Map<SakId, Sak>,
+)
+
+data class SakIdDto(
+    val sakId: SakId,
 )

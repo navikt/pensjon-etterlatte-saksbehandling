@@ -39,6 +39,7 @@ data class EtteroppgjoerForbehandling(
     val opphoerSkyldesDoedsfall: JaNei?,
     val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
     val mottattSkatteoppgjoer: Boolean = false,
+    val klageOmgjoering: UUID? = null,
 ) {
     companion object {
         fun opprett(
@@ -155,6 +156,7 @@ data class EtteroppgjoerForbehandling(
             endringErTilUgunstForBruker = endringErTilUgunstForBruker,
             beskrivelseAvUgunst = beskrivelseAvUgunst,
             varselbrevSendt = varselbrevSendt,
+            klageOmgjoering = klageOmgjoering,
         )
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)

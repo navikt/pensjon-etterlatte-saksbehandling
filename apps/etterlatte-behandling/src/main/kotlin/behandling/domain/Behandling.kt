@@ -65,7 +65,7 @@ sealed class Behandling {
 
     abstract fun erSluttbehandling(): Boolean
 
-    open val relatertBehandlingId: String? = null
+    open val relatertBehandlingId: UUID? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)

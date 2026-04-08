@@ -39,8 +39,9 @@ export function TilbakekrevingUtbetalinger({
                   som informeres til mottaker i vedtaket.
                 </BodyLong>
                 <BodyLong>
-                  Dersom skatt er overført til Skatteetaten, vil Gjenny forholde seg til kun brutto feilutbetaling. Det
-                  vil ikke bli foretatt netto tilbakekreving.
+                  Dersom skatt er overført til Skatteetaten, vil Gjenny i utgangspunktet forholde seg til kun brutto
+                  feilutbetaling. For å gjøre en netto tilbakekreving må det velges at perioden overstyrer netto til
+                  brutto, og så må det opprettes en oppgave til NØP for å få postert skattebeløpet riktig.
                 </BodyLong>
               </VStack>
             </Alert>

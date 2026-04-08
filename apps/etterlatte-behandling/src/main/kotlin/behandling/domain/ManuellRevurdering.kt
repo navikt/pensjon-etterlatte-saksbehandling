@@ -37,7 +37,7 @@ data class ManuellRevurdering(
     override val vedtaksloesning: Vedtaksloesning,
     override val opprinnelse: BehandlingOpprinnelse,
     override val begrunnelse: String?,
-    override val relatertBehandlingId: String?,
+    override val relatertBehandlingId: UUID?,
     override val sendeBrev: Boolean,
     override val opphoerFraOgMed: YearMonth?,
     override val tidligereFamiliepleier: TidligereFamiliepleier?,

@@ -5,7 +5,7 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
-import no.nav.etterlatte.beregning.grunnlag.Vedtaksperioder
+import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
@@ -188,11 +188,11 @@ class BeregnOmstillingsstoenadService(
         grunnlag: Grunnlag,
         beregningsgrunnlag: PeriodisertOmstillingstoenadGrunnlag,
         virkningstidspunkt: YearMonth,
-        vedtaksperioder: Vedtaksperioder,
+        vedtaksperioder: List<Vedtaksperiode>,
         tilDato: LocalDate? = null,
     ): Beregning {
-        if (vedtaksperioder.perioder.none {
-                it.fom <= virkningstidspunkt && (it.tom ?: virkningstidspunkt) >= virkningstidspunkt
+        if (vedtaksperioder.none {
+                it.fraOgMed <= virkningstidspunkt && (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
             }
         ) {
             throw UgyldigForespoerselException(
@@ -203,14 +203,14 @@ class BeregnOmstillingsstoenadService(
         }
 
         val relevantePerioderForBeregning =
-            vedtaksperioder.perioder.filter {
-                (it.tom ?: virkningstidspunkt) >= virkningstidspunkt
+            vedtaksperioder.filter {
+                (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
             }
         val alleBeregninger =
             relevantePerioderForBeregning.map { periode ->
                 val virkForBeregningIPeriode =
-                    if (periode.fom > virkningstidspunkt) {
-                        periode.fom
+                    if (periode.fraOgMed > virkningstidspunkt) {
+                        periode.fraOgMed
                     } else {
                         virkningstidspunkt
                     }
@@ -219,7 +219,7 @@ class BeregnOmstillingsstoenadService(
                     grunnlag = grunnlag,
                     beregningsgrunnlag = beregningsgrunnlag,
                     virkningstidspunkt = virkForBeregningIPeriode,
-                    tilDato = periode.tom?.atEndOfMonth() ?: tilDato,
+                    tilDato = periode.tilOgMed?.atEndOfMonth() ?: tilDato,
                 )
             }
         val allePerioder = alleBeregninger.flatMap { it.beregningsperioder }

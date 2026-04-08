@@ -1,6 +1,11 @@
-package no.nav.etterlatte.behandling.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.behandling.vedtaksvurdering.OpprettVedtak
+import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
@@ -18,19 +23,19 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class VedtakKlageService(
-    private val repository: VedtaksvurderingRepository,
-    private val rapidService: VedtaksvurderingRapidService,
+    private val vedtaksvurderingRepository: VedtaksvurderingRepositoryOperasjoner,
+    private val vedtaksvurderingRapidService: VedtaksvurderingRapidService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun opprettEllerOppdaterVedtakOmAvvisning(klage: Klage): Vedtak {
         logger.info("Oppretter eller oppdaterer vedtak for klage med id=${klage.id}")
-        val eksisterendeVedtak = repository.hentVedtak(klage.id)
+        val eksisterendeVedtak = vedtaksvurderingRepository.hentVedtak(klage.id)
         val vedtak =
             if (eksisterendeVedtak == null) {
-                repository.opprettVedtak(
+                vedtaksvurderingRepository.opprettVedtak(
                     OpprettVedtak(
-                        soeker = Folkeregisteridentifikator.of(klage.sak.ident),
+                        soeker = Folkeregisteridentifikator.Companion.of(klage.sak.ident),
                         sakId = klage.sak.id,
                         sakType = klage.sak.sakType,
                         behandlingId = klage.id,
@@ -43,7 +48,7 @@ class VedtakKlageService(
                     eksisterendeVedtak.status,
                     listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT),
                 )
-                repository.oppdaterVedtak(
+                vedtaksvurderingRepository.oppdaterVedtak(
                     eksisterendeVedtak.copy(
                         innhold =
                             VedtakInnhold.Klage(
@@ -61,20 +66,20 @@ class VedtakKlageService(
     ): Vedtak {
         logger.info("Fatter vedtak for klage=${klage.id}")
         val eksisterendeVedtak =
-            repository.hentVedtak(klage.id)
+            vedtaksvurderingRepository.hentVedtak(klage.id)
                 ?: throw NotFoundException("Fant ikke vedtak for klage med id=${klage.id}")
 
         verifiserGyldigVedtakStatus(eksisterendeVedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        repository.oppdaterVedtak(eksisterendeVedtak.copy(innhold = VedtakInnhold.Klage(klage.toObjectNode())))
+        vedtaksvurderingRepository.oppdaterVedtak(eksisterendeVedtak.copy(innhold = VedtakInnhold.Klage(klage.toObjectNode())))
 
         val fattetVedtak =
-            repository.fattVedtak(
+            vedtaksvurderingRepository.fattVedtak(
                 klage.id,
-                VedtakFattet(brukerTokenInfo.ident(), klage.sak.enhet, Tidspunkt.now()),
+                VedtakFattet(brukerTokenInfo.ident(), klage.sak.enhet, Tidspunkt.Companion.now()),
             )
 
-        rapidService.sendToRapid(vedtakOgRapidFattet(fattetVedtak))
+        vedtaksvurderingRapidService.sendToRapid(vedtakOgRapidFattet(fattetVedtak))
         return fattetVedtak
     }
 
@@ -84,19 +89,19 @@ class VedtakKlageService(
     ): Vedtak {
         logger.info("Attesterer vedtak for klage=${klage.id}")
         val eksisterendeVedtak =
-            repository.hentVedtak(klage.id)
+            vedtaksvurderingRepository.hentVedtak(klage.id)
                 ?: throw NotFoundException("Fant ikke vedtak for klage med id=${klage.id}")
 
-        sjekkAttestantHarAnnenIdentEnnDenSomFattet(eksisterendeVedtak, brukerTokenInfo)
+        sjekkAttestantHarAnnenIdentEnnSaksbehandler(eksisterendeVedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
         verifiserGyldigVedtakStatus(eksisterendeVedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
 
         val attestertVedtak =
-            repository.attesterVedtak(
+            vedtaksvurderingRepository.attesterVedtak(
                 klage.id,
-                Attestasjon(brukerTokenInfo.ident(), klage.sak.enhet, Tidspunkt.now()),
+                Attestasjon(brukerTokenInfo.ident(), klage.sak.enhet, Tidspunkt.Companion.now()),
             )
         try {
-            rapidService.sendToRapid(vedtakOgRapidAttestert(attestertVedtak))
+            vedtaksvurderingRapidService.sendToRapid(vedtakOgRapidAttestert(attestertVedtak))
         } catch (e: Exception) {
             logger.error(
                 "Kan ikke sende attestert vedtak på kafka for behandling id: ${attestertVedtak.behandlingId}, " +
@@ -114,13 +119,13 @@ class VedtakKlageService(
     fun underkjennVedtak(klageId: UUID): Vedtak {
         logger.info("Underkjenner vedtak for klage=$klageId")
         val eksisterendeVedtak =
-            repository.hentVedtak(klageId)
+            vedtaksvurderingRepository.hentVedtak(klageId)
                 ?: throw NotFoundException("Fant ikke vedtak for klage med id=$klageId")
 
         verifiserGyldigVedtakStatus(eksisterendeVedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
-        val vedtak = repository.underkjennVedtak(klageId)
+        val vedtak = vedtaksvurderingRepository.underkjennVedtak(klageId)
 
-        rapidService.sendToRapid(vedtakOgRapidUnderkjent(vedtak))
+        vedtaksvurderingRapidService.sendToRapid(vedtakOgRapidUnderkjent(vedtak))
         return vedtak
     }
 
@@ -153,24 +158,8 @@ class VedtakKlageService(
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseHendelseType.UNDERKJENT,
                 vedtak = vedtak.toDto(),
-                tekniskTid = Tidspunkt.now(),
+                tekniskTid = Tidspunkt.Companion.now(),
                 behandlingId = vedtak.behandlingId,
             ),
         )
-
-    private fun verifiserGyldigVedtakStatus(
-        gjeldendeStatus: VedtakStatus,
-        forventetStatus: List<VedtakStatus>,
-    ) {
-        if (gjeldendeStatus !in forventetStatus) throw VedtakTilstandException(gjeldendeStatus, forventetStatus)
-    }
-
-    private fun sjekkAttestantHarAnnenIdentEnnDenSomFattet(
-        vedtak: Vedtak,
-        attestant: BrukerTokenInfo,
-    ) {
-        if (attestant.erSammePerson(vedtak.vedtakFattet!!.ansvarligSaksbehandler)) {
-            throw UgyldigAttestantException(attestant.ident())
-        }
-    }
 }

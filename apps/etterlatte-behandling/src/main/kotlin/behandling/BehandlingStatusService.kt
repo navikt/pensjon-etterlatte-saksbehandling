@@ -207,7 +207,7 @@ class BehandlingStatusServiceImpl(
                             val etteroppgjoersAar =
                                 forbehandlingService
                                     .hentForbehandling(
-                                        UUID.fromString(behandling.relatertBehandlingId!!),
+                                        behandling.relatertBehandlingId!!,
                                     ).aar
 
                             genererMerknad(
@@ -419,8 +419,7 @@ class BehandlingStatusServiceImpl(
         if (behandling.type != BehandlingType.REVURDERING || behandling.revurderingsaarsak() != Revurderingaarsak.ETTEROPPGJOER) {
             return
         }
-
-        val forbehandling = forbehandlingService.hentForbehandling(UUID.fromString(behandling.relatertBehandlingId))
+        val forbehandling = forbehandlingService.hentForbehandling(behandling.relatertBehandlingId!!)
         if (forbehandling.erUnderBehandling()) {
             forbehandlingService.ferdigstillRevurderingForbehandling(forbehandling, brukerTokenInfo)
         }

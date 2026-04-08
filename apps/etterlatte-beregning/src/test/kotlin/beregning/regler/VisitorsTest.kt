@@ -72,5 +72,6 @@ class VisitorsTest {
                 ),
             institusjonsopphold = KonstantGrunnlag(FaktumNode(null, kilde, "Ingen institusjonsopphold")),
             kunEnJuridiskForelder = KonstantGrunnlag(FaktumNode(false, kilde, "Kun en registrert juridisk forelder")),
+            vedtaksperioder = KonstantGrunnlag(FaktumNode(null, kilde, "Ingen vedtaksperioder")),
         )
 }

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon
 
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
-import no.nav.etterlatte.beregning.grunnlag.Vedtaksperioder
+import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
@@ -21,7 +21,7 @@ data class PeriodisertBarnepensjonGrunnlag(
     val avdoedesTrygdetid: PeriodisertGrunnlag<FaktumNode<List<AnvendtTrygdetid>>>,
     val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>,
     val kunEnJuridiskForelder: PeriodisertGrunnlag<FaktumNode<Boolean>>,
-    val vedtaksperioder: KonstantGrunnlag<FaktumNode<Vedtaksperioder?>>,
+    val vedtaksperioder: KonstantGrunnlag<FaktumNode<List<Vedtaksperiode>?>>,
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
         val soeskenkullKnekkpunkter =
@@ -51,7 +51,7 @@ data class BarnepensjonGrunnlag(
     val avdoedesTrygdetid: FaktumNode<List<AnvendtTrygdetid>>,
     val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
     val kunEnJuridiskForelder: FaktumNode<Boolean>,
-    val vedtaksperioder: FaktumNode<Vedtaksperioder?>,
+    val vedtaksperioder: FaktumNode<List<Vedtaksperiode>?>,
 )
 
 @Deprecated("Ikke i bruk lenger")

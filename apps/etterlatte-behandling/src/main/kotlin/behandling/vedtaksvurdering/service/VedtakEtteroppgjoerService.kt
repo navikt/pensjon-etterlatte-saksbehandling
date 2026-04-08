@@ -1,5 +1,6 @@
-package no.nav.etterlatte.behandling.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -9,7 +10,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
 import java.time.LocalDate
 
 class VedtakEtteroppgjoerService(
-    private val repository: VedtaksvurderingRepository,
+    private val repository: VedtaksvurderingRepositoryOperasjoner,
     private val vedtakSamordningService: VedtakSamordningService,
 ) {
     fun hentVedtakslisteIEtteroppgjoersAar(
@@ -19,7 +20,7 @@ class VedtakEtteroppgjoerService(
         val vedtak = repository.hentVedtakForSak(sakId).firstOrNull()
         krevIkkeNull(vedtak) { "Fant ingen vedtak for sakId=$sakId" }
 
-        val fnr = Folkeregisteridentifikator.of(vedtak.soeker.value)
+        val fnr = Folkeregisteridentifikator.Companion.of(vedtak.soeker.value)
 
         val vedtaksliste = vedtakSamordningService.hentVedtaksliste(fnr, SakType.OMSTILLINGSSTOENAD, LocalDate.of(etteroppgjoersAar, 1, 1))
 

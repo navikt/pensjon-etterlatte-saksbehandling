@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -153,6 +154,7 @@ class VedtaksbrevService(
 
             val etterbetaling = behandlingInfoService.hentEtterbetaling(behandlingId)?.toEtterbetalingDTO()
             val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+            krev(trygdetid.isNotEmpty()) { "Klarte ikke hente trygdetid for å generere vedtaksbrev" }
 
             val erTidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true
 
@@ -243,26 +245,25 @@ class VedtaksbrevService(
         }
 
     fun hentKlageForBehandling(
-        relatertBehandlingId: String?,
+        relatertBehandlingId: UUID?,
         behandling: DetaljertBehandling?,
-    ): Klage? =
-        if (behandling?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING && relatertBehandlingId != null) {
+    ): Klage? {
+        if (relatertBehandlingId == null) return null
+        if (behandling?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             try {
-                val klageId = UUID.fromString(relatertBehandlingId)
+                val klageId = relatertBehandlingId
                 klageService.hentKlage(klageId)
             } catch (e: Exception) {
                 logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
                 logger.info(
                     "Kunne ikke finne klage med id=$relatertBehandlingId, denne førstegangsbehandlingen med id=${behandling.id} gjelder ikke omgjøring på grunn av klage",
                 )
-                null
             }
         } else if (behandling?.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
-            val klageId = UUID.fromString(relatertBehandlingId)
-            klageService.hentKlage(klageId)
-        } else {
-            null
+            klageService.hentKlage(relatertBehandlingId)
         }
+        return null
+    }
 }
 
 fun innvilgetMindreEnnFireMndEtterDoedsfall(

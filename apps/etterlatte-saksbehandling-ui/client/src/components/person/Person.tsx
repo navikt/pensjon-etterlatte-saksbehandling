@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { SakOversikt } from './sakOgBehandling/SakOversikt'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -18,8 +18,9 @@ import {
 } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
-import { hentSakMedBehandlnger } from '~shared/api/sak'
-import { isSuccess, Result, transformResult } from '~shared/api/apiUtils'
+import { hentSak, hentSakMedBehandlnger } from '~shared/api/sak'
+import Spinner from '~shared/Spinner'
+import { isPending, isSuccess, mapSuccess, Result, transformResult } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
@@ -47,8 +48,14 @@ export enum PersonOversiktFane {
 export const Person = () => {
   useSidetittel('Personoversikt')
 
+  const { sakId } = useParams()
+  const [sakIdentResult, hentSakForIdent] = useApiCall(hentSak)
+
   const [search, setSearch] = useSearchParams()
-  const fnr = usePersonLocationState(search.get('key'))?.fnr
+  const locationState = usePersonLocationState(search.get('key'))
+
+  const fnrFraSak = mapSuccess(sakIdentResult, (sak) => sak.ident)
+  const fnr = fnrFraSak ?? locationState?.fnr
 
   const [foretrukketSak, setForetrukketSak] = useState<number | undefined>()
 
@@ -70,11 +77,21 @@ export const Person = () => {
   )
 
   useEffect(() => {
+    if (sakId) {
+      hentSakForIdent(Number(sakId))
+    }
+  }, [sakId])
+
+  useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
       resetSak()
       sakFetch(fnr!!)
     }
   }, [fnr])
+
+  if (sakId && isPending(sakIdentResult)) {
+    return <Spinner label="Henter sak..." />
+  }
 
   if (!fnr) {
     return (

@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -103,7 +102,7 @@ class RevurderingDao(
             vedtaksloesning = rs.getString("vedtaksloesning").let { Vedtaksloesning.valueOf(it) },
             revurderingInfo = revurderingInfo,
             begrunnelse = rs.getString("begrunnelse"),
-            relatertBehandlingId = rs.getString("relatert_behandling"),
+            relatertBehandlingId = rs.getString("relatert_behandling")?.let { UUID.fromString(it) },
             sendeBrev = rs.getBoolean("sende_brev"),
             opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
             soeknadMottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")?.toLocalDatetimeUTC(),

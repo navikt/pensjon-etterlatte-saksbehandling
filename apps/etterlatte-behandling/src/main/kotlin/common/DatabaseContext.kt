@@ -27,7 +27,7 @@ class DatabaseContext(
 
     override fun <T> inTransaction(block: () -> T): T {
         if (transaktionOpen.getAndSet(true)) {
-            throw IllegalStateException("Støtter ikke nøstede transactsjoner")
+            throw IllegalStateException("Støtter ikke nøstede transaksjoner")
         }
         val c = ds.connection
         val autocommit = c.autoCommit

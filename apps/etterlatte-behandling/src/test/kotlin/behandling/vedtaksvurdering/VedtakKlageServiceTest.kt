@@ -9,8 +9,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
@@ -26,6 +29,7 @@ import no.nav.etterlatte.libs.common.behandling.KlageVedtak
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -46,7 +50,7 @@ import javax.sql.DataSource
 internal class VedtakKlageServiceTest(
     dataSource: DataSource,
 ) {
-    private val vedtaksvurderingRepository = VedtaksvurderingRepository(dataSource)
+    private val vedtaksvurderingRepository = VedtaksvurderingRepository(ConnectionAutoclosingTest(dataSource))
     private val vedtaksvurderingRapidService = mockk<VedtaksvurderingRapidService>()
     private val vedtakKlageService = VedtakKlageService(vedtaksvurderingRepository, vedtaksvurderingRapidService)
 
@@ -151,7 +155,7 @@ internal class VedtakKlageServiceTest(
         vedtakKlageService.fattVedtak(klage, saksbehandler)
         vedtaksvurderingRepository.iverksattVedtak(klage.id)
 
-        assertThrows<VedtakTilstandException> {
+        assertThrows<InternfeilException> {
             vedtakKlageService.attesterVedtak(klage, attestant)
         }
         val slot = slot<VedtakOgRapid>()
@@ -203,7 +207,7 @@ internal class VedtakKlageServiceTest(
         val klageId = UUID.randomUUID()
         vedtaksvurderingRepository.opprettVedtak(opprettVedtak(behandlingId = klageId))
 
-        assertThrows<VedtakTilstandException> {
+        assertThrows<InternfeilException> {
             vedtakKlageService.underkjennVedtak(klageId)
         }
     }

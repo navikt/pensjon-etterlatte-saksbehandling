@@ -201,9 +201,9 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             )
         }
         val revurderingOmgjoering =
-            inTransaction { revurderingService.opprettOmgjoeringKlage(sak.id, oppgaveForOmgjoering.id, saksbehandler) }
+            revurderingService.opprettOmgjoeringKlage(sak.id, oppgaveForOmgjoering.id, saksbehandler)
 
-        assertEquals(revurderingOmgjoering.relatertBehandlingId, klage.id.toString())
+        assertEquals(revurderingOmgjoering.relatertBehandlingId, klage.id)
         assertEquals(revurderingOmgjoering.revurderingsaarsak, Revurderingaarsak.OMGJOERING_ETTER_KLAGE)
 
         inTransaction { applicationContext.behandlingService.avbrytBehandling(revurderingOmgjoering.id, saksbehandler) }
@@ -245,6 +245,8 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
         klageService = applicationContext.klageService,
         behandlingDao = applicationContext.behandlingDao,
         grunnlagService = grunnlagService,
+        etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
+        featureToggleService = applicationContext.featureToggleService,
     )
 
     private fun behandlingFactory() =

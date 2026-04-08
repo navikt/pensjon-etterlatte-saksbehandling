@@ -3,20 +3,18 @@ package no.nav.etterlatte.behandling.vedtaksvurdering.outbox
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.UUID
 
 class OutboxService(
     private val outboxRepository: OutboxRepository,
     private val vedtaksvurderingService: VedtaksvurderingService,
-    private val publiserEksternHendelse: (UUID, String) -> Unit,
+    private val vedtakshendelseEksternProdusent: VedtakshendelseEksternProdusent,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -42,7 +40,7 @@ class OutboxService(
             )
 
         if (vedtak.type.tilgjengeligEksternt) {
-            publiserEksternHendelse(
+            vedtakshendelseEksternProdusent.publiserHendelse(
                 item.id,
                 Vedtakshendelse(
                     ident = vedtak.soeker.value,
@@ -56,7 +54,7 @@ class OutboxService(
                                 "Har et vedtak som skal være internt tilgjengelig, " +
                                     "med vedtaksinnhold som ikke er vanlig behandling. Id=${vedtak.id} i sak=${vedtak.sakId}",
                             ),
-                ).toJson(),
+                ),
             )
             logger.info(markers, "Publisert vedtakshendelse for vedtak=${vedtak.id}")
         } else {

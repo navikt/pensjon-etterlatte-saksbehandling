@@ -299,6 +299,8 @@ interface BehandlingService {
 
     fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
 
+    fun erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId: UUID): Boolean
+
     fun settBeregnet(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -318,7 +320,7 @@ data class SakMedBehandlingerOgOppgaver(
     fun somSakMedBehandlinger(): SakMedBehandlinger = SakMedBehandlinger(sak, behandlinger)
 }
 
-internal class BehandlingServiceImpl(
+class BehandlingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
@@ -460,7 +462,7 @@ internal class BehandlingServiceImpl(
         logger.info("Tilbakestiller etteroppgjøret ved avbrutt revurdering")
         val erEndringTilUgunst = (aarsak == AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST)
 
-        val forbehandlingId = UUID.fromString(behandling.relatertBehandlingId)
+        val forbehandlingId = behandling.relatertBehandlingId!!
         val forbehandling =
             etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)
                 ?: throw FantIkkeForbehandling(forbehandlingId)
@@ -508,7 +510,7 @@ internal class BehandlingServiceImpl(
                     behandling.relatertBehandlingId?.let { klageId ->
                         oppgaveService
                             .hentOppgaverForSak(behandling.sak.id, OppgaveType.KLAGE)
-                            .any { it.id.toString() == klageId }
+                            .any { it.id == klageId }
                     } ?: false
                 }
             }
@@ -517,7 +519,7 @@ internal class BehandlingServiceImpl(
             val omgjoeringsoppgaveForKlage =
                 oppgaveService
                     .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
-                    .find { it.referanse == behandling.relatertBehandlingId }
+                    .find { it.referanse == behandling.relatertBehandlingId.toString() }
                     ?: throw InternfeilException(
                         "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
                             "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
@@ -771,7 +773,11 @@ internal class BehandlingServiceImpl(
             }
             when (behandling!!.type) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+                    if (erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId)) {
+                        behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
+                    } else {
+                        throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+                    }
                 }
 
                 BehandlingType.REVURDERING -> {
@@ -1073,6 +1079,22 @@ internal class BehandlingServiceImpl(
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
 
     override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
+
+    override fun erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId: UUID): Boolean {
+        val behandling = hentBehandlingForId(behandlingId) ?: return false
+
+        if (behandling !is Foerstegangsbehandling) {
+            return false
+        }
+
+        val alleBehandlingerISak = behandlingDao.hentBehandlingerForSak(behandling.sak.id)
+        val avslaatteFoerstegangsbehandlinger =
+            alleBehandlingerISak
+                .filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING && it.status == BehandlingStatus.AVSLAG }
+                .filter { it.id != behandlingId }
+
+        return avslaatteFoerstegangsbehandlinger.isNotEmpty()
+    }
 
     override fun settBeregnet(
         behandlingId: UUID,

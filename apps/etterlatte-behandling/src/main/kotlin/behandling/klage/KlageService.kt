@@ -596,7 +596,7 @@ class KlageServiceImpl(
         oppgaveService.tilAttestering(
             referanse = klageId.toString(),
             type = OppgaveType.KLAGE,
-            "Vedtak om avvist klage til attestering",
+            "Vedtak om avvist klage behandlet av ${saksbehandler.ident} kan attesteres",
         )
 
         return oppdatertKlage

@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -19,6 +20,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
@@ -87,7 +89,8 @@ class TilbakekrevingService(
             val nyTilbakekreving = TilbakekrevingBehandling.ny(kravgrunnlag, sak, omgjoeringAvId)
             val oppdatertMedVurderingerOmgjoering =
                 if (omgjoeringAvId != null) {
-                    val opprinneligVurdering = tilbakekrevingDao.hentTilbakekreving(omgjoeringAvId).tilbakekreving.vurdering
+                    val opprinneligVurdering =
+                        tilbakekrevingDao.hentTilbakekreving(omgjoeringAvId).tilbakekreving.vurdering
                     nyTilbakekreving.oppdaterVurdering(opprinneligVurdering)
                 } else {
                     nyTilbakekreving
@@ -203,7 +206,12 @@ class TilbakekrevingService(
             lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.AVBRUTT)
 
             tilbakekrevinghendelser.sendTilbakekreving(
-                statistikkTilbakekreving = tilbakekrevingForStatistikk(avbruttTilbakekreving, Fagsaksystem.EY.name, null),
+                statistikkTilbakekreving =
+                    tilbakekrevingForStatistikk(
+                        avbruttTilbakekreving,
+                        Fagsaksystem.EY.name,
+                        null,
+                    ),
                 type = TilbakekrevingHendelseType.AVBRUTT,
             )
 
@@ -284,6 +292,7 @@ class TilbakekrevingService(
             sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
             sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
             sjekkAtTilbakekrevingErGyldig(tilbakekreving)
+            sjekkAtTilbakekrevingIkkeHarFeilOverstyringNettoBrutto(tilbakekreving)
 
             val lagretTilbakekreving =
                 tilbakekrevingDao.lagreTilbakekreving(
@@ -306,6 +315,38 @@ class TilbakekrevingService(
 
             lagretTilbakekreving
         }
+
+    /**
+     * Det er kun gyldig å sette opp overstyring netto til brutto for barnepensjonssaker, og kun i perioder
+     */
+    private fun sjekkAtTilbakekrevingIkkeHarFeilOverstyringNettoBrutto(tilbakekreving: TilbakekrevingBehandling) {
+        val maanedMedUgyldigOverstyring =
+            when (tilbakekreving.sak.sakType) {
+                SakType.OMSTILLINGSSTOENAD -> {
+                    tilbakekreving.tilbakekreving.perioder
+                        .find { periode ->
+                            periode.tilbakekrevingsbeloep.any {
+                                it.overstyrBehandletNettoTilBrutto ==
+                                    JaNei.JA
+                            }
+                        }?.maaned
+                }
+
+                SakType.BARNEPENSJON -> {
+                    tilbakekreving.tilbakekreving.perioder
+                        .find { periode ->
+                            periode.tilbakekrevingsbeloep.any { it.overstyrBehandletNettoTilBrutto == JaNei.JA } &&
+                                periode.tilbakekrevingsbeloep.any { it.klasseType == KlasseType.SKAT.name }
+                        }?.maaned
+                }
+            }
+        if (maanedMedUgyldigOverstyring != null) {
+            throw UgyldigForespoerselException(
+                "TILBAKEKREVING_HAR_UGYLDIG_OVERSTYRT_PERIODE",
+                "Tilbakekrevingen har en måned der skatt ikke er i behold men allikevel har overstyring av netto til brutto ($maanedMedUgyldigOverstyring)",
+            )
+        }
+    }
 
     fun oppdaterKravgrunnlag(
         tilbakekrevingId: UUID,
@@ -347,7 +388,12 @@ class TilbakekrevingService(
                     begrunnelse = TilbakekrevingAvbruttAarsak.IKKE_NOE_KRAVGRUNNLAG.name,
                 )
                 tilbakekrevinghendelser.sendTilbakekreving(
-                    statistikkTilbakekreving = tilbakekrevingForStatistikk(oppdatertTilbakekreving, saksbehandler.ident, null),
+                    statistikkTilbakekreving =
+                        tilbakekrevingForStatistikk(
+                            oppdatertTilbakekreving,
+                            saksbehandler.ident,
+                            null,
+                        ),
                     type = TilbakekrevingHendelseType.AVBRUTT,
                 )
                 return@inTransaction oppdatertTilbakekreving
@@ -440,7 +486,7 @@ class TilbakekrevingService(
         oppgaveService.tilAttestering(
             referanse = tilbakekreving.id.toString(),
             type = OppgaveType.TILBAKEKREVING,
-            merknad = "Tilbakekreving kan attesteres",
+            merknad = "Tilbakekreving behandlet av ${saksbehandler.ident} kan attesteres",
         )
 
         oppdatertTilbakekreving
@@ -796,6 +842,7 @@ class TilbakekrevingService(
             tilbakekrevingSomSkalOmgjoeres.tilbakekreving.kravgrunnlag.kravgrunnlagId.value,
             tilbakekrevingSomSkalOmgjoeres.sak,
             saksbehandler,
-        ) ?: throw InternfeilException("Fikk ikke noe kravgrunnlag for omgjøring tilbake fra tilbakekrevingskomponenten")
+        )
+            ?: throw InternfeilException("Fikk ikke noe kravgrunnlag for omgjøring tilbake fra tilbakekrevingskomponenten")
     }
 }

@@ -111,10 +111,11 @@ class EtteroppgjoerRevurderingBrevService(
                 behandlingService.hentBehandling(behandlingId) ?: throw InternfeilException("Fant ikke behandlingId=$behandlingId")
             val avkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
             val sisteUtbetaltBeloep = avkorting.perioder.maxBy { it.periode.fom }.ytelseEtterAvkorting
+            krevIkkeNull(behandling.relatertBehandlingId) { "Behandling $behandlingId mangler forbehandlingId" }
 
             val detaljertForbehandling =
                 etteroppgjoerForbehandlingService.hentDetaljertForbehandling(
-                    UUID.fromString(behandling.relatertBehandlingId),
+                    behandling.relatertBehandlingId!!,
                     brukerTokenInfo,
                 )
 
@@ -168,6 +169,7 @@ class EtteroppgjoerRevurderingBrevService(
                         rettsgebyrBeloep = Kroner(beregnetEtteroppgjoerResultat.grense.rettsgebyr),
                         harOpphoer = detaljertForbehandling.forbehandling.harVedtakAvTypeOpphoer ?: etteroppgjoer.harOpphoer,
                         mottattSkatteoppgjoer = detaljertForbehandling.forbehandling.mottattSkatteoppgjoer,
+                        klageOmgjoering = detaljertForbehandling.forbehandling.klageOmgjoering != null,
                     ),
                 brevRedigerbarInnholdData =
                     EtteroppgjoerBrevData.VedtakInnhold(

@@ -23,7 +23,7 @@ data class DetaljertBehandling(
     val vedtaksloesning: Vedtaksloesning,
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth?,
-    val relatertBehandlingId: String?,
+    val relatertBehandlingId: UUID?,
     val tidligereFamiliepleier: TidligereFamiliepleier?,
     val opprinnelse: BehandlingOpprinnelse,
     val erSluttbehandling: Boolean = false,

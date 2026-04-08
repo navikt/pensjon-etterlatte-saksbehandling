@@ -1,15 +1,23 @@
-package no.nav.etterlatte.behandling.vedtaksvurdering
+package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.behandling.vedtaksvurdering.InnvilgetPeriode
+import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
+import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
+import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtakstidslinje
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 class VedtaksvurderingService(
-    private val repository: VedtaksvurderingRepository,
+    private val repository: VedtaksvurderingRepositoryOperasjoner,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -24,6 +32,23 @@ class VedtaksvurderingService(
     }
 
     fun hentVedtakISak(sakId: SakId): List<Vedtak> = repository.hentVedtakForSak(sakId)
+
+    fun sjekkOmVedtakErLoependePaaDato(
+        sakId: SakId,
+        dato: LocalDate,
+    ): LoependeYtelse {
+        logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
+        val alleVedtakForSak =
+            repository
+                .hentVedtakForSak(sakId)
+                .filter { it.vedtakFattet != null && it.attestasjon != null }
+        return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
+    }
+
+    fun hentIverksatteVedtakISak(sakId: SakId): List<Vedtak> =
+        repository
+            .hentVedtakForSak(sakId)
+            .filter { it.status == VedtakStatus.IVERKSATT }
 
     fun hentVedtak(fnr: Folkeregisteridentifikator): List<Vedtak> = repository.hentFerdigstilteVedtak(fnr)
 

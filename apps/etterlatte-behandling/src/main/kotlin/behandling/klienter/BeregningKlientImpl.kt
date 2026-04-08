@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingReq
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
+import no.nav.etterlatte.libs.common.beregning.MaanederMedGammelSanksjonIAvkorting
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.deserialize
@@ -108,6 +109,12 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AvkortingDto?
+
+    suspend fun harAvkortingMedSanksjonGamleRegler(
+        behandlingId: UUID,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): MaanederMedGammelSanksjonIAvkorting
 }
 
 class BeregningKlientImpl(
@@ -219,6 +226,29 @@ class BeregningKlientImpl(
             )
         }
     }
+
+    override suspend fun harAvkortingMedSanksjonGamleRegler(
+        behandlingId: UUID,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): MaanederMedGammelSanksjonIAvkorting =
+        try {
+            logger.info("Henter om behandling med id=$behandlingId har avkorting med sanksjon gamle regler")
+            downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId,
+                            "$resourceUrl/api/beregning/avkorting/$behandlingId/har-sanksjon-gamle-regler?inntektsaar=$inntektsaar",
+                        ),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: ResponseException) {
+            throw InternfeilException("Henting av om behandling (id=$behandlingId) har avkorting med sanksjon gamle regler feilet", e)
+        }
 
     override suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,

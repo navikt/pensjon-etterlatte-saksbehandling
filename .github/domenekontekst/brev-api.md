@@ -28,7 +28,7 @@ Oppretter, redigerer, ferdigstiller og distribuerer brev til brukere. Bruker Bre
 - `Brevdistribuerer` – sender til Brevdistribusjon
 - `PDFService` – genererer PDF fra brevinnhold via Brevbakeren
 
-**Brevbakeren** er en ekstern tjeneste eid av pensjonsbrev-teamet i NAV. Gjenny har skrivetilgang til egne brevmaler og vedlikeholder innholdet i disse selv.
+**Brevbakeren** er en ekstern tjeneste eid av pensjonsbrev-teamet i Nav. Gjenny har skrivetilgang til egne brevmaler og vedlikeholder innholdet i disse selv.
 
 ## Avhengigheter
 

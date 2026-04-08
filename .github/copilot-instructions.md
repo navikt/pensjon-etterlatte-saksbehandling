@@ -16,13 +16,13 @@ Systemet heter **Gjenny** internt.
 - **`etterlatte-behandling`** – kjerne-saksbehandlingstjeneste. Mesteparten av domenelogikken lever her, inkludert vilkårsvurdering.
 - **`etterlatte-*-kafka`** – separate apper som konsumerer meldinger fra Rapids-en og kaller tilhørende REST-app. Mønsteret sikrer at en hengende kafka-melding ikke låser ned selve REST-tjenesten. Gjelder `beregning`, `trygdetid`, `vedtaksvurdering`, `behandling`, `brev` og `vilkaarsvurdering`.
 - **`etterlatte-saksbehandling-ui`** – React-frontend med Node/Express som BFF (backend-for-frontend)
-- **`etterlatte-api`** – eksternt API for tjenestepensjonsleverandører (TP-ordninger) og andre NAV-team. Ikke det samme som frontendens BFF.
+- **`etterlatte-api`** – eksternt API for tjenestepensjonsleverandører (TP-ordninger) og andre Nav-team. Ikke det samme som frontendens BFF.
 - **`etterlatte-pdltjenester`** – proxy mot PDL (Folkeregisteret). Persondata som er avgjørende for vedtaksdokumentasjon lagres i grunnlagshendelse-tabellen i `etterlatte-behandling` sin database.
 - **`etterlatte-tidshendelser`** – trigger tidsbaserte hendelser som aldersoverganger, G-regulering og årlig inntektsjustering, publisert på Rapids-en.
 - **`etterlatte-klage`** – proxy mot Kabal (klageenhetens saksbehandlingssystem). Ingen egen database.
 - **`etterlatte-tilbakekreving`** – proxy mot tilbakekrevingskomponenten. Har database for å kvittere på sendte og mottatte meldinger.
 - **`etterlatte-statistikk`** – henter data fra BigQuery og deler saksbehandlings- og stønadsstatistikk med interne team via Metabase/BigQuery.
-- **`etterlatte-egne-ansatte-lytter`** – lytter på Kafka-topic for NAV-ansatte og familiemedlemmer («egne ansatte») slik at sakene rutes til saksbehandlere med særskilte tilganger.
+- **`etterlatte-egne-ansatte-lytter`** – lytter på Kafka-topic for Nav-ansatte og familiemedlemmer («egne ansatte») slik at sakene rutes til saksbehandlere med særskilte tilganger.
 - **`etterlatte-institusjonsopphold`** – lytter på hendelser om institusjonsopphold (tilsvarende hendelser-appene).
 - **`etterlatte-hendelser-pdl/joark/samordning/ufoere`** – broer mellom eksterne Kafka-topics og Gjennys interne Rapids. Oversetter eksterne hendelser til interne meldingsformater.
 - Domenespesifikke tjenester: `etterlatte-beregning`, `etterlatte-vedtaksvurdering`, `etterlatte-trygdetid`, `etterlatte-brev-api`, `etterlatte-utbetaling` – se [domenekontekst](#domenekontekst).
@@ -32,9 +32,9 @@ Delte Kotlin-biblioteker. Konvensjon: `*-model`-biblioteker inneholder kun datak
 
 ### Kommunikasjonsmønstre
 - REST mellom tjenester (Ktor-klienter med Azure AD / on-behalf-of-autentisering)
-- Kafka via NAV Rapids & Rivers for asynkron hendelseshåndtering (River = Kafka-meldingshåndterer)
+- Kafka via Nav Rapids & Rivers for asynkron hendelseshåndtering (River = Kafka-meldingshåndterer)
 - **Rapid** (intern topic) brukes for kommunikasjon mellom Gjennys egne tjenester
-- **`etterlatte.vedtakshendelser`** er et separat topic beregnet for deling med andre systemer i NAV (f.eks. TP-ordninger)
+- **`etterlatte.vedtakshendelser`** er et separat topic beregnet for deling med andre systemer i Nav (f.eks. TP-ordninger)
 - Maskin-til-maskin-kall bruker `httpClientClientCredentials` fra `libs/etterlatte-ktor`
 - On-behalf-of-kall (brukerflyt) bruker `DownstreamResourceClient` fra `libs/etterlatte-ktor`
 

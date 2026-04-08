@@ -36,7 +36,7 @@ Oppretter og forvalter vedtak (beslutninger) for pensjonssaker. Fungerer som ork
 
 ## Kafka-publisering
 
-Publiserer til topic `etterlatte.vedtakshendelser` (deles med andre NAV-systemer) ved iverksetting, med bl.a. `ident`, `sakstype`, `vedtakType`, `vedtakId` og `virkningFom`. Dette trigger utbetaling og brevgenerering. Meldinger internt i Gjenny går på Rapids-en (eget internt topic).
+Publiserer til topic `etterlatte.vedtakshendelser` (deles med andre Nav-systemer) ved iverksetting, med bl.a. `ident`, `sakstype`, `vedtakType`, `vedtakId` og `virkningFom`. Dette trigger utbetaling og brevgenerering. Meldinger internt i Gjenny går på Rapids-en (eget internt topic).
 
 Outbox-mønsteret (database-tabell + `OutboxJob`) brukes for å sikre pålitelig publisering. Dette er spesifikt for `vedtaksvurdering`.
 

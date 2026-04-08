@@ -59,9 +59,13 @@ jobs:
       - name: Install client
         working-directory: apps/${{ github.workflow }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Install server
         working-directory: apps/${{ github.workflow }}
         run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Run tests
         working-directory: apps/${{ github.workflow }}/client
         run: CI=true yarn test

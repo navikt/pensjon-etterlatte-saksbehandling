@@ -63,13 +63,17 @@ data class AktivitetForMaaned(
                 )
             val aktivitetsplikt =
                 when (maanederEtterDoedsfall) {
-                    in 0..6 -> Aktivitetsplikt.OMSTILLINGSPERIODE
-                    else ->
+                    in 0..6 -> {
+                        Aktivitetsplikt.OMSTILLINGSPERIODE
+                    }
+
+                    else -> {
                         if (statistikkAktivitet.harVarigUnntak) {
                             Aktivitetsplikt.VARIG_UNNTAK
                         } else {
                             Aktivitetsplikt.JA
                         }
+                    }
                 }
 
             val vurderingForMaaned =
@@ -80,25 +84,9 @@ data class AktivitetForMaaned(
             val fyllerAktivitet =
                 unntakForMaaned != null || vurderingForMaaned?.vurdering != VurdertAktivitet.UNDER_50_PROSENT
 
-            val aktiviteterForMaaned =
-                statistikkAktivitet.brukersAktivitet
-                    .filter { it.erInnenforMaaned(statistikkmaaned) }
-                    .map { it.opplysning }
-            val aktivitetForBruker =
-                if (aktiviteterForMaaned.size == 1) {
-                    aktiviteterForMaaned.single()
-                } else if (aktiviteterForMaaned.isEmpty()) {
-                    null
-                } else {
-                    "FLERE_AKTIVITETER"
-                }
-
             val aktivitet =
                 unntakForMaaned?.opplysning?.let { "UNNTAK_$it" }
-                    ?: listOfNotNull(
-                        vurderingForMaaned?.vurdering?.name,
-                        aktivitetForBruker,
-                    ).joinToString(separator = "_")
+                    ?: vurderingForMaaned?.vurdering?.name
 
             return AktivitetForMaaned(
                 harAktivitetsplikt = aktivitetsplikt,

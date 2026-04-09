@@ -310,7 +310,10 @@ class RevurderingService(
         saksbehandlerIdent: String?,
     ) {
         if (opphoerFraTidligereBehandling != null) {
-            val revurdering = behandlingDao.hentBehandling(opprettBehandling.id)!!
+            val revurdering =
+                krevIkkeNull(behandlingDao.hentBehandling(opprettBehandling.id)) {
+                    "Behandling ${opprettBehandling.id} må finnes siden den nettopp ble opprettet"
+                }
             val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opphoerFraTidligereBehandling.behandlingId)
             loggHvisViderefoertOpphoerIkkeViderefoerer(viderefoertOpphoer)
 

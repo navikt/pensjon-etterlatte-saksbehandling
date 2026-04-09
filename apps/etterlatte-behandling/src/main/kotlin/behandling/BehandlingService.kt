@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -506,7 +505,7 @@ class BehandlingServiceImpl(
             val persongalleri: Persongalleri =
                 grunnlagService
                     .hentPersongalleri(behandlingId)
-                    ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
+                    ?: throw InternfeilException("Persongalleri mangler for sak ${it.sak.id}")
 
             it.toStatistikkBehandling(persongalleri)
         }
@@ -518,7 +517,7 @@ class BehandlingServiceImpl(
         hentBehandling(behandlingId)?.let {
             val persongalleri: Persongalleri =
                 grunnlagService.hentPersongalleri(behandlingId)
-                    ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
+                    ?: throw InternfeilException("Persongalleri mangler for sak ${it.sak.id}")
 
             it.toDetaljertBehandlingWithPersongalleri(persongalleri)
         }
@@ -550,7 +549,7 @@ class BehandlingServiceImpl(
             }
 
             else -> {
-                throw Exception("BehandlingType ${behandling.type} er ikke støttet")
+                throw InternfeilException("BehandlingType ${behandling.type} er ikke støttet")
             }
         }
     }
@@ -731,11 +730,11 @@ class BehandlingServiceImpl(
     ) {
         inTransaction {
             val behandling = behandlingDao.hentBehandling(behandlingId)
-            krev(behandling != null) {
-                "Behandling finnes ikke $behandlingId"
-            }
             val erOmgjoering = erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId)
-            val oppdatert = behandling!!.oppdaterSendeBrev(skalSendeBrev, erOmgjoering)
+            val oppdatert =
+                krevIkkeNull(behandling) {
+                    "Behandling finnes ikke $behandlingId"
+                }.oppdaterSendeBrev(skalSendeBrev, erOmgjoering)
             behandlingDao.lagreBehandling(oppdatert)
         }
     }
@@ -850,8 +849,7 @@ class BehandlingServiceImpl(
     ): Virkningstidspunkt {
         val behandling =
             hentBehandling(behandlingId) ?: run {
-                logger.error("Prøvde å oppdatere virkningstidspunkt på en behandling som ikke eksisterer: $behandlingId")
-                throw RuntimeException("Fant ikke behandling")
+                throw InternfeilException("Prøvde å oppdatere virkningstidspunkt på en behandling som ikke eksisterer: $behandlingId")
             }
 
         val virkningstidspunktData =
@@ -892,10 +890,7 @@ class BehandlingServiceImpl(
     ) {
         val behandling =
             hentBehandling(behandlingId) ?: run {
-                logger.error(
-                    "Prøvde å oppdatere bodd/arbeidet utlandet på en behandling som ikke eksisterer: $behandlingId",
-                )
-                throw RuntimeException("Fant ikke behandling")
+                throw InternfeilException("Prøvde å oppdatere bodd/arbeidet utlandet på en behandling som ikke eksisterer: $behandlingId")
             }
 
         try {
@@ -1025,7 +1020,7 @@ class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val behandling = hentBehandling(behandlingId) ?: throw NotFoundException("Fant ikke behandling med id=$behandlingId")
+        val behandling = hentBehandling(behandlingId) ?: throw BehandlingNotFoundException(behandlingId)
 
         behandling
             .tilBeregnet()

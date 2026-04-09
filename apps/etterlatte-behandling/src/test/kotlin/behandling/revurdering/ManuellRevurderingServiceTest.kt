@@ -415,7 +415,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
 
         inTransaction {
-            val b = applicationContext.behandlingDao.hentBehandling(behandling.id)!! as Foerstegangsbehandling
+            val b =
+                requireNotNull(applicationContext.behandlingDao.hentBehandling(behandling.id)) {
+                    "Behandling ${behandling.id} må finnes siden den nettopp ble opprettet"
+                } as Foerstegangsbehandling
             applicationContext.behandlingDao.lagreBehandling(
                 b.oppdaterBoddEllerArbeidetUtlandet(
                     BoddEllerArbeidetUtlandet(
@@ -494,7 +497,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, saksbehandler)
         }
         inTransaction {
-            val b = applicationContext.behandlingDao.hentBehandling(behandling.id)!! as Foerstegangsbehandling
+            val b =
+                requireNotNull(applicationContext.behandlingDao.hentBehandling(behandling.id)) {
+                    "Behandling ${behandling.id} må finnes siden den nettopp ble opprettet"
+                } as Foerstegangsbehandling
             applicationContext.behandlingDao.lagreBehandling(
                 b.oppdaterBoddEllerArbeidetUtlandet(
                     BoddEllerArbeidetUtlandet(
@@ -696,7 +702,10 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, saksbehandler)
         }
         inTransaction {
-            val b = applicationContext.behandlingDao.hentBehandling(nonNullBehandling.id)!! as Foerstegangsbehandling
+            val b =
+                requireNotNull(applicationContext.behandlingDao.hentBehandling(nonNullBehandling.id)) {
+                    "Behandling ${nonNullBehandling.id} må finnes siden den nettopp ble opprettet"
+                } as Foerstegangsbehandling
             applicationContext.behandlingDao.lagreBehandling(
                 b.oppdaterBoddEllerArbeidetUtlandet(
                     BoddEllerArbeidetUtlandet(

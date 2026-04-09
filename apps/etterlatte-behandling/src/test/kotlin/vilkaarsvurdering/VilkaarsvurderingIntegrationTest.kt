@@ -165,7 +165,10 @@ internal class VilkaarsvurderingIntegrationTest(
         inTransaction { applicationContext.behandlingDao.opprettBehandling(opprettBehandlingMedPersongalleri) }
         val behandlingId = opprettBehandlingMedPersongalleri.id
         inTransaction {
-            val behandling = applicationContext.behandlingDao.hentBehandling(behandlingId)!! as Foerstegangsbehandling
+            val behandling =
+                requireNotNull(applicationContext.behandlingDao.hentBehandling(behandlingId)) {
+                    "Behandling $behandlingId må finnes siden den nettopp ble opprettet"
+                } as Foerstegangsbehandling
             applicationContext.behandlingDao.lagreBehandling(
                 behandling.oppdaterVirkningstidspunkt(
                     Virkningstidspunkt.create(

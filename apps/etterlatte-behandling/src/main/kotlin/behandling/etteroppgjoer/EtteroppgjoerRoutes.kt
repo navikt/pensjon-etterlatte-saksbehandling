@@ -9,6 +9,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.AktivitetspliktRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.InformasjonFraBrukerRequest
@@ -316,6 +317,22 @@ fun Route.etteroppgjoerRoutes(
                     kunSkrivetilgang {
                         inTransaction {
                             forbehandlingService.oppdaterSisteInntekter(forbehandlingId, brukerTokenInfo)
+                        }
+
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+
+                post("lagre-aktivitetsplikt") {
+                    kunSkrivetilgang {
+                        val request = call.receive<AktivitetspliktRequest>()
+
+                        inTransaction {
+                            forbehandlingService.lagreAktivitetsplikt(
+                                forbehandlingId,
+                                aktivitetspliktOverholdt = request.aktivitetspliktOverholdt,
+                                begrunnelse = request.begrunnelse,
+                            )
                         }
 
                         call.respond(HttpStatusCode.OK)

@@ -88,6 +88,7 @@ fun barnepensjonGrunnlag(
         ),
     institusjonsopphold = FaktumNode(institusjonsopphold, kilde, "institusjonsopphold"),
     kunEnJuridiskForelder = FaktumNode(false, kilde, "kunEnJuridiskForelder"),
+    vedtaksperioder = FaktumNode(null, kilde, "vedtaksperioder"),
 )
 
 fun samletTrygdetid(

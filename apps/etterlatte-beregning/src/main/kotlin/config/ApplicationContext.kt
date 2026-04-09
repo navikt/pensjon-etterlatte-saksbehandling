@@ -85,6 +85,7 @@ class ApplicationContext {
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
             anvendtTrygdetidRepository = anvendtTrygdetidRepository,
+            featureToggleService = featureToggleService,
         )
     val beregnOmstillingsstoenadService =
         BeregnOmstillingsstoenadService(

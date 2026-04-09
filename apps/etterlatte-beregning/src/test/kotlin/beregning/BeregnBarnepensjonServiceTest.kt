@@ -20,6 +20,7 @@ import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -79,6 +80,10 @@ internal class BeregnBarnepensjonServiceTest {
         mockk<AnvendtTrygdetidRepository>().also {
             every { it.lagreAnvendtTrygdetid(any(), any()) } returns 1
         }
+    private val featureToggleService =
+        mockk<FeatureToggleService>().also {
+            every { it.isEnabled(any(), any<Boolean>()) } returns false
+        }
     private val periodensSisteDato = LocalDate.of(2024, Month.APRIL, 30)
 
     private fun beregnBarnepensjonService() =
@@ -88,6 +93,7 @@ internal class BeregnBarnepensjonServiceTest {
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
             anvendtTrygdetidRepository = anvendtTrygdetidRepository,
+            featureToggleService = featureToggleService,
         )
 
     @Test

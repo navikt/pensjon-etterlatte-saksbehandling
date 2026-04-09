@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -59,7 +59,7 @@ class EtteroppgjoerService(
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) ?: throw FantIkkEtteroppgjoer(sakId, inntektsaar)
+    ): Etteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) ?: throw FantIkkeEtteroppgjoer(sakId, inntektsaar)
 
     fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
 
@@ -120,7 +120,7 @@ class EtteroppgjoerService(
 
     fun oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         if (!forbehandling.erFerdigstilt()) {
-            throw IkkeTillattException("FORBEHADNLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")
+            throw IkkeTillattException("FORBEHANDLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")
         }
 
         val nyEtteroppgjoerStatus = finnStatusForForbehandling(forbehandling)

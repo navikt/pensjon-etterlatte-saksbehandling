@@ -101,7 +101,7 @@ fun Route.etteroppgjoerRoutes(
                     call.respond(HttpStatusCode.NotFound)
                 }
 
-                val request = call.receive<OpprettEtteroppgjeorForbehandlingRequest>()
+                val request = call.receive<OpprettEtteroppgjoerForbehandlingRequest>()
                 val inntektsaar = request.inntektsaar
 
                 kunSkrivetilgang {
@@ -132,7 +132,7 @@ fun Route.etteroppgjoerRoutes(
             post("tilbakestill-og-opprett-forbehandlingsoppgave") {
                 sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService)
                 kunSkrivetilgang {
-                    val request = call.receive<OpprettEtteroppgjeorForbehandlingRequest>()
+                    val request = call.receive<OpprettEtteroppgjoerForbehandlingRequest>()
                     val inntektsaar = request.inntektsaar
 
                     inTransaction {
@@ -176,7 +176,7 @@ fun Route.etteroppgjoerRoutes(
             post("/opprett-forbehandling/{$OPPGAVEID_CALL_PARAMETER}") {
                 sjekkEtteroppgjoerEnabled(featureToggleService)
 
-                val request = call.receive<OpprettEtteroppgjeorForbehandlingRequest>()
+                val request = call.receive<OpprettEtteroppgjoerForbehandlingRequest>()
                 val inntektsaar = request.inntektsaar
 
                 kunSkrivetilgang {
@@ -378,12 +378,12 @@ fun Route.etteroppgjoerRoutes(
                 call.respond(resultat)
             }
 
-            post("/omgjoer-avbrutt-revurdering") {
+            post("/gjennopprett-avbrutt-revurdering") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
 
                     sjekkEtteroppgjoerEnabled(featureToggleService)
                     val behandling =
-                        etteroppgjoerRevurderingService.omgjoerAvbruttEtteroppgjoerRevurdering(
+                        etteroppgjoerRevurderingService.gjennopprettAvbruttEtteroppgjoerRevurdering(
                             behandlingId = behandlingId,
                             brukerTokenInfo = saksbehandler,
                         )
@@ -422,7 +422,7 @@ private fun sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService: Fea
     }
 }
 
-data class OpprettEtteroppgjeorForbehandlingRequest(
+data class OpprettEtteroppgjoerForbehandlingRequest(
     val inntektsaar: Int,
 )
 

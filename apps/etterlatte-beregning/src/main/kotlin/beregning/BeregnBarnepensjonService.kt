@@ -5,7 +5,9 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.beregning.grunnlag.validerVedtaksperioder
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
@@ -18,6 +20,7 @@ import no.nav.etterlatte.beregning.regler.finnAnvendtRegelverkBarnepensjon
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.finnAvdodeForeldre
 import no.nav.etterlatte.beregning.regler.finnHarForeldreloessats
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -57,8 +60,59 @@ class BeregnBarnepensjonService(
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
     private val anvendtTrygdetidRepository: AnvendtTrygdetidRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
+
+    private fun beregnBarnepensjonPerioder(
+        behandlingId: UUID,
+        grunnlag: Grunnlag,
+        beregningsgrunnlag: PeriodisertBarnepensjonGrunnlag,
+        trygdetider: List<TrygdetidDto>,
+        virkningstidspunkt: YearMonth,
+        vedtaksperioder: List<Vedtaksperiode>,
+        kunGammeltRegelverk: Boolean = false,
+        tilDato: LocalDate? = null,
+    ): Beregning {
+        vedtaksperioder.validerVedtaksperioder()
+        if (vedtaksperioder.none {
+                it.fraOgMed <= virkningstidspunkt && (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
+            }
+        ) {
+            throw UgyldigForespoerselException(
+                "VIRK_STARTER_UTENFOR_VEDTAKSPERIODE",
+                "Kan ikke beregne en ytelse med virkningstidspunkt fra $virkningstidspunkt, " +
+                    "siden det er utenfor vedtaksperiodene",
+            )
+        }
+
+        val relevantePerioderForBeregning =
+            vedtaksperioder.filter {
+                (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
+            }
+        val alleBeregninger =
+            relevantePerioderForBeregning.map { periode ->
+                val virkForBeregningIPeriode =
+                    if (periode.fraOgMed > virkningstidspunkt) {
+                        periode.fraOgMed
+                    } else {
+                        virkningstidspunkt
+                    }
+                beregnBarnepensjon(
+                    behandlingId = behandlingId,
+                    grunnlag = grunnlag,
+                    beregningsgrunnlag = beregningsgrunnlag,
+                    trygdetider = trygdetider,
+                    virkningstidspunkt = virkForBeregningIPeriode,
+                    kunGammeltRegelverk = kunGammeltRegelverk,
+                    tilDato = periode.tilOgMed?.atEndOfMonth() ?: tilDato,
+                )
+            }
+        val allePerioder = alleBeregninger.flatMap { it.beregningsperioder }
+        return alleBeregninger.first().copy(
+            beregningsperioder = allePerioder,
+        )
+    }
 
     suspend fun beregn(
         behandling: DetaljertBehandling,
@@ -105,20 +159,53 @@ class BeregnBarnepensjonService(
                 anvendtTrygdetider.anvendt,
                 virkningstidspunkt.atDay(1),
                 null,
+                beregningsGrunnlag.vedtaksperioder,
             )
 
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING ->
-                beregnBarnepensjon(
-                    behandling.id,
-                    grunnlag,
-                    barnepensjonGrunnlag,
-                    trygdetidListe,
-                    virkningstidspunkt,
-                    tilDato = tilDato,
-                )
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                if (featureToggleService.isEnabled(
+                        BeregningToggles.BEREGN_OVER_FLERE_PERIODER,
+                        false,
+                    )
+                ) {
+                    when (val perioder = beregningsGrunnlag.vedtaksperioder) {
+                        null -> {
+                            beregnBarnepensjon(
+                                behandling.id,
+                                grunnlag,
+                                barnepensjonGrunnlag,
+                                trygdetidListe,
+                                virkningstidspunkt,
+                                tilDato = tilDato,
+                            )
+                        }
+
+                        else -> {
+                            beregnBarnepensjonPerioder(
+                                behandling.id,
+                                grunnlag,
+                                barnepensjonGrunnlag,
+                                trygdetidListe,
+                                virkningstidspunkt,
+                                tilDato = tilDato,
+                                vedtaksperioder = perioder,
+                            )
+                        }
+                    }
+                } else {
+                    beregnBarnepensjon(
+                        behandling.id,
+                        grunnlag,
+                        barnepensjonGrunnlag,
+                        trygdetidListe,
+                        virkningstidspunkt,
+                        tilDato = tilDato,
+                    )
+                }
+            }
 
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall =
@@ -126,17 +213,51 @@ class BeregnBarnepensjonService(
                         ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {
-                    VilkaarsvurderingUtfall.OPPFYLT ->
-                        beregnBarnepensjon(
-                            behandling.id,
-                            grunnlag,
-                            barnepensjonGrunnlag,
-                            trygdetidListe,
-                            virkningstidspunkt,
-                            tilDato = tilDato,
-                        )
+                    VilkaarsvurderingUtfall.OPPFYLT -> {
+                        if (featureToggleService.isEnabled(
+                                BeregningToggles.BEREGN_OVER_FLERE_PERIODER,
+                                false,
+                            )
+                        ) {
+                            when (val perioder = beregningsGrunnlag.vedtaksperioder) {
+                                null -> {
+                                    beregnBarnepensjon(
+                                        behandling.id,
+                                        grunnlag,
+                                        barnepensjonGrunnlag,
+                                        trygdetidListe,
+                                        virkningstidspunkt,
+                                        tilDato = tilDato,
+                                    )
+                                }
 
-                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
+                                else -> {
+                                    beregnBarnepensjonPerioder(
+                                        behandling.id,
+                                        grunnlag,
+                                        barnepensjonGrunnlag,
+                                        trygdetidListe,
+                                        virkningstidspunkt,
+                                        tilDato = tilDato,
+                                        vedtaksperioder = perioder,
+                                    )
+                                }
+                            }
+                        } else {
+                            beregnBarnepensjon(
+                                behandling.id,
+                                grunnlag,
+                                barnepensjonGrunnlag,
+                                trygdetidListe,
+                                virkningstidspunkt,
+                                tilDato = tilDato,
+                            )
+                        }
+                    }
+
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
+                        opphoer(behandling.id, grunnlag, virkningstidspunkt)
+                    }
                 }
             }
         }
@@ -257,9 +378,11 @@ class BeregnBarnepensjonService(
                 )
             }
 
-            is RegelkjoeringResultat.UgyldigPeriode -> throw RuntimeException(
-                "Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}",
-            )
+            is RegelkjoeringResultat.UgyldigPeriode -> {
+                throw RuntimeException(
+                    "Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}",
+                )
+            }
         }
     }
 
@@ -308,6 +431,7 @@ class BeregnBarnepensjonService(
         anvendtTrygdetider: List<GrunnlagMedPeriode<List<AnvendtTrygdetid>>>,
         virkFom: LocalDate,
         tom: LocalDate?,
+        vedtaksperioder: List<Vedtaksperiode>?,
     ) = PeriodisertBarnepensjonGrunnlag(
         soeskenKull =
             if (beregningsGrunnlag.soeskenMedIBeregning.isNotEmpty()) {
@@ -335,8 +459,12 @@ class BeregnBarnepensjonService(
                                     trygdetider,
                                     beregningsGrunnlag,
                                     virkFom,
-                                ).also { anvendtTrygdetidRepository.lagreAnvendtTrygdetid(beregningsGrunnlag.behandlingId, it) }
-                                .anvendt
+                                ).also {
+                                    anvendtTrygdetidRepository.lagreAnvendtTrygdetid(
+                                        beregningsGrunnlag.behandlingId,
+                                        it,
+                                    )
+                                }.anvendt
                                 .first()
                                 .data,
                         kilde = beregningsGrunnlag.kilde,
@@ -375,6 +503,10 @@ class BeregnBarnepensjonService(
                     }
                 } ?: emptyList(),
             ) { _, _, _ -> FaktumNode(false, beregningsGrunnlag.kilde, "Kun en registrert juridisk forelder") },
+        vedtaksperioder =
+            KonstantGrunnlag(
+                FaktumNode(vedtaksperioder, "", ""),
+            ),
     )
 
     private fun validerKunEnJuridiskForelder(

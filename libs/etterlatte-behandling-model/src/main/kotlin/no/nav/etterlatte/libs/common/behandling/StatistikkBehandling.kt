@@ -32,8 +32,7 @@ data class StatistikkBehandling(
     val relatertBehandlingId: UUID?,
     val pesysId: Long?,
 ) {
-    fun relatertBehandlingIdNonNull(): UUID =
-            krevIkkeNull(relatertBehandlingId) { "Behandlingen mangler relatertBehandlingId" }
+    fun relatertBehandlingIdNonNull(): UUID = krevIkkeNull(relatertBehandlingId) { "Behandlingen mangler relatertBehandlingId" }
 }
 
 enum class BehandlingHendelseType : EventnameHendelseType {

@@ -36,7 +36,7 @@ internal val skjekklisteItemsFoerstegangsbehandlingBP =
     listOf(
         "Utbetalt bidragsforskudd som skal trekkes inn i etterbetaling - sendt oppgave til Bidrag",
         "Mulighet for, og ikke søkt om (utvidet) barnetrygd - sendt oppgave til barnetrygd",
-        "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
+        "Etterbetaling av barnepensjon blir mer enn 2G - kontaktet statsforvalter for informasjon (Gjelder kun barn mellom 0 og 18 år)",
         "Ikke registrert/registrert annet kontonummer i saken - opprettet oppgave til NØP",
         "Sendt oppgave til NAY om innvilget BP, slik at de kan avkorte AAP og DP",
         "Ved avslag: Informert om at barnet kan ha rett på bidragsforskudd",
@@ -47,7 +47,7 @@ internal val skjekklisteItemsFoerstegangsbehandlingBP =
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
         "Ved vergemål - sjekk at riktig verge er registrert, og at brev/vedtak blir sendt til riktig person",
         "Bruker mottar AFP livsvarig. Registreres som inntekt (se tjenestepensjon i Pesys og A-ordningen)",
-        "Dersom bruker er mellom 18 og 20 år, sjekk om bruker har ytelse gjennom ungdomsprogrammet",
+        "Har sjekket om bruker har ytelse gjennom ungdomsprogrammet (gjelder kun barn mellom 18 og 20 år)",
     )
 
 internal val sjekklisteItemsFoerstegangsbehandlingOMS =
@@ -71,7 +71,7 @@ internal val sjekklisteItemsFoerstegangsbehandlingOMS =
 
 internal val sjekklisteItemsRevurderingBP =
     listOf(
-        "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
+        "Etterbetaling av barnepensjon blir mer enn 2G - kontaktet statsforvalter for informasjon (Gjelder kun barn mellom 0 og 18 år)",
         "Barnet mottar uføretrygd fra Nav - pensjonen er avkortet",
         "Mottatt nye bankopplysninger - sendt oppgave til NØP",
         "Ved vergemål - sjekk at riktig verge er registrert, og at brev/vedtak blir sendt til riktig person",

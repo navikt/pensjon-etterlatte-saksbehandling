@@ -58,7 +58,7 @@ export const AktivitetspliktSpørsmål = ({ erRedigerbar, setAktivitetspliktSkje
 
   return (
     <form>
-      <VStack gap="4">
+      <VStack gap="space-16">
         <Heading size="large">Vurder aktivitetsplikt</Heading>
         <Box maxWidth="60rem">
           <BodyShort>
@@ -69,7 +69,7 @@ export const AktivitetspliktSpørsmål = ({ erRedigerbar, setAktivitetspliktSkje
         </Box>
 
         {skjemaErAapent && erRedigerbar ? (
-          <VStack gap="4">
+          <VStack gap="space-16">
             <ControlledRadioGruppe
               name="aktivitetspliktOverholdt"
               control={control}
@@ -108,7 +108,7 @@ export const AktivitetspliktSpørsmål = ({ erRedigerbar, setAktivitetspliktSkje
               errorMessage: 'Kunne ikke hente oppdatert etteroppgjør',
             })}
 
-            <HStack gap="4">
+            <HStack gap="space-16">
               <Button
                 size="small"
                 loading={isPending(lagreAktivitetspliktResult) || isPending(hentEtteroppgjoerResult)}
@@ -131,10 +131,10 @@ export const AktivitetspliktSpørsmål = ({ erRedigerbar, setAktivitetspliktSkje
             </HStack>
           </VStack>
         ) : (
-          <VStack gap="4">
+          <VStack gap="space-16">
             {!forbehandling.aktivitetspliktOverholdt ? (
               !erRedigerbar ? (
-                <VStack gap="2">
+                <VStack gap="space-8">
                   <Label>Aktivitetsplikt</Label>
                   <BodyShort>
                     Spørsmålet om aktivitetsplikt ble lagt til i ettertid, og er ikke svart på i denne behandlingen.
@@ -145,12 +145,12 @@ export const AktivitetspliktSpørsmål = ({ erRedigerbar, setAktivitetspliktSkje
               )
             ) : (
               <>
-                <VStack gap="2">
+                <VStack gap="space-8">
                   <Label>Er aktivitetsplikten overholdt i etteroppgjørsåret?</Label>
                   <BodyShort>{forbehandling.aktivitetspliktOverholdt === JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
                 </VStack>
                 {forbehandling.aktivitetspliktBegrunnelse && (
-                  <VStack gap="2" maxWidth="30rem">
+                  <VStack gap="space-8" maxWidth="30rem">
                     <Label>Begrunnelse</Label>
                     <BodyShort>{forbehandling.aktivitetspliktBegrunnelse}</BodyShort>
                   </VStack>

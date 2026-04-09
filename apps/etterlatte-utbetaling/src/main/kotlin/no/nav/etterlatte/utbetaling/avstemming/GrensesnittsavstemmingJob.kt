@@ -68,7 +68,7 @@ class GrensesnittsavstemmingJob(
                 try {
                     grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
                 } catch (e: Exception) {
-                    log.error("Feil under kjøring i grensesnittavstemming, se sikkerlogg", e::class.simpleName)
+                    log.error("Feil av type ${e::class.simpleName} under kjøring i grensesnittavstemming, se sikkerlogg")
                     sikkerLogg.error("Feil under kjøring i grensesnittavstemming", e)
                     throw e
                 }

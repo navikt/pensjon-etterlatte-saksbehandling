@@ -19,7 +19,3 @@ yarn-error.log
 **/coverage/
 /buildSrc/build/
 **/buildSrc/.kotlin/
-
-# Per-utvikler lessons-fil for agent-læring
-.github/lessons.md
-

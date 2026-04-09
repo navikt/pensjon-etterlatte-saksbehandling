@@ -51,7 +51,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.migrering.KILDE_KEY
@@ -500,7 +500,7 @@ class VedtakBehandlingService(
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
         beregningOgAvkorting: BeregningOgAvkorting?,
-        vilkaarsvurdering: Vilkaarsvurdering?,
+        vilkaarsvurdering: VilkaarsvurderingDto?,
     ): Vedtak {
         val opphoerFraOgMed = utledOpphoerFraOgMed(vedtakType, virkningstidspunkt, behandling)
         val opprettetVedtak =
@@ -540,7 +540,7 @@ class VedtakBehandlingService(
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
         beregningOgAvkorting: BeregningOgAvkorting?,
-        vilkaarsvurdering: Vilkaarsvurdering?,
+        vilkaarsvurdering: VilkaarsvurderingDto?,
     ): Vedtak {
         val opphoerFraOgMed = utledOpphoerFraOgMed(vedtakType, virkningstidspunkt, behandling)
         val oppdatertVedtak =
@@ -593,7 +593,7 @@ class VedtakBehandlingService(
     private fun vedtakType(
         behandlingType: BehandlingType,
         revurderingaarsak: Revurderingaarsak?,
-        vilkaarsvurdering: Vilkaarsvurdering?,
+        vilkaarsvurdering: VilkaarsvurderingDto?,
         etteroppgjoerResultat: BeregnetEtteroppgjoerResultatDto?,
     ): VedtakType =
         when (behandlingType) {
@@ -756,7 +756,7 @@ class VedtakBehandlingService(
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
-                    val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandling.id)
+                    val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id)
 
                     when (vilkaarsvurdering?.resultat?.utfall) {
                         VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {

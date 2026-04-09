@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import org.junit.jupiter.api.AfterEach
@@ -26,7 +26,7 @@ internal class GrunnlagVersjonValideringTest {
     @Test
     fun `Vilkaar eller beregning er null`() {
         assertDoesNotThrow {
-            val vilkaarsvurdering = mockk<Vilkaarsvurdering>(relaxed = true)
+            val vilkaarsvurdering = mockk<VilkaarsvurderingDto>(relaxed = true)
             val behandling = mockk<DetaljertBehandling>(relaxed = true)
             val trygdetid = mockTrygdetidDtoUtenDiff()
             GrunnlagVersjonValidering.validerVersjon(vilkaarsvurdering, null, listOf(trygdetid), behandling)
@@ -43,7 +43,7 @@ internal class GrunnlagVersjonValideringTest {
     @Test
     fun `Ulike versjoner  beregning og vilkårsvurdering - skal kaste feil`() {
         val vilkaarsvurdering =
-            mockk<Vilkaarsvurdering> {
+            mockk<VilkaarsvurderingDto> {
                 every { grunnlagVersjon } returns 2
                 every { resultat } returns
                     VilkaarsvurderingResultat(
@@ -75,7 +75,7 @@ internal class GrunnlagVersjonValideringTest {
     @Test
     fun `Like versjoner - skal ikke kaste feil`() {
         val vilkaarsvurdering =
-            mockk<Vilkaarsvurdering> {
+            mockk<VilkaarsvurderingDto> {
                 every { grunnlagVersjon } returns 1
                 every { resultat } returns
                     VilkaarsvurderingResultat(
@@ -106,7 +106,7 @@ internal class GrunnlagVersjonValideringTest {
     @Test
     fun `Vilkårsvurdering avslag, ikke avhuket vurdereAvdoedesTrygdeavtale, ignorerer trygdetid diff`() {
         val vilkaarsvurdering =
-            mockk<Vilkaarsvurdering> {
+            mockk<VilkaarsvurderingDto> {
                 every { grunnlagVersjon } returns 1
                 every { resultat } returns
                     VilkaarsvurderingResultat(
@@ -146,7 +146,7 @@ internal class GrunnlagVersjonValideringTest {
     @Test
     fun `Differanse mellom trygdetid og behandling - skal kaste feil`() {
         val vilkaarsvurdering =
-            mockk<Vilkaarsvurdering> {
+            mockk<VilkaarsvurderingDto> {
                 every { grunnlagVersjon } returns 1
                 every { resultat } returns
                     VilkaarsvurderingResultat(
@@ -178,7 +178,7 @@ internal class GrunnlagVersjonValideringTest {
     @Test
     fun `Differanse mellom trygdetid og behandling paa minst en trygdetid naar det er flere - skal kaste feil`() {
         val vilkaarsvurdering =
-            mockk<Vilkaarsvurdering> {
+            mockk<VilkaarsvurderingDto> {
                 every { grunnlagVersjon } returns 1
                 every { resultat } returns
                     VilkaarsvurderingResultat(

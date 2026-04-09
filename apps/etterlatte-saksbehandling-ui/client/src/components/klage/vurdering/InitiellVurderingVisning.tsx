@@ -28,8 +28,8 @@ export const InitiellVurderingVisningContent = (props: { klage: Klage }) => {
   const saksbehandler = klage.initieltUtfall?.saksbehandler ?? 'Ukjent'
 
   return (
-    <VStack gap="2">
-      <HStack gap="4">
+    <VStack gap="space-8">
+      <HStack gap="space-16">
         <Info label="Utfall" tekst={utfall} />
         <Info label="Sist endret" tekst={sistEndret} />
         <Info label="Saksbehandler" tekst={saksbehandler} />

@@ -29,7 +29,6 @@ export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveS
       >
         Avslutt oppgave uten behandling
       </Button>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Header>
           <Heading level="1" spacing size="medium" id="modal-heading">
@@ -53,7 +52,7 @@ export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveS
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" justify="center">
+          <HStack gap="space-16" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(ferdigstillOppgaveStatus)}>
               Nei
             </Button>

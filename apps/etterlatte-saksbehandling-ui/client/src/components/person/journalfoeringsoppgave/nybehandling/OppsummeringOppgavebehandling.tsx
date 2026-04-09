@@ -38,8 +38,7 @@ export default function OppsummeringOppgavebehandling() {
       <Heading size="medium" spacing>
         Opprett behandling fra oppgave
       </Heading>
-
-      <VStack gap="4">
+      <VStack gap="space-16">
         <Info label="Saktype" tekst={formaterSakstype(nyBehandlingRequest.sakType!!)} />
 
         <Info label="Språk" tekst={formaterSpraak(spraak)} />
@@ -70,16 +69,14 @@ export default function OppsummeringOppgavebehandling() {
           />
         )) || <Info label="Innsender" tekst={<Detail>Ikke oppgitt</Detail>} />}
       </VStack>
-
       {!persongalleri.avdoed?.length && (
         <Alert variant="warning" size="small">
           Avdød er påkrevd ved innvilgelse. Det anbefales derfor å legge til (hvis mulig) for å slippe oppdatering av
           persongalleriet på et senere tidspunkt.
         </Alert>
       )}
-
-      <VStack gap="2">
-        <HStack gap="4" justify="center">
+      <VStack gap="space-8">
+        <HStack gap="space-16" justify="center">
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>

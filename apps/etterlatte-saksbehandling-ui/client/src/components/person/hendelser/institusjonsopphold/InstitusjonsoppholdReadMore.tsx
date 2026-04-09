@@ -5,7 +5,7 @@ import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 export const InstitusjonsoppholdReadMore = () => {
   return (
     <ReadMore header="Informasjon om institusjonsopphold">
-      <VStack gap="2">
+      <VStack gap="space-8">
         <HjemmelLenke
           tittel="§ 18-8.Barnepensjon under opphold i institusjon"
           lenke="https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_6-6#%C2%A718-8"

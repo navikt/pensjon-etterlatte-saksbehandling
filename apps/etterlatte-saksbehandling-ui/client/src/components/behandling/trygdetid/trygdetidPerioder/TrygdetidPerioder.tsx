@@ -110,14 +110,12 @@ export const TrygdetidPerioder = ({
 
   const faktiskTrygdetid = trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK
   return (
-    <VStack gap="4">
-      <HStack gap="2" align="center">
+    <VStack gap="space-16">
+      <HStack gap="space-8" align="center">
         <CalendarIcon aria-hidden height="1.5rem" width="1.5rem" />
         <Heading size="small">{formaterEnumTilLesbarString(trygdetidGrunnlagType)} trygdetid</Heading>
       </HStack>
-
       {faktiskTrygdetid ? <FaktiskTrygdetidHjelpeTekst /> : <FremtidigTrygdetidHjelpeTekst />}
-
       <TrygdetidPerioderTable
         trygdetidId={trygdetid.id}
         trygdetidPerioder={trygdetidPerioder}
@@ -128,9 +126,7 @@ export const TrygdetidPerioder = ({
         landListe={landListe}
         redigerbar={redigerbar}
       />
-
       {isFailureHandler({ apiResult: slettTrygdetidResult, errorMessage: 'Feil oppstått i slettingen av trygdetid' })}
-
       {visLeggTilTrygdetidPeriode && (
         <TrygdetidGrunnlag
           eksisterendeGrunnlag={undefined}
@@ -144,7 +140,6 @@ export const TrygdetidPerioder = ({
           landListe={landListe}
         />
       )}
-
       {kanLeggeTilNyPeriode && (
         <div>
           <Button
@@ -157,7 +152,6 @@ export const TrygdetidPerioder = ({
           </Button>
         </div>
       )}
-
       {kanLeggeTilNyPeriode &&
         faktiskTrygdetid &&
         erFoerstegangsbehandling &&

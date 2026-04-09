@@ -46,8 +46,8 @@ export const SkruPaaOverstyrtBeregning = ({
   }
 
   return (
-    <VStack gap="4" maxWidth="20rem">
-      <HStack gap="2" align="center">
+    <VStack gap="space-16" maxWidth="20rem">
+      <HStack gap="space-8" align="center">
         <ArrowsCirclepathIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small">Skal beregning overstyres?</Heading>
       </HStack>
@@ -64,12 +64,10 @@ export const SkruPaaOverstyrtBeregning = ({
         ))}
       </Select>
       <Textarea label="Begrunnelse (valgfri)" onChange={(e) => setBegrunnelse(e.target.value)} />
-
       {isFailureHandler({
         apiResult: opprettOverstyrBeregningResult,
         errorMessage: 'Feil under overstyring av beregning',
       })}
-
       <div>
         <Button
           size="small"

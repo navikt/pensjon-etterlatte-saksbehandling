@@ -85,7 +85,7 @@ export const VurderingsboksWrapper = ({
           </Oppsummering>
 
           {redigerbar && (
-            <HStack gap="3">
+            <HStack gap="space-12">
               <Button
                 icon={<PencilIcon />}
                 size="small"
@@ -170,5 +170,5 @@ const VurderingKnapper = styled.div`
 
 const Kommentar = styled.div`
   margin-bottom: 1.5em;
-  color: var(--a-gray-700);
+  color: var(--ax-neutral-800);
 `

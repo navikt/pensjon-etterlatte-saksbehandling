@@ -51,10 +51,9 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
       >
         Utgår
       </Button>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Slett brev" header={{ heading: 'Brev utgår' }}>
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-16">
             <BodyShort spacing>
               Brevet er mer enn {EN_UKE} uke gammelt og ikke distribuert. Vurder om brevet skal utgå.
             </BodyShort>
@@ -67,7 +66,7 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
               mapResult(journalfoerResult, {
                 initial: (
                   <Alert variant="warning">
-                    <HStack gap="4" align="center">
+                    <HStack gap="space-16" align="center">
                       <BodyShort>Brevet er ikke journalført. Vil du journalføre brevet?</BodyShort>
                       <Button size="small" variant="secondary" onClick={journalfoer}>
                         Ja, journalfør
@@ -100,7 +99,7 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
               success: () => <Alert variant="success">Brev markert som utgått. Laster siden på nytt...</Alert>,
             })}
 
-            <HStack gap="4" justify="center">
+            <HStack gap="space-16" justify="center">
               <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(brevUtgaarResult)}>
                 Nei, avbryt
               </Button>

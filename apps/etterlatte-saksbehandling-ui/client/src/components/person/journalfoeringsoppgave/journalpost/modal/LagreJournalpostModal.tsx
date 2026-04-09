@@ -62,7 +62,6 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Lagre utkast
         </Button>
-
         <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
           <Modal.Body>
             <Heading size="medium" id="modal-heading" spacing>
@@ -83,7 +82,7 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
                 oppgavebenken.
               </Alert>
             ) : (
-              <HStack gap="4" justify="center">
+              <HStack gap="space-16" justify="center">
                 <Button
                   variant="secondary"
                   onClick={() => setOpen(false)}

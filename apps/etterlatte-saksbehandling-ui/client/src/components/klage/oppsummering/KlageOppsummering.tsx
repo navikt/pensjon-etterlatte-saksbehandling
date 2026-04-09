@@ -48,13 +48,12 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
   const { utfall, sak } = klage
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Heading level="1" size="large">
           Oppsummering
         </Heading>
       </Box>
-
-      <Box paddingBlock="8" paddingInline="16 8">
+      <Box paddingBlock="space-32" paddingInline="space-64 space-32">
         <Heading size="medium" level="2">
           Utfall
         </Heading>
@@ -72,19 +71,16 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
           <VisOmgjoering omgjoering={utfall.omgjoering} kanRedigere={kanRedigere} />
         )}
       </Box>
-
       {isFailureHandler({
         apiResult: ferdigstillStatus,
         errorMessage:
           'Kunne ikke ferdigstille klagebehandling på grunn av en feil. Prøv igjen etter å ha ' +
           'lastet siden på nytt, og meld sak hvis problemet vedvarer.',
       })}
-
       {mapFailure(fattVedtakStatus, (error) => (
         <ApiErrorAlert>Kunne ikke fatte vedtak om avvist klage, på grunn av feil: {error.detail}.</ApiErrorAlert>
       ))}
-
-      <HStack gap="4" justify="center">
+      <HStack gap="space-16" justify="center">
         <Button variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'oppsummering'))}>
           Gå tilbake
         </Button>

@@ -55,7 +55,6 @@ export const BrevOppgaveModal = ({
       <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setIsOpen(true)}>
         Se oppgave
       </Button>
-
       <Modal
         open={isOpen}
         aria-labelledby="modal-heading"
@@ -64,8 +63,8 @@ export const BrevOppgaveModal = ({
         header={{ heading: 'Manuell utsending av brev' }}
       >
         <Modal.Body>
-          <VStack gap="4">
-            <HStack gap="4">
+          <VStack gap="space-16">
+            <HStack gap="space-16">
               <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
               <Info label="Frist" tekst={formaterDato(oppgave.frist)} />
             </HStack>
@@ -112,7 +111,7 @@ export const BrevOppgaveModal = ({
               error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
             })}
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-16" justify="end">
               <Button
                 variant="secondary"
                 onClick={() => setIsOpen(false)}

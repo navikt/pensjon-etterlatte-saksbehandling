@@ -63,13 +63,12 @@ export const Oppgaver = ({
   if (!paginerteOppgaver.length) return AlertIngenOppgaver
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       <PagineringsKontroller
         page={page}
         setPage={setPage}
         antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
       />
-
       <OppgaverTable
         oppgaver={paginerteOppgaver}
         oppdaterTildeling={oppdaterSaksbehandlerTildeling}
@@ -79,7 +78,6 @@ export const Oppgaver = ({
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         setSortering={setSortering}
       />
-
       <PagineringsKontroller
         page={page}
         setPage={setPage}

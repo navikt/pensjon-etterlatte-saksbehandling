@@ -18,12 +18,11 @@ export const TrygdetidManueltOverstyrtVisning = ({
     : beregnetTrygdetid.resultat.samletTrygdetidNorge
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Box>
         <Heading size="xsmall">Anvendt trygdetid</Heading>
         <BodyShort>{trygdetidAar} år</BodyShort>
       </Box>
-
       {harProrata && (
         <Box>
           <Heading size="xsmall">Prorata brøk</Heading>
@@ -32,12 +31,10 @@ export const TrygdetidManueltOverstyrtVisning = ({
           </BodyShort>
         </Box>
       )}
-
       <Box>
         <Heading size="xsmall">Begrunnelse</Heading>
         <BodyLong>{beregnetTrygdetid.resultat.overstyrtBegrunnelse}</BodyLong>
       </Box>
-
       {redigerbar && (
         <Box>
           <Button icon={<PencilIcon />} size="small" variant="tertiary" onClick={() => setVisSkjema(true)}>

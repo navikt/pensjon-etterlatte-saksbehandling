@@ -19,7 +19,7 @@ export const Underkjenn = () => {
   const [returType, setReturType] = useState<aarsakTyper[number] | velg>('velg')
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Select
         label="Årsak til retur"
         value={returType || ''}
@@ -34,7 +34,6 @@ export const Underkjenn = () => {
           </option>
         ))}
       </Select>
-
       <Textarea
         style={{ padding: '10px' }}
         label="Tilbakemelding fra attestant"
@@ -44,7 +43,6 @@ export const Underkjenn = () => {
         minRows={3}
         autoComplete="off"
       />
-
       <div>
         <UnderkjennVedtak kommentar={tilbakemeldingFraAttestant} valgtBegrunnelse={returType} />
       </div>

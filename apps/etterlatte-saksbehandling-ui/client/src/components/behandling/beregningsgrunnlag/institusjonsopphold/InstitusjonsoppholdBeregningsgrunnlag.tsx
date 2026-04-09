@@ -29,8 +29,8 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
     useState<boolean>(false)
 
   return (
-    <VStack gap="4">
-      <HStack gap="2" align="center">
+    <VStack gap="space-16">
+      <HStack gap="space-8" align="center">
         <HospitalIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small" level="3">
           Beregningsgrunnlag for institusjonsopphold
@@ -41,7 +41,6 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
         {sakType === SakType.OMSTILLINGSSTOENAD && <InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS />}
         <HvaSkalRegistreresReadMore />
       </VStack>
-
       <Box maxWidth="60rem">
         <InstitusjonsoppholdBeregningsgrunnlagTable
           behandling={behandling}
@@ -50,7 +49,6 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
           beregningsgrunnlag={beregningsgrunnlag}
         />
       </Box>
-
       {redigerbar &&
         (visInstitusjonsoppholdBeregningPeriodeSkjema ? (
           <InstitusjonsoppholdBeregningsgrunnlagSkjema

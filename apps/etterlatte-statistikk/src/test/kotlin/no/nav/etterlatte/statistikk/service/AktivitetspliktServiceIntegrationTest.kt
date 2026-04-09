@@ -216,7 +216,7 @@ class AktivitetspliktServiceIntegrationTest(
                 AktivitetForMaaned(
                     Aktivitetsplikt.JA,
                     true,
-                    "HUNDRE_PROSENT_ARBEIDSSOEKER",
+                    "HUNDRE_PROSENT",
                 ),
             )
             get(sakMedIkkeOppfyltAktivitet)?.shouldBeEqual(

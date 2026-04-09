@@ -39,7 +39,7 @@ export const tilbakestillEtteroppgjoerOgOpprettOppgave = async (args: {
   })
 }
 
-export const opprettEtteroppgoerForbehandling = async (args: {
+export const opprettEtteroppgjoerForbehandling = async (args: {
   sakId: number
   oppgaveId: string
   inntektsaar: string

@@ -15,7 +15,7 @@ export function AktivitetspliktSidemeny() {
         <Heading size="small">Vurdering av aktivitet</Heading>
         <Heading size="xsmall">{formaterOppgaveStatus(oppgave.status)}</Heading>
 
-        <VStack gap="2">
+        <VStack gap="space-8">
           <div>
             <SakTypeTag sakType={oppgave.sakType} />
           </div>
@@ -25,9 +25,7 @@ export function AktivitetspliktSidemeny() {
           </div>
         </VStack>
       </SidebarPanel>
-
       {oppgave.fnr && <DokumentlisteLiten fnr={oppgave.fnr} />}
-
       {(oppgave.type === Oppgavetype.AKTIVITETSPLIKT || oppgave.type === Oppgavetype.AKTIVITETSPLIKT_12MND) && (
         <AvbrytAktivitetspliktOppgave />
       )}

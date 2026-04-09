@@ -128,8 +128,8 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
 
   return (
     <form onSubmit={handleSubmit(lagrePeriode)}>
-      <VStack gap="4">
-        <HGrid gap="4" columns="min-content min-content max-content" align="start">
+      <VStack gap="space-16">
+        <HGrid gap="space-16" columns="min-content min-content max-content" align="start">
           <ControlledMaanedVelger name="fom" label="Fra og med" control={control} required kunViseMaanedOgAar={true} />
           <ControlledMaanedVelger
             name="tom"
@@ -149,7 +149,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
             kunViseMaanedOgAar={true}
           />
           <Box width="fit-content">
-            <HStack gap="3" align="center">
+            <HStack gap="space-12" align="center">
               <TextField
                 {...register('data.utbetaltBeloep', {
                   valueAsNumber: true,
@@ -189,7 +189,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
           />
           <div>
             <Label>Prorata brøk (valgfritt)</Label>
-            <HStack gap="3" align="center">
+            <HStack gap="space-12" align="center">
               <TextField
                 {...register('data.prorataBroekTeller')}
                 label=""
@@ -204,7 +204,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
             </HStack>
           </div>
         </HGrid>
-        <VStack gap="4" maxWidth="17rem">
+        <VStack gap="space-16" maxWidth="17rem">
           <Select
             {...register('data.aarsak', {
               validate: validerAarsak,
@@ -226,7 +226,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
           errorMessage: 'Feil i lagringen av periode',
         })}
 
-        <HStack gap="4">
+        <HStack gap="space-16">
           <Button
             size="small"
             icon={<FloppydiskIcon aria-hidden />}

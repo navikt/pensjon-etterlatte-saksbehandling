@@ -18,7 +18,6 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
       <Button variant="primary" onClick={() => setOpen(true)}>
         Ferdigstill
       </Button>
-
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Body>
           <Heading size="medium" id="modal-heading" spacing>
@@ -36,7 +35,7 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
 
               <br />
 
-              <HStack gap="4" justify="center">
+              <HStack gap="space-16" justify="center">
                 <Button variant="secondary" onClick={() => navigate('/')}>
                   Gå til oppgavelisten
                 </Button>
@@ -46,7 +45,7 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
               </HStack>
             </>
           ) : (
-            <HStack gap="4" justify="center">
+            <HStack gap="space-16" justify="center">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillOppgaveStatus)}>
                 Nei, avbryt
               </Button>

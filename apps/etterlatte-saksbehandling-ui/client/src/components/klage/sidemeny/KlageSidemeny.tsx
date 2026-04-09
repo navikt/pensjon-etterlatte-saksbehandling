@@ -58,7 +58,7 @@ export function KlageSidemeny() {
         <HStack width="100%">
           <Heading size="small">Klage</Heading>
         </HStack>
-        <VStack gap="2">
+        <VStack gap="space-8">
           <BodyShort>{teksterKlagestatus[klage.status]}</BodyShort>
 
           {klage.kabalStatus && <Info label="Status Kabal" tekst={teksterKabalstatus[klage.kabalStatus]} />}
@@ -66,7 +66,7 @@ export function KlageSidemeny() {
           <Box>
             <SakTypeTag sakType={klage.sak.sakType}></SakTypeTag>
           </Box>
-          <HStack gap="4">
+          <HStack gap="space-16">
             <div>
               <Label size="small">Klager</Label>
               <Detail>{klage.innkommendeDokument?.innsender ?? 'Ukjent'}</Detail>
@@ -83,7 +83,7 @@ export function KlageSidemeny() {
 
           {erRedigerbar && <RedigerMottattDato />}
 
-          <Box marginBlock="2 0">
+          <Box marginBlock="space-8 space-0">
             <SettPaaVent oppgave={oppgave} />
           </Box>
         </VStack>

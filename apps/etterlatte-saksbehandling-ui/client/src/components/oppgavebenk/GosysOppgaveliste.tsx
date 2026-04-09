@@ -84,7 +84,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }, [filter])
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <ToggleGroup
         defaultValue={GosysOppgaveValg.ALLE_OPPGAVER}
         onChange={(e) => setFilter(lagGosysFilterBasertPaaOppgaveValg(e as GosysOppgaveValg))}
@@ -100,14 +100,12 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
           {formaterEnumTilLesbarString(GosysOppgaveValg.IKKE_TILDELTE)}
         </ToggleGroup.Item>
       </ToggleGroup>
-
       <GosysFilterRad
         hentAlleOppgaver={hentOppgaver}
         filter={filter}
         setFilter={setFilter}
         filterFoedselsnummer={setFnrFilter}
       />
-
       {mapResult(gosysOppgaverResult, {
         pending: <Spinner label="Henter Gosys-oppgaver" />,
         error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente Gosys-oppgaver'}</ApiErrorAlert>,

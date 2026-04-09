@@ -82,8 +82,8 @@ export const BeregningsMetodeBrukt = ({
   const beregningsMetode = behandling?.beregningsGrunnlag?.beregningsMetode
 
   return (
-    <VStack gap="4">
-      <HStack gap="2" align="center">
+    <VStack gap="space-16">
+      <HStack gap="space-8" align="center">
         <TagIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small" level="3">
           Trygdetid i beregning
@@ -114,7 +114,7 @@ export const BeregningsMetodeBrukt = ({
                 redigerTrydgetidMetodeBrukt ? (
                   <>
                     <form onSubmit={handleSubmit(lagreBeregningsMetode)}>
-                      <VStack gap="4">
+                      <VStack gap="space-16">
                         {kunEnJuridiskForelderPersongalleri && (
                           <ControlledMaanedVelger
                             name="datoTilKunEnJuridiskForelder"
@@ -146,7 +146,7 @@ export const BeregningsMetodeBrukt = ({
                         <Box width="15rem">
                           <Textarea {...register('begrunnelse')} label="Begrunnelse (valgfritt)" />
                         </Box>
-                        <HStack gap="4">
+                        <HStack gap="space-16">
                           <Button
                             size="small"
                             icon={<FloppydiskIcon aria-hidden />}
@@ -194,7 +194,7 @@ export const BeregningsMetodeBrukt = ({
                   : 'Metode er ikke satt'}
               </Table.DataCell>
               <Table.DataCell>
-                <HStack gap="4">
+                <HStack gap="space-16">
                   {redigerbar && (
                     <>
                       <Button

@@ -2,7 +2,6 @@ import styled from 'styled-components'
 import { BodyShort, Search as SearchField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ABlue500, AGray900, ANavRed } from '@navikt/ds-tokens/dist/tokens'
 import { InformationSquareIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { fnrErGyldig } from '~utils/fnr'
@@ -11,6 +10,8 @@ import { hentSak } from '~shared/api/behandling'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiError } from '~shared/api/apiClient'
+
+import { Accent600, Neutral1000, TextLogo } from '@navikt/ds-tokens/js'
 
 export const Search = () => {
   const navigate = useNavigate()
@@ -85,7 +86,7 @@ export const Search = () => {
       {feilInput && (
         <Dropdown $info={true}>
           <span className="icon">
-            <InformationSquareIcon stroke={ABlue500} fill={ABlue500} />
+            <InformationSquareIcon stroke={Accent600} fill={Accent600} />
           </span>
           <SearchResult>
             <BodyShort className="text">Tast inn gyldig fødselsnummer eller saksid</BodyShort>
@@ -96,7 +97,7 @@ export const Search = () => {
       {mapFailure(funnetSak, (error) => (
         <Dropdown $error={true}>
           <span className="icon">
-            <XMarkOctagonIcon color={ANavRed} fill={AGray900} />
+            <XMarkOctagonIcon color={TextLogo} fill={Neutral1000} />
           </span>
           <SearchResult>
             <BodyShort className="text">{feilkodehaandtering(error)}</BodyShort>

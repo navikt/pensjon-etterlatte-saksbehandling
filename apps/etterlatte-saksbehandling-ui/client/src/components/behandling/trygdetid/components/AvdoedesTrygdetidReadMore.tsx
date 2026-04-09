@@ -5,8 +5,8 @@ import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 export const AvdoedesTrygdetidReadMore = () => {
   return (
     <ReadMore header="Mer om avdødes trygdetid">
-      <VStack gap="2">
-        <HStack gap="2">
+      <VStack gap="space-8">
+        <HStack gap="space-8">
           <HjemmelLenke
             tittel="§ 3-5 Trygdetid ved beregning av ytelser"
             lenke="https://lovdata.no/pro/lov/1997-02-28-19/§3-5"

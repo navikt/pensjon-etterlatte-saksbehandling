@@ -98,11 +98,11 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
     }
   }
   if (isFailure(sakResult)) {
-    return <Box padding="8">{feilkodehaandtering(sakResult.error)}</Box>
+    return <Box padding="space-32">{feilkodehaandtering(sakResult.error)}</Box>
   }
 
   return (
-    <Box padding="8">
+    <Box padding="space-32">
       {mapApiResult(
         brevListe,
         <Spinner label="Henter brev for sak ..." />,
@@ -147,7 +147,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
                     ))}
                   </Table.DataCell>
                   <Table.DataCell>
-                    <HStack gap="4" justify="end" align="center">
+                    <HStack gap="space-16" justify="end" align="center">
                       <SlettBrev brev={b} />
                       <BrevUtgaar brev={b} />
                       {handlingKnapp(b)}
@@ -159,12 +159,10 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
           </Table>
         )
       )}
-
       <br />
-
       <div>
         {mapSuccess(sakResult, (sak) => (
-          <HStack gap="4">
+          <HStack gap="space-16">
             <NyttBrevModal sakId={sak.sak.id} sakType={sak.sak.sakType} />
             <LastOppBrev sak={sak.sak} />
           </HStack>

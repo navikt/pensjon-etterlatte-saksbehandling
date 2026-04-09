@@ -79,9 +79,9 @@ class EtteroppgjoerForbehandlingDao(
                         """
                         INSERT INTO etteroppgjoer_behandling(
                             id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst, varselbrev_sendt, etteroppgjoer_resultat_type,
-                            aarsak_til_avbrytelse, kommentar_til_avbrytelse, har_vedtak_av_type_opphoer, opphoer_skyldes_doedsfall, opphoer_skyldes_doedsfall_i_etteroppgjoersaar, mottatt_skatteoppgjoer, klage_omgjoering
+                            aarsak_til_avbrytelse, kommentar_til_avbrytelse, har_vedtak_av_type_opphoer, opphoer_skyldes_doedsfall, opphoer_skyldes_doedsfall_i_etteroppgjoersaar, mottatt_skatteoppgjoer, klage_omgjoering, aktivitetsplikt_overholdt, aktivitetsplikt_begrunnelse
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id,
@@ -96,7 +96,9 @@ class EtteroppgjoerForbehandlingDao(
                             opphoer_skyldes_doedsfall = excluded.opphoer_skyldes_doedsfall,
                             opphoer_skyldes_doedsfall_i_etteroppgjoersaar = excluded.opphoer_skyldes_doedsfall_i_etteroppgjoersaar,
                             mottatt_skatteoppgjoer = excluded.mottatt_skatteoppgjoer,
-                            klage_omgjoering = excluded.klage_omgjoering
+                            klage_omgjoering = excluded.klage_omgjoering,
+                            aktivitetsplikt_overholdt = excluded.aktivitetsplikt_overholdt,
+                            aktivitetsplikt_begrunnelse = excluded.aktivitetsplikt_begrunnelse
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)
@@ -127,6 +129,8 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setString(20, forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar?.name)
                 statement.setBoolean(21, forbehandling.mottattSkatteoppgjoer)
                 statement.setObject(22, forbehandling.klageOmgjoering)
+                statement.setString(23, forbehandling.aktivitetspliktOverholdt?.name)
+                statement.setString(24, forbehandling.aktivitetspliktBegrunnelse)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -334,6 +338,8 @@ class EtteroppgjoerForbehandlingDao(
                 )?.let { enumValueOf<JaNei>(it) },
             mottattSkatteoppgjoer = getBoolean("mottatt_skatteoppgjoer"),
             klageOmgjoering = getString("klage_omgjoering")?.let { UUID.fromString(it) },
+            aktivitetspliktOverholdt = getString("aktivitetsplikt_overholdt")?.let { enumValueOf<JaNei>(it) },
+            aktivitetspliktBegrunnelse = getString("aktivitetsplikt_begrunnelse"),
         )
 
     private fun ResultSet.toSummertePensjonsgivendeInntekter(): SummertePensjonsgivendeInntekter =

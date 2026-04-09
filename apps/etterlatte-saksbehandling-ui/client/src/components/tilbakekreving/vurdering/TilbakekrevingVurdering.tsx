@@ -12,7 +12,7 @@ export function TilbakekrevingVurdering({
 }) {
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Heading level="1" size="large">
           Vurdering
         </Heading>

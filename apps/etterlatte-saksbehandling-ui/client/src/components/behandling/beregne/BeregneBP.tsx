@@ -81,7 +81,7 @@ export const BeregneBP = (props: { behandling: IBehandlingReducer }) => {
   return (
     <>
       {erOpphoer ? (
-        <Box paddingInline="18" paddingBlock="4">
+        <Box paddingInline="space-72" paddingBlock="space-16">
           <SimulerUtbetaling behandling={behandling} />
           <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
         </Box>
@@ -94,7 +94,7 @@ export const BeregneBP = (props: { behandling: IBehandlingReducer }) => {
               <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
             ),
             (beregning) => (
-              <Box paddingInline="18" paddingBlock="4">
+              <Box paddingInline="space-72" paddingBlock="space-16">
                 <>
                   <BarnepensjonSammendrag beregning={beregning} />
                   <SimulerUtbetaling behandling={behandling} />
@@ -110,14 +110,12 @@ export const BeregneBP = (props: { behandling: IBehandlingReducer }) => {
           )}
         </>
       )}
-
       {isFailureHandler({
         apiResult: vedtakStatus,
         errorMessage: 'Vedtaksoppdatering feilet',
         wrapperComponent: { component: HStack, props: { justify: 'center' } },
       })}
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             {visAttesteringsmodal ? (

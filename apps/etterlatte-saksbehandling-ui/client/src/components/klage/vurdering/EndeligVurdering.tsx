@@ -140,9 +140,8 @@ export function EndeligVurdering(props: { klage: Klage }) {
       <Heading level="2" size="medium" spacing>
         Endelig vurdering
       </Heading>
-
       <form onSubmit={handleSubmit(skjemaLagring)}>
-        <VStack gap="4">
+        <VStack gap="space-16">
           <ControlledRadioGruppe
             name="utfall"
             control={control}
@@ -191,7 +190,7 @@ export function EndeligVurdering(props: { klage: Klage }) {
               )}
             </>
           )}
-          <HStack gap="4" justify="center">
+          <HStack gap="space-16" justify="center">
             <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
               Gå tilbake
             </Button>

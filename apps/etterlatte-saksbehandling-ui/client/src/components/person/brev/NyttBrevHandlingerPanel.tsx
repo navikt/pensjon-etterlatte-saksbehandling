@@ -74,7 +74,6 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
           Ferdigstill
         </Button>
       )}
-
       <Modal
         open={statusModalOpen}
         onClose={() => setStatusModalOpen(false)}
@@ -99,7 +98,6 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
           success: () => <Alert variant="success">Brev sendt til distribusjon. Laster inn brev på nytt...</Alert>,
         })}
       </Modal>
-
       <Modal open={isOpen && !statusModalOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Body>
           <Heading level="1" spacing size="medium" id="modal-heading">
@@ -113,7 +111,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
             <BodyLong spacing>Når varselbrevet er sendt kan du sette oppgaven på vent.</BodyLong>
           )}
           {erAktivitetspliktVarsel && (
-            <Box paddingBlock="4">
+            <Box paddingBlock="space-16">
               <ConfirmationPanel
                 label="Infobrevet er sendt for minst tre uker siden, slik at varselsbrevet kan sendes ut"
                 onChange={() => setBekreftetInfobrev((bekreftet) => !bekreftet)}
@@ -129,7 +127,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" justify="center">
+          <HStack gap="space-16" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett redigering
             </Button>

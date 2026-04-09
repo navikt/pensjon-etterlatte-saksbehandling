@@ -47,12 +47,11 @@ export const SlettBrev = ({ brev }: { brev: IBrev }) => {
       >
         Slett
       </Button>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Slett brev">
         <Modal.Body>
           <BodyShort spacing>Er du sikker på at du vil slette brevet? Handlingen kan ikke angres.</BodyShort>
 
-          <HStack gap="4" justify="center">
+          <HStack gap="space-16" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(slettBrevStatus)}>
               Nei, avbryt
             </Button>

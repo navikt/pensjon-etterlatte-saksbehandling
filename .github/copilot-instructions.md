@@ -124,6 +124,28 @@ Inget DI-rammeverk brukes. Hver app har en `ApplicationContext`-klasse (i `confi
 - Rå JDBC via `kotliquery` (ikke ORM). DAO-er tar imot `DataSource` eller `ConnectionAutoclosing`
 - DB-tester bruker `@ExtendWith(DatabaseExtension::class)`, som starter én delt Testcontainers Postgres-instans. Hver app definerer sin egen `DatabaseExtension` med `@ResetDatabaseStatement` som trunkerer tabeller mellom testklasser.
 
+### Feilhåndtering og preconditions (Kotlin)
+
+Bruk hjelpefunksjonene fra `no.nav.etterlatte.libs.common.feilhaandtering` i stedet for Kotlins innebygde `require`/`check`/`requireNotNull`/`checkNotNull`:
+
+| Funksjon | Kaster | HTTP | Logger | Bruk når |
+|---|---|---|---|---|
+| `krev(bool)` / `krevIkkeNull(T?)` | `InternfeilException` | 500 | `error` | Systemfeil – en tilstand som aldri skal kunne inntreffe i korrekt kjørende kode |
+| `sjekk(bool)` / `sjekkIkkeNull(T?)` | `UgyldigForespoerselException` | 400 | `info` | Klientfeil – ugyldig forespørsel eller domenetilstand forårsaket av hva kalleren sendte inn |
+
+Tommelfingerregel: hvis feilen skyldes en bug eller dataintegritetsproblem → `krev`/`krevIkkeNull`. Hvis feilen skyldes ugyldig input fra klienten → `sjekk`/`sjekkIkkeNull`. I tester brukes Kotlins standard `requireNotNull` (uten domenefeil-semantikk).
+
+Ved `throw` direkte skal alltid én av disse exception-typene brukes (eller en subklasse av dem):
+
+| Exception | HTTP | Logger | Bruk når |
+|---|---|---|---|
+| `InternfeilException` | 500 | `error` | Systemfeil / programmeringsfeil |
+| `UgyldigForespoerselException` | 400 | `info` | Ugyldig forespørsel / domenetilstandsfeil |
+| `IkkeFunnetException` / `GenerellIkkeFunnetException` | 404 | `info` | Ressurs ikke funnet |
+| `IkkeTillattException` / `ManglerTilgang` | 403 | `info` | Mangler tilgang |
+
+**Unngå** å kaste `RuntimeException`, `IllegalStateException`, `IllegalArgumentException` e.l. fra produksjonskode — disse fanges av Ktors `else`-gren, logges med `error` og klienten får kun en generisk «ukjent feil»-respons uten noe detalj. Egendefinerte exception-klasser skal arve fra én av typene over.
+
 ### Kafka Rivers (Kotlin)
 Meldingshåndterere extender `ListenerMedLogging` og kaller `initialiserRiver(...)` i `init`. Handleren mottar en `JsonMessage`-pakke og implementerer `haandterPakke(packet, context)`.
 

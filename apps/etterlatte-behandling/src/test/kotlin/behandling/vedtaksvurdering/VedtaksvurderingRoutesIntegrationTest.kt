@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.vedtaksvurdering
 
 import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -38,11 +39,13 @@ import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -119,15 +122,18 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
                     contentType(ContentType.Application.Json)
                 }
             response.status shouldBe HttpStatusCode.OK
-        }
-        inTransaction {
-            with(vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)!!) {
-                type shouldBe VedtakType.INNVILGELSE
-                vedtakFattet shouldBe null
-                sakId shouldBe behandling.sak.id
-                val vedtakInnhold = innhold as VedtakInnhold.Behandling
-                vedtakInnhold.virkningstidspunkt shouldBe virkningstidspunkt
-                vedtakInnhold.opphoerFraOgMed shouldBe null
+            val opprettetVedtak: VedtakDto = deserialize(response.body())
+
+            inTransaction {
+                with(vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)!!) {
+                    type shouldBe VedtakType.INNVILGELSE
+                    vedtakFattet shouldBe null
+                    sakId shouldBe behandling.sak.id
+                    id shouldBe opprettetVedtak.id
+                    val vedtakInnhold = innhold as VedtakInnhold.Behandling
+                    vedtakInnhold.virkningstidspunkt shouldBe virkningstidspunkt
+                    vedtakInnhold.opphoerFraOgMed shouldBe null
+                }
             }
         }
     }

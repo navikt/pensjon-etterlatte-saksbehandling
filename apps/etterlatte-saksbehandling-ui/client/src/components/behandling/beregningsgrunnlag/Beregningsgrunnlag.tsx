@@ -64,13 +64,13 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Heading spacing size="large" level="1">
           Beregningsgrunnlag
         </Heading>
         <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
-      <VStack gap="12" paddingInline="16">
+      <VStack gap="space-48" paddingInline="space-64">
         {(isSuccess(overstyrtBeregningResponse) || isSuccess(overstyrtBeregningGrunnlagResponse)) && (
           <>
             {visOverstyrKnapp && !erBehandlingFerdigstilt && !overstyrtBeregning && (

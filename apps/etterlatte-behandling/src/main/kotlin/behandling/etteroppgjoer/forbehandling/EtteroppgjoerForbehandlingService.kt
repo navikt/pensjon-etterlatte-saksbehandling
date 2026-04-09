@@ -482,6 +482,21 @@ class EtteroppgjoerForbehandlingService(
             }
     }
 
+    fun lagreAktivitetsplikt(
+        forbehandlingId: UUID,
+        aktivitetspliktOverholdt: JaNei,
+        begrunnelse: String,
+    ) {
+        val forbehandling = hentForbehandling(forbehandlingId)
+        if (!forbehandling.erRedigerbar()) {
+            throw ForbehandlingKanIkkeEndres()
+        }
+
+        forbehandling
+            .oppdaterAktivitetsplikt(aktivitetspliktOverholdt, begrunnelse)
+            .also { dao.lagreForbehandling(it) }
+    }
+
     fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
         inntektsaar: Int,
@@ -844,6 +859,11 @@ data class InformasjonFraBrukerRequest(
 data class OpphoerSkyldesDoedsfallRequest(
     val opphoerSkyldesDoedsfall: JaNei,
     val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
+)
+
+data class AktivitetspliktRequest(
+    val aktivitetspliktOverholdt: JaNei,
+    val begrunnelse: String,
 )
 
 data class BeregnetResultatOgBrevSomSkalSlettes(

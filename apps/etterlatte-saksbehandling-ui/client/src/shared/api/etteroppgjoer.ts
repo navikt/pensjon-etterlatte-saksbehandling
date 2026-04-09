@@ -7,6 +7,7 @@ import {
   DetaljertEtteroppgjoerForbehandling,
   FaktiskInntekt,
   IInformasjonFraBruker,
+  Aktivitetsplikt,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { JaNei } from '~shared/types/ISvar'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -102,6 +103,12 @@ export const lagreOmOpphoerSkyldesDoedsfall = async (args: {
   return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/opphoer-skyldes-doedsfall`, {
     opphoerSkyldesDoedsfall: args.opphoerSkyldesDoedsfall,
     opphoerSkyldesDoedsfallIEtteroppgjoersaar: args.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
+  })
+}
+
+export const lagreAktivitetsplikt = async (args: { forbehandlingId: string; aktivitetsplikt: Aktivitetsplikt }) => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/lagre-aktivitetsplikt`, {
+    ...args.aktivitetsplikt,
   })
 }
 

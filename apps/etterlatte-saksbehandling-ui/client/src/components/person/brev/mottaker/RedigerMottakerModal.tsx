@@ -97,11 +97,10 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
         icon={<DocPencilIcon title="Endre mottaker" />}
         size="small"
       />
-
       <form onSubmit={handleSubmit(lagreEndringer)}>
         <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Endre mottaker">
           <Modal.Body>
-            <VStack gap="4">
+            <VStack gap="space-16">
               <Heading size="large" spacing>
                 Endre mottaker
               </Heading>
@@ -215,7 +214,7 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
                     <TextField {...register('adresse.adresselinje3')} label="" placeholder="Adresselinje 3" />
                   </VStack>
 
-                  <HGrid columns={2} gap="4 4">
+                  <HGrid columns={2} gap="space-16 space-16">
                     <TextField
                       {...register('adresse.postnummer', {
                         shouldUnregister: true,
@@ -305,7 +304,7 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
                 errorMessage: 'Kunne ikke oppdatere mottaker.',
               })}
 
-              <HStack gap="4" justify="end">
+              <HStack gap="space-16" justify="end">
                 <Button variant="secondary" type="button" disabled={isPending(lagreResult)} onClick={avbryt}>
                   Avbryt
                 </Button>

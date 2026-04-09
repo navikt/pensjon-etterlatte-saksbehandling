@@ -45,7 +45,6 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer; behandlin
       <Heading size="small" level="2">
         Skal sende vedtaksbrev
       </Heading>
-
       {redigere ? (
         <form onSubmit={handleSubmit(lagreSkalSendeBrev)}>
           <Controller
@@ -59,7 +58,7 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer; behandlin
             )}
           />
           {isFailure(skalSendeBrevStatus) && <Alert variant="error">{skalSendeBrevStatus.error.detail}</Alert>}
-          <HStack gap="4">
+          <HStack gap="space-16">
             <Button type="submit" loading={isPending(skalSendeBrevStatus)} variant="primary" size="small">
               Lagre
             </Button>

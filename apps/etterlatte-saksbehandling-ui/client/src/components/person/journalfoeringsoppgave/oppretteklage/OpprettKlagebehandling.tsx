@@ -39,7 +39,6 @@ export default function OpprettKlagebehandling() {
           {formaterSakstype(sakType)}
         </Tag>
       </Heading>
-
       <DatoVelger
         value={nyKlageRequest?.mottattDato ? new Date(nyKlageRequest.mottattDato) : undefined}
         onChange={(mottattDato) =>
@@ -53,10 +52,8 @@ export default function OpprettKlagebehandling() {
         label="Klagedato"
         description="Datoen klagen er framsatt av klager"
       />
-
       {feilmelding.length > 0 && <ApiErrorAlert>{feilmelding}</ApiErrorAlert>}
-
-      <HStack gap="4" justify="center">
+      <HStack gap="space-16" justify="center">
         <Button variant="secondary" onClick={tilbake}>
           Tilbake
         </Button>

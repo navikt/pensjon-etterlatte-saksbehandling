@@ -107,10 +107,8 @@ export const KnyttTilAnnenBruker = ({
     return (
       <>
         <Alert variant="success">Journalposten ble flyttet til sak {sakid} og journalføringsoppgave opprettet.</Alert>
-
         <br />
-
-        <HStack gap="4" justify="end">
+        <HStack gap="space-16" justify="end">
           <Button variant="tertiary" onClick={() => window.location.reload()}>
             Avslutt
           </Button>
@@ -137,7 +135,7 @@ export const KnyttTilAnnenBruker = ({
 
   return mapResult(annenSakStatus, {
     initial: (
-      <HStack gap="4" align="end">
+      <HStack gap="space-16" align="end">
         <TextField
           label="Hvilken sakid skal journalposten flyttes til?"
           value={sakid || ''}
@@ -156,7 +154,7 @@ export const KnyttTilAnnenBruker = ({
     ),
     pending: <Spinner label="Henter sak..." />,
     success: (annenSak) => (
-      <VStack gap="4">
+      <VStack gap="space-16">
         {mapSuccess(sakStatus, (data) => (
           <SakOverfoeringDetailjer fra={data.sak} til={annenSak} />
         ))}
@@ -166,7 +164,7 @@ export const KnyttTilAnnenBruker = ({
           </ApiErrorAlert>
         ))}
 
-        <HStack gap="4" justify="end">
+        <HStack gap="space-16" justify="end">
           <Button variant="secondary" onClick={lukkModal} disabled={isLoading}>
             Nei, avbryt
           </Button>

@@ -22,7 +22,7 @@ export const StatsborgerskapExpansionCard = ({
   return (
     <ExpansionCard aria-labelledby="Statsborgerskap" size="small" defaultOpen>
       <ExpansionCard.Header>
-        <HStack gap="4" align="center">
+        <HStack gap="space-16" align="center">
           <PassportIcon aria-hidden fontSize="1.5rem" />
           <ExpansionCard.Title size="small">
             {erAvdoedesStatsborgerskap ? 'Avdødes statsborgerskap' : 'Statsborgerskap'}

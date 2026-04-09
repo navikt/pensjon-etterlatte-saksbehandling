@@ -43,10 +43,10 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
 
   return (
     <>
-      <Box paddingInline="16 4" paddingBlock="4" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingInline="space-64 space-16" paddingBlock="space-16" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <HStack justify="space-between">
-          <VStack gap="1">
-            <HStack align="center" gap="4">
+          <VStack gap="space-4">
+            <HStack align="center" gap="space-16">
               <StatusIcon status={status()} aria-hidden />
               <Heading size="small" level="3">
                 {vilkaar.hovedvilkaar.tittel}
@@ -62,7 +62,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                 {paragrafType(vilkaar)} {vilkaar.hovedvilkaar.lovreferanse.paragraf}
               </>
             )}
-            <Box marginBlock="3" marginInline="0" maxWidth="41rem" style={{ whiteSpace: 'pre-line' }}>
+            <Box marginBlock="space-12" marginInline="space-0" maxWidth="41rem" style={{ whiteSpace: 'pre-line' }}>
               {vilkaar.hovedvilkaar.beskrivelse}
             </Box>
           </VStack>

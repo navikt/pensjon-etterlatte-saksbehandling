@@ -13,14 +13,12 @@ export function OpplysningerFraAInntektSummert({
   avkorting?: Avkorting
 }) {
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Heading size="small">Opplysninger fra A-ordningen</Heading>
       <BodyShort>
         Opplysningene er angitt som brutto inntekt og er summert per måned. For detaljer per måned, sjekk A-ordningen.
       </BodyShort>
-
       <LenkeTilInntektOversikt />
-
       <Table>
         <Table.Header>
           <Table.Row>
@@ -60,7 +58,7 @@ export function OpplysningerFraAInntektSummert({
           {avkorting && (
             <Table.Row>
               <Table.DataCell>
-                <HStack gap="1">
+                <HStack gap="space-4">
                   Har ytelse &gt; 0
                   <HelpText>
                     Oversikt over innvilgede måneder med brutto stønad større enn 0 kr før inntektsavkorting. Legg inn
@@ -86,7 +84,6 @@ export function OpplysningerFraAInntektSummert({
           )}
         </Table.Body>
       </Table>
-
       <div>
         <Label size="small">Kilde</Label>
         <BodyShort size="small">A-ordningen {formaterDatoMedKlokkeslett(inntekter.tidspunktBeregnet)}</BodyShort>

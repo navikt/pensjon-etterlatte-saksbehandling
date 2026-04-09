@@ -33,15 +33,14 @@ export const Inntektsopplysninger = ({ forbehandling, erRedigerbar }: Props) => 
           </BodyShort>
         )}
       </Box>
-
       <Box
-        paddingInline="6"
-        paddingBlock="4"
-        background="surface-action-subtle"
-        borderColor="border-action"
+        paddingInline="space-24"
+        paddingBlock="space-16"
+        background="accent-soft"
+        borderColor="accent"
         borderWidth="0 0 0 4"
       >
-        <VStack gap="8">
+        <VStack gap="space-32">
           <Heading size="large" level="2">
             Inntektsopplysninger
           </Heading>

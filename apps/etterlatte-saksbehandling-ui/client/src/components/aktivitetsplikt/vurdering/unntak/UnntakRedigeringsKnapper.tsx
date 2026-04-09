@@ -19,18 +19,16 @@ export const UnntakRedigeringsKnapper = ({
   slettUnntak: (unntak: IAktivitetspliktUnntak) => void
 }) => {
   return (
-    <VStack gap="6">
-      <VStack gap="2">
+    <VStack gap="space-24">
+      <VStack gap="space-8">
         <Label>Beskrivelse</Label>
         <BodyShort>{unntak.beskrivelse}</BodyShort>
       </VStack>
-
       {isFailure(slettUnntakStatus) && (
         <ApiErrorAlert>Kunne ikke slette unntaket, på grunn av feil: {slettUnntakStatus.error.detail}</ApiErrorAlert>
       )}
-
       {redigerbar && (
-        <HStack gap="4">
+        <HStack gap="space-16">
           <Button
             size="xsmall"
             variant="secondary"

@@ -36,7 +36,6 @@ export default function FerdigstillOppgave() {
       <Heading size="medium" spacing>
         Ferdigstill oppgave
       </Heading>
-
       {journalpost ? (
         <>
           <BodyLong spacing>
@@ -64,16 +63,15 @@ export default function FerdigstillOppgave() {
           </PersonLink>
         </Alert>
       )}
-
-      <VStack gap="2">
-        <HStack gap="4" justify="center">
+      <VStack gap="space-8">
+        <HStack gap="space-16" justify="center">
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>
 
           <FerdigstillOppgaveModal oppgave={oppgave} />
         </HStack>
-        <HStack gap="4" justify="center">
+        <HStack gap="space-16" justify="center">
           <AvbrytBehandleJournalfoeringOppgave />
         </HStack>
       </VStack>

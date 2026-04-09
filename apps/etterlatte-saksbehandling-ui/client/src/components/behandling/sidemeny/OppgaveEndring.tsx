@@ -17,7 +17,7 @@ export const OppgaveEndring = ({ oppgaveResult }: { oppgaveResult: Result<Oppgav
   }, [oppgaveResult])
 
   return mapSuccess(endringerResult, (endringer) => (
-    <Box padding="4">
+    <Box padding="space-16">
       <EndringListe>
         {endringer.map((endring, index) => (
           <EndringLinje key={`endringlinje-${index}`} endring={endring} />
@@ -60,7 +60,7 @@ export const EndringElement = styled.li`
   margin-left: 10px;
 
   &:first-child:before {
-    background: var(--a-blue-200);
+    background: var(--ax-accent-300);
     border: none;
   }
 
@@ -74,7 +74,7 @@ export const EndringElement = styled.li`
     width: 15px;
     height: 15px;
     background: white;
-    border: 3px solid var(--a-gray-600);
+    border: 3px solid var(--ax-neutral-700);
     border-radius: 50%;
     position: absolute;
     left: -8px;

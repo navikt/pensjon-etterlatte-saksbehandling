@@ -96,7 +96,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
               return (
                 <>
                   {sorterteMuligeRevurderingAarsaker.length ? (
-                    <VStack gap="4">
+                    <VStack gap="space-16">
                       <Select
                         {...register('aarsak', {
                           required: {
@@ -142,7 +142,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
                         <ApiErrorAlert>{error.detail || 'Kunne ikke opprette revurdering'}</ApiErrorAlert>
                       ))}
 
-                      <HStack gap="2" justify="end">
+                      <HStack gap="space-8" justify="end">
                         <Button variant="secondary" type="button" onClick={lukkModal}>
                           Avbryt
                         </Button>

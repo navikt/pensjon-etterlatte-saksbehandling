@@ -50,7 +50,7 @@ export function OpprettOppgaveTilJournalpost({ sak }: { sak: ISak }) {
       >
         <form onSubmit={handleSubmit(sendInn)}>
           <Modal.Body>
-            <VStack gap="4">
+            <VStack gap="space-16">
               <TextField
                 {...register('journalpostId', {
                   required: {
@@ -92,7 +92,6 @@ export function OpprettOppgaveTilJournalpost({ sak }: { sak: ISak }) {
           </Modal.Footer>
         </form>
       </Modal>
-
       <Button variant="tertiary" size="small" onClick={() => setModalOpen(true)}>
         Opprett oppgave for annen journalpost
       </Button>

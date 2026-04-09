@@ -14,7 +14,7 @@ export const TrygdeavtaleVisning = ({ trygdeavtale, avtaler, kriterier }: Trygde
   const avtaleKriteria = kriterier.find((kriteria) => trygdeavtale.avtaleKriteriaKode === kriteria.kode)
 
   return (
-    <VStack gap="8">
+    <VStack gap="space-32">
       <Box>
         <Label>Avtale</Label>
         <BodyShort>
@@ -22,7 +22,6 @@ export const TrygdeavtaleVisning = ({ trygdeavtale, avtaler, kriterier }: Trygde
           {avtaleDato && <> - {avtaleDato.beskrivelse}</>}
         </BodyShort>
       </Box>
-
       {avtaleKriteria && (
         <Box>
           <Label>Avtalekriterier</Label>
@@ -36,7 +35,7 @@ export const TrygdeavtaleVisning = ({ trygdeavtale, avtaler, kriterier }: Trygde
         </Box>
       )}
       {trygdeavtale.arbInntekt1G && (
-        <VStack gap="2">
+        <VStack gap="space-8">
           <Box>
             <Label>Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?</Label>
             <BodyShort>{JaNeiRec[trygdeavtale.arbInntekt1G]}</BodyShort>
@@ -50,7 +49,7 @@ export const TrygdeavtaleVisning = ({ trygdeavtale, avtaler, kriterier }: Trygde
         </VStack>
       )}
       {trygdeavtale.beregArt50 && (
-        <VStack gap="2">
+        <VStack gap="space-8">
           <Box>
             <Label>Beregning etter artikkel 50 (EØS-forordning 883/2004)?</Label>
             <BodyShort>{JaNeiRec[trygdeavtale.beregArt50]}</BodyShort>
@@ -64,9 +63,8 @@ export const TrygdeavtaleVisning = ({ trygdeavtale, avtaler, kriterier }: Trygde
           )}
         </VStack>
       )}
-
       {trygdeavtale.nordiskTrygdeAvtale && (
-        <VStack gap="2">
+        <VStack gap="space-8">
           <Box>
             <Label>Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?</Label>
             <BodyShort>{JaNeiRec[trygdeavtale.nordiskTrygdeAvtale]}</BodyShort>

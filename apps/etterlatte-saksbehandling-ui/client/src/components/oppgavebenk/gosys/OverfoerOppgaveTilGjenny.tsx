@@ -58,9 +58,7 @@ export const OverfoerOppgaveTilGjenny = ({
         <br />
         Gosys-oppgaven vil bli markert som feilregistrert og erstattet med en ny oppgave i Gjenny.
       </Alert>
-
       <br />
-
       {(!oppgave.tema || oppgave.tema === GosysTema.PEN) && (
         <>
           <Alert variant="warning" inline>
@@ -74,7 +72,6 @@ export const OverfoerOppgaveTilGjenny = ({
           </Select>
         </>
       )}
-
       {mapResult(sakStatus, {
         success: (sak) =>
           sak ? (
@@ -99,12 +96,10 @@ export const OverfoerOppgaveTilGjenny = ({
           </Alert>
         ),
       })}
-
       <br />
-
       {mapResult(flyttOppgaveResult, {
         initial: (
-          <HStack gap="4" justify="end">
+          <HStack gap="space-16" justify="end">
             <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })} disabled={loading}>
               Nei, avbryt
             </Button>
@@ -114,7 +109,7 @@ export const OverfoerOppgaveTilGjenny = ({
           </HStack>
         ),
         success: (oppgave) => (
-          <HStack gap="4" justify="end">
+          <HStack gap="space-16" justify="end">
             <Button variant="tertiary" onClick={() => window.location.reload()}>
               Avslutt
             </Button>

@@ -156,7 +156,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
             success: (oppgaver) =>
               oppgaver.length > 1 && (
                 <Box>
-                  <VStack gap="4">
+                  <VStack gap="space-16">
                     <Alert variant="info" inline>
                       <BodyShort spacing>Det finnes andre oppgaver tilknyttet samme avdød.</BodyShort>
 
@@ -187,7 +187,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                           <Table.Row
                             key={`${oppgave.id}-${oppgave.gruppeId}`}
                             style={
-                              oppgave.id === oppgaveId ? { backgroundColor: 'var(--a-surface-selected)' } : undefined
+                              oppgave.id === oppgaveId ? { backgroundColor: 'var(--ax-bg-accent-soft)' } : undefined
                             }
                           >
                             <Table.DataCell>
@@ -226,7 +226,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                       </Table.Body>
                     </Table>
 
-                    <HStack gap="4" justify="end">
+                    <HStack gap="space-16" justify="end">
                       <Button
                         variant="secondary"
                         onClick={lukkGrupperteOppgaver}
@@ -277,7 +277,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
               : 'Ikke tildelt'}
           </Button>
           <DropdownMeny onClose={() => setOpenDropdown(false)}>
-            <VStack gap="3">
+            <VStack gap="space-12">
               <>
                 <VelgSaksbehandlerCombobox
                   label="Velg saksbehandler"

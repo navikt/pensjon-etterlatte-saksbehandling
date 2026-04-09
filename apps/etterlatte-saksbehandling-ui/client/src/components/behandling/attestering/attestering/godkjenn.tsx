@@ -6,7 +6,7 @@ export const Godkjenn = () => {
   const [tilbakemeldingFraAttestant, setTilbakemeldingFraAttestant] = useState('')
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Textarea
         style={{ padding: '10px' }}
         label="Tilbakemelding fra attestant"
@@ -17,7 +17,6 @@ export const Godkjenn = () => {
         size="small"
         autoComplete="off"
       />
-
       <div>
         <AttesterVedtak kommentar={tilbakemeldingFraAttestant} />
       </div>

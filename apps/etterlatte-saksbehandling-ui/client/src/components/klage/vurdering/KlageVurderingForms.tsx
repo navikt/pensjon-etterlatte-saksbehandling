@@ -45,11 +45,10 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
   const { control } = props
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Heading level="2" size="medium">
         Omgjøring
       </Heading>
-
       <Controller
         rules={{
           required: true,
@@ -74,7 +73,6 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
           )
         }}
       />
-
       <Controller
         rules={{
           required: true,

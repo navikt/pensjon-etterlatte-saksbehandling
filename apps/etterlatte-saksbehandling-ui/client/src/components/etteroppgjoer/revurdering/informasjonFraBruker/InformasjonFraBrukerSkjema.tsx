@@ -69,7 +69,7 @@ export const InformasjonFraBrukerSkjema = ({
 
   return (
     <form>
-      <VStack gap="4">
+      <VStack gap="space-16">
         <ControlledRadioGruppe
           name="harMottattNyInformasjon"
           control={control}
@@ -128,7 +128,7 @@ export const InformasjonFraBrukerSkjema = ({
           errorMessage: 'Kunne ikke hente oppdatert etteroppgjør',
         })}
 
-        <HStack gap="4">
+        <HStack gap="space-16">
           <Button
             size="small"
             loading={isPending(informasjonFraBrukerResult) || isPending(hentEtteroppgjoerResult)}

@@ -11,7 +11,7 @@ import { feilregistrerSakstilknytning, knyttTilAnnenSak } from '~shared/api/doku
 import { MagnifyingGlassIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { useNavigate } from 'react-router-dom'
-import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
+import { SakOverfoeringDetailjer } from '~components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
 import { opprettOppgave } from '~shared/api/oppgaver'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'

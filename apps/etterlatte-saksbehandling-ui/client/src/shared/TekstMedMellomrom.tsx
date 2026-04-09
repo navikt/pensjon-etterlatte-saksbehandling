@@ -1,4 +1,4 @@
-import { BodyShort, BodyShortProps, Box, OverridableComponent } from '@navikt/ds-react'
+import { BodyShort, Box, BodyShortProps, OverridableComponent } from '@navikt/ds-react'
 import React from 'react'
 
 export const TekstMedMellomrom: OverridableComponent<BodyShortProps, HTMLParagraphElement> = (

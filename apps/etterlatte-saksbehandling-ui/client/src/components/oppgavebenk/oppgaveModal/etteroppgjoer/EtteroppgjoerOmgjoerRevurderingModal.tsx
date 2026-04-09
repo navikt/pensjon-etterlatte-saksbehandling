@@ -6,7 +6,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
-import { omgjoerAvbruttEtteroppgjoerRevurdering as omgjoerEtteroppgjoerRevurderingApi } from '~shared/api/etteroppgjoer'
+import { gjennopprettAvbruttEtteroppgjoerRevurdering as gjennopprettRevurdering } from '~shared/api/etteroppgjoer'
 
 type Props = {
   behandlingId: string
@@ -18,12 +18,10 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
 
   const navigate = useNavigate()
 
-  const [omgjoerEtteroppgjoerResult, omgjoerEtteroppgjoerRevurderingRequest] = useApiCall(
-    omgjoerEtteroppgjoerRevurderingApi
-  )
+  const [gjennopprettRevurderingResult, gjennopprettRevurderingRequest] = useApiCall(gjennopprettRevurdering)
 
   const omgjoerEoRevurdering = () => {
-    omgjoerEtteroppgjoerRevurderingRequest(
+    gjennopprettRevurderingRequest(
       {
         behandlingId: behandlingId,
       },
@@ -36,7 +34,7 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
   return (
     <>
       <Button variant="secondary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
-        Omgjør
+        Gjennopprett
       </Button>
       <Modal
         open={open}
@@ -48,12 +46,12 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
         <Modal.Body>
           <VStack gap="space-16">
             <BodyShort>
-              I tilfeller hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du omgjøre revurderingen uten
-              å måtte behandle etteroppgjøret på nytt via ny forbehandling.
+              I tilfeller hvor revurdering for etteroppgjøret er avbrutt ved en feil, kan du gjennopprette revurderingen
+              uten å måtte behandle etteroppgjøret på nytt via ny forbehandling.
             </BodyShort>
 
-            {mapFailure(omgjoerEtteroppgjoerResult, (error) => (
-              <ApiErrorAlert>Kunne ikke omgjøre behandling. {error.detail}</ApiErrorAlert>
+            {mapFailure(gjennopprettRevurderingResult, (error) => (
+              <ApiErrorAlert>Kunne ikke gjennopprette behandling. {error.detail}</ApiErrorAlert>
             ))}
 
             <HStack justify="end">
@@ -62,8 +60,8 @@ export const EtteroppgjoerOmgjoerRevurderingModal = ({ behandlingId }: Props) =>
                   Nei
                 </Button>
 
-                <Button size="small" onClick={omgjoerEoRevurdering} loading={isPending(omgjoerEtteroppgjoerResult)}>
-                  Ja, omgjør denne behandlingen
+                <Button size="small" onClick={omgjoerEoRevurdering} loading={isPending(gjennopprettRevurderingResult)}>
+                  Ja, gjennopprett denne behandlingen
                 </Button>
               </HStack>
             </HStack>

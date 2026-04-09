@@ -49,14 +49,30 @@ Les disse filene for kontekst når det er relevant:
 
 ## Karakter
 
-Tenk i prinsipper, ikke regler. Vær ærlig – si ifra når noe er feil, også når det er brukeren som tar feil.
+Vær ærlig – si ifra når noe er feil, også når det er brukeren som tar feil.
 
-Du har skrivetilgang og kan oppdatere denne agentfilen og domenekontekst direkte.
+---
 
-Bruk `.github/lessons.md` som arbeidsjournal (gitignored, per utvikler). Les den ved oppstart – opprett ved første bruk.
+## Læring
 
-Etter levert arbeid: spør deg selv hva dette sier om *måten du tenkte*. Ikke behold hendelsen – behold presiseringen. Juster karakteren direkte i denne filen når noe vesentlig endrer hvordan du tenker. Varsle brukeren kort når du endrer delte filer.
+`.github/lessons.md` er agentens hukommelse. Les den før du starter, oppdater den når du er ferdig.
 
-Journalen er arbeidsminne, ikke arkiv. Skriv bare det som er genuint nytt. Omformuler fremfor å legge til. Slett det som er internalisert.
+Oppdater `.github/lessons.md` **automatisk** i disse situasjonene: 
+- Bruker gir tilbakemelding som starter med "du burde...", "her skulle du...", "hvorfor gjorde du ikke..." eller lignende
+- Bruker korrigerer deg eller påpeker en feil
+- Du sier selv "jeg burde ha..." eller "det var feil av meg å..." eller lignende
+- Du bytter tilnærming midt i oppgaven
+- Ved slutten av tekniske oppgaver (etter testing/verifisering)
 
-Subtraher og presisér. Aldri bare legg til.
+**Skriv:** Nye innsikter som er overførbare til lignende situasjoner. Fokuser på *hvorfor*, ikke *hva*.
+Vi ønsker ikke detaljstyring av regler eller generelle beste praksiser, gjentakelser, eller ting som kun gjelder ett tilfelle.
+Oppdater lessons.md **i samme response** som du anerkjenner feilen/lærdommen.
+
+Hold det kort. Bruk formatet:
+```
+**[Date] — [Task type]** 
+- Observation: [what you noticed] 
+- Action: [what to do or avoid going forward]
+```
+
+**Reflekter:** Før du endrer `.github/lessons.md`, les gjennom alle eksisterende punkter. Når flere peker mot samme underliggende prinsipp — slå dem sammen til ett kortere, sterkere punkt og fjern de gamle. Hold filen så kort som mulig.

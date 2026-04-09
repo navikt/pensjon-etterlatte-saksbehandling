@@ -12,6 +12,7 @@ export interface Etteroppgjoer {
 enum EtteroppgjoerStatus {
   VENTER_PAA_SKATTEOPPGJOER = 'VENTER_PAA_SKATTEOPPGJOER',
   MOTTATT_SKATTEOPPGJOER = 'MOTTATT_SKATTEOPPGJOER',
+  MANGLER_SKATTEOPPGJOER = 'MANGLER_SKATTEOPPGJOER',
   VENTER_PAA_SVAR = 'VENTER_PAA_SVAR',
   UNDER_FORBEHANDLING = 'UNDER_FORBEHANDLING',
   UNDER_REVURDERING = 'UNDER_REVURDERING',
@@ -22,6 +23,7 @@ enum EtteroppgjoerStatus {
 export const etteroppgjoerStatusTekst = {
   VENTER_PAA_SKATTEOPPGJOER: 'Venter på skatteoppgjør',
   MOTTATT_SKATTEOPPGJOER: 'Mottatt skatteoppgjør',
+  MANGLER_SKATTEOPPGJOER: 'Mangler skatteoppgjør',
   VENTER_PAA_SVAR: 'Venter på svar fra bruker',
   UNDER_FORBEHANDLING: 'Under forbehandling',
   UNDER_REVURDERING: 'Under revurdering',

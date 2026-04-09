@@ -858,7 +858,7 @@ class FantIkkeForbehandling(
         detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
     )
 
-class FantIkkEtteroppgjoer(
+class FantIkkeEtteroppgjoer(
     val sakId: SakId,
     val inntektsaar: Int,
 ) : IkkeFunnetException(

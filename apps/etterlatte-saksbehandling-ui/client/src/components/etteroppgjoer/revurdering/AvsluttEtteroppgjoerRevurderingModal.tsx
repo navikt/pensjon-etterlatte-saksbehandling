@@ -50,7 +50,6 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
         <Button variant="danger" onClick={() => setErAapen(true)}>
           Avslutt revurdering
         </Button>
-
         {mapResult(sakResult, {
           pending: <Spinner label="Henter sak..." />,
           error: (error) => <ApiErrorAlert>{error.detail ?? 'Kunne ikke hente sak'}</ApiErrorAlert>,
@@ -67,7 +66,7 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
                 </Heading>
               </Modal.Header>
               <Modal.Body>
-                <VStack gap="4">
+                <VStack gap="space-16">
                   <BodyShort>Du får oppgave om ny forbehandling når du avslutter revurderingen.</BodyShort>
 
                   {isFailureHandler({
@@ -77,7 +76,7 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
                 </VStack>
               </Modal.Body>
               <Modal.Footer>
-                <HStack gap="4" justify="end">
+                <HStack gap="space-16" justify="end">
                   <Button
                     variant="secondary"
                     onClick={() => setErAapen(false)}

@@ -31,7 +31,6 @@ export const OpprettSakModal = ({ fnr }: { fnr: string }) => {
       <Button variant="primary" onClick={() => setIsOpen(true)} icon={<PlusCircleIcon aria-hidden />}>
         Opprett sak
       </Button>
-
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Opprett sak">
         <Modal.Body>
           <Heading size="large" spacing>
@@ -68,7 +67,7 @@ export const OpprettSakModal = ({ fnr }: { fnr: string }) => {
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4" justify="end">
+          <HStack gap="space-16" justify="end">
             <Button
               variant="secondary"
               type="button"

@@ -113,7 +113,6 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
       <Button variant="primary" size="small" onClick={() => setOpen(true)} style={{ textAlign: 'left' }}>
         Omgjør vedtak
       </Button>
-
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Header>
           <Heading size="medium" id="modal-heading">
@@ -138,14 +137,12 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
                 )
               }
               return (
-                <VStack gap="4">
+                <VStack gap="space-16">
                   <BodyShort>
                     Vedtaket om {formaterVedtakType(vedtak.vedtakType!!)} attestert{' '}
                     {formaterKanskjeStringDato(vedtak.datoAttestert)} skal omgjøres.
                   </BodyShort>
-
                   {avslutteOmgjoeringsoppgaveEnabled && <AvsluttOmgjoeringsoppgave oppgave={oppgave} />}
-
                   {!finnOmgjoeringsHandlingForKlage(klage) ||
                     (disabledOpprett && (
                       <Alert variant="warning">

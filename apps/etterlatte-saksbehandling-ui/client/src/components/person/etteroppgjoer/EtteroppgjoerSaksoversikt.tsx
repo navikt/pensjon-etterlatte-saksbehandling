@@ -53,9 +53,9 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
   const etteroppgjoerListe = fetchEtteroppgjoerListeResult.data
 
   return (
-    <VStack gap="2" maxWidth="70rem">
-      <Box padding="8">
-        <Box marginBlock="0 8">
+    <VStack gap="space-8" maxWidth="70rem">
+      <Box padding="space-32">
+        <Box marginBlock="space-0 space-32">
           <Heading size="medium">Etteroppgjør saksoversikt</Heading>
         </Box>
         <Accordion>
@@ -70,7 +70,7 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
                     Etteroppgjør for {etteroppgjoer.inntektsaar} - {etteroppgjoerStatusTekst[etteroppgjoer.status]}
                   </Accordion.Header>
                   <Accordion.Content>
-                    <Box padding="4">
+                    <Box padding="space-16">
                       <List as="ul">
                         {steg.map((step, idx) => (
                           <List.Item
@@ -89,15 +89,13 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
             })}
         </Accordion>
       </Box>
-
       {etteroppgjoerDevKnappEnabled && (
-        <Box padding="8">
+        <Box padding="space-32">
           <OpprettEtteroppgjoerIDev sakId={sakId} />
         </Box>
       )}
-
       {tilbakestillEtteroppgjoerEnabled && (
-        <Box padding="8">
+        <Box padding="space-32">
           <TilbakestillOgOpprettNyForbehandling sakId={sakId} />
         </Box>
       )}

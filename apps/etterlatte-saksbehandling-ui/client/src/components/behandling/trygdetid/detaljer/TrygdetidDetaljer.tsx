@@ -13,15 +13,15 @@ type Props = {
 
 export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
   return (
-    <VStack gap="4" paddingBlock="0 8">
-      <HStack gap="2" align="center">
+    <VStack gap="space-16" paddingBlock="space-0 space-32">
+      <HStack gap="space-8" align="center">
         <CalculatorIcon fontSize={IconSize.DEFAULT} aria-hidden />
         <Heading size="small" level="3">
           Beregnet trygdetid
         </Heading>
       </HStack>
       {beregnetTrygdetid.overstyrt && (
-        <HStack gap="2">
+        <HStack gap="space-8">
           <ExclamationmarkTriangleIcon fontSize={IconSize.DEFAULT} />
           <BodyShort>
             Beregnet trygdetid har blitt overstyrt ved migrering på grunn av manglende eller inkonsistent grunnlag i
@@ -29,7 +29,7 @@ export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
           </BodyShort>
         </HStack>
       )}
-      <VStack gap="8">
+      <VStack gap="space-32">
         <BeregnetFaktiskTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
         <BeregnetFremtidigTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
         <BeregnetSamletTrygdetid beregnetTrygdetid={beregnetTrygdetid} />

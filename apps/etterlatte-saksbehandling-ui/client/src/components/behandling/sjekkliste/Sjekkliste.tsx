@@ -75,16 +75,13 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
       {sjekklisteValideringsfeil && (
         <Alert variant="error">Før du kan sende til attestering må du bekrefte at alle punkter er gjennomgått</Alert>
       )}
-
       <Heading spacing size="small">
         Sjekkliste
       </Heading>
-
       {isFailureHandler({
         apiResult: oppdaterSjekklisteResult,
         errorMessage: 'Oppdateringen av sjekklista feilet',
       })}
-
       {sjekkliste && (
         <>
           <BodyLong>
@@ -108,7 +105,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
           ))}
 
           <HMargin>
-            <VStack gap="4">
+            <VStack gap="space-16">
               <Heading size="small">Lenker</Heading>
               {soeker?.foedselsnummer ? (
                 <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker.foedselsnummer}`} target="_blank">
@@ -125,7 +122,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
             </VStack>
           </HMargin>
 
-          <VStack gap="4">
+          <VStack gap="space-16">
             <Textarea
               label="Kommentar"
               name="Kommentar"

@@ -91,12 +91,11 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
+      <Box paddingInline="space-64" paddingBlock="space-64 space-16">
         <Heading size="large" level="1">
           Vilkårsvurdering
         </Heading>
       </Box>
-
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
         <>
           {visHarGammelVilkaarsvurdering() && (
@@ -129,7 +128,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             </AlertWrapper>
           )}
 
-          <Box paddingInline="16" paddingBlock="16 4">
+          <Box paddingInline="space-64" paddingBlock="space-64 space-16">
             {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
               vilkaarsvurdering.resultat == null && (
                 <KopierVilkaarAvdoed behandlingId={behandling.id} vilkaar={vilkaarsvurdering.vilkaar} />
@@ -160,11 +159,9 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
           />
         </>
       )}
-
       <Spinner visible={isPending(vilkaarsvurderingStatus)} label="Henter vilkårsvurdering" />
       <Spinner visible={isPending(opprettNyVilkaarsvurderingStatus)} label="Oppretter vilkårsvurdering" />
       <Spinner visible={isPending(slettVilkaarsvurderingStatus)} label="Sletter vilkårsvurdering" />
-
       {isFailure(vilkaarsvurderingStatus) && isInitial(opprettNyVilkaarsvurderingStatus) && (
         <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
       )}

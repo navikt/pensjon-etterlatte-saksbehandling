@@ -117,8 +117,8 @@ export function TilbakekrevingVurderingSkjema({
 
   return (
     <>
-      <Box paddingBlock="8" paddingInline="16 8">
-        <VStack gap="8" style={{ width: '50em' }}>
+      <Box paddingBlock="space-32" paddingInline="space-64 space-32">
+        <VStack gap="space-32" style={{ width: '50em' }}>
           <Select {...register('aarsak')} label="Årsak til sak om feilutbetaling" readOnly={!redigerbar}>
             <option value="">Velg..</option>
             {Object.values(TilbakekrevingAarsak).map((aarsak) => (
@@ -369,7 +369,7 @@ export function TilbakekrevingVurderingSkjema({
           )}
 
           {redigerbar && (
-            <VStack gap="5">
+            <VStack gap="space-20">
               {mapResult(lagreVurderingStatus, {
                 success: () => <Toast melding="Vurdering lagret" position="bottom-center" />,
                 error: (error) => (
@@ -384,8 +384,7 @@ export function TilbakekrevingVurderingSkjema({
           )}
         </VStack>
       </Box>
-
-      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-48 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <HStack justify="center">
           {redigerbar ? (
             <Button

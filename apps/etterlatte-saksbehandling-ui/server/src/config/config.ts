@@ -1,4 +1,3 @@
-
 interface IAppConf {
   port: string | number
   brukVedtaksroutesIBehandling: boolean
@@ -6,7 +5,7 @@ interface IAppConf {
 
 export const appConf: IAppConf = {
   port: process.env.PORT || 8080,
-  brukVedtaksroutesIBehandling: (process.env.BRUK_VEDTAKSROUTES_I_BEHANDLING === "true")
+  brukVedtaksroutesIBehandling: process.env.BRUK_VEDTAKSROUTES_I_BEHANDLING === 'true',
 }
 
 export const AdConfig = {

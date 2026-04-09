@@ -16,10 +16,10 @@ import {
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
-import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { Success600 } from '@navikt/ds-tokens/js'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -156,14 +156,14 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Heading level="3" size="small">
         Søskenjustering
       </Heading>
       {manglendeSoesken.length > 0 && !skjulManglendeSoesken && (
         <div style={{ maxWidth: '40rem' }}>
           <Alert variant="warning">
-            <VStack gap="4">
+            <VStack gap="space-16">
               <BodyShort>
                 Den lagrede søskenjusteringen har ikke med alle avdødes barn. For å få riktig søskenjustering må de
                 manglende søskene legges til periodene.
@@ -183,7 +183,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
           />
         )}
       </FamilieforholdWrapper>
-      <Box borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {visFeil && feil.length > 0 && redigerbar ? <FeilIPerioder feil={feil} /> : null}
         <form id="formsoeskenjustering">
           <UstiletListe>
@@ -208,7 +208,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
             ))}
           </UstiletListe>
           {redigerbar && (
-            <HStack gap="4" align="center">
+            <HStack gap="space-16" align="center">
               <Button
                 size="small"
                 variant="secondary"
@@ -221,7 +221,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
               <Button type="submit" onClick={handleSubmit(ferdigstillForm)} size="small">
                 Lagre søskenjustering
               </Button>
-              {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
+              {visOkLagret && <CheckmarkCircleIcon color={Success600} />}
             </HStack>
           )}
         </form>

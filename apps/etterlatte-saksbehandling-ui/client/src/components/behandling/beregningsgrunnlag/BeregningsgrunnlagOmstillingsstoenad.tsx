@@ -155,8 +155,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
       {visManglendeBeregningsgrunnlag && (
         <ApiErrorAlert>Beregningsmetode for trygdetid må velges før ytelsen kan beregnes.</ApiErrorAlert>
       )}
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button

@@ -1,20 +1,19 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "~*": ["src/*"]
+      "~*": ["./src/*"]
     },
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "noUnusedParameters": true,
     "noImplicitAny": true,

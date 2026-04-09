@@ -14,7 +14,7 @@ export const HeaderBanner = () => {
   return (
     <InternalHeader data-theme="light">
       <InternalHeader.Title href="/">
-        <HStack gap="4">
+        <HStack gap="space-16">
           {erPaaske && (
             <div>
               <img src="/paaskekylling.png" alt="Påskekylling" style={{ height: '1.75rem', width: '1.75rem' }} />

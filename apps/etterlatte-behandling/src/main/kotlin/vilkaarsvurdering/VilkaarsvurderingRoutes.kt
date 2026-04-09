@@ -1,18 +1,14 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -45,8 +41,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
             if (vilkaarsvurdering != null) {
                 call.respond(
-                    toDto(
-                        vilkaarsvurdering,
+                    vilkaarsvurdering.toDto(
                         inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                     ),
                 )
@@ -90,12 +85,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                         )
                     }
 
-                call.respond(
-                    toDto(
-                        vilkaarsvurdering,
-                        behandlingGrunnlagsversjon,
-                    ),
-                )
+                call.respond(vilkaarsvurdering.toDto(behandlingGrunnlagsversjon))
             } catch (_: VirkningstidspunktIkkeSattException) {
                 logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                 call.respond(HttpStatusCode.PreconditionFailed)
@@ -154,12 +144,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                         )
                     }
 
-                call.respond(
-                    toDto(
-                        vilkaarsvurdering,
-                        behandlingGrunnversjon,
-                    ),
-                )
+                call.respond(vilkaarsvurdering.toDto(behandlingGrunnversjon))
             } catch (_: VirkningstidspunktIkkeSattException) {
                 logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                 call.respond(HttpStatusCode.PreconditionFailed)
@@ -194,8 +179,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                         )
                     }
                 call.respond(
-                    toDto(
-                        vilkaarsvurdering,
+                    vilkaarsvurdering.toDto(
                         inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                     ),
                 )
@@ -222,8 +206,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                     val vilkaarsvurdering =
                         inTransaction { vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, brukerTokenInfo, vilkaarId) }
                     call.respond(
-                        toDto(
-                            vilkaarsvurdering,
+                        vilkaarsvurdering.toDto(
                             inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                         ),
                     )
@@ -272,12 +255,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                                 vurdertResultat,
                             )
                         }
-                    call.respond(
-                        toDto(
-                            vilkaarsvurdering,
-                            behandlingGrunnlagversjon,
-                        ),
-                    )
+                    call.respond(vilkaarsvurdering.toDto(behandlingGrunnlagversjon))
                 } catch (e: BehandlingstilstandException) {
                     logger.error(
                         "Kunne ikke oppdatere total-vurdering for behandling $behandlingId. " +
@@ -299,8 +277,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             )
                         }
                     call.respond(
-                        toDto(
-                            vilkaarsvurdering,
+                        vilkaarsvurdering.toDto(
                             inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
                         ),
                     )
@@ -343,18 +320,6 @@ data class VurdertVilkaarDto(
     val hovedvilkaar: VilkaarTypeOgUtfall,
     val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
     val kommentar: String?,
-)
-
-fun toDto(
-    vilkaarsvurdering: Vilkaarsvurdering,
-    behandlingGrunnlagVersjon: Long?,
-) = VilkaarsvurderingDto(
-    behandlingId = vilkaarsvurdering.behandlingId,
-    virkningstidspunkt = vilkaarsvurdering.virkningstidspunkt,
-    vilkaar = vilkaarsvurdering.vilkaar,
-    resultat = vilkaarsvurdering.resultat,
-    grunnlagVersjon = vilkaarsvurdering.grunnlagVersjon,
-    behandlingGrunnlagVersjon = behandlingGrunnlagVersjon,
 )
 
 private fun behandlingGrunnlagVersjon(

@@ -14,8 +14,8 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres, manuel
   const [nyTittel, setNyTittel] = useState(tittel)
 
   return (
-    <Box padding="4" borderWidth="1" borderRadius="small">
-      <HStack gap="4" justify="space-between">
+    <Box padding="space-16" borderWidth="1" borderRadius="2">
+      <HStack gap="space-16" justify="space-between">
         <Heading spacing level="2" size="medium">
           Tittel
         </Heading>
@@ -23,7 +23,6 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres, manuel
           <BrevTittelModal nyTittel={nyTittel} setNyTittel={setNyTittel} brevId={brevId} sakId={sakId} />
         )}
       </HStack>
-
       {nyTittel ? (
         <>
           <BodyShort spacing>{nyTittel}</BodyShort>

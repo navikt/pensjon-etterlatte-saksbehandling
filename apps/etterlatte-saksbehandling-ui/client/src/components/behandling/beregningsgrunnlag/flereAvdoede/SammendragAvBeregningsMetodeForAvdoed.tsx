@@ -12,21 +12,21 @@ interface Props {
 
 export const SammendragAvBeregningsMetodeForAvdoed = ({ beregningsMetodeForAvdoed }: Props) => {
   return beregningsMetodeForAvdoed ? (
-    <VStack gap="4">
-      <VStack gap="2">
+    <VStack gap="space-16">
+      <VStack gap="space-8">
         <Label>Metode brukt:</Label>
         <BodyShort>
           {formaterEnumTilLesbarString(beregningsMetodeForAvdoed.data.beregningsMetode.beregningsMetode!)}
         </BodyShort>
       </VStack>
-      <VStack gap="2">
+      <VStack gap="space-8">
         <Label>Gyldig for beregning:</Label>
         <BodyShort>
           {formaterDatoMedFallback(beregningsMetodeForAvdoed.fom, '')} -{' '}
           {beregningsMetodeForAvdoed.tom && formaterDatoMedFallback(lastDayOfMonth(beregningsMetodeForAvdoed.tom))}
         </BodyShort>
       </VStack>
-      <VStack gap="2">
+      <VStack gap="space-8">
         <Label>Begrunnelse</Label>
         <BodyShort>
           {beregningsMetodeForAvdoed.data.beregningsMetode.begrunnelse

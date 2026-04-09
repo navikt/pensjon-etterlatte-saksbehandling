@@ -146,7 +146,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const tilbakemeldingClickEventForUtlandsbehandling = velgTilbakemeldingClickEventForUtlandsbehandling(behandling)
 
   return (
-    <Box paddingInline="16" maxWidth="69rem">
+    <Box paddingInline="space-64" maxWidth="69rem">
       {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && redigerbar && (
         <TrygdetidIAnnenBehandlingMedSammeAvdoede
           behandlingId={behandling.id}
@@ -155,7 +155,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           mapNavn={mapNavn}
         />
       )}
-      <VStack gap="11">
+      <VStack gap="space-44">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         {landListe && (
           <>
@@ -184,7 +184,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                   </Tabs.List>
                   {trygdetider.map((trygdetid) => (
                     <Tabs.Panel value={trygdetid.ident} key={trygdetid.ident}>
-                      <Box paddingBlock="6 0">
+                      <Box paddingBlock="space-24 space-0">
                         <EnkelPersonTrygdetid
                           redigerbar={redigerbar}
                           behandling={behandling}
@@ -199,11 +199,11 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                   ))}
                 </Tabs>
 
-                <Box paddingBlock="0 8">
+                <Box paddingBlock="space-0 space-32">
                   <Heading size="medium" level="2" spacing>
                     Oppsummering av trygdetid for flere avdøde
                   </Heading>
-                  <VStack gap="8">
+                  <VStack gap="space-32">
                     {trygdetider.map((trygdetid) => (
                       <div key={trygdetid.ident}>
                         {trygdetid.beregnetTrygdetid?.resultat ? (
@@ -247,7 +247,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           </ApiErrorAlert>
         )}
         {tilbakemeldingClickEventForUtlandsbehandling && (
-          <Box paddingBlock="0 16">
+          <Box paddingBlock="space-0 space-64">
             <EnigUenigTilbakemelding
               spoersmaal="Jeg synes det er lett å behandle utlandssaker i Gjenny"
               clickEvent={tilbakemeldingClickEventForUtlandsbehandling}

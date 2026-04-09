@@ -67,7 +67,6 @@ export const SendTilAttesteringModal = ({
           Oppgaven til denne behandlingen må tildeles deg før du kan sende til attestering
         </Alert>
       )}
-
       <Modal
         open={isOpen}
         onClose={() => {
@@ -81,7 +80,7 @@ export const SendTilAttesteringModal = ({
             Er du sikker på at du vil sende vedtaket til attestering?
           </Heading>
           <BodyShort spacing>Når du sender til attestering vil vedtaket låses og du får ikke gjort endringer</BodyShort>
-          <HStack gap="4" justify="center">
+          <HStack gap="space-16" justify="center">
             <Button
               variant="secondary"
               onClick={() => {

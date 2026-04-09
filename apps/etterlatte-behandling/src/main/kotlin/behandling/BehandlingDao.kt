@@ -273,28 +273,6 @@ class BehandlingDao(
             }
         }
 
-    fun lagreGyldighetsproeving(
-        behandlingId: UUID,
-        gyldighetsproeving: GyldighetsResultat?,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
-                    UPDATE behandling SET gyldighetssproving = ?, sist_endret = ?
-                    WHERE id = ?
-                    """.trimIndent(),
-                )
-
-            stmt.setObject(1, objectMapper.writeValueAsString(gyldighetsproeving))
-            stmt.setTidspunkt(2, Tidspunkt.now().toLocalDatetimeUTC().toTidspunkt())
-            stmt.setObject(3, behandlingId)
-            krev(stmt.executeUpdate() == 1) {
-                "Kunne ikke lagreGyldighetsproeving behandling for $behandlingId"
-            }
-        }
-    }
-
     fun lagreStatus(lagretBehandling: Behandling) {
         if (lagretBehandling.status == BehandlingStatus.AVBRUTT) {
             throw InternfeilException(
@@ -302,7 +280,49 @@ class BehandlingDao(
                     "utsending av statistikkmelding og lagring av behandlingshendelse.",
             )
         }
-        lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
+        lagreStatus(lagretBehandling.id, lagretBehandling.status, Tidspunkt.now().toLocalDatetimeUTC())
+    }
+
+    fun lagreBehandling(behandling: Behandling) {
+        if (behandling.status == BehandlingStatus.AVBRUTT) {
+            throw InternfeilException(
+                "Behandlinger skal ikke avbrytes med status direkte, siden vi da mangler " +
+                    "utsending av statistikkmelding og lagring av behandlingshendelse.",
+            )
+        }
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        UPDATE behandling SET
+                            status = ?,
+                            sist_endret = ?,
+                            virkningstidspunkt = ?,
+                            bodd_eller_arbeidet_utlandet = ?,
+                            utlandstilknytning = ?,
+                            tidligere_familiepleier = ?,
+                            opphoer_fom = ?,
+                            sende_brev = ?,
+                            gyldighetssproving = ?
+                        WHERE id = ?
+                        """.trimIndent(),
+                    )
+                stmt.setString(1, behandling.status.name)
+                stmt.setTidspunkt(2, Tidspunkt.now())
+                stmt.setString(3, objectMapper.writeValueAsString(behandling.virkningstidspunkt))
+                stmt.setString(4, objectMapper.writeValueAsString(behandling.boddEllerArbeidetUtlandet))
+                stmt.setJsonb(5, behandling.utlandstilknytning)
+                stmt.setJsonb(6, behandling.tidligereFamiliepleier)
+                stmt.setString(7, objectMapper.writeValueAsString(behandling.opphoerFraOgMed))
+                stmt.setBoolean(8, behandling.sendeBrev)
+                stmt.setString(9, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
+                stmt.setObject(10, behandling.id)
+                krev(stmt.executeUpdate() == 1) {
+                    "Kunne ikke lagre behandling ${behandling.id}"
+                }
+            }
+        }
     }
 
     private fun lagreStatus(
@@ -340,49 +360,6 @@ class BehandlingDao(
         }
     }
 
-    fun lagreBoddEllerArbeidetUtlandet(
-        behandlingId: UUID,
-        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt = prepareStatement("UPDATE behandling SET bodd_eller_arbeidet_utlandet = ? WHERE id = ?")
-
-            stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
-            stmt.setObject(2, behandlingId)
-            krev(stmt.executeUpdate() == 1) {
-                "Kunne ikke lagreBoddEllerArbeidetUtlandet behandling for $behandlingId"
-            }
-        }
-    }
-
-    fun lagreUtlandstilknytning(
-        behandlingId: UUID,
-        utlandstilknytning: Utlandstilknytning,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement = prepareStatement("UPDATE behandling set utlandstilknytning = ? where id = ?")
-            statement.setJsonb(1, utlandstilknytning)
-            statement.setObject(2, behandlingId)
-            krev(statement.executeUpdate() == 1) {
-                "Kunne ikke lagreUtlandstilknytning behandling for $behandlingId"
-            }
-        }
-    }
-
-    fun lagreTidligereFamiliepleier(
-        behandlingId: UUID,
-        tidligereFamiliepleier: TidligereFamiliepleier,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement = prepareStatement("UPDATE behandling set tidligere_familiepleier = ? where id = ?")
-            statement.setJsonb(1, tidligereFamiliepleier)
-            statement.setObject(2, behandlingId)
-            krev(statement.executeUpdate() == 1) {
-                "Kunne ikke lagreTidligereFamiliepleier behandling for $behandlingId"
-            }
-        }
-    }
-
     fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -395,10 +372,17 @@ class BehandlingDao(
         }
 
     fun lagreViderefoertOpphoer(
+        behandling: Behandling,
+        viderefoertOpphoer: ViderefoertOpphoer,
+    ) {
+        lagreBehandling(behandling)
+        lagreViderefoertOpphoerData(behandling.id, viderefoertOpphoer)
+    }
+
+    private fun lagreViderefoertOpphoerData(
         behandlingId: UUID,
         viderefoertOpphoer: ViderefoertOpphoer,
     ) {
-        lagreOpphoerFom(behandlingId, viderefoertOpphoer.dato)
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -433,10 +417,10 @@ class BehandlingDao(
     }
 
     fun fjernViderefoertOpphoer(
-        behandlingId: UUID,
+        behandling: Behandling,
         kilde: Grunnlagsopplysning.Kilde,
     ) {
-        lagreOpphoerFom(behandlingId, null)
+        lagreBehandling(behandling)
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -449,7 +433,7 @@ class BehandlingDao(
                             "AND aktiv = true",
                     )
                 statement.setJsonb(1, kilde)
-                statement.setObject(2, behandlingId)
+                statement.setObject(2, behandling.id)
 
                 krev(statement.executeUpdate() == 1) {
                     "Feil ved fjerning av videreført opphør"
@@ -483,20 +467,6 @@ class BehandlingDao(
             }
         }
 
-    fun lagreSendeBrev(
-        behandlingId: UUID,
-        skalSendeBrev: Boolean,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement = prepareStatement("UPDATE behandling set sende_brev = ? where id = ?")
-            statement.setBoolean(1, skalSendeBrev)
-            statement.setObject(2, behandlingId)
-            krev(statement.executeUpdate() == 1) {
-                "Kunne ikke send brev behandling for $behandlingId"
-            }
-        }
-    }
-
     private fun ResultSet.behandlingsListe(): List<Behandling> = toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()
 
     private fun ResultSet.tilBehandling(key: String?) =
@@ -521,30 +491,6 @@ class BehandlingDao(
 
         if (aarsakTilAvbrytelse != null) {
             this.lagreAvbruttAarsak(behandlingId, aarsakTilAvbrytelse, kommentar ?: "")
-        }
-    }
-
-    fun lagreNyttVirkningstidspunkt(
-        behandlingId: UUID,
-        virkningstidspunkt: Virkningstidspunkt,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement = prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
-            statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
-            statement.setObject(2, behandlingId)
-            statement.executeUpdate()
-        }
-    }
-
-    fun lagreOpphoerFom(
-        behandlingId: UUID,
-        opphoerFraOgMed: YearMonth?,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement = prepareStatement("UPDATE behandling SET opphoer_fom = ? where id = ?")
-            statement.setString(1, objectMapper.writeValueAsString(opphoerFraOgMed))
-            statement.setObject(2, behandlingId)
-            statement.executeUpdate()
         }
     }
 

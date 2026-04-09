@@ -529,20 +529,20 @@ internal class SakSkrivDaoTest(
             )
 
         behandlingRepo.opprettBehandling(behandlingSakEn)
-        behandlingRepo.lagreTidligereFamiliepleier(
-            behandlingSakEn.id,
-            tidligereFamiliepleier =
-                TidligereFamiliepleier(
-                    svar = true,
-                    kilde = Grunnlagsopplysning.automatiskSaksbehandler,
-                    foedselsnummer = "pleid1",
-                    startPleieforhold = pleieForholdEnStart,
-                    opphoertPleieforhold = pleieForholdEnSlutt,
-                    begrunnelse = "",
-                ),
-        )
-        val behandlingEn = behandlingRepo.hentBehandling(behandlingSakEn.id) as Foerstegangsbehandling
-        behandlingRepo.lagreStatus(behandlingEn.copy(status = BehandlingStatus.IVERKSATT))
+        val behandlingEn =
+            (behandlingRepo.hentBehandling(behandlingSakEn.id) as Foerstegangsbehandling).copy(
+                tidligereFamiliepleier =
+                    TidligereFamiliepleier(
+                        svar = true,
+                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        foedselsnummer = "pleid1",
+                        startPleieforhold = pleieForholdEnStart,
+                        opphoertPleieforhold = pleieForholdEnSlutt,
+                        begrunnelse = "",
+                    ),
+                status = BehandlingStatus.IVERKSATT,
+            )
+        behandlingRepo.lagreBehandling(behandlingEn)
 
         val behandlingSakTo =
             opprettBehandling(
@@ -550,19 +550,20 @@ internal class SakSkrivDaoTest(
                 sakId = sak2.id,
             )
         behandlingRepo.opprettBehandling(behandlingSakTo)
-        behandlingRepo.lagreTidligereFamiliepleier(
-            behandlingSakTo.id,
-            TidligereFamiliepleier(
-                svar = true,
-                kilde = Grunnlagsopplysning.automatiskSaksbehandler,
-                foedselsnummer = "pleid2",
-                startPleieforhold = pleieForholdToStart,
-                opphoertPleieforhold = pleieForholdToSlutt,
-                begrunnelse = "",
-            ),
-        )
-        val behandlingTo = behandlingRepo.hentBehandling(behandlingSakTo.id) as Foerstegangsbehandling
-        behandlingRepo.lagreStatus(behandlingTo.copy(status = BehandlingStatus.IVERKSATT))
+        val behandlingTo =
+            (behandlingRepo.hentBehandling(behandlingSakTo.id) as Foerstegangsbehandling).copy(
+                tidligereFamiliepleier =
+                    TidligereFamiliepleier(
+                        svar = true,
+                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        foedselsnummer = "pleid2",
+                        startPleieforhold = pleieForholdToStart,
+                        opphoertPleieforhold = pleieForholdToSlutt,
+                        begrunnelse = "",
+                    ),
+                status = BehandlingStatus.IVERKSATT,
+            )
+        behandlingRepo.lagreBehandling(behandlingTo)
 
         sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdEnSlutt)) shouldBe listOf(sak1.id)
         sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdToSlutt)) shouldBe listOf(sak2.id)

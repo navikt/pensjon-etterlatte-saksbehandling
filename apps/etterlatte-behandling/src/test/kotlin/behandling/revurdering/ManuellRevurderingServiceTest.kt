@@ -415,17 +415,20 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
 
         inTransaction {
-            applicationContext.behandlingDao.lagreBoddEllerArbeidetUtlandet(
-                behandling.id,
-                BoddEllerArbeidetUtlandet(
-                    true,
-                    Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
-                    "begrunnelse",
-                    boddArbeidetIkkeEosEllerAvtaleland = true,
-                    boddArbeidetEosNordiskKonvensjon = true,
-                    boddArbeidetAvtaleland = true,
-                    vurdereAvdoedesTrygdeavtale = true,
-                    skalSendeKravpakke = true,
+            val b = applicationContext.behandlingDao.hentBehandling(behandling.id)!! as Foerstegangsbehandling
+            applicationContext.behandlingDao.lagreBehandling(
+                b.copy(
+                    boddEllerArbeidetUtlandet =
+                        BoddEllerArbeidetUtlandet(
+                            true,
+                            Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
+                            "begrunnelse",
+                            boddArbeidetIkkeEosEllerAvtaleland = true,
+                            boddArbeidetEosNordiskKonvensjon = true,
+                            boddArbeidetAvtaleland = true,
+                            vurdereAvdoedesTrygdeavtale = true,
+                            skalSendeKravpakke = true,
+                        ),
                 ),
             )
         }
@@ -492,13 +495,16 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, saksbehandler)
         }
         inTransaction {
-            applicationContext.behandlingDao.lagreBoddEllerArbeidetUtlandet(
-                behandling.id,
-                BoddEllerArbeidetUtlandet(
-                    boddEllerArbeidetUtlandet = true,
-                    skalSendeKravpakke = true,
-                    begrunnelse = "enbegrunnelse",
-                    kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+            val b = applicationContext.behandlingDao.hentBehandling(behandling.id)!! as Foerstegangsbehandling
+            applicationContext.behandlingDao.lagreBehandling(
+                b.copy(
+                    boddEllerArbeidetUtlandet =
+                        BoddEllerArbeidetUtlandet(
+                            boddEllerArbeidetUtlandet = true,
+                            skalSendeKravpakke = true,
+                            begrunnelse = "enbegrunnelse",
+                            kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                        ),
                 ),
             )
         }
@@ -692,13 +698,16 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, saksbehandler)
         }
         inTransaction {
-            applicationContext.behandlingDao.lagreBoddEllerArbeidetUtlandet(
-                nonNullBehandling.id,
-                BoddEllerArbeidetUtlandet(
-                    boddEllerArbeidetUtlandet = true,
-                    skalSendeKravpakke = true,
-                    begrunnelse = "enbegrunnelse",
-                    kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+            val b = applicationContext.behandlingDao.hentBehandling(nonNullBehandling.id)!! as Foerstegangsbehandling
+            applicationContext.behandlingDao.lagreBehandling(
+                b.copy(
+                    boddEllerArbeidetUtlandet =
+                        BoddEllerArbeidetUtlandet(
+                            boddEllerArbeidetUtlandet = true,
+                            skalSendeKravpakke = true,
+                            begrunnelse = "enbegrunnelse",
+                            kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                        ),
                 ),
             )
         }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
@@ -322,7 +323,7 @@ class BehandlingFactory(
                 }
 
                 if (omgjoeringRequest.skalKopiere && sisteAvslaatteBehandling != null) {
-                    kopierFoerstegangsbehandlingOversikt(sisteAvslaatteBehandling, nyFoerstegangsbehandling.id)
+                    kopierFoerstegangsbehandlingOversikt(sisteAvslaatteBehandling, nyFoerstegangsbehandling as Foerstegangsbehandling)
                 } else {
                     val nyGyldighetsproeving =
                         GyldighetsResultat(
@@ -331,7 +332,9 @@ class BehandlingFactory(
                             Tidspunkt.now().toLocalDatetimeUTC(),
                         )
 
-                    behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandling.id, nyGyldighetsproeving)
+                    behandlingDao.lagreBehandling(
+                        (nyFoerstegangsbehandling as Foerstegangsbehandling).copy(gyldighetsproeving = nyGyldighetsproeving),
+                    )
                 }
 
                 if (omgjoeringRequest.omgjoeringsOppgaveId != null) {
@@ -412,35 +415,20 @@ class BehandlingFactory(
 
     private fun kopierFoerstegangsbehandlingOversikt(
         sisteAvslaatteBehandling: Behandling,
-        nyFoerstegangsbehandlingId: UUID,
+        nyFoerstegangsbehandling: Foerstegangsbehandling,
     ) {
         sisteAvslaatteBehandling.kommerBarnetTilgode?.let {
-            kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandlingId))
+            kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandling.id))
         }
-        sisteAvslaatteBehandling.virkningstidspunkt?.let {
-            behandlingDao.lagreNyttVirkningstidspunkt(
-                nyFoerstegangsbehandlingId,
-                it,
-            )
-        }
-        sisteAvslaatteBehandling.utlandstilknytning?.let {
-            behandlingDao.lagreUtlandstilknytning(
-                nyFoerstegangsbehandlingId,
-                it,
-            )
-        }
-        sisteAvslaatteBehandling
-            .gyldighetsproeving()
-            ?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandlingId, it) }
-
-        sisteAvslaatteBehandling.opphoerFraOgMed?.let { behandlingDao.lagreOpphoerFom(nyFoerstegangsbehandlingId, it) }
-
-        sisteAvslaatteBehandling.boddEllerArbeidetUtlandet?.let {
-            behandlingDao.lagreBoddEllerArbeidetUtlandet(
-                nyFoerstegangsbehandlingId,
-                it,
-            )
-        }
+        behandlingDao.lagreBehandling(
+            nyFoerstegangsbehandling.copy(
+                virkningstidspunkt = sisteAvslaatteBehandling.virkningstidspunkt,
+                utlandstilknytning = sisteAvslaatteBehandling.utlandstilknytning,
+                gyldighetsproeving = sisteAvslaatteBehandling.gyldighetsproeving,
+                opphoerFraOgMed = sisteAvslaatteBehandling.opphoerFraOgMed,
+                boddEllerArbeidetUtlandet = sisteAvslaatteBehandling.boddEllerArbeidetUtlandet,
+            ),
+        )
     }
 
     private fun opprettMerknad(

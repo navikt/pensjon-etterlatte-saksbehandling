@@ -14,7 +14,7 @@ class KommerBarnetTilGodeService(
                 .hentBehandling(it)
                 ?.tilOpprettet()
                 ?.also { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode) }
-                ?.also { behandling -> behandlingDao.lagreStatus(behandling) }
+                ?.also { behandling -> behandlingDao.lagreBehandling(behandling) }
         }
     }
 

@@ -90,8 +90,7 @@ class GyldighetsproevingServiceImpl(
 
     private fun Behandling.lagreGyldighetsproeving(gyldighetsproeving: GyldighetsResultat) {
         val oppdatert = oppdaterGyldighetsproeving(gyldighetsproeving)
-        behandlingDao.lagreGyldighetsproeving(oppdatert.id, gyldighetsproeving)
-        behandlingDao.lagreStatus(oppdatert)
+        behandlingDao.lagreBehandling(oppdatert)
         logger.info("behandling ${oppdatert.id} i sak: ${oppdatert.sak.id} er gyldighetsprøvd. Saktype: ${oppdatert.sak.sakType}")
     }
 }

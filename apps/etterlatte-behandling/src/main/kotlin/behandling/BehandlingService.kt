@@ -693,7 +693,7 @@ class BehandlingServiceImpl(
                         behandling.sak.sakType,
                     )
                 }
-                behandlingDao.lagreStatus(behandling)
+                behandlingDao.lagreBehandling(behandling)
                 hendelseDao.opppdatertGrunnlagHendelse(behandlingId, behandling.sak.id, brukerTokenInfo.ident())
             }
     }
@@ -736,7 +736,7 @@ class BehandlingServiceImpl(
             }
             val erOmgjoering = erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId)
             val oppdatert = behandling!!.oppdaterSendeBrev(skalSendeBrev, erOmgjoering)
-            behandlingDao.lagreSendeBrev(behandlingId, oppdatert.sendeBrev)
+            behandlingDao.lagreBehandling(oppdatert)
         }
     }
 
@@ -750,7 +750,7 @@ class BehandlingServiceImpl(
             hentBehandling(behandlingId)
                 ?: throw InternfeilException("Kunne ikke oppdatere opphoerFom fordi behandlingen ikke finnes")
         behandling.oppdaterOpphoerFom(opphoerFraOgMed).also {
-            behandlingDao.lagreOpphoerFom(behandlingId, opphoerFraOgMed)
+            behandlingDao.lagreBehandling(it)
         }
     }
 
@@ -869,8 +869,7 @@ class BehandlingServiceImpl(
             behandling
                 .oppdaterVirkningstidspunkt(virkningstidspunktData)
                 .also {
-                    behandlingDao.lagreNyttVirkningstidspunkt(behandlingId, virkningstidspunktData)
-                    behandlingDao.lagreStatus(it)
+                    behandlingDao.lagreBehandling(it)
                 }
         } catch (e: NotImplementedError) {
             logger.error(
@@ -903,8 +902,7 @@ class BehandlingServiceImpl(
             behandling
                 .oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet)
                 .also {
-                    behandlingDao.lagreBoddEllerArbeidetUtlandet(behandlingId, boddEllerArbeidetUtlandet)
-                    behandlingDao.lagreStatus(it)
+                    behandlingDao.lagreBehandling(it)
                 }
         } catch (e: NotImplementedError) {
             logger.error(
@@ -926,8 +924,7 @@ class BehandlingServiceImpl(
         behandling
             .oppdaterUtlandstilknytning(utlandstilknytning)
             .also {
-                behandlingDao.lagreUtlandstilknytning(behandlingId, utlandstilknytning)
-                behandlingDao.lagreStatus(it)
+                behandlingDao.lagreBehandling(it)
             }
     }
 
@@ -943,8 +940,7 @@ class BehandlingServiceImpl(
         behandling
             .oppdaterViderefoertOpphoer(viderefoertOpphoer)
             .also {
-                behandlingDao.lagreViderefoertOpphoer(behandlingId, viderefoertOpphoer)
-                behandlingDao.lagreStatus(it)
+                behandlingDao.lagreViderefoertOpphoer(it, viderefoertOpphoer)
                 if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
                     beregningKlient.slettAvkorting(behandling.id, brukerTokenInfo)
                 }
@@ -963,8 +959,7 @@ class BehandlingServiceImpl(
                 )
 
         behandling.oppdaterViderefoertOpphoer(null).also {
-            behandlingDao.fjernViderefoertOpphoer(behandlingId, brukerTokenInfo.lagGrunnlagsopplysning())
-            behandlingDao.lagreStatus(it)
+            behandlingDao.fjernViderefoertOpphoer(it, brukerTokenInfo.lagGrunnlagsopplysning())
             if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
                 beregningKlient.slettAvkorting(behandling.id, brukerTokenInfo)
             }
@@ -1001,8 +996,7 @@ class BehandlingServiceImpl(
                 ?: throw InternfeilException("Kunne ikke oppdatere tidligere familiepleier fordi behandlingen ikke finnes")
 
         behandling.oppdaterTidligereFamiliepleier(tidligereFamiliepleier).also {
-            behandlingDao.lagreTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
-            behandlingDao.lagreStatus(it)
+            behandlingDao.lagreBehandling(it)
         }
     }
 
@@ -1036,7 +1030,7 @@ class BehandlingServiceImpl(
         behandling
             .tilBeregnet()
             .let {
-                behandlingDao.lagreStatus(it)
+                behandlingDao.lagreBehandling(it)
                 registrerBehandlingHendelse(it, brukerTokenInfo.ident())
             }
     }
@@ -1117,7 +1111,7 @@ class BehandlingServiceImpl(
                             behandling.sak.sakType,
                         )
                     }
-                    behandlingDao.lagreStatus(behandling)
+                    behandlingDao.lagreBehandling(behandling)
                 }
         }
     }

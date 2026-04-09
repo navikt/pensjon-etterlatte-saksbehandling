@@ -89,8 +89,7 @@ internal class GyldighetsproevingServiceImplTest {
             )
         every { behandlingDaoMock.hentBehandling(any()) } returns behandling
 
-        every { behandlingDaoMock.lagreGyldighetsproeving(any(), any()) } just Runs
-        every { behandlingDaoMock.lagreStatus(any()) } just Runs
+        every { behandlingDaoMock.lagreBehandling(any()) } just Runs
 
         every {
             user.enheter()
@@ -128,8 +127,7 @@ internal class GyldighetsproevingServiceImplTest {
 
         verify(exactly = 1) {
             behandlingDaoMock.hentBehandling(id)
-            behandlingDaoMock.lagreStatus(any())
-            behandlingDaoMock.lagreGyldighetsproeving(any(), any())
+            behandlingDaoMock.lagreBehandling(any())
         }
     }
 
@@ -158,8 +156,7 @@ internal class GyldighetsproevingServiceImplTest {
             behandlingDaoMock.hentBehandling(id)
         }
         verify(exactly = 0) {
-            behandlingDaoMock.lagreStatus(any())
-            behandlingDaoMock.lagreGyldighetsproeving(any(), any())
+            behandlingDaoMock.lagreBehandling(any())
         }
     }
 
@@ -172,8 +169,7 @@ internal class GyldighetsproevingServiceImplTest {
         every { revurdering.type } returns BehandlingType.REVURDERING
         every { revurdering.revurderingsaarsak } returns Revurderingaarsak.NY_SOEKNAD
         every { revurdering.oppdaterGyldighetsproeving(any()) } returns revurdering
-        every { behandlingDaoMock.lagreGyldighetsproeving(any(), any()) } just Runs
-        every { behandlingDaoMock.lagreStatus(any()) } just Runs
+        every { behandlingDaoMock.lagreBehandling(any()) } just Runs
 
         every {
             user.enheter()
@@ -211,8 +207,7 @@ internal class GyldighetsproevingServiceImplTest {
 
         verify(exactly = 1) {
             behandlingDaoMock.hentBehandling(id)
-            behandlingDaoMock.lagreStatus(any())
-            behandlingDaoMock.lagreGyldighetsproeving(any(), any())
+            behandlingDaoMock.lagreBehandling(any())
         }
     }
 }

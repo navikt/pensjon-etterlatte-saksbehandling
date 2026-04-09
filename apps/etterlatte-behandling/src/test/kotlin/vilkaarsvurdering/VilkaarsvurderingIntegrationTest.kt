@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlag.GrunnlagService
@@ -164,12 +165,15 @@ internal class VilkaarsvurderingIntegrationTest(
         inTransaction { applicationContext.behandlingDao.opprettBehandling(opprettBehandlingMedPersongalleri) }
         val behandlingId = opprettBehandlingMedPersongalleri.id
         inTransaction {
-            applicationContext.behandlingDao.lagreNyttVirkningstidspunkt(
-                behandlingId,
-                Virkningstidspunkt.create(
-                    YearMonth.now(),
-                    "begrunnelse",
-                    saksbehandler = Grunnlagsopplysning.Saksbehandler.create("ident"),
+            val behandling = applicationContext.behandlingDao.hentBehandling(behandlingId)!! as Foerstegangsbehandling
+            applicationContext.behandlingDao.lagreBehandling(
+                behandling.copy(
+                    virkningstidspunkt =
+                        Virkningstidspunkt.create(
+                            YearMonth.now(),
+                            "begrunnelse",
+                            saksbehandler = Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        ),
                 ),
             )
         }

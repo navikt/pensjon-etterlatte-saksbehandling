@@ -245,7 +245,7 @@ internal class BehandlingFactoryTest {
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
-        every { behandlingDaoMock.lagreGyldighetsproeving(any(), any()) } returns Unit
+        every { behandlingDaoMock.lagreBehandling(any()) } just Runs
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns emptyList()
         every { behandlingDaoMock.lagreStatus(any()) } returns Unit
         every {
@@ -651,10 +651,9 @@ internal class BehandlingFactoryTest {
                 avslaattFoerstegangsbehandling,
                 revurdering,
             )
-        every { behandlingDaoMock.lagreOpphoerFom(any(), any()) } returns 1
+        every { behandlingDaoMock.lagreBehandling(any()) } just Runs
         every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
         every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
-        every { behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any()) } returns 1
         every { kommerBarnetTilGodeServiceMock.lagreKommerBarnetTilgode(any()) } just Runs
         val vv =
             Vilkaarsvurdering(
@@ -709,10 +708,8 @@ internal class BehandlingFactoryTest {
 
         verify {
             sakServiceMock.finnSak(sak.id)
-            behandlingDaoMock.lagreOpphoerFom(opprettetBehandling.id, any())
-            behandlingDaoMock.lagreBoddEllerArbeidetUtlandet(opprettetBehandling.id, boddEllerArbeidetUtlandet)
+            behandlingDaoMock.lagreBehandling(any())
             behandlingDaoMock.hentBehandlingerForSak(sak.id)
-            behandlingDaoMock.lagreNyttVirkningstidspunkt(opprettetBehandling.id, any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             kommerBarnetTilGodeServiceMock.lagreKommerBarnetTilgode(any())
@@ -800,7 +797,7 @@ internal class BehandlingFactoryTest {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), merknad = "Omgjøring på grunn av klage", frist = any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
-            behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
+            behandlingDaoMock.lagreBehandling(any())
             oppgaveService.ferdigstillOppgave(omgjoeringsOppgaveId, saksbehandler)
             grunnlagService.hentPersongalleri(sak.id)
         }
@@ -875,7 +872,7 @@ internal class BehandlingFactoryTest {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), "Omgjøring av førstegangsbehandling", frist = any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
-            behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
+            behandlingDaoMock.lagreBehandling(any())
             grunnlagService.hentPersongalleri(sak.id)
         }
         coVerify {

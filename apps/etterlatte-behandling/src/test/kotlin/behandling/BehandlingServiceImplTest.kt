@@ -14,6 +14,7 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.KanIkkeEndreSendeBrevForFoerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.PleieforholdMaaStarteFoerDetOpphoerer
@@ -992,7 +993,7 @@ internal class BehandlingServiceImplTest {
 
         val uuid = UUID.randomUUID()
 
-        val slot = slot<BoddEllerArbeidetUtlandet>()
+        val slot = slot<Behandling>()
 
         every { behandlingDaoMock.hentBehandling(any()) } returns
             foerstegangsbehandling(
@@ -1001,8 +1002,7 @@ internal class BehandlingServiceImplTest {
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
-        every { behandlingDaoMock.lagreBoddEllerArbeidetUtlandet(any(), capture(slot)) } just runs
-        every { behandlingDaoMock.lagreStatus(any()) } just runs
+        every { behandlingDaoMock.lagreBehandling(capture(slot)) } just runs
 
         inTransaction {
             behandlingService.oppdaterBoddEllerArbeidetUtlandet(
@@ -1015,9 +1015,9 @@ internal class BehandlingServiceImplTest {
             )
         }
 
-        assertEquals(true, slot.captured.boddEllerArbeidetUtlandet)
-        assertEquals("Test", slot.captured.begrunnelse)
-        assertEquals("ident", (slot.captured.kilde as Grunnlagsopplysning.Saksbehandler).ident)
+        assertEquals(true, slot.captured.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet)
+        assertEquals("Test", slot.captured.boddEllerArbeidetUtlandet?.begrunnelse)
+        assertEquals("ident", (slot.captured.boddEllerArbeidetUtlandet?.kilde as Grunnlagsopplysning.Saksbehandler).ident)
     }
 
     @Test
@@ -1066,8 +1066,7 @@ internal class BehandlingServiceImplTest {
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
-        every { behandlingDaoMock.lagreTidligereFamiliepleier(any(), capture(slot)) } just runs
-        every { behandlingDaoMock.lagreStatus(any()) } just runs
+        every { behandlingDaoMock.lagreBehandling(any()) } just runs
 
         shouldThrow<PleieforholdMaaStarteFoerDetOpphoerer> {
             inTransaction {
@@ -1092,7 +1091,7 @@ internal class BehandlingServiceImplTest {
 
         val uuid = UUID.randomUUID()
 
-        val slot = slot<TidligereFamiliepleier>()
+        val slot = slot<Behandling>()
 
         every { behandlingDaoMock.hentBehandling(any()) } returns
             foerstegangsbehandling(
@@ -1101,8 +1100,7 @@ internal class BehandlingServiceImplTest {
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
-        every { behandlingDaoMock.lagreTidligereFamiliepleier(any(), capture(slot)) } just runs
-        every { behandlingDaoMock.lagreStatus(any()) } just runs
+        every { behandlingDaoMock.lagreBehandling(capture(slot)) } just runs
 
         inTransaction {
             behandlingService.oppdaterTidligereFamiliepleier(
@@ -1118,10 +1116,10 @@ internal class BehandlingServiceImplTest {
             )
         }
 
-        assertEquals(true, slot.captured.svar)
-        assertEquals("123", slot.captured.foedselsnummer)
-        assertEquals("Test", slot.captured.begrunnelse)
-        assertEquals("ident", (slot.captured.kilde as Grunnlagsopplysning.Saksbehandler).ident)
+        assertEquals(true, slot.captured.tidligereFamiliepleier?.svar)
+        assertEquals("123", slot.captured.tidligereFamiliepleier?.foedselsnummer)
+        assertEquals("Test", slot.captured.tidligereFamiliepleier?.begrunnelse)
+        assertEquals("ident", (slot.captured.tidligereFamiliepleier?.kilde as Grunnlagsopplysning.Saksbehandler).ident)
     }
 
     @Test
@@ -1151,12 +1149,12 @@ internal class BehandlingServiceImplTest {
     fun `Kan kun endre send brev for revurdering`() {
         nyKontekstMedBruker(mockSaksbehandler())
         val behandlingId = UUID.randomUUID()
-        every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
+        every { behandlingDaoMock.lagreBehandling(any()) } just runs
         every {
             behandlingDaoMock.hentBehandling(behandlingId)
         } returns revurdering(sakId = sakId1, revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING)
         behandlingService.endreSkalSendeBrev(behandlingId, true)
-        verify(exactly = 1) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
+        verify(exactly = 1) { behandlingDaoMock.lagreBehandling(any()) }
     }
 
     @Test
@@ -1164,14 +1162,14 @@ internal class BehandlingServiceImplTest {
         nyKontekstMedBruker(mockSaksbehandler())
         val behandlingId = UUID.randomUUID()
         val behandling = foerstegangsbehandling(id = behandlingId, sakId = sakId1)
-        every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
+        every { behandlingDaoMock.lagreBehandling(any()) } just runs
         every { behandlingDaoMock.hentBehandling(behandlingId) } returns behandling
         every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns listOf(behandling)
         assertThrows<KanIkkeEndreSendeBrevForFoerstegangsbehandling> {
             behandlingService.endreSkalSendeBrev(behandlingId, true)
         }
 
-        verify(exactly = 0) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
+        verify(exactly = 0) { behandlingDaoMock.lagreBehandling(any()) }
     }
 
     @Test
@@ -1180,13 +1178,13 @@ internal class BehandlingServiceImplTest {
         val behandlingId = UUID.randomUUID()
         val behandling = foerstegangsbehandling(id = behandlingId, sakId = sakId1)
         val avslaattBehandling = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.AVSLAG)
-        every { behandlingDaoMock.lagreSendeBrev(behandlingId, false) } just runs
+        every { behandlingDaoMock.lagreBehandling(any()) } just runs
         every { behandlingDaoMock.hentBehandling(behandlingId) } returns behandling
         every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns listOf(behandling, avslaattBehandling)
 
         behandlingService.endreSkalSendeBrev(behandlingId, false)
 
-        verify(exactly = 1) { behandlingDaoMock.lagreSendeBrev(behandlingId, false) }
+        verify(exactly = 1) { behandlingDaoMock.lagreBehandling(any()) }
     }
 
     @Test
@@ -1197,8 +1195,8 @@ internal class BehandlingServiceImplTest {
         every { grunnlagService.hentPersongalleri(behandling.id) } returns mockPersongalleri()
         every { grunnlagService.lagreNyeSaksopplysninger(any(), behandling.id, any()) } just runs
         coEvery { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, any()) } just runs
-        every { behandlingDaoMock.lagreStatus(any()) } just runs
-        every { behandlingDaoMock.lagreStatus(any()) } just runs
+        every { behandlingDaoMock.lagreBehandling(any()) } just runs
+        every { behandlingDaoMock.lagreBehandling(any()) } just runs
 
         val annenForelderInRequest =
             AnnenForelder(

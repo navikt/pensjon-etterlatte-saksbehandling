@@ -310,6 +310,7 @@ class RevurderingService(
         saksbehandlerIdent: String?,
     ) {
         if (opphoerFraTidligereBehandling != null) {
+            val revurdering = behandlingDao.hentBehandling(opprettBehandling.id)!!
             val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opphoerFraTidligereBehandling.behandlingId)
             loggHvisViderefoertOpphoerIkkeViderefoerer(viderefoertOpphoer)
 
@@ -317,7 +318,7 @@ class RevurderingService(
                 sjekkAtOpphoersdatoStemmerMedViderefoertOpphoer(viderefoertOpphoer, opphoerFraTidligereBehandling, opprettBehandling.id)
                 logger.info("Lagrer tidligere opprettet videreført opphør i behandling ${opprettBehandling.id}")
                 behandlingDao.lagreViderefoertOpphoer(
-                    opprettBehandling.id,
+                    revurdering,
                     viderefoertOpphoer.copy(
                         skalViderefoere = JaNei.JA,
                         behandlingId = opprettBehandling.id,
@@ -327,7 +328,7 @@ class RevurderingService(
             } else {
                 logger.info("Oppretter nytt videreført opphør i behandling ${opprettBehandling.id}")
                 behandlingDao.lagreViderefoertOpphoer(
-                    opprettBehandling.id,
+                    revurdering,
                     ViderefoertOpphoer(
                         skalViderefoere = JaNei.JA,
                         behandlingId = opprettBehandling.id,

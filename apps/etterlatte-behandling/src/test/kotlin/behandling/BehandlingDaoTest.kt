@@ -32,6 +32,7 @@ import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -226,10 +227,7 @@ internal class BehandlingDaoTest(
                 status = BehandlingStatus.OPPRETTET,
             )
 
-        behandlingRepo.lagreGyldighetsproeving(
-            gyldighetsproevingBehandling.id,
-            gyldighetsproevingBehandling.gyldighetsproeving(),
-        )
+        behandlingRepo.lagreBehandling(gyldighetsproevingBehandling)
         val lagretGyldighetsproving =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
@@ -254,14 +252,16 @@ internal class BehandlingDaoTest(
         val opprettetBehandling =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
-        behandlingRepo.lagreBoddEllerArbeidetUtlandet(
-            opprettetBehandling.id,
-            BoddEllerArbeidetUtlandet(
-                true,
-                Grunnlagsopplysning.Saksbehandler.create("navIdent"),
-                "Test",
-                true,
-                skalSendeKravpakke = true,
+        behandlingRepo.lagreBehandling(
+            opprettetBehandling.copy(
+                boddEllerArbeidetUtlandet =
+                    BoddEllerArbeidetUtlandet(
+                        true,
+                        Grunnlagsopplysning.Saksbehandler.create("navIdent"),
+                        "Test",
+                        true,
+                        skalSendeKravpakke = true,
+                    ),
             ),
         )
 
@@ -291,15 +291,17 @@ internal class BehandlingDaoTest(
         val opprettetBehandling =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
-        behandlingRepo.lagreTidligereFamiliepleier(
-            opprettetBehandling.id,
-            TidligereFamiliepleier(
-                true,
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "123",
-                LocalDate.of(1970, 1, 1),
-                LocalDate.now(),
-                "Test",
+        behandlingRepo.lagreBehandling(
+            opprettetBehandling.copy(
+                tidligereFamiliepleier =
+                    TidligereFamiliepleier(
+                        true,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "123",
+                        LocalDate.of(1970, 1, 1),
+                        LocalDate.now(),
+                        "Test",
+                    ),
             ),
         )
 
@@ -449,16 +451,16 @@ internal class BehandlingDaoTest(
         val behandlingFoerStatusendring = behandlingRepo.hentBehandling(opprettBehandling.id) as? Foerstegangsbehandling
         assertNotNull(behandlingFoerStatusendring)
 
-        val endretTidspunkt = Tidspunkt.now().toLocalDatetimeUTC()
+        val foerLagring = Tidspunkt.now().toLocalDatetimeUTC()
         val behandlingMedNyStatus =
-            behandlingFoerStatusendring!!.copy(status = BehandlingStatus.VILKAARSVURDERT, sistEndret = endretTidspunkt)
+            behandlingFoerStatusendring!!.copy(status = BehandlingStatus.VILKAARSVURDERT)
         behandlingRepo.lagreStatus(behandlingMedNyStatus)
 
         val behandlingEtterStatusendring = behandlingRepo.hentBehandling(opprettBehandling.id)
 
         assertEquals(BehandlingStatus.OPPRETTET, behandlingFoerStatusendring.status)
         assertEquals(BehandlingStatus.VILKAARSVURDERT, behandlingEtterStatusendring!!.status)
-        assertEquals(endretTidspunkt, behandlingEtterStatusendring.sistEndret)
+        assertFalse(behandlingEtterStatusendring.sistEndret.isBefore(foerLagring))
     }
 
     @Test
@@ -507,7 +509,7 @@ internal class BehandlingDaoTest(
         val nyDato = YearMonth.of(2021, 2)
         val virkningstidspunkt = Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse")
         behandling!!.oppdaterVirkningstidspunkt(virkningstidspunkt).let {
-            behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.virkningstidspunkt!!)
+            behandlingRepo.lagreBehandling(it)
         }
 
         with(behandlingRepo.hentBehandling(behandling.id)) {
@@ -536,7 +538,7 @@ internal class BehandlingDaoTest(
         val nyDato = YearMonth.of(2021, 2)
         val virkningstidspunkt = Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse", LocalDate.now())
         behandling!!.oppdaterVirkningstidspunkt(virkningstidspunkt).let {
-            behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.virkningstidspunkt!!)
+            behandlingRepo.lagreBehandling(it)
         }
 
         with(behandlingRepo.hentBehandling(behandling.id)) {
@@ -604,10 +606,8 @@ internal class BehandlingDaoTest(
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert()
             .let {
-                behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
-                behandlingRepo.lagreGyldighetsproeving(it.id, it.gyldighetsproeving())
+                behandlingRepo.lagreBehandling(it)
                 kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(it.kommerBarnetTilgode!!)
-                behandlingRepo.lagreStatus(it)
             }
 
         with(behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling) {
@@ -617,26 +617,6 @@ internal class BehandlingDaoTest(
             assertEquals(gyldighetsResultat, this.gyldighetsproeving)
             assertTrue(this.sistEndret > foerstegangsbehandling.sistEndret)
         }
-    }
-
-    @Test
-    fun `lagreOpphoerFom skal oppdatere behandling med opphoer fom`() {
-        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val opprettBehandling =
-            opprettBehandling(
-                type = BehandlingType.REVURDERING,
-                revurderingAarsak = Revurderingaarsak.REGULERING,
-                sakId = sak,
-                status = BehandlingStatus.OPPRETTET,
-            )
-
-        behandlingRepo.opprettBehandling(opprettBehandling)
-
-        behandlingRepo.lagreOpphoerFom(opprettBehandling.id, YearMonth.of(2024, 6))
-
-        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
-
-        behandling?.opphoerFraOgMed shouldBe YearMonth.of(2024, 6)
     }
 
     @Test

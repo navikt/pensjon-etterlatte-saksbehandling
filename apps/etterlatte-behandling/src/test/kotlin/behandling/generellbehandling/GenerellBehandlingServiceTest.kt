@@ -164,22 +164,26 @@ internal class GenerellBehandlingServiceTest(
                 sakId = sak.id,
             )
         behandlingRepo.opprettBehandling(foerstegangsbehandling)
-        behandlingRepo.lagreBoddEllerArbeidetUtlandet(
-            foerstegangsbehandling.id,
-            BoddEllerArbeidetUtlandet(
-                true,
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse",
-                boddArbeidetIkkeEosEllerAvtaleland = true,
-                boddArbeidetEosNordiskKonvensjon = true,
-                boddArbeidetAvtaleland = true,
-                vurdereAvdoedesTrygdeavtale = true,
-                skalSendeKravpakke = true,
-            ),
-        )
         val foerstegangsbehandlingHentet =
             behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling
-        every { behandlingService.hentBehandlingerForSak(sak.id) } returns listOf(foerstegangsbehandlingHentet)
+        behandlingRepo.lagreBehandling(
+            foerstegangsbehandlingHentet.copy(
+                boddEllerArbeidetUtlandet =
+                    BoddEllerArbeidetUtlandet(
+                        true,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                        boddArbeidetIkkeEosEllerAvtaleland = true,
+                        boddArbeidetEosNordiskKonvensjon = true,
+                        boddArbeidetAvtaleland = true,
+                        vurdereAvdoedesTrygdeavtale = true,
+                        skalSendeKravpakke = true,
+                    ),
+            ),
+        )
+        val foerstegangsbehandlingMedBodd =
+            behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling
+        every { behandlingService.hentBehandlingerForSak(sak.id) } returns listOf(foerstegangsbehandlingMedBodd)
         val doedsdato = LocalDate.parse("2016-12-30")
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)

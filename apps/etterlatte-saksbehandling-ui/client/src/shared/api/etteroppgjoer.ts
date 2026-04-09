@@ -61,10 +61,10 @@ export const hentEtteroppgjoerForbehandlinger = async (
   return apiClient.get(`/etteroppgjoer/forbehandlinger/${sakId}`)
 }
 
-export const omgjoerAvbruttEtteroppgjoerRevurdering = async (args: {
+export const gjennopprettAvbruttEtteroppgjoerRevurdering = async (args: {
   behandlingId: string
 }): Promise<ApiResponse<IDetaljertBehandling>> => {
-  return apiClient.post(`/etteroppgjoer/revurdering/${args.behandlingId}/omgjoer-avbrutt-revurdering`, {})
+  return apiClient.post(`/etteroppgjoer/revurdering/${args.behandlingId}/gjennopprett-avbrutt-revurdering`, {})
 }
 
 export const avbrytEtteroppgjoerForbehandling = async (args: {

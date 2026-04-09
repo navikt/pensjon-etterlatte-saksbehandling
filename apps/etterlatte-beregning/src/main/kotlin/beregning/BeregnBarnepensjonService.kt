@@ -7,6 +7,7 @@ import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.beregning.grunnlag.validerVedtaksperioder
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
@@ -73,6 +74,7 @@ class BeregnBarnepensjonService(
         kunGammeltRegelverk: Boolean = false,
         tilDato: LocalDate? = null,
     ): Beregning {
+        vedtaksperioder.validerVedtaksperioder()
         if (vedtaksperioder.none {
                 it.fraOgMed <= virkningstidspunkt && (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
             }
@@ -169,15 +171,6 @@ class BeregnBarnepensjonService(
                         false,
                     )
                 ) {
-                    beregnBarnepensjon(
-                        behandling.id,
-                        grunnlag,
-                        barnepensjonGrunnlag,
-                        trygdetidListe,
-                        virkningstidspunkt,
-                        tilDato = tilDato,
-                    )
-                } else {
                     when (val perioder = beregningsGrunnlag.vedtaksperioder) {
                         null -> {
                             beregnBarnepensjon(
@@ -202,6 +195,15 @@ class BeregnBarnepensjonService(
                             )
                         }
                     }
+                } else {
+                    beregnBarnepensjon(
+                        behandling.id,
+                        grunnlag,
+                        barnepensjonGrunnlag,
+                        trygdetidListe,
+                        virkningstidspunkt,
+                        tilDato = tilDato,
+                    )
                 }
             }
 
@@ -217,15 +219,6 @@ class BeregnBarnepensjonService(
                                 false,
                             )
                         ) {
-                            beregnBarnepensjon(
-                                behandling.id,
-                                grunnlag,
-                                barnepensjonGrunnlag,
-                                trygdetidListe,
-                                virkningstidspunkt,
-                                tilDato = tilDato,
-                            )
-                        } else {
                             when (val perioder = beregningsGrunnlag.vedtaksperioder) {
                                 null -> {
                                     beregnBarnepensjon(
@@ -250,6 +243,15 @@ class BeregnBarnepensjonService(
                                     )
                                 }
                             }
+                        } else {
+                            beregnBarnepensjon(
+                                behandling.id,
+                                grunnlag,
+                                barnepensjonGrunnlag,
+                                trygdetidListe,
+                                virkningstidspunkt,
+                                tilDato = tilDato,
+                            )
                         }
                     }
 

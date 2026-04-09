@@ -7,6 +7,7 @@ import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.beregning.grunnlag.validerVedtaksperioder
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.Avdoed
@@ -114,8 +115,6 @@ class BeregnOmstillingsstoenadService(
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 if (featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, false)) {
-                    beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
-                } else {
                     when (val perioder = beregningsgrunnlag.vedtaksperioder) {
                         null -> {
                             beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
@@ -132,6 +131,8 @@ class BeregnOmstillingsstoenadService(
                             )
                         }
                     }
+                } else {
+                    beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
                 }
             }
 
@@ -148,8 +149,6 @@ class BeregnOmstillingsstoenadService(
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.OPPFYLT -> {
                         if (featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, false)) {
-                            beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
-                        } else {
                             when (val perioder = beregningsgrunnlag.vedtaksperioder) {
                                 null -> {
                                     beregnOmstillingsstoenad(
@@ -172,6 +171,8 @@ class BeregnOmstillingsstoenadService(
                                     )
                                 }
                             }
+                        } else {
+                            beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
                         }
                     }
 
@@ -191,6 +192,7 @@ class BeregnOmstillingsstoenadService(
         vedtaksperioder: List<Vedtaksperiode>,
         tilDato: LocalDate? = null,
     ): Beregning {
+        vedtaksperioder.validerVedtaksperioder()
         if (vedtaksperioder.none {
                 it.fraOgMed <= virkningstidspunkt && (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
             }

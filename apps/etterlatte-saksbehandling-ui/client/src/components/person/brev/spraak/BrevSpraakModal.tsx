@@ -70,7 +70,6 @@ export const BrevSpraakModal = ({
         icon={<DocPencilIcon title="Endre Språk" />}
         size="small"
       />
-
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Endre tittel">
         <form onSubmit={handleSubmit(lagre)}>
           <Modal.Body>
@@ -119,7 +118,7 @@ export const BrevSpraakModal = ({
           </Modal.Body>
 
           <Modal.Footer>
-            <HStack gap="4" justify="end">
+            <HStack gap="space-16" justify="end">
               <Button
                 variant="secondary"
                 type="button"

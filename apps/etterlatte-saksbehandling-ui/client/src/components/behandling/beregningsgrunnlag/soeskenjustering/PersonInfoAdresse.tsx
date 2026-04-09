@@ -32,9 +32,8 @@ export const PersonInfoAdresse = (props: Props) => {
       ) : (
         <span>Ingen bostedadresse</span>
       )}
-
       {adresser && props.visHistorikk && (
-        <Box paddingBlock="2 0">
+        <Box paddingBlock="space-8 space-0">
           <ReadMore header="Historikk">
             <Adressevisning adresser={adresser} soeknadsoversikt={true} />
           </ReadMore>

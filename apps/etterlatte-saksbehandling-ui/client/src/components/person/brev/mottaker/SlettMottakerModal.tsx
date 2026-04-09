@@ -37,10 +37,9 @@ export function SlettMottakerModal({ brevId, sakId, mottakerId, fjernMottaker }:
         icon={<TrashIcon title="Slett mottaker" />}
         size="small"
       />
-
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Slett mottaker">
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-16">
             <Heading size="large" spacing>
               Er du sikker på at du vil slette mottakeren?
             </Heading>
@@ -50,7 +49,7 @@ export function SlettMottakerModal({ brevId, sakId, mottakerId, fjernMottaker }:
               errorMessage: 'Kunne ikke slette mottaker.',
             })}
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-16" justify="end">
               <Button variant="secondary" disabled={isPending(slettMottakerResult)} onClick={avbryt}>
                 Avbryt
               </Button>

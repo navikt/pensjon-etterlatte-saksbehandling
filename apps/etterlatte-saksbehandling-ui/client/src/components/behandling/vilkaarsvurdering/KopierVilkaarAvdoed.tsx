@@ -68,9 +68,9 @@ export const KopierVilkaarAvdoed = ({ behandlingId, vilkaar }: { behandlingId: s
         success: (behandlingId) => (
           <>
             {behandlingId && (
-              <Box maxWidth="50rem" marginBlock="0 10">
+              <Box maxWidth="50rem" marginBlock="space-0 space-40">
                 <Alert variant="info">
-                  <HStack gap="6" align="center" justify="end" minWidth="45rem">
+                  <HStack gap="space-24" align="center" justify="end" minWidth="45rem">
                     <Heading size="small" level="2">
                       Det finnes en annen sak tilknyttet samme avdøde
                     </Heading>
@@ -82,7 +82,7 @@ export const KopierVilkaarAvdoed = ({ behandlingId, vilkaar }: { behandlingId: s
                     )}
                   </HStack>
                   {skalViseDetaljer && (
-                    <VStack gap="3">
+                    <VStack gap="space-12">
                       <BodyShort>
                         Det finnes en søskensak tilknyttet avdøde {avdoede}, der vilkår som omhandler avdøde allerede er
                         fylt inn. Ønsker du å benytte de samme vilkårsvurderingene for avdøde i denne behandlingen?
@@ -92,7 +92,7 @@ export const KopierVilkaarAvdoed = ({ behandlingId, vilkaar }: { behandlingId: s
                         Se vilkårsvurderingen for den andre behandlingen
                         <ExternalLinkIcon aria-hidden />
                       </Link>
-                      <HStack gap="1">
+                      <HStack gap="space-4">
                         <Button
                           variant="secondary"
                           size="small"
@@ -118,7 +118,6 @@ export const KopierVilkaarAvdoed = ({ behandlingId, vilkaar }: { behandlingId: s
           </>
         ),
       })}
-
       {isFailureHandler({
         apiResult: kopierVilkaarStatus,
         errorMessage: 'En feil har oppstått ved kopiering av vilkår for avdøde',

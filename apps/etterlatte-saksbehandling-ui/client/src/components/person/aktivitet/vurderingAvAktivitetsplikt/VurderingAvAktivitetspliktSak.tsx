@@ -9,12 +9,11 @@ export const VurderingAvAktivitetspliktSak = ({
   aktivitetspliktVurdering: IAktivitetspliktVurderingNyDto
 }) => {
   return (
-    <VStack gap="8">
-      <VStack gap="2">
+    <VStack gap="space-32">
+      <VStack gap="space-8">
         <Heading size="medium">Vurdering av aktivitetsplikt</Heading>
         <BodyShort>Følgende vurderinger av aktiviteten er registrert.</BodyShort>
       </VStack>
-
       <AktivitetsgradOgUnntakSakTabell
         aktiviteter={aktivitetspliktVurdering.aktivitet}
         unntak={aktivitetspliktVurdering.unntak}

@@ -160,7 +160,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
   }
 
   return (
-    <VStack gap="10" paddingInline="16" paddingBlock="16 4">
+    <VStack gap="space-40" paddingInline="space-64" paddingBlock="space-64 space-16">
       <Heading size="xlarge" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
@@ -179,14 +179,12 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
           setValideringFeilmelding={setValideringFeilmelding}
         />
       )}
-
       {forbehandling.harVedtakAvTypeOpphoer && (
         <OpphoerSkyldesDoedsfall
           erRedigerbar={erRedigerbar}
           setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerDoedsfallErrors}
         />
       )}
-
       {!doedsfallIEtteroppgjoersaaret && !forbehandlingSkalAvsluttes && (
         <FastsettFaktiskInntekt
           erRedigerbar={erRedigerbartFaktiskInntekt}
@@ -197,14 +195,13 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
       <AktivitetspliktSpørsmål erRedigerbar={erRedigerbar} setAktivitetspliktSkjemaErrors={setAktivitetspliktErrors} />
 
       {visBeregnetResultat && (
-        <VStack gap="4">
+        <VStack gap="space-16">
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
         </VStack>
       )}
-
       <Box maxWidth="42.5rem">
-        <VStack gap="8">
+        <VStack gap="space-32">
           {aktivitetspliktErrors && <SammendragAvSkjemaFeil errors={aktivitetspliktErrors} />}
           {informasjonFraBrukerErrors && <SammendragAvSkjemaFeil errors={informasjonFraBrukerErrors} />}
           {opphoerDoedsfallErrors && <SammendragAvSkjemaFeil errors={opphoerDoedsfallErrors} />}
@@ -219,7 +216,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         </Alert>
       )}
 
-      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+      <Box borderWidth="1 0 0 0" borderColor="neutral-subtle" paddingBlock="space-32 space-64">
         <HStack width="100%" justify="center">
           {navigasjon()}
         </HStack>
@@ -276,7 +273,7 @@ function RevurderingNavigasjon({
   onNesteSteg: () => void
 }) {
   return (
-    <VStack gap="4" align="center">
+    <VStack gap="space-16" align="center">
       {forbehandling.endringErTilUgunstForBruker === JaNei.JA ? (
         <AvsluttEtteroppgjoerRevurderingModal
           behandling={behandling}

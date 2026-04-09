@@ -43,7 +43,6 @@ export const HarSvartIModiaModal = ({ sakId }: { sakId: number }) => {
       <Button variant="secondary" icon={<PersonChatIcon />} iconPosition="right" onClick={() => setAapen(true)}>
         Har svart i Modia
       </Button>
-
       <Modal open={aapen} onClose={lukkModal} aria-labelledby="Bruker har svart på etteroppgjør i Modia modal">
         <Modal.Header closeButton>
           <Heading size="medium" level="2">
@@ -52,7 +51,7 @@ export const HarSvartIModiaModal = ({ sakId }: { sakId: number }) => {
         </Modal.Header>
 
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-16">
             <BodyShort>
               Hvis bruker har svart på etteroppgjøret i Modia kan du opprette revurdering for etteroppgjøret her.
             </BodyShort>
@@ -68,7 +67,7 @@ export const HarSvartIModiaModal = ({ sakId }: { sakId: number }) => {
               errorMessage: 'Feil under opprettelse av revurdering',
             })}
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-16" justify="end">
               <Button
                 loading={isPending(opprettRevurderingResult)}
                 disabled={!valgtEtteroppgjoer}

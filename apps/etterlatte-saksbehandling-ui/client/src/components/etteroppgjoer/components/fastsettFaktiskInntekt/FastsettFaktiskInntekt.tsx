@@ -28,10 +28,10 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntekt
       ?.filter((ytelse) => ytelse.ytelseFoerAvkorting === 0) ?? []
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Heading size="large">Fastsett faktisk inntekt</Heading>
       <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
-      <VStack gap="4" maxWidth="42.5rem">
+      <VStack gap="space-16" maxWidth="42.5rem">
         <div>
           <Tag variant="neutral">
             {maanedNavn(forbehandling.innvilgetPeriode.fom)} - {maanedNavn(forbehandling.innvilgetPeriode.tom)}
@@ -39,7 +39,7 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntekt
         </div>
         {maanederMedIngenBeregnetYtelseEtteroppgjoeret.length > 0 && (
           <Alert variant="warning">
-            <VStack gap="2">
+            <VStack gap="space-8">
               <BodyShort>
                 Bruker har ikke hatt innvilget omstillingsstønad hele året, på grunn av sanksjon, stans eller fengsel.
                 Dette gjelder følgende perioder:
@@ -57,14 +57,13 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntekt
           </Alert>
         )}
       </VStack>
-
       {faktiskInntektSkjemaErAapen && erRedigerbar ? (
         <FaktiskInntektSkjema
           setFaktiskInntektSkjemaErAapen={setFaktiskInntektSkjemaErAapen}
           setFastsettFaktiskInntektSkjemaErrors={setFastsettFaktiskInntektSkjemaErrors}
         />
       ) : (
-        <VStack gap="4">
+        <VStack gap="space-16">
           <FaktiskInntektVisning />
           {erRedigerbar && (
             <div>

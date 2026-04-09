@@ -49,7 +49,6 @@ export default function OppdaterGrunnlagModal({
       >
         Oppdater grunnlag
       </Button>
-
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" className="padding-modal">
         <Modal.Body style={{ textAlign: 'center' }}>
           <Heading level="1" spacing size="medium" id="modal-heading">
@@ -62,7 +61,7 @@ export default function OppdaterGrunnlagModal({
             til &quot;Opprettet&quot;. Hvis du har startet behandlingen allerede, må du gå gjennom stegene på nytt.
           </BodyLong>
 
-          <HStack gap="4" justify="center">
+          <HStack gap="space-16" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(oppdatert)}>
               Nei, fortsett behandling
             </Button>

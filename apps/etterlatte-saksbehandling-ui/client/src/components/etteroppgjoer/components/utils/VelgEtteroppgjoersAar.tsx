@@ -26,7 +26,7 @@ export const VelgEtteroppgjoersAar = ({ sakId, value, onChange }: Props) => {
     pending: <Spinner label="Henter etteroppgjør..." />,
     error: (error) => <ApiErrorAlert>Kunne ikke hente etteroppgjør: {error.detail}</ApiErrorAlert>,
     success: (etteroppgjoerListe) => (
-      <VStack gap="4">
+      <VStack gap="space-16">
         {etteroppgjoerListe.length === 0 ? (
           <BodyShort>Ingen etteroppgjør funnet.</BodyShort>
         ) : (

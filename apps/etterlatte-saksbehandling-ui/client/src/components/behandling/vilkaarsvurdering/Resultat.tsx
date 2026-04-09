@@ -100,17 +100,16 @@ export const Resultat = (props: Props) => {
   const nySoeknad = revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
 
   return (
-    <VStack gap="4" paddingInline="16 4" paddingBlock="16 0">
+    <VStack gap="space-16" paddingInline="space-64 space-16" paddingBlock="space-64 space-0">
       <Heading size="small" level="2">
         {erRevurdering
           ? 'Utfall etter revurdering'
           : `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`}
       </Heading>
-
       {vilkaarsvurdering.resultat && (
-        <VStack gap="2">
+        <VStack gap="space-8">
           <Box>
-            <HStack gap="2" align="center">
+            <HStack gap="space-8" align="center">
               <StatusIcon status={status} />
               <BodyShort textColor="subtle">{resultatTekst()}</BodyShort>
             </HStack>
@@ -131,7 +130,7 @@ export const Resultat = (props: Props) => {
               <ResultatKommentar>{vilkaarsvurdering.resultat.kommentar}</ResultatKommentar>
             </Box>
           )}
-          <HStack gap="4">
+          <HStack gap="space-16">
             {redigerbar && (
               <Button
                 loading={isPending(slettVurderingStatus)}
@@ -149,14 +148,12 @@ export const Resultat = (props: Props) => {
           </HStack>
         </VStack>
       )}
-
       {!vilkaarsvurdering.resultat && !alleVilkaarErVurdert && (
         <BodyShort>Alle vilkår må vurderes før man kan gå videre</BodyShort>
       )}
-
       {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
         <VurderAlleVilkaarBox>
-          <VStack gap="4">
+          <VStack gap="space-16">
             <RadioGroup
               legend=""
               size="small"
@@ -194,8 +191,7 @@ export const Resultat = (props: Props) => {
           </VStack>
         </VurderAlleVilkaarBox>
       )}
-
-      <Box paddingBlock="4 8" paddingInline="16 4">
+      <Box paddingBlock="space-16 space-32" paddingInline="space-64 space-16">
         {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
           <OppdatertGrunnlagAlert variant="warning">
             Virkningstidspunktet er endret siden vilkårene ble vurdert sist. Du må se over vurderingene og sjekke at de
@@ -203,8 +199,7 @@ export const Resultat = (props: Props) => {
           </OppdatertGrunnlagAlert>
         )}
       </Box>
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar && vilkaarsvurdering.isGrunnlagUtdatert && (
           <OppdatertGrunnlagAlert variant="warning">
             OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />

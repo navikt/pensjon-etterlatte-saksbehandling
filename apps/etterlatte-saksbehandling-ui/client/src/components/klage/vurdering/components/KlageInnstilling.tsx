@@ -17,11 +17,10 @@ export const KlageInnstilling = ({
   const aktuelleHjemler = klage?.sak.sakType === SakType.BARNEPENSJON ? LOVHJEMLER_BP : LOVHJEMLER_OMS
 
   return (
-    <VStack gap="4" width="41.5rem">
+    <VStack gap="space-16" width="41.5rem">
       <Heading level="3" size="medium">
         Innstilling til KA
       </Heading>
-
       <Box width="fit-content">
         <Select
           {...register('innstilling.lovhjemmel', {
@@ -41,7 +40,6 @@ export const KlageInnstilling = ({
           <ErrorMessage>Du må angi hjemmelen klagen hovedsakelig knytter seg til.</ErrorMessage>
         )}
       </Box>
-
       <Textarea
         {...register('innstilling.innstillingTekst', {
           required: {
@@ -53,7 +51,6 @@ export const KlageInnstilling = ({
         description="Innstillingen blir med i brev til klager og til KA"
         error={errors.innstilling?.innstillingTekst?.message}
       />
-
       <Textarea
         {...register('innstilling.internKommentar')}
         label="Intern kommentar til KA (valgfri)"

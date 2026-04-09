@@ -62,7 +62,6 @@ export const KlageBehandleSvarFraKa = ({ oppgave, oppdaterStatus }: Props) => {
       <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
         Se oppgave
       </Button>
-
       <Modal
         open={open}
         aria-labelledby="modal-heading"
@@ -71,8 +70,8 @@ export const KlageBehandleSvarFraKa = ({ oppgave, oppdaterStatus }: Props) => {
         header={{ heading: 'Klage - Behandle svar fra KA' }}
       >
         <Modal.Body>
-          <VStack gap="4">
-            <HStack gap="4">
+          <VStack gap="space-16">
+            <HStack gap="space-16">
               <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
               <Info label="Frist" tekst={formaterDato(oppgave.frist)} />
             </HStack>
@@ -100,7 +99,7 @@ export const KlageBehandleSvarFraKa = ({ oppgave, oppdaterStatus }: Props) => {
               error: (error) => <ApiErrorAlert>Det oppstod en feil: {error.detail}</ApiErrorAlert>,
             })}
 
-            <HStack gap="4" justify="end">
+            <HStack gap="space-16" justify="end">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillStatus)}>
                 Lukk
               </Button>

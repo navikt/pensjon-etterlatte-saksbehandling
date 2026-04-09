@@ -62,7 +62,6 @@ export const NotatRedigeringModal = ({ notat, minifyRedigerKnapp }: RedigerbartN
       <Button variant="secondary" onClick={open} size="small" icon={<PencilIcon title="Rediger notat" />}>
         {!minifyRedigerKnapp && 'Rediger'}
       </Button>
-
       <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Header>
           <Heading size="medium">Rediger notat</Heading>
@@ -84,8 +83,8 @@ export const NotatRedigeringModal = ({ notat, minifyRedigerKnapp }: RedigerbartN
             </Tabs.List>
 
             <Tabs.Panel value={NotatRedigeringFane.REDIGER}>
-              <Box paddingBlock="4">
-                <VStack gap="4">
+              <Box paddingBlock="space-16">
+                <VStack gap="space-16">
                   <RedigerNotatTittel id={notat.id} tittel={notat.tittel} />
 
                   <Heading size="xsmall">Rediger notat</Heading>

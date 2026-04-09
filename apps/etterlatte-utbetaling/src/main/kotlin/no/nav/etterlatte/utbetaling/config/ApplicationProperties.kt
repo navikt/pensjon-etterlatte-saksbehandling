@@ -83,6 +83,7 @@ enum class UtbetalingKey : EnvEnum {
     KONSISTENSAVSTEMMING_ENABLED,
     GRENSESNITTAVSTEMMING_OMS_ENABLED,
     KONSISTENSAVSTEMMING_OMS_ENABLED,
+    BRUK_VEDTAK_FRA_BEHANDLING,
     ;
 
     override fun key() = name

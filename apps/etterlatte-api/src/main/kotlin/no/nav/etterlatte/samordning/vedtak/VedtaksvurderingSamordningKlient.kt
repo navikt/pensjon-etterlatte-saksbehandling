@@ -27,16 +27,26 @@ import java.time.LocalDate
 class VedtaksvurderingSamordningKlient(
     config: Config,
     private val httpClient: HttpClient,
+    private val brukEtterlatteBehandling: Boolean = false,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingSamordningKlient::class.java)
 
-    private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/api/samordning/vedtak"
+    private val vedtaksvurderingUrl =
+        if (brukEtterlatteBehandling) {
+            "${config.getString("behandling.url")}/api/samordning/vedtak"
+        } else {
+            "${config.getString("vedtak.url")}/api/samordning/vedtak"
+        }
 
     suspend fun hentVedtak(
         vedtakId: Long,
         callerContext: CallerContext,
     ): VedtakSamordningDto {
-        logger.info("Henter vedtaksvurdering med vedtakId=$vedtakId")
+        if (brukEtterlatteBehandling) {
+            logger.info("Henter vedtaksvurdering med vedtakId:$vedtakId fra etterlatte-behandling")
+        } else {
+            logger.info("Henter vedtaksvurdering med vedtakId:$vedtakId")
+        }
 
         return try {
             httpClient
@@ -66,7 +76,11 @@ class VedtaksvurderingSamordningKlient(
         fnr: String,
         callerContext: CallerContext,
     ): List<VedtakSamordningDto> {
-        logger.info("Henter vedtaksliste, fomDato=$fomDato")
+        if (brukEtterlatteBehandling) {
+            logger.info("Henter vedtaksliste, fomDato=$fomDato fra etterlatte-behandling")
+        } else {
+            logger.info("Henter vedtaksliste, fomDato=$fomDato")
+        }
         val erMaskinPorten = callerContext is MaskinportenTpContext
         if (erMaskinPorten) {
             logger.info("Henter vedtaksliste med orgnr {}", kv(X_ORGNR, callerContext.organisasjonsnr))

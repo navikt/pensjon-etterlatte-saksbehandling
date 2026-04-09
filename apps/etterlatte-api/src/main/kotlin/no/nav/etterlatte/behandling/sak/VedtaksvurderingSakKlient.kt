@@ -17,14 +17,26 @@ import java.time.LocalDate
 class VedtaksvurderingSakKlient(
     config: Config,
     private val httpClient: HttpClient,
+    private val brukEtterlatteBehandling: Boolean = false,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingSakKlient::class.java)
 
-    private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/api/vedtak"
+    private val vedtaksvurderingUrl =
+        if (brukEtterlatteBehandling) {
+            "${config.getString("behandling.url")}/api/vedtak"
+        } else {
+            "${config.getString("vedtak.url")}/api/vedtak"
+        }
 
     suspend fun hentLoependeVedtak(sakId: SakId): LoependeYtelseDTO {
         val dato = LocalDate.now()
-        logger.info("Henter lopende vedtak, date=$dato")
+
+        if (brukEtterlatteBehandling) {
+            logger.info("Henter lopende vedtak, date: $dato fra etterlatte-behandling")
+        } else {
+            logger.info("Henter lopende vedtak, date: $dato")
+        }
+
         return try {
             httpClient
                 .get("$vedtaksvurderingUrl/loepende/${sakId.sakId}?dato=$dato")

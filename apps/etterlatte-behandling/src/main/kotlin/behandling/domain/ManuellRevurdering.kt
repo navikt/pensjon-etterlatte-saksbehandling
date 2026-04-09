@@ -89,13 +89,22 @@ data class ManuellRevurdering(
 
     override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer?) =
         hvisRedigerbar {
+            viderefoertOpphoer?.let { validerViderefoertOpphoer(it) }
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer?.dato)
         }
 
     override fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier) =
         hvisRedigerbar {
+            validerTidligereFamiliepleier(tidligereFamiliepleier)
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(tidligereFamiliepleier = tidligereFamiliepleier)
         }
+
+    override fun oppdaterSendeBrev(
+        skalSendeBrev: Boolean,
+        erOmgjoering: Boolean,
+    ): Revurdering = this.copy(sendeBrev = skalSendeBrev)
+
+    override fun oppdaterOpphoerFom(dato: YearMonth?): Revurdering = this.copy(opphoerFraOgMed = dato)
 
     override fun tilOpprettet() = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
 

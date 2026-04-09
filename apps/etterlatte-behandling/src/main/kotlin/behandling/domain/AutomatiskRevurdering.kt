@@ -66,17 +66,24 @@ data class AutomatiskRevurdering(
 
     override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer?) =
         hvisRedigerbar {
+            viderefoertOpphoer?.let { validerViderefoertOpphoer(it) }
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer?.dato)
         }
 
     override fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier) =
         hvisRedigerbar {
+            validerTidligereFamiliepleier(tidligereFamiliepleier)
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(tidligereFamiliepleier = tidligereFamiliepleier)
         }
 
-    override fun tilOpprettet() = endreTilStatus(BehandlingStatus.OPPRETTET)
+    override fun oppdaterSendeBrev(
+        skalSendeBrev: Boolean,
+        erOmgjoering: Boolean,
+    ): AutomatiskRevurdering = this.copy(sendeBrev = skalSendeBrev)
 
-    override fun tilVilkaarsvurdert() = endreTilStatus(BehandlingStatus.VILKAARSVURDERT)
+    override fun oppdaterOpphoerFom(dato: YearMonth?): AutomatiskRevurdering = this.copy(opphoerFraOgMed = dato)
+
+    override fun tilOpprettet() = endreTilStatus(BehandlingStatus.OPPRETTET)
 
     override fun tilTrygdetidOppdatert() = endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT)
 

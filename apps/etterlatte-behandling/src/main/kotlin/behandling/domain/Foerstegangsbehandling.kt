@@ -71,6 +71,7 @@ data class Foerstegangsbehandling(
 
     override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer?) =
         hvisRedigerbar {
+            viderefoertOpphoer?.let { validerViderefoertOpphoer(it) }
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer?.dato)
         }
 
@@ -81,8 +82,19 @@ data class Foerstegangsbehandling(
 
     override fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier) =
         hvisRedigerbar {
+            validerTidligereFamiliepleier(tidligereFamiliepleier)
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(tidligereFamiliepleier = tidligereFamiliepleier)
         }
+
+    override fun oppdaterSendeBrev(
+        skalSendeBrev: Boolean,
+        erOmgjoering: Boolean,
+    ): Foerstegangsbehandling {
+        if (!erOmgjoering) throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+        return this.copy(sendeBrev = skalSendeBrev)
+    }
+
+    override fun oppdaterOpphoerFom(dato: YearMonth?): Foerstegangsbehandling = this.copy(opphoerFraOgMed = dato)
 
     override fun tilOpprettet(): Foerstegangsbehandling = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
 

@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.behandling.domain.VirkningstidspunktKanIkkeVaereEtterOpphoer
 import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
@@ -91,14 +92,6 @@ class VirkningstidspunktMaaHaUtenlandstilknytning(
     message: String,
 ) : UgyldigForespoerselException(code = "VIRK_MAA_HA_UTENLANDSTILKNYTNING", detail = message)
 
-class VirkningstidspunktKanIkkeVaereEtterOpphoer(
-    virk: YearMonth?,
-    opphoerVirk: YearMonth?,
-) : UgyldigForespoerselException(
-        code = "VIRK_KAN_IKKE_VAERE_ETTER_OPPHOER",
-        detail = "Virkningstidspunkt ($virk) kan ikke være etter opphør ($opphoerVirk)",
-    )
-
 class VirkFoerIverksattVirk(
     virk: YearMonth,
     foersteVirk: YearMonth,
@@ -134,40 +127,10 @@ class PersongalleriFinnesIkkeException :
         detail = "Kunne ikke finne persongalleri",
     )
 
-class KanIkkeEndreSendeBrevForFoerstegangsbehandling :
-    UgyldigForespoerselException(
-        "KAN_IKKE_ENDRE_SEND_BREV",
-        "Kan ikke endre send brev for førstegangsbehandling, skal alltid sendes",
-    )
-
 class KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling :
     UgyldigForespoerselException(
         "KAN_IKKE_OPPRETTE_REVURDERING_MANGLER_FOERSTEGANGSBEHANDLING_IVERKSATT",
         "Kan ikke opprette revurdering når man mangler føstegangsbehandling med virkningstidspunkt",
-    )
-
-class VilkaarMaaFinnesHvisViderefoertOpphoer :
-    UgyldigForespoerselException(
-        "VIDEREFOERT_OPPHOER_MAA_HA_VILKAAR",
-        "Vilkår må angis hvis opphør skal videreføres",
-    )
-
-class DatoMaaFinnesHvisViderefoertOpphoer :
-    UgyldigForespoerselException(
-        "VIDEREFOERT_OPPHOER_MAA_HA_DATO",
-        "Dato må angis hvis opphør skal videreføres",
-    )
-
-class PleieforholdMaaStarteFoerDetOpphoerer :
-    UgyldigForespoerselException(
-        code = "PLEIEFORHOLD_MAA_STARTE_FOER_DET_OPPHOERER",
-        detail = "Pleieforholdet må ha startdato som er før opphørsdato",
-    )
-
-class PleieforholdMaaHaStartOgOpphoer :
-    UgyldigForespoerselException(
-        code = "PLEIEFORHOLD_MAA_HA_START_OG_OPPHOER",
-        detail = "Pleieforholdet må ha både startdato og opphørsdato",
     )
 
 interface BehandlingService {
@@ -771,19 +734,9 @@ class BehandlingServiceImpl(
             krev(behandling != null) {
                 "Behandling finnes ikke $behandlingId"
             }
-            when (behandling!!.type) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    if (erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId)) {
-                        behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
-                    } else {
-                        throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
-                    }
-                }
-
-                BehandlingType.REVURDERING -> {
-                    behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
-                }
-            }
+            val erOmgjoering = erOmgjoeringAvAvslaattFoerstegangsbehandling(behandlingId)
+            val oppdatert = behandling!!.oppdaterSendeBrev(skalSendeBrev, erOmgjoering)
+            behandlingDao.lagreSendeBrev(behandlingId, oppdatert.sendeBrev)
         }
     }
 
@@ -793,7 +746,12 @@ class BehandlingServiceImpl(
         behandlingId: UUID,
         opphoerFraOgMed: YearMonth,
     ) {
-        behandlingDao.lagreOpphoerFom(behandlingId, opphoerFraOgMed)
+        val behandling =
+            hentBehandling(behandlingId)
+                ?: throw InternfeilException("Kunne ikke oppdatere opphoerFom fordi behandlingen ikke finnes")
+        behandling.oppdaterOpphoerFom(opphoerFraOgMed).also {
+            behandlingDao.lagreOpphoerFom(behandlingId, opphoerFraOgMed)
+        }
     }
 
     data class BehandlingMedData(
@@ -982,25 +940,6 @@ class BehandlingServiceImpl(
             hentBehandling(behandlingId)
                 ?: throw InternfeilException("Kunne ikke oppdatere videreført opphør fordi behandlingen ikke finnes")
 
-        if (viderefoertOpphoer.skalViderefoere == JaNei.JA) {
-            if (viderefoertOpphoer.vilkaar == null) {
-                throw VilkaarMaaFinnesHvisViderefoertOpphoer()
-            }
-            if (viderefoertOpphoer.dato == null) {
-                throw DatoMaaFinnesHvisViderefoertOpphoer()
-            }
-            if (virkningstidspunktErEtterOpphoerFraOgMed(
-                    behandling.virkningstidspunkt?.dato,
-                    viderefoertOpphoer.dato,
-                )
-            ) {
-                throw VirkningstidspunktKanIkkeVaereEtterOpphoer(
-                    behandling.virkningstidspunkt?.dato,
-                    viderefoertOpphoer.dato,
-                )
-            }
-        }
-
         behandling
             .oppdaterViderefoertOpphoer(viderefoertOpphoer)
             .also {
@@ -1060,14 +999,6 @@ class BehandlingServiceImpl(
         val behandling =
             hentBehandling(behandlingId)
                 ?: throw InternfeilException("Kunne ikke oppdatere tidligere familiepleier fordi behandlingen ikke finnes")
-
-        if (tidligereFamiliepleier.svar) {
-            if (tidligereFamiliepleier.startPleieforhold == null || tidligereFamiliepleier.opphoertPleieforhold == null) {
-                throw PleieforholdMaaHaStartOgOpphoer()
-            } else if (!tidligereFamiliepleier.startPleieforhold!!.isBefore(tidligereFamiliepleier.opphoertPleieforhold)) {
-                throw PleieforholdMaaStarteFoerDetOpphoerer()
-            }
-        }
 
         behandling.oppdaterTidligereFamiliepleier(tidligereFamiliepleier).also {
             behandlingDao.lagreTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)

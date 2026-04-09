@@ -15,7 +15,10 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.KanIkkeEndreSendeBrevForFoerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.PleieforholdMaaStarteFoerDetOpphoerer
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.VirkningstidspunktKanIkkeVaereEtterOpphoer
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus

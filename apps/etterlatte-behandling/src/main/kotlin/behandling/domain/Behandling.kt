@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -43,6 +44,44 @@ internal sealed class TilstandException(
         override val detail: String,
     ) : UgyldigForespoerselException("BEHANDLING_KAN_IKKE_REDIGERES", detail)
 }
+
+class PleieforholdMaaStarteFoerDetOpphoerer :
+    UgyldigForespoerselException(
+        code = "PLEIEFORHOLD_MAA_STARTE_FOER_DET_OPPHOERER",
+        detail = "Pleieforholdet må ha startdato som er før opphørsdato",
+    )
+
+class PleieforholdMaaHaStartOgOpphoer :
+    UgyldigForespoerselException(
+        code = "PLEIEFORHOLD_MAA_HA_START_OG_OPPHOER",
+        detail = "Pleieforholdet må ha både startdato og opphørsdato",
+    )
+
+class KanIkkeEndreSendeBrevForFoerstegangsbehandling :
+    UgyldigForespoerselException(
+        "KAN_IKKE_ENDRE_SEND_BREV",
+        "Kan ikke endre send brev for førstegangsbehandling, skal alltid sendes",
+    )
+
+class VilkaarMaaFinnesHvisViderefoertOpphoer :
+    UgyldigForespoerselException(
+        "VIDEREFOERT_OPPHOER_MAA_HA_VILKAAR",
+        "Vilkår må angis hvis opphør skal videreføres",
+    )
+
+class DatoMaaFinnesHvisViderefoertOpphoer :
+    UgyldigForespoerselException(
+        "VIDEREFOERT_OPPHOER_MAA_HA_DATO",
+        "Dato må angis hvis opphør skal videreføres",
+    )
+
+class VirkningstidspunktKanIkkeVaereEtterOpphoer(
+    virk: YearMonth?,
+    opphoerVirk: YearMonth?,
+) : UgyldigForespoerselException(
+        code = "VIRK_KAN_IKKE_VAERE_ETTER_OPPHOER",
+        detail = "Virkningstidspunkt ($virk) kan ikke være etter opphør ($opphoerVirk)",
+    )
 
 sealed class Behandling {
     abstract val id: UUID
@@ -133,6 +172,44 @@ sealed class Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere tidligere famililiepleier på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av tidligere famililiepleier.",
+        )
+
+    protected fun validerTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier) {
+        if (tidligereFamiliepleier.svar) {
+            val start = tidligereFamiliepleier.startPleieforhold
+            val opphoer = tidligereFamiliepleier.opphoertPleieforhold
+            if (start == null || opphoer == null) {
+                throw PleieforholdMaaHaStartOgOpphoer()
+            } else if (!start.isBefore(opphoer)) {
+                throw PleieforholdMaaStarteFoerDetOpphoerer()
+            }
+        }
+    }
+
+    protected fun validerViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer) {
+        if (viderefoertOpphoer.skalViderefoere == JaNei.JA) {
+            viderefoertOpphoer.vilkaar ?: throw VilkaarMaaFinnesHvisViderefoertOpphoer()
+            val dato = viderefoertOpphoer.dato ?: throw DatoMaaFinnesHvisViderefoertOpphoer()
+            val virk = virkningstidspunkt?.dato
+            if (virk != null && virk.isAfter(dato)) {
+                throw VirkningstidspunktKanIkkeVaereEtterOpphoer(virk, dato)
+            }
+        }
+    }
+
+    open fun oppdaterSendeBrev(
+        skalSendeBrev: Boolean,
+        erOmgjoering: Boolean = false,
+    ): Behandling =
+        throw NotImplementedError(
+            "Kan ikke oppdatere sendeBrev på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av sendeBrev.",
+        )
+
+    open fun oppdaterOpphoerFom(dato: YearMonth?): Behandling =
+        throw NotImplementedError(
+            "Kan ikke oppdatere opphoerFom på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av opphoerFom.",
         )
 
     open fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Behandling =

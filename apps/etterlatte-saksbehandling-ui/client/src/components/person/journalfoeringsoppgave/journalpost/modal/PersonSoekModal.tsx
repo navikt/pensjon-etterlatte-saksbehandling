@@ -60,7 +60,6 @@ export const PersonSoekModal = ({ velgPerson }: { velgPerson: (bruker: SoekPerso
       >
         Søk etter person
       </Button>
-
       <Modal open={isOpen} aria-labelledby="modal-heading" onClose={() => setIsOpen(false)} width="medium">
         <Modal.Header>
           <Heading size="medium" id="modal-heading" spacing>
@@ -69,7 +68,7 @@ export const PersonSoekModal = ({ velgPerson }: { velgPerson: (bruker: SoekPerso
         </Modal.Header>
 
         <Modal.Body>
-          <VStack gap="8">
+          <VStack gap="space-32">
             <TextField
               {...register('navn', {
                 required: { value: true, message: 'Navn er påkrevd i søket' },
@@ -124,7 +123,7 @@ export const PersonSoekModal = ({ velgPerson }: { velgPerson: (bruker: SoekPerso
         </Modal.Body>
 
         <Modal.Footer>
-          <HStack gap="4">
+          <HStack gap="space-16">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
               Avbryt
             </Button>

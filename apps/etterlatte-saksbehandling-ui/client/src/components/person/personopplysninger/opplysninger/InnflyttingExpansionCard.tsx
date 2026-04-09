@@ -16,7 +16,7 @@ export const InnflyttingExpansionCard = ({ innflytting, alleLand, erAvdoedesInnf
   return (
     <ExpansionCard aria-labelledby="Innflytting" size="small" defaultOpen>
       <ExpansionCard.Header>
-        <HStack gap="4" align="center">
+        <HStack gap="space-16" align="center">
           <AirplaneIcon aria-hidden fontSize="1.5rem" />
           <ExpansionCard.Title size="small">
             {erAvdoedesInnflytting ? 'Avdødes innflytting' : 'Innflytting'}

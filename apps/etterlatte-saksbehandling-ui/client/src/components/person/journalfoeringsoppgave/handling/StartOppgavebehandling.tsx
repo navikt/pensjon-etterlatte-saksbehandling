@@ -82,7 +82,6 @@ export default function StartOppgavebehandling() {
       <Heading size="medium" spacing>
         Behandle journalføringsoppgave
       </Heading>
-
       {journalpost ? (
         <>
           {antallBehandlinger > 0 ? (
@@ -98,7 +97,6 @@ export default function StartOppgavebehandling() {
       ) : (
         <Alert variant="warning">Kan ikke behandle oppgaven uten journalpost</Alert>
       )}
-
       {isSuccess(personResult) && !tilhoererBruker && (
         <Alert variant="warning">
           Journalposten og oppgaven tilhører nå to ulike brukere. Hvis du skal opprette ny behandling eller klage på
@@ -106,9 +104,7 @@ export default function StartOppgavebehandling() {
           dokumentoversikten til brukeren.
         </Alert>
       )}
-
       {isFailure(personResult) && <Alert variant="error">Kunne ikke hente person: {personResult.error.detail}</Alert>}
-
       <RadioGroup
         legend="Velg handling"
         size="small"
@@ -147,7 +143,7 @@ export default function StartOppgavebehandling() {
           </Radio>
         )}
       </RadioGroup>
-      <VStack gap="2">
+      <VStack gap="space-8">
         <HStack justify="center">
           <Button variant="primary" onClick={neste} disabled={!oppgaveHandling}>
             Neste
@@ -167,7 +163,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       Oppgavedetaljer
     </Heading>
 
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Info
         label="Type"
         tekst={

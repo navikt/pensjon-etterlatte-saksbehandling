@@ -71,8 +71,8 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
   return (
     <>
       <SkjemaWrapper onSubmit={handlesubmit}>
-        <VStack gap="10">
-          <VStack gap="2">
+        <VStack gap="space-40">
+          <VStack gap="space-8">
             <Heading size="medium" level="3">
               Årsak til revurdering
             </Heading>
@@ -87,12 +87,12 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
               <BodyShort>{revurderingsaarsak}</BodyShort>
             )}
           </VStack>
-          <VStack gap="2">
+          <VStack gap="space-8">
             <Heading size="medium" level="3">
               Begrunnelse
             </Heading>
             {redigerbar ? (
-              <VStack gap="5">
+              <VStack gap="space-20">
                 <Textarea
                   value={begrunnelse}
                   onChange={(e) => {

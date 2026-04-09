@@ -93,7 +93,6 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
       >
         Last opp fil
       </Button>
-
       <DokumentVisningModal open={isOpen} onClose={avbryt} aria-label="Last opp fil">
         <Modal.Header>
           <Heading size="medium" spacing>
@@ -101,7 +100,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
           </Heading>
         </Modal.Header>
         <Modal.Body>
-          <VStack gap="4">
+          <VStack gap="space-16">
             {!valgtFil && (
               <>
                 <Alert variant="warning" inline>
@@ -146,7 +145,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
                 </ApiErrorAlert>
               )}
 
-              <HStack gap="4" justify="end">
+              <HStack gap="space-16" justify="end">
                 <Button variant="secondary" onClick={avbryt} disabled={isPending(lastOppStatus)}>
                   Avbryt
                 </Button>

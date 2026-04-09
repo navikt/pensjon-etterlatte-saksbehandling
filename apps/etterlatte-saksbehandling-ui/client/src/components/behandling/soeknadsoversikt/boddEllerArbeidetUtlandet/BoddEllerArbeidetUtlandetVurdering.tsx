@@ -141,7 +141,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
           </RadioGroup>
         </RadioGroupWrapper>
         {svar === JaNei.JA && (
-          <VStack gap="4">
+          <VStack gap="space-16">
             <div>
               <Heading level="3" size="xsmall">
                 Vurdering av utlandsopphold
@@ -189,7 +189,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
                   setSkalSendeKravpakke(!skalSendeKravpakke)
                 }}
               >
-                <HStack gap="2">
+                <HStack gap="space-8">
                   <BodyShort>Det skal sendes kravpakke</BodyShort>
                   <HelpText strategy="fixed">
                     Hvis avdøde har hatt AP/UT og kravpakke er sendt med svar om ingen rett fra utland, skal det ikke

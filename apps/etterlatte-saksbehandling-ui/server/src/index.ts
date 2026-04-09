@@ -100,8 +100,7 @@ app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiC
 
 if (appConf.brukVedtaksroutesIBehandling) {
   app.use('/api/vedtak', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
-}
-else {
+} else {
   app.use('/api/vedtak', tokenMiddleware(ApiConfig.vedtak.scope), proxy(ApiConfig.vedtak.url))
 }
 

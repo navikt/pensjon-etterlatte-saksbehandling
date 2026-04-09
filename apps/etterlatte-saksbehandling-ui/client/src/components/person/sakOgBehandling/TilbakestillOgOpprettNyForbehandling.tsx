@@ -20,15 +20,15 @@ export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
   )
 
   return (
-    <Box marginBlock="5 0">
-      <VStack gap="4">
-        <Box background="surface-subtle" padding="5">
+    <Box marginBlock="space-20 space-0">
+      <VStack gap="space-16">
+        <Box background="neutral-soft" padding="space-20">
           <InlineMessage status="warning">
             I tilfelle forbehandling, eller etteroppgjøret er ferdigstilt med feil informasjon, kan etteroppgjøret
             tilbakestilles og ny forbehandling opprettes.
           </InlineMessage>
 
-          <Box marginBlock="5 0">
+          <Box marginBlock="space-20 space-0">
             <VelgEtteroppgjoersAar
               sakId={sakId.toString()}
               value={valgtEtteroppgjoer}
@@ -36,7 +36,7 @@ export function TilbakestillOgOpprettNyForbehandling({ sakId }: IProps) {
             />
           </Box>
 
-          <Box marginBlock="5 0">
+          <Box marginBlock="space-20 space-0">
             <Button
               loading={isPending(tilbakestillOgOpprettOppgaveStatus)}
               disabled={!valgtEtteroppgjoer}

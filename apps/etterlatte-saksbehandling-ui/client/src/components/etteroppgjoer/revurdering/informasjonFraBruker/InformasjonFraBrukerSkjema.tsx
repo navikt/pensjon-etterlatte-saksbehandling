@@ -1,19 +1,19 @@
-import {Box, Button, HStack, Radio, Textarea, VStack} from '@navikt/ds-react'
-import {FieldErrors, useForm} from 'react-hook-form'
-import {IInformasjonFraBruker} from '~shared/types/EtteroppgjoerForbehandling'
+import { Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { FieldErrors, useForm } from 'react-hook-form'
+import { IInformasjonFraBruker } from '~shared/types/EtteroppgjoerForbehandling'
 import {
   addDetaljertEtteroppgjoerForbehandling,
   useEtteroppgjoerForbehandling,
 } from '~store/reducers/EtteroppgjoerReducer'
-import {ControlledRadioGruppe} from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import {useApiCall} from '~shared/hooks/useApiCall'
-import {hentEtteroppgjoerForbehandling, lagreInformasjonFraBruker} from '~shared/api/etteroppgjoer'
-import {IDetaljertBehandling} from '~shared/types/IDetaljertBehandling'
-import {isPending} from '~shared/api/apiUtils'
-import {isFailureHandler} from '~shared/api/IsFailureHandler'
-import {useAppDispatch} from '~store/Store'
-import {JaNei} from '~shared/types/ISvar'
-import {Dispatch, SetStateAction} from 'react'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentEtteroppgjoerForbehandling, lagreInformasjonFraBruker } from '~shared/api/etteroppgjoer'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppDispatch } from '~store/Store'
+import { JaNei } from '~shared/types/ISvar'
+import { Dispatch, SetStateAction } from 'react'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -69,7 +69,7 @@ export const InformasjonFraBrukerSkjema = ({
 
   return (
     <form>
-      <VStack gap="4">
+      <VStack gap="space-16">
         <ControlledRadioGruppe
           name="harMottattNyInformasjon"
           control={control}
@@ -128,7 +128,7 @@ export const InformasjonFraBrukerSkjema = ({
           errorMessage: 'Kunne ikke hente oppdatert etteroppgjør',
         })}
 
-        <HStack gap="4">
+        <HStack gap="space-16">
           <Button
             size="small"
             loading={isPending(informasjonFraBrukerResult) || isPending(hentEtteroppgjoerResult)}

@@ -1,6 +1,19 @@
 import { erOppgaveRedigerbar, OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import React, { useEffect, useState } from 'react'
-import { Alert, BodyShort, Button, Heading, HStack, Label, Link, List, Modal, Textarea, VStack } from '@navikt/ds-react'
+import {
+  Alert,
+  BodyShort,
+  Button,
+  Heading,
+  HStack,
+  Label,
+  Link,
+  List,
+  Modal,
+  Textarea,
+  VStack,
+  Box,
+} from '@navikt/ds-react'
 import { CalendarIcon, EyeIcon, FilePlusIcon } from '@navikt/aksel-icons'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -47,7 +60,6 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
       <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
         Se oppgave
       </Button>
-
       <Modal
         open={open}
         aria-labelledby="modal-heading"
@@ -56,16 +68,16 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
         header={{ heading: 'Ny inntektsopplysning' }}
       >
         <Modal.Body>
-          <VStack gap="4">
-            <HStack gap="8">
-              <VStack gap="2">
-                <HStack gap="1" align="center">
+          <VStack gap="space-16">
+            <HStack gap="space-32">
+              <VStack gap="space-8">
+                <HStack gap="space-4" align="center">
                   <FilePlusIcon fontSize="1.5rem" /> <Label>Opprettet</Label>
                 </HStack>
                 <BodyShort>{formaterDato(oppgave.opprettet)}</BodyShort>
               </VStack>
-              <VStack gap="2">
-                <HStack gap="1" align="center">
+              <VStack gap="space-8">
+                <HStack gap="space-4" align="center">
                   <CalendarIcon fontSize="1.5rem" /> <Label>Frist</Label>
                 </HStack>
                 <BodyShort>{formaterDato(oppgave.frist)}</BodyShort>
@@ -78,40 +90,44 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
                   {mapResult(hentJournalpostResult, {
                     pending: <Spinner label="Henter journalpost" />,
                     success: (journalpost) => (
-                      <VStack gap="4">
-                        <List
-                          as="ol"
-                          title="Mottatt inntektsopplysning for neste år"
-                          description="For å behandle denne oppgaven, følg disse stegene:"
-                        >
-                          <List.Item>
-                            <Link
-                              href={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
-                              target="_blank"
-                              inlineText
-                            >
-                              Gå til dokumentoversikten (åpnes i ny fane)
-                            </Link>{' '}
-                            for å se inntektsopplysningen.
-                          </List.Item>
-                          <List.Item>
-                            Vurder om det skal opprettes en revurdering, eller om det er nok å sende informasjon til{' '}
-                            {!!oppgave.fnr ? (
-                              <PersonLink fnr={oppgave.fnr} target="_blank">
-                                bruker
-                              </PersonLink>
-                            ) : (
-                              'bruker'
-                            )}
-                            .
-                          </List.Item>
-                          <List.Item>
-                            Ved revurdering, opprett en revurdering og velg årsak “endring av inntekt”.
-                          </List.Item>
-                          <List.Item>Ferdigstill denne oppgaven.</List.Item>
-                        </List>
+                      <VStack gap="space-16">
+                        <div>
+                          <Heading as="h3" size="small">
+                            Mottatt inntektsopplysning for neste år
+                          </Heading>
+                          <BodyShort>For å behandle denne oppgaven, følg disse stegene:</BodyShort>
+                          <Box marginBlock="space-16" asChild>
+                            <List as="ol">
+                              <List.Item>
+                                <Link
+                                  href={`/api/dokumenter/${journalpost.journalpostId}/${journalpost.dokumenter[0].dokumentInfoId}`}
+                                  target="_blank"
+                                  inlineText
+                                >
+                                  Gå til dokumentoversikten (åpnes i ny fane)
+                                </Link>{' '}
+                                for å se inntektsopplysningen.
+                              </List.Item>
+                              <List.Item>
+                                Vurder om det skal opprettes en revurdering, eller om det er nok å sende informasjon til{' '}
+                                {!!oppgave.fnr ? (
+                                  <PersonLink fnr={oppgave.fnr} target="_blank">
+                                    bruker
+                                  </PersonLink>
+                                ) : (
+                                  'bruker'
+                                )}
+                                .
+                              </List.Item>
+                              <List.Item>
+                                Ved revurdering, opprett en revurdering og velg årsak “endring av inntekt”.
+                              </List.Item>
+                              <List.Item>Ferdigstill denne oppgaven.</List.Item>
+                            </List>
+                          </Box>
+                        </div>
 
-                        <VStack gap="2" maxWidth="20rem">
+                        <VStack gap="space-8" maxWidth="20rem">
                           <Heading size="small">Ferdigstill oppgave</Heading>
                           <Textarea
                             label="Beskrivelse (valgfritt)"
@@ -126,7 +142,7 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
               ) : (
                 <Alert variant="warning">Du må tildele deg oppgaven for å endre den</Alert>
               ))}
-            <HStack gap="4" justify="space-between">
+            <HStack gap="space-16" justify="space-between">
               <Button variant="tertiary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillOppgaveResult)}>
                 Avbryt
               </Button>

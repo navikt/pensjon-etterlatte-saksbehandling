@@ -34,9 +34,8 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       {!mottakere.length && <Alert variant="error">Brevet har ingen mottaker!</Alert>}
-
       {mottakere.map((mottaker) => (
         <BrevMottakerPanel
           key={mottaker.id}
@@ -49,7 +48,6 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
           fjernMottaker={fjernMottaker}
         />
       ))}
-
       {kanRedigeres && mottakere.length < 2 && (
         <HStack justify="center">
           <Button

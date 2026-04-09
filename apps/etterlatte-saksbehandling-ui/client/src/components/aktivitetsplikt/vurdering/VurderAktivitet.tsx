@@ -32,8 +32,8 @@ export function VurderAktivitet() {
   return (
     <>
       <AktivitetspliktVurderingOversikt />
-      <Box paddingInline="16" paddingBlock="16" maxWidth="120rem">
-        <VStack gap="4">
+      <Box paddingInline="space-64" paddingBlock="space-64" maxWidth="120rem">
+        <VStack gap="space-16">
           {mapResult(sistIverksattPersonopplysningerResult, {
             pending: <Spinner label="Henter opplysninger om avdød" />,
             error: (error) => (
@@ -77,10 +77,10 @@ function NesteKnapp() {
   }, [vurdering.aktivitet])
 
   return (
-    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle" marginBlock="4">
-      <VStack gap="6">
+    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle" marginBlock="space-16">
+      <VStack gap="space-24">
         {feilmeldingAktiviteter.length > 0 && <Alert variant="error">{feilmeldingAktiviteter}</Alert>}
-        <HStack gap="4" justify="center">
+        <HStack gap="space-16" justify="center">
           <Button onClick={gaaTilNeste}>Neste</Button>
         </HStack>
       </VStack>

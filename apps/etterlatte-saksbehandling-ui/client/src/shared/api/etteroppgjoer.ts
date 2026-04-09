@@ -7,6 +7,7 @@ import {
   DetaljertEtteroppgjoerForbehandling,
   FaktiskInntekt,
   IInformasjonFraBruker,
+  Aktivitetsplikt,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { JaNei } from '~shared/types/ISvar'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -39,7 +40,7 @@ export const tilbakestillEtteroppgjoerOgOpprettOppgave = async (args: {
   })
 }
 
-export const opprettEtteroppgoerForbehandling = async (args: {
+export const opprettEtteroppgjoerForbehandling = async (args: {
   sakId: number
   oppgaveId: string
   inntektsaar: string
@@ -61,10 +62,10 @@ export const hentEtteroppgjoerForbehandlinger = async (
   return apiClient.get(`/etteroppgjoer/forbehandlinger/${sakId}`)
 }
 
-export const omgjoerAvbruttEtteroppgjoerRevurdering = async (args: {
+export const gjennopprettAvbruttEtteroppgjoerRevurdering = async (args: {
   behandlingId: string
 }): Promise<ApiResponse<IDetaljertBehandling>> => {
-  return apiClient.post(`/etteroppgjoer/revurdering/${args.behandlingId}/omgjoer-avbrutt-revurdering`, {})
+  return apiClient.post(`/etteroppgjoer/revurdering/${args.behandlingId}/gjennopprett-avbrutt-revurdering`, {})
 }
 
 export const avbrytEtteroppgjoerForbehandling = async (args: {
@@ -102,6 +103,12 @@ export const lagreOmOpphoerSkyldesDoedsfall = async (args: {
   return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/opphoer-skyldes-doedsfall`, {
     opphoerSkyldesDoedsfall: args.opphoerSkyldesDoedsfall,
     opphoerSkyldesDoedsfallIEtteroppgjoersaar: args.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
+  })
+}
+
+export const lagreAktivitetsplikt = async (args: { forbehandlingId: string; aktivitetsplikt: Aktivitetsplikt }) => {
+  return apiClient.post(`/etteroppgjoer/forbehandling/${args.forbehandlingId}/lagre-aktivitetsplikt`, {
+    ...args.aktivitetsplikt,
   })
 }
 

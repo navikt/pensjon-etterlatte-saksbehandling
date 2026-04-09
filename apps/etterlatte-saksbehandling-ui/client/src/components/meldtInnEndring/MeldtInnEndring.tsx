@@ -62,13 +62,13 @@ export const MeldtInnEndring = () => {
             success: (journalpost) => (
               <>
                 <StatusBar ident={oppgave.fnr} />
-                <VStack gap="4" paddingInline="16" paddingBlock="16 4" maxWidth="50rem">
+                <VStack gap="space-16" paddingInline="space-64" paddingBlock="space-64 space-16" maxWidth="50rem">
                   <Heading size="large" level="1">
                     Melding om endring
                   </Heading>
                   {meldtInnEndringHandlingValgt === MeldtInnEndringHandlingValgt.INGEN && (
                     <Alert variant="info">
-                      <VStack gap="2">
+                      <VStack gap="space-8">
                         <BodyShort>
                           Bruker har meldt inn en endring. Velg mellom å opprette en revurdering eller å avslutte
                           oppgaven dersom den ikke skal behandles.
@@ -133,7 +133,7 @@ export const MeldtInnEndring = () => {
                             ). Velg svarmåte, deretter kan du avslutte oppgaven.
                           </BodyShort>
 
-                          <HStack gap="4">
+                          <HStack gap="space-16">
                             <Button
                               as={Link}
                               variant="secondary"

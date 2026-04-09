@@ -141,7 +141,7 @@ class EtteroppgjoerRevurderingService(
         }
     }
 
-    fun omgjoerAvbruttEtteroppgjoerRevurdering(
+    fun gjennopprettAvbruttEtteroppgjoerRevurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
@@ -152,7 +152,7 @@ class EtteroppgjoerRevurderingService(
                 if (behandling.status != BehandlingStatus.AVBRUTT) {
                     throw IkkeTillattException(
                         "BEHANDLING_IKKE_AVBRUTT",
-                        "Revurdering med id=${behandling.id} er ikke avbrutt og kan ikke omgjoeres",
+                        "Revurdering med id=${behandling.id} er ikke avbrutt og kan ikke gjennopprettes",
                     )
                 }
 
@@ -160,7 +160,7 @@ class EtteroppgjoerRevurderingService(
                 if (forbehandling.status != EtteroppgjoerForbehandlingStatus.AVBRUTT) {
                     throw IkkeTillattException(
                         "FORBEHANDLING_IKKE_AVBRUTT",
-                        "Etteroppgjør forbehandling med id=${forbehandling.id} er ikke avbrutt og kan ikke omgjoeres",
+                        "Etteroppgjør forbehandling med id=${forbehandling.id} er ikke avbrutt og kan ikke gjennopprettes",
                     )
                 }
 
@@ -178,6 +178,7 @@ class EtteroppgjoerRevurderingService(
             sakId = behandling.sak.id,
             inntektsaar = forbehandling.aar,
             opprinnelse = behandling.opprinnelse,
+            klageId = forbehandling.klageOmgjoering,
             brukerTokenInfo = brukerTokenInfo,
         )
     }

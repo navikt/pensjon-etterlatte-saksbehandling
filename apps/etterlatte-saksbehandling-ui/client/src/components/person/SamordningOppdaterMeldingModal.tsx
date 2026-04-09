@@ -50,19 +50,18 @@ export default function SamordningOppdaterMeldingModal({
   return (
     <>
       <Button variant="primary" icon={<DocPencilIcon title="Overstyr" />} onClick={() => setOpen(true)} />
-
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Body>
           <Heading size="medium" id="modal-heading" spacing>
             Overstyr samordningsmelding
           </Heading>
 
-          <VStack gap="4">
-            <HStack gap="4">
+          <VStack gap="space-16">
+            <HStack gap="space-16">
               <Label>SamordningsmeldingID:</Label>
               <BodyShort>{mld.samId}</BodyShort>
             </HStack>
-            <HStack gap="4">
+            <HStack gap="space-16">
               <Label>Tjenestepensjonsordning:</Label>
               <BodyShort>{mld.tpNr}</BodyShort>
             </HStack>
@@ -74,7 +73,7 @@ export default function SamordningOppdaterMeldingModal({
               }}
               value={erRefusjonskrav || ''}
             >
-              <HStack gap="4">
+              <HStack gap="space-16">
                 <Radio size="small" value={JaNei.JA}>
                   Ja
                 </Radio>
@@ -92,7 +91,7 @@ export default function SamordningOppdaterMeldingModal({
               onChange={(event) => setKommentar(event.target.value)}
             />
 
-            <HStack gap="4" justify="center">
+            <HStack gap="space-16" justify="center">
               <Button
                 variant="secondary"
                 onClick={() => setOpen(false)}

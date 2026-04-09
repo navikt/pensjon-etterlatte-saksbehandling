@@ -24,12 +24,11 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
   const faktiskInntektUtland = (avkortingGrunnlag: FaktiskInntektGrunnlag) => avkortingGrunnlag.utlandsinntekt
 
   return (
-    <VStack gap="4">
-      <VStack gap="1">
+    <VStack gap="space-16">
+      <VStack gap="space-4">
         <Heading size="small">Siste brukeroppgitte inntekt for innvilgede perioder</Heading>
         <BodyShort>Brukeroppgitt inntekt er det brukeren forventer å tjene før skatt</BodyShort>
       </VStack>
-
       <Table>
         <Table.Header>
           <Table.Row>
@@ -37,7 +36,7 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
             <Table.HeaderCell scope="col">Type</Table.HeaderCell>
             <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
             <Table.HeaderCell scope="col">
-              <HStack gap="1">
+              <HStack gap="space-4">
                 Innvilgede måneder
                 <HelpText>
                   Her vises antall måneder med innvilget stønad i gjeldende inntektsår. Antallet endres ikke selv om man
@@ -58,16 +57,16 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
                   <Table.ExpandableRow
                     key={i}
                     content={
-                      <HStack gap="6">
-                        <VStack gap="2">
+                      <HStack gap="space-24">
+                        <VStack gap="space-8">
                           <Label>Forventet inntekt Norge</Label>
                           <BodyShort>{NOK(forventetInntektNorge(grunnlag))}</BodyShort>
                         </VStack>
-                        <VStack gap="2">
+                        <VStack gap="space-8">
                           <Label>Forventet inntekt utland</Label>
                           <BodyShort>{NOK(forventetInntektUtland(grunnlag))}</BodyShort>
                         </VStack>
-                        <VStack gap="2">
+                        <VStack gap="space-8">
                           <Label>Kilde</Label>
                           <BodyShort>{grunnlag.kilde.ident}</BodyShort>
                           <Detail>Saksbehandler: {formaterDatoMedKlokkeslett(grunnlag.kilde.tidspunkt)}</Detail>
@@ -92,19 +91,19 @@ export const BrukeroppgittInntektForInnvilgedePerioder = ({
                   <Table.ExpandableRow
                     key={i}
                     content={
-                      <HStack gap="6">
-                        <VStack gap="2">
+                      <HStack gap="space-24">
+                        <VStack gap="space-8">
                           <Label>Faktisk inntekt Norge</Label>
                           <BodyShort>{NOK(faktiskInntektNorge(grunnlag))}</BodyShort>
                           <Detail>Lønnsinntekt: {NOK(grunnlag.loennsinntekt)}</Detail>
                           <Detail>Næringsinntekt: {NOK(grunnlag.naeringsinntekt)}</Detail>
                           <Detail>AFP: {NOK(grunnlag.afp)}</Detail>
                         </VStack>
-                        <VStack gap="2">
+                        <VStack gap="space-8">
                           <Label>Faktisk inntekt utland</Label>
                           <BodyShort>{NOK(faktiskInntektUtland(grunnlag))}</BodyShort>
                         </VStack>
-                        <VStack gap="2">
+                        <VStack gap="space-8">
                           <Label>Kilde</Label>
                           <BodyShort>{grunnlag.kilde.ident}</BodyShort>
                           <Detail>Saksbehandler: {formaterDatoMedKlokkeslett(grunnlag.kilde.tidspunkt)}</Detail>

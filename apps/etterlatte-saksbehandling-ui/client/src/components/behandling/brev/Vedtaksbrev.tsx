@@ -168,8 +168,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           <BrevutfallModal behandling={behandling} onLagre={hentBrevPaaNytt} setVis={setVisBrevutfall} />
         )}
       <HStack wrap={false}>
-        <SidebarBox paddingInline="16" paddingBlock="16 4">
-          <VStack gap="4">
+        <SidebarBox paddingInline="space-64" paddingBlock="space-64 space-16">
+          <VStack gap="space-16">
             <Heading spacing size="large" level="1">
               Vedtaksbrev
             </Heading>
@@ -225,8 +225,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         {isFailureHandler({ apiResult: hentBrevStatus, errorMessage: 'Feil ved henting av brev' })}
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
       </HStack>
-
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         <SjekklisteValideringErrorSummary />
 
         <BehandlingHandlingKnapper>
@@ -247,5 +246,5 @@ const SidebarBox = styled(Box)`
   max-height: fit-content;
   min-width: 40%;
   width: 40%;
-  border-right: 1px solid var(--a-border-subtle);
+  border-right: 1px solid var(--ax-border-neutral-subtle);
 `

@@ -5,7 +5,7 @@ import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 export const InstitusjonsoppholdBeregningsgrunnlagReadMoreOMS = () => {
   return (
     <ReadMore header="Mer om institusjonsopphold">
-      <VStack gap="2">
+      <VStack gap="space-8">
         <HjemmelLenke
           tittel="§ 17-13.Ytelser til gjenlevende ektefelle under opphold i institusjon"
           lenke="https://lovdata.no/lov/1997-02-28-19/§17-13"

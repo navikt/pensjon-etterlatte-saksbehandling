@@ -121,7 +121,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }, [])
 
   return (
-    <VStack gap="6">
+    <VStack gap="space-24">
       <FilterRad
         hentAlleOppgaver={hentMinOppgavelisteOppgaver}
         filter={filter}
@@ -129,7 +129,6 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         oppgavelisteValg={OppgavelisteValg.MIN_OPPGAVELISTE}
       />
-
       {oppgavebenkState.minOppgavelisteOppgaver.length >= 0 && !isPending(minOppgavelisteOppgaverResult) ? (
         <Oppgaver
           oppgaver={oppgavebenkState.minOppgavelisteOppgaver}

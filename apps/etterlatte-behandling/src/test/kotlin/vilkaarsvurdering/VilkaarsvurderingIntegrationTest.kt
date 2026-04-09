@@ -167,13 +167,12 @@ internal class VilkaarsvurderingIntegrationTest(
         inTransaction {
             val behandling = applicationContext.behandlingDao.hentBehandling(behandlingId)!! as Foerstegangsbehandling
             applicationContext.behandlingDao.lagreBehandling(
-                behandling.copy(
-                    virkningstidspunkt =
-                        Virkningstidspunkt.create(
-                            YearMonth.now(),
-                            "begrunnelse",
-                            saksbehandler = Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        ),
+                behandling.oppdaterVirkningstidspunkt(
+                    Virkningstidspunkt.create(
+                        YearMonth.now(),
+                        "begrunnelse",
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create("ident"),
+                    ),
                 ),
             )
         }

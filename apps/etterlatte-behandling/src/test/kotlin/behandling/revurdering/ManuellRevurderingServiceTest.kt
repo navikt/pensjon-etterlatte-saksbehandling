@@ -417,18 +417,17 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         inTransaction {
             val b = applicationContext.behandlingDao.hentBehandling(behandling.id)!! as Foerstegangsbehandling
             applicationContext.behandlingDao.lagreBehandling(
-                b.copy(
-                    boddEllerArbeidetUtlandet =
-                        BoddEllerArbeidetUtlandet(
-                            true,
-                            Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
-                            "begrunnelse",
-                            boddArbeidetIkkeEosEllerAvtaleland = true,
-                            boddArbeidetEosNordiskKonvensjon = true,
-                            boddArbeidetAvtaleland = true,
-                            vurdereAvdoedesTrygdeavtale = true,
-                            skalSendeKravpakke = true,
-                        ),
+                b.oppdaterBoddEllerArbeidetUtlandet(
+                    BoddEllerArbeidetUtlandet(
+                        true,
+                        Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
+                        "begrunnelse",
+                        boddArbeidetIkkeEosEllerAvtaleland = true,
+                        boddArbeidetEosNordiskKonvensjon = true,
+                        boddArbeidetAvtaleland = true,
+                        vurdereAvdoedesTrygdeavtale = true,
+                        skalSendeKravpakke = true,
+                    ),
                 ),
             )
         }
@@ -497,14 +496,13 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         inTransaction {
             val b = applicationContext.behandlingDao.hentBehandling(behandling.id)!! as Foerstegangsbehandling
             applicationContext.behandlingDao.lagreBehandling(
-                b.copy(
-                    boddEllerArbeidetUtlandet =
-                        BoddEllerArbeidetUtlandet(
-                            boddEllerArbeidetUtlandet = true,
-                            skalSendeKravpakke = true,
-                            begrunnelse = "enbegrunnelse",
-                            kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
-                        ),
+                b.oppdaterBoddEllerArbeidetUtlandet(
+                    BoddEllerArbeidetUtlandet(
+                        boddEllerArbeidetUtlandet = true,
+                        skalSendeKravpakke = true,
+                        begrunnelse = "enbegrunnelse",
+                        kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                    ),
                 ),
             )
         }
@@ -700,14 +698,13 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         inTransaction {
             val b = applicationContext.behandlingDao.hentBehandling(nonNullBehandling.id)!! as Foerstegangsbehandling
             applicationContext.behandlingDao.lagreBehandling(
-                b.copy(
-                    boddEllerArbeidetUtlandet =
-                        BoddEllerArbeidetUtlandet(
-                            boddEllerArbeidetUtlandet = true,
-                            skalSendeKravpakke = true,
-                            begrunnelse = "enbegrunnelse",
-                            kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
-                        ),
+                b.oppdaterBoddEllerArbeidetUtlandet(
+                    BoddEllerArbeidetUtlandet(
+                        boddEllerArbeidetUtlandet = true,
+                        skalSendeKravpakke = true,
+                        begrunnelse = "enbegrunnelse",
+                        kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                    ),
                 ),
             )
         }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.avstemming
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -63,7 +64,13 @@ class GrensesnittsavstemmingJob(
                  *     til = Tidspunkt.parse("2024-01-03T23:00:00.00Z"),
                  *   )
                  */
-                grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
+                try {
+                    grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
+                } catch (e: Exception) {
+                    log.error("Feil under kjøring i grensesnittavstemming, se sikkerlogg", e::class.simpleName)
+                    sikkerLogg.error("Feil under kjøring i grensesnittavstemming", e)
+                    throw e
+                }
             }
         }
     }

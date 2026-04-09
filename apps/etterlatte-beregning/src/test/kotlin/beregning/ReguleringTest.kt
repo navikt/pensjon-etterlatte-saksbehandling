@@ -20,6 +20,7 @@ import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository.hentGjeldendeGrunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -61,6 +62,10 @@ class ReguleringTest {
         mockk<AnvendtTrygdetidRepository>().also {
             every { it.lagreAnvendtTrygdetid(any(), any()) } returns 1
         }
+    private val featureToggleService =
+        mockk<FeatureToggleService>().also {
+            every { it.isEnabled(any(), any<Boolean>()) } returns false
+        }
     private lateinit var beregnBarnepensjonService: BeregnBarnepensjonService
 
     @BeforeEach
@@ -72,6 +77,7 @@ class ReguleringTest {
                 beregningsGrunnlagService = beregningsGrunnlagService,
                 trygdetidKlient = trygdetidKlient,
                 anvendtTrygdetidRepository = anvendtTrygdetidRepository,
+                featureToggleService = featureToggleService,
             )
     }
 

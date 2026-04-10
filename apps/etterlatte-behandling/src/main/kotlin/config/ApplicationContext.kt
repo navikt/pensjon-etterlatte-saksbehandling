@@ -197,6 +197,7 @@ internal class ApplicationContext(
     val vedtakEtteroppgjoerService get() = serviceModule.vedtakEtteroppgjoerService
     val vedtakTilbakekrevingService get() = serviceModule.vedtakTilbakekrevingService
     val vedtakKlient get() = serviceModule.vedtakKlient
+    val vedtakSamordningService get() = serviceModule.vedtakSamordningService
 
     val behandlingsHendelser get() = kafkaModule.behandlingsHendelser
 

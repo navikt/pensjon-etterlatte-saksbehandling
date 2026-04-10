@@ -429,7 +429,7 @@ class ServiceModule(
         )
     }
 
-    private val vedtakSamordningService by lazy {
+    val vedtakSamordningService by lazy {
         VedtakSamordningService(vedtaksvurderingRepositoryOperasjoner)
     }
 

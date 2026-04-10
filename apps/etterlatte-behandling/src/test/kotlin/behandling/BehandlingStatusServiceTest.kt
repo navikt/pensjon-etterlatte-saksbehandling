@@ -80,7 +80,7 @@ internal class BehandlingStatusServiceTest {
     private val behandlingInfoDao = mockk<BehandlingInfoDao>(relaxUnitFun = true)
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val generellBehandlingService = mockk<GenerellBehandlingService>()
-    private val behandlingDao = mockk<BehandlingDao>(relaxUnitFun = true)
+    private val behandlingDao = mockk<BehandlingStatusDao>(relaxUnitFun = true)
     private val aktivitetspliktService = mockk<AktivitetspliktService>(relaxUnitFun = true)
     private val saksbehandlerService: SaksbehandlerService = mockk()
     private val etteroppgjoerService: EtteroppgjoerService = mockk()

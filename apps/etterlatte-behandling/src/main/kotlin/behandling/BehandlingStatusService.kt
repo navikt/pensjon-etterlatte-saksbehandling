@@ -112,7 +112,7 @@ interface BehandlingStatusService {
 }
 
 class BehandlingStatusServiceImpl(
-    private val behandlingDao: BehandlingDao,
+    private val behandlingDao: BehandlingStatusDao,
     private val behandlingService: BehandlingService,
     private val behandlingInfoDao: BehandlingInfoDao,
     private val oppgaveService: OppgaveService,

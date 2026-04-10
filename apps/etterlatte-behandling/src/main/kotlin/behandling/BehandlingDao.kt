@@ -55,7 +55,7 @@ class BehandlingDao(
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val revurderingDao: RevurderingDao,
     private val connectionAutoclosing: ConnectionAutoclosing,
-) {
+) : BehandlingStatusDao {
     private val alleBehandlingerMedSak =
         """
         SELECT b.*, i.omgjoering_sluttbehandling, s.sakType, s.enhet, s.adressebeskyttelse, s.erSkjermet, s.fnr 
@@ -141,7 +141,7 @@ class BehandlingDao(
             }
         }
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(sakIder: List<SakId>): List<BehandlingOgSak> =
+    override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(sakIder: List<SakId>): List<BehandlingOgSak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
@@ -164,7 +164,7 @@ class BehandlingDao(
             }
         }
 
-    fun hentAapneBehandlinger(sakIder: List<SakId>): List<BehandlingOgSak> =
+    override fun hentAapneBehandlinger(sakIder: List<SakId>): List<BehandlingOgSak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
@@ -273,7 +273,7 @@ class BehandlingDao(
             }
         }
 
-    fun lagreStatus(lagretBehandling: Behandling) {
+    override fun lagreStatus(lagretBehandling: Behandling) {
         if (lagretBehandling.status == BehandlingStatus.AVBRUTT) {
             throw InternfeilException(
                 "Behandlinger skal ikke avbrytes med status direkte, siden vi da mangler " +

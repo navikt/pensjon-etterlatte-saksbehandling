@@ -44,13 +44,24 @@ class VedtaksvurderingKlientException(
 class VedtaksvurderingKlientImpl(
     config: Config,
     httpClient: HttpClient,
+    private val brukEtterlatteBehandling: Boolean = false,
 ) : VedtaksvurderingKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("vedtaksvurdering.client.id")
-    private val resourceUrl = config.getString("vedtaksvurdering.resource.url")
+    private val clientId =
+        if (brukEtterlatteBehandling) {
+            config.getString("behandling.client.id")
+        } else {
+            config.getString("vedtaksvurdering.client.id")
+        }
+    private val resourceUrl =
+        if (brukEtterlatteBehandling) {
+            config.getString("behandling.resource.url")
+        } else {
+            config.getString("vedtaksvurdering.resource.url")
+        }
 
     override suspend fun hentIverksatteVedtak(
         sakId: SakId,

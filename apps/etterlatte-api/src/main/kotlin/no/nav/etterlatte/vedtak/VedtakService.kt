@@ -32,5 +32,6 @@ fun VedtakDto.fromDto(): Vedtak {
                 )
             },
         iverksettelsesTidspunkt = iverksettelsesTidspunkt,
+        attestertTidspunkt = attestasjon?.tidspunkt,
     )
 }

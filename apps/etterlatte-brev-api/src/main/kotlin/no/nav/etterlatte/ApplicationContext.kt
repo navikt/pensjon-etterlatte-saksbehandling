@@ -5,6 +5,7 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import no.nav.etterlatte.BrevKey.BREVBAKER_SCOPE
 import no.nav.etterlatte.BrevKey.BREVBAKER_URL
+import no.nav.etterlatte.BrevKey.BRUK_VEDTAK_FRA_BEHANDLING
 import no.nav.etterlatte.BrevKey.CLAMAV_ENDPOINT_URL
 import no.nav.etterlatte.BrevKey.REGOPPSLAG_SCOPE
 import no.nav.etterlatte.BrevKey.REGOPPSLAG_URL
@@ -103,7 +104,7 @@ internal class ApplicationContext {
     val regoppslagKlient =
         RegoppslagKlient(httpClient(REGOPPSLAG_SCOPE), env.requireEnvValue(REGOPPSLAG_URL))
     val saksbehandlerKlient = SaksbehandlerKlient(config, httpClient())
-    val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
+    val vedtakKlient = VedtaksvurderingKlient(config, httpClient(), brukEtterlatteBehandling = env[BRUK_VEDTAK_FRA_BEHANDLING] == "ja")
     val beregningKlient = BeregningKlient(config, httpClient())
     val pdltjenesterKlient = PdlTjenesterKlient(config, httpClient())
     val behandlingKlient = BehandlingKlient(config, httpClient())
@@ -284,6 +285,7 @@ internal class ApplicationContext {
 enum class BrevKey : EnvEnum {
     BREVBAKER_SCOPE,
     BREVBAKER_URL,
+    BRUK_VEDTAK_FRA_BEHANDLING,
     CLAMAV_ENDPOINT_URL,
     REGOPPSLAG_SCOPE,
     REGOPPSLAG_URL,

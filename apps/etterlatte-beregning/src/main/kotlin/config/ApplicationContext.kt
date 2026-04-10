@@ -54,7 +54,12 @@ class ApplicationContext {
         )
 
     val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlientImpl(config, httpClient())
-    val vedtaksvurderingKlient = VedtaksvurderingKlientImpl(config, httpClient())
+    val vedtaksvurderingKlient =
+        VedtaksvurderingKlientImpl(
+            config = config,
+            httpClient = httpClient(),
+            brukEtterlatteBehandling = env.props["BRUK_VEDTAK_FRA_BEHANDLING"] == "ja",
+        )
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())

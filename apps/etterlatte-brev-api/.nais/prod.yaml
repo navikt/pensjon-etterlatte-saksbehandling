@@ -113,6 +113,8 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: BRUK_VEDTAK_FRA_BEHANDLING
+      value: "nei"
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL

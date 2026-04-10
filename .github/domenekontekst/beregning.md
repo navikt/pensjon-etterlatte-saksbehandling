@@ -27,7 +27,7 @@ Etteroppgjør er en to-trinns prosess der beregning deltar i begge:
 
 **Trinn 1 – Forbehandling (preview)**
 - `EtteroppgjoerService` (i `etterlatte-beregning`) kaller `beregnAvkortingForbehandling` med faktisk inntekt
-- Beregner avkorting basert på faktisk inntekt (fra a-ordningen og pensjonsgivende inntekt fra Skatteetaten) – ingen av kildene er fasit, begge er referansepunkter
+- Beregner avkorting basert på faktisk inntekt (fra a-ordningen og pensjonsgivende inntekt fra Skatteetaten) – kildene er den dataen vi har på nåværende tidspunkt.
 - Resultat: `BeregnetEtteroppgjoerResultat` med differanse, grense og `EtteroppgjoerResultatType`
 - Forbehandlingen er et *preview* av det endelige vedtaket – ikke et eget vedtak
 

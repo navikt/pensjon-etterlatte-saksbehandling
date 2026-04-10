@@ -22,10 +22,16 @@ import org.slf4j.LoggerFactory
 class VedtaksvurderingKlient(
     config: Config,
     private val httpClient: HttpClient,
+    private val brukEtterlatteBehandling: Boolean = false,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
 
-    private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/vedtak/fnr"
+    private val vedtaksvurderingUrl =
+        if (brukEtterlatteBehandling) {
+            "${config.getString("behandling.url")}/vedtak/fnr"
+        } else {
+            "${config.getString("vedtak.url")}/vedtak/fnr"
+        }
 
     suspend fun hentVedtak(request: Folkeregisteridentifikator): List<VedtakDto> {
         sikkerlogger().info("Henter vedtak med fnr=$request")
@@ -41,6 +47,7 @@ class VedtaksvurderingKlient(
             logger.error("Det oppstod feil i kall til vedtak API", e)
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> throw IkkeTillattException("VEDTAK-TILGANG", "Vedtak: Ikke tilgang")
+
                 HttpStatusCode.BadRequest -> throw UgyldigForespoerselException(
                     "VEDTAK-FORESPOERSEL",
                     "Vedtak: Ugyldig forespørsel",

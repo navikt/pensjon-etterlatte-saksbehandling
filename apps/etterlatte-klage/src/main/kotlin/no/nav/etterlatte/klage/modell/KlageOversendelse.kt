@@ -55,7 +55,16 @@ fun SakType.tilYtelse(): Ytelse =
         SakType.OMSTILLINGSSTOENAD -> Ytelse.PEN_EYO
     }
 
-fun KabalHjemmel.tilHjemmel(): Hjemmel = enumValueOf(this.name)
+fun KabalHjemmel.tilHjemmel(): Hjemmel =
+    when (this) {
+        KabalHjemmel.FTRL_22_13_1,
+        KabalHjemmel.FTRL_22_13_3,
+        KabalHjemmel.FTRL_22_13_4_C,
+        KabalHjemmel.FTRL_22_13_7,
+        -> Hjemmel.FTRL_22_13
+
+        else -> enumValueOf(this.name)
+    }
 
 /**
  * Har det subsettet av datamodellen for ovesendelse til Kabal som vi kommer til å bruke

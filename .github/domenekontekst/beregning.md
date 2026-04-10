@@ -18,6 +18,23 @@ Beregner pensjonsytelser for BP og OMS basert på trygdetid, grunnbeløp og even
 | `Avkorting` | Reduksjon av OMS-ytelse pga. inntekt |
 | `OverstyrBeregning` | Manuell overstyring av beregnet beløp |
 | `Grunnbeløp` | Folketrygdens grunnbeløp (G), brukes som beregningsgrunnlag |
+| `EtteroppgjoerGrense` | Terskel for om differansen mellom utbetalt og faktisk skyldig stønad er stor nok til å gi et handlingsutfall (etterbetaling/tilbakekreving/ingen endring). Påvirker *utfallet*, ikke om vi trigger revurdering. |
+| `BeregnetEtteroppgjoerResultat` | Beregnet differanse mellom hva bruker faktisk fikk utbetalt og hva de skulle hatt basert på faktisk inntekt. Produseres i forbehandlingen, videreføres til revurdering. |
+
+## Etteroppgjør – beregningsperspektiv
+
+Etteroppgjør er en to-trinns prosess der beregning deltar i begge:
+
+**Trinn 1 – Forbehandling (preview)**
+- `EtteroppgjoerService` (i `etterlatte-beregning`) kaller `beregnAvkortingForbehandling` med faktisk inntekt
+- Beregner avkorting basert på faktisk inntekt (fra a-ordningen og pensjonsgivende inntekt fra Skatteetaten) – ingen av kildene er fasit, begge er referansepunkter
+- Resultat: `BeregnetEtteroppgjoerResultat` med differanse, grense og `EtteroppgjoerResultatType`
+- Forbehandlingen er et *preview* av det endelige vedtaket – ikke et eget vedtak
+
+**Trinn 2 – Revurdering**
+- Kopierer forbehandlingen (`kopiertFra`-referanse)
+- Saksbehandler kan korrigere faktisk inntekt etter brukers tilbakemelding
+- Normal behandlingsflyt (fatte → attestere → iverksette)
 
 ## Nøkkelklasser
 

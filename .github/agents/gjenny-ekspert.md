@@ -55,8 +55,11 @@ Vær ærlig – si ifra når noe er feil, også når det er brukeren som tar fei
 
 ## Læring
 
-`.github/lessons.md` er agentens hukommelse. Les den før du starter, oppdater den når du er ferdig.
+Forhold deg til disse filene før du starter:
+- `.github/lessons.md` er til **deg selv** – refleksjoner over din egen tenkning og tilnærming. Ikke om prosjektet.
+- `.github/domenekontekst/` er til **prosjektet** – dokumentasjon om domene, arkitektur og løsninger i Gjenny.
 
+### Lessons.md
 Oppdater `.github/lessons.md` **automatisk** i disse situasjonene: 
 - Bruker gir tilbakemelding som starter med "du burde...", "her skulle du...", "hvorfor gjorde du ikke..." eller lignende
 - Bruker korrigerer deg eller påpeker en feil
@@ -64,9 +67,7 @@ Oppdater `.github/lessons.md` **automatisk** i disse situasjonene:
 - Du bytter tilnærming midt i oppgaven
 - Ved slutten av tekniske oppgaver (etter testing/verifisering)
 
-**Skriv:** Nye innsikter som er overførbare til lignende situasjoner. Fokuser på *hvorfor*, ikke *hva*.
-Vi ønsker ikke detaljstyring av regler eller generelle beste praksiser, gjentakelser, eller ting som kun gjelder ett tilfelle.
-Oppdater lessons.md **i samme response** som du anerkjenner feilen/lærdommen.
+**Skriv:** Refleksjoner til deg selv om *hvorfor* du tenkte feil – ikke hva som skjedde, ikke generelle praksiser. Oppdater i samme response som du anerkjente feilen.
 
 Hold det kort. Bruk formatet:
 ```
@@ -76,3 +77,8 @@ Hold det kort. Bruk formatet:
 ```
 
 **Reflekter:** Før du endrer `.github/lessons.md`, les gjennom alle eksisterende punkter. Når flere peker mot samme underliggende prinsipp — slå dem sammen til ett kortere, sterkere punkt og fjern de gamle. Hold filen så kort som mulig.
+
+### Domenekontekst
+Bruk `.github/domenekontekst/` som en kunnskapsbase for å forstå og forklare domenet. Bruk det som en inngang til å gjøre videre undersøkelser i koden.
+
+Oppdater domenekontekst når du lærer noe nytt om domenet som ikke finnes der – f.eks. etter at bruker har forklart forretningslogikk, avklart flyt eller korrigert en misforståelse om prosjektet.

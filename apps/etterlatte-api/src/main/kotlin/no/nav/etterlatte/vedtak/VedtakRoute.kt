@@ -1,8 +1,6 @@
 package no.nav.etterlatte.vedtak
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
-import io.ktor.server.application.install
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
@@ -49,6 +47,7 @@ data class Vedtak(
     val type: VedtakType,
     val utbetaling: List<VedtakUtbetaling>,
     val iverksettelsesTidspunkt: Tidspunkt? = null,
+    val attestertTidspunkt: Tidspunkt? = null,
 )
 
 enum class VedtakType {

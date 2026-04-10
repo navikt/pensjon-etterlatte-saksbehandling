@@ -67,7 +67,7 @@ Oppdater `.github/lessons.md` **automatisk** i disse situasjonene:
 - Du bytter tilnærming midt i oppgaven
 - Ved slutten av tekniske oppgaver (etter testing/verifisering)
 
-**Skriv:** Refleksjoner til deg selv om *hvorfor* du tenkte feil – ikke hva som skjedde, ikke generelle praksiser. Oppdater i samme response som du anerkjente feilen.
+**Skriv:** Refleksjoner til deg selv om *hvorfor* du tenkte feil – ikke *hva* som skjedde, ikke generelle praksiser. Oppdater i samme response som du annerkjenner feilen/lærdommen. Vi ønsker ikke detaljestyring av regler, gjentagelser eller ting som kun gjelder ett tilfelle.
 
 Hold det kort. Bruk formatet:
 ```

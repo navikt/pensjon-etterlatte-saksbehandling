@@ -17,6 +17,14 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Month
 
+/**
+ * Oppretter etteroppgjør når skatteoppgjør ikke har kommet inn via normal hendelsesflyt i [LesSkatteoppgjoerHendelserJobService].
+ *
+ * Alle skal ha mottatt skatteoppgjør innen 1. Desember. For de sakene som ikke har mottatt skatteoppgjør skal vi alikevell opprette
+ * etteroppgjør og oppgave for opprettelse av forbehandling, slik at de kommer med i det ordinære etteroppgjørsarbeidet.
+ *
+ * TL;DR Jobbe skal kun kjøres etter 1. Desember for å fange opp manglende etteroppgjør
+ */
 class OppdaterSkatteoppgjoerIkkeMottattJobService(
     private val featureToggleService: FeatureToggleService,
     private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
@@ -28,7 +36,6 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)
 
-        // Alle skal ha mottatt skatteoppgjør i Desember
         if (LocalDate.now().month != Month.DECEMBER) {
             logger.info("Periodisk jobb for å oppdatere saker med skatteoppgjør ikke mottatt kan kun kjøres i desember")
             return

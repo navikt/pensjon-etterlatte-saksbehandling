@@ -42,6 +42,8 @@ spec:
       value: etterlatte.dodsmelding
     - name: KAFKA_RESET_POLICY
       value: earliest
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: VEDTAK_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
     - name: ETTERLATTE_VEDTAK_URL

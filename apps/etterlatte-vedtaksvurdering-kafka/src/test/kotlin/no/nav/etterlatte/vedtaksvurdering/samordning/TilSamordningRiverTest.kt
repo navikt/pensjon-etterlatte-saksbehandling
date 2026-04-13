@@ -4,8 +4,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.SamordneResponse
-import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.vedtaksvurdering.SamordneResponse
+import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException

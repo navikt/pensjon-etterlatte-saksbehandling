@@ -1,4 +1,4 @@
-package no.nav.etterlatte.regulering
+package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -7,7 +7,11 @@ import no.nav.etterlatte.EnvKey
 import no.nav.etterlatte.EnvKey.BEHANDLING_AZURE_SCOPE
 import no.nav.etterlatte.EnvKey.UTBETALING_AZURE_SCOPE
 import no.nav.etterlatte.EnvKey.VEDTAK_AZURE_SCOPE
-import no.nav.etterlatte.VedtakServiceImpl
+import no.nav.etterlatte.config.VedtakKafkaKey.BRUK_VEDTAK_FRA_BEHANDLING
+import no.nav.etterlatte.config.VedtakKafkaKey.ETTERLATTE_BEHANDLING_URL
+import no.nav.etterlatte.config.VedtakKafkaKey.ETTERLATTE_BREV_API_URL
+import no.nav.etterlatte.config.VedtakKafkaKey.ETTERLATTE_UTBETALING_URL
+import no.nav.etterlatte.config.VedtakKafkaKey.ETTERLATTE_VEDTAK_URL
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BrevKlient
@@ -20,11 +24,7 @@ import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import no.nav.etterlatte.regulering.VedtakKafkaKey.BRUK_VEDTAK_FRA_BEHANDLING
-import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_BEHANDLING_URL
-import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_BREV_API_URL
-import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_UTBETALING_URL
-import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_VEDTAK_URL
+import no.nav.etterlatte.vedtaksvurdering.VedtakServiceImpl
 
 class AppBuilder(
     props: Miljoevariabler,

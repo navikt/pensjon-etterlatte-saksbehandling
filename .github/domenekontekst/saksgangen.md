@@ -89,19 +89,21 @@ Hendelsen konsumeres av `etterlatte-vedtaksvurdering-kafka` (og evt. `etterlatte
 
 ## Flyt 4 – Etteroppgjør (kun OMS)
 
-Gjennomføres i to steg etter at skatteoppgjøret for et ytelsesår er ferdig:
+Gjennomføres etter at skatteoppgjøret for et ytelsesår er ferdig. Primærtrigger er skatteoppgjørshendelser fra Skatteetaten. Saker som ikke har mottatt skatteoppgjør innen desember fanges opp av en jobb som setter status `MANGLER_SKATTEOPPGJOER` og presser dem videre med et eget flagg.
 
-**Steg 1 – Forbehandling / varselbrev**
-- Data hentes fra Skatteetaten og a-inntekt
-- Saksbehandler fastsetter riktig inntekt for det aktuelle året
-- Hvis inntekten stemte godt nok skal informasjonsbrev sendes, ingen revurdering med mindre bruker kommer med ny informasjon
-- Hvis inntekten ikke stemte blir det et varselbrev, og det skal gjøres en revurdering
+**Steg 1 – Forbehandling**
+- Data hentes fra Skatteetaten (pensjonsgivende inntekt) og a-ordningen – begge er referansepunkter, ingen er fasit
+- Saksbehandler fastsetter faktisk inntekt og beregner differansen mot utbetalt stønad
+- Informasjonsbrev (ingen avvik) eller varselbrev (avvik) sendes til bruker
+- Ferdigstilling av forbehandlingen setter automatisk status `VENTER_PAA_SVAR`
 
-**Steg 2 – Revurdering med vedtak** (hvis avvik)
-- Revurdering med årsak `ETTEROPPGJOER` opprettes
-- Vedtaket slår fast om bruker skal etterbetales eller tilbakekreves
-- Normal vedtaksflyt (fatte → attestere → iverksette)
+**Steg 2 – Revurdering med vedtak**
+- Revurderingen kopierer forbehandlingen (`kopiertFra`); forbehandlingen er et preview av det endelige vedtaket
+- Saksbehandler kan korrigere faktisk inntekt basert på brukers tilbakemelding
+- Vedtaket slår fast om bruker skal etterbetales, tilbakekreves, eller ingen endring
+- Normal vedtaksflyt: fatte → attestere → iverksette
 
+> `EtteroppgjoerGrense` avgjør utfallet (etterbetaling/tilbakekreving/ingen endring), ikke om vi trigger revurdering.
 > Beregning av restanse i avkortingen er reelt kompleks – se ikke etter en forenkling som ikke er der.
 
 ---

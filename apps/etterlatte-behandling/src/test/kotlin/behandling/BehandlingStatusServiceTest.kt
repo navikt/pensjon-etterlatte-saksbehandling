@@ -265,7 +265,7 @@ internal class BehandlingStatusServiceTest {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfallDto(behandlingId)
         coEvery {
-            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+            etteroppgjoerService.haandterEtteroppgjoerVedFoerstegangsbehandling(
                 behandling = behandling,
                 inntektsaar = any(),
             )
@@ -294,7 +294,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
-            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+            etteroppgjoerService.haandterEtteroppgjoerVedFoerstegangsbehandling(
                 behandling = behandling,
                 inntektsaar = any(),
             )
@@ -314,7 +314,7 @@ internal class BehandlingStatusServiceTest {
             )
 
         coEvery {
-            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+            etteroppgjoerService.haandterEtteroppgjoerVedFoerstegangsbehandling(
                 behandling = behandling,
                 inntektsaar = any(),
             )
@@ -326,10 +326,10 @@ internal class BehandlingStatusServiceTest {
 
         // F.eks inneværende år er 2026, så etteroppgjør skal opprettes for 2024 og 2025
         coVerify(exactly = 1) {
-            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, Year.now().value - 2)
+            etteroppgjoerService.haandterEtteroppgjoerVedFoerstegangsbehandling(behandling, Year.now().value - 2)
         }
         coVerify(exactly = 1) {
-            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, Year.now().value - 1)
+            etteroppgjoerService.haandterEtteroppgjoerVedFoerstegangsbehandling(behandling, Year.now().value - 1)
         }
     }
 
@@ -351,7 +351,7 @@ internal class BehandlingStatusServiceTest {
 
         // Ingen etteroppgjør skal opprettes når virkningstidspunkt er inneværende år
         coVerify(exactly = 0) {
-            etteroppgjoerService.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(any(), any())
+            etteroppgjoerService.haandterEtteroppgjoerVedFoerstegangsbehandling(any(), any())
         }
     }
 

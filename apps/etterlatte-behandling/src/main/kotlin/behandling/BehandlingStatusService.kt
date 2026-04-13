@@ -387,7 +387,7 @@ class BehandlingStatusServiceImpl(
         aktuelleAar.forEach { inntektsaar ->
             try {
                 etteroppgjoerService
-                    .opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(behandling, inntektsaar)
+                    .haandterEtteroppgjoerVedFoerstegangsbehandling(behandling, inntektsaar)
             } catch (e: Exception) {
                 logger.error("Kunne ikke opprette etteroppgjør ved iverksettelse av sak for år $inntektsaar", e)
             }

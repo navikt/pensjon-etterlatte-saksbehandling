@@ -6,6 +6,12 @@
 
 **Behandling** er alltid knyttet til en sak og representerer én endring av ytelsen. All historikk, vedtak og utbetalingsendringer skjer via behandlinger. Behandlingstyper: `FØRSTEGANGSBEHANDLING` og `REVURDERING` (inkl. opphør).
 
+**Grunnlag** er samlingen av opplysninger knyttet til en sak – persondata fra PDL, søknad og andre kilder. Lagres i `etterlatte-behandling` og versjoneres per sak; behandlingen tracker hvilken grunnlagsversjon den jobber mot. Saksbehandler kan oppdatere grunnlaget ved å hente på nytt fra PDL eller endre persongalleriet (`PERSONGALLERI_V1`). Grunnlag var tidligere en egen app; det er grunnen til at andre apper bruker `GrunnlagKlient` (ikke `BehandlingKlient`) for å hente grunnlag – begge peker nå mot `etterlatte-behandling`.
+
+**Vilkårsvurdering** er en vurdering av om de lovpålagte vilkårene for å motta ytelsen er oppfylt. Den er alltid knyttet til én konkret behandling og kopieres fra forrige behandling ved revurdering. Vilkårene er ytelsestype-spesifikke (ulike sett for BP og OMS). Vilkårsvurdering var tidligere en egen tjeneste, men er slått sammen med `etterlatte-behandling`.
+
+Vilkårene er hjemlet i **folketrygdloven kapittel 17** (OMS) og **kapittel 18** (BP). Detaljerte lovreferanser per vilkår finnes i `OmstillingstoenadVilkaar.kt` og `BarnepensjonVilkaar2024.kt`. Virkningstidspunkt reguleres av §§ 22-12 og 22-13.
+
 Tilbakekrevings- og klagebehandlinger er egne konstrukter, men knyttet til samme sak.
 
 ---
@@ -92,14 +98,18 @@ Hendelsen konsumeres av `etterlatte-vedtaksvurdering-kafka` (og evt. `etterlatte
 Gjennomføres etter at skatteoppgjøret for et ytelsesår er ferdig. Primærtrigger er skatteoppgjørshendelser fra Skatteetaten. Saker som ikke har mottatt skatteoppgjør innen desember fanges opp av en jobb som setter status `MANGLER_SKATTEOPPGJOER` og presser dem videre med et eget flagg.
 
 **Steg 1 – Forbehandling**
-- Data hentes fra Skatteetaten (pensjonsgivende inntekt) og A-ordningen – begge er referansepunkter, ingen er fasit
-- Saksbehandler fastsetter faktisk inntekt og beregner differansen mot utbetalt stønad
+- Data hentes fra Skatteetaten (pensjonsgivende inntekt) og a-ordningen – begge er referansepunkter, ingen er fasit
+- Saksbehandler fastsetter faktisk inntekt via `EtteroppgjoerForbehandlingService.lagreOgBeregnFaktiskInntekt`, som kaller `beregningKlient.beregnAvkortingFaktiskInntekt` (se `beregning.md` for beregningsperspektivet)
+- `BeregnetEtteroppgjoerResultat` returneres og lagres på forbehandlingen
 - Informasjonsbrev (ingen avvik) eller varselbrev (avvik) sendes til bruker
-- Ferdigstilling av forbehandlingen setter automatisk status `VENTER_PAA_SVAR`
+- Ferdigstilling setter automatisk status `VENTER_PAA_SVAR` på etteroppgjøret
 
 **Steg 2 – Revurdering med vedtak**
-- Revurderingen kopierer forbehandlingen (`kopiertFra`); forbehandlingen er et preview av det endelige vedtaket
-- Saksbehandler kan korrigere faktisk inntekt basert på brukers tilbakemelding
+- `EtteroppgjoerRevurderingService.opprettEtteroppgjoerRevurdering` oppretter revurderingen:
+  - En kopi av den ferdigstilte forbehandlingen opprettes (`kopierOgLagreNyForbehandling`) – `relatertBehandlingId` på revurderingen peker på denne kopien
+  - Faktisk inntekt kopieres fra den ferdigstilte forbehandlingen til den nye (`kopierFaktiskInntekt`) → trigger beregning automatisk
+- Saksbehandler kan korrigere faktisk inntekt basert på brukers tilbakemelding – korrigeringen skjer via `lagreOgBeregnFaktiskInntekt` på den tilknyttede forbehandlingen (ikke direkte på revurderingen)
+- Forbehandlingen er et preview av det endelige vedtaket – ikke et eget vedtak
 - Vedtaket slår fast om bruker skal etterbetales, tilbakekreves, eller ingen endring
 - Normal vedtaksflyt: fatte → attestere → iverksette
 

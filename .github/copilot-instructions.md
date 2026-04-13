@@ -170,6 +170,15 @@ Følgende regler skal **aldri** brytes, uansett kontekst:
 3. **Iverksatte eller attesterte behandlinger skal aldri endres** – opprett ny revurdering i stedet
 4. **`etterlatte-behandling` er autoriteten for tilgangskontroll** – andre apper kaller behandling for å sjekke tilgang
 5. **Grunnlagsdata skal hentes fra `etterlatte-behandling`** via `GrunnlagKlient`, ikke direkte fra PDL eller andre kilder
+6. **Vedtak skal ikke fattes med kjente feil** – hvis systemet oppdager en inkonsistens som vil gi feil vedtak, skal saksbehandler informeres og blokkeres fra å gå videre til feilen er løst. Dette er et lovkrav, ikke en designpreferanse.
+
+## Designprinsipper
+
+Disse prinsippene styrer løsningsvalg og bør veie tungt ved sparring:
+
+- **Saksbehandler i førersetet for vedtaksdata.** Systemet skal ikke automatisk transformere eller avlede sentrale data som inngår i vedtak (beregningsgrunnlag, inntekt, perioder). Når en feil eller inkonsistens oppdages, skal saksbehandler eksplisitt oppgi korrekte verdier — systemet tilbyr et grensesnitt for å løse det, ikke en autokorrigering. Automatiserte beregninger er akseptabelt *kun* der logikken er eksplisitt dokumentert gjennom regel-biblioteket.
+
+- **Detekter og håndter feil på det tidligste punktet der du har komplett kunnskap.** En kjent feil bør ikke passere videre i flyten. Finn det steget der (a) all nødvendig informasjon er tilgjengelig og (b) saksbehandler faktisk kan handle — og plasser sperren der.
 
 ## Teknisk gjeld å kjenne til
 

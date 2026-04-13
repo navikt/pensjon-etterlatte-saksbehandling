@@ -15,11 +15,15 @@ Målet er å produsere `.github/domenekontekst/<domene>.md` – en kompakt fil s
 
 > **Dokumenter *hvorfor*, aldri *hva*.** AI kan lese kode, finne klasser og følge enum-verdier. Den kan ikke gjette forretningsregler, lovkrav eller designbeslutninger.
 
-**Tabeller > prosa.** En 5-rads tabell erstatter 20 linjer med tekst.
+**Tabeller for strukturert data** – begreper, statusoverganger og terskler egner seg godt i tabellformat.
 
-**Ikke dokumenter det AI finner selv:** ASCII-diagrammer av statusmaskiner, prosa som gjentar tabellinnhold, tekniske detaljer som er åpenbare fra kode og tester.
+**Prosa for kontekst** – forklaringer av flyt, sammenhenger og begrunnelser trenger fullstendige setninger for å være forståelige. Ikke komprimer alt til tabeller.
 
-**Dokumenter det overraskende:** kontraintuitive koblinger, lovfestede regler, farlige edge cases, ting som biter deg.
+**Ikke dokumenter det AI finner selv:** filstier, enum-verdier, metodesignaturer, tekniske detaljer som er åpenbare fra kode og tester.
+
+**Dokumenter det overraskende:** kontraintuitive koblinger, lovfestede regler, farlige edge cases, designbeslutninger med begrunnelse.
+
+**Ikke dupliser:** Sjekk eksisterende domenekontekst-filer før du skriver. Hvis informasjonen allerede er dekket i en annen fil, referer til den i stedet for å gjenta.
 
 ---
 
@@ -43,10 +47,10 @@ Målet er å produsere `.github/domenekontekst/<domene>.md` – en kompakt fil s
 
 ## Mal
 
-Faste seksjoner brukes i alle filer. Valgfrie seksjoner tas med når de tilfører verdi.
+### Fast struktur (alltid med, i denne rekkefølgen)
 
 ```markdown
-# {Domene/App}
+# {App/Domene}
 Én setning om hva dette er og løser.
 
 ## Ansvarsområder
@@ -56,7 +60,19 @@ Faste seksjoner brukes i alle filer. Valgfrie seksjoner tas med når de tilføre
 | Begrep | Forklaring |
 
 Kun begreper som ikke er selvforklarende fra koden.
+```
 
+### Domenespesifikke seksjoner (etter Sentrale begreper)
+
+Bruk frie `##`-overskrifter for det som gir mest verdi for akkurat dette domenet. Eksempler fra eksisterende filer:
+- «Etteroppgjør – beregningsperspektiv» (beregning)
+- «Gammel vs. ny brevflyt» (brev-api)
+- «Regelendringer – prosess og versjonering» (beregning)
+- «To flyter for vedtaksopprettelse» (vedtaksvurdering)
+
+### Fast struktur (alltid med, til slutt)
+
+```markdown
 ## Nøkkelklasser
 - `KlasseNavn` – hva den gjør (én linje per klasse)
 
@@ -68,34 +84,11 @@ Kaller: ... Lytter på: ... Publiserer til: ...
 Én kompakt linje eller kort avsnitt.
 ```
 
-### Valgfrie seksjoner – bruk når relevant
+### Formateringsregler
 
-```markdown
-## Flyt
-Kompakt beskrivelse av hovedflyten med → for overganger.
-
-## Statusoverganger
-| Fra | Til | Trigger |
-
-## Forretningsregler og beslutninger
-| Regel/Beslutning | Begrunnelse | Lovfestet? |
-
-Ting AI ikke kan utlede: terskler, policy-valg, designbeslutninger.
-
-## Spesialtilfeller og farer
-⚠️ Edge cases som biter. Korte, presise.
-
-## Teknisk kontekst
-Kun det overraskende: historisk bagasje, deprecated patterns, tech debt.
-```
-
-### Domenespesifikke seksjoner
-
-Bruk frie overskrifter for det som gir mest verdi for akkurat dette domenet. Eksempler fra eksisterende filer:
-- «Gammel vs. ny brevflyt» (brev-api)
-- «Regelendringer – prosess og versjonering» (beregning)
-- «To flyter for vedtaksopprettelse» (vedtaksvurdering)
-- «Forbehandling vs. revurderingsforbehandling» (etteroppgjør)
+- Bruk `##` for alle seksjoner – ikke `###` eller `---`-separatorer
+- Hold filen kompakt: 40-80 linjer er typisk, over 100 bør begrunnes
+- Prosa og tabeller side om side – bruk det som passer best for innholdet
 
 Legg til referansen i `.github/copilot-instructions.md` under domenekontekst-listen.
 

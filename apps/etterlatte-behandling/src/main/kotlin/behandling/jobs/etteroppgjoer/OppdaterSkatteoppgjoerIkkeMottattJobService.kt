@@ -48,8 +48,8 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
 
         logger.info("Starter jobb for å oppdatere saker med skatteoppgjør ikke mottatt")
         runBlocking {
-            oppdaterSkatteoppgjoerIkkeMottatt()
             finnOgOpprettManglendeEtteroppgjoer()
+            oppdaterSkatteoppgjoerIkkeMottatt()
         }
     }
 

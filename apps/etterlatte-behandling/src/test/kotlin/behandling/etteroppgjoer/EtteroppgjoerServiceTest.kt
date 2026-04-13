@@ -159,7 +159,7 @@ class EtteroppgjoerServiceTest {
             ctx.returnerEtteroppgjoer(
                 Etteroppgjoer(
                     sakId = sakId,
-                    inntektsaar = ETTEROPPGJOER_AAR,
+                    inntektsaar = 2024,
                     status = status,
                 ),
             )

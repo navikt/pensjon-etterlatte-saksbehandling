@@ -7,7 +7,6 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.User
-import no.nav.etterlatte.behandling.etteroppgjoer.ETTEROPPGJOER_AAR
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
@@ -180,7 +179,7 @@ class EtteroppgjoerDaoTest(
                 sak = sak,
                 kilde = OppgaveKilde.HENDELSE,
                 type = OppgaveType.ETTEROPPGJOER,
-                merknad = "Etteroppgjøret for $ETTEROPPGJOER_AAR er klart til behandling",
+                merknad = "Etteroppgjøret for 2024 er klart til behandling",
             )
         with(dataSource.connection) {
             val statement =

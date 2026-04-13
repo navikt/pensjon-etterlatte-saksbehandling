@@ -233,7 +233,6 @@ class EtteroppgjoerServiceTest {
                 sak = behandling.sak,
                 innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                 sisteIverksatteBehandling = behandling.id,
-                mottattSkatteoppgjoer = true,
             )
 
         val etteropgjoerResultat = listOf(EtteroppgjoerResultatType.ETTERBETALING, EtteroppgjoerResultatType.TILBAKEKREVING)
@@ -267,7 +266,6 @@ class EtteroppgjoerServiceTest {
                 sak = behandling.sak,
                 innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                 sisteIverksatteBehandling = behandling.id,
-                mottattSkatteoppgjoer = true,
             )
 
         val etteroppgjoerResultat =
@@ -306,7 +304,6 @@ class EtteroppgjoerServiceTest {
                     sak = behandling.sak,
                     innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                     sisteIverksatteBehandling = behandling.id,
-                    mottattSkatteoppgjoer = true,
                 ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
 
         assertThrows<InternfeilException> {
@@ -329,7 +326,6 @@ class EtteroppgjoerServiceTest {
                 sak = behandling.sak,
                 innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                 sisteIverksatteBehandling = behandling.id,
-                mottattSkatteoppgjoer = true,
             )
 
         assertThrows<IkkeTillattException> {

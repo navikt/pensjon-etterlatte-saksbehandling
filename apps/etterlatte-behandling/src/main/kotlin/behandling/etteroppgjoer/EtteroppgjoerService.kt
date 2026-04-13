@@ -203,7 +203,7 @@ class EtteroppgjoerService(
                     sakId,
                     inntektsaar,
                     sisteIverksatteBehandling,
-                    eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
                     harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
                     eksisterendeEtteroppgjoer?.sisteFerdigstilteForbehandling,
                 )
@@ -244,8 +244,16 @@ class EtteroppgjoerService(
             return
         }
 
-        aarUtenEtteroppgjoer.forEach {
-            opprettNyttEtteroppgjoer(sakId, it)
+        aarUtenEtteroppgjoer.forEach { inntektsaar ->
+            opprettNyttEtteroppgjoer(sakId, inntektsaar)
+                .also {
+                    dao
+                        .oppdaterEtteroppgjoerStatus(
+                            sakId,
+                            inntektsaar,
+                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                        )
+                }
         }
     }
 

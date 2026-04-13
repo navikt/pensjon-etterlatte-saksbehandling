@@ -54,7 +54,6 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
     }
 
     private fun finnOgOpprettManglendeEtteroppgjoer() {
-        // TODO: denne burde vell ta alle eller kun siste?
         val etteroppgjoersAar = LocalDate.now().year - 1
         val relevanteSaker =
             runBlocking { vedtakKlient.hentSakerMedUtbetalingForInntektsaar(etteroppgjoersAar, HardkodaSystembruker.etteroppgjoer) }
@@ -67,19 +66,17 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
                     }
                 }.getOrNull()
 
-            if (etteroppgjoer != null) {
-                return
-            }
-
-            logger.info(
-                "Sak med id $sakId har utbetaling for inntektsår $etteroppgjoersAar men mangler etteroppgjør. Oppretter Etteroppgjoer for $etteroppgjoersAar.",
-            )
-            try {
-                inTransaction {
-                    etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, etteroppgjoersAar)
+            if (etteroppgjoer == null) {
+                logger.info(
+                    "Sak med id $sakId har utbetaling for inntektsår $etteroppgjoersAar men mangler etteroppgjør. Oppretter Etteroppgjoer for $etteroppgjoersAar.",
+                )
+                try {
+                    inTransaction {
+                        etteroppgjoerService.opprettNyttEtteroppgjoer(sakId, etteroppgjoersAar)
+                    }
+                } catch (e: Exception) {
+                    logger.error("Kunne ikke opprette etteroppgjør for sak med id: $sakId for inntektsaar $etteroppgjoersAar", e)
                 }
-            } catch (e: Exception) {
-                logger.error("Kunne ikke opprette etteroppgjør for sak med id: $sakId for inntektsaar $etteroppgjoersAar", e)
             }
         }
     }

@@ -347,13 +347,13 @@ class EtteroppgjoerServiceTest {
         with(resultat) {
             this.sakId shouldBe ctx.sakId
             this.inntektsaar shouldBe 2024
-            this.status shouldBe EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+            this.status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
         }
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
     }
 
     @Test
-    fun `opprettEtteroppgjoer oppdaterer etteroppgjør dersom behandling ikke er påbegynt`() {
+    fun `opprettEtteroppgjoer oppdaterer etteroppgjør men ikke status dersom behandling ikke er påbegynt`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
             Etteroppgjoer(

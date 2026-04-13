@@ -1,13 +1,13 @@
 # Etteroppgjør (OMS)
 
-Årlig etterskuddsvis kontroll av om bruker fikk riktig omstillingsstønad i det foregående inntektsåret. Sammenligner faktisk inntekt fra skatteoppgjøret med avkortingsgrunnlaget som ble brukt i utbetalingene. Gjelder kun OMS – ikke BP.
+Årlig etterskuddsvis kontroll av om bruker fikk riktig omstillingsstønad i det foregående inntektsåret. Gjelder kun OMS – ikke BP.
 
 ## Ansvarsområder
 
 - Motta skatteoppgjørhendelser fra Sigrun og opprette etteroppgjør per sak
 - Forbehandling: hente PGI og A-inntekt, beregne avvik, sende forhåndsvarsel
 - Håndtere svarfrist, brukers tilbakemelding og omgjøring
-- Opprette revurdering ved tilbakekreving eller etterbetaling
+- Opprette revurdering når det er nødvendig
 
 ## Sentrale begreper
 
@@ -16,57 +16,69 @@
 | `inntektsaar` | Året vi gjør opp (f.eks. 2024). Etteroppgjøret behandles påfølgende år. |
 | `Etteroppgjoer` | Overordnet statussporingsobjekt – ett per sak per inntektsår. |
 | `EtteroppgjoerForbehandling` | Arbeidsobjektet der saksbehandler behandler etteroppgjøret og der etteroppgjørsdata lagres. |
-| Forhåndsvarsel | Brev til bruker med beregnet avvik og antatt inntekt. Svarfrist 1 måned. |
-| PGI | Pensjonsgivende inntekt fra Sigrun – det eneste beregningsgrunnlaget. |
-| A-inntekt | Detaljert inntektsdata fra A-ordningen – vises til saksbehandler som referanse, men brukes IKKE i beregningen. |
+| Forhåndsvarsel | Brev til bruker med beregnet avvik og faktisk inntekt. Svarfrist 1 måned. |
+| PGI | Pensjonsgivende inntekt fra Sigrun – eneste juridisk korrekte grunnlag for beregningen. |
+| A-inntekt | Detaljert inntektsdata fra A-ordningen – vises til saksbehandler som referanse, brukes IKKE i beregningen. |
 
-## Overordnet flyt
+## Trigger
 
-Flyten har to hovedsteg: først en forbehandling der avviket kartlegges og bruker varsles, deretter en revurdering dersom det er avvik som krever vedtak.
+Skatteoppgjørhendelser fra Skatteetaten (via Sigrun) mottas gjennom polling (feature-togglet). Saker som ikke har mottatt skatteoppgjør innen desember fanges opp av en jobb som setter status `MANGLER_SKATTEOPPGJOER` og oppretter oppgave med flagg `mottattSkatteoppgjoer = false`.
 
-1. Skatteoppgjørhendelse mottas fra Sigrun (polling, feature-togglet) → `Etteroppgjoer` opprettes
-2. Oppgave opprettes for saksbehandler
-3. Saksbehandler oppretter forbehandling manuelt – ikke automatisk fordi det ville blokkere pågående behandlinger i saken
-4. PGI og A-inntekt hentes, beregning kjøres mot hva som ble utbetalt
+## Flyt
+
+**Steg 1 – Forbehandling (preview)**
+1. Skatteoppgjørhendelse mottas → `Etteroppgjoer` opprettes, oppgave opprettes for saksbehandler
+2. Saksbehandler oppretter forbehandling manuelt (ikke automatisk – ville blokkere pågående behandlinger)
+3. PGI og A-inntekt hentes
+4. Beregning kjøres i `etterlatte-beregning` via `beregnAvkortingForbehandling` (se [beregning.md](beregning.md))
 5. Forhåndsvarsel sendes til bruker, svarfrist 1 måned
-6. Svarfrist utløper eller bruker svarer med ny informasjon
-7. Resultat: **TILBAKEKREVING/ETTERBETALING** → revurdering → normal vedtaksflyt → `FERDIGSTILT`, eller **INGEN_ENDRING** → `FERDIGSTILT` direkte
+6. Ferdigstilling av forbehandlingen setter automatisk status `VENTER_PAA_SVAR`
+
+**Steg 2 – Revurdering (hvis nødvendig)**
+7. Revurderingen kopierer den ferdigstilte forbehandlingen (`kopiertFra != null`)
+8. Saksbehandler kan korrigere faktisk inntekt basert på brukers tilbakemelding
+9. Normal vedtaksflyt: fatte → attestere → iverksette → `FERDIGSTILT`
+
+Hvis `EtteroppgjoerResultatType` er `INGEN_ENDRING`, settes status `FERDIGSTILT` direkte uten revurdering.
 
 ## Inntektskilder – PGI vs. A-inntekt
 
-Selv om begge kildene omhandler brukers inntekt, er de svært ulike og **ikke direkte sammenlignbare**.
+**PGI (Sigrun)** – aggregerte årsbeløp per inntektstype etter skatteloven. Eneste juridisk korrekte grunnlag.
 
-**PGI (Sigrun)** gir aggregerte årsbeløp per inntektstype – kun pensjonsgivende inntekt etter skatteloven. Eneste juridisk korrekte grunnlag for beregningen.
+**A-ordningen** – detaljerte enkeltutbetalinger med dato, arbeidsgiver og metadata. Bredere inntektsbegrep, inkl. ikke-pensjonsgivende poster. Kun visning for saksbehandler.
 
-**A-ordningen** gir detaljerte enkeltutbetalinger med dato, arbeidsgiver og metadata. Dekker et bredere inntektsbegrep inkl. ikke-pensjonsgivende poster. Kun visning for saksbehandler.
+## Forbehandling vs. revurdering
 
-## Forbehandling og revurdering
+Forbehandlingen er et *preview* av det endelige vedtaket – den viser saksbehandler og bruker hva utfallet vil bli, men er ikke et vedtak i seg selv.
 
-Når en revurdering opprettes, kopieres den ferdigstilte forbehandlingen (`kopiertFra != null`). Kopien er datakontainer for revurderingen, har ingen oppgave, og ferdigstilles automatisk ved iverksettelse. `sisteFerdigstilteForbehandling` er ankerpunkt for å opprette revurderingen.
+Når revurdering opprettes, kopieres den ferdigstilte forbehandlingen (`kopiertFra != null`). Kopien er datakontainer for revurderingen, har ingen oppgave, og ferdigstilles automatisk ved iverksettelse.
 
-Hvis saksbehandler registrerer at brukers svar gir **endring til ugunst** (`endringErTilUgunstForBruker = JA`): revurderingen avsluttes og en ny forbehandling opprettes fra bunnen – bruker må få nytt forhåndsvarsel med oppdaterte tall (lovkrav).
+**Endring til ugunst**: Hvis saksbehandler registrerer at brukers svar gir endring til ugunst (`endringErTilUgunstForBruker = JA`) → revurderingen avsluttes og ny forbehandling opprettes fra bunnen. Bruker må få nytt forhåndsvarsel med oppdaterte tall (lovkrav).
 
-Avbrutt forbehandling tilbakestiller etteroppgjøret til `MOTTATT_SKATTEOPPGJOER`. Kan ikke gjenopptas – saksbehandler må opprette ny.
+**Avbrutt forbehandling**: Tilbakestiller etteroppgjøret til `MOTTATT_SKATTEOPPGJOER`. Kan ikke gjenopptas – saksbehandler må opprette ny.
 
 ## Spesialtilfeller
 
 **Dødsfall i inntektsåret** – ingen etteroppgjør, ferdigstilles uten brev.
 
-**Dødsfall etter inntektsåret** – etteroppgjøret gjennomføres normalt, men tilbakekreving overstyres til `INGEN_ENDRING` (uhensiktsmessig å kreve fra dødsbo, NAV-policy). Etterbetaling utbetales til dødsboet.
+**Dødsfall etter inntektsåret** – etteroppgjøret gjennomføres normalt, men tilbakekreving overstyres til `INGEN_ENDRING` (NAV-policy: uhensiktsmessig å kreve fra dødsbo). Etterbetaling utbetales til dødsboet.
 
-**Manglende skatteoppgjør** – saker uten PGI innen 1. desember → `MANGLER_SKATTEOPPGJOER`, manuell oppgave. Forbehandlingen markeres med `mottattSkatteoppgjoer = false`.
-
-**Svarfrist** – produksjon bruker 1 måned (`EN_MND`), som er 3 uker lovfestet + postgang. `ETT_MINUTT`/`FEM_MINUTT` er kun for test.
+**Svarfrist** – produksjon: 1 måned (`EN_MND`) = 3 uker lovfestet + postgang. Test: `ETT_MINUTT`/`FEM_MINUTT`.
 
 ## Nøkkelklasser
 
-- `EtteroppgjoerService` – oppretter og oppdaterer etteroppgjør, koordinerer statusoverganger
-- `EtteroppgjoerForbehandlingService` – oppretter, beregner og ferdigstiller forbehandlinger
-- `EtteroppgjoerRevurderingService` – oppretter revurdering basert på ferdigstilt forbehandling
-- `PensjonsgivendeInntektService` – henter PGI fra Sigrun
-- `InntektskomponentService` – henter A-inntekt fra A-ordningen
+- `EtteroppgjoerService` (`etterlatte-behandling`) – oppretter og oppdaterer etteroppgjør, koordinerer statusoverganger
+- `EtteroppgjoerForbehandlingService` (`etterlatte-behandling`) – oppretter, beregner og ferdigstiller forbehandlinger
+- `EtteroppgjoerRevurderingService` (`etterlatte-behandling`) – oppretter revurdering basert på ferdigstilt forbehandling
+- `PensjonsgivendeInntektService` (`etterlatte-behandling`) – henter PGI fra Sigrun
+- `InntektskomponentService` (`etterlatte-behandling`) – henter A-inntekt fra A-ordningen
+- `EtteroppgjoerService` (`etterlatte-beregning`) – beregner avvik mellom faktisk og utbetalt (se [beregning.md](beregning.md))
 
 ## Avhengigheter
 
-Kaller: `etterlatte-behandling` (sak, tilgang, grunnlag), `etterlatte-beregning` (avkortingsdata, beregningsresultat, terskler – se [beregning.md](beregning.md)), Sigrun (PGI), Inntektskomponenten (A-inntekt)
-Lytter på: Skatteoppgjørhendelser via polling mot Sigrun (`LesSkatteoppgjoerHendelserJobService`, feature-togglet, cursor-basert)
+**Kaller:**
+- `etterlatte-beregning` – `beregnAvkortingForbehandling`, se [beregning.md](beregning.md)
+- Sigrun – PGI via polling (`LesSkatteoppgjoerHendelserJobService`, cursor-basert)
+- Inntektskomponenten – A-inntekt
+
+**Lytter på:** Skatteoppgjørhendelser via polling (feature-togglet)

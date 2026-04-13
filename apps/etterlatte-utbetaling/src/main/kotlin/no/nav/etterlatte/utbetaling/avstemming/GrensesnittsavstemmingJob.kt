@@ -67,6 +67,13 @@ class GrensesnittsavstemmingJob(
             if (leaderElection.isLeader()) {
                 try {
                     grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
+                } catch (e: UnsupportedOperationException) {
+                    log.error("Feil av type ${e::class.simpleName} under kjøring i grensesnittavstemming", e)
+
+                    // Tester ulike variasjoner av logging til team logs, vil noen av disse vises?
+                    sikkerLogg.info("Test av sikkerlogg med info: Feil under kjøring i grensesnittavstemming", e)
+                    sikkerLogg.error("Test av sikkerlogg med error og oe:  Feil under kjoering i grensesnittavstemming", e)
+                    throw e
                 } catch (e: Exception) {
                     log.error("Feil av type ${e::class.simpleName} under kjøring i grensesnittavstemming, se sikkerlogg")
                     sikkerLogg.error("Feil under kjøring i grensesnittavstemming", e)

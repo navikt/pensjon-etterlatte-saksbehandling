@@ -2,6 +2,8 @@
 
 Årlig etterskuddsvis kontroll av om bruker fikk riktig omstillingsstønad i det foregående inntektsåret. Gjelder kun OMS – ikke BP.
 
+> **Overordnet flyt:** Se [saksgangen.md](saksgangen.md) "Flyt 4 – Etteroppgjør" for prosessen fra skatteoppgjør til ferdigstilt vedtak.
+
 ## Ansvarsområder
 
 - Motta skatteoppgjørhendelser fra Sigrun og opprette etteroppgjør per sak
@@ -24,28 +26,15 @@
 
 Skatteoppgjørhendelser fra Skatteetaten (via Sigrun) mottas gjennom polling (feature-togglet). Saker som ikke har mottatt skatteoppgjør innen desember fanges opp av en jobb som setter status `MANGLER_SKATTEOPPGJOER` og oppretter oppgave med flagg `mottattSkatteoppgjoer = false`.
 
-## Flyt
-
-**Steg 1 – Forbehandling (preview)**
-1. Skatteoppgjørhendelse mottas → `Etteroppgjoer` opprettes, oppgave opprettes for saksbehandler
-2. Saksbehandler oppretter forbehandling manuelt (ikke automatisk – ville blokkere pågående behandlinger)
-3. PGI og A-inntekt hentes
-4. Beregning kjøres i `etterlatte-beregning` via `beregnAvkortingForbehandling` (se [beregning.md](beregning.md))
-5. Forhåndsvarsel sendes til bruker, svarfrist 1 måned
-6. Ferdigstilling av forbehandlingen setter automatisk status `VENTER_PAA_SVAR`
-
-**Steg 2 – Revurdering (hvis nødvendig)**
-7. Revurderingen kopierer den ferdigstilte forbehandlingen (`kopiertFra != null`)
-8. Saksbehandler kan korrigere faktisk inntekt basert på brukers tilbakemelding
-9. Normal vedtaksflyt: fatte → attestere → iverksette → `FERDIGSTILT`
-
-Hvis `EtteroppgjoerResultatType` er `INGEN_ENDRING`, settes status `FERDIGSTILT` direkte uten revurdering.
-
 ## Inntektskilder – PGI vs. A-inntekt
 
-**PGI (Sigrun)** – aggregerte årsbeløp per inntektstype etter skatteloven. Eneste juridisk korrekte grunnlag.
+Data hentes fra to kilder, men begge er referansepunkter – **ingen er fasit**. Saksbehandler fastsetter faktisk inntekt.
+
+**PGI (Sigrun)** – aggregerte årsbeløp per inntektstype etter skatteloven. Eneste juridisk korrekte grunnlag for beregningen.
 
 **A-ordningen** – detaljerte enkeltutbetalinger med dato, arbeidsgiver og metadata. Bredere inntektsbegrep, inkl. ikke-pensjonsgivende poster. Kun visning for saksbehandler.
+
+Disse kildene er ikke direkte sammenlignbare – PGI er pensjonsgivende inntekt per skatteloven, A-inntekt dekker et videre spekter av utbetalinger.
 
 ## Forbehandling vs. revurdering
 

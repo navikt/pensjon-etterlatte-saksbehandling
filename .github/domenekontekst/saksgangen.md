@@ -89,16 +89,24 @@ Hendelsen konsumeres av `etterlatte-vedtaksvurdering-kafka` (og evt. `etterlatte
 
 ## Flyt 4 – Etteroppgjør (kun OMS)
 
-Årlig etterskuddsvis kontroll av faktisk inntekt vs. utbetalt stønad. Se [etteroppgjoer.md](etteroppgjoer.md) for detaljert beskrivelse.
+Gjennomføres etter at skatteoppgjøret for et ytelsesår er ferdig. Primærtrigger er skatteoppgjørshendelser fra Skatteetaten. Saker som ikke har mottatt skatteoppgjør innen desember fanges opp av en jobb som setter status `MANGLER_SKATTEOPPGJOER` og presser dem videre med et eget flagg.
 
-**Trigger:** Skatteoppgjørhendelser fra Skatteetaten (via Sigrun polling). Saker uten skatteoppgjør innen desember får status `MANGLER_SKATTEOPPGJOER`.
+**Steg 1 – Forbehandling**
+- Data hentes fra Skatteetaten (pensjonsgivende inntekt) og A-ordningen – begge er referansepunkter, ingen er fasit
+- Saksbehandler fastsetter faktisk inntekt og beregner differansen mot utbetalt stønad
+- Informasjonsbrev (ingen avvik) eller varselbrev (avvik) sendes til bruker
+- Ferdigstilling av forbehandlingen setter automatisk status `VENTER_PAA_SVAR`
 
-**To-trinns prosess:**
+**Steg 2 – Revurdering med vedtak**
+- Revurderingen kopierer forbehandlingen (`kopiertFra`); forbehandlingen er et preview av det endelige vedtaket
+- Saksbehandler kan korrigere faktisk inntekt basert på brukers tilbakemelding
+- Vedtaket slår fast om bruker skal etterbetales, tilbakekreves, eller ingen endring
+- Normal vedtaksflyt: fatte → attestere → iverksette
 
-1. **Forbehandling** – hent PGI og A-inntekt, beregn avvik, send forhåndsvarsel til bruker
-2. **Revurdering** (hvis nødvendig) – normal vedtaksflyt ved tilbakekreving eller etterbetaling
+> `EtteroppgjoerGrense` avgjør utfallet (etterbetaling/tilbakekreving/ingen endring), ikke om vi trigger revurdering.
+> Beregning av restanse i avkortingen er reelt kompleks – se ikke etter en forenkling som ikke er der.
 
-Ved `INGEN_ENDRING` settes status `FERDIGSTILT` direkte uten revurdering.
+Se [etteroppgjoer.md](etteroppgjoer.md) for detaljert flyt, spesialtilfeller og nøkkelklasser.
 
 ---
 

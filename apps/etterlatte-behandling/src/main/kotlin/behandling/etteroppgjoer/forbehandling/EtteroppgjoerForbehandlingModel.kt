@@ -49,7 +49,6 @@ data class EtteroppgjoerForbehandling(
             innvilgetPeriode: Periode,
             sisteIverksatteBehandling: UUID,
             harVedtakAvTypeOpphoer: Boolean? = null,
-            mottattSkatteoppgjoer: Boolean,
         ) = EtteroppgjoerForbehandling(
             id = UUID.randomUUID(),
             sak = sak,
@@ -67,7 +66,6 @@ data class EtteroppgjoerForbehandling(
             harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
             opphoerSkyldesDoedsfall = null,
             opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
-            mottattSkatteoppgjoer = mottattSkatteoppgjoer,
             aktivitetspliktOverholdt = null,
             aktivitetspliktBegrunnelse = null,
         )

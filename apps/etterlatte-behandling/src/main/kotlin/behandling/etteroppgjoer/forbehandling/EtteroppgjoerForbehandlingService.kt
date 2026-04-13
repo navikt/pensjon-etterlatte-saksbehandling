@@ -299,10 +299,12 @@ class EtteroppgjoerForbehandlingService(
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar, oppgaveId, etteroppgjoer, brukerTokenInfo)
 
         val nyForbehandling = opprettForbehandling(sak, inntektsaar, etteroppgjoer, brukerTokenInfo)
-        dao.lagreForbehandling(nyForbehandling)
-        etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
-
         hentOgLagreAInntektOgPgi(sak, nyForbehandling)
+
+        val harPgi = dao.hentPensjonsgivendeInntekt(nyForbehandling.id) != null
+        dao.lagreForbehandling(nyForbehandling.copy(mottattSkatteoppgjoer = harPgi))
+
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
         hendelserService.registrerOgSendHendelse(
             etteroppgjoerForbehandling = nyForbehandling,
@@ -599,7 +601,6 @@ class EtteroppgjoerForbehandlingService(
                 innvilgetPeriode = innvilgetPeriode,
                 sisteIverksatteBehandling = sisteVedtakMedAvkorting.behandlingId,
                 harVedtakAvTypeOpphoer = vedtakMedGjeldendeOpphoer != null,
-                mottattSkatteoppgjoer = etteroppgjoer.status != EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
             )
     }
 
@@ -782,6 +783,7 @@ class EtteroppgjoerForbehandlingService(
             val pensjonsgivendeInntekter =
                 runBlocking { pensjonsgivendeInntektService.hentSummerteInntekter(sak.ident, forbehandling.aar) }
             dao.lagrePensjonsgivendeInntekt(forbehandling.id, pensjonsgivendeInntekter)
+            dao.lagreForbehandling(forbehandling.copy(mottattSkatteoppgjoer = true))
         } catch (e: Exception) {
             logger.warn(
                 "Kunne ikke hente og lagre PGI fra Skatt for forbehandlingen i sakId=${sak.id}",

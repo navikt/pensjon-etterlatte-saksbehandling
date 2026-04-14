@@ -3,9 +3,9 @@ package no.nav.etterlatte.vedtaksvurdering.samordning
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
+import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.slf4j.LoggerFactory
 
 internal class SamordningMottattRiver(

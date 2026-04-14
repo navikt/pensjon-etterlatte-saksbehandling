@@ -10,7 +10,6 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.BrevKlient
@@ -34,6 +33,7 @@ import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.vedtaksvurdering.RapidInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
+import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

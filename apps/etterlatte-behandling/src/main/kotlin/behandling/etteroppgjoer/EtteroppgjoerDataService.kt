@@ -6,7 +6,6 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -17,7 +16,6 @@ import no.nav.etterlatte.logger
 
 class EtteroppgjoerDataService(
     val behandlingService: BehandlingService,
-    val featureToggleService: FeatureToggleService,
     val vedtakKlient: VedtakKlient,
     val beregningKlient: BeregningKlient,
 ) {

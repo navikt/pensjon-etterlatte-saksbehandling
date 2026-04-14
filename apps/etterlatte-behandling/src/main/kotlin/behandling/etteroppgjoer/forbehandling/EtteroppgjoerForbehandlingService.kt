@@ -375,7 +375,7 @@ class EtteroppgjoerForbehandlingService(
                     sakId = sakId,
                     inntektsAar = inntektsaar,
                 )
-            } catch (e: Error) {
+            } catch (e: Exception) {
                 logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
             }
         }

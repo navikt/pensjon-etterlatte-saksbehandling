@@ -122,7 +122,7 @@ class LesSkatteoppgjoerHendelserJobService(
                 etteroppgjoerService.opprettNyttEtteroppgjoer(sak.id, inntektsaar)
             }
 
-        etteroppgjoerService.haandterSkatteoppgjoerMottatt(hendelse, etteroppgjoer, sak)
+        etteroppgjoerService.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
 
         return true
     }

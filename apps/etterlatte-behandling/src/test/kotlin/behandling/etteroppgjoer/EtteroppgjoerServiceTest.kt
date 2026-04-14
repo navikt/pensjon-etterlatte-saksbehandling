@@ -39,7 +39,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -160,7 +159,7 @@ class EtteroppgjoerServiceTest {
             ctx.returnerEtteroppgjoer(
                 Etteroppgjoer(
                     sakId = sakId,
-                    inntektsaar = ETTEROPPGJOER_AAR,
+                    inntektsaar = 2024,
                     status = status,
                 ),
             )
@@ -184,7 +183,7 @@ class EtteroppgjoerServiceTest {
 
         val etteroppgjoer =
             runBlocking {
-                ctx.service.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+                ctx.service.haandterEtteroppgjoerVedFoerstegangsbehandling(
                     behandling = foerstegangsBehandling,
                     inntektsaar = 2023,
                 )
@@ -209,7 +208,7 @@ class EtteroppgjoerServiceTest {
 
         val etteroppgjoer =
             runBlocking {
-                cx.service.opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+                cx.service.haandterEtteroppgjoerVedFoerstegangsbehandling(
                     behandling = foerstegangsBehandling,
                     inntektsaar = 2023,
                 )
@@ -348,13 +347,13 @@ class EtteroppgjoerServiceTest {
         with(resultat) {
             this.sakId shouldBe ctx.sakId
             this.inntektsaar shouldBe 2024
-            this.status shouldBe EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+            this.status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
         }
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
     }
 
     @Test
-    fun `opprettEtteroppgjoer oppdaterer etteroppgjør dersom behandling ikke er påbegynt`() {
+    fun `opprettEtteroppgjoer oppdaterer etteroppgjør men ikke status dersom behandling ikke er påbegynt`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
             Etteroppgjoer(
@@ -414,7 +413,7 @@ class EtteroppgjoerServiceTest {
             )
 
         runBlocking {
-            ctx.service.finnOgOpprettManglendeEtteroppgjoer(sakId, brukerTokenInfo)
+            ctx.service.kunDevFinnOgOpprettManglendeEtteroppgjoer(sakId, brukerTokenInfo)
         }
 
         // Skal opprette etteroppgjør for 2025

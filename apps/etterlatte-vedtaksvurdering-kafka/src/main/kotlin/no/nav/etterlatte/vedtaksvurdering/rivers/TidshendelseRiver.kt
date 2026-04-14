@@ -3,7 +3,6 @@ package no.nav.etterlatte.vedtaksvurdering.rivers
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -25,6 +24,7 @@ import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.vedtaksvurdering.RapidUtsender
+import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Month
@@ -72,22 +72,27 @@ class TidshendelseRiver(
         ) {
             val behandlet =
                 when (step) {
-                    IDENTIFISERT_SAK.name ->
+                    IDENTIFISERT_SAK.name -> {
                         handleIdentifisertSak(
                             packet = packet,
                             type = type,
                             sakId = sakId,
                             dryrun = dryrun,
                         )
+                    }
 
-                    VILKAARSVURDERT.name ->
+                    VILKAARSVURDERT.name -> {
                         handleVilkarsvurdertOgSkalFatteVedtak(
                             packet = packet,
                             sakId = sakId,
                             dryrun = dryrun,
                             context = context,
                         )
-                    else -> false
+                    }
+
+                    else -> {
+                        false
+                    }
                 }
 
             if (behandlet) {

@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.migrering.MigreringKjoringVariant
-import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import java.time.LocalDate
 import java.util.UUID
 

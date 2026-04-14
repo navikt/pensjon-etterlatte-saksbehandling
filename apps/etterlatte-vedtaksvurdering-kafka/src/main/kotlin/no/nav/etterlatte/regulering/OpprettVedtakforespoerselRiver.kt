@@ -3,7 +3,6 @@ package no.nav.etterlatte.regulering
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.GenererOgFerdigstillVedtaksbrev
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -28,6 +27,7 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.vedtaksvurdering.RapidUtsender
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
+import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.slf4j.LoggerFactory
 import tidspunkt.erEtter
 import tidspunkt.erFoerEllerPaa

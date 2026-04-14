@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -22,6 +21,7 @@ import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
+import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month

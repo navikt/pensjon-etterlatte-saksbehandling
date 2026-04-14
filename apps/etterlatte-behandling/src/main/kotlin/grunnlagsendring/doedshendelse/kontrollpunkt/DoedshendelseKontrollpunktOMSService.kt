@@ -39,20 +39,26 @@ internal class DoedshendelseKontrollpunktOMSService(
         if (hendelse.sakTypeForEpsEllerBarn() == SakType.BARNEPENSJON) {
             return null
         }
-        return runBlocking {
-            val kryssendeYtelser =
+        val sakerIPesys =
+            runBlocking {
                 pesysKlient
                     .hentSaker(hendelse.beroertFnr, bruker)
-                    .filter {
-                        it.sakStatus in listOf(TIL_BEHANDLING, LOPENDE)
-                    }.filter { it.sakType in listOf(SakSammendragResponse.UFORE_SAKTYPE, SakSammendragResponse.ALDER_SAKTYPE) }
-                    .filter { it.fomDato == null || it.fomDato.isBefore(hendelse.avdoedDoedsdato) }
-                    .any { it.tomDate == null || it.tomDate.isAfter(hendelse.avdoedDoedsdato) }
-
-            when (kryssendeYtelser) {
-                true -> DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps
-                false -> null
             }
+        val kryssendeYtelser =
+            sakerIPesys
+                .filter {
+                    it.sakStatus in listOf(TIL_BEHANDLING, LOPENDE)
+                }.filter { it.sakType in listOf(SakSammendragResponse.UFORE_SAKTYPE, SakSammendragResponse.ALDER_SAKTYPE) }
+                .filter { it.fomDato != null && it.fomDato.isBefore(hendelse.avdoedDoedsdato) }
+                .filter { it.tomDate == null || it.tomDate.isAfter(hendelse.avdoedDoedsdato) }
+
+        val harKryssendeAlderspensjon = kryssendeYtelser.any { it.sakType == SakSammendragResponse.ALDER_SAKTYPE }
+        val harKryssendeUfoeretrygd = kryssendeYtelser.any { it.sakType == SakSammendragResponse.UFORE_SAKTYPE }
+
+        return when {
+            harKryssendeAlderspensjon -> DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps
+            harKryssendeUfoeretrygd -> DoedshendelseKontrollpunkt.KryssendeUfoeretrygdIPesysEps
+            else -> null
         }
     }
 

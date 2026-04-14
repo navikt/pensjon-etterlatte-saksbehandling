@@ -230,6 +230,7 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling-kafka
+        - application: etterlatte-vedtaksvurdering-kafka
         - application: etterlatte-hendelser-joark
         - application: etterlatte-hendelser-ufoere
         - application: etterlatte-statistikk

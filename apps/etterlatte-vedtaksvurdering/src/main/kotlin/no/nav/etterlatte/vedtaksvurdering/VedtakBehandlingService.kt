@@ -833,32 +833,13 @@ class VedtakBehandlingService(
         val vedtak = hentVedtakNonNull(behandlingId)
 
         return when {
-            vedtak.sakType == SakType.BARNEPENSJON && vedtak.status == VedtakStatus.ATTESTERT -> {
-                val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-                VedtakOgRapid(
-                    vedtak.toDto(),
-                    RapidInfo(
-                        vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
-                        vedtak = vedtak.toDto(),
-                        tekniskTid = vedtak.attestasjon!!.tidspunkt,
-                        behandlingId = behandlingId,
-                        extraParams =
-                            mapOf(
-                                SKAL_SENDE_BREV to behandling.sendeBrev,
-                                KILDE_KEY to behandling.vedtaksloesning,
-                                REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
-                            ),
-                    ),
-                )
-            }
-
             vedtak.sakType == SakType.OMSTILLINGSSTOENAD && vedtak.status == VedtakStatus.SAMORDNET -> {
                 VedtakOgRapid(
                     vedtak.toDto(),
                     RapidInfo(
                         vedtakhendelse = VedtakKafkaHendelseHendelseType.SAMORDNET,
                         vedtak = vedtak.toDto(),
-                        tekniskTid = Tidspunkt.now(),
+                        tekniskTid = vedtak.attestasjon!!.tidspunkt,
                         behandlingId = behandlingId,
                     ),
                 )

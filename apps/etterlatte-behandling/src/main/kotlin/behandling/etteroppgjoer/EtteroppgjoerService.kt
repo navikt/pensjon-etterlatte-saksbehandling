@@ -56,6 +56,11 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): Etteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) ?: throw FantIkkeEtteroppgjoer(sakId, inntektsaar)
 
+    fun finnEtteroppgjoerForInntektsaar(
+        sakId: SakId,
+        inntektsaar: Int,
+    ): Etteroppgjoer? = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+
     fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
 
     fun hentEtteroppgjoerSakerIBulk(

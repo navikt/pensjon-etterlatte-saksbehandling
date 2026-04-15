@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
@@ -35,17 +36,19 @@ class Server(
                         context.outboxJob,
                     ),
             ) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    vedtaksvurderingRapidService,
-                    behandlingKlient,
-                )
-                automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
-                samordningSystembrukerVedtakRoute(vedtakSamordningService)
-                etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService, behandlingKlient)
-                tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
-                klagevedtakRoute(vedtakKlageService, behandlingKlient)
+                if (!isDev()) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        vedtakBehandlingService,
+                        vedtaksvurderingRapidService,
+                        behandlingKlient,
+                    )
+                    automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
+                    samordningSystembrukerVedtakRoute(vedtakSamordningService)
+                    etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService, behandlingKlient)
+                    tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
+                    klagevedtakRoute(vedtakKlageService, behandlingKlient)
+                }
                 vedtakCrudRoute(repository, behandlingKlient)
             }
         }

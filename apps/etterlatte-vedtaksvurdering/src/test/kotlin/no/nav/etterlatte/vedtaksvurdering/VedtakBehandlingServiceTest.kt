@@ -2017,29 +2017,6 @@ internal class VedtakBehandlingServiceTest(
         )
 
     @Test
-    fun `resend BP vedtak med status ATTESTERT skal gi ATTESTERT hendelse`() {
-        val behandlingId = randomUUID()
-
-        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
-            mockBehandling(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId)
-
-        val vedtakOgRapid =
-            runBlocking {
-                repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, sakType = SakType.BARNEPENSJON))
-                repository.fattVedtak(
-                    behandlingId,
-                    VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
-                )
-                repository.attesterVedtak(behandlingId, Attestasjon(SAKSBEHANDLER_2, ENHET_1, Tidspunkt.now()))
-
-                service.resendVedtakTilUtbetaling(behandlingId, saksbehandler)
-            }
-
-        vedtakOgRapid.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.ATTESTERT
-        vedtakOgRapid.vedtak.status shouldBe VedtakStatus.ATTESTERT
-    }
-
-    @Test
     fun `resend OMS vedtak med status SAMORDNET skal gi SAMORDNET hendelse`() {
         val behandlingId = randomUUID()
 

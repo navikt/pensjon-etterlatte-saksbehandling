@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.jobs.etteroppgjoer
 import kotlinx.coroutines.DelicateCoroutinesApi
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerSvarfrist
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
@@ -27,56 +28,53 @@ class EtteroppgjoerSvarfristUtloeptJobService(
 
     fun startKjoering(jobContext: Context) {
         Kontekst.set(jobContext)
-        if (featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB, false)) {
-            logger.info("Starter periodiske jobber for opprette oppgave svarfrist utløpt etteroppgjoer")
-            inTransaction {
-                opprettNyOppgaveSvarfristUtloept()
-            }
-        } else {
-            logger.info("Periodisk jobber for opprette oppgave svarfrist utløpt er deaktivert")
+
+        if (!featureToggleService.isEnabled(EtteroppgjoerToggles.ETTEROPPGJOER_SVARFRISTUTLOEPT_JOBB, false)) {
+            logger.info("Periodisk jobb for opprette oppgave svarfrist utløpt er deaktivert")
+            return
         }
+
+        logger.info("Starter periodisk jobb for å opprette oppgave svarfrist utløpt etteroppgjør")
+        inTransaction { opprettOppgaverForSvarfristUtloept() }
     }
 
-    private fun opprettNyOppgaveSvarfristUtloept() {
-        val relevanteEtteroppgjoer = etteroppgjoerService.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
+    private fun opprettOppgaverForSvarfristUtloept() {
+        val relevanteEtteroppgjoer =
+            etteroppgjoerService.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 
-        val antallOppgaverOpprettet =
-            relevanteEtteroppgjoer?.count { etteroppgjoer ->
+        relevanteEtteroppgjoer.forEach { opprettOppgave(it) }
 
-                val oppgaveFinnesAllerede =
-                    oppgaveService
-                        .hentOppgaverForReferanse(
-                            etteroppgjoer.sisteFerdigstilteForbehandling.toString(),
-                        ).any { it.type == OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING }
+        logger.info("Behandlet ${relevanteEtteroppgjoer.size} etteroppgjør med utløpt svarfrist")
+    }
 
-                if (oppgaveFinnesAllerede) {
-                    logger.info(
-                        "Oppgave for svarfrist utløpt finnes allerede for forbehandlingId=${etteroppgjoer.sisteFerdigstilteForbehandling}",
-                    )
-                    false
-                } else {
-                    logger.info(
-                        "Oppretter oppgave for svarfrist utløpt for forbehandlingId=${etteroppgjoer.sisteFerdigstilteForbehandling}",
-                    )
-                    oppgaveService.opprettOppgave(
-                        referanse = etteroppgjoer.sisteFerdigstilteForbehandling.toString(),
-                        sakId = etteroppgjoer.sakId,
-                        type = OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING,
-                        merknad = "Svarfrist for etteroppgjør ${etteroppgjoer.inntektsaar} er utløpt",
-                        kilde = OppgaveKilde.HENDELSE,
-                        gjelderAar = etteroppgjoer.inntektsaar,
-                    )
+    private fun opprettOppgave(etteroppgjoer: Etteroppgjoer) {
+        val forbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling.toString()
 
-                    etteroppgjoerService.registrerHendelseForEtteroppgjoer(
-                        etteroppgjoer.sakId,
-                        etteroppgjoer.inntektsaar,
-                        EtteroppgjoerHendelser.SVARFRIST_UTLOEPT,
-                    )
+        val oppgaveFinnesAllerede =
+            oppgaveService
+                .hentOppgaverForReferanse(forbehandlingId)
+                .any { it.type == OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING }
 
-                    true
-                }
-            }
+        if (oppgaveFinnesAllerede) {
+            logger.info("Oppgave for svarfrist utløpt finnes allerede for forbehandlingId=$forbehandlingId")
+            return
+        }
 
-        logger.info("Opprettet $antallOppgaverOpprettet oppgaver for etteroppgjør med svarfrist utløpt")
+        logger.info("Oppretter oppgave for svarfrist utløpt for forbehandlingId=$forbehandlingId")
+
+        oppgaveService.opprettOppgave(
+            referanse = forbehandlingId,
+            sakId = etteroppgjoer.sakId,
+            type = OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING,
+            merknad = "Svarfrist for etteroppgjør ${etteroppgjoer.inntektsaar} er utløpt",
+            kilde = OppgaveKilde.HENDELSE,
+            gjelderAar = etteroppgjoer.inntektsaar,
+        )
+
+        etteroppgjoerService.registrerHendelseForEtteroppgjoer(
+            etteroppgjoer.sakId,
+            etteroppgjoer.inntektsaar,
+            EtteroppgjoerHendelser.SVARFRIST_UTLOEPT,
+        )
     }
 }

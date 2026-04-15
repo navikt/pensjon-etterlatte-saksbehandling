@@ -113,9 +113,7 @@ class JobModule(
     val oppdaterSkatteoppgjoerIkkeMottattJobService by lazy {
         OppdaterSkatteoppgjoerIkkeMottattJobService(
             featureToggleService = featureToggleService,
-            etteroppgjoerOppgaveService = serviceModule.etteroppgjoerOppgaveService,
             etteroppgjoerService = serviceModule.etteroppgjoerService,
-            vedtakKlient = serviceModule.vedtakKlient,
         )
     }
 

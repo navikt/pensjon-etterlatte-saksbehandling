@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
+/**
+ * Vi lytter til skatteoppgjør hendelser fra Sigrun for når skatteoppgjøret er publisert
+ * Hvis en hendelse ident har OMS sak er hendelsen relevant og vi oppretter Etteroppgjør og oppgave for behandle etteroppgjøret
+ */
 class LesSkatteoppgjoerHendelserJobService(
     private val dao: SkatteoppgjoerHendelserDao,
     private val sigrunKlient: SigrunKlient,
@@ -106,9 +110,6 @@ class LesSkatteoppgjoerHendelserJobService(
         }
     }
 
-    /**
-     * Oppretter eller oppdaterer etteroppgjør for en hendelse som er bekreftet relevant.
-     */
     private fun opprettEllerOppdaterEtteroppgjoer(
         hendelse: SkatteoppgjoerHendelse,
         sak: Sak,

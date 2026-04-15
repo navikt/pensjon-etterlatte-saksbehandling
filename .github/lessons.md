@@ -21,3 +21,7 @@
 **2026-04-10 — Dokumentasjon med usikkerhet**
 - Observation: Jeg la inn "ikke referert i kodebasen" som plassholder i stedet for å bare spørre. Det er mer respektfullt og presist å stille spørsmålet direkte.
 - Action: Når en verdi ikke kan verifiseres, spør – ikke dokumenter usikkerheten som et faktum.
+
+**2026-04-15 — Refactoring**
+- Observation: `runCatching { }.getOrNull()` og unødvendig `runBlocking`-wrapping gjentok seg i begge job-service-filer. Første gang fikset jeg det via ny nullable-metode på service, men oppdaget ikke at det samme mønsteret fantes i den andre filen.
+- Action: Etter en mønsterbasert fix – søk aktivt etter samme anti-mønster i relaterte filer i samme pakke.

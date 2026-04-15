@@ -45,6 +45,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
@@ -2014,6 +2015,64 @@ internal class VedtakBehandlingServiceTest(
             tidligereFamiliepleier = null,
             opprinnelse = BehandlingOpprinnelse.UKJENT,
         )
+
+    @Test
+    fun `resend BP vedtak med status ATTESTERT skal gi ATTESTERT hendelse`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId)
+
+        val vedtakOgRapid =
+            runBlocking {
+                repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, sakType = SakType.BARNEPENSJON))
+                repository.fattVedtak(
+                    behandlingId,
+                    VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
+                )
+                repository.attesterVedtak(behandlingId, Attestasjon(SAKSBEHANDLER_2, ENHET_1, Tidspunkt.now()))
+
+                service.resendVedtakTilUtbetaling(behandlingId, saksbehandler)
+            }
+
+        vedtakOgRapid.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.ATTESTERT
+        vedtakOgRapid.vedtak.status shouldBe VedtakStatus.ATTESTERT
+    }
+
+    @Test
+    fun `resend OMS vedtak med status SAMORDNET skal gi SAMORDNET hendelse`() {
+        val behandlingId = randomUUID()
+
+        val vedtakOgRapid =
+            runBlocking {
+                repository.opprettVedtak(
+                    opprettVedtak(behandlingId = behandlingId, sakType = SakType.OMSTILLINGSSTOENAD),
+                )
+                repository.fattVedtak(
+                    behandlingId,
+                    VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
+                )
+                repository.attesterVedtak(behandlingId, Attestasjon(SAKSBEHANDLER_2, ENHET_1, Tidspunkt.now()))
+                repository.tilSamordningVedtak(behandlingId)
+                repository.samordnetVedtak(behandlingId)
+
+                service.resendVedtakTilUtbetaling(behandlingId, saksbehandler)
+            }
+
+        vedtakOgRapid.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.SAMORDNET
+        vedtakOgRapid.vedtak.status shouldBe VedtakStatus.SAMORDNET
+    }
+
+    @Test
+    fun `resend vedtak med feil status skal kaste VedtakTilstandException`() {
+        val behandlingId = randomUUID()
+
+        repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
+
+        assertThrows<VedtakTilstandException> {
+            runBlocking { service.resendVedtakTilUtbetaling(behandlingId, saksbehandler) }
+        }
+    }
 
     private companion object {
         val VIRKNINGSTIDSPUNKT_JAN_2023: YearMonth = YearMonth.of(2023, Month.JANUARY)

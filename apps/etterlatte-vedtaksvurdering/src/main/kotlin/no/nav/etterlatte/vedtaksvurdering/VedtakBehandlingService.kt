@@ -824,6 +824,35 @@ class VedtakBehandlingService(
             Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
 
     fun hentVedtakForBehandling(behandlingId: UUID): Vedtak? = repository.hentVedtak(behandlingId)
+
+    suspend fun resendVedtakTilUtbetaling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakOgRapid {
+        logger.info("Resender vedtak til utbetaling for behandlingId=$behandlingId")
+        val vedtak = hentVedtakNonNull(behandlingId)
+
+        return when {
+            vedtak.sakType == SakType.OMSTILLINGSSTOENAD && vedtak.status == VedtakStatus.SAMORDNET -> {
+                VedtakOgRapid(
+                    vedtak.toDto(),
+                    RapidInfo(
+                        vedtakhendelse = VedtakKafkaHendelseHendelseType.SAMORDNET,
+                        vedtak = vedtak.toDto(),
+                        tekniskTid = vedtak.attestasjon!!.tidspunkt,
+                        behandlingId = behandlingId,
+                    ),
+                )
+            }
+
+            else -> {
+                throw VedtakTilstandException(
+                    vedtak.status,
+                    listOf(VedtakStatus.ATTESTERT, VedtakStatus.SAMORDNET),
+                )
+            }
+        }
+    }
 }
 
 class VedtakTilstandException(

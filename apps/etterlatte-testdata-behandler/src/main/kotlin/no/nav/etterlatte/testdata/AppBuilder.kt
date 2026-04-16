@@ -69,9 +69,9 @@ class AppBuilder {
             )
         val vedtaksvurderingService =
             VedtaksvurderingService(
-                settOppHttpClient("vedtaksvurdering"),
-                "http://etterlatte-vedtaksvurdering",
-                config.getString("vedtaksvurdering.client.id"),
+                settOppHttpClient("behandling"),
+                "http://etterlatte-behandling",
+                config.getString("behandling.client.id"),
             )
         val brevService =
             BrevService(

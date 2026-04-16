@@ -104,10 +104,21 @@ class VedtakBehandlingService(
 
         return if (vedtak != null) {
             logger.info("Oppdaterer vedtak for behandling med behandlingId=$behandlingId")
-            oppdaterVedtak(behandling, vedtak, vedtakType, virkningstidspunkt, beregningOgAvkorting, vilkaarsvurdering)
+            val oppdatertVedtak =
+                vedtak.oppdatert(
+                    behandling,
+                    vedtakType,
+                    virkningstidspunkt,
+                    beregningOgAvkorting,
+                    vilkaarsvurdering,
+                )
+            vedtaksvurderingRepository.oppdaterVedtak(oppdatertVedtak)
         } else {
             logger.info("Oppretter vedtak for behandling med behandlingId=$behandlingId")
-            opprettVedtak(behandling, vedtakType, virkningstidspunkt, beregningOgAvkorting, vilkaarsvurdering)
+
+            vedtaksvurderingRepository.opprettVedtak(
+                lagOpprettVedtak(behandling, vedtakType, virkningstidspunkt, beregningOgAvkorting, vilkaarsvurdering),
+            )
         }
     }
 
@@ -175,9 +186,8 @@ class VedtakBehandlingService(
             )
 
         val oppdatertVedtak =
-            oppdaterVedtak(
+            vedtak.oppdatert(
                 behandling = behandling,
-                eksisterendeVedtak = vedtak,
                 vedtakType = vedtakType,
                 virkningstidspunkt = virkningstidspunkt,
                 beregningOgAvkorting = beregningOgAvkorting,
@@ -187,6 +197,8 @@ class VedtakBehandlingService(
         beregningOgAvkorting?.let {
             VedtakOgBeregningSammenligner.sammenlign(beregning = it, vedtak = oppdatertVedtak)
         }
+
+        vedtaksvurderingRepository.oppdaterVedtak(oppdatertVedtak)
 
         val fattetVedtak =
             vedtaksvurderingRepository
@@ -488,48 +500,45 @@ class VedtakBehandlingService(
             "Vedtak for behandling $behandlingId finnes ikke"
         }
 
-    private fun opprettVedtak(
+    private fun lagOpprettVedtak(
         behandling: DetaljertBehandling,
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
         beregningOgAvkorting: BeregningOgAvkorting?,
         vilkaarsvurdering: VilkaarsvurderingDto?,
-    ): Vedtak {
+    ): OpprettVedtak {
         val opphoerFraOgMed = utledOpphoerFraOgMed(vedtakType, virkningstidspunkt, behandling)
-        val opprettetVedtak =
-            OpprettVedtak(
-                soeker = behandling.soeker.let { Folkeregisteridentifikator.of(it) },
-                sakId = behandling.sak,
-                sakType = behandling.sakType,
-                behandlingId = behandling.id,
-                status = VedtakStatus.OPPRETTET,
-                type = vedtakType,
-                innhold =
-                    VedtakInnhold.Behandling(
-                        behandlingType = behandling.behandlingType,
-                        virkningstidspunkt = virkningstidspunkt,
-                        beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
-                        avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
-                        vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
-                        utbetalingsperioder =
-                            opprettUtbetalingsperioder(
-                                vedtakType = vedtakType,
-                                beregningOgAvkorting = beregningOgAvkorting,
-                                sakType = behandling.sakType,
-                                opphoerFraOgMed = opphoerFraOgMed,
-                            ),
-                        revurderingAarsak = behandling.revurderingsaarsak,
-                        revurderingInfo = behandling.revurderingInfo?.toJsonNode(),
-                        opphoerFraOgMed = opphoerFraOgMed,
-                    ),
-            )
 
-        return vedtaksvurderingRepository.opprettVedtak(opprettetVedtak)
+        return OpprettVedtak(
+            soeker = behandling.soeker.let { Folkeregisteridentifikator.of(it) },
+            sakId = behandling.sak,
+            sakType = behandling.sakType,
+            behandlingId = behandling.id,
+            status = VedtakStatus.OPPRETTET,
+            type = vedtakType,
+            innhold =
+                VedtakInnhold.Behandling(
+                    behandlingType = behandling.behandlingType,
+                    virkningstidspunkt = virkningstidspunkt,
+                    beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
+                    avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
+                    vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
+                    utbetalingsperioder =
+                        opprettUtbetalingsperioder(
+                            vedtakType = vedtakType,
+                            beregningOgAvkorting = beregningOgAvkorting,
+                            sakType = behandling.sakType,
+                            opphoerFraOgMed = opphoerFraOgMed,
+                        ),
+                    revurderingAarsak = behandling.revurderingsaarsak,
+                    revurderingInfo = behandling.revurderingInfo?.toJsonNode(),
+                    opphoerFraOgMed = opphoerFraOgMed,
+                ),
+        )
     }
 
-    private fun oppdaterVedtak(
+    private fun Vedtak.oppdatert(
         behandling: DetaljertBehandling,
-        eksisterendeVedtak: Vedtak,
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
         beregningOgAvkorting: BeregningOgAvkorting?,
@@ -537,10 +546,10 @@ class VedtakBehandlingService(
     ): Vedtak {
         val opphoerFraOgMed = utledOpphoerFraOgMed(vedtakType, virkningstidspunkt, behandling)
         val oppdatertVedtak =
-            eksisterendeVedtak.copy(
+            copy(
                 type = vedtakType,
                 innhold =
-                    (eksisterendeVedtak.innhold as VedtakInnhold.Behandling).copy(
+                    (innhold as VedtakInnhold.Behandling).copy(
                         virkningstidspunkt = virkningstidspunkt,
                         beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
                         avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
@@ -556,7 +565,7 @@ class VedtakBehandlingService(
                         opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
-        return vedtaksvurderingRepository.oppdaterVedtak(oppdatertVedtak)
+        return oppdatertVedtak
     }
 
     private fun utledOpphoerFraOgMed(

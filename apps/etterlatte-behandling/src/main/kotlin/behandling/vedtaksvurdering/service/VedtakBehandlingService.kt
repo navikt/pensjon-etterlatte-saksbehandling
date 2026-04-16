@@ -174,19 +174,20 @@ class VedtakBehandlingService(
                 etteroppgjoerResultat,
             )
 
-        // TODO er denne avhengig av at vedtaket er fattet allerede?
+        val oppdatertVedtak =
+            oppdaterVedtak(
+                behandling = behandling,
+                eksisterendeVedtak = vedtak,
+                vedtakType = vedtakType,
+                virkningstidspunkt = virkningstidspunkt,
+                beregningOgAvkorting = beregningOgAvkorting,
+                vilkaarsvurdering = vilkaarsvurdering,
+            )
+
         beregningOgAvkorting?.let {
-            VedtakOgBeregningSammenligner.sammenlign(it, vedtak)
+            VedtakOgBeregningSammenligner.sammenlign(beregning = it, vedtak = oppdatertVedtak)
         }
 
-        oppdaterVedtak(
-            behandling = behandling,
-            eksisterendeVedtak = vedtak,
-            vedtakType = vedtakType,
-            virkningstidspunkt = virkningstidspunkt,
-            beregningOgAvkorting = beregningOgAvkorting,
-            vilkaarsvurdering = vilkaarsvurdering,
-        )
         val fattetVedtak =
             vedtaksvurderingRepository
                 .fattVedtak(

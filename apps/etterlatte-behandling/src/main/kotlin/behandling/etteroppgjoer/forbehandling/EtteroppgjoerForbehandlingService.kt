@@ -497,7 +497,7 @@ class EtteroppgjoerForbehandlingService(
             .also { dao.lagreForbehandling(it) }
     }
 
-    fun kanOppretteForbehandlingForEtteroppgjoer(
+    private fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
         inntektsaar: Int,
         oppgaveId: UUID,
@@ -816,7 +816,7 @@ class EtteroppgjoerForbehandlingService(
     private fun validerOppgaveForOpprettForbehandling(
         oppgave: OppgaveIntern,
         sakId: SakId,
-    ): OppgaveIntern {
+    ) {
         if (oppgave.sakId != sakId) {
             throw UgyldigForespoerselException(
                 "OPPGAVE_IKKE_I_SAK",
@@ -837,8 +837,6 @@ class EtteroppgjoerForbehandlingService(
                 "Oppgaven har feil oppgaveType=${oppgave.type} til å opprette forbehandling",
             )
         }
-
-        return oppgave
     }
 }
 
@@ -876,14 +874,6 @@ class FantIkkeForbehandling(
 ) : IkkeFunnetException(
         code = "MANGLER_FORBEHANDLING_ETTEROPPGJOER",
         detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
-    )
-
-class FantIkkeEtteroppgjoer(
-    val sakId: SakId,
-    val inntektsaar: Int,
-) : IkkeFunnetException(
-        code = "MANGLER_ETTEROPPGJOER",
-        detail = "Fant ikke etteroppgjør $inntektsaar for sakId=$sakId",
     )
 
 class ForbehandlingKanIkkeEndres :

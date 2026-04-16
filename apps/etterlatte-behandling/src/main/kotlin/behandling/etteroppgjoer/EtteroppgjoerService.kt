@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -32,22 +31,14 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-enum class EtteroppgjoerSvarfrist(
-    val value: String,
-) {
-    ETT_MINUTT("1 minute"),
-    FEM_MINUTT("5 minutes"),
-    EN_MND("1 month"),
-}
-
 class EtteroppgjoerService(
-    val dao: EtteroppgjoerDao,
-    val vedtakKlient: VedtakKlient,
-    val behandlingService: BehandlingService,
-    val beregningKlient: BeregningKlient,
-    val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
-    val sigrunKlient: SigrunKlient,
-    val hendelseDao: HendelseDao,
+    private val dao: EtteroppgjoerDao,
+    private val vedtakKlient: VedtakKlient,
+    private val behandlingService: BehandlingService,
+    private val beregningKlient: BeregningKlient,
+    private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
+    private val sigrunKlient: SigrunKlient,
+    private val hendelseDao: HendelseDao,
 ) {
     fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer> =
         dao.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)

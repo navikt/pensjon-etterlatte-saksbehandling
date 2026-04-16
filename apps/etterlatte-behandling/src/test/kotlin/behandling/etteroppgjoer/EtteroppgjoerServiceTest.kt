@@ -441,13 +441,18 @@ class EtteroppgjoerServiceTest {
         coVerify { ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
     }
 
-    @Test
-    fun `haandterSkatteoppgjoerMottatt kaster ved ugyldig status`() {
+    @ParameterizedTest(name = "haandter skatteoppgjoerMottatt oppretter oppgave={0} kun for VENTER_PAA_SKATTEOPPGJOER")
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["VENTER_PAA_SKATTEOPPGJOER", "MOTTATT_SKATTEOPPGJOER"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `haandterSkatteoppgjoerMottatt kaster ved ugyldig status`(status: EtteroppgjoerStatus) {
         val ctx = TestContext(sakId)
         val enSak = sak(sakId = sakId)
-        val etteroppgjoer = Etteroppgjoer(sakId = sakId, inntektsaar = 2024, status = EtteroppgjoerStatus.FERDIGSTILT)
+        val etteroppgjoer = Etteroppgjoer(sakId = sakId, inntektsaar = 2024, status = status)
 
-        assertThrows<IkkeTillattException> {
+        assertThrows<InternfeilException> {
             ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, enSak)
         }
     }

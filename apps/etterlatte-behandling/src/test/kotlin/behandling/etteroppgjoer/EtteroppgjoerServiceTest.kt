@@ -37,6 +37,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -426,5 +427,28 @@ class EtteroppgjoerServiceTest {
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 1 }) } // f.eks 2025
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 2 }) } // f.eks 2024
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value }) } // f.eks 2026
+    }
+
+    @Test
+    fun `haandterSkatteoppgjoerMottatt oppdaterer status og oppretter oppgave`() {
+        val ctx = TestContext(sakId)
+        val enSak = sak(sakId = sakId)
+        val etteroppgjoer = Etteroppgjoer(sakId = sakId, inntektsaar = 2024, status = EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+
+        ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, enSak)
+
+        verify { ctx.dao.oppdaterEtteroppgjoerStatus(sakId, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) }
+        coVerify { ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
+    }
+
+    @Test
+    fun `haandterSkatteoppgjoerMottatt kaster ved ugyldig status`() {
+        val ctx = TestContext(sakId)
+        val enSak = sak(sakId = sakId)
+        val etteroppgjoer = Etteroppgjoer(sakId = sakId, inntektsaar = 2024, status = EtteroppgjoerStatus.FERDIGSTILT)
+
+        assertThrows<IkkeTillattException> {
+            ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, enSak)
+        }
     }
 }

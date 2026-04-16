@@ -347,13 +347,6 @@ class EtteroppgjoerRevurderingService(
             )
         }
     }
-
-    private fun String.parseUuid(): UUID? =
-        try {
-            UUID.fromString(this)
-        } catch (_: IllegalArgumentException) {
-            null
-        }
 }
 
 private fun VedtakSammendragDto.opphoersdato(): YearMonth? {

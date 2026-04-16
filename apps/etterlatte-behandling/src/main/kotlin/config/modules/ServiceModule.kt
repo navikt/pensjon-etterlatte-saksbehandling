@@ -184,7 +184,6 @@ class ServiceModule(
 
     val etteroppgjoerDataService by lazy {
         EtteroppgjoerDataService(
-            behandlingService = behandlingService,
             vedtakKlient = vedtakKlient,
             beregningKlient = klientModule.beregningKlient,
         )

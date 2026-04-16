@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -15,9 +14,8 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.logger
 
 class EtteroppgjoerDataService(
-    val behandlingService: BehandlingService,
-    val vedtakKlient: VedtakKlient,
-    val beregningKlient: BeregningKlient,
+    private val vedtakKlient: VedtakKlient,
+    private val beregningKlient: BeregningKlient,
 ) {
     fun sisteVedtakMedAvkorting(
         sakId: SakId,

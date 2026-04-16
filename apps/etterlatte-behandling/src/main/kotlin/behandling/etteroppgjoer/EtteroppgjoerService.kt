@@ -126,7 +126,7 @@ class EtteroppgjoerService(
         oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)
     }
 
-    fun oppdaterSisteFerdigstiltForbehandlingId(
+    private fun oppdaterSisteFerdigstiltForbehandlingId(
         sakId: SakId,
         inntektsaar: Int,
         forbehandlingId: UUID,

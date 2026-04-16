@@ -26,7 +26,9 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
@@ -277,6 +279,81 @@ internal class BrevdataFacadeImplTest {
             tidligereFamiliepleier = null,
             opprinnelse = BehandlingOpprinnelse.UKJENT,
         )
+
+    private fun lagFoerstegangsbehandling(relatertBehandlingId: UUID) =
+        lagBehandling().copy(
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            relatertBehandlingId = relatertBehandlingId,
+        )
+
+    private fun lagRevurderingMedAarsak(
+        aarsak: Revurderingaarsak,
+        relatertBehandlingId: UUID? = null,
+    ) = lagBehandling().copy(
+        behandlingType = BehandlingType.REVURDERING,
+        revurderingsaarsak = aarsak,
+        relatertBehandlingId = relatertBehandlingId,
+    )
+
+    private fun lagKlage() =
+        Klage.ny(
+            Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET, null, null),
+            null,
+        )
+
+    @Test
+    fun `hentKlageForBehandling returnerer null naar relatertBehandlingId er null`() {
+        val behandling = lagBehandling()
+
+        val resultat = runBlocking { service.hentKlageForBehandling(behandling, BRUKERTOKEN) }
+
+        resultat shouldBe null
+    }
+
+    @Test
+    fun `hentKlageForBehandling returnerer null naar klage ikke finnes for foerstegangsbehandling`() {
+        val relatertBehandlingId = UUID.randomUUID()
+        val behandling = lagFoerstegangsbehandling(relatertBehandlingId)
+        coEvery { behandlingService.hentKlage(relatertBehandlingId, BRUKERTOKEN) } throws RuntimeException("ikke funnet")
+
+        val resultat = runBlocking { service.hentKlageForBehandling(behandling, BRUKERTOKEN) }
+
+        resultat shouldBe null
+    }
+
+    @Test
+    fun `hentKlageForBehandling returnerer null naar behandlingen verken er foerstegangsbehandling eller omgjoering etter klage`() {
+        val relatertBehandlingId = UUID.randomUUID()
+        val behandling = lagRevurderingMedAarsak(Revurderingaarsak.SOESKENJUSTERING, relatertBehandlingId)
+
+        val resultat = runBlocking { service.hentKlageForBehandling(behandling, BRUKERTOKEN) }
+
+        resultat shouldBe null
+    }
+
+    @Test
+    fun `hentKlageForBehandling returnerer klage for foerstegangsbehandling`() {
+        val relatertBehandlingId = UUID.randomUUID()
+        val behandling = lagFoerstegangsbehandling(relatertBehandlingId)
+        val klage = lagKlage()
+        coEvery { behandlingService.hentKlage(relatertBehandlingId, BRUKERTOKEN) } returns klage
+
+        val resultat = runBlocking { service.hentKlageForBehandling(behandling, BRUKERTOKEN) }
+
+        resultat shouldBe klage
+    }
+
+    @Test
+    fun `hentKlageForBehandling returnerer klage for omgjoering etter klage`() {
+        val relatertBehandlingId = UUID.randomUUID()
+        val behandling = lagRevurderingMedAarsak(Revurderingaarsak.OMGJOERING_ETTER_KLAGE, relatertBehandlingId)
+        val klage = lagKlage()
+        coEvery { behandlingService.hentKlage(relatertBehandlingId, BRUKERTOKEN) } returns klage
+
+        val resultat = runBlocking { service.hentKlageForBehandling(behandling, BRUKERTOKEN) }
+
+        resultat shouldBe klage
+    }
 
     private fun hentBrevutfall() = null
 

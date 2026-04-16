@@ -73,10 +73,10 @@ class EtteroppgjoerOppgaveService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        val oppgaver = oppgaveService.hentOppgaverForReferanse(forbehandlingId.toString())
         val oppgave =
-            oppgaveService
-                .hentOppgaverForReferanse(forbehandlingId.toString())
-                .firstOrNull { it.erIkkeAvsluttet() }
+            oppgaver.firstOrNull { it.erIkkeAvsluttet() }
+                ?: oppgaver.firstOrNull()
                 ?: throw InternfeilException("Fant ingen oppgaver under behandling for forbehandlingId=$forbehandlingId")
 
         if (oppgave.saksbehandler?.ident != brukerTokenInfo.ident()) {

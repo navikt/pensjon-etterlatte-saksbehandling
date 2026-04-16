@@ -1,3 +1,7 @@
+**2026-04-16 — Testarbeid**
+- Observation: I testarbeid faller jeg for lett tilbake til teknisk og mekanisk navngiving fordi jeg tenker i brancher og setup, ikke i domenesituasjonen testen faktisk beskriver.
+- Action: Navngi tester etter domeneadferd og forventet forretningsutfall; teknisk setup og kontrollflyt skal ikke eie testnavnet.
+
 **2026-04-16 — Refactoring**
 - Observation: Jeg får tunnelsyn under refaktorering — søker ikke horisontalt etter samme anti-mønster i relaterte filer, og reagerer ikke på signaler i koden jeg selv berører (f.eks. at jeg sender nullable inn i en funksjon).
 - Action: Under refaktorering: scan relaterte filer for samme mønster, og les koden du berører som om du er reviewer — ikke bare utfører.

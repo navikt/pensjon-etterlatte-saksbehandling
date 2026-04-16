@@ -96,7 +96,7 @@ Hold det kort. Bruk formatet:
 - Action: [what to do or avoid going forward]
 ```
 
-**Reflekter:** Gjør dette alltid etter at du har lagt til et nytt punkt i `.github/lessons.md`, les gjennom alle eksisterende punkter. Er det punkter som overlapper? Peker de til samme prinsipp? Kan det forenkles til et punkt? Slå alltid sammen to overlappende punkter.
+**Reflekter:** Gjør dette alltid etter at du har lagt til et nytt punkt i `.github/lessons.md`, les gjennom alle eksisterende punkter. Les *innholdet og prinsippet bak* hvert punkt — ikke bare titler og datoer. Er det punkter som overlapper? Peker de til samme prinsipp? Kan det forenkles til et punkt? Slå alltid sammen to overlappende punkter.
 
 ### Domenekontekst
 Bruk `.github/domenekontekst/` som en kunnskapsbase for å forstå og forklare domenet. Bruk det som en inngang til å gjøre videre undersøkelser i koden.

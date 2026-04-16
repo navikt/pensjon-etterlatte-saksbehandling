@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.brev.model.Brev
@@ -191,6 +192,25 @@ data class EtteroppgjoerForbehandling(
     fun erRevurdering() = kopiertFra != null
 
     fun kanAvbrytesVedTilbakestilling() = erRedigerbar() && erRevurdering()
+
+    fun utledEtteroppgjoerStatus(): EtteroppgjoerStatus {
+        if (skyldesOpphoerDoedsfallIEtteroppgjoersaar()) {
+            return EtteroppgjoerStatus.FERDIGSTILT
+        }
+        return when (etteroppgjoerResultatType) {
+            EtteroppgjoerResultatType.ETTERBETALING,
+            EtteroppgjoerResultatType.TILBAKEKREVING,
+            -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+
+            EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING,
+            EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING,
+            -> EtteroppgjoerStatus.FERDIGSTILT
+
+            null -> throw InternfeilException(
+                "Mangler etteroppgjoerResultatType for forbehandling $id, kan ikke utlede etteroppgjørstatus",
+            )
+        }
+    }
 
     fun oppdaterBrukerHarSvart(
         harMottattNyInformasjon: JaNei?,

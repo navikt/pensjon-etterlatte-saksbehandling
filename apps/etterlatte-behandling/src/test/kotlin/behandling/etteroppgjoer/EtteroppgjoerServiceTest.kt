@@ -76,16 +76,14 @@ class EtteroppgjoerServiceTest {
         val sisteIverksatteBehandlingId = UUID.randomUUID()
 
         init {
-            every { dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns
-                mockk {
-                    every { status } returns EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
-                }
+            every { dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } answers {
+                Etteroppgjoer(sakId, secondArg(), EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+            }
 
             coEvery { hendelsesDao.etteroppgjoerHendelse(any(), any(), any(), any()) } just Runs
             coEvery { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) } just Runs
             coEvery { dao.lagreEtteroppgjoer(any()) } returns 1
             every { dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) } returns Unit
-            every { dao.oppdaterFerdigstiltForbehandlingId(any(), any(), any()) } returns Unit
 
             coEvery { beregningKlient.hentSanksjoner(any(), any()) } returns emptyList()
             coEvery { beregningKlient.hentBeregningsgrunnlag(any(), any()) } returns
@@ -245,9 +243,13 @@ class EtteroppgjoerServiceTest {
                 )
             ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandlingMedresultat)
             verify {
-                ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedresultat.aar, EtteroppgjoerStatus.VENTER_PAA_SVAR)
+                ctx.dao.lagreEtteroppgjoer(
+                    match {
+                        it.status == EtteroppgjoerStatus.VENTER_PAA_SVAR &&
+                            it.sisteFerdigstilteForbehandling == forbehandlingMedresultat.id
+                    },
+                )
             }
-            verify { ctx.dao.oppdaterFerdigstiltForbehandlingId(sakId, forbehandlingMedresultat.aar, forbehandlingMedresultat.id) }
         }
     }
 
@@ -283,9 +285,13 @@ class EtteroppgjoerServiceTest {
                 )
             ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandlingMedResultat)
             verify {
-                ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedResultat.aar, EtteroppgjoerStatus.FERDIGSTILT)
+                ctx.dao.lagreEtteroppgjoer(
+                    match {
+                        it.status == EtteroppgjoerStatus.FERDIGSTILT &&
+                            it.sisteFerdigstilteForbehandling == forbehandlingMedResultat.id
+                    },
+                )
             }
-            verify { ctx.dao.oppdaterFerdigstiltForbehandlingId(sakId, forbehandlingMedResultat.aar, forbehandlingMedResultat.id) }
         }
     }
 

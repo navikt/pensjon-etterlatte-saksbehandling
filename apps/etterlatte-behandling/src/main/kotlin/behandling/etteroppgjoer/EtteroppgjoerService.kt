@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
-import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -81,24 +80,25 @@ class EtteroppgjoerService(
         hendelse: EtteroppgjoerHendelser? = null,
     ) {
         dao.oppdaterEtteroppgjoerStatus(sakId, inntektsaar, status)
-        registrerHendelseForEtteroppgjoer(sakId, inntektsaar, hendelse)
+
+        if (hendelse != null) {
+            registrerHendelseForEtteroppgjoer(sakId, inntektsaar, hendelse)
+        }
     }
 
     fun registrerHendelseForEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
-        hendelse: EtteroppgjoerHendelser?,
+        hendelse: EtteroppgjoerHendelser,
     ) {
         try {
-            if (hendelse != null) {
-                val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sakId)
-                hendelseDao.etteroppgjoerHendelse(
-                    sakId = sakId,
-                    inntektsaar = inntektsaar,
-                    hendelseType = hendelse,
-                    sisteIverksatteBehandling = UUID.fromString(sisteIverksatteBehandling?.id.toString()),
-                )
-            }
+            val sisteIverksatteBehandling = behandlingService.hentSisteIverksatteBehandling(sakId)
+            hendelseDao.etteroppgjoerHendelse(
+                sakId = sakId,
+                inntektsaar = inntektsaar,
+                hendelseType = hendelse,
+                sisteIverksatteBehandling = UUID.fromString(sisteIverksatteBehandling?.id.toString()),
+            )
         } catch (ex: Exception) {
             logger.error(
                 "Feil ved registrering av hendelse for etteroppgjør. sakId=$sakId, inntektsaar=$inntektsaar, hendelse=$hendelse",
@@ -115,23 +115,19 @@ class EtteroppgjoerService(
             throw IkkeTillattException("FORBEHANDLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")
         }
 
-        val nyEtteroppgjoerStatus = finnStatusForForbehandling(forbehandling)
-        val hendelse =
-            when (nyEtteroppgjoerStatus) {
-                EtteroppgjoerStatus.FERDIGSTILT -> EtteroppgjoerHendelser.FERDIGSTILT
-                else -> null
-            }
+        val etteroppgjoer = hentEtteroppgjoerForInntektsaar(forbehandling.sak.id, forbehandling.aar)
+        val nyStatus = forbehandling.utledEtteroppgjoerStatus()
 
-        oppdaterEtteroppgjoerStatus(forbehandling.sak.id, forbehandling.aar, nyEtteroppgjoerStatus, hendelse)
-        oppdaterSisteFerdigstiltForbehandlingId(forbehandling.sak.id, forbehandling.aar, forbehandling.id)
-    }
+        dao.lagreEtteroppgjoer(
+            etteroppgjoer.copy(
+                status = nyStatus,
+                sisteFerdigstilteForbehandling = forbehandling.id,
+            ),
+        )
 
-    private fun oppdaterSisteFerdigstiltForbehandlingId(
-        sakId: SakId,
-        inntektsaar: Int,
-        forbehandlingId: UUID,
-    ) {
-        dao.oppdaterFerdigstiltForbehandlingId(sakId, inntektsaar, forbehandlingId)
+        if (nyStatus == EtteroppgjoerStatus.FERDIGSTILT) {
+            registrerHendelseForEtteroppgjoer(forbehandling.sak.id, forbehandling.aar, EtteroppgjoerHendelser.FERDIGSTILT)
+        }
     }
 
     fun haandterSkatteoppgjoerMottatt(
@@ -362,26 +358,6 @@ class EtteroppgjoerService(
                 }.distinct()
 
         return innvilgedeAar
-    }
-
-    private fun finnStatusForForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerStatus {
-        if (forbehandling.skyldesOpphoerDoedsfallIEtteroppgjoersaar()) {
-            return EtteroppgjoerStatus.FERDIGSTILT
-        }
-
-        return when (forbehandling.etteroppgjoerResultatType) {
-            EtteroppgjoerResultatType.ETTERBETALING,
-            EtteroppgjoerResultatType.TILBAKEKREVING,
-            -> EtteroppgjoerStatus.VENTER_PAA_SVAR
-
-            EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
-
-            EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
-
-            null -> throw InternfeilException(
-                "Mangler etteroppgjoerResultatType for forbehandling ${forbehandling.id} og kan derfor ikke oppdatere Etteroppgjør status",
-            )
-        }
     }
 
     private suspend fun etteroppgjoer(

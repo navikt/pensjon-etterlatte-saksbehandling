@@ -1,3 +1,7 @@
+**2026-04-16 — Refactoring**
+- Observation: Jeg refaktorerte rundt en nullable parameter (`hendelse: EtteroppgjoerHendelser?`) uten å spørre om selve parametersignaturen var riktig. Nullable i funksjonsparameter er et direkte signal om at null-sjekken tilhører kallstedet – det burde vært åpenbart.
+- Action: Når jeg sender nullable inn i en funksjon som et resultat av min egen logikk, stopp og vurder om funksjonen i stedet skal ta en ikke-nullable parameter og la kallstedet håndtere guards.
+
 **2026-04-09 — Kommunikasjon**
 - Observation: Lange svar uten oppsummering gjør at essensen drukner.
 - Action: Avslutt alltid lange svar med en TL;DR – 2–4 linjer, cave-man stil.

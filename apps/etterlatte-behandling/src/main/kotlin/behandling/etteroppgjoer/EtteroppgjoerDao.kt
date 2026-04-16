@@ -38,30 +38,6 @@ class EtteroppgjoerDao(
             }
         }
 
-    fun oppdaterFerdigstiltForbehandlingId(
-        sakId: SakId,
-        inntektsaar: Int,
-        forbehandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE etteroppgjoer
-                    SET siste_ferdigstilte_forbehandling = ?
-                    WHERE sak_id = ? AND inntektsaar = ?
-                    """.trimIndent(),
-                )
-
-            statement.setObject(1, forbehandlingId)
-            statement.setSakId(2, sakId)
-            statement.setInt(3, inntektsaar)
-
-            val updated = statement.executeUpdate()
-            krev(updated == 1) { "Kunne ikke oppdatere siste ferdigstilte forbehandling etteroppgjør for sakid $sakId" }
-        }
-    }
-
     fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> =
         connectionAutoclosing.hentConnection {
             with(it) {

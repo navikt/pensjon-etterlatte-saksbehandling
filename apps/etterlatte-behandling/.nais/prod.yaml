@@ -187,7 +187,7 @@ spec:
       value: api://prod-fss.pensjonsamhandling.sam/.default
     - name: BRUK_NY_VEDTAK_KLIENT
       value: nei
-    - name: BRUK_VEDTAK_REPOSITORY_KLIENT
+    - name: BRUK_EGEN_DATABASE_FOR_VEDTAK
       value: nei
 
   envFrom:

@@ -33,7 +33,6 @@ class Server(
                     listOf(
                         context.metrikkerJob,
                         context.outboxJob,
-                        context.resendTilUtbetalingJob,
                     ),
             ) {
                 vedtaksvurderingRoute(

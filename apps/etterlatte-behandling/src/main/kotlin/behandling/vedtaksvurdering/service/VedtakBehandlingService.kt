@@ -642,10 +642,10 @@ class VedtakBehandlingService(
                 VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
                     when (sakType) {
                         SakType.BARNEPENSJON -> {
-                            val beregningsperioder =
-                                krevIkkeNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
-                                    "Mangler beregning"
-                                }
+                            val beregningsperioder = beregningOgAvkorting?.beregning?.beregningsperioder
+                            if (beregningsperioder.isNullOrEmpty()) {
+                                throw ManglerBeregningsperioder()
+                            }
                             beregningsperioder.map {
                                 Utbetalingsperiode(
                                     periode =
@@ -663,8 +663,9 @@ class VedtakBehandlingService(
                         SakType.OMSTILLINGSSTOENAD -> {
                             val avkortetYtelse =
                                 beregningOgAvkorting?.avkorting?.avkortetYtelse
-                                    ?: throw ManglerAvkortetYtelse()
-
+                            if (avkortetYtelse.isNullOrEmpty()) {
+                                throw ManglerAvkortetYtelse()
+                            }
                             avkortetYtelse.map {
                                 Utbetalingsperiode(
                                     periode =
@@ -829,6 +830,13 @@ class ManglerAvkortetYtelse :
         code = "VEDTAKSVURDERING_MANGLER_AVKORTET_YTELSE",
         detail =
             "Det må legges til inntektsavkorting selv om mottaker ikke har inntekt. Legg inn \"0\" kr i alle felter.",
+    )
+
+class ManglerBeregningsperioder :
+    UgyldigForespoerselException(
+        code = "VEDTAKSVURDERING_MANGLER_BEREGNINGSPERIODER",
+        detail =
+            "Det mangler beregnet ytelse. Gå igjennom stegene fra beregningsgrunnlag en gang til.",
     )
 
 class VirkningstidspunktEtterOpphoerException :

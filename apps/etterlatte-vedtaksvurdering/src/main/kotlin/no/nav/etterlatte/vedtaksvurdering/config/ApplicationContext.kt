@@ -44,6 +44,8 @@ import no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxJob
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxRepository
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxService
+import no.nav.etterlatte.vedtaksvurdering.resend.ResendTilUtbetalingJob
+import no.nav.etterlatte.vedtaksvurdering.resend.ResendTilUtbetalingRepository
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -177,6 +179,17 @@ class ApplicationContext {
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(1, ChronoUnit.MINUTES),
+        )
+    }
+
+    val resendTilUtbetalingJob: ResendTilUtbetalingJob by lazy {
+        ResendTilUtbetalingJob(
+            repository = ResendTilUtbetalingRepository(dataSource),
+            vedtakBehandlingService = vedtakBehandlingService,
+            rapidService = vedtaksvurderingRapidService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(5, ChronoUnit.MINUTES),
         )
     }
 }

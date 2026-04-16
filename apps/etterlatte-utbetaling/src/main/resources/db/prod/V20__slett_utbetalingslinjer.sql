@@ -1,0 +1,2 @@
+DELETE FROM utbetaling WHERE id = 'ff5cb526-cbb8-43b2-abbf-9c4538fb7307' AND vedtak_id = '68905';
+DELETE FROM utbetalingshendelse WHERE utbetaling_id = 'ff5cb526-cbb8-43b2-abbf-9c4538fb7307' AND status = 'MOTTATT';

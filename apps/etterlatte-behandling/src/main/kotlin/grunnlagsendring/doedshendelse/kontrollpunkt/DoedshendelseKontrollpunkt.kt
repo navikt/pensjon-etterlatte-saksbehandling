@@ -82,6 +82,16 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = true
     }
 
+    @JsonTypeName("KRYSSENDE_YTELSE_IKKE_STARTET")
+    data object KryssendeYtelseIkkeOppstartet : DoedshendelseKontrollpunkt() {
+        override val kode: String = "KRYSSENDE_YTELSE_IKKE_STARTET"
+        override val beskrivelse: String = "Bruker har uføretrygd eller alderspensjon i Pesys, med oppstart etter dødsdato"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+        override val oppgaveTekst: String = "$beskrivelse. Sjekk om bruker må kontaktes for rettighet til OMS før ytelse i Pesys."
+    }
+
     @JsonTypeName("KRYSSENDE_UFOERETRYGD_I_PESYS")
     data object KryssendeUfoeretrygdIPesysEps : DoedshendelseKontrollpunkt() {
         override val kode: String = "KRYSSENDE_UFOERETRYGD_I_PESYS"

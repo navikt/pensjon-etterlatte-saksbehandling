@@ -1,7 +1,7 @@
 package no.nav.etterlatte.config.modules
 
+import no.nav.etterlatte.EnvKey.BRUK_EGEN_DATABASE_FOR_VEDTAK
 import no.nav.etterlatte.EnvKey.BRUK_NY_VEDTAK_KLIENT
-import no.nav.etterlatte.EnvKey.BRUK_VEDTAK_REPOSITORY_KLIENT
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BrukerService
@@ -185,7 +185,6 @@ class ServiceModule(
     val etteroppgjoerDataService by lazy {
         EtteroppgjoerDataService(
             behandlingService = behandlingService,
-            featureToggleService = featureToggleService,
             vedtakKlient = vedtakKlient,
             beregningKlient = klientModule.beregningKlient,
         )
@@ -396,12 +395,12 @@ class ServiceModule(
 
     val vedtaksvurderingRepositoryOperasjoner: VedtaksvurderingRepositoryOperasjoner by lazy {
         // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
-        val brukVedtakRepositoryKlient: Boolean = env[BRUK_VEDTAK_REPOSITORY_KLIENT] == "ja"
+        val brukEgendatabaseForVedtak: Boolean = env[BRUK_EGEN_DATABASE_FOR_VEDTAK] == "ja"
 
-        if (brukVedtakRepositoryKlient) {
-            klientModule.vedtaksvurderingRepositoryKlient()
-        } else {
+        if (brukEgendatabaseForVedtak) {
             daoModule.vedtaksvurderingRepository
+        } else {
+            klientModule.vedtaksvurderingRepositoryKlient()
         }
     }
 

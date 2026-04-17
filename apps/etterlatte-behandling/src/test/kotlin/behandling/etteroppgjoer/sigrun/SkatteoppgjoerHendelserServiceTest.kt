@@ -78,7 +78,7 @@ class SkatteoppgjoerHendelserServiceTest {
             Etteroppgjoer(SakId(3L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
 
         coEvery { dao.lagreKjoering(any()) } returns 1
-        coEvery { etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any(), any()) } just runs
+        coEvery { etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any()) } just runs
 
         runBlocking {
             lesSkatteoppgjoerHendelserJobService.lesOgBehandleHendelser(HendelseKjoeringRequest(antall))
@@ -96,7 +96,7 @@ class SkatteoppgjoerHendelserServiceTest {
         }
 
         coVerify(exactly = 2) {
-            etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any(), any())
+            etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any())
         }
     }
 

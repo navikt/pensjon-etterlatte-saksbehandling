@@ -109,6 +109,7 @@ For mer detaljert kontekst om enkeltapper, se:
 - [utbetaling](domenekontekst/utbetaling.md) – oversetter vedtak til utbetalinger via Oppdragssystemet
 - [brev-api](domenekontekst/brev-api.md) – genererer og distribuerer brev til brukere
 - [vedtaksvurdering](domenekontekst/vedtaksvurdering.md) – oppretter og forvalter vedtak, orkestrator mot nedstrøms systemer
+- [etteroppgjoer](domenekontekst/etteroppgjoer.md) – årlig etteroppgjør for OMS: flyt, statusmaskin og nøkkelklasser
 
 ## Viktige konvensjoner
 

@@ -116,6 +116,8 @@ Gjennomføres etter at skatteoppgjøret for et ytelsesår er ferdig. Primærtrig
 > `EtteroppgjoerGrense` avgjør utfallet (etterbetaling/tilbakekreving/ingen endring), ikke om vi trigger revurdering.
 > Beregning av restanse i avkortingen er reelt kompleks – se ikke etter en forenkling som ikke er der.
 
+Se [etteroppgjoer.md](etteroppgjoer.md) for detaljert flyt, spesialtilfeller og nøkkelklasser.
+
 ---
 
 ## Flyt 5 – Tilbakekreving

@@ -315,7 +315,9 @@ internal class BrevdataFacadeImplTest {
     fun `hentKlageForBehandling kaster exeption videre ved feil`() {
         val relatertBehandlingId = UUID.randomUUID()
         val behandling = lagFoerstegangsbehandling(relatertBehandlingId)
-        coEvery { behandlingService.hentKlage(relatertBehandlingId, BRUKERTOKEN) } throws RuntimeException("ikke funnet")
+        coEvery {
+            behandlingService.hentKlage(relatertBehandlingId, BRUKERTOKEN)
+        } throws mockk<BehandlingKlientException>()
 
         assertThrows<RuntimeException> {
             runBlocking { service.hentKlageForBehandling(behandling, BRUKERTOKEN) }

@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -125,6 +126,10 @@ class EtteroppgjoerForbehandlingServiceTest {
                     every { type } returns OppgaveType.ETTEROPPGJOER
                 }
             coEvery { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSakAvType(any(), any()) } returns emptyList()
+            every {
+                oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            } returns mockk(relaxed = true)
             every { oppgaveService.hentOppgaverForReferanse(any()) } returns emptyList()
             coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer
             every { behandlingService.hentUtlandstilknytningForSak(any()) } returns null
@@ -338,6 +343,80 @@ class EtteroppgjoerForbehandlingServiceTest {
                 2024,
                 ctx.oppgaveId,
                 mockk(),
+            )
+        }
+    }
+
+    @Test
+    fun `skal opprette manuell oppgave for opprett forbehandling`() {
+        val ctx = TestContext()
+
+        justRun {
+            ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sakId1,
+                2024,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            )
+        }
+
+        ctx.service.opprettManuellOppgaveForOpprettForbehandling(sakId1, 2024)
+
+        verify {
+            ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sakId1,
+                2024,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            )
+            ctx.oppgaveService.opprettOppgave(
+                referanse = "",
+                sakId = sakId1,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.ETTEROPPGJOER,
+                merknad = "Etteroppgjøret for 2024 er klart til behandling",
+                gjelderAar = 2024,
+            )
+        }
+    }
+
+    @Test
+    fun `skal tilbakestille etteroppgjoer og opprette ny oppgave`() {
+        val ctx = TestContext()
+
+        ctx.returnsForbehandlinger(
+            listOf(
+                EtteroppgjoerForbehandling.opprett(
+                    sak = ctx.behandling.sak,
+                    innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
+                    sisteIverksatteBehandling = ctx.behandling.id,
+                    mottattSkatteoppgjoer = true,
+                ),
+            ),
+        )
+        justRun {
+            ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sakId1,
+                2024,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                EtteroppgjoerHendelser.TILBAKESTILT,
+            )
+        }
+
+        ctx.service.tilbakestillEtteroppgjoerOgOpprettForbehandlingsoppgave(sakId1, 2024)
+
+        verify {
+            ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sakId1,
+                2024,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                EtteroppgjoerHendelser.TILBAKESTILT,
+            )
+            ctx.oppgaveService.opprettOppgave(
+                referanse = "",
+                sakId = sakId1,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.ETTEROPPGJOER,
+                merknad = "Etteroppgjøret for 2024 er klart til behandling",
+                gjelderAar = 2024,
             )
         }
     }

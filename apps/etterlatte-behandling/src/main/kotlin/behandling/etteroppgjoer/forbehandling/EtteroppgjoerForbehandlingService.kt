@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteFo
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
@@ -127,7 +128,7 @@ class EtteroppgjoerForbehandlingService(
         return ferdigstillForbehandling(forbehandling, brukerTokenInfo)
     }
 
-    fun forbehandlingBrukerSisteInntekter(id: UUID): Boolean {
+    fun sjekkAtForbehandlingBrukerSisteInntekter(id: UUID): Boolean {
         val forbehandling = hentForbehandling(id)
 
         return runCatching {
@@ -347,6 +348,69 @@ class EtteroppgjoerForbehandlingService(
             sakId = sakId,
             opprettetManuelt = opprettetManuelt,
             inntektsAar = etteroppgjoerAar,
+        )
+    }
+
+    /**
+     * Denne funksjonaliteten er kun for å opprette forbehandling i dev ifm testing.
+     */
+    fun opprettManuellOppgaveForOpprettForbehandling(
+        sakId: SakId,
+        inntektsaar: Int,
+    ) {
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+
+        if (!etteroppgjoer.venterPaaSkatteoppgjoer() && !etteroppgjoer.mottattSkatteoppgjoer()) {
+            throw InternfeilException(
+                "Etteroppgjøret $inntektsaar for sakId=$sakId har status ${etteroppgjoer.status}, kan ikke opprette forbehandling",
+            )
+        }
+
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+            sakId = sakId,
+            inntektsaar = etteroppgjoer.inntektsaar,
+            status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+        )
+
+        opprettOppgaveForOpprettForbehandling(
+            sakId = sakId,
+            opprettetManuelt = true,
+            etteroppgjoerAar = etteroppgjoer.inntektsaar,
+        )
+    }
+
+    fun tilbakestillEtteroppgjoerOgOpprettForbehandlingsoppgave(
+        sakId: SakId,
+        inntektsaar: Int,
+    ) {
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+
+        if (etteroppgjoer.venterPaaSkatteoppgjoer()) {
+            throw InternfeilException(
+                "Kan ikke tilbakestille etteroppgjoer $inntektsaar for sakId=$sakId, vi venter enda på skatteoppgjøret.",
+            )
+        }
+
+        if (hentForbehandlinger(sakId).isEmpty()) {
+            throw InternfeilException(
+                "Kan ikke tilbakestille etteroppgjoer $inntektsaar for sakId=$sakId, fant ingen tidligere forbehandlinger. Ta kontakt for manuell håndtering.",
+            )
+        }
+
+        sjekkHarAapneBehandlinger(etteroppgjoer.sakId, null)
+
+        logger.info("Tilbakestiller etteroppgjør $inntektsaar for sakId=${etteroppgjoer.sakId}")
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+            sakId = sakId,
+            inntektsaar = etteroppgjoer.inntektsaar,
+            status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            hendelse = EtteroppgjoerHendelser.TILBAKESTILT,
+        )
+
+        opprettOppgaveForOpprettForbehandling(
+            sakId = sakId,
+            opprettetManuelt = true,
+            etteroppgjoerAar = etteroppgjoer.inntektsaar,
         )
     }
 

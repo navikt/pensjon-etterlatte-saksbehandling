@@ -231,7 +231,7 @@ class BrevdataFacade(
         behandling: DetaljertBehandling,
         bruker: BrukerTokenInfo,
     ): Klage? {
-        val relatertBehandlingId = behandling?.relatertBehandlingId ?: return null
+        val relatertBehandlingId = behandling.relatertBehandlingId ?: return null
 
         if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             try {

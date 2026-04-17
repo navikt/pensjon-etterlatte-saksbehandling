@@ -16,10 +16,10 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.OMGJOERING_ETTER_KLAGE
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -233,13 +233,14 @@ class BrevdataFacade(
     ): Klage? {
         val relatertBehandlingId = behandling.relatertBehandlingId ?: return null
 
-        if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+        if (behandling.behandlingType == FØRSTEGANGSBEHANDLING) {
             try {
                 return behandlingService.hentKlage(relatertBehandlingId, bruker)
             } catch (e: Exception) {
                 logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
+                throw e
             }
-        } else if (behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+        } else if (behandling.revurderingsaarsak == OMGJOERING_ETTER_KLAGE) {
             return behandlingService.hentKlage(relatertBehandlingId, bruker)
         }
         return null

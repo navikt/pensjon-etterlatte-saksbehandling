@@ -55,6 +55,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.UUID
 
@@ -311,14 +312,14 @@ internal class BrevdataFacadeImplTest {
     }
 
     @Test
-    fun `hentKlageForBehandling returnerer null naar klage ikke finnes for foerstegangsbehandling`() {
+    fun `hentKlageForBehandling kaster exeption videre ved feil`() {
         val relatertBehandlingId = UUID.randomUUID()
         val behandling = lagFoerstegangsbehandling(relatertBehandlingId)
         coEvery { behandlingService.hentKlage(relatertBehandlingId, BRUKERTOKEN) } throws RuntimeException("ikke funnet")
 
-        val resultat = runBlocking { service.hentKlageForBehandling(behandling, BRUKERTOKEN) }
-
-        resultat shouldBe null
+        assertThrows<RuntimeException> {
+            runBlocking { service.hentKlageForBehandling(behandling, BRUKERTOKEN) }
+        }
     }
 
     @Test

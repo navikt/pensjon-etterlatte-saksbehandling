@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
@@ -10,7 +11,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeEtteroppgjoer
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.ForbehandlingKanIkkeEndres
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
@@ -18,14 +19,21 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -50,19 +58,19 @@ import kotlin.test.assertNotEquals
 
 class EtteroppgjoerForbehandlingServiceTest {
     private class TestContext {
-        val dao: EtteroppgjoerForbehandlingDao = mockk()
+        val dao: EtteroppgjoerForbehandlingDao = mockk(relaxed = true)
         val sakDao: SakLesDao = mockk()
         val etteroppgjoerService: EtteroppgjoerService = mockk()
-        val oppgaveService: OppgaveService = mockk()
+        val oppgaveService: OppgaveService = mockk(relaxed = true)
         val inntektskomponentService: InntektskomponentService = mockk()
         val pensjonsgivendeInntektService: PensjonsgivendeInntektService = mockk()
-        val hendelserService: EtteroppgjoerForbehandlingHendelseService = mockk()
+        val hendelserService: EtteroppgjoerForbehandlingHendelseService = mockk(relaxed = true)
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakKlient: VedtakKlient = mockk()
         val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
         val etteroppgjoerDataService: EtteroppgjoerDataService =
-            EtteroppgjoerDataService(behandlingService, vedtakKlient, beregningKlient)
+            EtteroppgjoerDataService(vedtakKlient, beregningKlient)
 
         val service =
             EtteroppgjoerForbehandlingService(
@@ -118,9 +126,11 @@ class EtteroppgjoerForbehandlingServiceTest {
                     every { type } returns OppgaveType.ETTEROPPGJOER
                 }
             coEvery { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
+            every { oppgaveService.hentOppgaverForSakAvType(any(), any()) } returns emptyList()
+            every { oppgaveService.hentOppgaverForReferanse(any()) } returns emptyList()
             coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer
+            every { behandlingService.hentUtlandstilknytningForSak(any()) } returns null
 
-            every { dao.lagreForbehandling(any()) } returns 1
             every { dao.kopierSummerteInntekter(any(), any()) } returns 1
             every { dao.kopierPensjonsgivendeInntekt(any(), any()) } returns 1
         }
@@ -139,6 +149,10 @@ class EtteroppgjoerForbehandlingServiceTest {
 
         fun returnsOppgave(oppgave: OppgaveIntern) {
             coEvery { oppgaveService.hentOppgave(any()) } returns oppgave
+        }
+
+        fun returnsOppgaverForReferanse(oppgaver: List<OppgaveIntern>) {
+            every { oppgaveService.hentOppgaverForReferanse(any()) } returns oppgaver
         }
 
         fun returnsSak(sak: Sak) {
@@ -330,6 +344,313 @@ class EtteroppgjoerForbehandlingServiceTest {
     }
 
     @Test
+    fun `skal opprette manuell oppgave for opprett forbehandling`() {
+        val ctx = TestContext()
+
+        justRun {
+            ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sakId1,
+                2024,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            )
+        }
+
+        ctx.service.opprettManuellOppgaveForOpprettForbehandling(sakId1, 2024)
+
+        verify {
+            ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sakId1,
+                2024,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            )
+            ctx.oppgaveService.opprettOppgave(
+                referanse = "",
+                sakId = sakId1,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.ETTEROPPGJOER,
+                merknad = "Etteroppgjøret for 2024 er klart til behandling",
+                gjelderAar = 2024,
+            )
+        }
+    }
+
+    @Test
+    fun `skal tilbakestille etteroppgjoer og opprette ny oppgave`() {
+        val ctx = TestContext()
+
+        ctx.returnsForbehandlinger(
+            listOf(
+                EtteroppgjoerForbehandling.opprett(
+                    sak = ctx.behandling.sak,
+                    innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
+                    sisteIverksatteBehandling = ctx.behandling.id,
+                    mottattSkatteoppgjoer = true,
+                ),
+            ),
+        )
+        justRun {
+            ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sakId1,
+                2024,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                EtteroppgjoerHendelser.TILBAKESTILT,
+            )
+        }
+
+        ctx.service.tilbakestillEtteroppgjoerOgOpprettForbehandlingsoppgave(sakId1, 2024)
+
+        verify {
+            ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sakId1,
+                2024,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                EtteroppgjoerHendelser.TILBAKESTILT,
+            )
+            ctx.oppgaveService.opprettOppgave(
+                referanse = "",
+                sakId = sakId1,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.ETTEROPPGJOER,
+                merknad = "Etteroppgjøret for 2024 er klart til behandling",
+                gjelderAar = 2024,
+            )
+        }
+    }
+
+    @Test
+    fun `skal ikke avbryte forbehandling hvis den er ferdigstilt`() {
+        val ctx = TestContext()
+        val brukerTokenInfo = simpleSaksbehandler()
+        val forbehandling =
+            EtteroppgjoerForbehandling
+                .opprett(
+                    sak = ctx.behandling.sak,
+                    innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
+                    sisteIverksatteBehandling = ctx.behandling.id,
+                    mottattSkatteoppgjoer = true,
+                ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
+
+        ctx.returnsForbehandling(forbehandling)
+        ctx.returnsOppgaverForReferanse(
+            listOf(
+                oppgaveForEtteroppgjoer(
+                    referanse = forbehandling.id.toString(),
+                    saksbehandler = OppgaveSaksbehandler(brukerTokenInfo.ident),
+                ),
+            ),
+        )
+
+        val exception =
+            assertThrows(IkkeTillattException::class.java) {
+                ctx.service.avbrytForbehandling(
+                    forbehandling.id,
+                    brukerTokenInfo,
+                    AarsakTilAvbryteForbehandling.ANNET,
+                    "kommentar",
+                )
+            }
+
+        assertEquals("FEIL_STATUS_FORBEHANDLING", exception.code)
+    }
+
+    @Test
+    fun `skal ikke avbryte forbehandling som er revurdering`() {
+        val ctx = TestContext()
+        val brukerTokenInfo = simpleSaksbehandler()
+        val forbehandling =
+            EtteroppgjoerForbehandling
+                .opprett(
+                    sak = ctx.behandling.sak,
+                    innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
+                    sisteIverksatteBehandling = ctx.behandling.id,
+                    mottattSkatteoppgjoer = true,
+                ).copy(kopiertFra = UUID.randomUUID())
+
+        ctx.returnsForbehandling(forbehandling)
+        ctx.returnsOppgaverForReferanse(
+            listOf(
+                oppgaveForEtteroppgjoer(
+                    referanse = forbehandling.id.toString(),
+                    saksbehandler = OppgaveSaksbehandler(brukerTokenInfo.ident),
+                ),
+            ),
+        )
+
+        val exception =
+            assertThrows(IkkeTillattException::class.java) {
+                ctx.service.avbrytForbehandling(
+                    forbehandling.id,
+                    brukerTokenInfo,
+                    AarsakTilAvbryteForbehandling.ANNET,
+                    "kommentar",
+                )
+            }
+
+        assertEquals("FORBEHANDLING_ER_TILKNYTT_REVURDERING", exception.code)
+    }
+
+    @Test
+    fun `skal ikke avbryte forbehandling uten begrunnelse`() {
+        val ctx = TestContext()
+        val brukerTokenInfo = simpleSaksbehandler()
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                sak = ctx.behandling.sak,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
+                sisteIverksatteBehandling = ctx.behandling.id,
+                mottattSkatteoppgjoer = true,
+            )
+
+        ctx.returnsForbehandling(forbehandling)
+        ctx.returnsOppgaverForReferanse(
+            listOf(
+                oppgaveForEtteroppgjoer(
+                    referanse = forbehandling.id.toString(),
+                    saksbehandler = OppgaveSaksbehandler(brukerTokenInfo.ident),
+                ),
+            ),
+        )
+
+        val exception =
+            assertThrows(UgyldigForespoerselException::class.java) {
+                ctx.service.avbrytForbehandling(
+                    forbehandling.id,
+                    brukerTokenInfo,
+                    AarsakTilAvbryteForbehandling.ANNET,
+                    null,
+                )
+            }
+
+        assertEquals("VERDI_ER_NULL", exception.code)
+    }
+
+    @Test
+    fun `skal avbryte forbehandling og oppdatere status og oppgaver`() {
+        val ctx = TestContext()
+        val brukerTokenInfo = simpleSaksbehandler()
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                sak = ctx.behandling.sak,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
+                sisteIverksatteBehandling = ctx.behandling.id,
+                mottattSkatteoppgjoer = true,
+            )
+
+        ctx.returnsForbehandling(forbehandling)
+        ctx.returnsOppgaverForReferanse(
+            listOf(
+                oppgaveForEtteroppgjoer(
+                    referanse = forbehandling.id.toString(),
+                    saksbehandler = OppgaveSaksbehandler(brukerTokenInfo.ident),
+                ),
+            ),
+        )
+        justRun { ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(sakId1, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) }
+        justRun { ctx.oppgaveService.avbrytAapneOppgaverMedReferanse(forbehandling.id.toString(), any()) }
+        justRun { ctx.hendelserService.registrerOgSendHendelse(any(), null, any(), any(), any()) }
+
+        ctx.service.avbrytForbehandling(
+            forbehandling.id,
+            brukerTokenInfo,
+            AarsakTilAvbryteForbehandling.ANNET,
+            "manuell kommentar",
+        )
+
+        verify {
+            ctx.dao.lagreForbehandling(
+                match {
+                    it.id == forbehandling.id &&
+                        it.status == EtteroppgjoerForbehandlingStatus.AVBRUTT &&
+                        it.aarsakTilAvbrytelse == AarsakTilAvbryteForbehandling.ANNET &&
+                        it.aarsakTilAvbrytelseBeskrivelse == "manuell kommentar"
+                },
+            )
+            ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                sakId1,
+                2024,
+                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+            )
+            ctx.oppgaveService.avbrytAapneOppgaverMedReferanse(
+                forbehandling.id.toString(),
+                "Avbrutt manuelt. Årsak: manuell kommentar",
+            )
+            ctx.hendelserService.registrerOgSendHendelse(any(), null, any(), brukerTokenInfo.ident, null)
+        }
+    }
+
+    @Test
+    fun `skal ikke opprette forbehandling naar det finnes aapne behandlingsoppgaver`() {
+        val ctx = TestContext()
+
+        every { ctx.oppgaveService.hentOppgaverForSak(sakId1) } returns
+            listOf(
+                oppgaveForEtteroppgjoer(
+                    type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                    kilde = OppgaveKilde.BEHANDLING,
+                ),
+            )
+
+        val exception =
+            assertThrows(IkkeTillattException::class.java) {
+                ctx.service.sjekkHarAapneBehandlinger(sakId1, null)
+            }
+
+        assertEquals("ALLEREDE_AAPEN_BEHANDLING", exception.code)
+    }
+
+    @Test
+    fun `skal ikke ferdigstille forbehandling uten brev naar resultatet krever brev`() {
+        val ctx = TestContext()
+        val forbehandling =
+            EtteroppgjoerForbehandling
+                .opprett(
+                    sak = ctx.behandling.sak,
+                    innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
+                    sisteIverksatteBehandling = ctx.behandling.id,
+                    mottattSkatteoppgjoer = true,
+                ).copy(
+                    status = EtteroppgjoerForbehandlingStatus.BEREGNET,
+                    etteroppgjoerResultatType = no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType.ETTERBETALING,
+                )
+
+        ctx.returnsForbehandling(forbehandling)
+
+        val exception =
+            assertThrows(UgyldigForespoerselException::class.java) {
+                ctx.service.ferdigstillForbehandlingUtenBrev(forbehandling.id, simpleSaksbehandler())
+            }
+
+        assertEquals("ETTEROPPGJOER_RESULTAT_TRENGER_BREV", exception.code)
+    }
+
+    @Test
+    fun `skal ikke tillate oppdatering av ferdigstilt forbehandling`() {
+        val ctx = TestContext()
+        val forbehandling =
+            EtteroppgjoerForbehandling
+                .opprett(
+                    sak = ctx.behandling.sak,
+                    innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
+                    sisteIverksatteBehandling = ctx.behandling.id,
+                    mottattSkatteoppgjoer = true,
+                ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
+
+        ctx.returnsForbehandling(forbehandling)
+
+        listOf<() -> Unit>(
+            { ctx.service.lagreInformasjonFraBruker(forbehandling.id, JaNei.JA, JaNei.NEI, null) },
+            { ctx.service.lagreOmOpphoerSkyldesDoedsfall(forbehandling.id, JaNei.JA, JaNei.JA) },
+            { ctx.service.lagreAktivitetsplikt(forbehandling.id, JaNei.JA, "begrunnelse") },
+        ).forEach { oppdatering ->
+            assertThrows(ForbehandlingKanIkkeEndres::class.java) {
+                oppdatering()
+            }
+        }
+
+        verify(exactly = 0) { ctx.dao.lagreForbehandling(any()) }
+    }
+
+    @Test
     fun `skal kopiere forbehandling, summerteInntekter og pensjonsgivendeInntekt ved kopierOgLagreNyForbehandling`() {
         val ctx = TestContext()
         val uuid = UUID.randomUUID()
@@ -377,4 +698,27 @@ class EtteroppgjoerForbehandlingServiceTest {
             ctx.dao.kopierPensjonsgivendeInntekt(forbehandling.id, kopiertForbehandling.id)
         }
     }
+
+    private fun oppgaveForEtteroppgjoer(
+        referanse: String = UUID.randomUUID().toString(),
+        status: Status = Status.UNDER_BEHANDLING,
+        type: OppgaveType = OppgaveType.ETTEROPPGJOER,
+        kilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
+        saksbehandler: OppgaveSaksbehandler? = null,
+    ) = OppgaveIntern(
+        id = UUID.randomUUID(),
+        status = status,
+        enhet = sak().enhet,
+        sakId = sakId1,
+        kilde = kilde,
+        type = type,
+        saksbehandler = saksbehandler,
+        referanse = referanse,
+        gruppeId = null,
+        merknad = "merknad",
+        opprettet = Tidspunkt.now(),
+        sakType = sak().sakType,
+        fnr = sak().ident,
+        frist = null,
+    )
 }

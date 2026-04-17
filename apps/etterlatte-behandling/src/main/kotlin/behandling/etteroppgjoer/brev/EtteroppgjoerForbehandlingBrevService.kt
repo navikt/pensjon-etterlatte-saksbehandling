@@ -196,15 +196,7 @@ class EtteroppgjoerForbehandlingBrevService(
         sisteIverksatteBehandling: Behandling,
         pensjonsgivendeInntekt: SummertePensjonsgivendeInntekter?,
     ): EtteroppgjoerBrevRequestData {
-        krevIkkeNull(detaljertForbehandling.beregnetEtteroppgjoerResultat) {
-            "Beregnet etteroppgjoer resultat er null og kan ikke vises i brev"
-        }
-        if (detaljertForbehandling.beregnetEtteroppgjoerResultat.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING) {
-            throw UgyldigForespoerselException(
-                "SKAL_IKKE_HA_BREV",
-                "Resultatet i etteroppgjøret er ingen endring og ingen utbetaling, så bruker skal ikke ha et varselbrev.",
-            )
-        }
+        val beregnetResultat = detaljertForbehandling.beregnetEtteroppgjoerResultat!!
 
         val bosattUtland = sisteIverksatteBehandling.erBosattUtland()
         val grunnlag =
@@ -223,9 +215,9 @@ class EtteroppgjoerForbehandlingBrevService(
                     bosattUtland = bosattUtland,
                     norskInntekt = norskInntekt,
                     etteroppgjoersAar = detaljertForbehandling.forbehandling.aar,
-                    rettsgebyrBeloep = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
-                    resultatType = detaljertForbehandling.beregnetEtteroppgjoerResultat.resultatType,
-                    avviksBeloep = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                    rettsgebyrBeloep = Kroner(beregnetResultat.grense.rettsgebyr),
+                    resultatType = beregnetResultat.resultatType,
+                    avviksBeloep = Kroner(beregnetResultat.differanse.toInt()),
                     sak = sisteIverksatteBehandling.sak,
                 ),
             innhold =
@@ -233,11 +225,11 @@ class EtteroppgjoerForbehandlingBrevService(
                     bosattUtland = bosattUtland,
                     norskInntekt = norskInntekt,
                     etteroppgjoersAar = detaljertForbehandling.forbehandling.aar,
-                    rettsgebyrBeloep = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.grense.rettsgebyr),
-                    resultatType = detaljertForbehandling.beregnetEtteroppgjoerResultat.resultatType,
-                    stoenad = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.utbetaltStoenad.toInt()),
-                    faktiskStoenad = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.nyBruttoStoenad.toInt()),
-                    avviksBeloep = Kroner(detaljertForbehandling.beregnetEtteroppgjoerResultat.differanse.toInt()),
+                    rettsgebyrBeloep = Kroner(beregnetResultat.grense.rettsgebyr),
+                    resultatType = beregnetResultat.resultatType,
+                    stoenad = Kroner(beregnetResultat.utbetaltStoenad.toInt()),
+                    faktiskStoenad = Kroner(beregnetResultat.nyBruttoStoenad.toInt()),
+                    avviksBeloep = Kroner(beregnetResultat.differanse.toInt()),
                     grunnlag = EtteroppgjoerBrevGrunnlag.fra(grunnlag, summertPensjonsgivendeInntekt, mottattSkatteoppgjoer),
                     mottattSkatteoppgjoer = mottattSkatteoppgjoer,
                 ),

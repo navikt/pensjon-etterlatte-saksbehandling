@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.util.UUID
@@ -61,3 +62,19 @@ enum class EtteroppgjoerStatus {
     FERDIGSTILT,
     OMGJOERING, // midlertidig status for omgjøring av revurdering
 }
+
+enum class EtteroppgjoerSvarfrist(
+    val value: String,
+) {
+    ETT_MINUTT("1 minute"),
+    FEM_MINUTT("5 minutes"),
+    EN_MND("1 month"),
+}
+
+class FantIkkeEtteroppgjoer(
+    val sakId: SakId,
+    val inntektsaar: Int,
+) : IkkeFunnetException(
+        code = "MANGLER_ETTEROPPGJOER",
+        detail = "Fant ikke etteroppgjør $inntektsaar for sakId=$sakId",
+    )

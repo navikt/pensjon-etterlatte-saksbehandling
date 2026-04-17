@@ -12,6 +12,12 @@ import no.nav.etterlatte.logger
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.util.UUID
 
+/**
+ * Vi oppretter oppgave for opprette forbehandling slik at vi ikke
+ * blokkerer andre behandlinger i Saken, på den måten kan saksbehandler avslutte eksisterende behandlinger selv
+ *
+ * Samme oppgave brukes for oppretting og behandling av forbehandling. En tom referanse betyr at oppgaven gjelder oppretting. Når forbehandling opprettes, settes referansen til forbehandlingId.
+ */
 class EtteroppgjoerOppgaveService(
     private val oppgaveService: OppgaveService,
 ) {
@@ -21,9 +27,6 @@ class EtteroppgjoerOppgaveService(
         inntektsAar: Int,
         opprettetManuelt: Boolean? = false,
     ) {
-        // Samme oppgave brukes for oppretting og behandling av forbehandling.
-        // En tom referanse betyr at oppgaven gjelder oppretting.
-        // Når forbehandling opprettes, settes referansen til forbehandlingId.
         val eksisterendeOppgaver =
             oppgaveService
                 .hentOppgaverForSakAvType(sakId, listOf(OppgaveType.ETTEROPPGJOER))
@@ -39,7 +42,6 @@ class EtteroppgjoerOppgaveService(
 
             eksisterendeOppgaver.isNotEmpty() -> {
                 if (opprettetManuelt == true) {
-                    // Hvis oppgaven prøves å opprettes manuelt skal vi rapportere tilbake feil i saksbehandlingsløsningen
                     throw InternfeilException(
                         "Det eksisterer allerede en oppgave for opprette forbehandling i " +
                             "sak=$sakId, hopper over opprettelse",
@@ -71,10 +73,10 @@ class EtteroppgjoerOppgaveService(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        val oppgaver = oppgaveService.hentOppgaverForReferanse(forbehandlingId.toString())
         val oppgave =
-            oppgaveService
-                .hentOppgaverForReferanse(forbehandlingId.toString())
-                .firstOrNull { it.erIkkeAvsluttet() }
+            oppgaver.firstOrNull { it.erIkkeAvsluttet() }
+                ?: oppgaver.firstOrNull()
                 ?: throw InternfeilException("Fant ingen oppgaver under behandling for forbehandlingId=$forbehandlingId")
 
         if (oppgave.saksbehandler?.ident != brukerTokenInfo.ident()) {

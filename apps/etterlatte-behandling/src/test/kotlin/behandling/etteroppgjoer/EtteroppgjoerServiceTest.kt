@@ -2,11 +2,9 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
@@ -37,6 +35,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -54,13 +53,13 @@ class EtteroppgjoerServiceTest {
     private class TestContext(
         val sakId: SakId,
     ) {
-        val dao: EtteroppgjoerDao = mockk()
+        val dao: EtteroppgjoerDao = mockk(relaxed = true)
         val sigrunKlient: SigrunKlient = mockk()
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakKlient: VedtakKlient = mockk()
-        val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = mockk()
-        val hendelsesDao = mockk<HendelseDao>()
+        val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = mockk(relaxed = true)
+        val hendelsesDao = mockk<HendelseDao>(relaxed = true)
 
         val service =
             EtteroppgjoerService(
@@ -76,16 +75,9 @@ class EtteroppgjoerServiceTest {
         val sisteIverksatteBehandlingId = UUID.randomUUID()
 
         init {
-            every { dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } returns
-                mockk {
-                    every { status } returns EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
-                }
-
-            coEvery { hendelsesDao.etteroppgjoerHendelse(any(), any(), any(), any()) } just Runs
-            coEvery { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) } just Runs
-            coEvery { dao.lagreEtteroppgjoer(any()) } returns 1
-            every { dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) } returns Unit
-            every { dao.oppdaterFerdigstiltForbehandlingId(any(), any(), any()) } returns Unit
+            every { dao.hentEtteroppgjoerForInntektsaar(sakId, any()) } answers {
+                Etteroppgjoer(sakId, secondArg(), EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+            }
 
             coEvery { beregningKlient.hentSanksjoner(any(), any()) } returns emptyList()
             coEvery { beregningKlient.hentBeregningsgrunnlag(any(), any()) } returns
@@ -218,79 +210,7 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `etteroppgjør settes til VENTER_PAA_SVAR ved etterbetaling eller tilbakekreving`() {
-        val ctx = TestContext(sakId)
-        val behandling =
-            foerstegangsbehandling(
-                sakId = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
-                status = BehandlingStatus.ATTESTERT,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
-            )
-        val forbehandling =
-            EtteroppgjoerForbehandling.opprett(
-                sak = behandling.sak,
-                innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
-                sisteIverksatteBehandling = behandling.id,
-                mottattSkatteoppgjoer = true,
-            )
-
-        val etteropgjoerResultat = listOf(EtteroppgjoerResultatType.ETTERBETALING, EtteroppgjoerResultatType.TILBAKEKREVING)
-
-        etteropgjoerResultat.forEach { type ->
-            val forbehandlingMedresultat =
-                forbehandling.copy(
-                    etteroppgjoerResultatType = type,
-                    status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
-                )
-            ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandlingMedresultat)
-            verify {
-                ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedresultat.aar, EtteroppgjoerStatus.VENTER_PAA_SVAR)
-            }
-            verify { ctx.dao.oppdaterFerdigstiltForbehandlingId(sakId, forbehandlingMedresultat.aar, forbehandlingMedresultat.id) }
-        }
-    }
-
-    @Test
-    fun `etteroppgjør settes til FERDIGSTILT ved ingen endring`() {
-        val ctx = TestContext(sakId)
-        val behandling =
-            foerstegangsbehandling(
-                sakId = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
-                status = BehandlingStatus.ATTESTERT,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
-            )
-        val forbehandling =
-            EtteroppgjoerForbehandling.opprett(
-                sak = behandling.sak,
-                innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
-                sisteIverksatteBehandling = behandling.id,
-                mottattSkatteoppgjoer = true,
-            )
-
-        val etteroppgjoerResultat =
-            listOf(
-                EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING,
-                EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING,
-            )
-
-        etteroppgjoerResultat.forEach { type ->
-            val forbehandlingMedResultat =
-                forbehandling.copy(
-                    etteroppgjoerResultatType = type,
-                    status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
-                )
-            ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandlingMedResultat)
-            verify {
-                ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedResultat.aar, EtteroppgjoerStatus.FERDIGSTILT)
-            }
-            verify { ctx.dao.oppdaterFerdigstiltForbehandlingId(sakId, forbehandlingMedResultat.aar, forbehandlingMedResultat.id) }
-        }
-    }
-
-    @Test
-    fun `etteroppgjør kaster feil hvis resultat mangler`() {
+    fun `oppdaterEtteroppgjoerEtterFerdigstiltForbehandling lagrer utledet status og siste forbehandling`() {
         val ctx = TestContext(sakId)
         val behandling =
             foerstegangsbehandling(
@@ -306,10 +226,20 @@ class EtteroppgjoerServiceTest {
                     innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                     sisteIverksatteBehandling = behandling.id,
                     mottattSkatteoppgjoer = true,
-                ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
+                ).copy(
+                    etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
+                    status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT,
+                )
 
-        assertThrows<InternfeilException> {
-            ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling)
+        ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling)
+
+        verify {
+            ctx.dao.lagreEtteroppgjoer(
+                match {
+                    it.status == EtteroppgjoerStatus.VENTER_PAA_SVAR &&
+                        it.sisteFerdigstilteForbehandling == forbehandling.id
+                },
+            )
         }
     }
 
@@ -420,5 +350,33 @@ class EtteroppgjoerServiceTest {
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 1 }) } // f.eks 2025
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 2 }) } // f.eks 2024
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value }) } // f.eks 2026
+    }
+
+    @Test
+    fun `haandterSkatteoppgjoerMottatt oppdaterer status og oppretter oppgave`() {
+        val ctx = TestContext(sakId)
+        val enSak = sak(sakId = sakId)
+        val etteroppgjoer = Etteroppgjoer(sakId = sakId, inntektsaar = 2024, status = EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
+
+        ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, enSak)
+
+        verify { ctx.dao.oppdaterEtteroppgjoerStatus(sakId, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER) }
+        coVerify { ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
+    }
+
+    @ParameterizedTest(name = "haandter skatteoppgjoerMottatt oppretter oppgave={0} kun for VENTER_PAA_SKATTEOPPGJOER")
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["VENTER_PAA_SKATTEOPPGJOER", "MOTTATT_SKATTEOPPGJOER"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `haandterSkatteoppgjoerMottatt kaster ved ugyldig status`(status: EtteroppgjoerStatus) {
+        val ctx = TestContext(sakId)
+        val enSak = sak(sakId = sakId)
+        val etteroppgjoer = Etteroppgjoer(sakId = sakId, inntektsaar = 2024, status = status)
+
+        assertThrows<InternfeilException> {
+            ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, enSak)
+        }
     }
 }

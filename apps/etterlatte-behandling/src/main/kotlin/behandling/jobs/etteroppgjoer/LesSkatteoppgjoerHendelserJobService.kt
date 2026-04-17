@@ -11,7 +11,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelser
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakService
@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
+/**
+ * Vi lytter til skatteoppgjør hendelser fra Sigrun for når skatteoppgjøret er publisert
+ * Hvis en hendelse ident har OMS sak er hendelsen relevant og vi oppretter Etteroppgjør og oppgave for behandle etteroppgjøret
+ */
 class LesSkatteoppgjoerHendelserJobService(
     private val dao: SkatteoppgjoerHendelserDao,
     private val sigrunKlient: SigrunKlient,
@@ -28,26 +32,22 @@ class LesSkatteoppgjoerHendelserJobService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun lesOgBehandleHendelser(request: HendelseKjoeringRequest): Int {
-        val antallLest =
-            inTransaction {
-                val hendelsesliste = lesHendelsesliste(request)
+    fun lesOgBehandleHendelser(request: HendelseKjoeringRequest): Int =
+        inTransaction {
+            val hendelsesliste = lesHendelsesliste(request)
 
-                if (hendelsesliste.hendelser.isNotEmpty()) {
-                    behandleHendelseListe(hendelsesliste.hendelser)
-                }
-
-                hendelsesliste.hendelser.size
+            if (hendelsesliste.hendelser.isNotEmpty()) {
+                behandleHendelseListe(hendelsesliste.hendelser)
             }
 
-        return antallLest
-    }
+            hendelsesliste.hendelser.size
+        }
 
     private fun behandleHendelseListe(hendelsesListe: List<SkatteoppgjoerHendelse>) {
         logger.info("Starter å behandle ${hendelsesListe.size} hendelser fra skatt")
         val (antallRelevante, varighet) =
             measureTimedValue {
-                val antallRelevante =
+                val antallRelevanteHendelser =
                     hendelsesListe.count {
                         behandleHendelse(it)
                     }
@@ -56,12 +56,12 @@ class LesSkatteoppgjoerHendelserJobService(
                     HendelserKjoering(
                         sisteSekvensnummer = hendelsesListe.last().sekvensnummer,
                         antallHendelser = hendelsesListe.size,
-                        antallRelevante = antallRelevante,
+                        antallRelevante = antallRelevanteHendelser,
                         sisteRegistreringstidspunkt = hendelsesListe.last().registreringstidspunkt,
                     ),
                 )
 
-                antallRelevante
+                antallRelevanteHendelser
             }
 
         logger.info(
@@ -72,22 +72,7 @@ class LesSkatteoppgjoerHendelserJobService(
 
     private fun behandleHendelse(hendelse: SkatteoppgjoerHendelse): Boolean {
         logger.info("Behandler hendelse ${hendelse.sekvensnummer}")
-        return try {
-            opprettEllerOppdaterEtteroppgjoer(hendelse)
-        } catch (e: Exception) {
-            throw InternfeilException(
-                "Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}",
-                e,
-            )
-        }
-    }
 
-    /**
-     * Behandler hendelse, det vil si oppdaterer status på etteroppgjøret.
-     *
-     * @return true hvis hendelsen er relevant, dvs. at saken skal ha etteroppgjør.
-     */
-    private fun opprettEllerOppdaterEtteroppgjoer(hendelse: SkatteoppgjoerHendelse): Boolean {
         val inntektsaar =
             hendelse.gjelderPeriode?.toInt() ?: run {
                 logger.info("${hendelse.sekvensnummer}: har ikke gyldig gjelderPeriode, hopper over")
@@ -101,11 +86,6 @@ class LesSkatteoppgjoerHendelserJobService(
                 return false
             }
 
-        sikkerLogg.info(
-            "Behandler hendelse sekvensnummer=${hendelse.sekvensnummer}, ident=$ident, sakId=${sak.id}. " +
-                "Hendelse=${hendelse.toJson()}",
-        )
-
         val innvilgetAar = etteroppgjoerService.finnInnvilgedeAarForSak(sak.id, HardkodaSystembruker.etteroppgjoer)
         if (inntektsaar !in innvilgetAar) {
             logger.info(
@@ -114,21 +94,44 @@ class LesSkatteoppgjoerHendelserJobService(
             return false
         }
 
+        sikkerLogg.info(
+            "Behandler hendelse sekvensnummer=${hendelse.sekvensnummer}, ident=$ident, sakId=${sak.id}. " +
+                "Hendelse=${hendelse.toJson()}",
+        )
+
+        return try {
+            opprettEllerOppdaterEtteroppgjoer(hendelse, sak, inntektsaar)
+            true
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Feilet i behandling av hendelse med sekvensnummer: ${hendelse.sekvensnummer}",
+                e,
+            )
+        }
+    }
+
+    private fun opprettEllerOppdaterEtteroppgjoer(
+        hendelse: SkatteoppgjoerHendelse,
+        sak: Sak,
+        inntektsaar: Int,
+    ) {
         val etteroppgjoer =
-            runCatching {
-                etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
-            }.getOrNull() ?: runBlocking {
-                logger.info("${hendelse.sekvensnummer}: fant ingen etteroppgjør for sak og inntektsår, oppretter nytt etteroppgjør")
-                etteroppgjoerService.opprettNyttEtteroppgjoer(sak.id, inntektsaar)
-            }
+            etteroppgjoerService.finnEtteroppgjoerForInntektsaar(sak.id, inntektsaar)
+                ?: run {
+                    logger.info("${hendelse.sekvensnummer}: fant ingen etteroppgjør for sak og inntektsår, oppretter nytt etteroppgjør")
+                    etteroppgjoerService.opprettNyttEtteroppgjoer(sak.id, inntektsaar)
+                }
 
         etteroppgjoerService.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
-
-        return true
     }
 
     private fun lesHendelsesliste(request: HendelseKjoeringRequest): HendelseslisteFraSkatt {
         val sisteKjoering = dao.hentSisteKjoering()
-        return runBlocking { sigrunKlient.hentHendelsesliste(request.antallHendelser, sisteKjoering.nesteSekvensnummer()) }
+        return runBlocking {
+            sigrunKlient.hentHendelsesliste(
+                request.antallHendelser,
+                sisteKjoering.nesteSekvensnummer(),
+            )
+        }
     }
 }

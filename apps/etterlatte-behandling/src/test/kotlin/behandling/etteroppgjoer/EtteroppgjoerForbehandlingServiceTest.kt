@@ -58,13 +58,13 @@ import kotlin.test.assertNotEquals
 
 class EtteroppgjoerForbehandlingServiceTest {
     private class TestContext {
-        val dao: EtteroppgjoerForbehandlingDao = mockk()
+        val dao: EtteroppgjoerForbehandlingDao = mockk(relaxed = true)
         val sakDao: SakLesDao = mockk()
         val etteroppgjoerService: EtteroppgjoerService = mockk()
-        val oppgaveService: OppgaveService = mockk()
+        val oppgaveService: OppgaveService = mockk(relaxed = true)
         val inntektskomponentService: InntektskomponentService = mockk()
         val pensjonsgivendeInntektService: PensjonsgivendeInntektService = mockk()
-        val hendelserService: EtteroppgjoerForbehandlingHendelseService = mockk()
+        val hendelserService: EtteroppgjoerForbehandlingHendelseService = mockk(relaxed = true)
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakKlient: VedtakKlient = mockk()
@@ -127,14 +127,10 @@ class EtteroppgjoerForbehandlingServiceTest {
                 }
             coEvery { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
             every { oppgaveService.hentOppgaverForSakAvType(any(), any()) } returns emptyList()
-            every {
-                oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any(), any(), any())
-            } returns mockk(relaxed = true)
             every { oppgaveService.hentOppgaverForReferanse(any()) } returns emptyList()
             coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer
             every { behandlingService.hentUtlandstilknytningForSak(any()) } returns null
 
-            every { dao.lagreForbehandling(any()) } returns 1
             every { dao.kopierSummerteInntekter(any(), any()) } returns 1
             every { dao.kopierPensjonsgivendeInntekt(any(), any()) } returns 1
         }
@@ -628,7 +624,7 @@ class EtteroppgjoerForbehandlingServiceTest {
     }
 
     @Test
-    fun `skal ikke lagre ny informasjon fra bruker for ferdigstilte forbehandlinger`() {
+    fun `skal ikke tillate oppdatering av ferdigstilt forbehandling`() {
         val ctx = TestContext()
         val forbehandling =
             EtteroppgjoerForbehandling
@@ -641,47 +637,17 @@ class EtteroppgjoerForbehandlingServiceTest {
 
         ctx.returnsForbehandling(forbehandling)
 
-        assertThrows(ForbehandlingKanIkkeEndres::class.java) {
-            ctx.service.lagreInformasjonFraBruker(forbehandling.id, JaNei.JA, JaNei.NEI, null)
+        listOf<() -> Unit>(
+            { ctx.service.lagreInformasjonFraBruker(forbehandling.id, JaNei.JA, JaNei.NEI, null) },
+            { ctx.service.lagreOmOpphoerSkyldesDoedsfall(forbehandling.id, JaNei.JA, JaNei.JA) },
+            { ctx.service.lagreAktivitetsplikt(forbehandling.id, JaNei.JA, "begrunnelse") },
+        ).forEach { oppdatering ->
+            assertThrows(ForbehandlingKanIkkeEndres::class.java) {
+                oppdatering()
+            }
         }
-    }
 
-    @Test
-    fun `skal ikke lagre ny informasjon om opphoer ved doedsfall når forbehandling er ferdigstilt`() {
-        val ctx = TestContext()
-        val forbehandling =
-            EtteroppgjoerForbehandling
-                .opprett(
-                    sak = ctx.behandling.sak,
-                    innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
-                    sisteIverksatteBehandling = ctx.behandling.id,
-                    mottattSkatteoppgjoer = true,
-                ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
-
-        ctx.returnsForbehandling(forbehandling)
-
-        assertThrows(ForbehandlingKanIkkeEndres::class.java) {
-            ctx.service.lagreOmOpphoerSkyldesDoedsfall(forbehandling.id, JaNei.JA, JaNei.JA)
-        }
-    }
-
-    @Test
-    fun `skal ikke lagre informasjon om aktivitetsplikt når forbehandling er ferdigstilt`() {
-        val ctx = TestContext()
-        val forbehandling =
-            EtteroppgjoerForbehandling
-                .opprett(
-                    sak = ctx.behandling.sak,
-                    innvilgetPeriode = Periode(YearMonth.of(2024, 1), null),
-                    sisteIverksatteBehandling = ctx.behandling.id,
-                    mottattSkatteoppgjoer = true,
-                ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
-
-        ctx.returnsForbehandling(forbehandling)
-
-        assertThrows(ForbehandlingKanIkkeEndres::class.java) {
-            ctx.service.lagreAktivitetsplikt(forbehandling.id, JaNei.JA, "begrunnelse")
-        }
+        verify(exactly = 0) { ctx.dao.lagreForbehandling(any()) }
     }
 
     @Test

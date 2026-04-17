@@ -4,6 +4,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.behandling.sakId1
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 class EtteroppgjoerModelTest {
     private fun etteroppgjoer(status: EtteroppgjoerStatus) =
@@ -45,33 +47,43 @@ class EtteroppgjoerModelTest {
 
     // kanOppretteRevurdering
 
-    @Test
-    fun `kanOppretteRevurdering er true for VENTER_PAA_SVAR, FERDIGSTILT og OMGJOERING`() {
-        etteroppgjoer(EtteroppgjoerStatus.VENTER_PAA_SVAR).kanOppretteRevurdering() shouldBe true
-        etteroppgjoer(EtteroppgjoerStatus.FERDIGSTILT).kanOppretteRevurdering() shouldBe true
-        etteroppgjoer(EtteroppgjoerStatus.OMGJOERING).kanOppretteRevurdering() shouldBe true
+    @ParameterizedTest
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["VENTER_PAA_SVAR", "FERDIGSTILT", "OMGJOERING"],
+    )
+    fun `kanOppretteRevurdering er true for gyldige statuser`(status: EtteroppgjoerStatus) {
+        etteroppgjoer(status).kanOppretteRevurdering() shouldBe true
     }
 
-    @Test
-    fun `kanOppretteRevurdering er false for statuser som ikke er gyldige`() {
-        etteroppgjoer(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER).kanOppretteRevurdering() shouldBe false
-        etteroppgjoer(EtteroppgjoerStatus.UNDER_REVURDERING).kanOppretteRevurdering() shouldBe false
-        etteroppgjoer(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER).kanOppretteRevurdering() shouldBe false
+    @ParameterizedTest
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["VENTER_PAA_SVAR", "FERDIGSTILT", "OMGJOERING"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `kanOppretteRevurdering er false for ugyldige statuser`(status: EtteroppgjoerStatus) {
+        etteroppgjoer(status).kanOppretteRevurdering() shouldBe false
     }
 
     // kanOppretteForbehandling
 
-    @Test
-    fun `kanOppretteForbehandling er true for MOTTATT_SKATTEOPPGJOER og MANGLER_SKATTEOPPGJOER`() {
-        etteroppgjoer(EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER).kanOppretteForbehandling() shouldBe true
-        etteroppgjoer(EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER).kanOppretteForbehandling() shouldBe true
+    @ParameterizedTest
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["MOTTATT_SKATTEOPPGJOER", "MANGLER_SKATTEOPPGJOER"],
+    )
+    fun `kanOppretteForbehandling er true for gyldige statuser`(status: EtteroppgjoerStatus) {
+        etteroppgjoer(status).kanOppretteForbehandling() shouldBe true
     }
 
-    @Test
-    fun `kanOppretteForbehandling er false for alle andre statuser`() {
-        etteroppgjoer(EtteroppgjoerStatus.VENTER_PAA_SVAR).kanOppretteForbehandling() shouldBe false
-        etteroppgjoer(EtteroppgjoerStatus.FERDIGSTILT).kanOppretteForbehandling() shouldBe false
-        etteroppgjoer(EtteroppgjoerStatus.UNDER_REVURDERING).kanOppretteForbehandling() shouldBe false
-        etteroppgjoer(EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER).kanOppretteForbehandling() shouldBe false
+    @ParameterizedTest
+    @EnumSource(
+        value = EtteroppgjoerStatus::class,
+        names = ["MOTTATT_SKATTEOPPGJOER", "MANGLER_SKATTEOPPGJOER"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `kanOppretteForbehandling er false for ugyldige statuser`(status: EtteroppgjoerStatus) {
+        etteroppgjoer(status).kanOppretteForbehandling() shouldBe false
     }
 }

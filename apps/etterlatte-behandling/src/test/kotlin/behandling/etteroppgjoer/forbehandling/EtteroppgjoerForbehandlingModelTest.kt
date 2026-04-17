@@ -2,17 +2,18 @@ package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerGrenseDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.sak
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -31,7 +32,29 @@ class EtteroppgjoerForbehandlingModelTest {
         )
 
     private fun beregnetResultat(type: EtteroppgjoerResultatType): BeregnetEtteroppgjoerResultatDto =
-        mockk { every { resultatType } returns type }
+        BeregnetEtteroppgjoerResultatDto(
+            id = UUID.randomUUID(),
+            aar = 2024,
+            forbehandlingId = UUID.randomUUID(),
+            sisteIverksatteBehandlingId = UUID.randomUUID(),
+            utbetaltStoenad = 1000,
+            nyBruttoStoenad = 1000,
+            differanse = 0,
+            grense =
+                EtteroppgjoerGrenseDto(
+                    tilbakekreving = 0.0,
+                    etterbetaling = 0.0,
+                    rettsgebyr = 0,
+                    rettsgebyrGyldigFra = LocalDate.of(2024, 1, 1),
+                ),
+            resultatType = type,
+            harIngenInntekt = false,
+            tidspunkt = Tidspunkt.now(),
+            kilde = Grunnlagsopplysning.Saksbehandler.create("Z12345"),
+            avkortingForbehandlingId = UUID.randomUUID(),
+            avkortingSisteIverksatteId = UUID.randomUUID(),
+            vedtakReferanse = emptyList(),
+        )
 
     // tilBeregnet
 

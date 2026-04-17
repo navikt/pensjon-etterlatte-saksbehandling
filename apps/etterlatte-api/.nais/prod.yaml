@@ -104,7 +104,7 @@ spec:
     - name: ROLLE_GJENNYSAKSBEHANDLER
       value: e4eb614b-d37d-4721-ba1b-df8f0fd16f85
     - name: BRUK_VEDTAK_FRA_BEHANDLING
-      value: "nei"
+      value: "ja"
   accessPolicy:
     inbound:
       rules:

@@ -115,7 +115,7 @@ spec:
     - name: ETTERLATTE_PROXY_SCOPE
       value: api://prod-fss.etterlatte.etterlatte-proxy/.default
     - name: BRUK_VEDTAK_FRA_BEHANDLING
-      value: "nei"
+      value: "ja"
     - name: GRENSESNITTAVSTEMMING_ENABLED
       value: "true"
     - name: KONSISTENSAVSTEMMING_ENABLED

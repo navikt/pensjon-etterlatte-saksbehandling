@@ -242,11 +242,18 @@ class VedtaksbrevService(
         }
 
     fun hentKlageForBehandling(behandling: DetaljertBehandling): Klage? {
+        validerRevurderingOmgjoringHarRelatertBehandlingId(behandling)
         val relatertBehandlingId = behandling.relatertBehandlingId ?: return null
         if (behandling.kanHaKlage()) {
             return klageService.hentKlage(relatertBehandlingId) // returnerer null hvis vi ikke finner klage
         }
         return null
+    }
+}
+
+private fun validerRevurderingOmgjoringHarRelatertBehandlingId(behandling: DetaljertBehandling) {
+    if (behandling.revurderingsaarsak == OMGJOERING_ETTER_KLAGE && behandling.relatertBehandlingId == null) {
+        throw InternfeilException("Behandling med revurderingsårsak OMGJOERING_ETTER_KLAGE må ha relatertBehandlingId")
     }
 }
 

@@ -234,21 +234,26 @@ class BrevdataFacade(
         validerRevurderingOmgjoringHarRelatertBehandlingId(behandling)
         val relatertBehandlingId = behandling.relatertBehandlingId ?: return null
 
-        when (behandling.kanHaKlage()) {
-            true -> return try {
-                return behandlingService.hentKlage(relatertBehandlingId, bruker)
-            } catch (e: Exception) {
-                logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
-                throw e
-            }
-
-            false -> return null
+        return when (behandling.kanHaKlage()) {
+            true -> hentKlageOgLoggevtFeil(relatertBehandlingId, bruker)
+            false -> null
         }
     }
 
+    private suspend fun hentKlageOgLoggevtFeil(
+        relatertBehandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ): Klage =
+        try {
+            behandlingService.hentKlage(relatertBehandlingId, bruker)
+        } catch (e: Exception) {
+            logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
+            throw e
+        }
+
     private fun validerRevurderingOmgjoringHarRelatertBehandlingId(behandling: DetaljertBehandling) {
         if (behandling.revurderingsaarsak == OMGJOERING_ETTER_KLAGE && behandling.relatertBehandlingId == null) {
-            throw IllegalStateException("Behandling med revurderingsårsak OMGJOERING_ETTER_KLAGE må ha relatertBehandlingId")
+            throw InternfeilException("Behandling med revurderingsårsak OMGJOERING_ETTER_KLAGE må ha relatertBehandlingId")
         }
     }
 }

@@ -193,6 +193,14 @@ class BeregnOmstillingsstoenadService(
         tilDato: LocalDate? = null,
     ): Beregning {
         vedtaksperioder.validerVedtaksperioder()
+
+        val virkningstidspunktErEtterAlleEksisterendePerioder =
+            vedtaksperioder.all { it.tilOgMed != null && it.tilOgMed!! < virkningstidspunkt }
+
+        if (virkningstidspunktErEtterAlleEksisterendePerioder) {
+            return beregnOmstillingsstoenad(behandlingId, grunnlag, beregningsgrunnlag, virkningstidspunkt, tilDato)
+        }
+
         if (vedtaksperioder.none {
                 it.fraOgMed <= virkningstidspunkt && (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
             }

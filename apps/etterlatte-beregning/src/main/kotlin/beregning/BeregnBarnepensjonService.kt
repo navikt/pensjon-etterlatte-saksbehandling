@@ -75,6 +75,22 @@ class BeregnBarnepensjonService(
         tilDato: LocalDate? = null,
     ): Beregning {
         vedtaksperioder.validerVedtaksperioder()
+
+        val virkningstidspunktErEtterAlleEksisterendePerioder =
+            vedtaksperioder.all { it.tilOgMed != null && it.tilOgMed!! < virkningstidspunkt }
+
+        if (virkningstidspunktErEtterAlleEksisterendePerioder) {
+            return beregnBarnepensjon(
+                behandlingId,
+                grunnlag,
+                beregningsgrunnlag,
+                trygdetider,
+                virkningstidspunkt,
+                kunGammeltRegelverk,
+                tilDato,
+            )
+        }
+
         if (vedtaksperioder.none {
                 it.fraOgMed <= virkningstidspunkt && (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
             }

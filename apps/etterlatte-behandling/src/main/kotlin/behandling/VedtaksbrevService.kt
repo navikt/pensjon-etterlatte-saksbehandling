@@ -26,10 +26,10 @@ import no.nav.etterlatte.brev.model.oms.omsBeregning
 import no.nav.etterlatte.brev.model.oms.toAvkortetBeregningsperiode
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.kodeverk.KodeverkService
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.OMGJOERING_ETTER_KLAGE
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -42,7 +42,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
@@ -59,8 +58,6 @@ class VedtaksbrevService(
     private val klageService: KlageService,
     private val kodeverkService: KodeverkService,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
-
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
@@ -174,7 +171,7 @@ class VedtaksbrevService(
                 } else {
                     avdoede.single().doedsdato
                 }
-            val klage = hentKlageForBehandling(behandling.relatertBehandlingId, behandling)
+            val klage = hentKlageForBehandling(behandling)
 
             BrevRequest(
                 sak = sak,
@@ -244,27 +241,35 @@ class VedtaksbrevService(
             )
         }
 
-    fun hentKlageForBehandling(
-        relatertBehandlingId: UUID?,
-        behandling: DetaljertBehandling?,
-    ): Klage? {
-        if (relatertBehandlingId == null) return null
-        if (behandling?.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            try {
-                val klageId = relatertBehandlingId
-                klageService.hentKlage(klageId)
-            } catch (e: Exception) {
-                logger.error("Fant ikke klage med id=$relatertBehandlingId", e)
-                logger.info(
-                    "Kunne ikke finne klage med id=$relatertBehandlingId, denne førstegangsbehandlingen med id=${behandling.id} gjelder ikke omgjøring på grunn av klage",
-                )
-            }
-        } else if (behandling?.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
-            klageService.hentKlage(relatertBehandlingId)
+    fun hentKlageForBehandling(behandling: DetaljertBehandling): Klage? {
+        validerRevurderingOmgjoringHarRelatertBehandlingId(behandling)
+        val relatertBehandlingId = behandling.relatertBehandlingId ?: return null
+        if (behandling.kanHaKlage()) {
+            return klageService.hentKlage(relatertBehandlingId) // returnerer null hvis vi ikke finner klage
         }
         return null
     }
 }
+
+private fun validerRevurderingOmgjoringHarRelatertBehandlingId(behandling: DetaljertBehandling) {
+    if (behandling.revurderingsaarsak == OMGJOERING_ETTER_KLAGE && behandling.relatertBehandlingId == null) {
+        throw InternfeilException("Behandling med revurderingsårsak OMGJOERING_ETTER_KLAGE må ha relatertBehandlingId")
+    }
+}
+
+/*
+┌───────────────────────────────────────────────────────┬──────────────────────────────────┐
+│ Behandlingstype + årsak                               │ relatertBehandlingId peker på    │
+├───────────────────────────────────────────────────────┼──────────────────────────────────┤
+│ FØRSTEGANGSBEHANDLING (omgjøring av avslag pga klage) │ klage-UUID (eller null)          │
+├───────────────────────────────────────────────────────┼──────────────────────────────────┤
+│ REVURDERING – OMGJOERING_ETTER_KLAGE                  │ alltid klage-UUID                │
+├───────────────────────────────────────────────────────┼──────────────────────────────────┤
+│ REVURDERING – ETTEROPPGJOER                           │ forbehandling-UUID (ikke klage!) │
+└───────────────────────────────────────────────────────┴──────────────────────────────────┘
+*/
+private fun DetaljertBehandling.kanHaKlage(): Boolean =
+    this.revurderingsaarsak == OMGJOERING_ETTER_KLAGE || this.behandlingType == FØRSTEGANGSBEHANDLING
 
 fun innvilgetMindreEnnFireMndEtterDoedsfall(
     innvilgelsesDato: LocalDate = LocalDate.now(),

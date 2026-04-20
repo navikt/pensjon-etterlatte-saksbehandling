@@ -201,6 +201,8 @@ internal class ApplicationContext(
 
     val behandlingsHendelser get() = kafkaModule.behandlingsHendelser
 
+    val automatiskVedtakBehandlingService get() = highLevelServiceModule.automatiskVedtakBehandlingService
+
     val lesSkatteoppgjoerHendelserJobService get() = jobModule.lesSkatteoppgjoerHendelserJobService
     val aarligInntektsjusteringJobbService get() = jobModule.aarligInntektsjusteringJobbService
 

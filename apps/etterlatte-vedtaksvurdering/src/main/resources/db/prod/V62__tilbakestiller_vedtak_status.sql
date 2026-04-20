@@ -5,4 +5,5 @@ SET vedtakstatus      = 'OPPRETTET',
     datofattet        = null,
     saksbehandlerid   = null
 WHERE id = 69169
-  and behandlingid = '8a780fe4-8d62-487d-9e5a-0ee1e2ac2761';
+  and behandlingid = '8a780fe4-8d62-487d-9e5a-0ee1e2ac2761'
+  and vedtakstatus = 'FATTET_VEDTAK';

@@ -32,6 +32,7 @@ import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.behandling.vedtaksbehandling.behandlingMedBrevRoutes
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.etteroppgjoerSystembrukerVedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.klagevedtakRoute
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.samordningSystembrukerVedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.tilbakekrevingvedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.vedtaksvurderingRoute
 import no.nav.etterlatte.brev.brevRoute
@@ -112,6 +113,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.uttrekkLoependeYtelseEtter67Job,
         context.lesSkatteoppgjoerHendelserJob,
         context.oppdaterSkatteoppgjoerIkkeMottattJob,
+        context.outboxJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -270,6 +272,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     klagevedtakRoute(vedtakKlageService = applicationContext.vedtakKlageService)
 
     etteroppgjoerSystembrukerVedtakRoute(applicationContext.vedtakEtteroppgjoerService)
+    samordningSystembrukerVedtakRoute(applicationContext.vedtakSamordningService)
     tilbakekrevingvedtakRoute(applicationContext.vedtakTilbakekrevingService)
 }
 

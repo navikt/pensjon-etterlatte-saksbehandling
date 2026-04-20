@@ -73,7 +73,7 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettel
         <Box width="40rem">
           <form onSubmit={handleSubmit(opprettOppfoelgingsoppgave)}>
             <Modal.Body>
-              <VStack gap="4">
+              <VStack gap="space-16">
                 <BodyShort>
                   En oppfølgingsoppgave har en egendefinert frist og merknad, og kan brukes til å lage påminnelser om
                   noe som skal følges opp i saken.

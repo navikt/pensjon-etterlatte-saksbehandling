@@ -44,7 +44,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
               <Dropdown.Menu.GroupedList.Heading>Velg dokument</Dropdown.Menu.GroupedList.Heading>
               <Dropdown.Menu.Divider />
               {dokumenter.map((dok, index) => (
-                <HStack key={index} gap="4">
+                <HStack key={index} gap="space-16">
                   <Dropdown.Menu.GroupedList.Item
                     key={dok.dokumentInfoId}
                     onClick={() => open(dok.dokumentInfoId)}
@@ -53,7 +53,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
                     {dok.tittel}
                   </Dropdown.Menu.GroupedList.Item>
                   {!dok.dokumentvarianter[0]?.saksbehandlerHarTilgang && (
-                    <Box padding="4">
+                    <Box padding="space-16">
                       <Alert variant="warning" size="small">
                         Ikke Tilgang
                       </Alert>
@@ -78,7 +78,6 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
           Ingen tilgang
         </Alert>
       )}
-
       <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)} aria-label={tittel}>
         <Modal.Header>
           <Heading spacing level="2" size="medium">

@@ -44,7 +44,6 @@ export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalP
       >
         Journalfør
       </Button>
-
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Body>
           <Heading size="medium" id="modal-heading" spacing>
@@ -72,7 +71,7 @@ export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalP
           {isSuccess(oppdaterStatus) ? (
             <Alert variant="success">Journalpost journalført ok! Laster siden på nytt...</Alert>
           ) : (
-            <HStack gap="4" justify="center">
+            <HStack gap="space-16" justify="center">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(oppdaterStatus)}>
                 Nei, avbryt
               </Button>

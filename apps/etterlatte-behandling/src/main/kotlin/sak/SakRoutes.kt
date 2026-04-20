@@ -519,4 +519,3 @@ data class SakerDto(
 data class SakIdDto(
     val sakId: SakId,
 )
-

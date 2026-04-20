@@ -67,7 +67,7 @@ export default function VelgJournalpost({ journalpostStatus }: { journalpostStat
 }
 
 const JournalpostContainer = styled(Box)`
-  padding: var(--a-spacing-8);
+  padding: var(--ax-space-32);
   min-width: 680px;
 `
 

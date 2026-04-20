@@ -8,8 +8,10 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.brev.model.Brev
@@ -149,7 +151,7 @@ class EtteroppgjoerForbehandlingService(
         )
 
         val forbehandling = hentForbehandling(forbehandlingId)
-        hentOgLagreAInntektOgPgi(forbehandling.sak, forbehandling)
+        hentOgLagreAInntektOgPgi(forbehandlingId)
         hendelserService.registrerOgSendHendelse(
             etteroppgjoerForbehandling = forbehandling,
             hendelseType = EtteroppgjoerForbehandlingHendelser.OPPDATERT_INNTEKT,
@@ -298,11 +300,13 @@ class EtteroppgjoerForbehandlingService(
 
         kanOppretteForbehandlingForEtteroppgjoer(sak, inntektsaar, oppgaveId, etteroppgjoer, brukerTokenInfo)
 
-        val nyForbehandling = opprettForbehandling(sak, inntektsaar, etteroppgjoer, brukerTokenInfo)
-        dao.lagreForbehandling(nyForbehandling)
-        etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
+        val nyForbehandling =
+            opprettForbehandling(sak, inntektsaar, brukerTokenInfo)
+                .let {
+                    hentOgLagreAInntektOgPgi(it.id)
+                }
 
-        hentOgLagreAInntektOgPgi(sak, nyForbehandling)
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(sak.id, inntektsaar, EtteroppgjoerStatus.UNDER_FORBEHANDLING)
 
         hendelserService.registrerOgSendHendelse(
             etteroppgjoerForbehandling = nyForbehandling,
@@ -375,7 +379,7 @@ class EtteroppgjoerForbehandlingService(
                     sakId = sakId,
                     inntektsAar = inntektsaar,
                 )
-            } catch (e: Error) {
+            } catch (e: Exception) {
                 logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
             }
         }
@@ -482,6 +486,21 @@ class EtteroppgjoerForbehandlingService(
             }
     }
 
+    fun lagreAktivitetsplikt(
+        forbehandlingId: UUID,
+        aktivitetspliktOverholdt: JaNei,
+        begrunnelse: String,
+    ) {
+        val forbehandling = hentForbehandling(forbehandlingId)
+        if (!forbehandling.erRedigerbar()) {
+            throw ForbehandlingKanIkkeEndres()
+        }
+
+        forbehandling
+            .oppdaterAktivitetsplikt(aktivitetspliktOverholdt, begrunnelse)
+            .also { dao.lagreForbehandling(it) }
+    }
+
     fun kanOppretteForbehandlingForEtteroppgjoer(
         sak: Sak,
         inntektsaar: Int,
@@ -564,7 +583,6 @@ class EtteroppgjoerForbehandlingService(
     private fun opprettForbehandling(
         sak: Sak,
         inntektsaar: Int,
-        etteroppgjoer: Etteroppgjoer,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerForbehandling {
         val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sak.id, brukerTokenInfo)
@@ -584,7 +602,6 @@ class EtteroppgjoerForbehandlingService(
                 innvilgetPeriode = innvilgetPeriode,
                 sisteIverksatteBehandling = sisteVedtakMedAvkorting.behandlingId,
                 harVedtakAvTypeOpphoer = vedtakMedGjeldendeOpphoer != null,
-                mottattSkatteoppgjoer = etteroppgjoer.status != EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER,
             )
     }
 
@@ -759,41 +776,69 @@ class EtteroppgjoerForbehandlingService(
         }
     }
 
-    private fun hentOgLagreAInntektOgPgi(
-        sak: Sak,
-        forbehandling: EtteroppgjoerForbehandling,
-    ) {
-        try {
+    /**
+     * Henter A-inntekt og PGI, og setter mottattSkatteoppgjoer på forbehandlingen til true hvis PGI ble funnet.
+     */
+    private fun hentOgLagreAInntektOgPgi(forbehandlingId: UUID): EtteroppgjoerForbehandling {
+        val forbehandling = hentForbehandling(forbehandlingId)
+
+        val pgi = hentPgi(forbehandling)
+        val oppdatertForbehandling =
+            if (pgi != null) {
+                dao.lagrePensjonsgivendeInntekt(forbehandling.id, pgi)
+                forbehandling.copy(mottattSkatteoppgjoer = true)
+            } else {
+                forbehandling
+            }
+
+        val aInntekt = hentAInntekt(oppdatertForbehandling)
+        if (aInntekt != null) {
+            dao.lagreSummerteInntekter(oppdatertForbehandling.id, aInntekt)
+        }
+        if (oppdatertForbehandling != forbehandling) {
+            dao.lagreForbehandling(oppdatertForbehandling)
+        }
+
+        return oppdatertForbehandling
+    }
+
+    private fun hentPgi(forbehandling: EtteroppgjoerForbehandling): SummertePensjonsgivendeInntekter? {
+        val sak = forbehandling.sak
+        return try {
             val pensjonsgivendeInntekter =
-                runBlocking { pensjonsgivendeInntektService.hentSummerteInntekter(sak.ident, forbehandling.aar) }
-            dao.lagrePensjonsgivendeInntekt(forbehandling.id, pensjonsgivendeInntekter)
+                runBlocking {
+                    pensjonsgivendeInntektService.hentSummerteInntekter(sak.ident, forbehandling.aar)
+                }
+            pensjonsgivendeInntekter
         } catch (e: Exception) {
-            logger.warn(
-                "Kunne ikke hente og lagre PGI fra Skatt for forbehandlingen i sakId=${sak.id}",
-                e,
-            )
             if (forbehandling.mottattSkatteoppgjoer) {
                 throw InternfeilException(
                     "Kunne ikke hente PGI fra skatt. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
                     e,
                 )
+            } else {
+                logger.warn("Kunne ikke hente og lagre PGI fra Skatt for forbehandlingen i sakId=${sak.id}", e)
+                null
             }
         }
+    }
 
-        try {
-            val summerteInntekter =
-                runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, forbehandling.aar) }
-            dao.lagreSummerteInntekter(forbehandling.id, summerteInntekter)
+    private fun hentAInntekt(forbehandling: EtteroppgjoerForbehandling): SummerteInntekterAOrdningen? {
+        val sak = forbehandling.sak
+        return try {
+            runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, forbehandling.aar) }
         } catch (e: Exception) {
-            logger.warn(
-                "Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=${sak.id}",
-                e,
-            )
             if (forbehandling.mottattSkatteoppgjoer) {
                 throw InternfeilException(
-                    "Kunne ikke inntekter fra A-ordningen. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
+                    "Kunne ikke hente inntekter fra A-ordningen. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
                     e,
                 )
+            } else {
+                logger.warn(
+                    "Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=${sak.id}",
+                    e,
+                )
+                null
             }
         }
     }
@@ -846,6 +891,11 @@ data class OpphoerSkyldesDoedsfallRequest(
     val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
 )
 
+data class AktivitetspliktRequest(
+    val aktivitetspliktOverholdt: JaNei,
+    val begrunnelse: String,
+)
+
 data class BeregnetResultatOgBrevSomSkalSlettes(
     val resultat: BeregnetEtteroppgjoerResultatDto,
     val brevIdOgSakIdSomSkalSlettes: Pair<BrevID, SakId>?,
@@ -858,7 +908,7 @@ class FantIkkeForbehandling(
         detail = "Fant ikke forbehandling etteroppgjør $behandlingId",
     )
 
-class FantIkkEtteroppgjoer(
+class FantIkkeEtteroppgjoer(
     val sakId: SakId,
     val inntektsaar: Int,
 ) : IkkeFunnetException(

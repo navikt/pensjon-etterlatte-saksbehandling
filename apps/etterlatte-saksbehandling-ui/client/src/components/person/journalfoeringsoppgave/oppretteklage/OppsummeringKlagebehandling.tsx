@@ -42,12 +42,11 @@ export default function OppsummeringKlagebehandling() {
           {formaterSakstype(oppgave.sakType)}
         </Tag>
       </Heading>
-
-      <VStack gap="4">
+      <VStack gap="space-16">
         <Info label="Klage framsatt dato" tekst={formaterDato(mottattDato)} />
       </VStack>
       <div>
-        <HStack gap="4" justify="center">
+        <HStack gap="space-16" justify="center">
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>

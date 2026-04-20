@@ -42,7 +42,6 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
       <Heading size="small" spacing>
         Dokumenter
       </Heading>
-
       {journalposter?.map((journalpost) => (
         <div key={journalpost.journalpostId}>
           {journalpost.dokumenter.map((dokumentInfo) => (
@@ -74,7 +73,6 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
           <i>Ingen dokumenter ble funnet</i>
         </Detail>
       )}
-
       {sideInfo?.finnesNesteSide && (
         <Button
           variant="secondary"
@@ -85,15 +83,18 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
           Last flere
         </Button>
       )}
-
       {mapResult(status, {
         pending: <Spinner label="Henter dokumenter" />,
         error: (error) => (
           <ApiErrorAlert>{error.detail || 'Det har oppstått en feil ved henting av dokumenter'}</ApiErrorAlert>
         ),
       })}
-
-      <Box borderColor="border-subtle" borderWidth="1 0 0 0" paddingBlock="4 0" marginBlock="4 0">
+      <Box
+        borderColor="neutral-subtle"
+        borderWidth="1 0 0 0"
+        paddingBlock="space-16 space-0"
+        marginBlock="space-16 space-0"
+      >
         <HStack justify="end">
           <PersonButtonLink
             fnr={fnr}

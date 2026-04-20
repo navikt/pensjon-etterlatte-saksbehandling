@@ -22,7 +22,7 @@ export const SumAvFaktiskInntekt = ({ faktiskInntekt }: { faktiskInntekt: Faktis
   }
 
   return (
-    <VStack gap="2" padding="2" minWidth="25rem" maxWidth="fit-content">
+    <VStack gap="space-8" padding="space-8" minWidth="25rem" maxWidth="fit-content">
       <Label>Sum</Label>
       <Label>= {sumAvFaktiskInntektStringBulder(faktiskInntekt)}</Label>
     </VStack>

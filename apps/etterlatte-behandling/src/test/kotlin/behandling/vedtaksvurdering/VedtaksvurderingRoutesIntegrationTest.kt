@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.vedtaksvurdering
 
 import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -22,12 +23,15 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxItemType
+import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxRepository
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagVersjonValidering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -35,12 +39,16 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -72,7 +80,6 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun beforeAll() {
         startServer(
             featureToggleService = DummyFeatureToggleService(),
-
         ).also {
             resetDatabase()
         }
@@ -118,15 +125,18 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
                     contentType(ContentType.Application.Json)
                 }
             response.status shouldBe HttpStatusCode.OK
-        }
-        inTransaction {
-            with(vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)!!) {
-                type shouldBe VedtakType.INNVILGELSE
-                vedtakFattet shouldBe null
-                sakId shouldBe behandling.sak.id
-                val vedtakInnhold = innhold as VedtakInnhold.Behandling
-                vedtakInnhold.virkningstidspunkt shouldBe virkningstidspunkt
-                vedtakInnhold.opphoerFraOgMed shouldBe null
+            val opprettetVedtak: VedtakDto = deserialize(response.body())
+
+            inTransaction {
+                with(vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)!!) {
+                    type shouldBe VedtakType.INNVILGELSE
+                    vedtakFattet shouldBe null
+                    sakId shouldBe behandling.sak.id
+                    id shouldBe opprettetVedtak.id
+                    val vedtakInnhold = innhold as VedtakInnhold.Behandling
+                    vedtakInnhold.virkningstidspunkt shouldBe virkningstidspunkt
+                    vedtakInnhold.opphoerFraOgMed shouldBe null
+                }
             }
         }
     }
@@ -189,7 +199,8 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
             response.status shouldBe HttpStatusCode.OK
         }
         inTransaction {
-            with(vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)!!) {
+            val vedtak = vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)
+            with(vedtak!!) {
                 type shouldBe VedtakType.INNVILGELSE
                 vedtakFattet?.ansvarligSaksbehandler shouldBe saksbehandlerIdent
                 attestasjon?.attestant shouldBe attestantIdent
@@ -198,6 +209,12 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 vedtakInnhold.virkningstidspunkt shouldBe virkningstidspunkt
                 vedtakInnhold.opphoerFraOgMed shouldBe null
             }
+            val upublisertEksternVedtakshendelse =
+                OutboxRepository(applicationContext.dataSource)
+                    .hentUpubliserte()
+                    .single()
+            upublisertEksternVedtakshendelse.vedtakId shouldBe vedtak.id
+            upublisertEksternVedtakshendelse.type shouldBe OutboxItemType.ATTESTERT
         }
     }
 
@@ -250,7 +267,32 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
             beregningId = UUID.randomUUID(),
             behandlingId = behandling.id,
             type = Beregningstype.BP,
-            beregningsperioder = emptyList(),
+            beregningsperioder =
+                listOf(
+                    Beregningsperiode(
+                        id = UUID.randomUUID(),
+                        datoFOM = YearMonth.of(2024, 1),
+                        datoTOM = null,
+                        utbetaltBeloep = 10_000,
+                        soeskenFlokk = emptyList(),
+                        institusjonsopphold = null,
+                        grunnbelop = 118620,
+                        grunnbelopMnd = 9885,
+                        trygdetid = 40,
+                        trygdetidForIdent = "avdød",
+                        beregningsMetode = BeregningsMetode.NASJONAL,
+                        samletNorskTrygdetid = 40,
+                        samletTeoretiskTrygdetid = 40,
+                        broek = null,
+                        avdoedeForeldre = emptyList(),
+                        regelResultat = null,
+                        regelVersjon = "1.1",
+                        regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
+                        kunEnJuridiskForelder = false,
+                        kilde = null,
+                        harForeldreloessats = false,
+                    ),
+                ),
             beregnetDato = mottattTidspunkt.toTidspunkt(),
             grunnlagMetadata = mockk(relaxed = true),
             overstyrBeregning = null,

@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxItemType
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxRepository
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxService
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.Vedtakshendelse
+import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.VedtakshendelseEksternProdusent
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.toEksternApi
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.typeToEksternApi
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
@@ -33,11 +34,16 @@ import javax.sql.DataSource
 class OutboxIntegrationTest(
     private val dataSource: DataSource,
 ) {
-    private val testProdusent = TestProdusent<UUID, String>()
+    private val testProdusent = TestProdusent<String, String>()
     private val vedtaksvurderingRepository = VedtaksvurderingRepository(ConnectionAutoclosingTest(dataSource))
     private val vedtaksvurderingService = VedtaksvurderingService(vedtaksvurderingRepository)
     private val outboxRepository = OutboxRepository(dataSource)
-    private val outboxService = OutboxService(outboxRepository, vedtaksvurderingService, testProdusent::publiser)
+    private val outboxService =
+        OutboxService(
+            outboxRepository,
+            vedtaksvurderingService,
+            VedtakshendelseEksternProdusent(testProdusent),
+        )
 
     @Test
     fun `skal publisere hendelser for alle upubliserte innslag i outbox`() {

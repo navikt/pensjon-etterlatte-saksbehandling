@@ -5,8 +5,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
-import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

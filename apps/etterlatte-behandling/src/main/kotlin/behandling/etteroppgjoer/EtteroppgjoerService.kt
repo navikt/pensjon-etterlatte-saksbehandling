@@ -4,13 +4,12 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
@@ -29,7 +28,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import java.time.LocalDate
-import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
@@ -40,9 +38,6 @@ enum class EtteroppgjoerSvarfrist(
     FEM_MINUTT("5 minutes"),
     EN_MND("1 month"),
 }
-
-// TODO: finne en bedre plass for denne, evnt i config
-const val ETTEROPPGJOER_AAR = 2024
 
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
@@ -59,7 +54,7 @@ class EtteroppgjoerService(
     fun hentEtteroppgjoerForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
-    ): Etteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) ?: throw FantIkkEtteroppgjoer(sakId, inntektsaar)
+    ): Etteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) ?: throw FantIkkeEtteroppgjoer(sakId, inntektsaar)
 
     fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
 
@@ -120,7 +115,7 @@ class EtteroppgjoerService(
 
     fun oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandling: EtteroppgjoerForbehandling) {
         if (!forbehandling.erFerdigstilt()) {
-            throw IkkeTillattException("FORBEHADNLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")
+            throw IkkeTillattException("FORBEHANDLING_IKKE_FERDIGSTILT", "Forbehandlingen er ikke ferdigstilt")
         }
 
         val nyEtteroppgjoerStatus = finnStatusForForbehandling(forbehandling)
@@ -143,22 +138,12 @@ class EtteroppgjoerService(
     }
 
     fun haandterSkatteoppgjoerMottatt(
-        hendelse: SkatteoppgjoerHendelse,
         etteroppgjoer: Etteroppgjoer,
         sak: Sak,
     ) {
-        // hente etteroppgjoer
         krev(etteroppgjoer.kanOppdateresMedSkatteoppgjoerMottatt()) {
             "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør har status ${etteroppgjoer.status}. " +
                 "Se sikkerlogg for mer informasjon."
-        }
-
-        // TODO: fjerne hvis ikke et problem
-        if (etteroppgjoer.mottattSkatteoppgjoer()) {
-            logger.info(
-                "Ny hendelse (type=${hendelse.hendelsetype}) mottatt etter at status allerede er " +
-                    "MOTTATT_SKATTEOPPGJOER. Sekvensnummer=${hendelse.sekvensnummer}, sakId=${sak.id}.",
-            )
         }
 
         oppdaterEtteroppgjoerStatus(
@@ -174,7 +159,6 @@ class EtteroppgjoerService(
         )
     }
 
-    // TODO: må vi ha flere måter å opprette etteroppgjør på?
     fun opprettNyttEtteroppgjoer(
         sakId: SakId,
         inntektsaar: Int,
@@ -216,7 +200,7 @@ class EtteroppgjoerService(
                     sakId,
                     inntektsaar,
                     sisteIverksatteBehandling,
-                    eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                    eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
                     harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
                     eksisterendeEtteroppgjoer?.sisteFerdigstilteForbehandling,
                 )
@@ -241,7 +225,7 @@ class EtteroppgjoerService(
         return oppdatertEtteroppgjoer
     }
 
-    fun finnOgOpprettManglendeEtteroppgjoer(
+    fun kunDevFinnOgOpprettManglendeEtteroppgjoer(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
@@ -257,19 +241,24 @@ class EtteroppgjoerService(
             return
         }
 
-        aarUtenEtteroppgjoer.forEach {
-            opprettNyttEtteroppgjoer(sakId, it)
+        aarUtenEtteroppgjoer.forEach { inntektsaar ->
+            opprettNyttEtteroppgjoer(sakId, inntektsaar)
+                .also {
+                    dao
+                        .oppdaterEtteroppgjoerStatus(
+                            sakId,
+                            inntektsaar,
+                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                        )
+                }
         }
     }
 
-    // TODO: må vi ha flere måter å opprette etteroppgjør på?
-    suspend fun opprettEtteroppgjoerVedIverksattFoerstegangsbehandling(
+    suspend fun haandterEtteroppgjoerVedFoerstegangsbehandling(
         behandling: Behandling,
         inntektsaar: Int,
     ): Etteroppgjoer {
         val sakId = behandling.sak.id
-
-        // TODO: blir ikke dette rett?
         val harOpphoer = behandling.opphoerFraOgMed != null
 
         logger.info(

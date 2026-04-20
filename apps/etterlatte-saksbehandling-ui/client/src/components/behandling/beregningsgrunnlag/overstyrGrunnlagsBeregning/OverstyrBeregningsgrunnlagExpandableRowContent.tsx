@@ -12,7 +12,7 @@ export const OverstyrBeregningsgrunnlagExpandableRowContent = ({
   sakType: SakType
 }) => {
   return (
-    <HStack gap="8">
+    <HStack gap="space-32">
       <div>
         <Label>Anvendt trygdetid (år)</Label>
         <BodyShort>{overtyrBeregningsgrunnlagPeriode.data.trygdetid}</BodyShort>
@@ -31,7 +31,6 @@ export const OverstyrBeregningsgrunnlagExpandableRowContent = ({
           <BodyShort>{`${overtyrBeregningsgrunnlagPeriode.data.foreldreloessats ? 'Ja' : overtyrBeregningsgrunnlagPeriode.data.foreldreloessats === false ? 'Nei' : 'Ikke besvart'}`}</BodyShort>
         </div>
       )}
-
       <Box maxWidth="7rem">
         <Label>Beskrivelse</Label>
         <BodyShort>{overtyrBeregningsgrunnlagPeriode.data.beskrivelse}</BodyShort>

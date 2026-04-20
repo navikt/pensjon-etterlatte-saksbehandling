@@ -20,7 +20,7 @@ export const OpprettEtteroppgjoerForbehandlingIDev = ({ sakId }: Props) => {
   return (
     <Box maxWidth="50rem">
       <Alert variant="warning">
-        <VStack gap="4">
+        <VStack gap="space-16">
           <Heading size="small">Opprett etteroppgjør forbehandling (kun i dev)</Heading>
           <VelgEtteroppgjoersAar sakId={sakId.toString()} value={valgtEtteroppgjoer} onChange={setValgtEtteroppgjoer} />
 

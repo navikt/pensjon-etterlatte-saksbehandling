@@ -217,8 +217,8 @@ fun Route.vedtakCrudRoute(
                     oppdatering = request.oppdatering,
                     brukerTokenInfo = brukerTokenInfo,
                 )
+                call.respond(HttpStatusCode.OK)
             }
-            call.respond(HttpStatusCode.OK)
         }
 
         delete("/samordning-manuell/{samId}") {

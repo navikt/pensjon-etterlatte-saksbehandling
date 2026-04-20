@@ -55,7 +55,7 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 
   return (
     <>
-      <Box paddingBlock="12">
+      <Box paddingBlock="space-48">
         <Heading spacing size="small" level="2">
           Simulere utbetaling
         </Heading>
@@ -102,11 +102,9 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
 
 const SimuleringBeregning = ({ data }: { data: SimulertBeregning }) => {
   return (
-    <VStack gap="8">
+    <VStack gap="space-32">
       <UtbetalingTable tittel="Kommende utbetaling(er)" perioder={data.kommendeUtbetalinger} />
-
       <SimuleringGruppertPaaAar data={data} />
-
       <>
         Beregnet dato: {formaterDato(data.datoBeregnet)}
         {data.infomelding && <BodyShort textColor="subtle">{data.infomelding}</BodyShort>}

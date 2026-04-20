@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning.grunnlag
 
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import java.time.YearMonth
@@ -23,3 +24,21 @@ data class Vedtaksperiode(
     val fraOgMed: YearMonth,
     val tilOgMed: YearMonth? = null,
 )
+
+fun List<Vedtaksperiode>.validerVedtaksperioder() {
+    sjekk(isNotEmpty()) {
+        "Må ha perioder"
+    }
+    val perioderFoerSistePeriode = dropLast(1)
+    sjekk(perioderFoerSistePeriode.none { it.tilOgMed == null }) {
+        "Kun siste periode kan være åpen"
+    }
+
+    val perioderErIRiktigRekkefoelge =
+        zipWithNext()
+            .all { (first, second) -> first.tilOgMed != null && second.fraOgMed > first.tilOgMed }
+
+    sjekk(perioderErIRiktigRekkefoelge) {
+        "Perioder ikke i riktig rekkefølge / overlapper"
+    }
+}

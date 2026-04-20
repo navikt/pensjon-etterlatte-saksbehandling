@@ -29,7 +29,7 @@ function PersonerUtenIdenterVisning(props: { saktype: SakType; personer: Array<P
   return (
     <PersonUtenIdentWrapper>
       {personer.map((person, index) => (
-        <Box background="surface-alt-3-subtle" paddingInline="4" key={index}>
+        <Box background="brand-blue-soft" paddingInline="space-16" key={index}>
           <UstiletListe>
             <li>Rolle: {relativPersonrolleTekst[saktype][person.rolle]}</li>
             <li>Navn: {person.person.navn ? formaterKanskjeNavn(person.person.navn) || 'Ukjent' : 'Ukjent'} </li>
@@ -100,9 +100,8 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
           Søkers identifikator er forskjellig i behandling og PDL. Dette kan f.eks. komme av at bruker har gått fra
           D-nummer til fødselsnummer.
         </BodyShort>
-
-        <HStack gap="4">
-          <VStack gap="2">
+        <HStack gap="space-16">
+          <VStack gap="space-8">
             <Heading level="4" size="xsmall">
               Ident i behandlingen
             </Heading>
@@ -114,7 +113,7 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
             />
           </VStack>
 
-          <VStack gap="2">
+          <VStack gap="space-8">
             <Heading level="4" size="xsmall">
               Ident i PDL
             </Heading>
@@ -145,12 +144,12 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
               er registrert i PDL. Merk at PDL kan ha mangler i informasjon om samboerskap.
             </BodyShort>
           )}
-          <VStack gap="4">
-            <VStack gap="2">
+          <VStack gap="space-16">
+            <VStack gap="space-8">
               <Heading level="4" size="xsmall">
                 Familieforholdet i behandlingen
               </Heading>
-              <HStack gap="4">
+              <HStack gap="space-16">
                 <Info label="Avdøde" tekst={formaterListeMedIdenter(samsvar.persongalleri.avdoed)} />
                 {saktype === SakType.BARNEPENSJON && (
                   <Info label="Gjenlevende" tekst={formaterListeMedIdenter(samsvar.persongalleri.gjenlevende)} />
@@ -162,11 +161,11 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
               </HStack>
             </VStack>
 
-            <VStack gap="4">
+            <VStack gap="space-16">
               <Heading level="4" size="xsmall">
                 Familieforholdet i PDL
               </Heading>
-              <HStack gap="4">
+              <HStack gap="space-16">
                 <Info label="Avdøde" tekst={formaterListeMedIdenter(samsvar.persongalleriPdl?.avdoed)} />
                 {saktype === SakType.BARNEPENSJON && (
                   <Info label="Gjenlevende" tekst={formaterListeMedIdenter(samsvar.persongalleriPdl?.gjenlevende)} />
@@ -180,7 +179,6 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
           </VStack>
         </BredAlert>
       )}
-
       {harPersonerUtenIdenter && (
         <div>
           <BredAlert variant="warning">

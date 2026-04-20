@@ -4,15 +4,11 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.jobs.LeaderElection
-import no.nav.etterlatte.libs.ktor.AppConfig
 import no.nav.etterlatte.libs.ktor.httpClient
-import no.nav.etterlatte.trygdetid.SjekkAvvikJobb
-import no.nav.etterlatte.trygdetid.SjekkAvvikService
-import no.nav.etterlatte.trygdetid.TrygdetidAvvikRepository
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
@@ -21,9 +17,8 @@ import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlientImpl
+import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingBehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlientImpl
-import java.time.Duration
-import java.time.temporal.ChronoUnit
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -39,8 +34,14 @@ class ApplicationContext {
     private val avtaleRepository = AvtaleRepository(dataSource)
 
     val behandlingKlient = BehandlingKlient(config, httpClient())
-    val vedtaksvurderingKlient = VedtaksvurderingKlientImpl(config, httpClient())
     val avtaleService = AvtaleService(avtaleRepository)
+
+    val vedtaksvurderingKlient =
+        if (env[TrygdetidKey.BRUK_VEDTAK_FRA_BEHANDLING] == "ja") {
+            VedtaksvurderingBehandlingKlient(config, httpClient())
+        } else {
+            VedtaksvurderingKlientImpl(config, httpClient())
+        }
 
     val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
     private val trygdetidRepository = TrygdetidRepository(dataSource)
@@ -56,23 +57,13 @@ class ApplicationContext {
             vedtaksvurderingKlient = vedtaksvurderingKlient,
             featureToggleService = featureToggleService,
         )
+}
 
-    private val leaderElection = LeaderElection(env[AppConfig.ELECTOR_PATH])
-    private val avvikRepository = TrygdetidAvvikRepository(dataSource)
-    private val sjekkAvvikService =
-        SjekkAvvikService(
-            avvikRepository = avvikRepository,
-            trygdetidRepository = trygdetidRepository,
-            avtaleRepository = avtaleRepository,
-        )
-    val sjekkAvvikJobb =
-        SjekkAvvikJobb(
-            sjekkAvvikService = sjekkAvvikService,
-            leaderElection = leaderElection,
-            featureToggleService = featureToggleService,
-            periode = Duration.of(10, ChronoUnit.MINUTES),
-            initialDelaySeconds = 120,
-        )
+enum class TrygdetidKey : EnvEnum {
+    BRUK_VEDTAK_FRA_BEHANDLING,
+    ;
+
+    override fun key() = name
 }
 
 private fun featureToggleProperties(config: Config) =

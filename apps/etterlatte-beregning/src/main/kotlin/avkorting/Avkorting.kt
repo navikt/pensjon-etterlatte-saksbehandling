@@ -1175,7 +1175,7 @@ data class AvkortetYtelse(
 enum class AvkortetYtelseType { FORVENTET_INNTEKT, AARSOPPGJOER, ETTEROPPGJOER }
 
 fun Beregning.mapTilYtelseFoerAvkorting() =
-    beregningsperioder.map {
+    beregningsperioder.sortedBy { it.datoFOM }.map {
         YtelseFoerAvkorting(
             beregning = it.utbetaltBeloep,
             periode = Periode(it.datoFOM, it.datoTOM),
@@ -1194,7 +1194,7 @@ fun Beregning.mapTilYtelseFoerAvkorting() =
 * helt like verdier. Dette fordi vi ikke sammenligner innhold og slår sammen men kun avslutter eksisterende
 * periode.
 */
-private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning): List<YtelseFoerAvkorting> {
+internal fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning): List<YtelseFoerAvkorting> {
     val nyYtelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
     val fraOgMedNyYtelse = nyYtelseFoerAvkorting.first().periode.fom
 
@@ -1266,6 +1266,12 @@ fun finnAntallInnvilgaMaanederForAar(
                     tomMaaned,
                     "TOM: $tom, aldersovergang: $aldersovergang",
                     "Til og med for året (hvis noen)",
+                ),
+            fomAar =
+                FaktumNode(
+                    fom.year,
+                    kilde = "FOM-dato for årsoppgjøret",
+                    beskrivelse = "Året vi utleder innvilgede måneder for",
                 ),
         )
     val antallInvilgedeMaaneder =

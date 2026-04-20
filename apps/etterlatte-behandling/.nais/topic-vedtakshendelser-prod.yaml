@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  pool: nav-dev
+  pool: nav-prod
   config: # optional; all fields are optional too; defaults shown
     cleanupPolicy: delete  # delete, compact
     minimumInSyncReplicas: 2
@@ -15,6 +15,9 @@ spec:
     retentionBytes: -1  # -1 means unlimited
     retentionHours: 168  # -1 means unlimited
   acl:
+    - team: etterlatte
+      application: etterlatte-behandling
+      access: readwrite
     - team: etterlatte
       application: etterlatte-vedtaksvurdering
       access: readwrite

@@ -8,10 +8,12 @@ import {
   OpphoerSkyldesDoedsfall,
   OpphoerSkyldesDoedsfallSkjema,
 } from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
+import { AktivitetspliktSpørsmål } from '~components/etteroppgjoer/components/aktivitetsplikt/AktivitetspliktSpørsmål'
 import {
   EtteroppgjoerForbehandling,
   EtteroppgjoerResultatType,
   IInformasjonFraBruker,
+  Aktivitetsplikt,
   erForbehandlingRedigerbar,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { JaNei } from '~shared/types/ISvar'
@@ -78,6 +80,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
   const [opphoerDoedsfallErrors, setOpphoerDoedsfallErrors] = useState<FieldErrors<OpphoerSkyldesDoedsfallSkjema>>()
   const [faktiskInntektErrors, setFaktiskInntektErrors] = useState<FieldErrors<FastsettFaktiskInntektSkjema>>()
   const [informasjonFraBrukerErrors, setInformasjonFraBrukerErrors] = useState<FieldErrors<IInformasjonFraBruker>>()
+  const [aktivitetspliktErrors, setAktivitetspliktErrors] = useState<FieldErrors<Aktivitetsplikt>>()
   const [valideringFeilmelding, setValideringFeilmelding] = useState<string>('')
 
   useEffect(() => {
@@ -108,11 +111,17 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
     forbehandling.endringErTilUgunstForBruker === JaNei.JA ? informasjonFraBrukerErrors : undefined
 
   const validerOgNaviger = (naviger: () => void) => {
-    if (opphoerDoedsfallErrors || relevantInformasjonFraBrukerErrors || faktiskInntektErrors) {
+    if (opphoerDoedsfallErrors || relevantInformasjonFraBrukerErrors || faktiskInntektErrors || aktivitetspliktErrors) {
       return
     }
 
-    if (forbehandling.harVedtakAvTypeOpphoer && !forbehandling.opphoerSkyldesDoedsfall) {
+    if (!forbehandling.aktivitetspliktOverholdt) {
+      setValideringFeilmelding('Du må ta stilling til om aktivitetsplikten er overholdt')
+    } else if (forbehandling.aktivitetspliktOverholdt === JaNei.NEI) {
+      setValideringFeilmelding(
+        'Aktivitetsplikten er ikke overholdt. Etteroppgjøret kan ikke gjennomføres før aktivitetsplikten for etteroppgjørsåret er vurdert på nytt.'
+      )
+    } else if (forbehandling.harVedtakAvTypeOpphoer && !forbehandling.opphoerSkyldesDoedsfall) {
       setValideringFeilmelding('Du må ta stilling til om opphør skyldes dødsfall')
     } else if (
       erRevurdering &&
@@ -151,7 +160,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
   }
 
   return (
-    <VStack gap="10" paddingInline="16" paddingBlock="16 4">
+    <VStack gap="space-40" paddingInline="space-64" paddingBlock="space-64 space-16">
       <Heading size="xlarge" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
@@ -170,14 +179,12 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
           setValideringFeilmelding={setValideringFeilmelding}
         />
       )}
-
       {forbehandling.harVedtakAvTypeOpphoer && (
         <OpphoerSkyldesDoedsfall
           erRedigerbar={erRedigerbar}
           setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerDoedsfallErrors}
         />
       )}
-
       {!doedsfallIEtteroppgjoersaaret && !forbehandlingSkalAvsluttes && (
         <FastsettFaktiskInntekt
           erRedigerbar={erRedigerbartFaktiskInntekt}
@@ -185,15 +192,17 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         />
       )}
 
+      <AktivitetspliktSpørsmål erRedigerbar={erRedigerbar} setAktivitetspliktSkjemaErrors={setAktivitetspliktErrors} />
+
       {visBeregnetResultat && (
-        <VStack gap="4">
+        <VStack gap="space-16">
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
         </VStack>
       )}
-
       <Box maxWidth="42.5rem">
-        <VStack gap="8">
+        <VStack gap="space-32">
+          {aktivitetspliktErrors && <SammendragAvSkjemaFeil errors={aktivitetspliktErrors} />}
           {informasjonFraBrukerErrors && <SammendragAvSkjemaFeil errors={informasjonFraBrukerErrors} />}
           {opphoerDoedsfallErrors && <SammendragAvSkjemaFeil errors={opphoerDoedsfallErrors} />}
           {faktiskInntektErrors && <SammendragAvSkjemaFeil errors={faktiskInntektErrors} />}
@@ -207,7 +216,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         </Alert>
       )}
 
-      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="8 16">
+      <Box borderWidth="1 0 0 0" borderColor="neutral-subtle" paddingBlock="space-32 space-64">
         <HStack width="100%" justify="center">
           {navigasjon()}
         </HStack>
@@ -264,7 +273,7 @@ function RevurderingNavigasjon({
   onNesteSteg: () => void
 }) {
   return (
-    <VStack gap="4" align="center">
+    <VStack gap="space-16" align="center">
       {forbehandling.endringErTilUgunstForBruker === JaNei.JA ? (
         <AvsluttEtteroppgjoerRevurderingModal
           behandling={behandling}

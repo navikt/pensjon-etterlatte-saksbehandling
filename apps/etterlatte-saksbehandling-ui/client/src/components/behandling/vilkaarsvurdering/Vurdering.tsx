@@ -142,7 +142,13 @@ export const Vurdering = ({
   )
 
   return (
-    <Box paddingInline="3 0" minWidth="18.75rem" width="10rem" borderWidth="0 0 0 2" borderColor="border-subtle">
+    <Box
+      paddingInline="space-12 space-0"
+      minWidth="18.75rem"
+      width="10rem"
+      borderWidth="0 0 0 2"
+      borderColor="neutral-subtle"
+    >
       <VurderingsboksWrapper
         tittel={overskrift()}
         subtittelKomponent={
@@ -278,5 +284,5 @@ export const Unntaksvilkaar = styled.div`
 
 export const VilkaarVurdertInformasjon = styled.div`
   margin-bottom: 1.5em;
-  color: var(--a-gray-700);
+  color: var(--ax-neutral-800);
 `

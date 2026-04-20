@@ -57,20 +57,18 @@ export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Pro
   if (!paginerteOppgaver.length) return AlertIngenOppgaver
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       <PagineringsKontroller
         page={page}
         setPage={setPage}
         antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
       />
-
       <GosysOppgaverTable
         oppgaver={paginerteOppgaver}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         setSortering={setSortering}
         oppdaterOppgaveTildeling={oppdaterOppgaveTildeling}
       />
-
       <PagineringsKontroller
         page={page}
         setPage={setPage}

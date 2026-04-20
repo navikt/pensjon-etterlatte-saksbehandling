@@ -10,7 +10,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingHendelseService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkEtteroppgjoer
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
@@ -62,7 +62,7 @@ class EtteroppgjoerForbehandlingServiceTest {
         val vedtakKlient: VedtakKlient = mockk()
         val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
         val etteroppgjoerDataService: EtteroppgjoerDataService =
-            EtteroppgjoerDataService(behandlingService, mockk(), vedtakKlient, beregningKlient)
+            EtteroppgjoerDataService(behandlingService, vedtakKlient, beregningKlient)
 
         val service =
             EtteroppgjoerForbehandlingService(
@@ -225,7 +225,6 @@ class EtteroppgjoerForbehandlingServiceTest {
                         sak(),
                         Periode(YearMonth.now().minusYears(1), null),
                         ctx.behandling.id,
-                        mottattSkatteoppgjoer = true,
                     ).copy(aar = 2024, status = status),
             ),
         )
@@ -273,10 +272,10 @@ class EtteroppgjoerForbehandlingServiceTest {
 
         coEvery {
             ctx.etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any())
-        } throws FantIkkEtteroppgjoer(sakId1, 2024)
+        } throws FantIkkeEtteroppgjoer(sakId1, 2024)
 
         val exception =
-            assertThrows(FantIkkEtteroppgjoer::class.java) {
+            assertThrows(FantIkkeEtteroppgjoer::class.java) {
                 ctx.service.opprettEtteroppgjoerForbehandling(
                     sakId1,
                     2024,
@@ -340,7 +339,6 @@ class EtteroppgjoerForbehandlingServiceTest {
                     sak = ctx.behandling.sak,
                     innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                     sisteIverksatteBehandling = ctx.behandling.id,
-                    mottattSkatteoppgjoer = true,
                 ).copy(brevId = 123L, varselbrevSendt = LocalDate.now())
 
         ctx.returnsForbehandling(forbehandling)

@@ -40,6 +40,8 @@ data class EtteroppgjoerForbehandling(
     val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
     val mottattSkatteoppgjoer: Boolean = false,
     val klageOmgjoering: UUID? = null,
+    val aktivitetspliktOverholdt: JaNei? = null,
+    val aktivitetspliktBegrunnelse: String? = null,
 ) {
     companion object {
         fun opprett(
@@ -47,7 +49,6 @@ data class EtteroppgjoerForbehandling(
             innvilgetPeriode: Periode,
             sisteIverksatteBehandling: UUID,
             harVedtakAvTypeOpphoer: Boolean? = null,
-            mottattSkatteoppgjoer: Boolean,
         ) = EtteroppgjoerForbehandling(
             id = UUID.randomUUID(),
             sak = sak,
@@ -65,7 +66,8 @@ data class EtteroppgjoerForbehandling(
             harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
             opphoerSkyldesDoedsfall = null,
             opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
-            mottattSkatteoppgjoer = mottattSkatteoppgjoer,
+            aktivitetspliktOverholdt = null,
+            aktivitetspliktBegrunnelse = null,
         )
     }
 
@@ -157,6 +159,8 @@ data class EtteroppgjoerForbehandling(
             beskrivelseAvUgunst = beskrivelseAvUgunst,
             varselbrevSendt = varselbrevSendt,
             klageOmgjoering = klageOmgjoering,
+            aktivitetspliktOverholdt = aktivitetspliktOverholdt,
+            aktivitetspliktBegrunnelse = aktivitetspliktBegrunnelse,
         )
 
     fun medBrev(opprettetBrev: Brev): EtteroppgjoerForbehandling = this.copy(brevId = opprettetBrev.id)
@@ -211,6 +215,15 @@ data class EtteroppgjoerForbehandling(
                 opphoerSkyldesDoedsfallIEtteroppgjoersaar?.takeIf {
                     opphoerSkyldesDoedsfall == JaNei.JA
                 },
+        )
+
+    fun oppdaterAktivitetsplikt(
+        aktivitetspliktOverholdt: JaNei,
+        begrunnelse: String,
+    ): EtteroppgjoerForbehandling =
+        copy(
+            aktivitetspliktOverholdt = aktivitetspliktOverholdt,
+            aktivitetspliktBegrunnelse = begrunnelse,
         )
 }
 

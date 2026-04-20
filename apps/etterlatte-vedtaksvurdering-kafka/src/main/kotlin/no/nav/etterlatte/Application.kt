@@ -1,6 +1,6 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.regulering.AppBuilder
+import no.nav.etterlatte.config.AppBuilder
 import no.nav.etterlatte.regulering.LoependeYtelserforespoerselRiver
 import no.nav.etterlatte.regulering.OpprettVedtakforespoerselRiver
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtakRiver

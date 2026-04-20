@@ -51,7 +51,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
   }, [])
 
   return (
-    <VStack gap="8" minWidth="50rem">
+    <VStack gap="space-32" minWidth="50rem">
       <AktivitetspliktTimeline
         doedsdato={doedsdato}
         aktivitetHendelser={aktivitetHendelser}
@@ -60,12 +60,10 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
         setAktivitetPerioder={setAktivitetPerioder}
         setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
       />
-
       {isFailureHandler({
         apiResult: aktivitetOgHendelserResult,
         errorMessage: 'Kunne ikke hente aktivitet hendelser og perioder',
       })}
-
       {aktivitetspliktRedigeringModus.aktivitetspliktSkjemaAaVise === AktivitetspliktSkjemaAaVise.AKTIVITET_PERIODE && (
         <AktivitetPeriode
           behandling={behandling}
@@ -85,9 +83,8 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
           setAktivitetspliktRedigeringModus={setAktivitetspliktRedigeringModus}
         />
       )}
-
       {aktivitetspliktRedigeringModus.aktivitetspliktSkjemaAaVise === AktivitetspliktSkjemaAaVise.INGEN && (
-        <HStack gap="4">
+        <HStack gap="space-16">
           <Button
             size="small"
             variant="secondary"

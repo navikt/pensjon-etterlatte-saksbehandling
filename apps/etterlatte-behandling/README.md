@@ -54,7 +54,7 @@ Rivers med hendelsesnøkkel `BEHANDLING:OPPRETTET`.
 ### Registrer vedtakshendelser
 
 Hendelser om vedtak påvirker statusen til en behandling. Når en vedtakshendelse mottas lagres den oppdaterte statusen
-for behandlingen vedtakshendelsen gjelder.
+for behandlingen vedtakshendelsen gjelder. Det publiseres også vedtakshendelser for eksterne systemer.
 
 ### Sjekker om det finnes saker for grunnlagsendringshendelser
 
@@ -62,6 +62,40 @@ Når en grunnlagsendringshendelse er plukket opp i applikasjonen `etterlatte-beh
 endepunktet `/grunnlagsendringshendelse/{hendelsetype}` hvor `{hendelsetype}` er typen hendelse som er plukket opp.
 Her sjekkes det om det finnes en sak tilhørende personen man har mottatt en hendelse for. På nåværende tidspunkt
 lyttes det kun til hendelser om dødsfall hos søker.
+
+### Vedtakshendelser for eksterne systemer
+
+Kafka-topic'en **etterlatte.vedtakshendelser** benyttes til dette. Kontakt teamet for tilgang.
+
+Oppdateringer av ACL er ikke automatisk, og må kjøres inn manuelt med `kubectl apply -f <manifest>`.
+
+| context  | manifest                                |
+|:---------|:----------------------------------------|
+| dev-gcp  | .nais/topic-vedtakshendelser-dev.yaml   |
+| prod-gcp | .nais/topic-vedtakshendelser-prod.yaml  |
+
+#### For å oppdatere endringer i topic yamler kjør dette:
+#### Obs: Må stå samme path som filen(e) og ha riktig context! feks kubectl config use-context dev-gcp
+https://docs.nais.io/persistence/kafka/how-to/create/?h=kafka+topic#apply-the-topic-resource
+```
+kubectl apply -f .nais/topic-vedtakshendelser-dev.yaml
+```
+
+#### Meldingsinnhold
+
+| Felt        | Datatype   | Beskrivelse                                                             |
+|:------------|:-----------|-------------------------------------------------------------------------|
+| ident       | String     | Fødselsnummer hendelsen gjelder                                         |
+| sakstype    | String     | Sakstype: OMS, BP                                                       |
+| type        | String     | Hva vedtaket gjelder: AVSLAG, INNVILGELSE, ENDRING, REGULERING, OPPHOER |
+| vedtakId    | Long       | Unik identifikator for vedtaket                                         |
+| vedtaksdato | yyyy-mm-dd | Dato vedtaket ble fattet                                                |
+| virkningFom | yyyy-mm-dd | Dato vedtaket gjelder fra                                               |
+
+- Se [Vedtakshendelse](./src/main/kotlin/behandling/vedtaksvurdering/outbox/OutboxService.kt) for implementasjon.
+- Dette er designet til å gå i tospann med denne [vedtaksinformasjonstjenesten](../etterlatte-api/README.md), dersom en trenger informasjon om utbetalt ytelse.
+- **NB:** _REGULERING_ er en spesifikk variant av _ENDRING_. Spesialhåndtert da det vil komme et større volum av denne under den årlige reguleringen.
+
 
 ## Kom i gang
 

@@ -31,6 +31,7 @@
       <env name="ETTERLATTE_PROXY_SCOPE" value="api://dev-fss.etterlatte.etterlatte-proxy/.default" />
       <env name="ETTERLATTE_PROXY_URL" value="https://etterlatte-proxy.dev-fss-pub.nais.io/aad" />
       <env name="ELECTOR_PATH" value="http://localhost:8096" />
+      <env name="BRUK_VEDTAK_FRA_BEHANDLING" value="ja" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-utbetaling.main" />

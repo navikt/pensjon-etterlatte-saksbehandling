@@ -84,16 +84,9 @@ class OmgjoeringKlageRevurderingService(
 
         val etteroppgjoer = behandlingSomOmgjoeres.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER
 
-        // TODO: fjerne etter testing
-        val kanOmgjoereEtteroppgjoer =
-            featureToggleService.isEnabled(
-                KlageFeatureToggle.KanOmgjoereEtteroppgjoer,
-                false,
-            )
-
         val revurdering =
-            if (kanOmgjoereEtteroppgjoer && etteroppgjoer) {
-                etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurdering(
+            if (etteroppgjoer) {
+                etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurderingEtterKlage(
                     behandlingId = behandlingSomOmgjoeres.id,
                     klageId = klageId,
                     brukerTokenInfo = saksbehandler,

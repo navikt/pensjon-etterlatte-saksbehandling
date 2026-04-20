@@ -55,7 +55,6 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
       >
         Endre
       </Button>
-
       <Modal open={open} onClose={closeAndReset} width="40rem" aria-labelledby="modal-heading">
         <Modal.Header closeButton={false}>
           <Heading spacing level="2" size="medium" id="modal-heading">
@@ -65,7 +64,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
 
         <Modal.Body>
           {enhetErVikafossenEllerEgneAnsatte(gjeldendeEnhet) ? (
-            <VStack gap="4">
+            <VStack gap="space-16">
               <Alert variant="warning">
                 Saken tilhører {ENHETER[gjeldendeEnhet]} og kan ikke flyttes til en annen enhet i Gjenny på grunn av
                 adressebeskyttelse eller skjerming. Dersom saken skal flyttes, må dette endres i Pdl eller
@@ -80,7 +79,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
           ) : (
             <>
               {isSuccess(endreEnhetStatus) ? (
-                <VStack gap="4">
+                <VStack gap="space-16">
                   <Alert variant="success">Saken er flyttet til enhet &quot;{valgtEnhetNavn}&quot;.</Alert>
 
                   {!harTilgangPaaNyEnhet && (
@@ -89,7 +88,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
                     </Alert>
                   )}
 
-                  <HStack gap="2" justify="end">
+                  <HStack gap="space-8" justify="end">
                     <Button variant={harTilgangPaaNyEnhet ? 'secondary' : 'primary'} as="a" href="/">
                       Gå til oppgavelisten
                     </Button>
@@ -101,9 +100,9 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
                   </HStack>
                 </VStack>
               ) : (
-                <VStack gap="4">
+                <VStack gap="space-16">
                   <form onSubmit={handleSubmit(endreEnhet)}>
-                    <VStack gap="5">
+                    <VStack gap="space-20">
                       <Select
                         {...register('enhet', {
                           required: {
@@ -142,7 +141,7 @@ export const EndreEnhet = ({ sakId, gjeldendeEnhet }: { sakId: number; gjeldende
                         label="Kommentar"
                       />
 
-                      <HStack gap="2" justify="end">
+                      <HStack gap="space-8" justify="end">
                         {isFailure(endreEnhetStatus) && (
                           <ApiErrorAlert>
                             Kunne ikke endre sakens enhet til &quot;{valgtEnhetNavn}&quot; på grunn av feil:{' '}

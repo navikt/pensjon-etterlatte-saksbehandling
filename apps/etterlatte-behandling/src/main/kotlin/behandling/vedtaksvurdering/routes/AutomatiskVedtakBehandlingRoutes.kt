@@ -6,7 +6,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.AutomatiskBehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.AutomatiskVedtakBehandlingService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -17,9 +17,9 @@ import no.nav.etterlatte.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 
-fun Route.automatiskBehandlingRoutes(automatiskBehandlingService: AutomatiskBehandlingService) {
+fun Route.automatiskVedtakBehandlingRoutes(automatiskVedtakBehandlingService: AutomatiskVedtakBehandlingService) {
     route("/api/vedtak") {
-        val logger = LoggerFactory.getLogger("AutomatiskBehandlingRoute")
+        val logger = LoggerFactory.getLogger("AutomatiskVedtakBehandlingRoute")
         // Automatisk hva da?
         post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGID_CALL_PARAMETER}/automatisk") {
             kunSkrivetilgang {
@@ -27,7 +27,7 @@ fun Route.automatiskBehandlingRoutes(automatiskBehandlingService: AutomatiskBeha
                 val nyttVedtak =
                     inTransaction {
                         runBlocking {
-                            automatiskBehandlingService.vedtakStegvis(
+                            automatiskVedtakBehandlingService.vedtakStegvis(
                                 behandlingId = behandlingId,
                                 sakId = sakId,
                                 brukerTokenInfo = brukerTokenInfo,
@@ -46,7 +46,7 @@ fun Route.automatiskBehandlingRoutes(automatiskBehandlingService: AutomatiskBeha
                 val nyttVedtak =
                     inTransaction {
                         runBlocking {
-                            automatiskBehandlingService.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, kjoringVariant)
+                            automatiskVedtakBehandlingService.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, kjoringVariant)
                         }
                     }
                 call.respond(nyttVedtak)

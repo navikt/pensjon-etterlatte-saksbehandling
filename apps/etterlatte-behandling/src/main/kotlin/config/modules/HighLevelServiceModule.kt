@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.klage.KlageServiceImpl
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.revurdering.OmgjoeringKlageRevurderingService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.AutomatiskVedtakBehandlingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.TilbakekrevingBrevService
@@ -215,6 +216,14 @@ class HighLevelServiceModule(
             brevApiKlient = klientModule.brevApiKlient,
             behandlingService = serviceModule.behandlingService,
             beregningKlient = klientModule.beregningKlient,
+        )
+    }
+
+    val automatiskVedtakBehandlingService by lazy {
+        AutomatiskVedtakBehandlingService(
+            service = vedtakBehandlingService,
+            oppgaveService = serviceModule.oppgaveService,
+            vedtaksvurderingService = serviceModule.vedtaksvurderingService,
         )
     }
 }

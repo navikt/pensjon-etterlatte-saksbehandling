@@ -14,7 +14,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class AutomatiskBehandlingService(
+class AutomatiskVedtakBehandlingService(
     private val service: VedtakBehandlingService,
     private val oppgaveService: OppgaveService,
     private val vedtaksvurderingService: VedtaksvurderingService,

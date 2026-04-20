@@ -25,8 +25,8 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.sakId1
-import no.nav.etterlatte.behandling.vedtaksvurdering.routes.automatiskBehandlingRoutes
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.AutomatiskBehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.automatiskVedtakBehandlingRoutes
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.AutomatiskVedtakBehandlingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
@@ -65,7 +65,7 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class AutomatiskBehandlingRoutesTest(
+internal class AutomatiskVedtakBehandlingRoutesTest(
     val dataSource: DataSource,
 ) {
     private val mockOAuth2Server = MockOAuth2Server()
@@ -73,8 +73,8 @@ internal class AutomatiskBehandlingRoutesTest(
     private val vedtaksvurderingService: VedtaksvurderingService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
     private val oppgaveService: OppgaveService = mockk()
-    private val automatiskBehandlingService =
-        AutomatiskBehandlingService(
+    private val automatiskVedtakBehandlingService =
+        AutomatiskVedtakBehandlingService(
             service = vedtakBehandlingService,
             oppgaveService = oppgaveService,
             vedtaksvurderingService = vedtaksvurderingService,
@@ -389,8 +389,8 @@ internal class AutomatiskBehandlingRoutesTest(
     ) {
         testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {
-                automatiskBehandlingRoutes(
-                    automatiskBehandlingService = automatiskBehandlingService,
+                automatiskVedtakBehandlingRoutes(
+                    automatiskVedtakBehandlingService = automatiskVedtakBehandlingService,
                 )
             }
             block(client)

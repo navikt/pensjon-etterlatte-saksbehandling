@@ -31,6 +31,7 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagVersjonValidering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -38,6 +39,8 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -264,7 +267,32 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
             beregningId = UUID.randomUUID(),
             behandlingId = behandling.id,
             type = Beregningstype.BP,
-            beregningsperioder = emptyList(),
+            beregningsperioder =
+                listOf(
+                    Beregningsperiode(
+                        id = UUID.randomUUID(),
+                        datoFOM = YearMonth.of(2024, 1),
+                        datoTOM = null,
+                        utbetaltBeloep = 10_000,
+                        soeskenFlokk = emptyList(),
+                        institusjonsopphold = null,
+                        grunnbelop = 118620,
+                        grunnbelopMnd = 9885,
+                        trygdetid = 40,
+                        trygdetidForIdent = "avdød",
+                        beregningsMetode = BeregningsMetode.NASJONAL,
+                        samletNorskTrygdetid = 40,
+                        samletTeoretiskTrygdetid = 40,
+                        broek = null,
+                        avdoedeForeldre = emptyList(),
+                        regelResultat = null,
+                        regelVersjon = "1.1",
+                        regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
+                        kunEnJuridiskForelder = false,
+                        kilde = null,
+                        harForeldreloessats = false,
+                    ),
+                ),
             beregnetDato = mottattTidspunkt.toTidspunkt(),
             grunnlagMetadata = mockk(relaxed = true),
             overstyrBeregning = null,

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -47,6 +48,13 @@ internal class KlageDaoImplTest(
             it.prepareStatement("""TRUNCATE TABLE klage""").executeUpdate()
             it.prepareStatement("""TRUNCATE TABLE sak CASCADE """).executeUpdate()
         }
+    }
+
+    @Test
+    fun `hentKlage returnerer null naar klage ikke finnes`() {
+        val resultat = klageDao.hentKlage(UUID.randomUUID())
+
+        resultat shouldBe null
     }
 
     @Test

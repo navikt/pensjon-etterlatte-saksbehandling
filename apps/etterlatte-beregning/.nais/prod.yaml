@@ -90,7 +90,7 @@ spec:
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
     - name: BRUK_VEDTAK_FRA_BEHANDLING
-      value: "nei"
+      value: "ja"
     - name: ETTERLATTE_TRYGDETID_URL
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID

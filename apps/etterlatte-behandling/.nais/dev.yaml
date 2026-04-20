@@ -63,9 +63,9 @@ spec:
   resources:
     requests:
       cpu: 50m
-      memory: 640Mi
+      memory: 1280Mi
     limits:
-      memory: 1024Mi
+      memory: 2048Mi
   replicas:
     scalingStrategy:
       cpu:
@@ -173,8 +173,8 @@ spec:
       value: api://dev-fss.pensjonsamhandling.sam-q2/.default
     - name: BRUK_NY_VEDTAK_KLIENT
       value: ja
-    - name: BRUK_VEDTAK_REPOSITORY_KLIENT
-      value: ja
+    - name: BRUK_EGEN_DATABASE_FOR_VEDTAK
+      value: nei
 
   envFrom:
     - secret: my-application-unleash-api-token

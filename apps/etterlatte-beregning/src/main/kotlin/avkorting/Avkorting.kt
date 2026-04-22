@@ -117,6 +117,7 @@ data class Avkorting(
                 relevanteAaroppgjoer.map {
                     when (it) {
                         is AarsoppgjoerLoepende -> {
+                            val aarsoppgjoerFom = it.fom
                             it.copy(
                                 id = UUID.randomUUID(),
                                 inntektsavkorting =
@@ -142,6 +143,17 @@ data class Avkorting(
                                                             fom = inntektsavkorting.grunnlag.periode.fom,
                                                             tom = tom,
                                                         ),
+                                                    // Gammelt grunnlag (opprettet før maanederInnvilget-kolonnen ble innført)
+                                                    // mangler feltet. Rekonstruer fra innvilgaMaaneder startende fra
+                                                    // årsoppgjørets fom – samme startpunkt som den opprinnelige beregningen.
+                                                    maanederInnvilget =
+                                                        inntektsavkorting.grunnlag.maanederInnvilget
+                                                            ?: (0 until inntektsavkorting.grunnlag.innvilgaMaaneder).map { offset ->
+                                                                MaanedInnvilget(
+                                                                    maaned = aarsoppgjoerFom.plusMonths(offset.toLong()),
+                                                                    innvilget = true,
+                                                                )
+                                                            },
                                                 ),
                                             avkortingsperioder =
                                                 if (nullstillAvkortetYtelse) {

@@ -414,35 +414,16 @@ object AvkortingRegelkjoring {
                 }
         val maanederInnvilget: FaktumNode<List<MaanedInnvilget>> =
             if (brukNyeReglerAvkorting) {
-                if (nyInntektsavkorting.grunnlag.maanederInnvilget != null) {
-                    FaktumNode(
-                        verdi = nyInntektsavkorting.grunnlag.maanederInnvilget,
-                        kilde = nyInntektsavkorting.grunnlag.id.toString(),
-                        beskrivelse = "Måneder innvilget i forventet inntekt",
-                    )
-                } else {
-                    // Gammelt grunnlag uten maanederInnvilget (opprettet før kolonnen ble innført).
-                    // Vi kan ikke rekonstruere fra periode.tom, siden lukkSisteInntektsperiode kan ha
-                    // satt den til måneden før neste inntekt trer i kraft etter at grunnlaget ble lagret.
-                    // innvilgaMaaneder ble derimot satt korrekt ved opprettelse og er fasiten.
-                    val innvilgaMaaneder = nyInntektsavkorting.grunnlag.innvilgaMaaneder
-                    val maaneder =
-                        (0 until innvilgaMaaneder).map { offset ->
-                            MaanedInnvilget(
-                                maaned = fraOgMed.plusMonths(offset.toLong()),
-                                innvilget = true,
-                            )
-                        }
-                    logger.info(
-                        "Mangler maanederInnvilget i inntektsgrunnlag ${nyInntektsavkorting.grunnlag.id}, " +
-                            "rekonstruert $innvilgaMaaneder måneder fra $fraOgMed",
-                    )
-                    FaktumNode(
-                        verdi = maaneder,
-                        kilde = "fallback-fra-innvilga-maaneder",
-                        beskrivelse = "Fallback for henting av liste av måneder innvilget",
-                    )
-                }
+                FaktumNode(
+                    verdi =
+                        requireNotNull(nyInntektsavkorting.grunnlag.maanederInnvilget) {
+                            "Inntekt i kopiert avkorting med periode=${nyInntektsavkorting.grunnlag.periode} mangler " +
+                                "maanederInnvilget. Avkortingen må kopieres på nytt ved å sette virkningstidspunkt" +
+                                " en gang til og så gå igjennom stegene fra start."
+                        },
+                    kilde = nyInntektsavkorting.grunnlag.id.toString(),
+                    beskrivelse = "Måneder innvilget i forventet inntekt",
+                )
             } else {
                 FaktumNode(emptyList(), "", "Placeholder i grunnlag hvis vi ikke bruker nye regler")
             }

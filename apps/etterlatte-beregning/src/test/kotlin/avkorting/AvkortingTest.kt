@@ -1081,12 +1081,11 @@ internal class AvkortingTest {
     inner class BeregnAvkortingMedNyeGrunnlag {
         @Test
         fun `skal haandtere gammelt grunnlag uten maanederInnvilget naar ny inntekt legges inn`() {
-            // Simulerer prod-scenario: to gamle inntektsgrunnlag (maanederInnvilget=null) i årsoppgjøret,
-            // og saksbehandler legger inn ny inntekt fra april.
+            // Simulerer prod-scenario: to gamle inntektsgrunnlag (maanederInnvilget=null) fra forrige behandling,
+            // og saksbehandler legger inn ny inntekt fra april i en ny revurdering.
             // Grunnlagene ble opprettet før maanederInnvilget-kolonnen ble innført → null i DB.
-            // lukkSisteInntektsperiode setter periode.tom=mars på feb-inntekten etter at april legges inn.
-            // Fallbacklogikken i beregnRestanse skal ikke bruke den låste periode.tom,
-            // men heller rekonstruere fra innvilgaMaaneder.
+            // kopierAvkorting populerer maanederInnvilget fra innvilgaMaaneder ved opprettelse av ny revurdering,
+            // slik at beregnRestanse ikke møter null når lukkSisteInntektsperiode har endret periode.tom.
 
             val regelKilde = Grunnlagsopplysning.RegelKilde(navn = "regel", ts = Tidspunkt.now(), versjon = "1")
 
@@ -1152,20 +1151,22 @@ internal class AvkortingTest {
                 )
 
             val resultat =
-                avkorting.beregnAvkortingMedNyeGrunnlag(
-                    nyttGrunnlag =
-                        listOf(
-                            avkortinggrunnlagLagreDto(
-                                aarsinntekt = 200_000,
-                                fom = YearMonth.of(2025, Month.APRIL),
+                avkorting
+                    .kopierAvkorting()
+                    .beregnAvkortingMedNyeGrunnlag(
+                        nyttGrunnlag =
+                            listOf(
+                                avkortinggrunnlagLagreDto(
+                                    aarsinntekt = 200_000,
+                                    fom = YearMonth.of(2025, Month.APRIL),
+                                ),
                             ),
-                        ),
-                    bruker = bruker,
-                    beregning = beregningForAaret,
-                    sanksjoner = emptyList(),
-                    opphoerFom = null,
-                    brukNyeReglerAvkorting = true,
-                )
+                        bruker = bruker,
+                        beregning = beregningForAaret,
+                        sanksjoner = emptyList(),
+                        opphoerFom = null,
+                        brukNyeReglerAvkorting = true,
+                    )
 
             resultat.aarsoppgjoer
                 .single()

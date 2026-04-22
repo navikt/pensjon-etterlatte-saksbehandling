@@ -21,3 +21,6 @@ spec:
     - team: etterlatte
       application: etterlatte-vedtaksvurdering
       access: readwrite
+    - team: pensjondeployer
+      application: pensjon-pen
+      access: read

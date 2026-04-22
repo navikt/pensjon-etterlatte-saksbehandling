@@ -26,25 +26,27 @@ class DatabaseContext(
         )
 
     override fun <T> inTransaction(block: () -> T): T {
-        if (transaktionOpen.getAndSet(true)) {
-            throw IllegalStateException("Støtter ikke nøstede transaksjoner")
+        val transactionAlreadyOpen = transaktionOpen.getAndSet(true)
+        val connection = ds.connection
+
+        if (transactionAlreadyOpen) {
+            return block()
         }
-        val c = ds.connection
-        val autocommit = c.autoCommit
+        val autocommit = connection.autoCommit
         return try {
-            c.autoCommit = false
-            transactionalConnection = c
+            connection.autoCommit = false
+            transactionalConnection = connection
             val retur = block()
-            c.commit()
+            connection.commit()
             retur
         } catch (ex: Throwable) {
-            c.rollback()
+            connection.rollback()
             logger.warn("Reason for rollback", ex)
             throw ex
         } finally {
             transactionalConnection = null
-            c.autoCommit = autocommit
-            c.close()
+            connection.autoCommit = autocommit
+            connection.close()
             transaktionOpen.set(false)
         }
     }

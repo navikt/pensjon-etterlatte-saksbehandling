@@ -205,7 +205,9 @@ suspend inline fun RoutingContext.withFoedselsnummerInternal(
             }
         }
 
-        else -> onSuccess(foedselsnummer)
+        else -> {
+            onSuccess(foedselsnummer)
+        }
     }
 }
 
@@ -228,8 +230,13 @@ fun RoutingContext.sjekkSkrivetilgang(
             }
         }
 
-        is SystemUser -> true
-        else -> false
+        is SystemUser -> {
+            true
+        }
+
+        else -> {
+            false
+        }
     }
 }
 
@@ -245,18 +252,33 @@ private fun RoutingContext.finnSkriveTilgangForId(sakId: SakId? = null): Enhetsn
     } else {
         val idForRequest = call.parameters[funnetCallIdParametersType.value]!!
         when (funnetCallIdParametersType) {
-            CallParamAuthId.BEHANDLINGID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId)?.enhetNr
-            CallParamAuthId.SAKID -> sakTilgangDao.hentSakMedGraderingOgSkjerming(idForRequest.tilSakId())?.enhetNr
-            CallParamAuthId.OPPGAVEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId)?.enhetNr
-            CallParamAuthId.KLAGEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(klageId)?.enhetNr
-            CallParamAuthId.GENERELLBEHANDLINGID ->
+            CallParamAuthId.BEHANDLINGID -> {
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId)?.enhetNr
+            }
+
+            CallParamAuthId.SAKID -> {
+                sakTilgangDao.hentSakMedGraderingOgSkjerming(idForRequest.tilSakId())?.enhetNr
+            }
+
+            CallParamAuthId.OPPGAVEID -> {
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId)?.enhetNr
+            }
+
+            CallParamAuthId.KLAGEID -> {
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(klageId)?.enhetNr
+            }
+
+            CallParamAuthId.GENERELLBEHANDLINGID -> {
                 sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(generellBehandlingId)?.enhetNr
+            }
 
-            CallParamAuthId.TILBAKEKREVINGID ->
+            CallParamAuthId.TILBAKEKREVINGID -> {
                 sakTilgangDao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId)?.enhetNr
+            }
 
-            CallParamAuthId.ETTEROPPGJOERID ->
+            CallParamAuthId.ETTEROPPGJOERID -> {
                 sakTilgangDao.hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(forbehandlingId)?.enhetNr
+            }
         }
     }
 }
@@ -333,6 +355,8 @@ suspend inline fun RoutingContext.kunAttestant(onSuccess: () -> Unit) {
             }
         }
 
-        else -> onSuccess()
+        else -> {
+            onSuccess()
+        }
     }
 }

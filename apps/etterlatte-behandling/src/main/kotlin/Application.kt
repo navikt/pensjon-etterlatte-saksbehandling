@@ -1,16 +1,20 @@
 package no.nav.etterlatte
 
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.Hook
 import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
+import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.auth.principal
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.intercept
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelinePhase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
+import kotliquery.HikariCP.dataSource
 import no.nav.etterlatte.arbeidOgInntekt.arbeidOgInntekt
 import no.nav.etterlatte.behandling.aktivitetsplikt.aktivitetspliktRoutes
 import no.nav.etterlatte.behandling.behandlingRoutes
@@ -62,9 +66,12 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
+import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
 import no.nav.etterlatte.tilgangsstyring.SpesialTilgangPlugin
 import no.nav.etterlatte.vilkaarsvurdering.aldersovergang
@@ -128,40 +135,100 @@ internal fun Application.module(context: ApplicationContext) {
 }
 
 internal fun Route.settOppApplikasjonen(context: ApplicationContext) {
-    attachContekst(context.dataSource, context)
     settOppRoutes(context)
     settOppTilganger(context, SpesialTilgangPlugin)
+    val contextPlugin = KontekstPlugin
+    install(contextPlugin) {
+        sakTilgangDao = { context.sakTilgangDao }
+        dataSource = { context.dataSource }
+        saksbehandlerService = { context.saksbehandlerService }
+        saksbehandlerGroupIdsByKey = { context.saksbehandlerGroupIdsByKey }
+    }
 }
+
+class KontekstConfiguration {
+    var saksbehandlerGroupIdsByKey: () -> Map<AzureGroup, String> = { throw IllegalStateException("not initialized!") }
+    var saksbehandlerService: () -> SaksbehandlerService = { throw IllegalStateException("not initialized!") }
+    var dataSource: () -> DataSource = { throw IllegalStateException("not initialized!") }
+    var sakTilgangDao: () -> SakTilgangDao = { throw IllegalStateException("not initialized!") }
+}
+
+val KontekstPlugin =
+    createRouteScopedPlugin(
+        name = "KontekstPlugin",
+        createConfiguration = ::KontekstConfiguration,
+    ) {
+        on(kontekstHook()) { call, proceed ->
+            val requestContekst =
+                Context(
+                    AppUser =
+                        decideUser(
+                            call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
+                            pluginConfig.saksbehandlerGroupIdsByKey(),
+                            pluginConfig.saksbehandlerService(),
+                            call.brukerTokenInfo,
+                        ),
+                    databasecontxt = DatabaseContext(pluginConfig.dataSource()),
+                    sakTilgangDao = pluginConfig.sakTilgangDao(),
+                    brukerTokenInfo = call.brukerTokenInfo,
+                )
+
+            withContext(
+                Dispatchers.Default +
+                    Kontekst.asContextElement(
+                        value = requestContekst,
+                    ),
+            ) {
+                proceed()
+            }
+            Kontekst.remove()
+        }
+    }
+
+internal fun kontekstHook() =
+    object : Hook<suspend (ApplicationCall, suspend () -> Unit) -> Unit> {
+        override fun install(
+            pipeline: ApplicationCallPipeline,
+            handler: suspend (ApplicationCall, suspend () -> Unit) -> Unit,
+        ) {
+            val thisPhase = PipelinePhase("Sett-Kontekst")
+            pipeline.insertPhaseBefore(ApplicationCallPipeline.Call, thisPhase)
+
+            pipeline.intercept(thisPhase) {
+                handler(call, ::proceed)
+            }
+        }
+    }
 
 private fun Route.attachContekst(
     ds: DataSource,
     context: ApplicationContext,
 ) {
-    intercept(ApplicationCallPipeline.Call) {
-        val requestContekst =
-            Context(
-                AppUser =
-                    decideUser(
-                        call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
-                        context.saksbehandlerGroupIdsByKey,
-                        context.saksbehandlerService,
-                        brukerTokenInfo,
-                    ),
-                databasecontxt = DatabaseContext(ds),
-                sakTilgangDao = context.sakTilgangDao,
-                brukerTokenInfo = brukerTokenInfo,
-            )
-
-        withContext(
-            Dispatchers.Default +
-                Kontekst.asContextElement(
-                    value = requestContekst,
-                ),
-        ) {
-            proceed()
-        }
-        Kontekst.remove()
-    }
+//    intercept(ApplicationCallPipeline.Call) {
+//        val requestContekst =
+//            Context(
+//                AppUser =
+//                    decideUser(
+//                        call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
+//                        context.saksbehandlerGroupIdsByKey,
+//                        context.saksbehandlerService,
+//                        call.brukerTokenInfo,
+//                    ),
+//                databasecontxt = DatabaseContext(ds),
+//                sakTilgangDao = context.sakTilgangDao,
+//                brukerTokenInfo = brukerTokenInfo,
+//            )
+//
+//        withContext(
+//            Dispatchers.Default +
+//                    Kontekst.asContextElement(
+//                        value = requestContekst,
+//                    ),
+//        ) {
+//            proceed()
+//        }
+//        Kontekst.remove()
+//    }
 }
 
 private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
@@ -185,7 +252,10 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         klageService = applicationContext.klageService,
         featureToggleService = applicationContext.featureToggleService,
     )
-    tilbakekrevingRoutes(service = applicationContext.tilbakekrevingService, featureToggleService = applicationContext.featureToggleService)
+    tilbakekrevingRoutes(
+        service = applicationContext.tilbakekrevingService,
+        featureToggleService = applicationContext.featureToggleService,
+    )
     etteroppgjoerRoutes(
         forbehandlingService = applicationContext.etteroppgjoerForbehandlingService,
         forbehandlingBrevService = applicationContext.etteroppgjoerForbehandlingBrevService,

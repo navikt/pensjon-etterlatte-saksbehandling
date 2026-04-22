@@ -1078,6 +1078,103 @@ internal class AvkortingTest {
     }
 
     @Nested
+    inner class BeregnAvkortingMedNyeGrunnlag {
+        @Test
+        fun `skal haandtere gammelt grunnlag uten maanederInnvilget naar ny inntekt legges inn`() {
+            // Simulerer prod-scenario: to gamle inntektsgrunnlag (maanederInnvilget=null) i årsoppgjøret,
+            // og saksbehandler legger inn ny inntekt fra april.
+            // Grunnlagene ble opprettet før maanederInnvilget-kolonnen ble innført → null i DB.
+            // lukkSisteInntektsperiode setter periode.tom=mars på feb-inntekten etter at april legges inn.
+            // Fallbacklogikken i beregnRestanse skal ikke bruke den låste periode.tom,
+            // men heller rekonstruere fra innvilgaMaaneder.
+
+            val regelKilde = Grunnlagsopplysning.RegelKilde(navn = "regel", ts = Tidspunkt.now(), versjon = "1")
+
+            fun gammeltGrunnlag(fom: YearMonth) =
+                ForventetInntekt(
+                    id = UUID.randomUUID(),
+                    periode = Periode(fom = fom, tom = null),
+                    inntektTom = 300_000,
+                    fratrekkInnAar = 0,
+                    inntektUtlandTom = 0,
+                    fratrekkInnAarUtland = 0,
+                    innvilgaMaaneder = 12,
+                    spesifikasjon = "",
+                    kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+                    overstyrtInnvilgaMaanederAarsak = null,
+                    overstyrtInnvilgaMaanederBegrunnelse = null,
+                    inntektInnvilgetPeriode =
+                        BenyttetInntektInnvilgetPeriode(
+                            verdi = 300_000,
+                            tidspunkt = Tidspunkt.now(),
+                            regelResultat = "{}".toJsonNode(),
+                            kilde = regelKilde,
+                        ),
+                    maanederInnvilget = null,
+                    maanederInnvilgetRegelResultat = null,
+                )
+
+            val avkorting =
+                Avkorting(
+                    aarsoppgjoer =
+                        listOf(
+                            AarsoppgjoerLoepende(
+                                id = UUID.randomUUID(),
+                                aar = 2025,
+                                fom = YearMonth.of(2025, Month.JANUARY),
+                                inntektsavkorting =
+                                    listOf(
+                                        Inntektsavkorting(gammeltGrunnlag(YearMonth.of(2025, Month.JANUARY))),
+                                        Inntektsavkorting(gammeltGrunnlag(YearMonth.of(2025, Month.FEBRUARY))),
+                                    ),
+                                ytelseFoerAvkorting =
+                                    listOf(
+                                        YtelseFoerAvkorting(
+                                            beregning = 15_000,
+                                            periode = Periode(YearMonth.of(2025, Month.JANUARY), null),
+                                            beregningsreferanse = UUID.randomUUID(),
+                                        ),
+                                    ),
+                            ),
+                        ),
+                )
+
+            // Åpen beregningsperiode: tomSluttenAvAaret=null (ingen neste årsoppgjør) → beregningen må dekke frem i tid
+            val beregningForAaret =
+                beregning(
+                    beregninger =
+                        listOf(
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2025, Month.APRIL),
+                                utbetaltBeloep = 15_000,
+                            ),
+                        ),
+                )
+
+            val resultat =
+                avkorting.beregnAvkortingMedNyeGrunnlag(
+                    nyttGrunnlag =
+                        listOf(
+                            avkortinggrunnlagLagreDto(
+                                aarsinntekt = 200_000,
+                                fom = YearMonth.of(2025, Month.APRIL),
+                            ),
+                        ),
+                    bruker = bruker,
+                    beregning = beregningForAaret,
+                    sanksjoner = emptyList(),
+                    opphoerFom = null,
+                    brukNyeReglerAvkorting = true,
+                )
+
+            resultat.aarsoppgjoer
+                .single()
+                .inntektsavkorting()
+                .size shouldBe 3
+        }
+    }
+
+    @Nested
     inner class ErstattAarsoppgjoer {
         val avkorting =
             Avkorting(

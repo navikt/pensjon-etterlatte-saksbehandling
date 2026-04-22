@@ -421,32 +421,25 @@ object AvkortingRegelkjoring {
                         beskrivelse = "Måneder innvilget i forventet inntekt",
                     )
                 } else {
-                    val tom = nyInntektsavkorting.grunnlag.periode.tom ?: YearMonth.of(fraOgMed.year, 12)
-                    val ytelse =
-                        finnAntallInnvilgaMaanederForAar(
-                            fom = fraOgMed,
-                            tom = tom,
-                            aldersovergang = tom,
-                            ytelse = emptyList(),
-                            // Bruk nye regler avkorting er satt som false, siden denne inntekten og utregningen av
-                            // innvilget periode er gjort med gammel regel
-                            brukNyeReglerAvkorting = false,
-                        )
+                    // Gammelt grunnlag uten maanederInnvilget (opprettet før kolonnen ble innført).
+                    // Vi kan ikke rekonstruere fra periode.tom, siden lukkSisteInntektsperiode kan ha
+                    // satt den til måneden før neste inntekt trer i kraft etter at grunnlaget ble lagret.
+                    // innvilgaMaaneder ble derimot satt korrekt ved opprettelse og er fasiten.
+                    val innvilgaMaaneder = nyInntektsavkorting.grunnlag.innvilgaMaaneder
+                    val maaneder =
+                        (0 until innvilgaMaaneder).map { offset ->
+                            MaanedInnvilget(
+                                maaned = fraOgMed.plusMonths(offset.toLong()),
+                                innvilget = true,
+                            )
+                        }
                     logger.info(
-                        "Mangler maanederInnvilget i inntektsgrunnlag, utledet ${ytelse.maaneder}. regelresultat: ${ytelse.regelResultat}",
+                        "Mangler maanederInnvilget i inntektsgrunnlag ${nyInntektsavkorting.grunnlag.id}, " +
+                            "rekonstruert $innvilgaMaaneder måneder fra $fraOgMed",
                     )
-                    val antallMaanederInnvilget = ytelse.maaneder.count { it.innvilget }
-                    if (antallMaanederInnvilget != nyInntektsavkorting.grunnlag.innvilgaMaaneder) {
-                        throw InternfeilException(
-                            "Kunne ikke bygge opp riktig antall måneder " +
-                                "innvilget for grunnlag med id=${nyInntektsavkorting.grunnlag.id}, " +
-                                "forventet ${nyInntektsavkorting.grunnlag.innvilgaMaaneder}, " +
-                                "men fikk $antallMaanederInnvilget (${ytelse.maaneder}).",
-                        )
-                    }
                     FaktumNode(
-                        verdi = ytelse.maaneder,
-                        kilde = "finnAntallInnvilgaMaanederForAar",
+                        verdi = maaneder,
+                        kilde = "fallback-fra-innvilga-maaneder",
                         beskrivelse = "Fallback for henting av liste av måneder innvilget",
                     )
                 }

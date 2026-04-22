@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpphoerFraTidligereBehandling
@@ -47,11 +48,15 @@ class AutomatiskRevurderingService(
         }
 
         val loepende =
-            vedtakKlient.sakHarLopendeVedtakPaaDato(
-                request.sakId,
-                request.fraDato,
-                systembruker,
-            )
+            inTransaction {
+                runBlocking {
+                    vedtakKlient.sakHarLopendeVedtakPaaDato(
+                        request.sakId,
+                        request.fraDato,
+                        systembruker,
+                    )
+                }
+            }
         val forrigeBehandling = hentForrigeBehandling(loepende, request.sakId)
 
         val forrigeIverksatteBehandling =

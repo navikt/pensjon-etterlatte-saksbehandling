@@ -1,5 +1,6 @@
 package no.nav.etterlatte.inntektsjustering.selvbetjening
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -109,11 +110,15 @@ class InntektsjusteringSelvbetjeningService(
 
         // ikke loepende || er under samordning
         val vedtak =
-            vedtakKlient.sakHarLopendeVedtakPaaDato(
-                sakId,
-                loependeFom,
-                HardkodaSystembruker.omregning,
-            )
+            inTransaction {
+                runBlocking {
+                    vedtakKlient.sakHarLopendeVedtakPaaDato(
+                        sakId,
+                        loependeFom,
+                        HardkodaSystembruker.omregning,
+                    )
+                }
+            }
         if (!vedtak.erLoepende || vedtak.underSamordning) return false
 
         // har sanksjon

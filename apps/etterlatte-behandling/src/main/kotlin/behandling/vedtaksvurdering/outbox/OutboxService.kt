@@ -4,7 +4,6 @@ import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -21,11 +20,9 @@ class OutboxService(
 
     internal fun run() {
         outboxRepository.hentUpubliserte().forEach {
-            inTransaction {
-                vedtaksvurderingService.hentVedtak(it.vedtakId)?.let { vedtak ->
-                    publiserVedtakshendelse(it, vedtak)
-                    outboxRepository.merkSomPublisert(it.id)
-                }
+            vedtaksvurderingService.hentVedtak(it.vedtakId)?.let { vedtak ->
+                publiserVedtakshendelse(it, vedtak)
+                outboxRepository.merkSomPublisert(it.id)
             }
         }
     }

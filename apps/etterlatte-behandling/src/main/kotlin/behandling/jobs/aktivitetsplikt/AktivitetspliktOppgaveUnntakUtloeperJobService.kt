@@ -46,7 +46,7 @@ class AktivitetspliktOppgaveUnntakUtloeperJobService(
         logger.info("Fant ${sakIds.size} saker som skal sjekkes for oppfølgingsoppgaver unntak utløper")
 
         sakIds.forEach { sakId ->
-            if (!vedtakKlient // trenger ikke inTransaction, fordi kontekst ikke er satt
+            if (!vedtakKlient
                     .sakHarLopendeVedtakPaaDato(
                         sakId,
                         tomDato,

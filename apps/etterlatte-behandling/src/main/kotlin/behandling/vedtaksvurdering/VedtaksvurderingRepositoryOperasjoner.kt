@@ -10,23 +10,22 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 interface VedtaksvurderingRepositoryOperasjoner {
-    // Noen som har intransaction lenger opp i fila som er avsluttet?
-    fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak // DONE
+    fun opprettVedtak(opprettVedtak: OpprettVedtak): Vedtak
 
-    fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak // DONE
+    fun oppdaterVedtak(oppdatertVedtak: Vedtak): Vedtak
 
-    fun hentVedtak(vedtakId: Long): Vedtak? // DONE
+    fun hentVedtak(vedtakId: Long): Vedtak?
 
-    fun hentVedtak(behandlingId: UUID): Vedtak? // DONE
+    fun hentVedtak(behandlingId: UUID): Vedtak?
 
-    fun hentVedtakForSak(sakId: SakId): List<Vedtak> // DONE
+    fun hentVedtakForSak(sakId: SakId): List<Vedtak>
 
-    fun fattVedtak( // DONE
+    fun fattVedtak(
         behandlingId: UUID,
         vedtakFattet: VedtakFattet,
     ): Vedtak
 
-    fun attesterVedtak( // DONE
+    fun attesterVedtak(
         behandlingId: UUID,
         attestasjon: Attestasjon,
     ): Vedtak

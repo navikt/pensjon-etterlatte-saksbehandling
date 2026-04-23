@@ -141,6 +141,11 @@ class EtteroppgjoerService(
         etteroppgjoer: Etteroppgjoer,
         sak: Sak,
     ) {
+        if (etteroppgjoer.status === EtteroppgjoerStatus.FERDIGSTILT) {
+            etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sak.id, etteroppgjoer.inntektsaar)
+            return
+        }
+
         krev(etteroppgjoer.kanOppdateresMedSkatteoppgjoerMottatt()) {
             "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør har status ${etteroppgjoer.status}. " +
                 "Se sikkerlogg for mer informasjon."

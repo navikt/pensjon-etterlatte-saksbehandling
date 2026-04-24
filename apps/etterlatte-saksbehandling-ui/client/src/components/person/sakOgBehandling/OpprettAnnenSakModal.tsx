@@ -31,9 +31,11 @@ export const OpprettAnnenSakModal = ({ sak }: Props) => {
 
   return (
     <>
-      <Button variant="secondary" size="small" onClick={() => setIsOpen(true)} icon={<PlusCircleIcon aria-hidden />}>
-        Opprett annen sak
-      </Button>
+      <div>
+        <Button variant="secondary" size="small" onClick={() => setIsOpen(true)} icon={<PlusCircleIcon aria-hidden />}>
+          Opprett annen sak
+        </Button>
+      </div>
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Opprett annen sak">
         <Modal.Body>
           <VStack gap="space-16">

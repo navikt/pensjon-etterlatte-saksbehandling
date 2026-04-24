@@ -150,13 +150,21 @@ class BehandlingServiceImpl(
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(BehandlingServiceImpl::class.java)
 
-    override fun sendDoedshendelse(doedshendelse: DoedshendelsePdl) {
+    private inline fun <reified T : Any> sendGrunnlagsendringshendelse(
+        hendelse: String,
+        body: T,
+    ): HttpResponse =
         runBlocking {
-            behandlingKlient.post("$url/grunnlagsendringshendelse/doedshendelse") {
-                contentType(ContentType.Application.Json)
-                setBody(doedshendelse)
+            retryOgPakkUt {
+                behandlingKlient.post("$url/grunnlagsendringshendelse/$hendelse") {
+                    contentType(ContentType.Application.Json)
+                    setBody(body)
+                }
             }
         }
+
+    override fun sendDoedshendelse(doedshendelse: DoedshendelsePdl) {
+        sendGrunnlagsendringshendelse("doedshendelse", doedshendelse)
     }
 
     override fun oppdaterDoedshendelseBrevDistribuert(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) {
@@ -169,66 +177,31 @@ class BehandlingServiceImpl(
     }
 
     override fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse) {
-        runBlocking {
-            behandlingKlient.post("$url/grunnlagsendringshendelse/utflyttingshendelse") {
-                contentType(ContentType.Application.Json)
-                setBody(utflyttingsHendelse)
-            }
-        }
+        sendGrunnlagsendringshendelse("utflyttingshendelse", utflyttingsHendelse)
     }
 
     override fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse) {
-        runBlocking {
-            behandlingKlient.post("$url/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
-                contentType(ContentType.Application.Json)
-                setBody(forelderBarnRelasjon)
-            }
-        }
+        sendGrunnlagsendringshendelse("forelderbarnrelasjonhendelse", forelderBarnRelasjon)
     }
 
     override fun sendAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
-        runBlocking {
-            behandlingKlient.post("$url/grunnlagsendringshendelse/adressebeskyttelse") {
-                contentType(ContentType.Application.Json)
-                setBody(adressebeskyttelse)
-            }
-        }
+        sendGrunnlagsendringshendelse("adressebeskyttelse", adressebeskyttelse)
     }
 
     override fun sendAdresseHendelse(bostedsadresse: Bostedsadresse) {
-        runBlocking {
-            behandlingKlient.post("$url/grunnlagsendringshendelse/bostedsadresse") {
-                contentType(ContentType.Application.Json)
-                setBody(bostedsadresse)
-            }
-        }
+        sendGrunnlagsendringshendelse("bostedsadresse", bostedsadresse)
     }
 
     override fun sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt) {
-        runBlocking {
-            behandlingKlient.post("$url/grunnlagsendringshendelse/vergemaalellerfremtidsfullmakt") {
-                contentType(ContentType.Application.Json)
-                setBody(vergeMaalEllerFremtidsfullmakt)
-            }
-        }
+        sendGrunnlagsendringshendelse("vergemaalellerfremtidsfullmakt", vergeMaalEllerFremtidsfullmakt)
     }
 
     override fun sendSivilstandHendelse(sivilstandHendelse: SivilstandHendelse) {
-        runBlocking {
-            behandlingKlient.post("$url/grunnlagsendringshendelse/sivilstandhendelse") {
-                contentType(ContentType.Application.Json)
-                setBody(sivilstandHendelse)
-            }
-        }
+        sendGrunnlagsendringshendelse("sivilstandhendelse", sivilstandHendelse)
     }
 
     override fun sendFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse) =
-        runBlocking {
-            behandlingKlient.post("$url/grunnlagsendringshendelse/folkeregisteridentifikatorhendelse") {
-                contentType(ContentType.Application.Json)
-                setBody(hendelse)
-            }
-        }
+        sendGrunnlagsendringshendelse("folkeregisteridentifikatorhendelse", hendelse)
 
     override fun opprettAutomatiskRevurdering(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse =
         runBlocking {

@@ -48,7 +48,7 @@ class EtteroppgjoerService(
     val sigrunKlient: SigrunKlient,
     val hendelseDao: HendelseDao,
 ) {
-    fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer>? =
+    fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer> =
         dao.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 
     fun hentEtteroppgjoerForInntektsaar(
@@ -143,6 +143,9 @@ class EtteroppgjoerService(
     ) {
         if (etteroppgjoer.status === EtteroppgjoerStatus.FERDIGSTILT) {
             etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sak.id, etteroppgjoer.inntektsaar)
+            logger.info(
+                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør for ${etteroppgjoer.inntektsaar} er ferdigstilt - oppretter vurder konsekvens oppgave",
+            )
             return
         }
 

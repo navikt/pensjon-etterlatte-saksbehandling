@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.samordning.X_ORGNR
@@ -49,16 +50,18 @@ class VedtaksvurderingSamordningKlient(
         }
 
         return try {
-            httpClient
-                .get {
-                    url("$vedtaksvurderingUrl/$vedtakId")
-                    if (callerContext is MaskinportenTpContext) {
-                        header(
-                            "orgnr",
-                            callerContext.organisasjonsnr,
-                        ).also { logger.info("Henter vedtak med orgnr ${callerContext.organisasjonsnr}") }
-                    }
-                }.body()
+            retryOgPakkUt {
+                httpClient
+                    .get {
+                        url("$vedtaksvurderingUrl/$vedtakId")
+                        if (callerContext is MaskinportenTpContext) {
+                            header(
+                                "orgnr",
+                                callerContext.organisasjonsnr,
+                            ).also { logger.info("Henter vedtak med orgnr ${callerContext.organisasjonsnr}") }
+                        }
+                    }.body()
+            }
         } catch (e: ClientRequestException) {
             logger.warn("Det oppstod feil i kall til vedtak API", e)
             when (e.response.status) {
@@ -86,19 +89,21 @@ class VedtaksvurderingSamordningKlient(
             logger.info("Henter vedtaksliste med orgnr {}", kv(X_ORGNR, callerContext.organisasjonsnr))
         }
         return try {
-            httpClient
-                .post(vedtaksvurderingUrl) {
-                    parameter("sakstype", sakType)
-                    parameter("fomDato", fomDato)
-                    if (erMaskinPorten) {
-                        header(
-                            "orgnr",
-                            callerContext.organisasjonsnr,
-                        )
-                    }
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                }.body()
+            retryOgPakkUt {
+                httpClient
+                    .post(vedtaksvurderingUrl) {
+                        parameter("sakstype", sakType)
+                        parameter("fomDato", fomDato)
+                        if (erMaskinPorten) {
+                            header(
+                                "orgnr",
+                                callerContext.organisasjonsnr,
+                            )
+                        }
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                    }.body()
+            }
         } catch (e: ClientRequestException) {
             logger.error("Det oppstod feil i kall til vedtaksliste API", e)
             when (e.response.status) {

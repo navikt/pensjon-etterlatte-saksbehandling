@@ -21,3 +21,7 @@
 **2026-04-10 — Dokumentasjon med usikkerhet**
 - Observation: Jeg la inn "ikke referert i kodebasen" som plassholder i stedet for å bare spørre. Det er mer respektfullt og presist å stille spørsmålet direkte.
 - Action: Når en verdi ikke kan verifiseres, spør – ikke dokumenter usikkerheten som et faktum.
+
+**2026-04-24 — Refaktorering**
+- Observation: Jeg committet uten å kompilere, og feilen ble oppdaget av bruker i neste melding.
+- Action: Kompiler alltid før commit – ikke anta at koden er riktig fordi den ser logisk ut.

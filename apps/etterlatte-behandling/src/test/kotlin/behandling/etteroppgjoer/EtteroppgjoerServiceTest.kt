@@ -47,6 +47,7 @@ import java.time.Instant
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.test.assertTrue
 import no.nav.etterlatte.libs.common.vedtak.Periode as VedtakPeriode
 
 class EtteroppgjoerServiceTest {
@@ -378,6 +379,17 @@ class EtteroppgjoerServiceTest {
             this.harUtlandstilsnitt shouldBe true
         }
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
+    }
+
+    @Test
+    fun `finnInnvilgedeAarForSak skal fungere naar sak ikke har innvilgede perioder`() {
+        val ctx = TestContext(sakId)
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
+
+        coEvery { ctx.vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) } returns emptyList()
+
+        val innvilgedeAarForSak = ctx.service.finnInnvilgedeAarForSak(sakId, brukerTokenInfo)
+        assertTrue(innvilgedeAarForSak.isEmpty())
     }
 
     private fun utlandstilsnitt(): Utlandstilknytning =

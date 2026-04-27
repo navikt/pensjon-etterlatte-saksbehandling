@@ -60,8 +60,6 @@
       <env name="SIGRUN_OUTBOUND_SCOPE" value="api://dev-fss.team-inntekt.sigrun-q2/.default" />
       <env name="SIGRUN_URL" value="https://sigrun-q2.dev-fss-pub.nais.io" />
       <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
-      <env name="BRUK_NY_VEDTAK_KLIENT" value="ja" />
-      <env name="BRUK_EGEN_DATABASE_FOR_VEDTAK" value="nei" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-behandling.main" />

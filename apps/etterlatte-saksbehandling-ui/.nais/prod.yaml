@@ -113,8 +113,6 @@ spec:
       value: https://bidrag.intern.nav.no/
     - name: PSAK_URL
       value: https://pensjon-psak.nais.adeo.no/psak
-    - name: BRUK_VEDTAKSROUTES_I_BEHANDLING
-      value: "true"
     - name: APP_VERSION
       value: "{{ image }}"
   envFrom:

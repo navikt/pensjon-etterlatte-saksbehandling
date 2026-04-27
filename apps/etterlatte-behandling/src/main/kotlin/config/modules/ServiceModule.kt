@@ -1,7 +1,5 @@
 package no.nav.etterlatte.config.modules
 
-import no.nav.etterlatte.EnvKey.BRUK_EGEN_DATABASE_FOR_VEDTAK
-import no.nav.etterlatte.EnvKey.BRUK_NY_VEDTAK_KLIENT
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BrukerService
@@ -394,14 +392,7 @@ class ServiceModule(
     }
 
     val vedtaksvurderingRepositoryOperasjoner: VedtaksvurderingRepositoryOperasjoner by lazy {
-        // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
-        val brukEgendatabaseForVedtak: Boolean = env[BRUK_EGEN_DATABASE_FOR_VEDTAK] == "ja"
-
-        if (brukEgendatabaseForVedtak) {
-            daoModule.vedtaksvurderingRepository
-        } else {
-            klientModule.vedtaksvurderingRepositoryKlient()
-        }
+        daoModule.vedtaksvurderingRepository
     }
 
     val vedtaksvurderingService by lazy {
@@ -462,20 +453,12 @@ class ServiceModule(
     }
 
     val vedtakKlient: VedtakKlient by lazy {
-        vedtakKlientOverride ?: run {
-            // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
-            val brukNyVedtakKlientInternal: Boolean = env[BRUK_NY_VEDTAK_KLIENT] == "ja"
-
-            if (brukNyVedtakKlientInternal) {
-                VedtakInternalService(
-                    vedtakTilbakekrevingService = vedtakTilbakekrevingService,
-                    vedtakKlageService = vedtakKlageService,
-                    vedtaksvurderingService = vedtaksvurderingService,
-                )
-            } else {
-                klientModule.vedtakKlient()
-            }
-        }
+        vedtakKlientOverride ?:
+            VedtakInternalService(
+                vedtakTilbakekrevingService = vedtakTilbakekrevingService,
+                vedtakKlageService = vedtakKlageService,
+                vedtaksvurderingService = vedtaksvurderingService,
+            )
     }
 
     val outboxService: OutboxService by lazy {

@@ -29,7 +29,7 @@ spec:
             envVarPrefix: DB
         flags:
           - name: cloudsql.enable_pgaudit
-            value: "true"
+            value: "false" ## TODO: Husk å skru meg på igjen! Kun for migrering av etterlatte-vedtaksvurdering til etterlatte-behandling.
           - name: pgaudit.log
             value: 'write,ddl,role'
           - name: pgaudit.log_parameter

@@ -25,7 +25,6 @@ import no.nav.etterlatte.behandling.revurdering.ManuellRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
@@ -391,12 +390,8 @@ class ServiceModule(
         )
     }
 
-    val vedtaksvurderingRepositoryOperasjoner: VedtaksvurderingRepositoryOperasjoner by lazy {
-        daoModule.vedtaksvurderingRepository
-    }
-
     val vedtaksvurderingService by lazy {
-        VedtaksvurderingService(vedtaksvurderingRepositoryOperasjoner)
+        VedtaksvurderingService(daoModule.vedtaksvurderingRepository)
     }
 
     val vedtaksvurderingRapidService by lazy {
@@ -407,25 +402,25 @@ class ServiceModule(
 
     val vedtakKlageService by lazy {
         VedtakKlageService(
-            vedtaksvurderingRepository = vedtaksvurderingRepositoryOperasjoner,
+            vedtaksvurderingRepository = daoModule.vedtaksvurderingRepository,
             vedtaksvurderingRapidService = vedtaksvurderingRapidService,
         )
     }
 
     val vedtakTilbakekrevingService by lazy {
         VedtakTilbakekrevingService(
-            repository = vedtaksvurderingRepositoryOperasjoner,
+            repository = daoModule.vedtaksvurderingRepository,
             featureToggleService = featureToggleService,
         )
     }
 
     val vedtakSamordningService by lazy {
-        VedtakSamordningService(vedtaksvurderingRepositoryOperasjoner)
+        VedtakSamordningService(daoModule.vedtaksvurderingRepository)
     }
 
     val vedtakEtteroppgjoerService by lazy {
         VedtakEtteroppgjoerService(
-            repository = vedtaksvurderingRepositoryOperasjoner,
+            repository = daoModule.vedtaksvurderingRepository,
             vedtakSamordningService = vedtakSamordningService,
         )
     }
@@ -453,8 +448,8 @@ class ServiceModule(
     }
 
     val vedtakKlient: VedtakKlient by lazy {
-        vedtakKlientOverride ?:
-            VedtakInternalService(
+        vedtakKlientOverride
+            ?: VedtakInternalService(
                 vedtakTilbakekrevingService = vedtakTilbakekrevingService,
                 vedtakKlageService = vedtakKlageService,
                 vedtaksvurderingService = vedtaksvurderingService,

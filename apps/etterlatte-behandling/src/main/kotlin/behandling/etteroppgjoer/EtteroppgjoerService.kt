@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHende
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -311,13 +310,6 @@ class EtteroppgjoerService(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Int> {
         val innvilgedePerioder = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
-
-        if (innvilgedePerioder.isEmpty()) {
-            throw UgyldigForespoerselException(
-                "MANGLER_INNVILGET_PERIODE",
-                "Saken har ingen innvilget periode.",
-            )
-        }
 
         val innvilgedeAar =
             innvilgedePerioder

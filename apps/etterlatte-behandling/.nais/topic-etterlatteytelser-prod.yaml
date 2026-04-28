@@ -38,25 +38,22 @@ spec:
       application: etterlatte-behandling-kafka
       access: readwrite
     - team: etterlatte
-      application: etterlatte-vedtaksvurdering
-      access: readwrite
-    - team: etterlatte
-      application: etterlatte-statistikk
+      application: etterlatte-beregning-kafka
       access: readwrite
     - team: etterlatte
       application: etterlatte-brev-api
       access: readwrite
     - team: etterlatte
-      application: etterlatte-utbetaling
+      application: etterlatte-brev-kafka
       access: readwrite
     - team: etterlatte
       application: etterlatte-hendelser-pdl
       access: readwrite
     - team: etterlatte
-      application: etterlatte-beregning-kafka
+      application: etterlatte-hendelser-samordning
       access: readwrite
     - team: etterlatte
-      application: etterlatte-vedtaksvurdering-kafka
+      application: etterlatte-statistikk
       access: readwrite
     - team: etterlatte
       application: etterlatte-tidshendelser
@@ -65,8 +62,8 @@ spec:
       application: etterlatte-trygdetid-kafka
       access: readwrite
     - team: etterlatte
-      application: etterlatte-hendelser-samordning
+      application: etterlatte-utbetaling
       access: readwrite
     - team: etterlatte
-      application: etterlatte-brev-kafka
+      application: etterlatte-vedtaksvurdering-kafka
       access: readwrite

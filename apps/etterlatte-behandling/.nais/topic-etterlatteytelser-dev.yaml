@@ -19,11 +19,9 @@ spec:
     retentionHours: 336
     segmentHours: 168
   acl:
+    # Felles (dev og prod)
     - team: etterlatte
       application: innsendt-soeknad
-      access: readwrite
-    - team: etterlatte
-      application: selvbetjening-api
       access: readwrite
     - team: etterlatte
       application: selvbetjening-backend
@@ -35,22 +33,16 @@ spec:
       application: etterlatte-notifikasjoner
       access: readwrite
     - team: etterlatte
-      application: etterlatte-testdata
-      access: write
-    - team: etterlatte
-      application: etterlatte-testdata-behandler
-      access: readwrite
-    - team: etterlatte
-      application: etterlatte-brev-api
-      access: readwrite
-    - team: etterlatte
       application: etterlatte-behandling
-      access: write
+      access: readwrite
     - team: etterlatte
       application: etterlatte-behandling-kafka
       access: readwrite
     - team: etterlatte
       application: etterlatte-beregning-kafka
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-brev-api
       access: readwrite
     - team: etterlatte
       application: etterlatte-brev-kafka
@@ -68,17 +60,21 @@ spec:
       application: etterlatte-tidshendelser
       access: readwrite
     - team: etterlatte
-      application: etterlatte-tilbakekreving
-      access: readwrite
-    - team: etterlatte
       application: etterlatte-trygdetid-kafka
       access: readwrite
     - team: etterlatte
       application: etterlatte-utbetaling
       access: readwrite
     - team: etterlatte
-      application: etterlatte-vedtaksvurdering
+      application: etterlatte-vedtaksvurdering-kafka
+      access: readwrite
+    # Kun dev
+    - team: etterlatte
+      application: selvbetjening-api
       access: readwrite
     - team: etterlatte
-      application: etterlatte-vedtaksvurdering-kafka
+      application: etterlatte-testdata
+      access: write
+    - team: etterlatte
+      application: etterlatte-testdata-behandler
       access: readwrite

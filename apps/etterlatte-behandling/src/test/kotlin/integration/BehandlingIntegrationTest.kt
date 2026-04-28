@@ -102,8 +102,6 @@ abstract class BehandlingIntegrationTest {
             EnvKey.ETTERLATTE_KLAGE_API_URL to "http://localhost",
             EnvKey.ETTERLATTE_TILBAKEKREVING_URL to "http://localhost",
             EnvKey.ETTERLATTE_MIGRERING_URL to "http://localhost",
-            EnvKey.BRUK_NY_VEDTAK_KLIENT to "ja",
-            EnvKey.BRUK_EGEN_DATABASE_FOR_VEDTAK to "ja",
             TestEnvKey.OPPGAVE_SCOPE to "scope",
         ).forEach { i -> systemEnv = systemEnv.append(i.key, { i.value }) }
 

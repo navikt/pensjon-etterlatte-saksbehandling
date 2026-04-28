@@ -143,17 +143,9 @@ data class Avkorting(
                                                             fom = inntektsavkorting.grunnlag.periode.fom,
                                                             tom = tom,
                                                         ),
-                                                    // Gammelt grunnlag (opprettet før maanederInnvilget-kolonnen ble innført)
-                                                    // mangler feltet. Rekonstruer fra innvilgaMaaneder startende fra
-                                                    // årsoppgjørets fom – samme startpunkt som den opprinnelige beregningen.
                                                     maanederInnvilget =
                                                         inntektsavkorting.grunnlag.maanederInnvilget
-                                                            ?: (0 until inntektsavkorting.grunnlag.innvilgaMaaneder).map { offset ->
-                                                                MaanedInnvilget(
-                                                                    maaned = aarsoppgjoerFom.plusMonths(offset.toLong()),
-                                                                    innvilget = true,
-                                                                )
-                                                            },
+                                                            ?: fallbackMaanederInnvilget(inntektsavkorting, aarsoppgjoerFom),
                                                 ),
                                             avkortingsperioder =
                                                 if (nullstillAvkortetYtelse) {
@@ -202,6 +194,42 @@ data class Avkorting(
                     }
                 },
         )
+    }
+
+    /**
+     * Gammelt grunnlag (opprettet før maanederInnvilget-kolonnen ble innført)
+     * mangler feltet. Rekonstruer fra innvilgaMaaneder startende fra
+     * årsoppgjørets fom – samme startpunkt som den opprinnelige beregningen.
+     *
+     * @returns liste med måneder innvilget i aktuelt år, basert på innvilgaMaaneder
+     */
+    private fun fallbackMaanederInnvilget(
+        inntektsavkorting: Inntektsavkorting,
+        aarsoppgjoerFom: YearMonth,
+    ): List<MaanedInnvilget> {
+        val maaneder =
+            (0 until inntektsavkorting.grunnlag.innvilgaMaaneder).map { offset ->
+                MaanedInnvilget(
+                    maaned = aarsoppgjoerFom.plusMonths(offset.toLong()),
+                    innvilget = true,
+                )
+            }
+        if (maaneder.any { it.maaned.year != aarsoppgjoerFom.year }) {
+            throw InternfeilException(
+                "Utleder fallback for måneder innvilget utenfor etteroppgjørsåret: " +
+                    "$aarsoppgjoerFom for inntektsavkortingen med id=${inntektsavkorting.grunnlag.id} og periode " +
+                    "${inntektsavkorting.grunnlag.periode}",
+            )
+        }
+        if (maaneder.count { it.innvilget } != inntektsavkorting.grunnlag.innvilgaMaaneder) {
+            throw InternfeilException(
+                "Utleder feil antall måneder innvilget for inntekten med id=" +
+                    "${inntektsavkorting.grunnlag.id} og periode=${inntektsavkorting.grunnlag.periode}, " +
+                    "forventet ${inntektsavkorting.grunnlag.innvilgaMaaneder} men fikk " +
+                    "${maaneder.count { it.innvilget }}.",
+            )
+        }
+        return maaneder
     }
 
     /**

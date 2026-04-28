@@ -18,25 +18,14 @@ import java.util.UUID
 class VedtaksvurderingKlient(
     config: Config,
     httpClient: HttpClient,
-    private val brukEtterlatteBehandling: Boolean = false,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId =
-        if (brukEtterlatteBehandling) {
-            config.getString("behandling.client.id")
-        } else {
-            config.getString("vedtak.client.id")
-        }
-    private val resourceUrl =
-        if (brukEtterlatteBehandling) {
-            config.getString("behandling.resource.url")
-        } else {
-            config.getString("vedtak.resource.url")
-        }
+    private val clientId = config.getString("behandling.client.id")
+    private val resourceUrl = config.getString("behandling.resource.url")
 
     internal suspend fun hentVedtak(
         behandlingId: UUID,

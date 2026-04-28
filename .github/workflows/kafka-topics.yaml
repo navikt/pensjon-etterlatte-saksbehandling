@@ -8,6 +8,23 @@ permissions:
   id-token: write
 
 jobs:
+  deploy-topic-etterlatteytelser:
+    name: etterlatteytelser (rapid)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
+      - name: dev-gcp
+        uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: apps/etterlatte-behandling/.nais/topic-etterlatteytelser-dev.yaml
+      # prod-steget utelates inntil dev er verifisert
+      # - name: prod-gcp
+      #   uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1
+      #   env:
+      #     CLUSTER: prod-gcp
+      #     RESOURCE: apps/etterlatte-behandling/.nais/topic-etterlatteytelser-prod.yaml
+
   deploy-topic-vedtakshendelser:
     name: vedtakshendelser
     runs-on: ubuntu-latest

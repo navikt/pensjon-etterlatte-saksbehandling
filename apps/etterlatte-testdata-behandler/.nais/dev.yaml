@@ -40,7 +40,7 @@ spec:
     pool: nav-dev
   env:
     - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY
       value: earliest
     - name: BEHANDLING_AZURE_SCOPE

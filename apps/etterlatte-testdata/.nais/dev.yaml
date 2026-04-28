@@ -53,7 +53,7 @@ spec:
     pool: nav-dev
   env:
     - name: KAFKA_TARGET_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
     - name: DOLLY_CLIENT_ID
       value: dev-gcp.dolly.dolly-backend
     - name: DOLLY_RESOURCE_URL

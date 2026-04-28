@@ -1,0 +1,84 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: etterlatteytelser
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  pool: nav-dev
+  config:
+    cleanupPolicy: delete
+    localRetentionBytes: -2
+    localRetentionHours: -2
+    maxMessageBytes: 1048588
+    minimumInSyncReplicas: 2
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: 336
+    segmentHours: 168
+  acl:
+    - team: etterlatte
+      application: innsendt-soeknad
+      access: readwrite
+    - team: etterlatte
+      application: selvbetjening-api
+      access: readwrite
+    - team: etterlatte
+      application: selvbetjening-backend
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-kafka-manager
+      access: read
+    - team: etterlatte
+      application: etterlatte-notifikasjoner
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-testdata
+      access: write
+    - team: etterlatte
+      application: etterlatte-testdata-behandler
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-brev-api
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-behandling
+      access: write
+    - team: etterlatte
+      application: etterlatte-behandling-kafka
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-beregning-kafka
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-brev-kafka
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-hendelser-pdl
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-hendelser-samordning
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-statistikk
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-tidshendelser
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-tilbakekreving
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-trygdetid-kafka
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-utbetaling
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-vedtaksvurdering
+      access: readwrite
+    - team: etterlatte
+      application: etterlatte-vedtaksvurdering-kafka
+      access: readwrite

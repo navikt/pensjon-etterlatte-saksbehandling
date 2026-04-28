@@ -70,7 +70,7 @@ spec:
     - name: JOBB_METRIKKER_OPENING_HOURS
       value: "07-18"
     - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
     - name: KAFKA_VEDTAKSHENDELSER_TOPIC
       value: etterlatte.vedtakshendelser
     - name: ETTERLATTE_BEREGNING_CLIENT_ID

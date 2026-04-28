@@ -47,7 +47,7 @@ spec:
     min: 1
   env:
     - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY
       value: earliest
     - name: JOBB_POLLER_INITIAL_DELAY

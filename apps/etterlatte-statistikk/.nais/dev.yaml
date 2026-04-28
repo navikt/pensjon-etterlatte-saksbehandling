@@ -48,7 +48,7 @@ spec:
       enabled: true
   env:
     - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
+      value: etterlatte.etterlatteytelser
     - name: BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEREGNING_AZURE_SCOPE

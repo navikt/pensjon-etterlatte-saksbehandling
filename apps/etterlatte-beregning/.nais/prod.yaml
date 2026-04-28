@@ -81,16 +81,10 @@ spec:
           - name: pgaudit.log_parameter
             value: "on"
   env:
-    - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_VEDTAKSVURDERING_URL
-      value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
-    - name: BRUK_VEDTAK_FRA_BEHANDLING
-      value: "ja"
     - name: ETTERLATTE_TRYGDETID_URL
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
@@ -100,7 +94,6 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
         - application: logging

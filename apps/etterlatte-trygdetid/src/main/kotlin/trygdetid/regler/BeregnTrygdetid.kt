@@ -49,25 +49,21 @@ data class TrygdetidPar<T>(
     val teoretisk: T,
 )
 
-data class TrygdetidGrunnlagMedAvdoed(
-    val trygdetidGrunnlagListe: List<TrygdetidGrunnlag>,
-    val foedselsDato: LocalDate,
-    val doedsDato: LocalDate,
-    val norskPoengaar: Int?,
-    val yrkesskade: Boolean,
-    val nordiskKonvensjon: Boolean,
-)
-
 data class TrygdetidGrunnlagMedAvdoedGrunnlag(
-    val trygdetidGrunnlagMedAvdoed: FaktumNode<TrygdetidGrunnlagMedAvdoed>,
+    val trygdetidGrunnlagListe: FaktumNode<List<TrygdetidGrunnlag>>,
+    val foedselsDato: FaktumNode<LocalDate>,
+    val doedsDato: FaktumNode<LocalDate>,
+    val norskPoengaar: FaktumNode<Int?>,
+    val yrkesskade: FaktumNode<Boolean>,
+    val nordiskKonvensjon: FaktumNode<Boolean>,
 )
 
 val nordiskKonvensjon: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Hent nordisk konvensjon",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { it.nordiskKonvensjon },
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::nordiskKonvensjon,
+        finnFelt = { it },
     )
 
 val dagerPrMaanedTrygdetidGrunnlag =
@@ -78,41 +74,44 @@ val dagerPrMaanedTrygdetidGrunnlag =
         verdi = 30,
     )
 
-data class Opptjeningsdatoer(
-    val foedselsDato: LocalDate,
-    val doedsDato: LocalDate,
-)
-
-val opptjeningsDatoer: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Opptjeningsdatoer> =
+val foedselsDato: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, LocalDate> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
-        beskrivelse = "Hent foedselsdato og doedsdato",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { Opptjeningsdatoer(foedselsDato = it.foedselsDato, doedsDato = it.doedsDato) },
+        beskrivelse = "Hent fødselsdato",
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::foedselsDato,
+        finnFelt = { it },
+    )
+
+val doedsDato: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, LocalDate> =
+    finnFaktumIGrunnlag(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Hent dødsdato",
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::doedsDato,
+        finnFelt = { it },
     )
 
 val antallPoengaarINorge: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Int?> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Finner antall poengår i Norge for overstyring av norske TT perioder",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { it.norskPoengaar },
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::norskPoengaar,
+        finnFelt = { it },
     )
 
 val erYrkesskade: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Er dette yrkesskade",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { it.yrkesskade },
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::yrkesskade,
+        finnFelt = { it },
     )
 
 val trygdetidGrunnlagListe: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, List<TrygdetidGrunnlag>> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Grunnlag liste med poengår",
-        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
-        finnFelt = { it.trygdetidGrunnlagListe },
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagListe,
+        finnFelt = { it },
     )
 
 /**
@@ -210,18 +209,19 @@ val finnDatoerForOpptjeningstid =
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Konverter foedselsdato og doedsdato eller start fremtidig trygdetid til opptjeningsdatoer",
         regelReferanse = RegelReferanse(id = "REGEL-BEREGN-OPPTJENINGSDATOER", versjon = "2.1"),
-    ) benytter opptjeningsDatoer og fremtidigTrygdetidFra med {
-        opptjeningsDatoer,
+    ) benytter foedselsDato og doedsDato og fremtidigTrygdetidFra med {
+        foedt,
+        doed,
         fremtidigFra,
         ->
         val opptjeningTil =
             if (fremtidigFra != null) {
                 fremtidigFra.withDayOfMonth(1).minusDays(1)
             } else {
-                opptjeningsDatoer.doedsDato.withDayOfMonth(1).minusDays(1)
+                doed.withDayOfMonth(1).minusDays(1)
             }
         Pair(
-            opptjeningsDatoer.foedselsDato.plusYears(16),
+            foedt.plusYears(16),
             opptjeningTil,
         )
     }
@@ -543,13 +543,17 @@ val beregnDetaljertBeregnetTrygdetidMedYrkesskade =
         regelReferanse = RegelReferanse(id = "REGEL-TOTAL-DETALJERT-TRYGDETID-YS"),
     ) benytter beregnDetaljertBeregnetTrygdetid og erYrkesskade med { trygdetid, erYrkesskade ->
         when (erYrkesskade) {
-            false -> trygdetid
-            true ->
+            false -> {
+                trygdetid
+            }
+
+            true -> {
                 trygdetid.copy(
                     yrkesskade = true,
                     beregnetSamletTrygdetidNorge = trygdetid.samletTrygdetidNorge,
                     samletTrygdetidNorge = 40,
                 )
+            }
         }
     }
 

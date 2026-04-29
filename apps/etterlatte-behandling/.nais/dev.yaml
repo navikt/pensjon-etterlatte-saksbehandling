@@ -63,9 +63,9 @@ spec:
   resources:
     requests:
       cpu: 50m
-      memory: 640Mi
+      memory: 1280Mi
     limits:
-      memory: 1024Mi
+      memory: 2048Mi
   replicas:
     scalingStrategy:
       cpu:
@@ -174,7 +174,7 @@ spec:
     - name: BRUK_NY_VEDTAK_KLIENT
       value: ja
     - name: BRUK_EGEN_DATABASE_FOR_VEDTAK
-      value: nei
+      value: ja
 
   envFrom:
     - secret: my-application-unleash-api-token

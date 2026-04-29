@@ -80,12 +80,14 @@ class UttrekkLoependeYtelseEtter67JobService(
 
                                 // Sjekker om sak er løpende måneden etter søker ble 67 år
                                 val ytelse =
-                                    runBlocking {
-                                        vedtakKlient.sakHarLopendeVedtakPaaDato(
-                                            sakId,
-                                            opphoerMnd,
-                                            HardkodaSystembruker.uttrekk,
-                                        )
+                                    inTransaction {
+                                        runBlocking {
+                                            vedtakKlient.sakHarLopendeVedtakPaaDato(
+                                                sakId,
+                                                opphoerMnd,
+                                                HardkodaSystembruker.uttrekk,
+                                            )
+                                        }
                                     }
 
                                 if (ytelse.erLoepende) {

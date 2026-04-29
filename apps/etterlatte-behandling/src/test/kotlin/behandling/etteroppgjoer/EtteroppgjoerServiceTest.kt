@@ -37,6 +37,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -46,6 +47,7 @@ import java.time.Instant
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.test.assertTrue
 import no.nav.etterlatte.libs.common.vedtak.Periode as VedtakPeriode
 
 class EtteroppgjoerServiceTest {
@@ -232,7 +234,6 @@ class EtteroppgjoerServiceTest {
                 sak = behandling.sak,
                 innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                 sisteIverksatteBehandling = behandling.id,
-                mottattSkatteoppgjoer = true,
             )
 
         val etteropgjoerResultat = listOf(EtteroppgjoerResultatType.ETTERBETALING, EtteroppgjoerResultatType.TILBAKEKREVING)
@@ -266,7 +267,6 @@ class EtteroppgjoerServiceTest {
                 sak = behandling.sak,
                 innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                 sisteIverksatteBehandling = behandling.id,
-                mottattSkatteoppgjoer = true,
             )
 
         val etteroppgjoerResultat =
@@ -305,7 +305,6 @@ class EtteroppgjoerServiceTest {
                     sak = behandling.sak,
                     innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                     sisteIverksatteBehandling = behandling.id,
-                    mottattSkatteoppgjoer = true,
                 ).copy(status = EtteroppgjoerForbehandlingStatus.FERDIGSTILT)
 
         assertThrows<InternfeilException> {
@@ -328,7 +327,6 @@ class EtteroppgjoerServiceTest {
                 sak = behandling.sak,
                 innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                 sisteIverksatteBehandling = behandling.id,
-                mottattSkatteoppgjoer = true,
             )
 
         assertThrows<IkkeTillattException> {
@@ -383,10 +381,44 @@ class EtteroppgjoerServiceTest {
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
     }
 
+    @Test
+    fun `finnInnvilgedeAarForSak skal fungere naar sak ikke har innvilgede perioder`() {
+        val ctx = TestContext(sakId)
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
+
+        coEvery { ctx.vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) } returns emptyList()
+
+        val innvilgedeAarForSak = ctx.service.finnInnvilgedeAarForSak(sakId, brukerTokenInfo)
+        assertTrue(innvilgedeAarForSak.isEmpty())
+    }
+
     private fun utlandstilsnitt(): Utlandstilknytning =
         Utlandstilknytning(UtlandstilknytningType.UTLANDSTILSNITT, kildeSaksbehandler(), "begrunnelse")
 
     fun kildeSaksbehandler() = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now()))
+
+    @Test
+    fun `haandterSkatteoppgjoerMottatt oppretter vurder konsekvens oppgave naar etteroppgjoer allerede er ferdigstilt`() {
+        val ctx = TestContext(sakId)
+        val inntektsaar = 2024
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = inntektsaar,
+                status = EtteroppgjoerStatus.FERDIGSTILT,
+            )
+        val sak = sak(sakId = sakId)
+
+        every { ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any()) } just Runs
+
+        ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
+
+        verify(exactly = 1) {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sakId, inntektsaar)
+        }
+        verify(exactly = 0) { ctx.dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) }
+        verify(exactly = 0) { ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
+    }
 
     @Test
     fun `finnOgOpprettManglendeEtteroppgjoer oppretter etteroppgjoer for manglende aar`() {

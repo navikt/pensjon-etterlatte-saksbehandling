@@ -56,7 +56,14 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
     private fun finnOgOpprettManglendeEtteroppgjoer() {
         val etteroppgjoersAar = LocalDate.now().year - 1
         val relevanteSaker =
-            runBlocking { vedtakKlient.hentSakerMedUtbetalingForInntektsaar(etteroppgjoersAar, HardkodaSystembruker.etteroppgjoer) }
+            inTransaction {
+                runBlocking {
+                    vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
+                        etteroppgjoersAar,
+                        HardkodaSystembruker.etteroppgjoer,
+                    )
+                }
+            }
 
         relevanteSaker.forEach { sakId ->
             val etteroppgjoer =

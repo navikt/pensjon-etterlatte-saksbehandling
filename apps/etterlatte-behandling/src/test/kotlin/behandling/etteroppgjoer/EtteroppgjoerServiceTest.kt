@@ -12,7 +12,9 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -57,6 +59,7 @@ class EtteroppgjoerServiceTest {
         val sakId: SakId,
     ) {
         val dao: EtteroppgjoerDao = mockk()
+        val forbehandlingDao: EtteroppgjoerForbehandlingDao = mockk()
         val sigrunKlient: SigrunKlient = mockk()
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
@@ -67,6 +70,7 @@ class EtteroppgjoerServiceTest {
         val service =
             EtteroppgjoerService(
                 dao = dao,
+                forbehandlingDao = forbehandlingDao,
                 vedtakKlient = vedtakKlient,
                 behandlingService = behandlingService,
                 beregningKlient = beregningKlient,
@@ -398,17 +402,44 @@ class EtteroppgjoerServiceTest {
     fun kildeSaksbehandler() = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now()))
 
     @Test
-    fun `haandterSkatteoppgjoerMottatt oppretter vurder konsekvens oppgave naar etteroppgjoer allerede er ferdigstilt`() {
+    fun `haandterSkatteoppgjoerMottatt kaster exception hvis etteroppgjoer er ferdigstilt men mangler sisteFerdigstilteForbehandling`() {
+        val ctx = TestContext(sakId)
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.FERDIGSTILT,
+                sisteFerdigstilteForbehandling = null,
+            )
+        val sak = sak(sakId = sakId)
+
+        assertThrows<InternfeilException> {
+            ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
+        }
+    }
+
+    @Test
+    fun `haandterSkatteoppgjoerMottatt oppretter vurder konsekvens oppgave naar inntekt har endret seg siden ferdigstilt etteroppgjoer`() {
         val ctx = TestContext(sakId)
         val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
         val etteroppgjoer =
             Etteroppgjoer(
                 sakId = sakId,
                 inntektsaar = inntektsaar,
                 status = EtteroppgjoerStatus.FERDIGSTILT,
+                sisteFerdigstilteForbehandling = forbehandlingId,
             )
         val sak = sak(sakId = sakId)
 
+        every { ctx.forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) } returns
+            SummertePensjonsgivendeInntekter(loensinntekt = 500_000, naeringsinntekt = 0, tidspunktBeregnet = null)
+        coEvery { ctx.sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) } returns
+            PensjonsgivendeInntektAarResponse(
+                inntektsaar = inntektsaar,
+                norskPersonidentifikator = sak.ident,
+                pensjonsgivendeInntekt = emptyList(),
+            )
         every { ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any()) } just Runs
 
         ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
@@ -416,8 +447,36 @@ class EtteroppgjoerServiceTest {
         verify(exactly = 1) {
             ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sakId, inntektsaar)
         }
-        verify(exactly = 0) { ctx.dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) }
-        verify(exactly = 0) { ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
+    }
+
+    @Test
+    fun `haandterSkatteoppgjoerMottatt oppretter ikke oppgave naar inntekt er uendret siden ferdigstilt etteroppgjoer`() {
+        val ctx = TestContext(sakId)
+        val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = inntektsaar,
+                status = EtteroppgjoerStatus.FERDIGSTILT,
+                sisteFerdigstilteForbehandling = forbehandlingId,
+            )
+        val sak = sak(sakId = sakId)
+
+        every { ctx.forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) } returns
+            SummertePensjonsgivendeInntekter(loensinntekt = 0, naeringsinntekt = 0, tidspunktBeregnet = null)
+        coEvery { ctx.sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) } returns
+            PensjonsgivendeInntektAarResponse(
+                inntektsaar = inntektsaar,
+                norskPersonidentifikator = sak.ident,
+                pensjonsgivendeInntekt = emptyList(),
+            )
+
+        ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
+
+        verify(exactly = 0) {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any())
+        }
     }
 
     @Test

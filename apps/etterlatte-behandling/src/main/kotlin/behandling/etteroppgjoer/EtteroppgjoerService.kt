@@ -12,8 +12,10 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.UNDER_REVU
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.VENTER_PAA_SVAR
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektBeregning
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
@@ -25,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHende
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -47,6 +50,7 @@ enum class EtteroppgjoerSvarfrist(
 
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
+    val forbehandlingDao: EtteroppgjoerForbehandlingDao,
     val vedtakKlient: VedtakKlient,
     val behandlingService: BehandlingService,
     val beregningKlient: BeregningKlient,
@@ -170,10 +174,16 @@ class EtteroppgjoerService(
             }
 
             FERDIGSTILT -> {
-                etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sak.id, etteroppgjoer.inntektsaar)
-                logger.info(
-                    "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør for ${etteroppgjoer.inntektsaar} er ferdigstilt - oppretter vurder konsekvens oppgave",
-                )
+                if (pensjonsgivendeInntektHarEndretSegForFerdigstiltEtteroppgjoer(etteroppgjoer, sak.ident)) {
+                    etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sak.id, etteroppgjoer.inntektsaar)
+                    logger.info(
+                        "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt har endret seg siden ferdigstilt etteroppgjør for ${etteroppgjoer.inntektsaar} - oppretter vurder konsekvens oppgave",
+                    )
+                } else {
+                    logger.info(
+                        "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt er uendret siden ferdigstilt etteroppgjør for ${etteroppgjoer.inntektsaar} - ingen oppgave opprettes",
+                    )
+                }
             }
 
             MANGLER_SKATTEOPPGJOER,
@@ -406,6 +416,33 @@ class EtteroppgjoerService(
         val overstyrtBeregningsgrunnlag =
             beregningKlient.hentOverstyrtBeregning(behandlingId, HardkodaSystembruker.etteroppgjoer)
         return overstyrtBeregningsgrunnlag != null
+    }
+
+    private fun pensjonsgivendeInntektHarEndretSegForFerdigstiltEtteroppgjoer(
+        etteroppgjoer: Etteroppgjoer,
+        ident: String,
+    ): Boolean {
+        krev(etteroppgjoer.status == FERDIGSTILT) {
+            "pensjonsgivendeInntektHarEndretSegForFerdigstiltEtteroppgjoer kan kun kalles for etteroppgjør med status FERDIGSTILT, " +
+                "men etteroppgjør for sakId=${etteroppgjoer.sakId} og inntektsaar=${etteroppgjoer.inntektsaar} har status ${etteroppgjoer.status}"
+        }
+
+        val forbehandlingId =
+            etteroppgjoer.sisteFerdigstilteForbehandling
+                ?: throw InternfeilException(
+                    "Etteroppgjør for sakId=${etteroppgjoer.sakId} og inntektsaar=${etteroppgjoer.inntektsaar} " +
+                        "har status FERDIGSTILT men mangler sisteFerdigstilteForbehandling",
+                )
+
+        val lagretInntekt = forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) ?: return true
+
+        val nyInntekt =
+            runBlocking {
+                val respons = sigrunKlient.hentPensjonsgivendeInntekt(ident, etteroppgjoer.inntektsaar)
+                PensjonsgivendeInntektBeregning.beregnInntekt(respons, etteroppgjoer.inntektsaar).verdi
+            }
+
+        return lagretInntekt.loensinntekt != nyInntekt.loensinntekt || lagretInntekt.naeringsinntekt != nyInntekt.naeringsinntekt
     }
 
     private fun utledAktivitetskrav(

@@ -421,6 +421,26 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
+    fun `haandterSkatteoppgjoerMottatt returnerer hvis etteroppgjoer har status VENTER_PAA_SVAR`() {
+        val ctx = TestContext(sakId)
+        val inntektsaar = 2024
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = inntektsaar,
+                status = EtteroppgjoerStatus.VENTER_PAA_SVAR,
+            )
+        val sak = sak(sakId = sakId)
+
+        every { ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any()) } just Runs
+
+        ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
+
+        verify(exactly = 0) { ctx.dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) }
+        verify(exactly = 0) { ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
+    }
+
+    @Test
     fun `finnOgOpprettManglendeEtteroppgjoer oppretter etteroppgjoer for manglende aar`() {
         val ctx = TestContext(sakId)
         val brukerTokenInfo = mockk<BrukerTokenInfo>()

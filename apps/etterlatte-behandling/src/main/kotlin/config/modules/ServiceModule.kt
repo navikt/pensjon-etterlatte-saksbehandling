@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.Pensjon
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
+import no.nav.etterlatte.behandling.klienter.VedtakInternalServiceImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
@@ -448,7 +449,7 @@ class ServiceModule(
 
     val vedtakInternalService: VedtakInternalService by lazy {
         vedtakInternalServiceOverride
-            ?: VedtakInternalService(
+            ?: VedtakInternalServiceImpl(
                 vedtakTilbakekrevingService = vedtakTilbakekrevingService,
                 vedtakKlageService = vedtakKlageService,
                 vedtaksvurderingService = vedtaksvurderingService,

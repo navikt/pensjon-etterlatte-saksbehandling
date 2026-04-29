@@ -122,7 +122,7 @@ import java.util.UUID
 class BeregningKlientTest :
     BeregningKlient,
     SakTilgangsSjekk {
-    suspend fun hentBeregningOgAvkorting(
+    override suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningOgAvkortingDto {
@@ -139,35 +139,35 @@ class BeregningKlientTest :
         )
     }
 
-    suspend fun slettAvkorting(
+    override suspend fun slettAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
-    suspend fun harOverstyrt(
+    override suspend fun harOverstyrt(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
 
-    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo): Grunnbeloep {
+    override suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo): Grunnbeloep {
         TODO("Not yet implemented")
     }
 
-    suspend fun inntektsjusteringAvkortingInfoSjekk(
+    override suspend fun inntektsjusteringAvkortingInfoSjekk(
         sakId: SakId,
         aar: Int,
         sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): InntektsjusteringAvkortingInfoResponse = mockk()
 
-    suspend fun harTilgangTilSak(
+    override suspend fun harTilgangTilSak(
         sakId: SakId,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean = true
 
-    suspend fun hentAvkortingForForbehandlingEtteroppgjoer(
+    override suspend fun hentAvkortingForForbehandlingEtteroppgjoer(
         request: EtteroppgjoerBeregnetAvkortingRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting =
@@ -179,37 +179,37 @@ class BeregningKlientTest :
             null,
         )
 
-    suspend fun hentBeregnetEtteroppgjoerResultat(
+    override suspend fun hentBeregnetEtteroppgjoerResultat(
         request: EtteroppgjoerHentBeregnetResultatRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto {
         TODO("Not yet implemented")
     }
 
-    suspend fun beregnAvkortingFaktiskInntekt(
+    override suspend fun beregnAvkortingFaktiskInntekt(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto = throw NotImplementedError("Ikke implementert for testklient")
 
-    suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
+    override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
-    suspend fun beregnBehandling(
+    override suspend fun beregnBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
-    suspend fun hentSanksjoner(
+    override suspend fun hentSanksjoner(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Sanksjon> = emptyList()
 
-    suspend fun hentBeregningsgrunnlag(
+    override suspend fun hentBeregningsgrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningsGrunnlag =
@@ -223,22 +223,22 @@ class BeregningKlientTest :
             kunEnJuridiskForelder = null,
         )
 
-    suspend fun hentOverstyrtBeregning(
+    override suspend fun hentOverstyrtBeregning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregningDTO? = null
 
-    suspend fun hentBeregning(
+    override suspend fun hentBeregning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningDTO? = null
 
-    suspend fun hentAvkorting(
+    override suspend fun hentAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AvkortingDto? = null
 
-    suspend fun harAvkortingMedSanksjonGamleRegler(
+    override suspend fun harAvkortingMedSanksjonGamleRegler(
         behandlingId: UUID,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
@@ -246,21 +246,21 @@ class BeregningKlientTest :
 }
 
 class TrygdetidKlientTest : TrygdetidKlient {
-    suspend fun kopierTrygdetidFraForrigeBehandling(
+    override suspend fun kopierTrygdetidFraForrigeBehandling(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
-    suspend fun hentTrygdetid(
+    override suspend fun hentTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<TrygdetidDto> = emptyList()
 }
 
-class VedtakInternalServiceTest {
-    suspend fun lagreVedtakTilbakekreving(
+class VedtakInternalServiceTest : VedtakInternalService {
+    override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
@@ -269,7 +269,7 @@ class VedtakInternalServiceTest {
             every { id } returns 123L
         }
 
-    suspend fun fattVedtakTilbakekreving(
+    override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
@@ -278,7 +278,7 @@ class VedtakInternalServiceTest {
             every { id } returns 123L
         }
 
-    suspend fun attesterVedtakTilbakekreving(
+    override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
@@ -293,7 +293,7 @@ class VedtakInternalServiceTest {
                 }
         }
 
-    suspend fun underkjennVedtakTilbakekreving(
+    override suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto =
@@ -301,7 +301,7 @@ class VedtakInternalServiceTest {
             every { id } returns 123L
         }
 
-    suspend fun lagreVedtakKlage(
+    override suspend fun lagreVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto =
@@ -309,7 +309,7 @@ class VedtakInternalServiceTest {
             every { id } returns 123L
         }
 
-    suspend fun fattVedtakKlage(
+    override suspend fun fattVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto =
@@ -317,7 +317,7 @@ class VedtakInternalServiceTest {
             every { id } returns 123L
         }
 
-    suspend fun attesterVedtakKlage(
+    override suspend fun attesterVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto =
@@ -325,7 +325,7 @@ class VedtakInternalServiceTest {
             every { id } returns 123L
         }
 
-    suspend fun underkjennVedtakKlage(
+    override suspend fun underkjennVedtakKlage(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto =
@@ -333,38 +333,38 @@ class VedtakInternalServiceTest {
             every { id } returns 123L
         }
 
-    suspend fun sakHarLopendeVedtakPaaDato(
+    override suspend fun sakHarLopendeVedtakPaaDato(
         sakId: SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO = LoependeYtelseDTO(true, false, LocalDate.now())
 
-    suspend fun hentVedtak(
+    override suspend fun hentVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto? = null
 
-    suspend fun hentIverksatteVedtak(
+    override suspend fun hentIverksatteVedtak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto> {
         TODO("Not yet implemented")
     }
 
-    suspend fun hentSakerMedUtbetalingForInntektsaar(
+    override suspend fun hentSakerMedUtbetalingForInntektsaar(
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<SakId> {
         TODO("Not yet implemented")
     }
 
-    suspend fun harSakUtbetalingForInntektsaar(
+    override suspend fun harSakUtbetalingForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = true
 
-    suspend fun hentInnvilgedePerioder(
+    override suspend fun hentInnvilgedePerioder(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<InnvilgetPeriodeDto> =
@@ -379,7 +379,7 @@ class VedtakInternalServiceTest {
             ),
         )
 
-    suspend fun angreAttesteringTilbakekreving(
+    override suspend fun angreAttesteringTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: Saksbehandler,
         enhet: Enhetsnummer,
@@ -389,14 +389,14 @@ class VedtakInternalServiceTest {
 }
 
 class TilbakekrevingKlientTest : TilbakekrevingKlient {
-    suspend fun sendTilbakekrevingsvedtak(
+    override suspend fun sendTilbakekrevingsvedtak(
         brukerTokenInfo: BrukerTokenInfo,
         tilbakekrevingVedtak: TilbakekrevingVedtak,
     ) {
         return
     }
 
-    suspend fun hentKravgrunnlag(
+    override suspend fun hentKravgrunnlag(
         brukerTokenInfo: BrukerTokenInfo,
         sakId: SakId,
         kravgrunnlagId: Long,
@@ -404,7 +404,7 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun hentKravgrunnlagOmgjoering(
+    override suspend fun hentKravgrunnlagOmgjoering(
         kravgrunnlagId: Long,
         sak: Sak,
         brukerTokenInfo: BrukerTokenInfo,
@@ -419,13 +419,13 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class BrevApiKlientTest : BrevApiKlient {
     private var brevId = 1L
 
-    suspend fun opprettSpesifiktBrev(
+    override suspend fun opprettSpesifiktBrev(
         sakId: SakId,
         brevParametre: BrevParametre,
         brukerTokenInfo: BrukerTokenInfo,
@@ -433,7 +433,7 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun slettBrev(
+    override suspend fun slettBrev(
         brevId: Long,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
@@ -441,7 +441,7 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun oppdaterSpesifiktBrev(
+    override suspend fun oppdaterSpesifiktBrev(
         sakId: SakId,
         brevId: BrevID,
         brevParametre: BrevParametre,
@@ -450,83 +450,83 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun ferdigstillJournalFoerOgDistribuerBrev(
+    override suspend fun ferdigstillJournalFoerOgDistribuerBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevStatusResponse {
         TODO("Not yet implemented")
     }
 
-    suspend fun opprettKlageOversendelsesbrevISak(
+    override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId++)
 
-    suspend fun opprettVedtaksbrev(
+    override suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId++)
 
-    suspend fun ferdigstillVedtaksbrev(
+    override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
-    suspend fun ferdigstillOversendelseBrev(
+    override suspend fun ferdigstillOversendelseBrev(
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
-    suspend fun journalfoerBrev(
+    override suspend fun journalfoerBrev(
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): JournalpostIdDto = JournalpostIdDto(listOf(UUID.randomUUID().toString()))
 
-    suspend fun distribuerBrev(
+    override suspend fun distribuerBrev(
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): BestillingsIdDto = BestillingsIdDto(listOf(UUID.randomUUID().toString()))
 
-    suspend fun hentBrev(
+    override suspend fun hentBrev(
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId)
 
-    suspend fun slettVedtaksbrev(
+    override suspend fun slettVedtaksbrev(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
-    suspend fun journalfoerNotatKa(
+    override suspend fun journalfoerNotatKa(
         klage: Klage,
         brukerInfoToken: BrukerTokenInfo,
     ): OpprettJournalpostDto = OpprettJournalpostDto(UUID.randomUUID().toString())
 
-    suspend fun slettOversendelsesbrev(
+    override suspend fun slettOversendelsesbrev(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
 
-    suspend fun hentVedtaksbrev(
+    override suspend fun hentVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId)
 
-    suspend fun hentOversendelsesbrev(
+    override suspend fun hentOversendelsesbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev = opprettetBrevDto(brevId)
 
-    suspend fun genererPdf(
+    override suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -534,7 +534,7 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun tilbakestillVedtaksbrev(
+    override suspend fun tilbakestillVedtaksbrev(
         brevID: BrevID,
         behandlingId: UUID,
         sakId: SakId,
@@ -544,7 +544,7 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun fjernFerdigstillingTilbakekreving(
+    override suspend fun fjernFerdigstillingTilbakekreving(
         tilbakekrevingId: UUID,
         sakId: SakId,
         systembruker: Systembruker,
@@ -552,7 +552,7 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun hentPdf(
+    override suspend fun hentPdf(
         sakId: SakId,
         brevID: BrevID,
         bruker: BrukerTokenInfo,
@@ -595,7 +595,7 @@ class BrevApiKlientTest : BrevApiKlient {
 }
 
 class SkjermingKlientTest : SkjermingKlient {
-    suspend fun personErSkjermet(fnr: String): Boolean = false
+    override suspend fun personErSkjermet(fnr: String): Boolean = false
 
     override val serviceName: String
         get() = "Navansatt"
@@ -604,11 +604,11 @@ class SkjermingKlientTest : SkjermingKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
-    suspend fun hentOppgaver(
+    override suspend fun hentOppgaver(
         aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
@@ -617,30 +617,30 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver = GosysOppgaver(0, emptyList())
 
-    suspend fun hentJournalfoeringsoppgave(
+    override suspend fun hentJournalfoeringsoppgave(
         journalpostId: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver = GosysOppgaver(0, emptyList())
 
-    suspend fun hentOppgave(
+    override suspend fun hentOppgave(
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 
-    suspend fun ferdigstill(
+    override suspend fun ferdigstill(
         id: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
         enhetsnr: String,
     ): GosysApiOppgave = gosysApiOppgave()
 
-    suspend fun feilregistrer(
+    override suspend fun feilregistrer(
         id: String,
         request: EndreStatusRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 
-    suspend fun opprettGenerellOppgave(
+    override suspend fun opprettGenerellOppgave(
         personident: String,
         sakType: SakType,
         beskrivelse: String,
@@ -664,13 +664,13 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
             bruker = null,
         )
 
-    suspend fun tildelOppgaveTilSaksbehandler(
+    override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
         request: SaksbehandlerEndringGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave = gosysApiOppgave()
 
-    suspend fun endreFrist(
+    override suspend fun endreFrist(
         oppgaveId: String,
         request: RedigerFristGosysRequest,
         brukerTokenInfo: BrukerTokenInfo,
@@ -681,11 +681,11 @@ class Norg2KlientTest : Norg2Klient {
     override fun hentArbeidsfordelingForOmraadeOgTema(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> =
         listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
 
-    suspend fun hentNavkontorForOmraade(omraade: String): Navkontor = Navkontor("1202 NAV BERGEN SØR", Enheter.PORSGRUNN.enhetNr)
+    override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor = Navkontor("1202 NAV BERGEN SØR", Enheter.PORSGRUNN.enhetNr)
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {
-    suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? = SaksbehandlerInfo("ident", "Max Manus")
+    override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? = SaksbehandlerInfo("ident", "Max Manus")
 
     override val serviceName: String
         get() = "Navansatt"
@@ -694,18 +694,18 @@ class NavAnsattKlientTest : NavAnsattKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class PesysKlientTest : PesysKlient {
-    suspend fun hentSaker(
+    override suspend fun hentSaker(
         fnr: String,
         bruker: BrukerTokenInfo,
     ): List<SakSammendragResponse> = emptyList()
 }
 
 class KrrklientTest : KrrKlient {
-    suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon =
+    override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon =
         DigitalKontaktinformasjon(
             personident = "",
             aktiv = true,
@@ -719,7 +719,7 @@ class KrrklientTest : KrrKlient {
 }
 
 class EntraProxyKlientTest : EntraProxyKlient {
-    suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> =
+    override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> =
         listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
@@ -732,11 +732,11 @@ class EntraProxyKlientTest : EntraProxyKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class KodeverkKlientTest : KodeverkKlient {
-    suspend fun hent(
+    override suspend fun hent(
         kodeverkNavn: KodeverkNavn,
         ekskluderUgyldige: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
@@ -759,7 +759,7 @@ class KodeverkKlientTest : KodeverkKlient {
 }
 
 class BrevKlientTest : BrevKlient {
-    suspend fun tilbakestillStrukturertBrev(
+    override suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,
         behandlingId: UUID,
         brevRequest: BrevRequest,
@@ -768,7 +768,7 @@ class BrevKlientTest : BrevKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun ferdigstillStrukturertBrev(
+    override suspend fun ferdigstillStrukturertBrev(
         behandlingId: UUID,
         brevtype: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
@@ -776,7 +776,7 @@ class BrevKlientTest : BrevKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun ferdigstillJournalfoerStrukturertBrev(
+    override suspend fun ferdigstillJournalfoerStrukturertBrev(
         behandlingId: UUID,
         brevType: Brevtype,
         brukerTokenInfo: BrukerTokenInfo,
@@ -784,7 +784,7 @@ class BrevKlientTest : BrevKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun kanFerdigstilleBrev(
+    override suspend fun kanFerdigstilleBrev(
         brevId: BrevID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
@@ -792,7 +792,7 @@ class BrevKlientTest : BrevKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun genererPdf(
+    override suspend fun genererPdf(
         brevID: BrevID,
         behandlingId: UUID,
         brevRequest: BrevRequest,
@@ -801,7 +801,7 @@ class BrevKlientTest : BrevKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun opprettStrukturertBrev(
+    override suspend fun opprettStrukturertBrev(
         behandlingId: UUID,
         brevRequest: BrevRequest,
         brukerTokenInfo: BrukerTokenInfo,
@@ -809,14 +809,14 @@ class BrevKlientTest : BrevKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun hentVedtaksbrev(
+    override suspend fun hentVedtaksbrev(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ): Brev? {
         TODO("Not yet implemented")
     }
 
-    suspend fun hentBrev(
+    override suspend fun hentBrev(
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
@@ -824,7 +824,7 @@ class BrevKlientTest : BrevKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun slettBrev(
+    override suspend fun slettBrev(
         brevSomskalSlettes: BrevID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
@@ -863,35 +863,35 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         saktype: SakType,
     ): GeografiskTilknytning = GeografiskTilknytning(kommune = "0301")
 
-    suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
+    override suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
         TODO("Not yet implemented")
     }
 
     // Greit å holde denne i sync ellers mocke til om man vil teste relaterte identer. Hvis ikke vil man ikke finne saker på identer man tester på.
-    suspend fun hentPdlFolkeregisterIdenter(ident: String): PdlFolkeregisterIdentListe =
+    override suspend fun hentPdlFolkeregisterIdenter(ident: String): PdlFolkeregisterIdentListe =
         PdlFolkeregisterIdentListe(
             listOf(PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(ident))),
         )
 
-    suspend fun hentAdressebeskyttelseForPerson(
+    override suspend fun hentAdressebeskyttelseForPerson(
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,
     ): AdressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT
 
-    suspend fun hentAktoerId(foedselsnummer: String): PdlIdentifikator.AktoerId? = PdlIdentifikator.AktoerId("0123456789")
+    override suspend fun hentAktoerId(foedselsnummer: String): PdlIdentifikator.AktoerId? = PdlIdentifikator.AktoerId("0123456789")
 
-    suspend fun hentPerson(
+    override suspend fun hentPerson(
         foedselsnummer: String,
         rolle: PersonRolle,
         sakType: SakType,
     ): Person = soeker()
 
-    suspend fun hentOpplysningsperson(
+    override suspend fun hentOpplysningsperson(
         foedselsnummer: String,
         rolle: PersonRolle,
         sakType: SakType,
     ): PersonDTO = hentPdlModellForSaktype(foedselsnummer, rolle, sakType)
 
-    suspend fun hentHistoriskForeldreansvar(
+    override suspend fun hentHistoriskForeldreansvar(
         fnr: Folkeregisteridentifikator,
         rolle: PersonRolle,
         sakType: SakType,
@@ -899,7 +899,7 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         TODO("Not yet implemented")
     }
 
-    suspend fun hentPersongalleri(
+    override suspend fun hentPersongalleri(
         foedselsnummer: String,
         sakType: SakType,
         innsender: String?,
@@ -912,26 +912,26 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class SigrunKlienTest : SigrunKlient {
-    suspend fun hentPensjonsgivendeInntekt(
+    override suspend fun hentPensjonsgivendeInntekt(
         ident: String,
         inntektsaar: Int,
     ): PensjonsgivendeInntektAarResponse = PensjonsgivendeInntektAarResponse.stub(ident, inntektsaar)
 
-    suspend fun hentHendelsesliste(
+    override suspend fun hentHendelsesliste(
         antall: Int,
         sekvensnummerStart: Long,
         brukAktoerId: Boolean,
     ): HendelseslisteFraSkatt = HendelseslisteFraSkatt.stub()
 
-    suspend fun hentSekvensnummerForLesingFraDato(dato: LocalDate): Long = 1
+    override suspend fun hentSekvensnummerForLesingFraDato(dato: LocalDate): Long = 1
 }
 
 class InntektskomponentKlientTest : InntektskomponentKlient {
-    suspend fun hentInntektFlereFilter(
+    override suspend fun hentInntektFlereFilter(
         personident: String,
         maanedFom: YearMonth,
         maanedTom: YearMonth,

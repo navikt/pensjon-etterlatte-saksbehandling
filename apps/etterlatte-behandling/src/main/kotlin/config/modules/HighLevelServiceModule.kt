@@ -56,7 +56,7 @@ class HighLevelServiceModule(
             oppgaveService = serviceModule.oppgaveService,
             klageKlient = klientModule.klageKlient,
             klageHendelser = kafkaModule.klageHendelser,
-            vedtakKlient = serviceModule.vedtakKlient,
+            vedtakInternalService = serviceModule.vedtakInternalService,
             featureToggleService = featureToggleService,
             klageBrevService = klageBrevService,
         )
@@ -93,7 +93,7 @@ class HighLevelServiceModule(
             sakService = serviceModule.sakService,
             brevKlient = klientModule.brevKlient,
             brevApiKlient = klientModule.brevApiKlient,
-            vedtakKlient = serviceModule.vedtakKlient,
+            vedtakInternalService = serviceModule.vedtakInternalService,
             grunnlagService = serviceModule.grunnlagService,
             oppgaveService = serviceModule.oppgaveService,
         )
@@ -112,7 +112,7 @@ class HighLevelServiceModule(
     val etteroppgjoerRevurderingBrevService by lazy {
         EtteroppgjoerRevurderingBrevService(
             grunnlagService = serviceModule.grunnlagService,
-            vedtakKlient = serviceModule.vedtakKlient,
+            vedtakInternalService = serviceModule.vedtakInternalService,
             brevKlient = klientModule.brevKlient,
             behandlingService = serviceModule.behandlingService,
             etteroppgjoerForbehandlingService = serviceModule.etteroppgjoerForbehandlingService,
@@ -125,7 +125,7 @@ class HighLevelServiceModule(
     private val vedtaksbrevService by lazy {
         VedtaksbrevService(
             grunnlagService = serviceModule.grunnlagService,
-            vedtakKlient = serviceModule.vedtakKlient,
+            vedtakInternalService = serviceModule.vedtakInternalService,
             brevKlient = klientModule.brevKlient,
             behandlingService = serviceModule.behandlingService,
             beregningKlient = klientModule.beregningKlient,
@@ -143,7 +143,7 @@ class HighLevelServiceModule(
             behandlingMedBrevService = serviceModule.behandlingMedBrevService,
             behandlingService = serviceModule.behandlingService,
             brevApiKlient = klientModule.brevApiKlient,
-            vedtakKlient = serviceModule.vedtakKlient,
+            vedtakInternalService = serviceModule.vedtakInternalService,
             tilbakekrevingBrevService = tilbakekrevingBrevService,
             etteroppgjoerForbehandlingBrevService = etteroppgjoerForbehandlingBrevService,
             etteroppgjoerRevurderingBrevService = etteroppgjoerRevurderingBrevService,
@@ -158,7 +158,7 @@ class HighLevelServiceModule(
             hendelseDao = daoModule.hendelseDao,
             behandlingService = serviceModule.behandlingService,
             oppgaveService = serviceModule.oppgaveService,
-            vedtakKlient = serviceModule.vedtakKlient,
+            vedtakInternalService = serviceModule.vedtakInternalService,
             brevApiKlient = klientModule.brevApiKlient,
             brevService = brevService,
             tilbakekrevingKlient = klientModule.tilbakekrevingKlient,

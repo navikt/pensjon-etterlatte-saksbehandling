@@ -27,8 +27,6 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlientImpl
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.brev.BrevKlient
@@ -80,8 +78,6 @@ class KlientModule(
     private val httpClientFactory by lazy { HttpClientFactory(config) }
     private val standardHttpClient: HttpClient by lazy { httpClient() }
     private val httpClientForventSuksess: HttpClient by lazy { httpClient(forventSuksess = true) }
-
-    internal fun vedtakKlient(): VedtakKlient = VedtakKlientImpl(config, httpClient())
 
     val navAnsattKlient: NavAnsattKlient by lazy {
         navAnsattKlientOverride ?: NavAnsattKlientImpl(

@@ -9,7 +9,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveSe
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
@@ -40,7 +40,7 @@ enum class EtteroppgjoerSvarfrist(
 
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
-    val vedtakKlient: VedtakKlient,
+    val vedtakInternalService: VedtakInternalService,
     val behandlingService: BehandlingService,
     val beregningKlient: BeregningKlient,
     val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
@@ -183,7 +183,7 @@ class EtteroppgjoerService(
 
         val attesterteVedtak =
             runBlocking {
-                vedtakKlient
+                vedtakInternalService
                     .hentIverksatteVedtak(sakId, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
                     .sortedByDescending { it.datoAttestert }
             }
@@ -309,7 +309,7 @@ class EtteroppgjoerService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Int> {
-        val innvilgedePerioder = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
+        val innvilgedePerioder = runBlocking { vedtakInternalService.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
 
         val innvilgedeAar =
             innvilgedePerioder

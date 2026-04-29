@@ -5,7 +5,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
@@ -50,7 +50,7 @@ class TilbakekrevingService(
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val brevApiKlient: BrevApiKlient,
     private val brevService: BrevService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
@@ -304,7 +304,7 @@ class TilbakekrevingService(
             runBlocking {
                 logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=$tilbakekrevingId")
                 val vedtakId =
-                    vedtakKlient.lagreVedtakTilbakekreving(
+                    vedtakInternalService.lagreVedtakTilbakekreving(
                         tilbakekrevingBehandling = lagretTilbakekreving,
                         brukerTokenInfo = saksbehandler,
                         enhet = lagretTilbakekreving.sak.enhet,
@@ -464,7 +464,7 @@ class TilbakekrevingService(
 
         val vedtak =
             runBlocking {
-                vedtakKlient.fattVedtakTilbakekreving(
+                vedtakInternalService.fattVedtakTilbakekreving(
                     tilbakekrevingId = tilbakekreving.id,
                     brukerTokenInfo = saksbehandler,
                     enhet = tilbakekreving.sak.enhet,
@@ -514,7 +514,7 @@ class TilbakekrevingService(
 
             val vedtak =
                 runBlocking {
-                    vedtakKlient.attesterVedtakTilbakekreving(
+                    vedtakInternalService.attesterVedtakTilbakekreving(
                         tilbakekrevingId = tilbakekreving.id,
                         brukerTokenInfo = saksbehandler,
                         enhet = tilbakekreving.sak.enhet,
@@ -596,7 +596,7 @@ class TilbakekrevingService(
 
             val vedtak =
                 runBlocking {
-                    vedtakKlient.underkjennVedtakTilbakekreving(
+                    vedtakInternalService.underkjennVedtakTilbakekreving(
                         tilbakekrevingId = tilbakekreving.id,
                         brukerTokenInfo = saksbehandler,
                     )
@@ -644,7 +644,7 @@ class TilbakekrevingService(
                     "attesteringen i vedtaksvurdering.",
             )
             runBlocking {
-                vedtakKlient.angreAttesteringTilbakekreving(
+                vedtakInternalService.angreAttesteringTilbakekreving(
                     tilbakekrevingId = tilbakekreving.id,
                     brukerTokenInfo = saksbehandler,
                     enhet = tilbakekreving.sak.enhet,

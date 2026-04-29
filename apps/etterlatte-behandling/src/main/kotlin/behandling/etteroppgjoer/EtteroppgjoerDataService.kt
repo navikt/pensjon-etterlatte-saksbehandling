@@ -5,7 +5,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -16,7 +16,7 @@ import no.nav.etterlatte.logger
 
 class EtteroppgjoerDataService(
     val behandlingService: BehandlingService,
-    val vedtakKlient: VedtakKlient,
+    val vedtakInternalService: VedtakInternalService,
     val beregningKlient: BeregningKlient,
 ) {
     fun sisteVedtakMedAvkorting(
@@ -81,7 +81,7 @@ class EtteroppgjoerDataService(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto> =
         runBlocking {
-            vedtakKlient
+            vedtakInternalService
                 .hentIverksatteVedtak(sakId, brukerTokenInfo)
         }
 }

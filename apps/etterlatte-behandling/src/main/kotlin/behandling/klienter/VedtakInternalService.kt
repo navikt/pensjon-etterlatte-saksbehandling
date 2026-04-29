@@ -28,10 +28,10 @@ class VedtakInternalService(
     private val vedtakTilbakekrevingService: VedtakTilbakekrevingService,
     private val vedtakKlageService: VedtakKlageService,
     private val vedtaksvurderingService: VedtaksvurderingService,
-) : VedtakKlient {
+) {
     private val logger = LoggerFactory.getLogger(VedtakInternalService::class.java)
 
-    override suspend fun lagreVedtakTilbakekreving(
+    suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
@@ -50,7 +50,7 @@ class VedtakInternalService(
         return vedtak.toDto()
     }
 
-    override suspend fun fattVedtakTilbakekreving(
+    suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
@@ -67,7 +67,7 @@ class VedtakInternalService(
         return vedtak.toDto()
     }
 
-    override suspend fun attesterVedtakTilbakekreving(
+    suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
@@ -84,7 +84,7 @@ class VedtakInternalService(
         return vedtak.toDto()
     }
 
-    override suspend fun underkjennVedtakTilbakekreving(
+    suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto {
@@ -93,7 +93,7 @@ class VedtakInternalService(
         return vedtak.toDto()
     }
 
-    override suspend fun lagreVedtakKlage(
+    suspend fun lagreVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto {
@@ -102,7 +102,7 @@ class VedtakInternalService(
         return vedtak.toDto()
     }
 
-    override suspend fun fattVedtakKlage(
+    suspend fun fattVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto {
@@ -111,7 +111,7 @@ class VedtakInternalService(
         return vedtak.toDto()
     }
 
-    override suspend fun attesterVedtakKlage(
+    suspend fun attesterVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto {
@@ -120,7 +120,7 @@ class VedtakInternalService(
         return vedtak.toDto()
     }
 
-    override suspend fun underkjennVedtakKlage(
+    suspend fun underkjennVedtakKlage(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto {
@@ -129,7 +129,7 @@ class VedtakInternalService(
         return vedtak.toDto()
     }
 
-    override suspend fun sakHarLopendeVedtakPaaDato(
+    suspend fun sakHarLopendeVedtakPaaDato(
         sakId: SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
@@ -139,7 +139,7 @@ class VedtakInternalService(
         return loependeYtelse.toDto()
     }
 
-    override suspend fun hentVedtak(
+    suspend fun hentVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto? {
@@ -147,7 +147,7 @@ class VedtakInternalService(
         return vedtaksvurderingService.hentVedtakMedBehandlingId(behandlingId)?.toDto()
     }
 
-    override suspend fun hentIverksatteVedtak(
+    suspend fun hentIverksatteVedtak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto> {
@@ -157,7 +157,7 @@ class VedtakInternalService(
             .map { it.toVedtakSammendragDto() }
     }
 
-    override suspend fun hentSakerMedUtbetalingForInntektsaar(
+    suspend fun hentSakerMedUtbetalingForInntektsaar(
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<SakId> {
@@ -165,7 +165,7 @@ class VedtakInternalService(
         return vedtaksvurderingService.hentSakIdMedUtbetalingForInntektsaar(inntektsaar)
     }
 
-    override suspend fun harSakUtbetalingForInntektsaar(
+    suspend fun harSakUtbetalingForInntektsaar(
         sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
@@ -174,7 +174,7 @@ class VedtakInternalService(
         return vedtaksvurderingService.harSakUtbetalingForInntektsaar(sakId, inntektsaar)
     }
 
-    override suspend fun hentInnvilgedePerioder(
+    suspend fun hentInnvilgedePerioder(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<InnvilgetPeriodeDto> {
@@ -184,7 +184,7 @@ class VedtakInternalService(
             .map(InnvilgetPeriode::tilDto)
     }
 
-    override suspend fun angreAttesteringTilbakekreving(
+    suspend fun angreAttesteringTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: Saksbehandler,
         enhet: Enhetsnummer,
@@ -203,3 +203,8 @@ class VedtakInternalService(
             sisteLoependeBehandlingId = this.sisteLoependeBehandlingId,
         )
 }
+
+class VedtakKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)

@@ -17,7 +17,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.Pensjon
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
@@ -63,7 +62,7 @@ class ServiceModule(
     private val rapid: KafkaProdusent<String, String>,
     private val env: Miljoevariabler,
     grunnlagServiceOverride: GrunnlagService? = null,
-    vedtakKlientOverride: VedtakKlient? = null,
+    vedtakInternalServiceOverride: VedtakInternalService? = null,
 ) {
     val brukerService: BrukerService by lazy {
         BrukerServiceImpl(pdltjenesterKlient = klientModule.pdlTjenesterKlient, norg2Klient = klientModule.norg2Klient)
@@ -170,7 +169,7 @@ class ServiceModule(
     val etteroppgjoerService: EtteroppgjoerService by lazy {
         EtteroppgjoerService(
             dao = daoModule.etteroppgjoerDao,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             behandlingService = behandlingService,
             beregningKlient = klientModule.beregningKlient,
             sigrunKlient = klientModule.sigrunKlient,
@@ -182,7 +181,7 @@ class ServiceModule(
     val etteroppgjoerDataService by lazy {
         EtteroppgjoerDataService(
             behandlingService = behandlingService,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             beregningKlient = klientModule.beregningKlient,
         )
     }
@@ -209,7 +208,7 @@ class ServiceModule(
             hendelserService = etteroppgjoerHendelseService,
             beregningKlient = klientModule.beregningKlient,
             behandlingService = behandlingService,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             etteroppgjoerDataService = etteroppgjoerDataService,
         )
@@ -307,7 +306,7 @@ class ServiceModule(
             revurderingService = revurderingService,
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             beregningKlient = klientModule.beregningKlient,
         )
     }
@@ -346,7 +345,7 @@ class ServiceModule(
     }
 
     private val grunnlagsendringsHendelseFilter by lazy {
-        GrunnlagsendringsHendelseFilter(vedtakKlient = vedtakKlient, behandlingService = behandlingService)
+        GrunnlagsendringsHendelseFilter(vedtakInternalService = vedtakInternalService, behandlingService = behandlingService)
     }
 
     val grunnlagsendringshendelseService: GrunnlagsendringshendelseService by lazy {
@@ -367,7 +366,7 @@ class ServiceModule(
         InntektsjusteringSelvbetjeningService(
             oppgaveService = oppgaveService,
             behandlingService = behandlingService,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             rapid = rapid,
             featureToggleService = featureToggleService,
             beregningKlient = klientModule.beregningKlient,
@@ -447,8 +446,8 @@ class ServiceModule(
         )
     }
 
-    val vedtakKlient: VedtakKlient by lazy {
-        vedtakKlientOverride
+    val vedtakInternalService: VedtakInternalService by lazy {
+        vedtakInternalServiceOverride
             ?: VedtakInternalService(
                 vedtakTilbakekrevingService = vedtakTilbakekrevingService,
                 vedtakKlageService = vedtakKlageService,

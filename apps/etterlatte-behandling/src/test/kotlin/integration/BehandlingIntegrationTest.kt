@@ -13,7 +13,7 @@ import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
@@ -56,7 +56,7 @@ abstract class BehandlingIntegrationTest {
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
         testProdusent: TestProdusent<String, String>? = null,
         skjermingKlient: SkjermingKlient? = null,
-        vedtakKlient: VedtakKlient? = null,
+        vedtakInternalService: VedtakInternalService? = null,
         grunnlagService: GrunnlagService? = null,
     ) {
         mockOAuth2Server.start()
@@ -136,7 +136,7 @@ abstract class BehandlingIntegrationTest {
                         sigrunKlientOverride = SigrunKlienTest(),
                         samordningKlientOverride = mockk(relaxed = true),
                     ),
-                vedtakKlientOverride = vedtakKlient ?: spyk(VedtakKlientTest()),
+                vedtakInternalServiceOverride = vedtakInternalService ?: spyk(VedtakInternalServiceTest()),
                 grunnlagServiceOverride = grunnlagService,
             )
     }

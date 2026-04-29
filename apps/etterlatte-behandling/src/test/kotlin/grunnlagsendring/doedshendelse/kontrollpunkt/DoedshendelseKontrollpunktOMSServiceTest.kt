@@ -93,7 +93,34 @@ class DoedshendelseKontrollpunktOMSServiceTest {
                 bruker,
             )
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeUfoeretrygdIPesysEps)
+    }
+
+    @Test
+    fun `Skal ikke opprette kontrollpunkt dersom ytelse i pesys ikke har en fra og med dato`() {
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr, bruker) } returns
+            listOf(
+                SakSammendragResponse(
+                    sakType = SakSammendragResponse.UFORE_SAKTYPE,
+                    sakStatus = SakSammendragResponse.Status.LOPENDE,
+                    fomDato = null,
+                    tomDate = null,
+                ),
+            )
+
+        val kontrollpunkter =
+            kontrollpunktService.identifiser(
+                doedshendelse,
+                null,
+                gjenlevende,
+                avdoed,
+                bruker,
+            )
+
+        kontrollpunkter shouldBe emptyList()
+        verify(exactly = 0) { behandlingService.hentSisteIverksatteBehandling(sak.id) }
+        coVerify(exactly = 1) { pesysKlient.hentSaker(doedshendelse.beroertFnr, bruker) }
+        confirmVerified(behandlingService, pesysKlient)
     }
 
     @Test

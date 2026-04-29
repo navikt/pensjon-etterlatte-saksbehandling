@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHende
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -48,7 +47,7 @@ class EtteroppgjoerService(
     val sigrunKlient: SigrunKlient,
     val hendelseDao: HendelseDao,
 ) {
-    fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer>? =
+    fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer> =
         dao.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 
     fun hentEtteroppgjoerForInntektsaar(
@@ -141,6 +140,14 @@ class EtteroppgjoerService(
         etteroppgjoer: Etteroppgjoer,
         sak: Sak,
     ) {
+        if (etteroppgjoer.status === EtteroppgjoerStatus.FERDIGSTILT) {
+            etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sak.id, etteroppgjoer.inntektsaar)
+            logger.info(
+                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør for ${etteroppgjoer.inntektsaar} er ferdigstilt - oppretter vurder konsekvens oppgave",
+            )
+            return
+        }
+
         krev(etteroppgjoer.kanOppdateresMedSkatteoppgjoerMottatt()) {
             "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør har status ${etteroppgjoer.status}. " +
                 "Se sikkerlogg for mer informasjon."
@@ -303,13 +310,6 @@ class EtteroppgjoerService(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Int> {
         val innvilgedePerioder = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
-
-        if (innvilgedePerioder.isEmpty()) {
-            throw UgyldigForespoerselException(
-                "MANGLER_INNVILGET_PERIODE",
-                "Saken har ingen innvilget periode.",
-            )
-        }
 
         val innvilgedeAar =
             innvilgedePerioder

@@ -18,6 +18,15 @@ spec:
     - team: etterlatte
       application: etterlatte-behandling
       access: readwrite
-    - team: etterlatte
-      application: etterlatte-vedtaksvurdering
-      access: readwrite
+    - team: pensjon-q0
+      application: pensjon-pen-q0
+      access: read
+    - team: pensjon-q1
+      application: pensjon-pen-q1
+      access: read
+    - team: pensjon-q2
+      application: pensjon-pen-q2
+      access: read
+    - team: pensjon-q5
+      application: pensjon-pen-q5
+      access: read

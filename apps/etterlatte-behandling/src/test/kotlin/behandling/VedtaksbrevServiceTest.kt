@@ -25,7 +25,7 @@ internal class VedtaksbrevServiceTest {
     private val service =
         VedtaksbrevService(
             grunnlagService = mockk(relaxed = true),
-            vedtakKlient = mockk(relaxed = true),
+            vedtakInternalService = mockk(relaxed = true),
             brevKlient = mockk(relaxed = true),
             behandlingService = mockk(relaxed = true),
             beregningKlient = mockk(relaxed = true),

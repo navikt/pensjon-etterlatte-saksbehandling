@@ -105,6 +105,7 @@ export const ViderefoereOpphoerSkjema = ({
             size="small"
             control={control}
             name="skalViderefoere"
+            errorVedTomInput="Du må velge om opphøret skal videreføres eller ikke"
             radios={
               <HStack gap="space-20">
                 <Radio value={JaNei.JA}>Ja</Radio>

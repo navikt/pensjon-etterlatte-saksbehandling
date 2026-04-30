@@ -15,7 +15,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -59,10 +59,10 @@ class EtteroppgjoerForbehandlingServiceTest {
         val hendelserService: EtteroppgjoerForbehandlingHendelseService = mockk()
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
-        val vedtakKlient: VedtakKlient = mockk()
+        val vedtakInternalService: VedtakInternalService = mockk()
         val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
         val etteroppgjoerDataService: EtteroppgjoerDataService =
-            EtteroppgjoerDataService(behandlingService, vedtakKlient, beregningKlient)
+            EtteroppgjoerDataService(behandlingService, vedtakInternalService, beregningKlient)
 
         val service =
             EtteroppgjoerForbehandlingService(
@@ -75,7 +75,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 hendelserService = hendelserService,
                 beregningKlient = beregningKlient,
                 behandlingService = behandlingService,
-                vedtakKlient = vedtakKlient,
+                vedtakInternalService = vedtakInternalService,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
                 etteroppgjoerDataService = etteroppgjoerDataService,
             )
@@ -180,7 +180,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
             )
 
-        coEvery { ctx.vedtakKlient.hentIverksatteVedtak(sakId1, any()) } returns
+        coEvery { ctx.vedtakInternalService.hentIverksatteVedtak(sakId1, any()) } returns
             listOf(
                 VedtakSammendragDto(
                     id = "1",
@@ -342,7 +342,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 ).copy(brevId = 123L, varselbrevSendt = LocalDate.now())
 
         ctx.returnsForbehandling(forbehandling)
-        coEvery { ctx.vedtakKlient.hentIverksatteVedtak(sakId1, any()) } returns
+        coEvery { ctx.vedtakInternalService.hentIverksatteVedtak(sakId1, any()) } returns
             listOf(
                 VedtakSammendragDto(
                     id = "1",

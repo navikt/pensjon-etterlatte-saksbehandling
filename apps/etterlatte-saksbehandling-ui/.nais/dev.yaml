@@ -115,8 +115,6 @@ spec:
       value: https://pensjon-psak-q2.dev.adeo.no/psak
     - name: APP_VERSION
       value: "{{ image }}"
-    - name: BRUK_VEDTAKSROUTES_I_BEHANDLING
-      value: "true"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

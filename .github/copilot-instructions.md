@@ -110,6 +110,7 @@ For mer detaljert kontekst om enkeltapper, se:
 - [brev-api](domenekontekst/brev-api.md) – genererer og distribuerer brev til brukere
 - [vedtaksvurdering](domenekontekst/vedtaksvurdering.md) – oppretter og forvalter vedtak, orkestrator mot nedstrøms systemer
 - [etteroppgjoer](domenekontekst/etteroppgjoer.md) – årlig etteroppgjør for OMS: flyt, statusmaskin og nøkkelklasser
+- [eksterne-repos](domenekontekst/eksterne-repos.md) – søknadsdialog, selvbetjening og delt infrastruktur (pensjon-etterlatte og pensjon-etterlatte-felles)
 
 ## Viktige konvensjoner
 

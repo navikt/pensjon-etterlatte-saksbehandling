@@ -5,7 +5,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -15,7 +15,7 @@ class KunSystembrukerException(
 ) : Exception(msg)
 
 class GrunnlagsendringsHendelseFilter(
-    val vedtakKlient: VedtakKlient,
+    val vedtakInternalService: VedtakInternalService,
     val behandlingService: BehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -33,7 +33,7 @@ class GrunnlagsendringsHendelseFilter(
             if (appUser is SystemUser) {
                 val loependeYtelseDTO =
                     runBlocking {
-                        vedtakKlient.sakHarLopendeVedtakPaaDato(
+                        vedtakInternalService.sakHarLopendeVedtakPaaDato(
                             sakId,
                             LocalDate.now(),
                             appUser.brukerTokenInfo,

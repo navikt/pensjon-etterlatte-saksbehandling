@@ -6,7 +6,7 @@ import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
@@ -47,7 +47,7 @@ import java.util.UUID
 
 class VedtaksbrevService(
     private val grunnlagService: GrunnlagService,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val brevKlient: BrevKlient,
     private val behandlingService: BehandlingService,
     private val beregningKlient: BeregningKlient,
@@ -115,7 +115,7 @@ class VedtaksbrevService(
         skalLagres: Boolean = false,
     ): BrevRequest =
         coroutineScope {
-            val vedtakDeferred = async { vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo) }
+            val vedtakDeferred = async { vedtakInternalService.hentVedtak(behandlingId, brukerTokenInfo) }
             val alleLand = async { kodeverkService.hentAlleLand(brukerTokenInfo) }
 
             val vedtak =

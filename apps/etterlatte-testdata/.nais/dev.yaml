@@ -62,9 +62,9 @@ spec:
       value: dev-gcp.dolly.testnav-person-service
     - name: TESTNAV_RESOURCE_URL
       value: http://testnav-person-service.dolly/api/v2
-    - name: ETTERLATTE_VEDTAKSVURDERING_URL
+    - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
+    - name: ETTERLATTE_BEHANDLING_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
   accessPolicy:
     outbound:

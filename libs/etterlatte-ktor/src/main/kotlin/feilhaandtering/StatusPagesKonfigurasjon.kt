@@ -8,6 +8,8 @@ import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -35,6 +37,9 @@ class StatusPagesKonfigurasjon(
         exception<Throwable> { call, cause ->
             when (cause) {
                 is ForespoerselException -> {
+                    // Vi vil manuelt sette status for Span her til OK, siden ellers vil Opentelemetry rapportere
+                    // dette som en error i appen. Siden dette er en 4xx feil er det korrekt å si "OK" fra serveren
+                    Span.current().setStatus(StatusCode.OK)
                     call.application.log.loggForespoerselException(cause, call)
                     call.respond(cause)
                 }
@@ -51,6 +56,9 @@ class StatusPagesKonfigurasjon(
                             detail = cause.message ?: "Fant ikke ressursen",
                             cause = cause,
                         )
+                    // Vi vil manuelt sette status for Span her til OK, siden ellers vil Opentelemetry rapportere
+                    // dette som en error i appen. Siden dette er en 4xx feil er det korrekt å si "OK" fra serveren
+                    Span.current().setStatus(StatusCode.OK)
                     call.application.log.loggForespoerselException(wrapped, call)
                     call.respond(wrapped)
                 }
@@ -89,15 +97,16 @@ class StatusPagesKonfigurasjon(
                     )
                 }
 
-                HttpStatusCode.BadRequest ->
+                HttpStatusCode.BadRequest -> {
                     call.respond(
                         UgyldigForespoerselException(
                             code = "BAD_REQUEST",
                             detail = "Forespørselen er ugyldig",
                         ),
                     )
+                }
 
-                HttpStatusCode.Unauthorized ->
+                HttpStatusCode.Unauthorized -> {
                     call.respond(
                         ForespoerselException(
                             status = 401,
@@ -105,16 +114,18 @@ class StatusPagesKonfigurasjon(
                             detail = "Forespørselen er ikke autentisert",
                         ),
                     )
+                }
 
-                HttpStatusCode.Forbidden ->
+                HttpStatusCode.Forbidden -> {
                     call.respond(
                         IkkeTillattException(
                             code = "FORBIDDEN",
                             detail = "Forespørselen er ikke tillatt",
                         ),
                     )
+                }
 
-                else ->
+                else -> {
                     call.respond(
                         ForespoerselException(
                             status = code.value,
@@ -122,6 +133,7 @@ class StatusPagesKonfigurasjon(
                             detail = "En ukjent feil oppstod",
                         ),
                     )
+                }
             }
         }
 

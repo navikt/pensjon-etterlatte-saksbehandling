@@ -25,3 +25,7 @@
 **2026-04-24 — Refaktorering**
 - Observation: Jeg committet uten å kompilere, og feilen ble oppdaget av bruker i neste melding.
 - Action: Kompiler alltid før commit – ikke anta at koden er riktig fordi den ser logisk ut.
+
+**2026-04-30 — OTel / bibliotekbruk**
+- Observation: Jeg antok at en API-verdi kunne settes og tilbakestilles symmetrisk, uten å sjekke hvilke tilstandsoverganger som faktisk er lovlige.
+- Action: Sjekk tillatte tilstandsoverganger i et bibliotek før du bruker det – ikke anta at alle verdier er likestilte.

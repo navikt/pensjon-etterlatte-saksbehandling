@@ -37,6 +37,8 @@ class StatusPagesKonfigurasjon(
         exception<Throwable> { call, cause ->
             when (cause) {
                 is ForespoerselException -> {
+                    // Vi vil manuelt sette status for Span her til OK, siden ellers vil Opentelemetry rapportere
+                    // dette som en error i appen. Siden dette er en 4xx feil er det korrekt å si "OK" fra serveren
                     Span.current().setStatus(StatusCode.OK)
                     call.application.log.loggForespoerselException(cause, call)
                     call.respond(cause)
@@ -54,6 +56,8 @@ class StatusPagesKonfigurasjon(
                             detail = cause.message ?: "Fant ikke ressursen",
                             cause = cause,
                         )
+                    // Vi vil manuelt sette status for Span her til OK, siden ellers vil Opentelemetry rapportere
+                    // dette som en error i appen. Siden dette er en 4xx feil er det korrekt å si "OK" fra serveren
                     Span.current().setStatus(StatusCode.OK)
                     call.application.log.loggForespoerselException(wrapped, call)
                     call.respond(wrapped)

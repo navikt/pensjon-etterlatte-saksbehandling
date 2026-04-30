@@ -486,12 +486,18 @@ class StatistikkService(
             fnrForeldre = persongalleri.avdoed,
             fnrSoesken = persongalleri.soesken,
             anvendtTrygdetid = "40",
-            // TODO  Bør utbedres?
             nettoYtelse =
-                vedtakInnhold.utbetalingsperioder
-                    .firstOrNull()
-                    ?.beloep
-                    ?.toString(),
+                avkorting
+                    ?.avkortetYtelse
+                    ?.firstOrNull()
+                    ?.ytelseEtterAvkorting
+                    .toString(),
+            ytelseFoerAvkorting =
+                avkorting
+                    ?.avkortetYtelse
+                    ?.firstOrNull()
+                    ?.ytelseFoerAvkorting
+                    .toString(),
             beregningType = "FOLKETRYGD",
             anvendtSats = "",
             behandlingId = vedtakInnhold.behandling.id,

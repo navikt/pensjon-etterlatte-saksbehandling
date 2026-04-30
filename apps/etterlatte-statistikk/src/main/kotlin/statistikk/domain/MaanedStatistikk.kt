@@ -3,6 +3,7 @@ package no.nav.etterlatte.statistikk.domain
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -20,6 +21,7 @@ data class MaanedStoenadRad(
     val fnrSoesken: List<String>,
     val anvendtTrygdetid: String,
     val nettoYtelse: String?,
+    val ytelseFoerAvkorting: String?,
     val avkortingsbeloep: String,
     val aarsinntekt: String,
     val beregningType: String,
@@ -84,33 +86,43 @@ class MaanedStatistikk(
                         }
                 val erOpphoer =
                     when (aktuellUtbetalingsperiode) {
-                        null ->
+                        null -> {
                             sisteVedtak.vedtakType == VedtakType.OPPHOER ||
                                 (sisteVedtak.opphoerFom != null && sisteVedtak.opphoerFom <= maaned)
+                        }
 
-                        else -> aktuellUtbetalingsperiode.type == StoenadPeriodeType.OPPHOER
+                        else -> {
+                            aktuellUtbetalingsperiode.type == StoenadPeriodeType.OPPHOER
+                        }
                     }
                 if (erOpphoer) {
                     return@mapNotNull null
                 }
-                val nettoYtelse =
-                    aktuellBeregning?.utbetaltBeloep
-                        ?: sisteVedtak.nettoYtelse?.toInt()
-                        ?: 0
 
-                val (avkortingsbeloep, aarsinntekt, sanksjon) =
+                val avkortingData =
                     sisteVedtak.avkorting?.let { avkorting ->
                         val aktuellAvkorting =
                             avkorting.avkortetYtelse.find { it.fom <= maaned && (it.tom ?: maaned) >= maaned }
                         val avkortingGrunnlag =
                             avkorting.avkortingGrunnlag.find { it.fom <= maaned && (it.tom ?: maaned) >= maaned }
                         val aarsinntekt = avkortingGrunnlag?.let { it.aarsinntekt - it.fratrekkInnAar }
-                        Triple(
+                        AvkortingData(
                             aktuellAvkorting?.avkortingsbeloep,
                             aarsinntekt,
                             aktuellAvkorting?.sanksjonertYtelse?.sanksjonType,
+                            aktuellAvkorting?.ytelseFoerAvkorting,
+                            aktuellAvkorting?.ytelseEtterAvkorting,
                         )
-                    } ?: Triple(null, null, null)
+                    }
+
+                val nettoYtelse =
+                    if (sisteVedtak.sakYtelse == SakType.OMSTILLINGSSTOENAD.name && avkortingData?.ytelseEtterAvkorting != null) {
+                        avkortingData.ytelseEtterAvkorting
+                    } else {
+                        aktuellBeregning?.utbetaltBeloep
+                            ?: sisteVedtak.nettoYtelse?.toInt()
+                            ?: 0
+                    }
 
                 val aktivitetForMaaned =
                     (aktiviteter[sakId] ?: AktivitetForMaaned.FALLBACK_OMSTILLINGSSTOENAD)
@@ -121,7 +133,10 @@ class MaanedStatistikk(
                         sisteVedtak.sakYtelsesgruppe
                     } else {
                         when (sisteVedtak.sakYtelsesgruppe) {
-                            SakYtelsesgruppe.FORELDRELOES -> SakYtelsesgruppe.FORELDRELOES
+                            SakYtelsesgruppe.FORELDRELOES -> {
+                                SakYtelsesgruppe.FORELDRELOES
+                            }
+
                             null, SakYtelsesgruppe.EN_AVDOED_FORELDER -> {
                                 // Kan være foreldreløs med overstyrt beregning
                                 if (sisteVedtak.beregning?.overstyrtBeregning == true &&
@@ -146,8 +161,9 @@ class MaanedStatistikk(
                         fnrSoesken = aktuellBeregning?.soeskenFlokk ?: sisteVedtak.fnrSoesken,
                         anvendtTrygdetid = aktuellBeregning?.trygdetid?.toString() ?: sisteVedtak.anvendtTrygdetid,
                         nettoYtelse = nettoYtelse.toString(),
-                        avkortingsbeloep = avkortingsbeloep.toString(),
-                        aarsinntekt = aarsinntekt.toString(),
+                        ytelseFoerAvkorting = avkortingData?.ytelseFoerAvkorting?.toString(),
+                        avkortingsbeloep = avkortingData?.avkortingsbeloep.toString(),
+                        aarsinntekt = avkortingData?.aarsinntekt.toString(),
                         beregningType = sisteVedtak.beregningType,
                         anvendtSats =
                             aktuellBeregning?.anvendtSats(
@@ -175,7 +191,7 @@ class MaanedStatistikk(
                         harAktivitetsplikt = aktivitetForMaaned?.harAktivitetsplikt?.name,
                         oppfyllerAktivitet = aktivitetForMaaned?.oppfyllerAktivitet,
                         aktivitet = aktivitetForMaaned?.aktivitet,
-                        sanksjon = sanksjon?.name,
+                        sanksjon = avkortingData?.sanksjon?.name,
                         etteroppgjoerAar = null,
                         etteroppgjoerUtbetalt = null,
                         etteroppgjoerNyStoenad = null,
@@ -185,8 +201,11 @@ class MaanedStatistikk(
                         tilbakekrevdBeloep = null,
                     )
                 when (val etteroppgjoerRad = etteroppgjoer[sakId]) {
-                    null -> rad
-                    else ->
+                    null -> {
+                        rad
+                    }
+
+                    else -> {
                         rad.copy(
                             // Sette inn de aktuelle mappingene for etteroppgjøret her
                             etteroppgjoerAar = etteroppgjoerRad.aar,
@@ -205,7 +224,16 @@ class MaanedStatistikk(
                                         EtteroppgjoerResultatType.TILBAKEKREVING
                                 },
                         )
+                    }
                 }
             }
     }
 }
+
+data class AvkortingData(
+    val avkortingsbeloep: Int?,
+    val aarsinntekt: Int?,
+    val sanksjon: SanksjonType?,
+    val ytelseFoerAvkorting: Int?,
+    val ytelseEtterAvkorting: Int?,
+)

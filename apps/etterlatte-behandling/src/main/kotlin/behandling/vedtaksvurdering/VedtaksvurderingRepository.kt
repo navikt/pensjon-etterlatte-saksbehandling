@@ -214,7 +214,8 @@ class VedtaksvurderingRepository(
                 queryString = hentVedtak,
                 params = { mapOf("sakId" to sakId.sakId) },
             ) {
-                it.toVedtak(emptyList())
+                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"))
+                it.toVedtak(utbetalingsperioder)
             }
         }
 

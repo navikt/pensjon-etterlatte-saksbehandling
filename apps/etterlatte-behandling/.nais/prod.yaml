@@ -109,10 +109,6 @@ spec:
       value: http://etterlatte-brev-api
     - name: ETTERLATTE_BREV_API_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-brev-api
-    - name: ETTERLATTE_VEDTAK_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_VEDTAK_URL
-      value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL
@@ -185,10 +181,6 @@ spec:
       value: https://sam.prod-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://prod-fss.pensjonsamhandling.sam/.default
-    - name: BRUK_NY_VEDTAK_KLIENT
-      value: ja
-    - name: BRUK_EGEN_DATABASE_FOR_VEDTAK
-      value: nei
 
   envFrom:
     - secret: my-application-unleash-api-token
@@ -204,7 +196,6 @@ spec:
         - application: digdir-krr-proxy
           namespace: team-rocket
           cluster: prod-gcp
-        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-beregning
         - application: etterlatte-trygdetid
         - application: etterlatte-tilbakekreving
@@ -234,7 +225,6 @@ spec:
         - application: etterlatte-hendelser-joark
         - application: etterlatte-hendelser-ufoere
         - application: etterlatte-statistikk
-        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-tidshendelser
         - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold

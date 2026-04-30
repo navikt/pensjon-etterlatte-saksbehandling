@@ -5,7 +5,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpphoerFraTidligereBehandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -32,7 +32,7 @@ class AutomatiskRevurderingService(
     private val revurderingService: RevurderingService,
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagService,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val beregningKlient: BeregningKlient,
 ) {
     /*
@@ -50,7 +50,7 @@ class AutomatiskRevurderingService(
         val loepende =
             inTransaction {
                 runBlocking {
-                    vedtakKlient.sakHarLopendeVedtakPaaDato(
+                    vedtakInternalService.sakHarLopendeVedtakPaaDato(
                         request.sakId,
                         request.fraDato,
                         systembruker,

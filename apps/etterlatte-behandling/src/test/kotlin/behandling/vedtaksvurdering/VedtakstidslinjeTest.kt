@@ -1063,6 +1063,12 @@ internal class VedtakstidslinjeTest {
             innvilgetPeriode[0].periode.tom shouldBe null
         }
 
+        @Test
+        fun `innvilgedePerioder returnerer tom liste når ingen attesterte vedtak finnes`() {
+            val tidslinje = Vedtakstidslinje(emptyList())
+            tidslinje.innvilgedePerioder() shouldBe emptyList()
+        }
+
         private val Vedtak.utbetalingsperioder: List<Utbetalingsperiode>
             get() = (this.innhold as VedtakInnhold.Behandling).utbetalingsperioder
     }

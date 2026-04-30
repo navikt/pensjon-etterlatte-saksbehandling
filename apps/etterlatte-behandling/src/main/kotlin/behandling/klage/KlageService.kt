@@ -7,7 +7,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -159,7 +159,7 @@ class KlageServiceImpl(
     private val oppgaveService: OppgaveService,
     private val klageKlient: KlageKlient,
     private val klageHendelser: IKlageHendelserService,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val featureToggleService: FeatureToggleService,
     private val klageBrevService: KlageBrevService,
 ) : KlageService {
@@ -575,7 +575,7 @@ class KlageServiceImpl(
         val oppdatertKlage = klage.fattVedtak()
         val vedtak =
             runBlocking {
-                vedtakKlient.fattVedtakKlage(klage, saksbehandler)
+                vedtakInternalService.fattVedtakKlage(klage, saksbehandler)
             }
         sjekkVedtakIdLagretIUtfall(klage, vedtak.id)
         klageDao.lagreKlage(oppdatertKlage)
@@ -621,7 +621,7 @@ class KlageServiceImpl(
         klageBrevService.ferdigstillVedtaksbrev(oppdatertKlage, saksbehandler)
         val vedtak =
             runBlocking {
-                vedtakKlient.attesterVedtakKlage(oppdatertKlage, saksbehandler)
+                vedtakInternalService.attesterVedtakKlage(oppdatertKlage, saksbehandler)
             }
         sjekkVedtakIdLagretIUtfall(oppdatertKlage, vedtak.id)
         klageDao.lagreKlage(oppdatertKlage)
@@ -665,7 +665,7 @@ class KlageServiceImpl(
 
         val vedtak =
             runBlocking {
-                vedtakKlient.underkjennVedtakKlage(
+                vedtakInternalService.underkjennVedtakKlage(
                     klageId = klageId,
                     brukerTokenInfo = saksbehandler,
                 )
@@ -731,7 +731,7 @@ class KlageServiceImpl(
         klage: Klage,
         saksbehandler: Saksbehandler,
     ): KlageVedtak {
-        val vedtak = vedtakKlient.lagreVedtakKlage(klage, saksbehandler)
+        val vedtak = vedtakInternalService.lagreVedtakKlage(klage, saksbehandler)
         return KlageVedtak(vedtak.id)
     }
 

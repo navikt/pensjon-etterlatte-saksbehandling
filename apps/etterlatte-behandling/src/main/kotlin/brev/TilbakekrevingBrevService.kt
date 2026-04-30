@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
@@ -44,7 +44,7 @@ class TilbakekrevingBrevService(
     private val sakService: SakService,
     private val brevKlient: BrevKlient,
     private val brevApiKlient: BrevApiKlient,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val grunnlagService: GrunnlagService,
     private val oppgaveService: OppgaveService,
 ) {
@@ -122,7 +122,7 @@ class TilbakekrevingBrevService(
 
             val vedtakDeferred =
                 async {
-                    vedtakKlient.hentVedtak(behandlingId, bruker)
+                    vedtakInternalService.hentVedtak(behandlingId, bruker)
                 }
             val grunnlag =
                 grunnlagService.hentOpplysningsgrunnlagForSak(sak.id)

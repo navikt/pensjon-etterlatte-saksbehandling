@@ -29,6 +29,7 @@ dependencies {
     implementation(libs.ktor.servercontentnegotiation)
 
     compileOnly(libs.opentelemetry.api)
+    testImplementation(libs.opentelemetry.api)
 
     implementation(libs.ktor.metricsmicrometer)
     implementation(libs.ktor.doublereceive)

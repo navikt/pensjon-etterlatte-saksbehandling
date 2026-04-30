@@ -6,7 +6,7 @@ import com.zaxxer.hikari.HikariDataSource
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.selftest.SelfTestService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.config.modules.DaoModule
@@ -63,7 +63,7 @@ internal class ApplicationContext(
         ),
     klientModuleOverride: KlientModule? = null,
     grunnlagServiceOverride: GrunnlagService? = null,
-    vedtakKlientOverride: VedtakKlient? = null,
+    vedtakInternalServiceOverride: VedtakInternalService? = null,
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -92,7 +92,7 @@ internal class ApplicationContext(
             rapid = rapid,
             env = env,
             grunnlagServiceOverride = grunnlagServiceOverride,
-            vedtakKlientOverride = vedtakKlientOverride,
+            vedtakInternalServiceOverride = vedtakInternalServiceOverride,
         )
 
     private val highLevelServiceModule =
@@ -196,7 +196,7 @@ internal class ApplicationContext(
     val vedtakKlageService get() = serviceModule.vedtakKlageService
     val vedtakEtteroppgjoerService get() = serviceModule.vedtakEtteroppgjoerService
     val vedtakTilbakekrevingService get() = serviceModule.vedtakTilbakekrevingService
-    val vedtakKlient get() = serviceModule.vedtakKlient
+    val vedtakInternalService get() = serviceModule.vedtakInternalService
     val vedtakSamordningService get() = serviceModule.vedtakSamordningService
 
     val behandlingsHendelser get() = kafkaModule.behandlingsHendelser

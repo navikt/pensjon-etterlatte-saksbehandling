@@ -37,7 +37,7 @@ class StatusPagesKonfigurasjon(
         exception<Throwable> { call, cause ->
             when (cause) {
                 is ForespoerselException -> {
-                    Span.current().setStatus(StatusCode.UNSET)
+                    Span.current().setStatus(StatusCode.OK)
                     call.application.log.loggForespoerselException(cause, call)
                     call.respond(cause)
                 }
@@ -54,7 +54,7 @@ class StatusPagesKonfigurasjon(
                             detail = cause.message ?: "Fant ikke ressursen",
                             cause = cause,
                         )
-                    Span.current().setStatus(StatusCode.UNSET)
+                    Span.current().setStatus(StatusCode.OK)
                     call.application.log.loggForespoerselException(wrapped, call)
                     call.respond(wrapped)
                 }

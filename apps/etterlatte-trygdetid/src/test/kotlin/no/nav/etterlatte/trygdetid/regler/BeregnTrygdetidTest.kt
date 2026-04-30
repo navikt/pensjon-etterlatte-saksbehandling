@@ -137,22 +137,45 @@ internal class BeregnTrygdetidTest {
         norskPoengaar: Int?,
         yrkesskade: Boolean,
     ) {
-        val grunnlag =
-            FaktumNode(
-                verdi =
-                    TrygdetidGrunnlagMedAvdoed(
-                        trygdetidGrunnlagListe = perioder,
-                        foedselsDato = datoer?.first ?: LocalDate.of(1981, 2, 21),
-                        doedsDato = datoer?.second ?: LocalDate.of(2023, 3, 15),
-                        norskPoengaar = norskPoengaar,
-                        yrkesskade = yrkesskade,
-                        nordiskKonvensjon = false,
+        val trygdetidGrunnlagMedAvdoedGrunnlag =
+            TrygdetidGrunnlagMedAvdoedGrunnlag(
+                trygdetidGrunnlagListe =
+                    FaktumNode(
+                        verdi = perioder,
+                        kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
+                        beskrivelse = "Trygdetidsperioder",
                     ),
-                kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
-                beskrivelse = "Perioder",
+                foedselsDato =
+                    FaktumNode(
+                        verdi = datoer?.first ?: LocalDate.of(1981, 2, 21),
+                        kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
+                        beskrivelse = "Fødselsdato",
+                    ),
+                doedsDato =
+                    FaktumNode(
+                        verdi = datoer?.second ?: LocalDate.of(2023, 3, 15),
+                        kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
+                        beskrivelse = "Dødsdato",
+                    ),
+                norskPoengaar =
+                    FaktumNode(
+                        verdi = norskPoengaar,
+                        kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
+                        beskrivelse = "Norske poengår",
+                    ),
+                yrkesskade =
+                    FaktumNode(
+                        verdi = yrkesskade,
+                        kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
+                        beskrivelse = "Yrkesskade",
+                    ),
+                nordiskKonvensjon =
+                    FaktumNode(
+                        verdi = false,
+                        kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
+                        beskrivelse = "Nordisk konvensjon",
+                    ),
             )
-
-        val trygdetidGrunnlagMedAvdoedGrunnlag = TrygdetidGrunnlagMedAvdoedGrunnlag(grunnlag)
 
         val resultat =
             beregnDetaljertBeregnetTrygdetidMedYrkesskade.anvend(

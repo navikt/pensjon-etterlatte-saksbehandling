@@ -17,7 +17,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektA
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -60,14 +60,14 @@ class EtteroppgjoerServiceTest {
         val sigrunKlient: SigrunKlient = mockk()
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
-        val vedtakKlient: VedtakKlient = mockk()
+        val vedtakInternalService: VedtakInternalService = mockk()
         val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = mockk()
         val hendelsesDao = mockk<HendelseDao>()
 
         val service =
             EtteroppgjoerService(
                 dao = dao,
-                vedtakKlient = vedtakKlient,
+                vedtakInternalService = vedtakInternalService,
                 behandlingService = behandlingService,
                 beregningKlient = beregningKlient,
                 sigrunKlient = sigrunKlient,
@@ -96,7 +96,7 @@ class EtteroppgjoerServiceTest {
                 }
             coEvery { beregningKlient.hentOverstyrtBeregning(any(), any()) } returns mockk()
             every { behandlingService.hentFoersteDoedsdato(any(), any()) } returns null
-            coEvery { vedtakKlient.hentIverksatteVedtak(any(), any()) } returns
+            coEvery { vedtakInternalService.hentIverksatteVedtak(any(), any()) } returns
                 listOf(
                     VedtakSammendragDto(
                         id = UUID.randomUUID().toString(),
@@ -386,7 +386,7 @@ class EtteroppgjoerServiceTest {
         val ctx = TestContext(sakId)
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
-        coEvery { ctx.vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) } returns emptyList()
+        coEvery { ctx.vedtakInternalService.hentInnvilgedePerioder(sakId, brukerTokenInfo) } returns emptyList()
 
         val innvilgedeAarForSak = ctx.service.finnInnvilgedeAarForSak(sakId, brukerTokenInfo)
         assertTrue(innvilgedeAarForSak.isEmpty())
@@ -421,12 +421,32 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
+    fun `haandterSkatteoppgjoerMottatt returnerer hvis etteroppgjoer har status VENTER_PAA_SVAR`() {
+        val ctx = TestContext(sakId)
+        val inntektsaar = 2024
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = inntektsaar,
+                status = EtteroppgjoerStatus.VENTER_PAA_SVAR,
+            )
+        val sak = sak(sakId = sakId)
+
+        every { ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any()) } just Runs
+
+        ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
+
+        verify(exactly = 0) { ctx.dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) }
+        verify(exactly = 0) { ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
+    }
+
+    @Test
     fun `finnOgOpprettManglendeEtteroppgjoer oppretter etteroppgjoer for manglende aar`() {
         val ctx = TestContext(sakId)
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
         // Innvilget periode f.eks 2024, 2025 og 2026
-        coEvery { ctx.vedtakKlient.hentInnvilgedePerioder(any(), any()) } returns
+        coEvery { ctx.vedtakInternalService.hentInnvilgedePerioder(any(), any()) } returns
             listOf(
                 InnvilgetPeriodeDto(VedtakPeriode(YearMonth.now().minusYears(1), null), mockk(relaxed = true)),
                 InnvilgetPeriodeDto(VedtakPeriode(YearMonth.now().minusYears(2), null), mockk(relaxed = true)),

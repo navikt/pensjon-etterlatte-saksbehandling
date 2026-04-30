@@ -6,7 +6,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -73,7 +73,7 @@ class AarligInntektsjusteringJobbService(
     private val revurderingService: RevurderingService,
     private val grunnlagService: GrunnlagService,
     private val aldersovergangService: AldersovergangService,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val beregningKlient: BeregningKlient,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val oppgaveService: OppgaveService,
@@ -124,7 +124,7 @@ class AarligInntektsjusteringJobbService(
         try {
             val vedtak =
                 runBlocking {
-                    vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
+                    vedtakInternalService.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
                 }
 
             if (!vedtak.erLoepende) {

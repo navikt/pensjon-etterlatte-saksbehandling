@@ -1,7 +1,5 @@
 package no.nav.etterlatte.config.modules
 
-import no.nav.etterlatte.EnvKey.BRUK_EGEN_DATABASE_FOR_VEDTAK
-import no.nav.etterlatte.EnvKey.BRUK_NY_VEDTAK_KLIENT
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BrukerService
@@ -19,7 +17,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.Pensjon
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalServiceImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
@@ -27,7 +25,6 @@ import no.nav.etterlatte.behandling.revurdering.ManuellRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
 import no.nav.etterlatte.behandling.vedtaksvurdering.outbox.OutboxService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
@@ -66,7 +63,7 @@ class ServiceModule(
     private val rapid: KafkaProdusent<String, String>,
     private val env: Miljoevariabler,
     grunnlagServiceOverride: GrunnlagService? = null,
-    vedtakKlientOverride: VedtakKlient? = null,
+    vedtakInternalServiceOverride: VedtakInternalService? = null,
 ) {
     val brukerService: BrukerService by lazy {
         BrukerServiceImpl(pdltjenesterKlient = klientModule.pdlTjenesterKlient, norg2Klient = klientModule.norg2Klient)
@@ -173,7 +170,7 @@ class ServiceModule(
     val etteroppgjoerService: EtteroppgjoerService by lazy {
         EtteroppgjoerService(
             dao = daoModule.etteroppgjoerDao,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             behandlingService = behandlingService,
             beregningKlient = klientModule.beregningKlient,
             sigrunKlient = klientModule.sigrunKlient,
@@ -185,7 +182,7 @@ class ServiceModule(
     val etteroppgjoerDataService by lazy {
         EtteroppgjoerDataService(
             behandlingService = behandlingService,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             beregningKlient = klientModule.beregningKlient,
         )
     }
@@ -212,7 +209,7 @@ class ServiceModule(
             hendelserService = etteroppgjoerHendelseService,
             beregningKlient = klientModule.beregningKlient,
             behandlingService = behandlingService,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             etteroppgjoerDataService = etteroppgjoerDataService,
         )
@@ -310,7 +307,7 @@ class ServiceModule(
             revurderingService = revurderingService,
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             beregningKlient = klientModule.beregningKlient,
         )
     }
@@ -349,7 +346,7 @@ class ServiceModule(
     }
 
     private val grunnlagsendringsHendelseFilter by lazy {
-        GrunnlagsendringsHendelseFilter(vedtakKlient = vedtakKlient, behandlingService = behandlingService)
+        GrunnlagsendringsHendelseFilter(vedtakInternalService = vedtakInternalService, behandlingService = behandlingService)
     }
 
     val grunnlagsendringshendelseService: GrunnlagsendringshendelseService by lazy {
@@ -370,7 +367,7 @@ class ServiceModule(
         InntektsjusteringSelvbetjeningService(
             oppgaveService = oppgaveService,
             behandlingService = behandlingService,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             rapid = rapid,
             featureToggleService = featureToggleService,
             beregningKlient = klientModule.beregningKlient,
@@ -393,19 +390,8 @@ class ServiceModule(
         )
     }
 
-    val vedtaksvurderingRepositoryOperasjoner: VedtaksvurderingRepositoryOperasjoner by lazy {
-        // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
-        val brukEgendatabaseForVedtak: Boolean = env[BRUK_EGEN_DATABASE_FOR_VEDTAK] == "ja"
-
-        if (brukEgendatabaseForVedtak) {
-            daoModule.vedtaksvurderingRepository
-        } else {
-            klientModule.vedtaksvurderingRepositoryKlient()
-        }
-    }
-
     val vedtaksvurderingService by lazy {
-        VedtaksvurderingService(vedtaksvurderingRepositoryOperasjoner)
+        VedtaksvurderingService(daoModule.vedtaksvurderingRepository)
     }
 
     val vedtaksvurderingRapidService by lazy {
@@ -416,25 +402,25 @@ class ServiceModule(
 
     val vedtakKlageService by lazy {
         VedtakKlageService(
-            vedtaksvurderingRepository = vedtaksvurderingRepositoryOperasjoner,
+            vedtaksvurderingRepository = daoModule.vedtaksvurderingRepository,
             vedtaksvurderingRapidService = vedtaksvurderingRapidService,
         )
     }
 
     val vedtakTilbakekrevingService by lazy {
         VedtakTilbakekrevingService(
-            repository = vedtaksvurderingRepositoryOperasjoner,
+            repository = daoModule.vedtaksvurderingRepository,
             featureToggleService = featureToggleService,
         )
     }
 
     val vedtakSamordningService by lazy {
-        VedtakSamordningService(vedtaksvurderingRepositoryOperasjoner)
+        VedtakSamordningService(daoModule.vedtaksvurderingRepository)
     }
 
     val vedtakEtteroppgjoerService by lazy {
         VedtakEtteroppgjoerService(
-            repository = vedtaksvurderingRepositoryOperasjoner,
+            repository = daoModule.vedtaksvurderingRepository,
             vedtakSamordningService = vedtakSamordningService,
         )
     }
@@ -461,21 +447,13 @@ class ServiceModule(
         )
     }
 
-    val vedtakKlient: VedtakKlient by lazy {
-        vedtakKlientOverride ?: run {
-            // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
-            val brukNyVedtakKlientInternal: Boolean = env[BRUK_NY_VEDTAK_KLIENT] == "ja"
-
-            if (brukNyVedtakKlientInternal) {
-                VedtakInternalService(
-                    vedtakTilbakekrevingService = vedtakTilbakekrevingService,
-                    vedtakKlageService = vedtakKlageService,
-                    vedtaksvurderingService = vedtaksvurderingService,
-                )
-            } else {
-                klientModule.vedtakKlient()
-            }
-        }
+    val vedtakInternalService: VedtakInternalService by lazy {
+        vedtakInternalServiceOverride
+            ?: VedtakInternalServiceImpl(
+                vedtakTilbakekrevingService = vedtakTilbakekrevingService,
+                vedtakKlageService = vedtakKlageService,
+                vedtaksvurderingService = vedtaksvurderingService,
+            )
     }
 
     val outboxService: OutboxService by lazy {

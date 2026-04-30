@@ -10,7 +10,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
@@ -37,14 +37,14 @@ class InntektsjusteringSelvbetjeningServiceTest {
     private val featureToggleService: FeatureToggleService = mockk()
     private val behandlingService: BehandlingService = mockk()
     private val beregningKlient: BeregningKlient = mockk()
-    private val vedtakKlient: VedtakKlient = mockk()
+    private val vedtakInternalService: VedtakInternalService = mockk()
 
     val service =
         InntektsjusteringSelvbetjeningService(
             oppgaveService,
             behandlingService,
             beregningKlient,
-            vedtakKlient,
+            vedtakInternalService,
             rapid,
             featureToggleService,
         )
@@ -89,7 +89,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
         }
 
         coVerify(exactly = 0) {
-            vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any())
+            vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any())
             beregningKlient.inntektsjusteringAvkortingInfoSjekk(any(), any(), any(), any())
         }
 
@@ -102,7 +102,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
 
         val loependeYtelseMock = mockk<LoependeYtelseDTO>(relaxed = true)
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
         every { loependeYtelseMock.erLoepende } returns true
         every { loependeYtelseMock.underSamordning } returns false
 
@@ -143,7 +143,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
 
         val loependeYtelseMock = mockk<LoependeYtelseDTO>(relaxed = true)
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
         every { loependeYtelseMock.erLoepende } returns true
         every { loependeYtelseMock.underSamordning } returns true
 
@@ -166,7 +166,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
 
         coVerify(exactly = 1) {
             behandlingService.hentAapneBehandlingerForSak(any())
-            vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any())
+            vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any())
         }
 
         verifyManuellBehandling()
@@ -178,7 +178,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
 
         val loependeYtelseMock = mockk<LoependeYtelseDTO>(relaxed = true)
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
         every { loependeYtelseMock.erLoepende } returns false
         every { loependeYtelseMock.underSamordning } returns false
 
@@ -201,7 +201,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
 
         coVerify(exactly = 1) {
             behandlingService.hentAapneBehandlingerForSak(any())
-            vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any())
+            vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any())
         }
 
         verifyManuellBehandling()
@@ -213,7 +213,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
 
         val loependeYtelseMock = mockk<LoependeYtelseDTO>(relaxed = true)
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
         every { loependeYtelseMock.erLoepende } returns true
         every { loependeYtelseMock.underSamordning } returns false
 
@@ -271,7 +271,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
 
         verify(exactly = 0) {
             behandlingService wasNot Called
-            vedtakKlient wasNot Called
+            vedtakInternalService wasNot Called
         }
 
         verifyManuellBehandling()
@@ -303,7 +303,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 },
             )
             behandlingService.hentAapneBehandlingerForSak(any())
-            vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any())
+            vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any())
             beregningKlient.inntektsjusteringAvkortingInfoSjekk(any(), any(), any(), any())
             rapid.publiser("mottak-inntektsjustering-fullfoert-123", any())
         }

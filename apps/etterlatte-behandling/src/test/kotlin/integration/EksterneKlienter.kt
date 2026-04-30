@@ -20,7 +20,7 @@ import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.brev.BrevKlient
@@ -259,7 +259,7 @@ class TrygdetidKlientTest : TrygdetidKlient {
     ): List<TrygdetidDto> = emptyList()
 }
 
-class VedtakKlientTest : VedtakKlient {
+class VedtakInternalServiceTest : VedtakInternalService {
     override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,

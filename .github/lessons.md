@@ -28,4 +28,8 @@
 
 **2026-04-30 — Testskriving**
 - Observation: Jeg antok hvilken metode og hvilken app endringen gjaldt uten å spørre. Begge var feil.
-- Action: Når brukeren sier "linje X", sjekk linje X i riktig app. Spør om usikkerheten er der. 
+- Action: Når brukeren sier "linje X", sjekk linje X i riktig app. Spør om usikkerheten er der.
+
+**2026-05-04 — Testskriving**
+- Observation: Jeg la inn mock for `SaksbehandlerInfoDao` uten å vurdere om real-DB var mulig og bedre. Brukeren måtte eksplisitt be om det.
+- Action: Når en DAO er enkel og DatabaseExtension finnes i modulen, vurder real-DB som default – ikke mock.

@@ -454,6 +454,23 @@ internal class VedtaksvurderingRepositoryTest(
     }
 
     @Test
+    fun `hentVedtakForSak skal inkludere utbetalingsperioder`() {
+        val nyttVedtak = opprettVedtak(sakId = sakId1)
+        repository.opprettVedtak(nyttVedtak)
+
+        val vedtakForSak = repository.hentVedtakForSak(sakId1)
+
+        vedtakForSak.size shouldBeExactly 1
+        val innhold = vedtakForSak.first().innhold as VedtakInnhold.Behandling
+        innhold.utbetalingsperioder.size shouldBe 1
+        innhold.utbetalingsperioder.first().let {
+            it.periode shouldBe Periode(YearMonth.of(2023, Month.JANUARY), null)
+            it.beloep shouldBe BigDecimal.valueOf(100L)
+            it.type shouldBe UtbetalingsperiodeType.UTBETALING
+        }
+    }
+
+    @Test
     fun `skal hente vedtak for fnr`() {
         val soeker1 = Folkeregisteridentifikator.of(FNR_1)
         val soeker2 = Folkeregisteridentifikator.of(FNR_2)

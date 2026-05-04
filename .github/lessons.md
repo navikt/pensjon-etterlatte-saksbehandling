@@ -29,3 +29,7 @@
 **2026-04-30 — OTel / bibliotekbruk**
 - Observation: Jeg antok at en API-verdi kunne settes og tilbakestilles symmetrisk, uten å sjekke hvilke tilstandsoverganger som faktisk er lovlige.
 - Action: Sjekk tillatte tilstandsoverganger i et bibliotek før du bruker det – ikke anta at alle verdier er likestilte.
+
+**2026-04-30 — Testskriving**
+- Observation: Jeg antok hvilken metode og hvilken app endringen gjaldt uten å spørre. Begge var feil.
+- Action: Når brukeren sier "linje X", sjekk linje X i riktig app. Spør om usikkerheten er der. 

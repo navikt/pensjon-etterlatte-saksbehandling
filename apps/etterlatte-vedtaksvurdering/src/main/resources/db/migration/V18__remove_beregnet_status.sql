@@ -1,1 +1,0 @@
-UPDATE vedtak SET vedtakstatus = 'OPPRETTET' WHERE vedtakstatus = 'BEREGNET';

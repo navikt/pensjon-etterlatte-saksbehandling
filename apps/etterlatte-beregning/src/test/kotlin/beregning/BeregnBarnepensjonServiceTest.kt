@@ -16,6 +16,7 @@ import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.grunnlag.TomVerdi
+import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
@@ -59,6 +60,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -943,6 +945,126 @@ internal class BeregnBarnepensjonServiceTest {
         }
     }
 
+    @Nested
+    inner class BeregnOverFlerePerioder {
+        @Test
+        fun `skal bruke vanlig beregning naar virkningstidspunkt er etter alle eksisterende vedtaksperioder`() {
+            val tidligereOpphoerstidspunkt = YearMonth.of(2024, 6)
+            val nyVirkningstidspunkt = YearMonth.of(2025, 10)
+            val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = nyVirkningstidspunkt)
+            val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+            every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
+            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+            coEvery {
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any(), any())
+            } returns
+                barnepensjonBeregningsGrunnlagMedVedtaksperioder(
+                    behandling.id,
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 1),
+                                tilOgMed = tidligereOpphoerstidspunkt,
+                            ),
+                        ),
+                )
+
+            runBlocking {
+                val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
+
+                with(beregning) {
+                    beregningsperioder.first().datoFOM shouldBe nyVirkningstidspunkt
+                    beregningsperioder.last().datoTOM shouldBe null
+                }
+            }
+        }
+
+        @Test
+        fun `skal beregne over flere perioder naar virkningstidspunkt er innenfor en vedtaksperiode`() {
+            val virkningstidspunkt = YearMonth.of(2024, 3)
+            val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virkningstidspunkt)
+            val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+            every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
+            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+            coEvery {
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any(), any())
+            } returns
+                barnepensjonBeregningsGrunnlagMedVedtaksperioder(
+                    behandling.id,
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 1),
+                                tilOgMed = YearMonth.of(2024, 6),
+                            ),
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 10),
+                                tilOgMed = null,
+                            ),
+                        ),
+                )
+
+            runBlocking {
+                val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
+
+                with(beregning) {
+                    beregningsperioder.first().datoFOM shouldBe virkningstidspunkt
+                    beregningsperioder.last().datoTOM shouldBe null
+
+                    val perioderFoersteVedtaksperiode =
+                        beregningsperioder.filter {
+                            it.datoFOM <= YearMonth.of(2024, 6)
+                        }
+                    perioderFoersteVedtaksperiode.last().datoTOM shouldBe YearMonth.of(2024, 6)
+
+                    val perioderAndreVedtaksperiode =
+                        beregningsperioder.filter {
+                            it.datoFOM >= YearMonth.of(2024, 10)
+                        }
+                    perioderAndreVedtaksperiode.first().datoFOM shouldBe YearMonth.of(2024, 10)
+                }
+            }
+        }
+
+        @Test
+        fun `skal kaste feil naar virkningstidspunkt er mellom to vedtaksperioder`() {
+            val virkningstidspunktMellomPerioder = YearMonth.of(2024, 8)
+            val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virkningstidspunktMellomPerioder)
+            val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+            every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
+            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+            coEvery {
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any(), any())
+            } returns
+                barnepensjonBeregningsGrunnlagMedVedtaksperioder(
+                    behandling.id,
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 1),
+                                tilOgMed = YearMonth.of(2024, 6),
+                            ),
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 10),
+                                tilOgMed = null,
+                            ),
+                        ),
+                )
+
+            runBlocking {
+                assertThrows<Exception> {
+                    beregnBarnepensjonService().beregn(behandling, bruker)
+                }
+            }
+        }
+    }
+
     private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
         val grunnlagEnAvdoed = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
@@ -995,6 +1117,34 @@ internal class BeregnBarnepensjonServiceTest {
         beregningsMetode = beregningsMetode.toGrunnlag(),
         beregningsMetodeFlereAvdoede = avdoedeBeregningmetode,
         kunEnJuridiskForelder = kunEnJuridiskForelder,
+    )
+
+    private fun barnepensjonBeregningsGrunnlagMedVedtaksperioder(
+        behandlingId: UUID,
+        soesken: List<Folkeregisteridentifikator> = emptyList(),
+        beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
+        vedtaksperioder: List<Vedtaksperiode>,
+    ) = BeregningsGrunnlag(
+        behandlingId,
+        defaultKilde(),
+        soeskenMedIBeregning =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = VIRKNINGSTIDSPUNKT_JAN_2023.minusMonths(1).atDay(1),
+                    tom = null,
+                    data =
+                        soesken.map {
+                            SoeskenMedIBeregning(
+                                it,
+                                skalBrukes = true,
+                            )
+                        },
+                ),
+            ),
+        institusjonsopphold = defaultInstitusjonsopphold(),
+        beregningsMetode = beregningsMetode.toGrunnlag(),
+        beregningsMetodeFlereAvdoede = defaultAvdoedeBeregningmetode(beregningsMetode),
+        vedtaksperioder = vedtaksperioder,
     )
 
     private fun beregningsGrunnlagMedSoesken(

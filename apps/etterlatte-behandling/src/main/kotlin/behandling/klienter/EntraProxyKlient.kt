@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -55,7 +57,16 @@ class EntraProxyKlientImpl(
                 ?.also {
                     enhetCache.put(ident, it)
                 } ?: emptyList()
-        } catch (cause: Throwable) {
+        } catch (cause: ResponseException) {
+            if (cause.response.status == HttpStatusCode.NotFound) {
+                logger.warn("Ident $ident finnes ikke i EntraProxy. Returnerer tom enhetsliste.")
+                emptyList()
+            } else {
+                val feilmelding = "Klarte ikke å hente enheter for ident $ident fra EntraProxy."
+                logger.error(feilmelding, cause)
+                throw HentEnhetException(feilmelding, cause)
+            }
+        } catch (cause: Exception) {
             val feilmelding = "Klarte ikke å hente enheter for ident $ident fra EntraProxy."
             logger.error(feilmelding, cause)
             throw HentEnhetException(feilmelding, cause)

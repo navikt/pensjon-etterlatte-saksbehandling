@@ -8,7 +8,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.OmregningAvSakUnderSamordning
@@ -29,7 +29,7 @@ import java.util.UUID
 class AutomatiskRevurderingServiceTest {
     val forrigeBehandlingId = UUID.randomUUID()
 
-    val vedtakKlient = mockk<VedtakKlient>()
+    val vedtakInternalService = mockk<VedtakInternalService>()
 
     val beregningKlient =
         mockk<BeregningKlient> {
@@ -82,7 +82,7 @@ class AutomatiskRevurderingServiceTest {
                 mockk {
                     every { hentPersongalleri(any<SakId>()) } returns mockk()
                 },
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             beregningKlient = beregningKlient,
         )
 
@@ -106,7 +106,7 @@ class AutomatiskRevurderingServiceTest {
                 dato = LocalDate.now(),
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
         every { behandlingService.hentSisteIverksatteBehandling(any()) } returns mockBehandling
 
         val request =
@@ -129,7 +129,7 @@ class AutomatiskRevurderingServiceTest {
                 dato = LocalDate.now(),
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
         every { behandlingService.hentSisteIverksatteBehandling(any()) } returns mockBehandling
 
         val request =
@@ -154,7 +154,7 @@ class AutomatiskRevurderingServiceTest {
                 dato = LocalDate.now(),
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
         every { behandlingService.hentSisteIverksatteBehandling(any()) } returns mockBehandling
 
         val request =
@@ -179,7 +179,7 @@ class AutomatiskRevurderingServiceTest {
                 dato = LocalDate.now(),
                 sisteLoependeBehandlingId = forrigeBehandlingId,
             )
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns vedtak
         coEvery { beregningKlient.harOverstyrt(any(), any()) } returns true
         every { behandlingService.hentSisteIverksatteBehandling(any()) } returns mockBehandling
 

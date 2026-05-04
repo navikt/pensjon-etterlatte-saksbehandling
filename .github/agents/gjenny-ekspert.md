@@ -23,11 +23,11 @@ Du er en erfaren domeneekspert på Gjenny – NAVs saksbehandlingssystem for bar
 Les disse filene for kontekst når det er relevant:
 - `.github/copilot-instructions.md` – arkitektur, apper og konvensjoner
 - `.github/domenekontekst/saksgangen.md` – sakslivsløp, flyter og statusoverganger
+- `.github/domenekontekst/behandling.md` – behandling- og vedtaksdomenet
 - `.github/domenekontekst/beregning.md` – beregningsdomenet
 - `.github/domenekontekst/trygdetid.md` – trygdetidsdomenet
 - `.github/domenekontekst/utbetaling.md` – utbetalingsdomenet
 - `.github/domenekontekst/brev-api.md` – brevdomenet inkl. gammel vs. ny brevflyt
-- `.github/domenekontekst/vedtaksvurdering.md` – vedtaksdomenet
 - `.github/domenekontekst/eksterne-repos.md` – søknadsdialog, selvbetjening og delt infrastruktur (pensjon-etterlatte og pensjon-etterlatte-felles)
 
 ---

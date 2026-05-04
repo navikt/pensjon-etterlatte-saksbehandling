@@ -26,7 +26,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
@@ -112,7 +112,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                 opprettetBrev(behandlingId = firstArg())
             }
         }
-    private val vedtakKlient: VedtakKlient = mockk()
+    private val vedtakInternalService: VedtakInternalService = mockk()
     private val grunnlagServiceMock: GrunnlagService = mockk()
     private val brevKlientMock: BrevKlient =
         mockk {
@@ -137,7 +137,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         startServer(
             brevApiKlient = brevApiKlientMock,
             brevKlient = brevKlientMock,
-            vedtakKlient = vedtakKlient,
+            vedtakInternalService = vedtakInternalService,
             grunnlagService = grunnlagServiceMock,
         )
         val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
@@ -169,7 +169,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         fun `skal opprette vedtaksbrev for behandling`() {
             val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON) // BP er fortsatt på gammel model
             val behandling: no.nav.etterlatte.behandling.domain.Behandling = opprettBehandling(sak)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns
                 vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
             withTestApplication { client ->
@@ -188,7 +188,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         fun `skal tilbakestille vedtaksbrev`() {
             val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
             val behandling = opprettBehandling(sak)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
             withTestApplication { client ->
                 val response =
@@ -218,7 +218,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         fun `skal generere pdf`() {
             val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
             val behandling = opprettBehandling(sak)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
             coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns
                 mockk {
                     every { kanEndres() } returns true
@@ -242,7 +242,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         fun `skal ferdigstille vedtaksbrev`() {
             val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
             val behandling = opprettBehandling(sak)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
             withTestApplication { client ->
                 val response =
@@ -262,7 +262,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         fun `skal hente vedtaksbrev`() {
             val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
             val behandling = opprettBehandling(sak)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
 
             withTestApplication { client ->
                 val response =
@@ -289,7 +289,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             val tilbakekrevingBehandling = opprettTilbakekreving(sak)
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
 
             withTestApplication { client ->
                 val response =
@@ -312,7 +312,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
 
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
 
             withTestApplication { client ->
                 val response =
@@ -343,7 +343,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
 
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
             coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns
                 mockk {
                     every { kanEndres() } returns true
@@ -369,7 +369,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             val tilbakekrevingBehandling = opprettTilbakekreving(sak)
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
 
             withTestApplication { client ->
                 val response =
@@ -397,7 +397,7 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
             val tilbakekrevingBehandling = opprettTilbakekreving(sak)
             val tilbakekrevingId = tilbakekrevingBehandling.id
             val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
-            coEvery { vedtakKlient.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
 
             withTestApplication { client ->
                 val response =

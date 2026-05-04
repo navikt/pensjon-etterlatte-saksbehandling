@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
-import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoed
 import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoedGrunnlag
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeMedPoengaar
@@ -40,19 +39,42 @@ object TrygdetidBeregningService {
 
         val grunnlag =
             TrygdetidGrunnlagMedAvdoedGrunnlag(
-                FaktumNode(
-                    verdi =
-                        TrygdetidGrunnlagMedAvdoed(
-                            trygdetidGrunnlagListe = trygdetidGrunnlag,
-                            foedselsDato = foedselsDato,
-                            doedsDato = doedsDato,
-                            norskPoengaar = norskPoengaar,
-                            yrkesskade = yrkesskade,
-                            nordiskKonvensjon = nordiskKonvensjon,
-                        ),
-                    kilde = "System",
-                    beskrivelse = "Beregn detaljert trygdetidsgrunnlag",
-                ),
+                trygdetidGrunnlagListe =
+                    FaktumNode(
+                        verdi = trygdetidGrunnlag,
+                        kilde = "System",
+                        beskrivelse = "Trygdetidsperioder",
+                    ),
+                foedselsDato =
+                    FaktumNode(
+                        verdi = foedselsDato,
+                        kilde = "System",
+                        beskrivelse = "Fødselsdato",
+                    ),
+                doedsDato =
+                    FaktumNode(
+                        verdi = doedsDato,
+                        kilde = "System",
+                        beskrivelse = "Dødsdato",
+                    ),
+                norskPoengaar =
+                    FaktumNode(
+                        verdi = norskPoengaar,
+                        kilde = "System",
+                        beskrivelse = "Norske poengår",
+                    ),
+                yrkesskade =
+                    FaktumNode(
+                        verdi = yrkesskade,
+                        kilde = "System",
+                        beskrivelse = "Yrkesskade",
+                    ),
+                nordiskKonvensjon =
+                    FaktumNode(
+                        verdi = nordiskKonvensjon,
+                        kilde = "System",
+                        beskrivelse = "Nordisk konvensjon",
+                    ),
             )
 
         val resultat =

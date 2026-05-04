@@ -18,11 +18,7 @@ data class Etteroppgjoer(
     val harOverstyrtBeregning: Boolean = false,
     val sisteFerdigstilteForbehandling: UUID? = null,
 ) {
-    fun venterPaaSkatteoppgjoer() =
-        status in
-            listOf(
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
-            )
+    fun venterPaaSkatteoppgjoer() = status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
 
     fun mottattSkatteoppgjoer() = status == EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
 
@@ -31,8 +27,6 @@ data class Etteroppgjoer(
 
     fun kanOppretteForbehandling() =
         status in listOf(EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER)
-
-    fun erFerdigstilt() = status == EtteroppgjoerStatus.FERDIGSTILT
 
     fun kanOppdateresMedSkatteoppgjoerMottatt(): Boolean = venterPaaSkatteoppgjoer() || mottattSkatteoppgjoer()
 

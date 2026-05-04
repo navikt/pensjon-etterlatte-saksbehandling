@@ -12,7 +12,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.foerstegangsbehandling
@@ -32,15 +32,16 @@ import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagsendringsHendelseFilterTest {
-    private val vedtakklient = mockk<VedtakKlient>()
+    private val vedtakInternalService = mockk<VedtakInternalService>()
     private val behandlingService = mockk<BehandlingService>()
     private lateinit var service: GrunnlagsendringsHendelseFilter
 
     @BeforeEach
     fun setup() {
-        coEvery { vedtakklient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns LoependeYtelseDTO(true, false, LocalDate.now())
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
+            LoependeYtelseDTO(true, false, LocalDate.now())
         every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
-        service = GrunnlagsendringsHendelseFilter(vedtakklient, behandlingService)
+        service = GrunnlagsendringsHendelseFilter(vedtakInternalService, behandlingService)
         val tokenValidationContext = mockk<TokenValidationContext>()
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
         val systembruker =
@@ -72,7 +73,7 @@ internal class GrunnlagsendringsHendelseFilterTest {
         every { behandlingService.hentBehandlingerForSak(any()) } returns foerstegangsbehandlinger
         assertTrue(service.hendelseErRelevantForSak(sakId1, grunnlagendringType))
         verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId1) }
-        coVerify(exactly = 0) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
+        coVerify(exactly = 0) { vedtakInternalService.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
     }
 
     @ParameterizedTest
@@ -84,7 +85,7 @@ internal class GrunnlagsendringsHendelseFilterTest {
     fun `Skal slippe gjennom relevante hendelser for sak med løpende vedtak ytelse`(grunnlagendringType: GrunnlagsendringsType) {
         assertTrue(service.hendelseErRelevantForSak(sakId1, grunnlagendringType))
         verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId1) }
-        coVerify(exactly = 1) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
+        coVerify(exactly = 1) { vedtakInternalService.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
     }
 
     @ParameterizedTest
@@ -96,11 +97,12 @@ internal class GrunnlagsendringsHendelseFilterTest {
     fun `Skal ikke slippe gjennom gyldige hendelser hvis sak ikke har en åpen behandling eller løpende vedtak`(
         grunnlagendringType: GrunnlagsendringsType,
     ) {
-        coEvery { vedtakklient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns LoependeYtelseDTO(false, false, LocalDate.now())
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
+            LoependeYtelseDTO(false, false, LocalDate.now())
         every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
         assertFalse(service.hendelseErRelevantForSak(sakId1, grunnlagendringType))
         verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId1) }
-        coVerify(exactly = 1) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
+        coVerify(exactly = 1) { vedtakInternalService.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
     }
 
     @ParameterizedTest
@@ -110,7 +112,8 @@ internal class GrunnlagsendringsHendelseFilterTest {
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `Ikke løpende ytelse men ikke åpen behandling`(grunnlagendringType: GrunnlagsendringsType) {
-        coEvery { vedtakklient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns LoependeYtelseDTO(false, false, LocalDate.now())
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
+            LoependeYtelseDTO(false, false, LocalDate.now())
 
         val foerstegangsbehandlinger =
             listOf(
@@ -119,6 +122,6 @@ internal class GrunnlagsendringsHendelseFilterTest {
         every { behandlingService.hentBehandlingerForSak(any()) } returns foerstegangsbehandlinger
         assertFalse(service.hendelseErRelevantForSak(sakId1, grunnlagendringType))
         verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId1) }
-        coVerify(exactly = 1) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
+        coVerify(exactly = 1) { vedtakInternalService.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
     }
 }

@@ -1,11 +1,9 @@
 interface IAppConf {
   port: string | number
-  brukVedtaksroutesIBehandling: boolean
 }
 
 export const appConf: IAppConf = {
   port: process.env.PORT || 8080,
-  brukVedtaksroutesIBehandling: process.env.BRUK_VEDTAKSROUTES_I_BEHANDLING === 'true',
 }
 
 export const AdConfig = {
@@ -48,10 +46,6 @@ const LOKAL_API_CONFIG = () => {
     beregning: {
       url: process.env.BEREGNING_API_URL || 'https://etterlatte-beregning.intern.dev.nav.no',
       scope: process.env.BEREGNING_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-beregning/.default',
-    },
-    vedtak: {
-      url: process.env.VEDTAK_API_URL || 'https://etterlatte-vedtaksvurdering.intern.dev.nav.no',
-      scope: process.env.VEDTAK_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default',
     },
     trygdetid: {
       url: process.env.TRYGDETID_API_URL || 'https://etterlatte-trygdetid.intern.dev.nav.no',
@@ -98,10 +92,6 @@ const API_CONFIG_FROM_ENV = (): ApiConfig => {
     beregning: {
       url: requireEnvValue('BEREGNING_API_URL'),
       scope: requireEnvValue('BEREGNING_API_SCOPE'),
-    },
-    vedtak: {
-      url: requireEnvValue('VEDTAK_API_URL'),
-      scope: requireEnvValue('VEDTAK_API_SCOPE'),
     },
     trygdetid: {
       url: requireEnvValue('TRYGDETID_API_URL'),

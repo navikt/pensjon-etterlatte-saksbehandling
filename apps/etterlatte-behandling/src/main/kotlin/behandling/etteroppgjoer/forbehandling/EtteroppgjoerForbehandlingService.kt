@@ -13,7 +13,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveSe
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -60,7 +60,7 @@ class EtteroppgjoerForbehandlingService(
     private val hendelserService: EtteroppgjoerForbehandlingHendelseService,
     private val beregningKlient: BeregningKlient,
     private val behandlingService: BehandlingService,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     private val etteroppgjoerDataService: EtteroppgjoerDataService,
 ) {
@@ -397,7 +397,7 @@ class EtteroppgjoerForbehandlingService(
         }
 
         val opphoerFom =
-            runBlocking { vedtakKlient.hentInnvilgedePerioder(forbehandling.sak.id, brukerTokenInfo) }
+            runBlocking { vedtakInternalService.hentInnvilgedePerioder(forbehandling.sak.id, brukerTokenInfo) }
                 .maxBy { it.periode.fom }
                 .periode.tom
                 ?.plusMonths(1)
@@ -593,7 +593,7 @@ class EtteroppgjoerForbehandlingService(
             "Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id ${sisteVedtakMedAvkorting.behandlingId}",
         )
 
-        val virkOgOpphoer = runBlocking { vedtakKlient.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
+        val virkOgOpphoer = runBlocking { vedtakInternalService.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
         val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
 
         return EtteroppgjoerForbehandling

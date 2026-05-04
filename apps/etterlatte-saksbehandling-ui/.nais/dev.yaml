@@ -77,8 +77,6 @@ spec:
       value: http://etterlatte-brev-api
     - name: BEHANDLING_API_URL
       value: http://etterlatte-behandling
-    - name: VEDTAK_API_URL
-      value: http://etterlatte-vedtaksvurdering
     - name: BEREGNING_API_URL
       value: http://etterlatte-beregning
     - name: TRYGDETID_API_URL
@@ -91,8 +89,6 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-brev-api/.default
     - name: BEHANDLING_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
-    - name: VEDTAK_API_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
     - name: BEREGNING_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
     - name: TRYGDETID_API_SCOPE
@@ -115,8 +111,6 @@ spec:
       value: https://pensjon-psak-q2.dev.adeo.no/psak
     - name: APP_VERSION
       value: "{{ image }}"
-    - name: BRUK_VEDTAKSROUTES_I_BEHANDLING
-      value: "true"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -132,7 +126,6 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-trygdetid
         - application: etterlatte-pdltjenester
-        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-utbetaling
     inbound:
       rules:

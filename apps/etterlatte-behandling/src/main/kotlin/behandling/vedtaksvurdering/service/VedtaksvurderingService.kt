@@ -6,18 +6,19 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtakstidslinje
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
 class VedtaksvurderingService(
-    private val repository: VedtaksvurderingRepositoryOperasjoner,
+    private val repository: VedtaksvurderingRepository,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -65,7 +66,7 @@ class VedtaksvurderingService(
      * Tar bare med vedtak som er attestert.
      */
     fun hentInnvilgedePerioder(sakId: SakId): List<InnvilgetPeriode> {
-        val vedtak = hentVedtakISak(sakId)
+        val vedtak = hentVedtakISak(sakId).filter { it.type != VedtakType.AVSLAG }
         val tidslinje = Vedtakstidslinje(vedtak)
         return tidslinje.innvilgedePerioder()
     }

@@ -1,1 +1,0 @@
-alter table vedtak add column revurderinginfo TEXT;

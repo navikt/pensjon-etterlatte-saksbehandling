@@ -7,7 +7,7 @@ import no.nav.etterlatte.behandling.VedtaksbrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlingBrevService
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
@@ -33,7 +33,7 @@ class BrevService(
     private val behandlingMedBrevService: BehandlingMedBrevService,
     private val behandlingService: BehandlingService,
     private val brevApiKlient: BrevApiKlient, // Gammel løsning (brev-api bygger brevdata)
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val tilbakekrevingBrevService: TilbakekrevingBrevService,
     private val etteroppgjoerForbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     private val etteroppgjoerRevurderingBrevService: EtteroppgjoerRevurderingBrevService,
@@ -88,7 +88,7 @@ class BrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val vedtak = vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo)
+        val vedtak = vedtakInternalService.hentVedtak(behandlingId, brukerTokenInfo)
 
         return when (behandling?.type) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
@@ -128,7 +128,7 @@ class BrevService(
         val skalLagrePdf =
             if (behandlingMedBrevType.harVedtaksbrev) {
                 val vedtak =
-                    vedtakKlient.hentVedtak(behandlingId, bruker)
+                    vedtakInternalService.hentVedtak(behandlingId, bruker)
                         ?: throw InternfeilException("Mangler vedtak for behandling (id=$behandlingId)")
                 val saksbehandlerident: String = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
 
@@ -185,7 +185,7 @@ class BrevService(
         val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
         if (behandlingMedBrevType.harVedtaksbrev) {
             val vedtakDto =
-                krevIkkeNull(vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo)) {
+                krevIkkeNull(vedtakInternalService.hentVedtak(behandlingId, brukerTokenInfo)) {
                     "Fant ikke vedtak for behandling (id=$behandlingId)"
                 }
             val saksbehandlerIdent = vedtakDto.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident()

@@ -6,7 +6,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktOppgaveToggles
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -20,7 +20,7 @@ class AktivitetspliktOppgaveUnntakUtloeperJobService(
     private val aktivitetspliktDao: AktivitetspliktDao,
     private val aktivitetspliktService: AktivitetspliktService,
     private val oppgaveService: OppgaveService,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -46,7 +46,7 @@ class AktivitetspliktOppgaveUnntakUtloeperJobService(
         logger.info("Fant ${sakIds.size} saker som skal sjekkes for oppfølgingsoppgaver unntak utløper")
 
         sakIds.forEach { sakId ->
-            if (!vedtakKlient
+            if (!vedtakInternalService
                     .sakHarLopendeVedtakPaaDato(
                         sakId,
                         tomDato,

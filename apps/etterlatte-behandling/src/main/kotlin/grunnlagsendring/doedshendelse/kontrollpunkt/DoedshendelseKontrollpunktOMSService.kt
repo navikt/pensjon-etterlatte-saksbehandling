@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.YearMonth
 import kotlin.math.absoluteValue
 
 internal class DoedshendelseKontrollpunktOMSService(
@@ -39,20 +40,29 @@ internal class DoedshendelseKontrollpunktOMSService(
         if (hendelse.sakTypeForEpsEllerBarn() == SakType.BARNEPENSJON) {
             return null
         }
-        return runBlocking {
-            val kryssendeYtelser =
+        val sakerIPesys =
+            runBlocking {
                 pesysKlient
                     .hentSaker(hendelse.beroertFnr, bruker)
-                    .filter {
-                        it.sakStatus in listOf(TIL_BEHANDLING, LOPENDE)
-                    }.filter { it.sakType in listOf(SakSammendragResponse.UFORE_SAKTYPE, SakSammendragResponse.ALDER_SAKTYPE) }
-                    .filter { it.fomDato == null || it.fomDato.isBefore(hendelse.avdoedDoedsdato) }
-                    .any { it.tomDate == null || it.tomDate.isAfter(hendelse.avdoedDoedsdato) }
-
-            when (kryssendeYtelser) {
-                true -> DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps
-                false -> null
             }
+        val foersteDatoMedOms = YearMonth.from(hendelse.avdoedDoedsdato).plusMonths(1).atDay(1)
+        val kryssendeYtelser =
+            sakerIPesys
+                .filter {
+                    it.sakStatus in listOf(TIL_BEHANDLING, LOPENDE)
+                }.filter { it.sakType in listOf(SakSammendragResponse.UFORE_SAKTYPE, SakSammendragResponse.ALDER_SAKTYPE) }
+                .filter { it.fomDato != null && (it.fomDato == foersteDatoMedOms || it.fomDato.isBefore(hendelse.avdoedDoedsdato)) }
+                .filter { it.tomDate == null || (it.tomDate.isAfter(foersteDatoMedOms) || it.tomDate == foersteDatoMedOms) }
+
+        val harKryssendeAlderspensjon = kryssendeYtelser.any { it.sakType == SakSammendragResponse.ALDER_SAKTYPE }
+        val harKryssendeUfoeretrygd = kryssendeYtelser.any { it.sakType == SakSammendragResponse.UFORE_SAKTYPE }
+        val ytelseKrysserEtterDoedsdato = kryssendeYtelser.any { it.fomDato != null && it.fomDato.isAfter(hendelse.avdoedDoedsdato) }
+
+        return when {
+            ytelseKrysserEtterDoedsdato -> DoedshendelseKontrollpunkt.KryssendeYtelseIkkeOppstartet
+            harKryssendeAlderspensjon -> DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps
+            harKryssendeUfoeretrygd -> DoedshendelseKontrollpunkt.KryssendeUfoeretrygdIPesysEps
+            else -> null
         }
     }
 

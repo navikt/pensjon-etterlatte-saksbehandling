@@ -82,9 +82,7 @@ internal class TrygdetidServiceIntegrationTest(
                 mockk<PesysKlient>(),
                 avtaleService,
                 vedtaksvurderingKlient,
-                DummyFeatureToggleService().also {
-                    it.settBryter(TrygdetidToggles.OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING, true)
-                },
+                DummyFeatureToggleService(),
             )
     }
 

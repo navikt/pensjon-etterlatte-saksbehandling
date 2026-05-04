@@ -97,7 +97,7 @@ class DollyService(
                     .hentPersonInfo(bestillinger.identer.map { it.ident })
                     .mapNotNull { personResponse ->
                         val avdoed = personResponse.ident
-                        val ibruk = bestillinger.identer.any { avdoed == it.ident && it.ibruk }
+                        val iBruk = bestillinger.identer.any { avdoed == it.ident && it.iBruk }
 
                         val gjenlevendeEktefelle =
                             personResponse.person.sivilstand
@@ -105,10 +105,13 @@ class DollyService(
                                 ?.relatertVedSivilstand
 
                         when (gjenlevendeEktefelle) {
-                            null -> null
-                            else ->
+                            null -> {
+                                null
+                            }
+
+                            else -> {
                                 ForenkletFamilieModell(
-                                    ibruk = ibruk,
+                                    ibruk = iBruk,
                                     avdoed = avdoed,
                                     gjenlevende = gjenlevendeEktefelle,
                                     barn =
@@ -116,6 +119,7 @@ class DollyService(
                                             .filter { it.relatertPersonsRolle == "BARN" }
                                             .map { it.relatertPersonsIdent },
                                 )
+                            }
                         }
                     }
             }

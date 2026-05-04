@@ -67,7 +67,6 @@ abstract class BehandlingIntegrationTest {
                 mapOf(
                     "pdltjenester.url" to "http://localhost",
                     "grunnlag.resource.url" to "http://localhost",
-                    "vedtak.resource.url" to "http://localhost",
                     "krr.url" to "http://localhost",
                     "arbeidOgInntekt.url" to "http://localhost",
                     "azure.app.client.id" to "test-client-id",

@@ -87,10 +87,6 @@ spec:
       value: Q1_ETTERLATTE
     - name: OPPDRAG_MQ_MANAGER
       value: MQLS04
-    - name: ETTERLATTE_VEDTAK_URL
-      value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_VEDTAK_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
@@ -111,7 +107,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
-        - application: etterlatte-vedtaksvurdering
         - application: logging
           namespace: nais-system
       external:

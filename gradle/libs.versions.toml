@@ -68,6 +68,8 @@ logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = 
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.1" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.16.0" }
+
+opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version = "1.51.0" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 

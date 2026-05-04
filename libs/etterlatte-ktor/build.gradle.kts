@@ -28,6 +28,8 @@ dependencies {
     implementation(libs.ktor.statuspages)
     implementation(libs.ktor.servercontentnegotiation)
 
+    implementation(libs.opentelemetry.api)
+
     implementation(libs.ktor.metricsmicrometer)
     implementation(libs.ktor.doublereceive)
 

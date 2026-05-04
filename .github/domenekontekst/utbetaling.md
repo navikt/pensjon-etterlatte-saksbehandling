@@ -35,5 +35,5 @@ Oversetter iverksatte vedtak til utbetalinger i Oppdragssystemet (OS), håndtere
 ## Avhengigheter
 
 Lytter på: Den interne Rapids-en (`ATTESTERT`-hendelse fra vedtaksvurdering)  
-Kaller: IBM MQ (Oppdrag), `etterlatte-behandling`, `etterlatte-vedtaksvurdering`  
+Kaller: IBM MQ (Oppdrag), `etterlatte-behandling`  
 Publiserer: utbetalingsstatus tilbake på Kafka

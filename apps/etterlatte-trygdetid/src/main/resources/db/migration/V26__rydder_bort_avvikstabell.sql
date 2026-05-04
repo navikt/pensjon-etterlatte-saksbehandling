@@ -1,0 +1,1 @@
+drop table trygdetid_avvik;

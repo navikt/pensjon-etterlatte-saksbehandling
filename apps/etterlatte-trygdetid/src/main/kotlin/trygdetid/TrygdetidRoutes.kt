@@ -1,8 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -12,9 +10,6 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -58,15 +53,6 @@ private inline val RoutingContext.trygdetidId: UUID
         }
 
 private val logger: Logger = LoggerFactory.getLogger("TrygdetidRoutes")
-
-enum class TrygdetidToggles(
-    val value: String,
-) : FeatureToggle {
-    OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING("oppdater-beregnet-trygdetid-ved-kopiering"),
-    ;
-
-    override fun key(): String = this.value
-}
 
 fun Route.trygdetid(
     trygdetidService: TrygdetidService,

@@ -70,6 +70,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                 "EntraProxyKlient er ikke ready, forsøker ikke å oppdatere saksbehandleres enheter. ${pingRes.toStringServiceDown()}",
             )
         }
+
         is PingResultUp -> {
             val tidbrukt =
                 measureTime {
@@ -90,12 +91,12 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                             }.mapNotNull { (ident, enheter) ->
                                 try {
                                     val enheterAwait = enheter.await()
-                                    if (enheterAwait.isNotEmpty()) {
-                                        ident to enheterAwait
-                                    } else {
-                                        logger.info("Saksbehandler med ident $ident har ingen enheter")
-                                        null
+                                    if (enheterAwait.isEmpty()) {
+                                        logger.info(
+                                            "Saksbehandler med ident $ident har ingen enheter – rydder opp i eventuelle stale enheter i databasen",
+                                        )
                                     }
+                                    ident to enheterAwait
                                 } catch (e: Exception) {
                                     logger.error("Kunne ikke hente enheter for saksbehandlerident $ident", e)
                                     null
@@ -121,10 +122,12 @@ internal suspend fun oppdaterSaksbehandlerNavn(
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
 ) {
     when (val pingRes = navAnsattKlient.ping()) {
-        is PingResultDown ->
+        is PingResultDown -> {
             logger.warn(
                 "navAnsattKlient er ikke ready, forsøker ikke å oppdatere saksbehandleres navn. ${pingRes.toStringServiceDown()}",
             )
+        }
+
         is PingResultUp -> {
             val tidbrukt =
                 measureTime {

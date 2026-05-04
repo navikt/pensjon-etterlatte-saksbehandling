@@ -25,7 +25,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class VedtaksvurderingServiceTest {
-    private val repository = mockk<VedtaksvurderingRepositoryOperasjoner>()
+    private val repository = mockk<VedtaksvurderingRepository>()
     private val service = VedtaksvurderingService(repository)
 
     @Nested

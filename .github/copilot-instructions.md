@@ -39,7 +39,7 @@ Systemet heter **Gjenny** internt.
 - **`etterlatte-egne-ansatte-lytter`** – lytter på Kafka-topic for Nav-ansatte og familiemedlemmer («egne ansatte») slik at sakene rutes til saksbehandlere med særskilte tilganger.
 - **`etterlatte-institusjonsopphold`** – lytter på hendelser om institusjonsopphold (tilsvarende hendelser-appene).
 - **`etterlatte-hendelser-pdl/joark/samordning/ufoere`** – broer mellom eksterne Kafka-topics og Gjennys interne Rapids. Oversetter eksterne hendelser til interne meldingsformater.
-- Domenespesifikke tjenester: `etterlatte-beregning`, `etterlatte-vedtaksvurdering`, `etterlatte-trygdetid`, `etterlatte-brev-api`, `etterlatte-utbetaling` – se [domenekontekst](#domenekontekst).
+- Domenespesifikke tjenester: `etterlatte-beregning`, `etterlatte-trygdetid`, `etterlatte-brev-api`, `etterlatte-utbetaling` – se [domenekontekst](#domenekontekst).
 
 ### Biblioteker (`libs/`)
 Delte Kotlin-biblioteker. Konvensjon: `*-model`-biblioteker inneholder kun dataklasser/DTO-er som deles på tvers av tjenester. Andre biblioteker inneholder delt infrastruktur (database, ktor-oppsett, kafka, logging osv.).
@@ -108,7 +108,7 @@ For mer detaljert kontekst om enkeltapper, se:
 - [trygdetid](domenekontekst/trygdetid.md) – opptjeningsperioder som grunnlag for beregning
 - [utbetaling](domenekontekst/utbetaling.md) – oversetter vedtak til utbetalinger via Oppdragssystemet
 - [brev-api](domenekontekst/brev-api.md) – genererer og distribuerer brev til brukere
-- [vedtaksvurdering](domenekontekst/vedtaksvurdering.md) – oppretter og forvalter vedtak, orkestrator mot nedstrøms systemer
+- [vedtaksvurdering](domenekontekst/behandling.md) – oppretter og forvalter vedtak, orkestrator mot nedstrøms systemer
 - [etteroppgjoer](domenekontekst/etteroppgjoer.md) – årlig etteroppgjør for OMS: flyt, statusmaskin og nøkkelklasser
 
 ## Viktige konvensjoner

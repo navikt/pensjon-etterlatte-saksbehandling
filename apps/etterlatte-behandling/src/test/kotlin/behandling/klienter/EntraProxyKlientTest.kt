@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.klienter
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -19,6 +20,31 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.junit.jupiter.api.Test
 
 internal class EntraProxyKlientTest {
+    @Test
+    fun `hent enheter for ident som ikke finnes i Entra skal returnere tom liste`() {
+        val ukjentIdent = "ukjent1"
+
+        val httpClient =
+            HttpClient(MockEngine) {
+                engine {
+                    addHandler { _ ->
+                        respond("", HttpStatusCode.NotFound, defaultHeaders)
+                    }
+                }
+                expectSuccess = true
+                install(ContentNegotiation) {
+                    jackson { registerModule(JavaTimeModule()) }
+                }
+            }
+
+        val entraProxyKlient: EntraProxyKlient = EntraProxyKlientImpl(httpClient, "")
+
+        runBlocking {
+            val resultat = entraProxyKlient.hentEnheterForIdent(ukjentIdent)
+            resultat shouldBe emptyList()
+        }
+    }
+
     @Test
     fun `hent enheter skal returnere en liste av enheter`() {
         val testNavIdent = "ident1"
@@ -61,14 +87,17 @@ internal class EntraProxyKlientTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/api/v1/enhet/ansatt/$ident" ->
+                            "/api/v1/enhet/ansatt/$ident" -> {
                                 respond(
                                     respons.toJson(),
                                     HttpStatusCode.OK,
                                     defaultHeaders,
                                 )
+                            }
 
-                            else -> error("Unhandled ${request.url.fullPath}")
+                            else -> {
+                                error("Unhandled ${request.url.fullPath}")
+                            }
                         }
                     }
                 }

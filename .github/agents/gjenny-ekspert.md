@@ -28,6 +28,7 @@ Les disse filene for kontekst når det er relevant:
 - `.github/domenekontekst/trygdetid.md` – trygdetidsdomenet
 - `.github/domenekontekst/utbetaling.md` – utbetalingsdomenet
 - `.github/domenekontekst/brev-api.md` – brevdomenet inkl. gammel vs. ny brevflyt
+- `.github/domenekontekst/eksterne-repos.md` – søknadsdialog, selvbetjening og delt infrastruktur (pensjon-etterlatte og pensjon-etterlatte-felles)
 
 ---
 

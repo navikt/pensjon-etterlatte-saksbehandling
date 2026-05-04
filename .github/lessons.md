@@ -26,6 +26,6 @@
 - Observation: Jeg committet uten å kompilere, og feilen ble oppdaget av bruker i neste melding.
 - Action: Kompiler alltid før commit – ikke anta at koden er riktig fordi den ser logisk ut.
 
-**2026-04-29 — Implementering / nullhåndtering**
-- Observation: Jeg returnerte `true` (silent fallback) ved en null-verdi som egentlig er et invariant-brudd. Brukeren måtte stille spørsmålet for at jeg skulle se det.
-- Action: Når en nullable verdi aldri _skal_ være null gitt systemets invarianter, er den riktige håndteringen exception – ikke en defensiv default. Sjekk alltid om null faktisk er et gyldig tilstand i domenet før du velger strategi.
+**2026-04-30 — Testskriving**
+- Observation: Jeg antok hvilken metode og hvilken app endringen gjaldt uten å spørre. Begge var feil.
+- Action: Når brukeren sier "linje X", sjekk linje X i riktig app. Spør om usikkerheten er der. 

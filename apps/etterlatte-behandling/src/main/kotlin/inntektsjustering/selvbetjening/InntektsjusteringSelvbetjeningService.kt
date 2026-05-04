@@ -3,7 +3,7 @@ package no.nav.etterlatte.inntektsjustering.selvbetjening
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -34,7 +34,7 @@ class InntektsjusteringSelvbetjeningService(
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,
     private val beregningKlient: BeregningKlient,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val rapid: KafkaProdusent<String, String>,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -112,7 +112,7 @@ class InntektsjusteringSelvbetjeningService(
         val vedtak =
             inTransaction {
                 runBlocking {
-                    vedtakKlient.sakHarLopendeVedtakPaaDato(
+                    vedtakInternalService.sakHarLopendeVedtakPaaDato(
                         sakId,
                         loependeFom,
                         HardkodaSystembruker.omregning,

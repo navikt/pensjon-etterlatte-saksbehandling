@@ -16,7 +16,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
@@ -87,7 +87,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     private lateinit var hendelseDao: HendelseDao
     private lateinit var service: TilbakekrevingService
     private lateinit var oppgaveService: OppgaveService
-    private lateinit var vedtakKlient: VedtakKlient
+    private lateinit var vedtakInternalService: VedtakInternalService
 
     private val brevApiKlient: BrevApiKlient = mockk()
     private val brevKlient: BrevKlient = mockk()
@@ -106,7 +106,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         tilbakekrevingDao = applicationContext.tilbakekrevingDao
         hendelseDao = applicationContext.hendelseDao
         oppgaveService = applicationContext.oppgaveService
-        vedtakKlient = applicationContext.vedtakKlient
+        vedtakInternalService = applicationContext.vedtakInternalService
     }
 
     @BeforeAll
@@ -254,7 +254,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal avbryte tilbakekrevingsbehandling`() {
-        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns vedtak()
+        coEvery { vedtakInternalService.fattVedtakTilbakekreving(any(), any(), any()) } returns vedtak()
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
@@ -304,7 +304,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     fun `skal oppdatere kravgrunnlag og perioder i tilbakekrevingsbehandling`() {
         val sak = inTransaction { sakSkrivDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
 
-        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns vedtak()
+        coEvery { vedtakInternalService.fattVedtakTilbakekreving(any(), any(), any()) } returns vedtak()
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
         coEvery { tilbakekrevingKlient.hentKravgrunnlag(any(), any(), any()) } returns
             kravgrunnlag(sak).copy(kontrollFelt = Kontrollfelt("ny_verdi"))
@@ -355,7 +355,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @Test
     fun `skal fatte vedtak for tilbakekrevingsbehandling`() {
-        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns vedtak()
+        coEvery { vedtakInternalService.fattVedtakTilbakekreving(any(), any(), any()) } returns vedtak()
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
@@ -380,8 +380,8 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         oppgaveTilAttestering.status shouldBe Status.ATTESTERING
 
         coVerify {
-            vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
-            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
+            vedtakInternalService.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
+            vedtakInternalService.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
         }
 
@@ -406,7 +406,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             }
         }
 
-        confirmVerified(vedtakKlient, brevApiKlient)
+        confirmVerified(vedtakInternalService, brevApiKlient)
     }
 
     @Test
@@ -421,7 +421,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak), null, null)
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
 
-        coEvery { vedtakKlient.hentVedtak(any(), any()) } returns
+        coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns
             VedtakDto(
                 123L,
                 tilbakekreving.id,
@@ -441,7 +441,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
                 VedtakInnholdDto.VedtakTilbakekrevingDto(tilbakekreving.tilbakekreving.toObjectNode()),
             )
 
-        coEvery { vedtakKlient.attesterVedtakTilbakekreving(any(), any(), any()) } returns
+        coEvery { vedtakInternalService.attesterVedtakTilbakekreving(any(), any(), any()) } returns
             tilbakekrevingsvedtak(saksbehandler, tilbakekreving.id, enhet)
 
         // Tildeler oppgaven til saksbehandler
@@ -468,12 +468,12 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         oppgaveFerdigstilt.status shouldBe Status.FERDIGSTILT
 
         coVerify {
-            vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
-            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
+            vedtakInternalService.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
+            vedtakInternalService.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
 
-            vedtakKlient.attesterVedtakTilbakekreving(tilbakekreving.id, attestant, enhet)
-            vedtakKlient.hentVedtak(tilbakekreving.id, attestant)
+            vedtakInternalService.attesterVedtakTilbakekreving(tilbakekreving.id, attestant, enhet)
+            vedtakInternalService.hentVedtak(tilbakekreving.id, attestant)
             brevKlient.ferdigstillStrukturertBrev(tilbakekreving.id, Brevtype.VEDTAK, attestant)
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(attestant, any())
         }
@@ -506,12 +506,12 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             }
         }
 
-        confirmVerified(vedtakKlient, brevApiKlient, tilbakekrevingKlient)
+        confirmVerified(vedtakInternalService, brevApiKlient, tilbakekrevingKlient)
     }
 
     @Test
     fun `skal fatte og underkjenne vedtak for tilbakekrevingsbehandling`() {
-        coEvery { vedtakKlient.underkjennVedtakTilbakekreving(any(), any()) } returns vedtak()
+        coEvery { vedtakInternalService.underkjennVedtakTilbakekreving(any(), any()) } returns vedtak()
         coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
 
         // Oppretter sak og tilbakekreving basert på kravgrunnlag
@@ -543,11 +543,11 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         oppgaveUnderkjent.status shouldBe Status.UNDERKJENT
 
         coVerify {
-            vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
-            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
+            vedtakInternalService.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
+            vedtakInternalService.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
             brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
 
-            vedtakKlient.underkjennVedtakTilbakekreving(tilbakekreving.id, attestant)
+            vedtakInternalService.underkjennVedtakTilbakekreving(tilbakekreving.id, attestant)
         }
 
         with(sisteLagretHendelse) {
@@ -571,7 +571,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             }
         }
 
-        confirmVerified(vedtakKlient, brevApiKlient)
+        confirmVerified(vedtakInternalService, brevApiKlient)
     }
 
     private fun tilbakekrevingsvedtak(

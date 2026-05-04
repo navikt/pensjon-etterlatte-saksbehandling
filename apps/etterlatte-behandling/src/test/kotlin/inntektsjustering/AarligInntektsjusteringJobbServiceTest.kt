@@ -14,7 +14,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -64,7 +64,7 @@ class AarligInntektsjusteringJobbServiceTest {
     private val grunnlagService: GrunnlagService = mockk()
     private val aldersovergangService: AldersovergangService = mockk()
     private val revurderingService: RevurderingService = mockk()
-    private val vedtakKlient: VedtakKlient = mockk()
+    private val vedtakInternalService: VedtakInternalService = mockk()
     private val beregningKlient: BeregningKlient = mockk()
     private val pdlTjenesterKlient: PdlTjenesterKlient = mockk()
     private val oppgaveService: OppgaveService = mockk()
@@ -80,7 +80,7 @@ class AarligInntektsjusteringJobbServiceTest {
             revurderingService,
             grunnlagService,
             aldersovergangService,
-            vedtakKlient,
+            vedtakInternalService,
             beregningKlient,
             pdlTjenesterKlient,
             oppgaveService,
@@ -101,7 +101,7 @@ class AarligInntektsjusteringJobbServiceTest {
 
         coEvery { etteroppgjoerForbehandlingService.hentForbehandlinger(any()) } returns emptyList()
 
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
         coEvery {
             beregningKlient.inntektsjusteringAvkortingInfoSjekk(
                 any(),
@@ -276,7 +276,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 loependeFom = YearMonth.of(2025, 1),
                 saker = listOf(SakId(123L)),
             )
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
             loependeYtdelseDto().copy(
                 erLoepende = false,
             )
@@ -354,7 +354,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 saker = listOf(SakId(123L)),
             )
 
-        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
+        coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
             loependeYtdelseDto().copy(
                 underSamordning = true,
             )

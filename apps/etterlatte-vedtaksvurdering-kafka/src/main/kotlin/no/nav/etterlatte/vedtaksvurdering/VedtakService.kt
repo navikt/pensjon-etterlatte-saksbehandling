@@ -55,7 +55,7 @@ interface VedtakService {
 }
 
 class VedtakServiceImpl(
-    private val vedtakKlient: HttpClient,
+    private val httpClient: HttpClient,
     private val url: String,
 ) : VedtakService {
     override fun harLoependeYtelserFra(
@@ -63,7 +63,7 @@ class VedtakServiceImpl(
         dato: LocalDate,
     ): LoependeYtelseDTO =
         runBlocking {
-            vedtakKlient.get("$url/api/vedtak/loepende/${sakId.sakId}?dato=$dato").body()
+            httpClient.get("$url/api/vedtak/loepende/${sakId.sakId}?dato=$dato").body()
         }
 
     override fun opprettVedtakFattOgAttester(
@@ -71,7 +71,7 @@ class VedtakServiceImpl(
         behandlingId: UUID,
     ): VedtakOgRapid =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk").body()
+            httpClient.post("$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk").body()
         }
 
     override fun opprettVedtakOgFatt(
@@ -79,7 +79,7 @@ class VedtakServiceImpl(
         behandlingId: UUID,
     ): VedtakOgRapid =
         runBlocking {
-            vedtakKlient
+            httpClient
                 .post("$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk/stegvis") {
                     contentType(ContentType.Application.Json)
                     setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
@@ -91,7 +91,7 @@ class VedtakServiceImpl(
         behandlingId: UUID,
     ): VedtakOgRapid =
         runBlocking {
-            vedtakKlient
+            httpClient
                 .post("$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk/stegvis") {
                     contentType(ContentType.Application.Json)
                     setBody(MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.toJson())
@@ -100,13 +100,13 @@ class VedtakServiceImpl(
 
     override fun tilbakestillVedtak(behandlingId: UUID) {
         runBlocking {
-            vedtakKlient.patch("$url/api/vedtak/$behandlingId/tilbakestill")
+            httpClient.patch("$url/api/vedtak/$behandlingId/tilbakestill")
         }
     }
 
     override fun tilSamordningVedtak(behandlingId: UUID): VedtakDto =
         runBlocking {
-            vedtakKlient
+            httpClient
                 .post("$url/api/vedtak/$behandlingId/tilsamordning") {
                     contentType(ContentType.Application.Json)
                 }.body()
@@ -114,7 +114,7 @@ class VedtakServiceImpl(
 
     override fun samordneVedtak(behandlingId: UUID): SamordneResponse =
         runBlocking {
-            vedtakKlient
+            httpClient
                 .post("$url/api/vedtak/$behandlingId/samordne") {
                     contentType(ContentType.Application.Json)
                 }.body<SamordneResponse>()
@@ -122,7 +122,7 @@ class VedtakServiceImpl(
 
     override fun samordnetVedtak(vedtakId: String): VedtakDto? =
         runBlocking {
-            vedtakKlient
+            httpClient
                 .post("$url/vedtak/samordnet/$vedtakId") {
                     contentType(ContentType.Application.Json)
                 }.body()
@@ -130,7 +130,7 @@ class VedtakServiceImpl(
 
     override fun iverksattVedtak(behandlingId: UUID): VedtakDto =
         runBlocking {
-            vedtakKlient
+            httpClient
                 .post("$url/api/vedtak/$behandlingId/iverksett") {
                     contentType(ContentType.Application.Json)
                 }.body()
@@ -138,12 +138,12 @@ class VedtakServiceImpl(
 
     override fun hentInnvilgedePerioder(behandlingId: UUID): List<InnvilgetPeriodeDto> =
         runBlocking {
-            vedtakKlient.get("$url/api/vedtak/$behandlingId/innvilgede-perioder").body()
+            httpClient.get("$url/api/vedtak/$behandlingId/innvilgede-perioder").body()
         }
 
     override fun hentVedtak(behandlingId: UUID): VedtakDto? =
         runBlocking {
-            vedtakKlient.get("$url/api/vedtak/$behandlingId").body()
+            httpClient.get("$url/api/vedtak/$behandlingId").body()
         }
 }
 

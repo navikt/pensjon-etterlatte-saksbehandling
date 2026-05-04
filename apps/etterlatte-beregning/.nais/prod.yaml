@@ -104,7 +104,6 @@ spec:
       rules:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-brev-api
-        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-statistikk
         - application: etterlatte-beregning-kafka
         - application: etterlatte-behandling

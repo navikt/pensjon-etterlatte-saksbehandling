@@ -1,9 +1,0 @@
-services:
-  postgres:
-    restart: always
-    container_name: etterlatte-vedtaksvurdering
-    image: postgres
-    ports:
-      - '5499:5432'
-    environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust

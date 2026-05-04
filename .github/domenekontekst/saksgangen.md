@@ -49,7 +49,7 @@ Sidespor:
 4. Saksbehandler fatter vedtak → REST-kall mot `etterlatte-behandling`
 5. Attestant godkjenner → behandling settes `ATTESTERT`
 6. OMS-saker med samordning: `TIL_SAMORDNING` → Pesys svarer → `SAMORDNET`
-7. `IVERKSATT`: vedtaksvurdering publiserer hendelse på den interne Rapids-en
+7. `IVERKSATT`: behandling publiserer hendelse på den interne Rapids-en
    - `etterlatte-utbetaling` lytter på `ATTESTERT`-hendelsen og oppretter utbetalingsoppdrag → Oppdrag via IBM MQ
    - `etterlatte-brev-kafka` lytter på Rapids-en og kaller `etterlatte-brev-api` for å generere og distribuere vedtaksbrev
    - Vedtakshendelser publiseres også til `etterlatte.vedtakshendelser`-topicet for eksterne konsumenter

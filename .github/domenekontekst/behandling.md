@@ -45,5 +45,5 @@ Outbox-mønsteret (database-tabell + `OutboxJob`) brukes for å sikre pålitelig
 
 ## Avhengigheter
 
-Kaller: `etterlatte-beregning`, `etterlatte-trygdetid`, `etterlatte-vilkaarsvurdering`, Pesys samordning (via `SamordningsKlient` – avgjør om OMS-ytelsen skal samordnes med TP-ordninger)  
+Kaller: `etterlatte-beregning`, `etterlatte-trygdetid`, Pesys samordning (via `SamordningsKlient` – avgjør om OMS-ytelsen skal samordnes med TP-ordninger)  
 Publiserer til: Kafka (`etterlatte.vedtakshendelser`)

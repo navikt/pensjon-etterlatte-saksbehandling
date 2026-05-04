@@ -22,7 +22,7 @@ import java.time.LocalDate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtakvurderingKlientTest {
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-    private val config = ConfigFactory.parseMap(mapOf("vedtak.url" to ""))
+    private val config = ConfigFactory.parseMap(mapOf("behandling.url" to ""))
 
     @Test
     fun `hent vedtak`() {
@@ -30,7 +30,7 @@ class VedtakvurderingKlientTest {
         val client =
             createHttpClient { request ->
                 when (request.url.fullPath) {
-                    "/api/samordning/vedtak/$vedtakId" ->
+                    "/api/samordning/vedtak/$vedtakId" -> {
                         respond(
                             vedtak(
                                 sakstype = SakType.OMSTILLINGSSTOENAD,
@@ -38,8 +38,11 @@ class VedtakvurderingKlientTest {
                             HttpStatusCode.OK,
                             defaultHeaders,
                         )
+                    }
 
-                    else -> error("Unhandled ${request.url.fullPath}")
+                    else -> {
+                        error("Unhandled ${request.url.fullPath}")
+                    }
                 }
             }
         val vedtaksvurderingKlient = VedtaksvurderingSamordningKlient(config, client)
@@ -56,7 +59,7 @@ class VedtakvurderingKlientTest {
         val client =
             createHttpClient { request ->
                 when (request.url.fullPath) {
-                    "/api/samordning/vedtak?sakstype=$sakType&fomDato=$fomDato" ->
+                    "/api/samordning/vedtak?sakstype=$sakType&fomDato=$fomDato" -> {
                         respond(
                             listOf(
                                 vedtak(
@@ -66,8 +69,11 @@ class VedtakvurderingKlientTest {
                             HttpStatusCode.OK,
                             defaultHeaders,
                         )
+                    }
 
-                    else -> error("Unhandled ${request.url.fullPath}")
+                    else -> {
+                        error("Unhandled ${request.url.fullPath}")
+                    }
                 }
             }
 

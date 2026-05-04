@@ -41,7 +41,7 @@ class EtteroppgjoerSvarfristUtloeptJobService(
         val relevanteEtteroppgjoer = etteroppgjoerService.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 
         val antallOppgaverOpprettet =
-            relevanteEtteroppgjoer?.count { etteroppgjoer ->
+            relevanteEtteroppgjoer.count { etteroppgjoer ->
 
                 val oppgaveFinnesAllerede =
                     oppgaveService

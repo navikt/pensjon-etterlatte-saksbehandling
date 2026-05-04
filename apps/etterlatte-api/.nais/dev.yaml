@@ -89,10 +89,6 @@ spec:
   env:
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: https://test.maskinporten.no/.well-known/oauth-authorization-server
-    - name: ETTERLATTE_VEDTAKSVURDERING_URL
-      value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_SCOPE
@@ -105,8 +101,6 @@ spec:
       value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
     - name: ROLLE_GJENNYSAKSBEHANDLER
       value: 5b6745de-b65d-40eb-a6f5-860c8b61c27f
-    - name: BRUK_VEDTAK_FRA_BEHANDLING
-      value: "ja"
   accessPolicy:
     inbound:
       rules:
@@ -238,7 +232,6 @@ spec:
               - les-bp-vedtak
     outbound:
       rules:
-        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
         - application: logging
           namespace: nais-system

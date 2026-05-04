@@ -4,7 +4,6 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -18,7 +17,6 @@ import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlientImpl
 import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingBehandlingKlient
-import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlientImpl
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -36,12 +34,7 @@ class ApplicationContext {
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val avtaleService = AvtaleService(avtaleRepository)
 
-    val vedtaksvurderingKlient =
-        if (env[TrygdetidKey.BRUK_VEDTAK_FRA_BEHANDLING] == "ja") {
-            VedtaksvurderingBehandlingKlient(config, httpClient())
-        } else {
-            VedtaksvurderingKlientImpl(config, httpClient())
-        }
+    val vedtaksvurderingKlient = VedtaksvurderingBehandlingKlient(config, httpClient())
 
     val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
     private val trygdetidRepository = TrygdetidRepository(dataSource)
@@ -57,13 +50,6 @@ class ApplicationContext {
             vedtaksvurderingKlient = vedtaksvurderingKlient,
             featureToggleService = featureToggleService,
         )
-}
-
-enum class TrygdetidKey : EnvEnum {
-    BRUK_VEDTAK_FRA_BEHANDLING,
-    ;
-
-    override fun key() = name
 }
 
 private fun featureToggleProperties(config: Config) =

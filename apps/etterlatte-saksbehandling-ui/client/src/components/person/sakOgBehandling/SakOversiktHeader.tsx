@@ -17,8 +17,10 @@ import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTypeTag'
 import { OpprettSaksgrunnlag } from '~components/person/sakOgBehandling/OpprettSaksgrunnlag'
 import { Sakshistorikk } from '~components/person/sakOgBehandling/Sakshistorikk'
+import { OpprettAnnenSakModal } from '~components/person/sakOgBehandling/OpprettAnnenSakModal'
 import { ENHETER } from '~shared/types/Enhet'
 import { ClickEvent, trackClick } from '~utils/analytics'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { AdressebeskyttelseGraderingTag } from '~shared/tags/AdressebeskyttelseGraderingTag'
 import { SanksjonTag } from '~shared/tags/SanksjonTag'
 
@@ -32,6 +34,7 @@ interface Props {
 
 export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const opprettAnnenSakEnabled = useFeaturetoggle(FeatureToggle.opprett_annen_sak)
 
   const [navkontorResult, hentNavkontor, resetNavkontor] = useApiCall(hentNavkontorForPerson)
   const [yrkesskadefordelResult, hentYrkesskadefordel, resetYrkesskadefordel] = useApiCall(hentMigrertYrkesskadeFordel)
@@ -87,6 +90,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
       <ReadMore header="Historikk" onClick={() => trackClick(ClickEvent.VIS_SAKSHISTORIKK)}>
         <Sakshistorikk sakId={sak.id} />
       </ReadMore>
+      {opprettAnnenSakEnabled && <OpprettAnnenSakModal sak={sak} />}
       {mapResult(flyktningResult, {
         success: (data) =>
           !!data?.erFlyktning && (

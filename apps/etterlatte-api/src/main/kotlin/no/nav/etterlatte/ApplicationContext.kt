@@ -6,7 +6,6 @@ import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.behandling.sak.BehandlingKlient
 import no.nav.etterlatte.behandling.sak.BehandlingService
 import no.nav.etterlatte.behandling.sak.VedtaksvurderingSakKlient
-import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
@@ -26,8 +25,6 @@ class ApplicationContext(
     val config: Config = ConfigFactory.load()
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
 
-    private val brukVedtakFraBehandling = env[ApiKey.BRUK_VEDTAK_FRA_BEHANDLING] == "ja"
-
     private val behandlingHttpClient =
         httpClientClientCredentials(
             azureAppClientId = env.requireEnvValue(AZURE_APP_CLIENT_ID),
@@ -36,30 +33,15 @@ class ApplicationContext(
             azureAppScope = config.getString("behandling.outbound"),
         )
 
-    private val vedtakHttpClient by lazy {
-        if (brukVedtakFraBehandling) {
-            behandlingHttpClient
-        } else {
-            httpClientClientCredentials(
-                azureAppClientId = env.requireEnvValue(AZURE_APP_CLIENT_ID),
-                azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
-                azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
-                azureAppScope = config.getString("vedtak.outbound"),
-            )
-        }
-    }
-
     private val vedtaksvurderingSamordningKlient =
         VedtaksvurderingSamordningKlient(
             config = config,
-            httpClient = vedtakHttpClient,
-            brukEtterlatteBehandling = brukVedtakFraBehandling,
+            httpClient = behandlingHttpClient,
         )
     private val vedtaksvurderingSakKlient =
         VedtaksvurderingSakKlient(
             config = config,
-            httpClient = vedtakHttpClient,
-            brukEtterlatteBehandling = brukVedtakFraBehandling,
+            httpClient = behandlingHttpClient,
         )
 
     private val tpHttpClient =
@@ -79,18 +61,10 @@ class ApplicationContext(
     val vedtakKlient =
         VedtaksvurderingKlient(
             config = config,
-            httpClient = vedtakHttpClient,
-            brukEtterlatteBehandling = brukVedtakFraBehandling,
+            httpClient = behandlingHttpClient,
         )
     val vedtakService = VedtakService(vedtakKlient)
 
     private val oppgaveKlient = OppgaveKlient(config, behandlingHttpClient)
     val oppgaveService = OppgaveService(oppgaveKlient)
-}
-
-enum class ApiKey : EnvEnum {
-    BRUK_VEDTAK_FRA_BEHANDLING,
-    ;
-
-    override fun key() = name
 }

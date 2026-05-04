@@ -136,6 +136,7 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
                     val vedtakInnhold = innhold as VedtakInnhold.Behandling
                     vedtakInnhold.virkningstidspunkt shouldBe virkningstidspunkt
                     vedtakInnhold.opphoerFraOgMed shouldBe null
+                    vedtakInnhold.revurderingInfo shouldBe null
                 }
             }
         }

@@ -6,12 +6,9 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey
 import no.nav.etterlatte.EnvKey.BEHANDLING_AZURE_SCOPE
 import no.nav.etterlatte.EnvKey.UTBETALING_AZURE_SCOPE
-import no.nav.etterlatte.EnvKey.VEDTAK_AZURE_SCOPE
-import no.nav.etterlatte.config.VedtakKafkaKey.BRUK_VEDTAK_FRA_BEHANDLING
 import no.nav.etterlatte.config.VedtakKafkaKey.ETTERLATTE_BEHANDLING_URL
 import no.nav.etterlatte.config.VedtakKafkaKey.ETTERLATTE_BREV_API_URL
 import no.nav.etterlatte.config.VedtakKafkaKey.ETTERLATTE_UTBETALING_URL
-import no.nav.etterlatte.config.VedtakKafkaKey.ETTERLATTE_VEDTAK_URL
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BrevKlient
@@ -30,18 +27,11 @@ class AppBuilder(
     props: Miljoevariabler,
 ) {
     private val behandlingUrl = krevIkkeNull(props[ETTERLATTE_BEHANDLING_URL]) { "Mangler behandling url " }
-    private val vedtakUrl = krevIkkeNull(props[ETTERLATTE_VEDTAK_URL]) { "Mangler vedtak url " }
     private val utbetalingUrl = krevIkkeNull(props[ETTERLATTE_UTBETALING_URL]) { "Mangler utbetaling url " }
     private val brevUrl = krevIkkeNull(props[ETTERLATTE_BREV_API_URL]) { "Mangler brev-api url " }
-    private val brukVedtakFraBehandling = krevIkkeNull(props[BRUK_VEDTAK_FRA_BEHANDLING]) { "Mangler toggle " } == "ja"
     private val env = Miljoevariabler.systemEnv()
 
-    fun lagVedtakKlient(): VedtakServiceImpl =
-        if (brukVedtakFraBehandling) {
-            VedtakServiceImpl(behandlingHttpKlient, behandlingUrl)
-        } else {
-            VedtakServiceImpl(vedtakHttpKlient, vedtakUrl)
-        }
+    fun lagVedtakKlient(): VedtakServiceImpl = VedtakServiceImpl(behandlingHttpKlient, behandlingUrl)
 
     fun lagUtbetalingKlient(): UtbetalingKlient = UtbetalingKlientImpl(utbetalingHttpKlient, utbetalingUrl)
 
@@ -55,15 +45,6 @@ class AppBuilder(
             azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
             azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
             azureAppScope = env.requireEnvValue(BEHANDLING_AZURE_SCOPE),
-        )
-    }
-
-    private val vedtakHttpKlient: HttpClient by lazy {
-        httpClientClientCredentials(
-            azureAppClientId = props.requireEnvValue(AZURE_APP_CLIENT_ID),
-            azureAppJwk = env.requireEnvValue(AZURE_APP_JWK),
-            azureAppWellKnownUrl = env.requireEnvValue(AZURE_APP_WELL_KNOWN_URL),
-            azureAppScope = env.requireEnvValue(VEDTAK_AZURE_SCOPE),
         )
     }
 
@@ -99,10 +80,8 @@ private fun featureToggleProperties(config: Config) =
 
 enum class VedtakKafkaKey : EnvEnum {
     ETTERLATTE_BEHANDLING_URL,
-    ETTERLATTE_VEDTAK_URL,
     ETTERLATTE_UTBETALING_URL,
     ETTERLATTE_BREV_API_URL,
-    BRUK_VEDTAK_FRA_BEHANDLING,
     ;
 
     override fun key() = name

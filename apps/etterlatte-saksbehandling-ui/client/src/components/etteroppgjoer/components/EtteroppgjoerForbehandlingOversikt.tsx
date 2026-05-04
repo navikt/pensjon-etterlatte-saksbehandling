@@ -10,17 +10,17 @@ import {
 } from '~components/etteroppgjoer/components/opphoerSkyldesDoedsfall/OpphoerSkyldesDoedsfall'
 import { AktivitetspliktSpørsmål } from '~components/etteroppgjoer/components/aktivitetsplikt/AktivitetspliktSpørsmål'
 import {
+  Aktivitetsplikt,
+  erForbehandlingRedigerbar,
   EtteroppgjoerForbehandling,
   EtteroppgjoerResultatType,
   IInformasjonFraBruker,
-  Aktivitetsplikt,
-  erForbehandlingRedigerbar,
 } from '~shared/types/EtteroppgjoerForbehandling'
 import { JaNei } from '~shared/types/ISvar'
 import { FieldErrors } from 'react-hook-form'
 import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { erBehandlingRedigerbar, enhetErSkrivbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { enhetErSkrivbar, erBehandlingRedigerbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { FerdigstillEtteroppgjoerForbehandlingUtenBrev } from '~components/etteroppgjoer/components/FerdigstillEtteroppgjoerForbehandlingUtenBrev'
 import { useNavigate } from 'react-router-dom'
@@ -103,9 +103,10 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
     ? forbehandling.endringErTilUgunstForBruker !== JaNei.JA
     : !!beregnetEtteroppgjoerResultat && !doedsfallIEtteroppgjoersaaret
 
-  const ferdigstillUtenBrev =
-    beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
-    forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
+  const ferdigstillUtenBrev = erRevurdering
+    ? forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
+    : beregnetEtteroppgjoerResultat?.resultatType === EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING ||
+      forbehandling.opphoerSkyldesDoedsfall === JaNei.JA
 
   const relevantInformasjonFraBrukerErrors =
     forbehandling.endringErTilUgunstForBruker === JaNei.JA ? informasjonFraBrukerErrors : undefined

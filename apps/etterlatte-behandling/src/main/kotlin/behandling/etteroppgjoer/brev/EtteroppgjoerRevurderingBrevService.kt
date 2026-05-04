@@ -8,7 +8,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.DetaljertForbeha
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
@@ -36,7 +36,7 @@ import java.util.UUID
 
 class EtteroppgjoerRevurderingBrevService(
     private val grunnlagService: GrunnlagService,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val brevKlient: BrevKlient,
     private val behandlingService: BehandlingService,
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService,
@@ -105,7 +105,7 @@ class EtteroppgjoerRevurderingBrevService(
         skalLagres: Boolean = false,
     ): BrevRequest =
         coroutineScope {
-            val vedtakDeferred = async { vedtakKlient.hentVedtak(behandlingId, brukerTokenInfo) }
+            val vedtakDeferred = async { vedtakInternalService.hentVedtak(behandlingId, brukerTokenInfo) }
             val vedtak = vedtakDeferred.await() ?: throw InternfeilException("Fant ikke vedtak for behandlingId=$behandlingId")
             val behandling =
                 behandlingService.hentBehandling(behandlingId) ?: throw InternfeilException("Fant ikke behandlingId=$behandlingId")

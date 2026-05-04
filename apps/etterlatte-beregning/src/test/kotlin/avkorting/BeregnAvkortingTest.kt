@@ -3,9 +3,9 @@ package no.nav.etterlatte.beregning.regler.avkorting
 import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
@@ -35,7 +35,6 @@ import kotlin.test.assertEquals
 class BeregnAvkortingTest {
     @BeforeEach
     fun `mock grunnbeloep`() {
-        clearAllMocks()
         mockkObject(GrunnbeloepRepository)
         every { GrunnbeloepRepository.historiskeGrunnbeloep } returns
             listOf(
@@ -55,8 +54,8 @@ class BeregnAvkortingTest {
     }
 
     @AfterEach
-    fun afterEach() {
-        clearAllMocks()
+    fun `unmock grunnbeloep`() {
+        unmockkObject(GrunnbeloepRepository)
     }
 
     @Test

@@ -73,6 +73,10 @@ class Vedtakstidslinje(
     }
 
     fun innvilgedePerioder(): List<InnvilgetPeriode> {
+        if (attesterteBehandlingVedtak.isEmpty()) {
+            return emptyList()
+        }
+
         val foersteVirk = attesterteBehandlingVedtak.minOf { it.virkningstidspunkt }
         val sammenstilt = sammenstill(foersteVirk)
         if (sammenstilt.size == 1) {

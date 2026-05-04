@@ -22,8 +22,6 @@ enum class EnvKey : EnvEnum {
     ETTERLATTE_KLAGE_API_URL,
     ETTERLATTE_TILBAKEKREVING_URL,
     ETTERLATTE_MIGRERING_URL,
-    BRUK_NY_VEDTAK_KLIENT,
-    BRUK_EGEN_DATABASE_FOR_VEDTAK,
     ;
 
     override fun key() = name

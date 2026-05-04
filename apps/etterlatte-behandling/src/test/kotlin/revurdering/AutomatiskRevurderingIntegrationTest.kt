@@ -130,7 +130,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                 val (sak, behandling) = opprettSakMedFoerstegangsbehandling(i.toString())
                 iverksettFoerstegangsbehandling(sak, behandling)
                 coEvery {
-                    applicationContext.vedtakKlient.sakHarLopendeVedtakPaaDato(
+                    applicationContext.vedtakInternalService.sakHarLopendeVedtakPaaDato(
                         any(),
                         any(),
                         any(),

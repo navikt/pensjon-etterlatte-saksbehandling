@@ -23,6 +23,7 @@ export const enum FeatureToggle {
   avslutte_omgjoeringsoppgave = 'avslutte-omgjoeringsoppgave',
   beregning_bruk_nye_beregningsregler = 'beregning_bruk_nye_beregningsregler',
   oppdater_inntekt_forbehandling = 'oppdater-inntekt-forbehandling',
+  opprett_annen_sak = 'opprett-annen-sak',
 }
 
 export interface Toggle {
@@ -98,6 +99,11 @@ const oppdater_inntekt_forbehandling: Toggle = {
   enabled: false,
 }
 
+const opprett_annen_sak: Toggle = {
+  togglename: FeatureToggle.opprett_annen_sak,
+  enabled: false,
+}
+
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,
@@ -114,6 +120,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.avslutte_omgjoeringsoppgave]: avslutte_omgjoeringsoppgave,
   [FeatureToggle.beregning_bruk_nye_beregningsregler]: beregning_bruk_nye_beregningsregler,
   [FeatureToggle.oppdater_inntekt_forbehandling]: oppdater_inntekt_forbehandling,
+  [FeatureToggle.opprett_annen_sak]: opprett_annen_sak,
 }
 
 export const Unleashcontext = createContext<{

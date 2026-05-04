@@ -100,12 +100,6 @@ spec:
       value: https://regoppslag.dev-fss-pub.nais.io
     - name: CLAMAV_ENDPOINT_URL
       value: http://clamav.nais-system.svc.cluster.local
-    - name: ETTERLATTE_VEDTAK_CLIENT_ID
-      value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
-    - name: ETTERLATTE_VEDTAK_URL
-      value: http://etterlatte-vedtaksvurdering
-    - name: BRUK_VEDTAK_FRA_BEHANDLING
-      value: "ja"
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEREGNING_URL
@@ -127,7 +121,6 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester

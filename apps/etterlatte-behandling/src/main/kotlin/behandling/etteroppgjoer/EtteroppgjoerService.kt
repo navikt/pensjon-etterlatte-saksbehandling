@@ -3,13 +3,21 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.FERDIGSTILT
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.MANGLER_SKATTEOPPGJOER
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.OMGJOERING
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.UNDER_FORBEHANDLING
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.UNDER_REVURDERING
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.VENTER_PAA_SVAR
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
@@ -17,8 +25,6 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHende
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -41,14 +47,14 @@ enum class EtteroppgjoerSvarfrist(
 
 class EtteroppgjoerService(
     val dao: EtteroppgjoerDao,
-    val vedtakKlient: VedtakKlient,
+    val vedtakInternalService: VedtakInternalService,
     val behandlingService: BehandlingService,
     val beregningKlient: BeregningKlient,
     val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     val sigrunKlient: SigrunKlient,
     val hendelseDao: HendelseDao,
 ) {
-    fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer>? =
+    fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer> =
         dao.hentEtteroppgjoerMedSvarfristUtloept(svarfrist)
 
     fun hentEtteroppgjoerForInntektsaar(
@@ -121,7 +127,7 @@ class EtteroppgjoerService(
         val nyEtteroppgjoerStatus = finnStatusForForbehandling(forbehandling)
         val hendelse =
             when (nyEtteroppgjoerStatus) {
-                EtteroppgjoerStatus.FERDIGSTILT -> EtteroppgjoerHendelser.FERDIGSTILT
+                FERDIGSTILT -> EtteroppgjoerHendelser.FERDIGSTILT
                 else -> null
             }
 
@@ -141,22 +147,46 @@ class EtteroppgjoerService(
         etteroppgjoer: Etteroppgjoer,
         sak: Sak,
     ) {
-        krev(etteroppgjoer.kanOppdateresMedSkatteoppgjoerMottatt()) {
-            "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør har status ${etteroppgjoer.status}. " +
-                "Se sikkerlogg for mer informasjon."
+        when (etteroppgjoer.status) {
+            MOTTATT_SKATTEOPPGJOER,
+            VENTER_PAA_SKATTEOPPGJOER,
+            -> {
+                oppdaterEtteroppgjoerStatus(
+                    sak.id,
+                    etteroppgjoer.inntektsaar,
+                    MOTTATT_SKATTEOPPGJOER,
+                    EtteroppgjoerHendelser.MOTTATT_SKATTEOPPGJOER,
+                )
+
+                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
+                    sakId = sak.id,
+                    inntektsAar = etteroppgjoer.inntektsaar,
+                )
+            }
+
+            VENTER_PAA_SVAR -> {
+                // Vi gjør ikke noe for hendelser hvor vi allerede har startet behandling. Vi vil fange opp inntektsendringer i validering før iverksetting i slike tilfeller.
+                logger.info("Mottok skatteoppgjørhendelse for sakId=${sak.id}: status $etteroppgjoer.")
+            }
+
+            FERDIGSTILT -> {
+                etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sak.id, etteroppgjoer.inntektsaar)
+                logger.info(
+                    "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør for ${etteroppgjoer.inntektsaar} er ferdigstilt - oppretter vurder konsekvens oppgave",
+                )
+            }
+
+            MANGLER_SKATTEOPPGJOER,
+            UNDER_FORBEHANDLING,
+            UNDER_REVURDERING,
+            OMGJOERING,
+            -> {
+                logger.error(
+                    "Mottok skatteoppgjørhendelse for sakId=${sak.id}, men etteroppgjør har status som ikke håndteres: ${etteroppgjoer.status}. ",
+                )
+                throw InternfeilException("Ikke håndtert status på etteroppgjør: ${etteroppgjoer.status}")
+            }
         }
-
-        oppdaterEtteroppgjoerStatus(
-            sak.id,
-            etteroppgjoer.inntektsaar,
-            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-            EtteroppgjoerHendelser.MOTTATT_SKATTEOPPGJOER,
-        )
-
-        etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
-            sakId = sak.id,
-            inntektsAar = etteroppgjoer.inntektsaar,
-        )
     }
 
     fun opprettNyttEtteroppgjoer(
@@ -176,7 +206,7 @@ class EtteroppgjoerService(
 
         val attesterteVedtak =
             runBlocking {
-                vedtakKlient
+                vedtakInternalService
                     .hentIverksatteVedtak(sakId, brukerTokenInfo = HardkodaSystembruker.etteroppgjoer)
                     .sortedByDescending { it.datoAttestert }
             }
@@ -200,7 +230,7 @@ class EtteroppgjoerService(
                     sakId,
                     inntektsaar,
                     sisteIverksatteBehandling,
-                    eksisterendeEtteroppgjoer?.status ?: EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER,
+                    eksisterendeEtteroppgjoer?.status ?: VENTER_PAA_SKATTEOPPGJOER,
                     harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed != null,
                     eksisterendeEtteroppgjoer?.sisteFerdigstilteForbehandling,
                 )
@@ -248,7 +278,7 @@ class EtteroppgjoerService(
                         .oppdaterEtteroppgjoerStatus(
                             sakId,
                             inntektsaar,
-                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                            MOTTATT_SKATTEOPPGJOER,
                         )
                 }
         }
@@ -271,7 +301,7 @@ class EtteroppgjoerService(
         val status =
             try {
                 sigrunKlient.hentPensjonsgivendeInntekt(behandling.sak.ident, inntektsaar)
-                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
+                MOTTATT_SKATTEOPPGJOER
             } catch (e: Exception) {
                 logger.info(
                     "Vi har opprettet et etteroppgjør for $inntektsaar i sakId=${behandling.sak.id}, " +
@@ -279,7 +309,7 @@ class EtteroppgjoerService(
                         "tilgjengelig, hvis annen feil må saken ryddes opp manuelt",
                     e,
                 )
-                EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
+                VENTER_PAA_SKATTEOPPGJOER
             }
 
         return etteroppgjoer(sakId, inntektsaar, behandling, status, harOpphoer)
@@ -302,14 +332,7 @@ class EtteroppgjoerService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Int> {
-        val innvilgedePerioder = runBlocking { vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
-
-        if (innvilgedePerioder.isEmpty()) {
-            throw UgyldigForespoerselException(
-                "MANGLER_INNVILGET_PERIODE",
-                "Saken har ingen innvilget periode.",
-            )
-        }
+        val innvilgedePerioder = runBlocking { vedtakInternalService.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
 
         val innvilgedeAar =
             innvilgedePerioder
@@ -328,17 +351,17 @@ class EtteroppgjoerService(
 
     private fun finnStatusForForbehandling(forbehandling: EtteroppgjoerForbehandling): EtteroppgjoerStatus {
         if (forbehandling.skyldesOpphoerDoedsfallIEtteroppgjoersaar()) {
-            return EtteroppgjoerStatus.FERDIGSTILT
+            return FERDIGSTILT
         }
 
         return when (forbehandling.etteroppgjoerResultatType) {
-            EtteroppgjoerResultatType.ETTERBETALING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+            EtteroppgjoerResultatType.ETTERBETALING -> VENTER_PAA_SVAR
 
-            EtteroppgjoerResultatType.TILBAKEKREVING -> EtteroppgjoerStatus.VENTER_PAA_SVAR
+            EtteroppgjoerResultatType.TILBAKEKREVING -> VENTER_PAA_SVAR
 
-            EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
+            EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING -> FERDIGSTILT
 
-            EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING -> EtteroppgjoerStatus.FERDIGSTILT
+            EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING -> FERDIGSTILT
 
             null -> throw InternfeilException(
                 "Mangler etteroppgjoerResultatType for forbehandling ${forbehandling.id} og kan derfor ikke oppdatere Etteroppgjør status",

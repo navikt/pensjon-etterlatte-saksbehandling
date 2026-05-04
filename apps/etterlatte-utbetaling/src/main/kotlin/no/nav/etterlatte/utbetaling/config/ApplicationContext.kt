@@ -64,7 +64,7 @@ class ApplicationContext(
     httpClient: HttpClient = httpClient(),
     val behandlingKlient: BehandlingKlient = BehandlingKlient(config, httpClient),
     val vedtaksvurderingKlient: VedtaksvurderingKlient =
-        VedtaksvurderingKlient(config, httpClient, brukEtterlatteBehandling = env[UtbetalingKey.BRUK_VEDTAK_FRA_BEHANDLING] == "ja"),
+        VedtaksvurderingKlient(config, httpClient),
     val simuleringOsKlient: SimuleringOsKlient =
         SimuleringOsKlient(
             config,

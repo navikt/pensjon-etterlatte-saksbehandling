@@ -73,16 +73,10 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-behandling
-    - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_VEDTAKSVURDERING_URL
-      value: http://etterlatte-vedtaksvurdering
     - name: PEN_URL
       value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen
     - name: PEN_CLIENT_ID
       value: ddd52335-cfe8-4ee9-9e68-416a5ab26efa
-    - name: BRUK_VEDTAK_FRA_BEHANDLING
-      value: "ja"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -102,7 +96,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
-        - application: etterlatte-vedtaksvurdering
         - application: logging
           namespace: nais-system
       external:

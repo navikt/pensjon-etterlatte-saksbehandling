@@ -3,7 +3,7 @@ package behandling.jobs.uttrekk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
@@ -33,7 +33,7 @@ data class LoependeSak(
 )
 
 class UttrekkLoependeYtelseEtter67JobService(
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
     private val sakService: SakService,
     private val aldersovergangService: AldersovergangService,
     private val featureToggleService: FeatureToggleService,
@@ -80,12 +80,14 @@ class UttrekkLoependeYtelseEtter67JobService(
 
                                 // Sjekker om sak er løpende måneden etter søker ble 67 år
                                 val ytelse =
-                                    runBlocking {
-                                        vedtakKlient.sakHarLopendeVedtakPaaDato(
-                                            sakId,
-                                            opphoerMnd,
-                                            HardkodaSystembruker.uttrekk,
-                                        )
+                                    inTransaction {
+                                        runBlocking {
+                                            vedtakInternalService.sakHarLopendeVedtakPaaDato(
+                                                sakId,
+                                                opphoerMnd,
+                                                HardkodaSystembruker.uttrekk,
+                                            )
+                                        }
                                     }
 
                                 if (ytelse.erLoepende) {

@@ -99,8 +99,6 @@ spec:
       value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
     - name: ETTERLATTE_PROXY_SCOPE
       value: api://dev-fss.etterlatte.etterlatte-proxy/.default
-    - name: BRUK_VEDTAK_FRA_BEHANDLING
-      value: "ja"
     - name: GRENSESNITTAVSTEMMING_ENABLED
       value: "true"
     - name: KONSISTENSAVSTEMMING_ENABLED

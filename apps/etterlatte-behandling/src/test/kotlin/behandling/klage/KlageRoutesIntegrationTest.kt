@@ -181,7 +181,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             val oppdatertKlage: Klage = vurderUtfall(klage, client, KlageUtfallUtenBrev.Avvist())
 
             coVerifyAll {
-                applicationContext.vedtakKlient.lagreVedtakKlage(
+                applicationContext.vedtakInternalService.lagreVedtakKlage(
                     klage,
                     withArg { it.ident() shouldBe "Saksbehandler01" },
                 )
@@ -198,7 +198,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `attestering gaar bra`() {
         withTestApplication { client ->
-            val vedtakKlient = applicationContext.vedtakKlient
+            val vedtakInternalService = applicationContext.vedtakInternalService
             val sak: Sak = opprettSak(client)
             val klage = opprettKlageOgFattVedtakOmAvvisning(client, sak, saksbehandlerIdent)
             tildelOppgavenForKlagen(client, klage, attestantIdent)
@@ -212,9 +212,9 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                     ).body()
 
             coVerifyAll {
-                vedtakKlient.lagreVedtakKlage(any(), any())
-                vedtakKlient.fattVedtakKlage(any(), any())
-                vedtakKlient.attesterVedtakKlage(
+                vedtakInternalService.lagreVedtakKlage(any(), any())
+                vedtakInternalService.fattVedtakKlage(any(), any())
+                vedtakInternalService.attesterVedtakKlage(
                     withArg {
                         it.id shouldBeEqual klage.id
                         it.status shouldBeEqual KlageStatus.FERDIGSTILT
@@ -236,7 +236,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun `underkjenn gaar bra`() {
         withTestApplication { client ->
             val attestantIdent = "Saksbehandler02"
-            val vedtakKlient = applicationContext.vedtakKlient
+            val vedtakInternalService = applicationContext.vedtakInternalService
             val sak: Sak = opprettSak(client)
             val klage = opprettKlageOgFattVedtakOmAvvisning(client, sak, saksbehandlerIdent)
             tildelOppgavenForKlagen(client, klage, attestantIdent)
@@ -250,9 +250,9 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                     ).body()
 
             coVerifyAll {
-                vedtakKlient.lagreVedtakKlage(any(), any())
-                vedtakKlient.fattVedtakKlage(any(), any())
-                vedtakKlient.underkjennVedtakKlage(klage.id, withArg { it.ident() shouldBe attestantIdent })
+                vedtakInternalService.lagreVedtakKlage(any(), any())
+                vedtakInternalService.fattVedtakKlage(any(), any())
+                vedtakInternalService.underkjennVedtakKlage(klage.id, withArg { it.ident() shouldBe attestantIdent })
             }
             underkjent shouldBeEqual hentKlage(client, klage.id)
             underkjent.status shouldBe KlageStatus.RETURNERT

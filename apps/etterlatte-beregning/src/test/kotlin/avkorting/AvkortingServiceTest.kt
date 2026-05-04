@@ -10,6 +10,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
@@ -84,6 +85,7 @@ internal class AvkortingServiceTest {
     fun afterEach() {
         confirmVerified()
         clearAllMocks()
+        unmockkObject(AvkortingMapper, AvkortingValider)
     }
 
     @Nested

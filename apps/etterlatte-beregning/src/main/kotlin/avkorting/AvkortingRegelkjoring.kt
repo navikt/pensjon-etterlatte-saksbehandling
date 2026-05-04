@@ -414,42 +414,16 @@ object AvkortingRegelkjoring {
                 }
         val maanederInnvilget: FaktumNode<List<MaanedInnvilget>> =
             if (brukNyeReglerAvkorting) {
-                if (nyInntektsavkorting.grunnlag.maanederInnvilget != null) {
-                    FaktumNode(
-                        verdi = nyInntektsavkorting.grunnlag.maanederInnvilget,
-                        kilde = nyInntektsavkorting.grunnlag.id.toString(),
-                        beskrivelse = "Måneder innvilget i forventet inntekt",
-                    )
-                } else {
-                    val tom = nyInntektsavkorting.grunnlag.periode.tom ?: YearMonth.of(fraOgMed.year, 12)
-                    val ytelse =
-                        finnAntallInnvilgaMaanederForAar(
-                            fom = fraOgMed,
-                            tom = tom,
-                            aldersovergang = tom,
-                            ytelse = emptyList(),
-                            // Bruk nye regler avkorting er satt som false, siden denne inntekten og utregningen av
-                            // innvilget periode er gjort med gammel regel
-                            brukNyeReglerAvkorting = false,
-                        )
-                    logger.info(
-                        "Mangler maanederInnvilget i inntektsgrunnlag, utledet ${ytelse.maaneder}. regelresultat: ${ytelse.regelResultat}",
-                    )
-                    val antallMaanederInnvilget = ytelse.maaneder.count { it.innvilget }
-                    if (antallMaanederInnvilget != nyInntektsavkorting.grunnlag.innvilgaMaaneder) {
-                        throw InternfeilException(
-                            "Kunne ikke bygge opp riktig antall måneder " +
-                                "innvilget for grunnlag med id=${nyInntektsavkorting.grunnlag.id}, " +
-                                "forventet ${nyInntektsavkorting.grunnlag.innvilgaMaaneder}, " +
-                                "men fikk $antallMaanederInnvilget (${ytelse.maaneder}).",
-                        )
-                    }
-                    FaktumNode(
-                        verdi = ytelse.maaneder,
-                        kilde = "finnAntallInnvilgaMaanederForAar",
-                        beskrivelse = "Fallback for henting av liste av måneder innvilget",
-                    )
-                }
+                FaktumNode(
+                    verdi =
+                        requireNotNull(nyInntektsavkorting.grunnlag.maanederInnvilget) {
+                            "Inntekt i kopiert avkorting med periode=${nyInntektsavkorting.grunnlag.periode} mangler " +
+                                "maanederInnvilget. Avkortingen må kopieres på nytt ved å sette virkningstidspunkt" +
+                                " en gang til og så gå igjennom stegene fra start."
+                        },
+                    kilde = nyInntektsavkorting.grunnlag.id.toString(),
+                    beskrivelse = "Måneder innvilget i forventet inntekt",
+                )
             } else {
                 FaktumNode(emptyList(), "", "Placeholder i grunnlag hvis vi ikke bruker nye regler")
             }

@@ -41,10 +41,10 @@ class StoenadRepository(
                 .prepareStatement(
                     """
                     SELECT id, fnrSoeker, fnrForeldre, 
-                        fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId, sakId, 
-                        sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
-                        vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, virkningstidspunkt, utbetalingsdato,
-                        kilde, pesysid, sakYtelsesgruppe, opphoerFom, vedtaksperioder
+                        fnrSoesken, anvendtTrygdetid, nettoYtelse, ytelse_foer_avkorting, beregningType, anvendtSats, 
+                        behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
+                        vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, 
+                        virkningstidspunkt, utbetalingsdato, kilde, pesysid, sakYtelsesgruppe, opphoerFom, vedtaksperioder
                     FROM stoenad
                     """.trimIndent(),
                 ).executeQuery()
@@ -77,14 +77,15 @@ class StoenadRepository(
                 .prepareStatement(
                     """
                     INSERT INTO maaned_stoenad(
-                        fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
+                        fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, ytelse_foer_avkorting,
+                        beregningType, anvendtSats, 
                         behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                         vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
                         virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid, 
                         sakYtelsesgruppe, harAktivitetsplikt, oppfyllerAktivitet, aktivitet, sanksjon,
                         etteroppgjoer_aar, etteroppgjoer_utbetalt, etteroppgjoer_ny_stoenad, etteroppgjoer_differanse,
                         etteroppgjoer_resultat, etterbetalt_beloep, tilbakekrevd_beloep
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                     ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 ).apply {
@@ -93,38 +94,39 @@ class StoenadRepository(
                     setJsonb(3, maanedStatistikkRad.fnrSoesken)
                     setString(4, maanedStatistikkRad.anvendtTrygdetid)
                     setString(5, maanedStatistikkRad.nettoYtelse)
-                    setString(6, maanedStatistikkRad.beregningType)
-                    setString(7, maanedStatistikkRad.anvendtSats)
-                    setObject(8, maanedStatistikkRad.behandlingId)
-                    setSakId(9, maanedStatistikkRad.sakId)
-                    setTidspunkt(10, maanedStatistikkRad.tekniskTid)
-                    setString(11, maanedStatistikkRad.sakYtelse)
-                    setString(12, maanedStatistikkRad.versjon)
-                    setString(13, maanedStatistikkRad.saksbehandler)
-                    setString(14, maanedStatistikkRad.attestant)
-                    setDate(15, Date.valueOf(maanedStatistikkRad.vedtakLoependeFom))
-                    setDate(16, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
-                    setString(17, maanedStatistikkRad.statistikkMaaned.toString())
-                    setString(18, maanedStatistikkRad.sakUtland.toString())
-                    setDate(19, maanedStatistikkRad.virkningstidspunkt?.let { Date.valueOf(it.atDay(1)) })
-                    setDate(20, maanedStatistikkRad.utbetalingsdato?.let { Date.valueOf(it) })
-                    setString(21, maanedStatistikkRad.avkortingsbeloep)
-                    setString(22, maanedStatistikkRad.aarsinntekt)
-                    setString(23, maanedStatistikkRad.kilde.name)
-                    maanedStatistikkRad.pesysId?.let { setLong(24, it) } ?: setNull(24, Types.BIGINT)
-                    setString(25, maanedStatistikkRad.sakYtelsesgruppe?.name)
-                    setString(26, maanedStatistikkRad.harAktivitetsplikt)
-                    setString(27, maanedStatistikkRad.oppfyllerAktivitet?.toString())
-                    setString(28, maanedStatistikkRad.aktivitet)
-                    setString(29, maanedStatistikkRad.sanksjon)
+                    setString(6, maanedStatistikkRad.ytelseFoerAvkorting)
+                    setString(7, maanedStatistikkRad.beregningType)
+                    setString(8, maanedStatistikkRad.anvendtSats)
+                    setObject(9, maanedStatistikkRad.behandlingId)
+                    setSakId(10, maanedStatistikkRad.sakId)
+                    setTidspunkt(11, maanedStatistikkRad.tekniskTid)
+                    setString(12, maanedStatistikkRad.sakYtelse)
+                    setString(13, maanedStatistikkRad.versjon)
+                    setString(14, maanedStatistikkRad.saksbehandler)
+                    setString(15, maanedStatistikkRad.attestant)
+                    setDate(16, Date.valueOf(maanedStatistikkRad.vedtakLoependeFom))
+                    setDate(17, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
+                    setString(18, maanedStatistikkRad.statistikkMaaned.toString())
+                    setString(19, maanedStatistikkRad.sakUtland.toString())
+                    setDate(20, maanedStatistikkRad.virkningstidspunkt?.let { Date.valueOf(it.atDay(1)) })
+                    setDate(21, maanedStatistikkRad.utbetalingsdato?.let { Date.valueOf(it) })
+                    setString(22, maanedStatistikkRad.avkortingsbeloep)
+                    setString(23, maanedStatistikkRad.aarsinntekt)
+                    setString(24, maanedStatistikkRad.kilde.name)
+                    maanedStatistikkRad.pesysId?.let { setLong(25, it) } ?: setNull(25, Types.BIGINT)
+                    setString(26, maanedStatistikkRad.sakYtelsesgruppe?.name)
+                    setString(27, maanedStatistikkRad.harAktivitetsplikt)
+                    setString(28, maanedStatistikkRad.oppfyllerAktivitet?.toString())
+                    setString(29, maanedStatistikkRad.aktivitet)
+                    setString(30, maanedStatistikkRad.sanksjon)
 
-                    setString(30, maanedStatistikkRad.etteroppgjoerAar?.toString())
-                    setNullableLong(31, maanedStatistikkRad.etteroppgjoerUtbetalt)
-                    setNullableLong(32, maanedStatistikkRad.etteroppgjoerNyStoenad)
-                    setNullableLong(33, maanedStatistikkRad.etteroppgjoerDifferanse)
-                    setString(34, maanedStatistikkRad.etteroppgjoerResultat)
-                    setNullableLong(35, maanedStatistikkRad.etterbetaltBeloep)
-                    setNullableLong(36, maanedStatistikkRad.tilbakekrevdBeloep)
+                    setString(31, maanedStatistikkRad.etteroppgjoerAar?.toString())
+                    setNullableLong(32, maanedStatistikkRad.etteroppgjoerUtbetalt)
+                    setNullableLong(33, maanedStatistikkRad.etteroppgjoerNyStoenad)
+                    setNullableLong(34, maanedStatistikkRad.etteroppgjoerDifferanse)
+                    setString(35, maanedStatistikkRad.etteroppgjoerResultat)
+                    setNullableLong(36, maanedStatistikkRad.etterbetaltBeloep)
+                    setNullableLong(37, maanedStatistikkRad.tilbakekrevdBeloep)
                 }.executeUpdate()
         }
 
@@ -135,12 +137,13 @@ class StoenadRepository(
                     .prepareStatement(
                         """
                         INSERT INTO stoenad(
-                            fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
+                            fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, ytelse_foer_avkorting,
+                            beregningType, anvendtSats, 
                             behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                             vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland,
                             virkningstidspunkt, utbetalingsdato, kilde, pesysid, sakYtelsesgruppe, opphoerFom,
                             vedtaksperioder
-                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                         Statement.RETURN_GENERATED_KEYS,
                     ).apply {
@@ -252,31 +255,31 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
         setJsonb(2, stoenadsrad.fnrForeldre)
         setJsonb(3, stoenadsrad.fnrSoesken)
         setString(4, stoenadsrad.anvendtTrygdetid)
-        stoenadsrad.nettoYtelse?.let { setString(5, it) } ?: setNull(5, Types.CHAR)
         setString(5, stoenadsrad.nettoYtelse)
-        setString(6, stoenadsrad.beregningType)
-        setString(7, stoenadsrad.anvendtSats)
-        setObject(8, stoenadsrad.behandlingId)
-        setSakId(9, stoenadsrad.sakId)
+        setString(6, stoenadsrad.ytelseFoerAvkorting)
+        setString(7, stoenadsrad.beregningType)
+        setString(8, stoenadsrad.anvendtSats)
+        setObject(9, stoenadsrad.behandlingId)
         setSakId(10, stoenadsrad.sakId)
-        setTidspunkt(11, stoenadsrad.tekniskTid)
-        setString(12, stoenadsrad.sakYtelse)
-        setString(13, stoenadsrad.versjon)
-        setString(14, stoenadsrad.saksbehandler)
-        setString(15, stoenadsrad.attestant)
-        setDate(16, Date.valueOf(stoenadsrad.vedtakLoependeFom))
-        setDate(17, stoenadsrad.vedtakLoependeTom?.let { Date.valueOf(it) })
-        setJsonb(18, stoenadsrad.beregning)
-        setJsonb(19, stoenadsrad.avkorting)
-        setString(20, stoenadsrad.vedtakType?.toString())
-        setString(21, stoenadsrad.sakUtland?.toString())
-        setDate(22, Date.valueOf(stoenadsrad.virkningstidspunkt?.atDay(1)))
-        setDate(23, stoenadsrad.utbetalingsdato?.let { Date.valueOf(it) })
-        setString(24, stoenadsrad.vedtaksloesning.name)
-        stoenadsrad.pesysId?.let { setLong(25, it) } ?: setNull(25, Types.BIGINT)
-        setString(26, stoenadsrad.sakYtelsesgruppe?.name)
-        setDate(27, stoenadsrad.opphoerFom?.let { Date.valueOf(it.atDay(1)) })
-        setJsonb(28, stoenadsrad.vedtaksperioder)
+        setSakId(11, stoenadsrad.sakId)
+        setTidspunkt(12, stoenadsrad.tekniskTid)
+        setString(13, stoenadsrad.sakYtelse)
+        setString(14, stoenadsrad.versjon)
+        setString(15, stoenadsrad.saksbehandler)
+        setString(16, stoenadsrad.attestant)
+        setDate(17, Date.valueOf(stoenadsrad.vedtakLoependeFom))
+        setDate(18, stoenadsrad.vedtakLoependeTom?.let { Date.valueOf(it) })
+        setJsonb(19, stoenadsrad.beregning)
+        setJsonb(20, stoenadsrad.avkorting)
+        setString(21, stoenadsrad.vedtakType?.toString())
+        setString(22, stoenadsrad.sakUtland?.toString())
+        setDate(23, Date.valueOf(stoenadsrad.virkningstidspunkt?.atDay(1)))
+        setDate(24, stoenadsrad.utbetalingsdato?.let { Date.valueOf(it) })
+        setString(25, stoenadsrad.vedtaksloesning.name)
+        stoenadsrad.pesysId?.let { setLong(26, it) } ?: setNull(26, Types.BIGINT)
+        setString(27, stoenadsrad.sakYtelsesgruppe?.name)
+        setDate(28, stoenadsrad.opphoerFom?.let { Date.valueOf(it.atDay(1)) })
+        setJsonb(29, stoenadsrad.vedtaksperioder)
     }
 
 private fun ResultSet.asStoenadRad(): StoenadRad =
@@ -287,6 +290,7 @@ private fun ResultSet.asStoenadRad(): StoenadRad =
         fnrSoesken = objectMapper.readValue(getString("fnrSoesken"), Array<String>::class.java).toList(),
         anvendtTrygdetid = getString("anvendtTrygdetid"),
         nettoYtelse = getString("nettoYtelse"),
+        ytelseFoerAvkorting = getString("ytelse_foer_avkorting"),
         beregningType = getString("beregningType"),
         anvendtSats = getString("anvendtSats"),
         behandlingId = getObject("behandlingId") as UUID,

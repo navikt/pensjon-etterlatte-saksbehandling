@@ -1,30 +1,17 @@
 package no.nav.etterlatte.brev.distribusjon
 
-import no.nav.etterlatte.brev.BrevToggles
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-enum class BrevdistribuererToggles(
-    private val toggle: String,
-) : FeatureToggle {
-    TILLAT_FLERE_MOTTAKERE("tillat-flere-mottakere-brev"),
-    ;
-
-    override fun key(): String = toggle
-}
-
 class Brevdistribuerer(
     private val db: BrevRepository,
     private val distribusjonService: DistribusjonService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -37,16 +24,7 @@ class Brevdistribuerer(
 
         val brev = db.hentBrev(brevId)
 
-        val maksAntallMottakere =
-            if (featureToggleService.isEnabled(
-                    BrevToggles.TILLAT_FLERE_MOTTAKERE,
-                    false,
-                )
-            ) {
-                3
-            } else {
-                2
-            }
+        val maksAntallMottakere = 3
 
         if (brev.status == Status.DISTRIBUERT) {
             logger.info("Fikk forespørsel om å distribuere brev som allerede er distribuert $brevId. Gjør ingen ting.")

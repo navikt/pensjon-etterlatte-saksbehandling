@@ -26,9 +26,6 @@ import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
-import no.nav.etterlatte.brev.vedtaksbrev.VedtakToggles
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
@@ -41,16 +38,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.UUID
-import kotlin.collections.contains
-
-enum class BrevToggles(
-    private val toggle: String,
-) : FeatureToggle {
-    TILLAT_FLERE_MOTTAKERE("tillat-flere-mottakere-brev"),
-    ;
-
-    override fun key(): String = toggle
-}
 
 class BrevService(
     private val db: BrevRepository,
@@ -62,7 +49,6 @@ class BrevService(
     private val oppgaveService: OppgaveService,
     private val brevdataFacade: BrevdataFacade,
     private val adresseService: AdresseService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
@@ -327,16 +313,7 @@ class BrevService(
         val personerISakOgSak = brevdataFacade.hentPersonerISakforBrev(brev.sakId, brev.behandlingId, bruker)
         val nyeMottakere = adresseService.hentMottakere(personerISakOgSak.sak.sakType, personerISakOgSak.personerISak, bruker)
 
-        val maksAntallMottakere =
-            if (featureToggleService.isEnabled(
-                    BrevToggles.TILLAT_FLERE_MOTTAKERE,
-                    false,
-                )
-            ) {
-                3
-            } else {
-                2
-            }
+        val maksAntallMottakere = 3
 
         if (nyeMottakere.isEmpty()) {
             throw KanIkkeTilbakestilleUtenNyeMottakere()

@@ -53,7 +53,7 @@ data class TestGruppeBestillinger(
 data class TestGruppeBestilling(
     val ident: String,
     val bestillingId: List<Long>,
-    val ibruk: Boolean,
+    val iBruk: Boolean,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

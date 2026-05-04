@@ -7,10 +7,10 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtakService(
-    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
+    private val behandlingKlient: BehandlingKlient,
 ) {
     suspend fun hentVedtak(fnr: Folkeregisteridentifikator): VedtakTilPerson {
-        val vedtak = vedtaksvurderingKlient.hentVedtak(fnr)
+        val vedtak = behandlingKlient.hentVedtak(fnr)
         return VedtakTilPerson(
             vedtak = vedtak.filter { it.type.vanligBehandling }.map { it.fromDto() },
         )

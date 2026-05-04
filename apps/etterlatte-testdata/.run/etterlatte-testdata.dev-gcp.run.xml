@@ -3,7 +3,8 @@
     <envs>
       <env name="DEV" value="true" />
       <env name="DOLLY_CLIENT_ID" value="1" />
-      <env name="DOLLY_RESOURCE_URL" value="http://localhost" />
+      <env name="DOLLY_RESOURCE_URL" value="https://dolly-backend.ekstern.dev.nav.no/api/v1" />
+      <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
       <env name="KAFKA_BROKERS" value="0.0.0.0:9092" />
       <env name="KAFKA_TARGET_TOPIC" value="etterlatte.doedsmelding" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />

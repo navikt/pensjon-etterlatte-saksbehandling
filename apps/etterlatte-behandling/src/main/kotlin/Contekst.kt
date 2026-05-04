@@ -1,5 +1,16 @@
 package no.nav.etterlatte
 
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.Hook
+import io.ktor.server.application.call
+import io.ktor.server.application.createRouteScopedPlugin
+import io.ktor.server.auth.principal
+import io.ktor.util.pipeline.PipelinePhase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.withContext
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -7,6 +18,7 @@ import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.getClaimAsString
 import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -18,6 +30,7 @@ import no.nav.security.token.support.v3.TokenValidationContextPrincipal
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Connection
+import javax.sql.DataSource
 
 object Kontekst : ThreadLocal<Context>()
 
@@ -136,3 +149,57 @@ fun <T> inTransaction(block: () -> T): T =
     }
 
 fun databaseContext() = Kontekst.get().databasecontxt
+
+val KontekstPlugin =
+    createRouteScopedPlugin(
+        name = "KontekstPlugin",
+        createConfiguration = ::KontekstConfiguration,
+    ) {
+        on(kontekstHook()) { call, proceed ->
+            val requestContekst =
+                Context(
+                    AppUser =
+                        decideUser(
+                            call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
+                            pluginConfig.saksbehandlerGroupIdsByKey(),
+                            pluginConfig.saksbehandlerService(),
+                            call.brukerTokenInfo,
+                        ),
+                    databasecontxt = DatabaseContext(pluginConfig.dataSource()),
+                    sakTilgangDao = pluginConfig.sakTilgangDao(),
+                    brukerTokenInfo = call.brukerTokenInfo,
+                )
+
+            withContext(
+                Dispatchers.Default +
+                    Kontekst.asContextElement(
+                        value = requestContekst,
+                    ),
+            ) {
+                proceed()
+            }
+            Kontekst.remove()
+        }
+    }
+
+internal fun kontekstHook() =
+    object : Hook<suspend (ApplicationCall, suspend () -> Unit) -> Unit> {
+        override fun install(
+            pipeline: ApplicationCallPipeline,
+            handler: suspend (ApplicationCall, suspend () -> Unit) -> Unit,
+        ) {
+            val thisPhase = PipelinePhase("Sett-Kontekst")
+            pipeline.insertPhaseBefore(ApplicationCallPipeline.Call, thisPhase)
+
+            pipeline.intercept(thisPhase) {
+                handler(call, ::proceed)
+            }
+        }
+    }
+
+class KontekstConfiguration {
+    var saksbehandlerGroupIdsByKey: () -> Map<AzureGroup, String> = { throw IllegalStateException("not initialized!") }
+    var saksbehandlerService: () -> SaksbehandlerService = { throw IllegalStateException("not initialized!") }
+    var dataSource: () -> DataSource = { throw IllegalStateException("not initialized!") }
+    var sakTilgangDao: () -> SakTilgangDao = { throw IllegalStateException("not initialized!") }
+}

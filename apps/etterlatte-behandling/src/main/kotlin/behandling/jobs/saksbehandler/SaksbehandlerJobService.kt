@@ -91,15 +91,12 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                             }.mapNotNull { (ident, enheter) ->
                                 try {
                                     val enheterAwait = enheter.await()
-                                    if (enheterAwait.isNotEmpty()) {
-                                        ident to enheterAwait
-                                    } else {
+                                    if (enheterAwait.isEmpty()) {
                                         logger.info(
                                             "Saksbehandler med ident $ident har ingen enheter – rydder opp i eventuelle stale enheter i databasen",
                                         )
-                                        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(ident to emptyList())
-                                        null
                                     }
+                                    ident to enheterAwait
                                 } catch (e: Exception) {
                                     logger.error("Kunne ikke hente enheter for saksbehandlerident $ident", e)
                                     null

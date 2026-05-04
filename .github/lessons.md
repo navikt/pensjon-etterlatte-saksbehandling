@@ -25,3 +25,7 @@
 **2026-04-24 — Refaktorering**
 - Observation: Jeg committet uten å kompilere, og feilen ble oppdaget av bruker i neste melding.
 - Action: Kompiler alltid før commit – ikke anta at koden er riktig fordi den ser logisk ut.
+
+**2026-04-30 — Testskriving**
+- Observation: Jeg antok hvilken metode og hvilken app endringen gjaldt uten å spørre. Begge var feil.
+- Action: Når brukeren sier "linje X", sjekk linje X i riktig app. Spør om usikkerheten er der. 

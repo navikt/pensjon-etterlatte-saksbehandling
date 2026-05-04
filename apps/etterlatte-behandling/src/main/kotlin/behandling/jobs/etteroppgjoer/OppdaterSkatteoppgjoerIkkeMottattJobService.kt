@@ -8,7 +8,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
@@ -29,7 +29,7 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
     private val featureToggleService: FeatureToggleService,
     private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     private val etteroppgjoerService: EtteroppgjoerService,
-    private val vedtakKlient: VedtakKlient,
+    private val vedtakInternalService: VedtakInternalService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -58,7 +58,7 @@ class OppdaterSkatteoppgjoerIkkeMottattJobService(
         val relevanteSaker =
             inTransaction {
                 runBlocking {
-                    vedtakKlient.hentSakerMedUtbetalingForInntektsaar(
+                    vedtakInternalService.hentSakerMedUtbetalingForInntektsaar(
                         etteroppgjoersAar,
                         HardkodaSystembruker.etteroppgjoer,
                     )

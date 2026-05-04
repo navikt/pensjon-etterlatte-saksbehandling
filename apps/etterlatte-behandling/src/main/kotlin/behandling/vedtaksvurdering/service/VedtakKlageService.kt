@@ -4,8 +4,7 @@ import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.vedtaksvurdering.OpprettVedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
-import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepositoryOperasjoner
-import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
+import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
@@ -23,7 +22,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class VedtakKlageService(
-    private val vedtaksvurderingRepository: VedtaksvurderingRepositoryOperasjoner,
+    private val vedtaksvurderingRepository: VedtaksvurderingRepository,
     private val vedtaksvurderingRapidService: VedtaksvurderingRapidService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)

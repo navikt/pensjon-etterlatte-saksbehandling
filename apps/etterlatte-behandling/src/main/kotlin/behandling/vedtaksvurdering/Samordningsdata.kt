@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
-import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDate
 import java.util.UUID
 
@@ -45,5 +44,4 @@ data class OppdaterSamordningsmelding(
     val vedtakId: Long,
     val refusjonskrav: Boolean,
     val kommentar: String,
-    val sakId: SakId,
 )

@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -230,79 +231,117 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         overskriv: Boolean,
-    ) = kanOppdatereTrygdetid(
-        behandlingId,
-        brukerTokenInfo,
-    ) {
-        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
-        val eksisterendeTrygdetider =
-            trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).let { trygdetider ->
-                if (overskriv) {
-                    trygdetider
-                        .forEach { trygdetid -> trygdetidRepository.slettTrygdetid(trygdetid.id) }
-                    emptyList()
-                } else {
-                    trygdetider
+    ): List<Trygdetid> =
+        kanOppdatereTrygdetid(
+            behandlingId,
+            brukerTokenInfo,
+        ) {
+            val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+            val eksisterendeTrygdetider =
+                trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).let { trygdetider ->
+                    if (overskriv) {
+                        trygdetider
+                            .forEach { trygdetid -> trygdetidRepository.slettTrygdetid(trygdetid.id) }
+                        emptyList()
+                    } else {
+                        trygdetider
+                    }
                 }
+            // ingen trygdetider i behandling, vi har en riktig avdød i grunnlag
+            if (eksisterendeTrygdetider.isNotEmpty() && avdoede.size == eksisterendeTrygdetider.size) {
+                throw TrygdetidAlleredeOpprettetException()
             }
 
-        if (eksisterendeTrygdetider.isNotEmpty() && avdoede.size == eksisterendeTrygdetider.size) {
-            throw TrygdetidAlleredeOpprettetException()
-        }
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            when (behandling.behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                    val ukjentAvdoed = avdoede.isEmpty()
+                    val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
 
-        when (behandling.behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                val ukjentAvdoed = avdoede.isEmpty()
-                val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
+                    if (ukjentAvdoed || tidligereFamiliepleier) {
+                        logger.info(
+                            "Oppretter overstyrt trygdetid for behandling $behandlingId " +
+                                "(ukjentAvdoed=$ukjentAvdoed, tidligereFamiliepleier=$tidligereFamiliepleier)",
+                        )
+                        listOf(opprettOverstyrtBeregnetTrygdetid(behandlingId, true, brukerTokenInfo))
+                    } else {
+                        logger.info("Oppretter trygdetid for behandling $behandlingId")
+                        opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
+                    }
+                }
 
-                if (ukjentAvdoed || tidligereFamiliepleier) {
-                    logger.info(
-                        "Oppretter overstyrt trygdetid for behandling $behandlingId " +
-                            "(ukjentAvdoed=$ukjentAvdoed, tidligereFamiliepleier=$tidligereFamiliepleier)",
-                    )
-                    listOf(opprettOverstyrtBeregnetTrygdetid(behandlingId, true, brukerTokenInfo))
-                } else {
-                    logger.info("Oppretter trygdetid for behandling $behandlingId")
-                    opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
+                BehandlingType.REVURDERING -> {
+                    val sisteIverksatteBehandling =
+                        vedtaksvurderingKlient
+                            .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                            .sortedByDescending { it.datoFattet }
+                            .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke trygdetid
+                    // e87d89c5-90b2-4385-9a6a-9571cf8a22c9 sist iverksatt, den har UKJENT_AVDOED trygdetid
+                    val forrigeTrygdetider =
+                        hentTrygdetiderIBehandling(sisteIverksatteBehandling.behandlingId, brukerTokenInfo)
+                    // ukjent avdoed trygdetid i forrige
+                    if (forrigeTrygdetider.isEmpty()) {
+                        opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
+                    } else {
+                        val kopierteTrygdetider =
+                            kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider, eksisterendeTrygdetider)
+                        kopierAvtale(behandling.id, sisteIverksatteBehandling.behandlingId)
+
+                        // Revurdering har fått kopiert inn trygdetid med ukjent avdød
+                        opprettTrygdetiderForRevurdering(behandling, kopierteTrygdetider, avdoede, brukerTokenInfo)
+                    }
                 }
             }
-
-            BehandlingType.REVURDERING -> {
-                val sisteIverksatteBehandling =
-                    vedtaksvurderingKlient
-                        .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
-                        .sortedByDescending { it.datoFattet }
-                        .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke trygdetid
-
-                val forrigeTrygdetider =
-                    hentTrygdetiderIBehandling(sisteIverksatteBehandling.behandlingId, brukerTokenInfo)
-                if (forrigeTrygdetider.isEmpty()) {
-                    opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
-                } else {
-                    val kopierteTrygdetider =
-                        kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider, eksisterendeTrygdetider)
-                    kopierAvtale(behandling.id, sisteIverksatteBehandling.behandlingId)
-                    opprettTrygdetiderForRevurdering(behandling, kopierteTrygdetider, avdoede, brukerTokenInfo)
-                }
-            }
-        }
-    }.also { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) }
+        }.also { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) }
 
     private suspend fun opprettTrygdetiderForRevurdering(
         behandling: DetaljertBehandling,
         eksisterendeTrygdetider: List<Trygdetid>,
         avdoede: List<Grunnlagsdata<JsonNode>>,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = if (behandling.revurderingsaarsak == Revurderingaarsak.REGULERING &&
-        behandling.prosesstype == Prosesstype.AUTOMATISK
-    ) {
-        logger.info("Forrige trygdetid for ${behandling.id} finnes ikke - må reguleres manuelt")
-        throw ManglerForrigeTrygdetidMaaReguleresManuelt()
-    } else {
-        logger.info("Oppretter trygdetid for behandling ${behandling.id} revurdering")
-        opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
+    ): List<Trygdetid> =
+        if (behandling.revurderingsaarsak == Revurderingaarsak.REGULERING &&
+            behandling.prosesstype == Prosesstype.AUTOMATISK
+        ) {
+            logger.info("Forrige trygdetid for ${behandling.id} finnes ikke - må reguleres manuelt")
+            throw ManglerForrigeTrygdetidMaaReguleresManuelt()
+        } else {
+            logger.info("Oppretter trygdetid for behandling ${behandling.id} revurdering")
+            opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
+        }
+
+    /**
+     * Det TODO
+     */
+    private fun ryddBortKopiertTrygdetidMedDaarligData(
+        behandling: DetaljertBehandling,
+        eksisterendeTrygdetider: List<Trygdetid>,
+        avdoede: List<Grunnlagsdata<JsonNode>>,
+    ): List<Trygdetid> {
+        if (behandling.sakType != SakType.OMSTILLINGSSTOENAD) {
+            return eksisterendeTrygdetider
+        }
+        if (eksisterendeTrygdetider.size != 1) {
+            return eksisterendeTrygdetider
+        }
+        val eksisterendeTrygdetid = eksisterendeTrygdetider.single()
+        if (eksisterendeTrygdetid.ident != UKJENT_AVDOED) {
+            return eksisterendeTrygdetider
+        }
+        if (avdoede.any { it.hentFoedselsnummer()?.verdi?.value == null }) {
+            logger.error(
+                "Vi har en OMS-sak med UKJENT_AVDOED, og mangler kjent avdød i grunnlaget. Trygedtid er " +
+                    "sannsynligvis ikke bra i denne saken. SakId = ${behandling.sak.sakId}, behandlingId = ${behandling.id}. " +
+                    "Denne bør følges opp av et menneske for å se om behandlingen blir riktig, og eventuelt om det trengs " +
+                    "å få på plass riktig avdød i saken.",
+            )
+            return eksisterendeTrygdetider
+        }
+        // Hvis vi har en OMS sak der vi har kun en kopiert trygedtid med ukjent avdød, og vi har en gyldig avdød i
+        // grunnlaget i saken, kan vi bare rydde bort den kopierte trygdetiden med UKJENT_AVDOED, siden den er broken
+        trygdetidRepository.slettTrygdetid(eksisterendeTrygdetid.id)
+        return emptyList()
     }
 
     private suspend fun opprettTrygdetiderForBehandling(
@@ -310,36 +349,41 @@ class TrygdetidServiceImpl(
         eksisterendeTrygdetider: List<Trygdetid>,
         avdoede: List<Grunnlagsdata<JsonNode>>,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = avdoede
-        .map { avdoed ->
-            val fnr =
-                krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
-                    "Kunne ikke hente identifikator for avdød til trygdetid i " +
-                        "behandlingen med id=${behandling.id}"
-                }
+    ): List<Trygdetid> {
+        val eksisterendeTrygdetidEtterRydding =
+            ryddBortKopiertTrygdetidMedDaarligData(behandling, eksisterendeTrygdetider, avdoede)
 
-            Pair(fnr, avdoed)
-        }.filter { avdoedMedFnr ->
-            eksisterendeTrygdetider.none { avdoedMedFnr.first == it.ident }
-        }.map { avdoedMedFnr ->
-            val trygdetid =
-                Trygdetid(
-                    sakId = behandling.sak,
-                    behandlingId = behandling.id,
-                    opplysninger = hentOpplysninger(avdoedMedFnr.second, behandling.id),
-                    ident = avdoedMedFnr.first,
-                    yrkesskade = false,
-                )
+        return avdoede
+            .map { avdoed ->
+                val fnr =
+                    krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                        "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                            "behandlingen med id=${behandling.id}"
+                    }
 
-            val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
+                Pair(fnr, avdoed)
+            }.filter { avdoedMedFnr ->
+                eksisterendeTrygdetidEtterRydding.none { avdoedMedFnr.first == it.ident }
+            }.map { avdoedMedFnr ->
+                val trygdetid =
+                    Trygdetid(
+                        sakId = behandling.sak,
+                        behandlingId = behandling.id,
+                        opplysninger = hentOpplysninger(avdoedMedFnr.second, behandling.id),
+                        ident = avdoedMedFnr.first,
+                        yrkesskade = false,
+                    )
 
-            val oppdatertTrygdetid =
-                opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
+                val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
 
-            oppdatertTrygdetid ?: opprettetTrygdetid
-        }.also {
-            logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
-        }
+                val oppdatertTrygdetid =
+                    opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
+
+                oppdatertTrygdetid ?: opprettetTrygdetid
+            }.also {
+                logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
+            }
+    }
 
     override suspend fun harTrygdetidsgrunnlagIPesysForApOgUfoere(
         behandlingId: UUID,

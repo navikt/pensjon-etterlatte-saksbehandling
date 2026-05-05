@@ -247,7 +247,7 @@ class TrygdetidServiceImpl(
                         trygdetider
                     }
                 }
-            // ingen trygdetider i behandling, vi har en riktig avdød i grunnlag
+
             if (eksisterendeTrygdetider.isNotEmpty() && avdoede.size == eksisterendeTrygdetider.size) {
                 throw TrygdetidAlleredeOpprettetException()
             }
@@ -275,12 +275,10 @@ class TrygdetidServiceImpl(
                     val sisteIverksatteBehandling =
                         vedtaksvurderingKlient
                             .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
-                            .sortedByDescending { it.datoFattet }
+                            .sortedByDescending { it.datoAttestert }
                             .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke trygdetid
-                    // e87d89c5-90b2-4385-9a6a-9571cf8a22c9 sist iverksatt, den har UKJENT_AVDOED trygdetid
                     val forrigeTrygdetider =
                         hentTrygdetiderIBehandling(sisteIverksatteBehandling.behandlingId, brukerTokenInfo)
-                    // ukjent avdoed trygdetid i forrige
                     if (forrigeTrygdetider.isEmpty()) {
                         opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
                     } else {
@@ -288,8 +286,10 @@ class TrygdetidServiceImpl(
                             kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider, eksisterendeTrygdetider)
                         kopierAvtale(behandling.id, sisteIverksatteBehandling.behandlingId)
 
-                        // Revurdering har fått kopiert inn trygdetid med ukjent avdød
                         opprettTrygdetiderForRevurdering(behandling, kopierteTrygdetider, avdoede, brukerTokenInfo)
+
+                        // Vi har oppdatert trydgetiden i databasen, henter på nytt
+                        hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                     }
                 }
             }
@@ -312,7 +312,10 @@ class TrygdetidServiceImpl(
         }
 
     /**
-     * Det TODO
+     * Vi har sett en sak der trydgetiden på forrige iverksatte behandling er feil. Dermed trenger vi å ikke kopiere
+     * med denne feilen videre i neste behandling.
+     *
+     * Se porten-sak FAGSYSTEM-425200
      */
     private fun ryddBortKopiertTrygdetidMedDaarligData(
         behandling: DetaljertBehandling,
@@ -327,6 +330,9 @@ class TrygdetidServiceImpl(
         }
         val eksisterendeTrygdetid = eksisterendeTrygdetider.single()
         if (eksisterendeTrygdetid.ident != UKJENT_AVDOED) {
+            return eksisterendeTrygdetider
+        }
+        if (avdoede.isEmpty()) {
             return eksisterendeTrygdetider
         }
         if (avdoede.any { it.hentFoedselsnummer()?.verdi?.value == null }) {

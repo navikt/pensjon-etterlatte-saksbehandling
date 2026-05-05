@@ -319,7 +319,6 @@ internal class TrygdetidServiceTest {
 
         coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
-            repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
@@ -341,6 +340,7 @@ internal class TrygdetidServiceTest {
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
         }
         verify {
+            repository.hentTrygdetiderForBehandling(behandlingId)
             behandling.behandlingType
             behandling.sak
             behandling.sakType
@@ -396,7 +396,6 @@ internal class TrygdetidServiceTest {
         }
         coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
-            repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
@@ -414,6 +413,7 @@ internal class TrygdetidServiceTest {
             }
         }
         verify {
+            repository.hentTrygdetiderForBehandling(behandlingId)
             behandling.id
             behandling.sak
             behandling.sakType

@@ -24,11 +24,9 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.PdfMedData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
-import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -71,7 +69,6 @@ internal class BrevServiceTest {
             brevoppretter,
             journalfoerBrevService,
             pdfService,
-            mockk(),
             mockk(),
             mockk(),
             mockk(),

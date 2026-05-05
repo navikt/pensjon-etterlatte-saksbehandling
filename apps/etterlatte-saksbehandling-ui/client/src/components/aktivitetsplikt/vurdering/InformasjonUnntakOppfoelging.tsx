@@ -1,13 +1,9 @@
 import { IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { Alert, Box } from '@navikt/ds-react'
 import React from 'react'
 import { formaterDato } from '~utils/formatering/dato'
 
 export function InformasjonUnntakOppfoelging(props: { vurdering: IAktivitetspliktVurderingNyDto }) {
-  const oppgaveFristUtloeper = useFeaturetoggle(FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist)
-  const oppgaveIngenFrist = useFeaturetoggle(FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist)
-
   const {
     vurdering: { unntak },
   } = props
@@ -17,7 +13,7 @@ export function InformasjonUnntakOppfoelging(props: { vurdering: IAktivitetsplik
 
   return (
     <>
-      {oppgaveFristUtloeper && !!unntakMedFrist && (
+      {!!unntakMedFrist && (
         <Box width="fit-content">
           <Alert variant="info">
             Du har lagt til et unntak med utløpsdato {formaterDato(unntakMedFrist.tom)}. To måneder før fristen blir det
@@ -25,7 +21,7 @@ export function InformasjonUnntakOppfoelging(props: { vurdering: IAktivitetsplik
           </Alert>
         </Box>
       )}
-      {oppgaveIngenFrist && !!unntakIngenFrist && (
+      {!!unntakIngenFrist && (
         <Box width="fit-content">
           <Alert variant="info">
             Du har lagt til et unntak uten frist. Når denne behandlingen er ferdig blir det opprettet en

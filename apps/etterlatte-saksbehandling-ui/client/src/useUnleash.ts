@@ -13,8 +13,6 @@ export const enum FeatureToggle {
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
-  aktivitetsplikt_oppgave_unntak_uten_frist = 'aktivitetsplikt-oppgave-unntak-uten-frist',
-  aktivitetsplikt_oppgave_unntak_med_frist = 'aktivitetsplikt-oppgave-unntak-med-frist',
   oppgave_til_journalpost = 'oppgave-til-journalpost',
   etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
   vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
@@ -69,16 +67,6 @@ const pensjon_etterlatte_kan_opprette_vedtak_avvist_klage: Toggle = {
   enabled: false,
 }
 
-const aktivitetsplikt_oppgave_unntak_uten_frist: Toggle = {
-  togglename: FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist,
-  enabled: false,
-}
-
-const aktivitetsplikt_oppgave_unntak_med_frist: Toggle = {
-  togglename: FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist,
-  enabled: false,
-}
-
 const etteroppgjoer_dev_opprett_forbehandling: Toggle = {
   togglename: FeatureToggle.etteroppgjoer_dev_opprett_forbehandling,
   enabled: false,
@@ -110,8 +98,6 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:
     pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
   [FeatureToggle.overstyr_beregning_knapp]: overstyr_beregning_knapp,
-  [FeatureToggle.aktivitetsplikt_oppgave_unntak_med_frist]: aktivitetsplikt_oppgave_unntak_med_frist,
-  [FeatureToggle.aktivitetsplikt_oppgave_unntak_uten_frist]: aktivitetsplikt_oppgave_unntak_uten_frist,
   [FeatureToggle.oppgave_til_journalpost]: oppgave_til_journalpost,
   [FeatureToggle.etteroppgjoer_dev_opprett_forbehandling]: etteroppgjoer_dev_opprett_forbehandling,
   [FeatureToggle.vis_tilbakestill_etteroppgjoer]: vis_tilbakestill_etteroppgjoer,

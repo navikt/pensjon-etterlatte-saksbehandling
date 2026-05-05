@@ -157,10 +157,6 @@ class AktivitetspliktService(
         sakId: SakId,
         doedsdatoAvdoed: LocalDate? = null,
     ) {
-        if (!featureToggleService.isEnabled(AktivitetspliktOppgaveToggles.UNNTAK_UTEN_FRIST, false)) {
-            return
-        }
-
         try {
             // Hvis bruker har varig unntak er det ikke nødvendig å følge opp
             if (unntak.any { it.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT }) {
@@ -813,10 +809,12 @@ class AktivitetspliktService(
                 logger.info("Kopierer inn vurdering i sak $sakId til oppgave med id $oppgaveId")
             }
 
-            else -> throw UgyldigForespoerselException(
-                "OPPGAVE_HAR_FEIL_TYPE",
-                "Kan ikke kopiere inn vurderingen av aktivitetsplikt til en oppgave som ikke går på aktivitetsplikt!",
-            )
+            else -> {
+                throw UgyldigForespoerselException(
+                    "OPPGAVE_HAR_FEIL_TYPE",
+                    "Kan ikke kopiere inn vurderingen av aktivitetsplikt til en oppgave som ikke går på aktivitetsplikt!",
+                )
+            }
         }
 
         aktivitetspliktKopierService.kopierVurderingTilOppgave(sakId, oppgaveId)
@@ -850,7 +848,9 @@ class AktivitetspliktService(
         val oppgaveType =
             when (dto.jobbType) {
                 JobbType.OMS_DOED_4MND -> OppgaveType.AKTIVITETSPLIKT
+
                 JobbType.OMS_DOED_10MND -> OppgaveType.AKTIVITETSPLIKT_12MND
+
                 else -> throw UgyldigForespoerselException(
                     "FEIL_JOBBTYPE",
                     "Kan ikke opprette en aktivitetspliktoppgave for jobbtype=${dto.jobbType} i sak $sakId",

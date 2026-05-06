@@ -51,6 +51,7 @@ import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.BehandlingVilkaa
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartVedleggVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.oppgave.OppgaveService
@@ -161,6 +162,12 @@ internal class ApplicationContext {
             vilkaarsvurderingService,
         )
 
+    val brevDataMapperRedigerbartVedleggVedtak =
+        BrevDataMapperRedigerbartVedleggVedtak(
+            behandlingService,
+            beregningService,
+        )
+
     val brevKodeMappingVedtak = BrevKodeMapperVedtak()
 
     val brevbakerService = BrevbakerService(brevbaker)
@@ -191,6 +198,7 @@ internal class ApplicationContext {
             pdfGenerator,
             brevDataMapperRedigerbartUtfallVedtak,
             brevDataMapperFerdigstilling,
+            brevDataMapperRedigerbartVedleggVedtak,
             behandlingService,
             featureToggleService,
             behandlingKlient,

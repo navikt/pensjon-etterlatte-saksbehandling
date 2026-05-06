@@ -24,6 +24,7 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKode: Brevkoder,
         brevData: BrevDataRedigerbar,
+        brevDataForVedlegg: BrevDataRedigerbar,
         spraak: Spraak? = null,
     ): Pair<Brev, Enhetsnummer> {
         with(
@@ -33,6 +34,7 @@ class Brevoppretter(
                 bruker,
                 brevKode,
                 brevData,
+                brevDataForVedlegg,
                 spraak,
             ),
         ) {
@@ -60,6 +62,7 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
+        brevDataForVedleggMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar = { ManueltBrevData() },
     ): Pair<Brev, Enhetsnummer> =
         with(
             innholdTilRedigerbartBrevHenter.hentInnData(
@@ -68,6 +71,7 @@ class Brevoppretter(
                 bruker,
                 brevKodeMapping,
                 brevDataMapping,
+                brevDataForVedleggMapping,
             ),
         ) {
             val nyttBrev =
@@ -93,6 +97,7 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
+        brevDataForVedleggMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar = { ManueltBrevData() },
     ): BrevService.BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
         val opprinneligBrevkoder = db.hentBrevkoder(brevId)
@@ -104,6 +109,7 @@ class Brevoppretter(
                 bruker,
                 brevKodeMapping,
                 brevDataMapping,
+                brevDataForVedleggMapping,
                 spraak,
             ),
         ) {

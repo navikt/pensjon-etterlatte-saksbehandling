@@ -39,6 +39,7 @@ class RedigerbartVedleggHenter(
         enhet: Enhetsnummer,
         spraak: Spraak,
         prosesstype: Prosesstype?,
+        brevDataForVedlegg: BrevDataRedigerbar,
     ): List<BrevInnholdVedlegg> {
         val vedlegg =
             finnVedlegg(
@@ -59,7 +60,7 @@ class RedigerbartVedleggHenter(
                         brevbakerService.hentRedigerbarTekstFraBrevbakeren(
                             BrevbakerRequest.fra(
                                 brevKode = it.first,
-                                brevData = ManueltBrevData(),
+                                brevData = brevDataForVedlegg,
                                 avsender =
                                     adresseService.hentAvsender(
                                         opprettAvsenderRequest(bruker, forenkletVedtak, enhet),
@@ -86,15 +87,16 @@ class RedigerbartVedleggHenter(
     ) = when (sakType) {
         SakType.OMSTILLINGSSTOENAD -> {
             when (vedtakType) {
-                VedtakType.INNVILGELSE ->
+                VedtakType.INNVILGELSE -> {
                     listOf(
                         Pair(
                             Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
                             BrevVedleggKey.OMS_BEREGNING,
                         ),
                     )
+                }
 
-                VedtakType.OPPHOER ->
+                VedtakType.OPPHOER -> {
                     if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                         listOf(
                             Pair(
@@ -105,6 +107,7 @@ class RedigerbartVedleggHenter(
                     } else {
                         emptyList()
                     }
+                }
 
                 VedtakType.ENDRING -> {
                     if (brevtype == Brevtype.VARSEL && revurderingaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
@@ -153,15 +156,16 @@ class RedigerbartVedleggHenter(
 
         SakType.BARNEPENSJON -> {
             when (vedtakType) {
-                VedtakType.INNVILGELSE ->
+                VedtakType.INNVILGELSE -> {
                     listOf(
                         Pair(
                             Vedlegg.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
                             BrevVedleggKey.BP_BEREGNING_TRYGDETID,
                         ),
                     )
+                }
 
-                VedtakType.OPPHOER ->
+                VedtakType.OPPHOER -> {
                     if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                         listOf(
                             Pair(
@@ -172,8 +176,9 @@ class RedigerbartVedleggHenter(
                     } else {
                         emptyList()
                     }
+                }
 
-                VedtakType.ENDRING ->
+                VedtakType.ENDRING -> {
                     if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                         listOf(
                             Pair(
@@ -193,6 +198,7 @@ class RedigerbartVedleggHenter(
                             ),
                         )
                     }
+                }
 
                 else -> {
                     if (brevtype == Brevtype.VARSEL) {

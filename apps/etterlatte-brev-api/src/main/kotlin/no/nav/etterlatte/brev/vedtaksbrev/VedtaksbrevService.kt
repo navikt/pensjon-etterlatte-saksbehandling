@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingS
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartVedleggVedtak
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.Pdf
@@ -52,6 +53,7 @@ class VedtaksbrevService(
     private val pdfGenerator: PDFGenerator,
     private val brevDataMapperRedigerbartUtfallVedtak: BrevDataMapperRedigerbartUtfallVedtak,
     private val brevDataMapperFerdigstilling: BrevDataMapperFerdigstillingVedtak,
+    private val brevDataMapperRedigerbartVedleggVedtak: BrevDataMapperRedigerbartVedleggVedtak,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
     private val behandlingKlient: BehandlingKlient,
@@ -94,6 +96,7 @@ class VedtaksbrevService(
                 bruker = brukerTokenInfo,
                 brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
                 brevDataMapping = { brevDataMapperRedigerbartUtfallVedtak.brevData(it) },
+                brevDataForVedleggMapping = { brevDataMapperRedigerbartVedleggVedtak.brevData(it) },
             ).first
     }
 
@@ -224,35 +227,48 @@ class VedtaksbrevService(
             )
         }
 
-        return brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, {
-            when (brevtype) {
-                Brevtype.VARSEL ->
-                    if (it.sakType === SakType.BARNEPENSJON) {
-                        Brevkoder.BP_VARSEL
-                    } else {
-                        Brevkoder.OMS_VARSEL
+        return brevoppretter.hentNyttInnhold(
+            sakId = sakId,
+            brevId = brevId,
+            behandlingId = behandlingId,
+            bruker = brukerTokenInfo,
+            brevKodeMapping = {
+                when (brevtype) {
+                    Brevtype.VARSEL -> {
+                        if (it.sakType === SakType.BARNEPENSJON) {
+                            Brevkoder.BP_VARSEL
+                        } else {
+                            Brevkoder.OMS_VARSEL
+                        }
                     }
 
-                Brevtype.VEDTAK -> brevKodeMappingVedtak.brevKode(it)
-                else -> throw UgyldigForespoerselException(
-                    "FEIL_BREVKODE_NYTT_INNHOLD",
-                    "Prøvde å hente brevkode for nytt innhold for brevtype $brevtype, men per nå støtter vi bare vedtak og varsel.",
-                )
-            }
-        }) {
-            if (brevtype == Brevtype.VARSEL) {
-                BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
-                    it.sakType,
-                    brukerTokenInfo,
-                    it.utlandstilknytningType,
-                    it.revurderingsaarsak,
-                    behandlingKlient.hentGrunnlag(behandlingId, brukerTokenInfo),
-                    behandlingService.hentBehandling(behandlingId, brukerTokenInfo),
-                )
-            } else {
-                brevDataMapperRedigerbartUtfallVedtak.brevData(it)
-            }
-        }
+                    Brevtype.VEDTAK -> {
+                        brevKodeMappingVedtak.brevKode(it)
+                    }
+
+                    else -> {
+                        throw UgyldigForespoerselException(
+                            "FEIL_BREVKODE_NYTT_INNHOLD",
+                            "Prøvde å hente brevkode for nytt innhold for brevtype $brevtype, men per nå støtter vi bare vedtak og varsel.",
+                        )
+                    }
+                }
+            },
+            brevDataMapping = {
+                if (brevtype == Brevtype.VARSEL) {
+                    BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
+                        it.sakType,
+                        brukerTokenInfo,
+                        it.utlandstilknytningType,
+                        it.revurderingsaarsak,
+                        behandlingKlient.hentGrunnlag(behandlingId, brukerTokenInfo),
+                        behandlingService.hentBehandling(behandlingId, brukerTokenInfo),
+                    )
+                } else {
+                    brevDataMapperRedigerbartUtfallVedtak.brevData(it)
+                }
+            },
+        )
     }
 
     private fun lagrePdfHvisVedtakFattet(
@@ -274,7 +290,7 @@ class VedtaksbrevService(
         } else {
             logger.warn(
                 "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerVedtak)" +
-                        " og attestant (${brukerTokenInfo.ident()}) er samme person.",
+                    " og attestant (${brukerTokenInfo.ident()}) er samme person.",
             )
         }
     }
@@ -303,15 +319,16 @@ class VedtaksbrevService(
         }
         if (brev.brevkoder != Brevkoder.TILBAKEKREVING) {
             throw UgyldigForespoerselException(
-                "IKKE_TILBAKEKREVING_BREV", "Ferdigstilling kan kun fjernes for tilbakekrevingsbrev, " +
-                        "men brev med id=${brev.id} til behandling $behandlingId har brevkode ${brev.brevkoder}"
+                "IKKE_TILBAKEKREVING_BREV",
+                "Ferdigstilling kan kun fjernes for tilbakekrevingsbrev, " +
+                    "men brev med id=${brev.id} til behandling $behandlingId har brevkode ${brev.brevkoder}",
             )
         }
 
         if (brev.status != Status.FERDIGSTILT) {
             throw UgyldigForespoerselException(
                 "FERDIGSTILT_KAN_IKKE_FJERNES",
-                "Brevet har status ${brev.status}, og vi kan ikke fjerne ferdigstillingen"
+                "Brevet har status ${brev.status}, og vi kan ikke fjerne ferdigstillingen",
             )
         }
         db.fjernFerdigstiltStatus(brev.id)
@@ -322,26 +339,26 @@ class UgyldigStatusKanIkkeFerdigstilles(
     id: BrevID,
     status: Status,
 ) : UgyldigForespoerselException(
-    code = "UGYLDIG_STATUS_BREV",
-    detail = "Brevet kan ikke ferdigstilles når status er ${status.name.lowercase()}",
-    meta =
-        mapOf(
-            "id" to id,
-            "status" to status,
-        ),
-)
+        code = "UGYLDIG_STATUS_BREV",
+        detail = "Brevet kan ikke ferdigstilles når status er ${status.name.lowercase()}",
+        meta =
+            mapOf(
+                "id" to id,
+                "status" to status,
+            ),
+    )
 
 class VedtaksbrevKanIkkeSlettes(
     brevId: BrevID,
     detalj: String,
 ) : IkkeTillattException(
-    code = "VEDTAKSBREV_KAN_IKKE_SLETTES",
-    detail = "Vedtaksbrevet kan ikke slettes: $detalj",
-    meta =
-        mapOf(
-            "id" to brevId,
-        ),
-)
+        code = "VEDTAKSBREV_KAN_IKKE_SLETTES",
+        detail = "Vedtaksbrevet kan ikke slettes: $detalj",
+        meta =
+            mapOf(
+                "id" to brevId,
+            ),
+    )
 
 class UgyldigAntallMottakere :
     UgyldigForespoerselException(
@@ -354,32 +371,32 @@ class UgyldigMottakerKanIkkeFerdigstilles(
     sakId: SakId,
     feil: List<String>,
 ) : UgyldigForespoerselException(
-    code = "UGYLDIG_MOTTAKER_BREV",
-    detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse. BrevID: $id, sakId: $sakId. $feil",
-    meta = id?.let { mapOf("id" to it) },
-)
+        code = "UGYLDIG_MOTTAKER_BREV",
+        detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse. BrevID: $id, sakId: $sakId. $feil",
+        meta = id?.let { mapOf("id" to it) },
+    )
 
 class BrevManglerPDF(
     id: BrevID,
 ) : UgyldigForespoerselException(
-    code = "PDF_MANGLER",
-    detail = "Kan ikke ferdigstille brev siden PDF ikke er ferdig generert og lagret.",
-    meta = mapOf("id" to id),
-)
+        code = "PDF_MANGLER",
+        detail = "Kan ikke ferdigstille brev siden PDF ikke er ferdig generert og lagret.",
+        meta = mapOf("id" to id),
+    )
 
 class SaksbehandlerOgAttestantSammePerson(
     saksbehandler: String,
     attestant: String,
 ) : UgyldigForespoerselException(
-    code = "SAKSBEHANDLER_OG_ATTESTANT_SAMME_PERSON",
-    detail = "Kan ikke ferdigstille vedtaksbrevet når saksbehandler ($saksbehandler) og attestant ($attestant) er samme person.",
-    meta = mapOf("saksbehandler" to saksbehandler, "attestant" to attestant),
-)
+        code = "SAKSBEHANDLER_OG_ATTESTANT_SAMME_PERSON",
+        detail = "Kan ikke ferdigstille vedtaksbrevet når saksbehandler ($saksbehandler) og attestant ($attestant) er samme person.",
+        meta = mapOf("saksbehandler" to saksbehandler, "attestant" to attestant),
+    )
 
 class KanIkkeOppretteVedtaksbrev(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(
-    code = "KAN_IKKE_ENDRE_VEDTAKSBREV",
-    detail = "Statusen til behandlingen tillater ikke at det opprettes vedtaksbrev",
-    meta = mapOf("behandlingId" to behandlingId),
-)
+        code = "KAN_IKKE_ENDRE_VEDTAKSBREV",
+        detail = "Statusen til behandlingen tillater ikke at det opprettes vedtaksbrev",
+        meta = mapOf("behandlingId" to behandlingId),
+    )

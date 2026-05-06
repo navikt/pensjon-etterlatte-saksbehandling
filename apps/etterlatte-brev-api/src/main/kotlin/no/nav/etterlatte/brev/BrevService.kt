@@ -67,6 +67,7 @@ class BrevService(
                 bruker = bruker,
                 brevKode = req.brevKode,
                 brevData = req.brevParametereAutomatisk.brevDataMapping(),
+                brevDataForVedlegg = ManueltBrevData(),
             )
         val brevId = brev.id
         try {
@@ -162,6 +163,7 @@ class BrevService(
         bruker: BrukerTokenInfo,
         brevkode: Brevkoder,
         brevData: BrevDataRedigerbar,
+        brevDataForVedlegg: BrevDataRedigerbar,
         spraak: Spraak? = null,
     ): Brev =
         brevoppretter
@@ -171,6 +173,7 @@ class BrevService(
                 bruker = bruker,
                 brevKode = brevkode,
                 brevData = brevData,
+                brevDataForVedlegg = brevDataForVedlegg,
                 spraak = spraak,
             ).first
 
@@ -209,8 +212,8 @@ class BrevService(
                 brevId = brevId,
                 behandlingId = null,
                 bruker = bruker,
-                brevDataMapping = { parametre.brevDataMapping() },
                 brevKodeMapping = { parametre.brevkode },
+                brevDataMapping = { parametre.brevDataMapping() },
             )
         if (innhold.hoveddel != null) {
             db.oppdaterPayload(brevId, innhold.hoveddel, bruker)

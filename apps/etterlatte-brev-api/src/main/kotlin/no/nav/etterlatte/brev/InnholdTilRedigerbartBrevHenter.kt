@@ -33,11 +33,12 @@ class InnholdTilRedigerbartBrevHenter(
         bruker: BrukerTokenInfo,
         brevKode: Brevkoder,
         brevData: BrevDataRedigerbar,
+        brevDataForVedlegg: BrevDataRedigerbar,
         spraak: Spraak? = null,
     ): OpprettBrevRequest {
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, spraak, bruker) }
-        return opprettBrevRequest(generellBrevData, brevKode, brevData, bruker)
+        return opprettBrevRequest(generellBrevData, brevKode, brevData, brevDataForVedlegg, bruker)
     }
 
     internal suspend fun hentInnData(
@@ -46,6 +47,7 @@ class InnholdTilRedigerbartBrevHenter(
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
+        brevDataForVedleggMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
         overstyrSpraak: Spraak? = null,
     ): OpprettBrevRequest {
         val generellBrevData =
@@ -89,13 +91,15 @@ class InnholdTilRedigerbartBrevHenter(
                 avdoede = generellBrevData.personerISak.avdoede,
             )
         val brevData: BrevDataRedigerbar = brevDataMapping(brevDataRedigerbarRequest)
-        return opprettBrevRequest(generellBrevData, kode, brevData, bruker)
+        val brevDataForVedlegg: BrevDataRedigerbar = brevDataForVedleggMapping(brevDataRedigerbarRequest)
+        return opprettBrevRequest(generellBrevData, kode, brevData, brevDataForVedlegg, bruker)
     }
 
     private suspend fun opprettBrevRequest(
         generellBrevData: GenerellBrevData,
         brevKode: Brevkoder,
         brevData: BrevData,
+        brevDataForVedlegg: BrevDataRedigerbar,
         bruker: BrukerTokenInfo,
     ): OpprettBrevRequest =
         coroutineScope {
@@ -137,6 +141,7 @@ class InnholdTilRedigerbartBrevHenter(
                         generellBrevData.sak.enhet,
                         generellBrevData.spraak,
                         generellBrevData.prosesstype,
+                        brevDataForVedlegg,
                     )
                 }
 

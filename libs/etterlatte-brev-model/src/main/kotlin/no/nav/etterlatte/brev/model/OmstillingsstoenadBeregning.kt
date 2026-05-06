@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.HarVedlegg
 import no.nav.etterlatte.brev.Slate
 import java.time.LocalDate
@@ -14,4 +15,5 @@ data class OmstillingsstoenadBeregning(
     val oppphoersdato: LocalDate?,
     val opphoerNesteAar: Boolean,
     val erYrkesskade: Boolean,
-) : HarVedlegg
+) : HarVedlegg,
+    BrevDataRedigerbar

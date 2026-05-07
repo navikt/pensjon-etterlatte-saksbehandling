@@ -37,6 +37,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.routes.samordningSystembruk
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.tilbakekrevingvedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.vedtaksvurderingRoute
 import no.nav.etterlatte.brev.brevRoute
+import no.nav.etterlatte.brev.notatRoute
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
@@ -202,6 +203,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     )
 
     brevRoute(service = applicationContext.brevService)
+    notatRoute(behandlingsvurderingNotatService = applicationContext.behandlingsvurderingNotatService)
 
     aktivitetspliktRoutes(
         aktivitetspliktService = applicationContext.aktivitetspliktService,

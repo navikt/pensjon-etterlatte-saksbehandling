@@ -33,4 +33,5 @@ enum class NotatMal(
     NORDISK_VEDLEGG("nordisk_vedlegg"),
     MANUELL_SAMORDNING("manuell_samordning"),
     KLAGE_OVERSENDELSE_BLANKETT("klage_oversendelse_blankett"),
+    BEHANDLINGSVURDERING("tom_mal"),
 }

@@ -40,7 +40,7 @@ private class Server(
             vedtaksbrevRoute(context.vedtaksbrevService, context.journalfoerBrevService, context.tilgangssjekker)
             dokumentRoute(context.safService, context.dokarkivService, context.tilgangssjekker)
             varselbrevRoute(context.varselbrevService, context.tilgangssjekker)
-            notatRoute(context.notatService, context.nyNotatService, context.tilgangssjekker)
+            notatRoute(context.notatService, context.nyNotatService, context.tilgangssjekker, context.behandlingsvurderingNotatService)
             oversendelseBrevRoute(context.oversendelseBrevService, context.tilgangssjekker)
 
             strukturertBrevRoute(context.tilbakekrevingBrevService, context.tilgangssjekker)

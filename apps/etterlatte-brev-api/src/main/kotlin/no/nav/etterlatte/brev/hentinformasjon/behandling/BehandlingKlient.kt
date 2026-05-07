@@ -136,7 +136,10 @@ class BehandlingKlient(
             }
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(errorMessage(), it.samlaExceptions())
                 }

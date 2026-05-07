@@ -3,8 +3,6 @@ package no.nav.etterlatte.brev.notat
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -13,7 +11,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.brev.BehandlingsvurderingNotatRequest
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.NyNotatService
 import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
@@ -21,10 +19,12 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -55,6 +55,7 @@ fun Route.notatRoute(
     notatService: NotatService,
     nyNotatService: NyNotatService,
     tilgangsSjekk: Tilgangssjekker,
+    behandlingsvurderingNotatService: BehandlingsvurderingNotatService,
 ) {
     route("/notat") {
         route("/{$NOTAT_ID_CALL_PARAMETER}") {
@@ -197,6 +198,17 @@ fun Route.notatRoute(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    route("/notat/behandling/{$BEHANDLINGID_CALL_PARAMETER}/behandlingsvurdering") {
+        post {
+            withBehandlingId(tilgangsSjekk, skrivetilgang = true) { behandlingId ->
+                val request = call.receive<BehandlingsvurderingNotatRequest>()
+                logger.info("Journalfører behandlingsvurdering for behandling $behandlingId")
+                behandlingsvurderingNotatService.opprettOgJournalfoer(behandlingId, request, brukerTokenInfo)
+                call.respond(HttpStatusCode.Created)
             }
         }
     }

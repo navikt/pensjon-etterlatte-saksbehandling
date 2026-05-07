@@ -37,3 +37,11 @@
 **2026-05-04 — Testskriving**
 - Observation: Jeg la inn mock for `SaksbehandlerInfoDao` uten å vurdere om real-DB var mulig og bedre. Brukeren måtte eksplisitt be om det.
 - Action: Når en DAO er enkel og DatabaseExtension finnes i modulen, vurder real-DB som default – ikke mock.
+
+**2026-05-06 — Arkitektur / lagdeling**
+- Observation: Jeg implementerte innholdsbygging (Slate, datauthenting) i brev-api i stedet for i behandling, selv om ny brevflyt eksplisitt sier at behandling eier innholdet.
+- Action: Før implementering av ny funksjonalitet: sjekk eksisterende mønster for hvem som eier domeneinnhold. I Gjenny → behandling bygger, brev-api rendrer og journalfører.
+
+**2026-05-06 — Grunnlag / datauthenting**
+- Observation: Brukte individuelle `hentXxx()`-hjelpere på `Grunnlagsdata<JsonNode>` for å hente persondata for avdøde. Brukeren påpekte at `hentPersonopplysninger()` → `Person` er den rette kilden — samme som frontend bruker.
+- Action: Sjekk om det finnes en allerede aggregert datakilde (typisk `hentPersonopplysninger`, `hentOpplysningsgrunnlag`) før du bruker enkeltfelts-hjelpere. Disse finnes nettopp fordi manuell mapping fra JsonNode er sårbar og unødvendig.

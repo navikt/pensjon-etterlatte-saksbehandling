@@ -93,6 +93,33 @@ class NyNotatService(
         return notat
     }
 
+    suspend fun opprettOgJournalfoerMedPayload(
+        sakId: SakId,
+        mal: NotatMal,
+        tittel: String,
+        referanse: String,
+        payload: Slate,
+        bruker: BrukerTokenInfo,
+    ): OpprettJournalpostResponse {
+        val sak = behandlingService.hentSak(sakId, bruker)
+
+        logger.info("Oppretter notat med ferdig payload for sak $sakId og referanse '$referanse'")
+
+        val id =
+            notatRepository.opprett(
+                NyttNotat(
+                    sakId = sak.id,
+                    referanse = referanse,
+                    tittel = tittel,
+                    mal = mal,
+                    payload = payload,
+                ),
+                bruker,
+            )
+
+        return journalfoer(id, bruker)
+    }
+
     suspend fun opprett(
         sakId: SakId,
         mal: NotatMal,
@@ -113,7 +140,7 @@ class NyNotatService(
                     tittel = tittel,
                     payload =
                         when (mal) {
-                            NotatMal.TOM_MAL ->
+                            NotatMal.TOM_MAL -> {
                                 Slate(
                                     listOf(
                                         Slate.Element(
@@ -122,17 +149,27 @@ class NyNotatService(
                                         ),
                                     ),
                                 )
+                            }
 
-                            NotatMal.NORDISK_VEDLEGG ->
+                            NotatMal.NORDISK_VEDLEGG -> {
                                 deserialize(
                                     javaClass.getResource("/notat/nordisk_vedlegg.json")!!.readText(),
                                 )
+                            }
 
                             NotatMal.MANUELL_SAMORDNING -> {
                                 opprettSamordningsnotatPayload(params)
                             }
 
-                            NotatMal.KLAGE_OVERSENDELSE_BLANKETT -> TODO("Foreløpig ikke støttet i ny service")
+                            NotatMal.KLAGE_OVERSENDELSE_BLANKETT -> {
+                                TODO("Foreløpig ikke støttet i ny service")
+                            }
+
+                            NotatMal.BEHANDLINGSVURDERING -> {
+                                throw UnsupportedOperationException(
+                                    "BEHANDLINGSVURDERING skal opprettes via opprettOgJournalfoerMedPayload",
+                                )
+                            }
                         },
                     mal = mal,
                 ),

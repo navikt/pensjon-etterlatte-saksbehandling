@@ -184,6 +184,7 @@ internal class ApplicationContext(
     val omgjoeringKlageRevurderingService get() = highLevelServiceModule.omgjoeringKlageRevurderingService
     val etteroppgjoerForbehandlingBrevService get() = highLevelServiceModule.etteroppgjoerForbehandlingBrevService
     val brevService get() = highLevelServiceModule.brevService
+    val behandlingsvurderingNotatService get() = highLevelServiceModule.behandlingsvurderingNotatService
     val tilbakekrevingService get() = highLevelServiceModule.tilbakekrevingService
     val gosysOppgaveService get() = highLevelServiceModule.gosysOppgaveService
     val behandlingFactory get() = highLevelServiceModule.behandlingFactory

@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
+import no.nav.etterlatte.brev.BehandlingsvurderingNotatRequest
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.BrevPayload
@@ -93,6 +94,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -257,6 +259,11 @@ class TrygdetidKlientTest : TrygdetidKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<TrygdetidDto> = emptyList()
+
+    override suspend fun hentTrygdeavtale(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdeavtale? = null
 }
 
 class VedtakInternalServiceTest : VedtakInternalService {
@@ -827,6 +834,14 @@ class BrevKlientTest : BrevKlient {
     override suspend fun slettBrev(
         brevSomskalSlettes: BrevID,
         sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun opprettOgJournalfoerBehandlingsvurderingNotat(
+        behandlingId: UUID,
+        request: BehandlingsvurderingNotatRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         TODO("Not yet implemented")

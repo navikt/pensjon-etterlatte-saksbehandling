@@ -52,6 +52,7 @@ import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.Vilkaarsvurderin
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
+import no.nav.etterlatte.brev.notat.BehandlingsvurderingNotatService
 import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
@@ -245,6 +246,8 @@ internal class ApplicationContext {
     val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue(PDFGEN_URL))
     val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
     val notatService = NotatService(notatRepository, pdfGeneratorKlient, dokarkivService, grunnlagService)
+    val behandlingsvurderingNotatService =
+        BehandlingsvurderingNotatService(nyNotatService)
 
     val tilgangssjekker = Tilgangssjekker(config, httpClient())
 

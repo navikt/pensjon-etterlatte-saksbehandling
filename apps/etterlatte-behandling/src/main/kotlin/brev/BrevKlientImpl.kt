@@ -75,6 +75,12 @@ interface BrevKlient {
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun opprettOgJournalfoerBehandlingsvurderingNotat(
+        behandlingId: UUID,
+        request: BehandlingsvurderingNotatRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class BrevKlientImpl(
@@ -211,6 +217,19 @@ class BrevKlientImpl(
                 success = { },
                 failure = { errorResponse -> throw errorResponse },
             )
+    }
+
+    override suspend fun opprettOgJournalfoerBehandlingsvurderingNotat(
+        behandlingId: UUID,
+        request: BehandlingsvurderingNotatRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        post(
+            url = "$resourceUrl/notat/behandling/$behandlingId/behandlingsvurdering",
+            postBody = request,
+            onSuccess = { },
+            brukerTokenInfo = brukerTokenInfo,
+        )
     }
 
     private suspend fun <T> get(

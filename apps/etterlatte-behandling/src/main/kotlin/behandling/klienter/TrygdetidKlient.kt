@@ -4,10 +4,12 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -26,6 +28,11 @@ interface TrygdetidKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<TrygdetidDto>
+
+    suspend fun hentTrygdeavtale(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdeavtale?
 }
 
 class TrygdetidKlientImpl(
@@ -89,6 +96,35 @@ class TrygdetidKlientImpl(
                 status = re.response.status.value,
                 code = "FEIL_MOT_TRYGDETID",
                 detail = "Henting av trygdetid feilet",
+            )
+        }
+    }
+
+    override suspend fun hentTrygdeavtale(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdeavtale? {
+        try {
+            logger.info("Henter trygdeavtale for behandling $behandlingId")
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/trygdetid/avtaler/$behandlingId"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource ->
+                        when (resource.status) {
+                            HttpStatusCode.NoContent -> null
+                            else -> resource.response?.let { deserialize(it.toString()) }
+                        }
+                    },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (re: ResponseException) {
+            logger.error("Henting av trygdeavtale for behandling=$behandlingId feilet", re)
+            throw ForespoerselException(
+                status = re.response.status.value,
+                code = "FEIL_MOT_TRYGDETID_AVTALE",
+                detail = "Henting av trygdeavtale feilet",
             )
         }
     }

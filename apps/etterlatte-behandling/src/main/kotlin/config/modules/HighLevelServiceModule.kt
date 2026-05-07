@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.revurdering.OmgjoeringKlageRevurderingServic
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.AutomatiskVedtakBehandlingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
+import no.nav.etterlatte.brev.BehandlingsvurderingNotatService
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.TilbakekrevingBrevService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -224,6 +225,18 @@ class HighLevelServiceModule(
             service = vedtakBehandlingService,
             oppgaveService = serviceModule.oppgaveService,
             vedtaksvurderingService = serviceModule.vedtaksvurderingService,
+        )
+    }
+
+    val behandlingsvurderingNotatService by lazy {
+        BehandlingsvurderingNotatService(
+            behandlingService = serviceModule.behandlingService,
+            trygdetidKlient = klientModule.trygdetidKlient,
+            beregningKlient = klientModule.beregningKlient,
+            aktivitetspliktService = serviceModule.aktivitetspliktService,
+            grunnlagService = serviceModule.grunnlagService,
+            vedtakInternalService = serviceModule.vedtakInternalService,
+            brevKlient = klientModule.brevKlient,
         )
     }
 }

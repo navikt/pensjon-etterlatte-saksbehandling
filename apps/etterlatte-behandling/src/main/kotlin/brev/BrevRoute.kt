@@ -143,3 +143,19 @@ fun Route.brevRoute(service: BrevService) {
         }
     }
 }
+
+fun Route.notatRoute(behandlingsvurderingNotatService: BehandlingsvurderingNotatService) {
+    val logger = LoggerFactory.getLogger("NotatRoute")
+
+    route("api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/notat") {
+        post("behandlingsvurdering") {
+            kunSkrivetilgang {
+                logger.info("Journalfører behandlingsvurdering-notat for behandling $behandlingId")
+                runBlocking {
+                    behandlingsvurderingNotatService.opprettOgJournalfoer(behandlingId, brukerTokenInfo)
+                }
+                call.respond(HttpStatusCode.Created)
+            }
+        }
+    }
+}

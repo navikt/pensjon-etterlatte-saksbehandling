@@ -9,6 +9,7 @@ import { NyKlageRequestUtfylling } from '~shared/types/Klage'
 import { Journalpost } from '~shared/types/Journalpost'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
+import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
 
 interface ModalProps {
   oppgave: OppgaveDTO
@@ -34,7 +35,7 @@ export default function FullfoerKlageModal({ oppgave, klageRequest, journalpost 
       () => {
         apiFerdigstillOppgave(oppgave.id, () => {
           setTimeout(() => {
-            navigate('/')
+            hentSakOgNavigerTilSaksoversikt(oppgave.sakId, navigate)
           }, 5000)
         })
       }
@@ -62,7 +63,7 @@ export default function FullfoerKlageModal({ oppgave, klageRequest, journalpost 
 
           {isSuccess(opprettKlageStatus) && isSuccess(ferdigstillOppgaveStatus) ? (
             <Alert variant="success">
-              Klage opprettet for bruker med fødselsnummer {oppgave.fnr}. Du blir straks sendt til oppgavebenken.
+              Klage opprettet for bruker med fødselsnummer {oppgave.fnr}. Du blir straks sendt til saksoversikten.
             </Alert>
           ) : (
             <HStack gap="space-16" justify="center">

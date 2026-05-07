@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
-    runtimeOnly(group = "com.papertrailapp", name = "logback-syslog4j", version = "1.0.0")
+    runtimeOnly("com.papertrailapp:logback-syslog4j:1.0.0")
 
     compileOnly(libs.logging.slf4japi)
 

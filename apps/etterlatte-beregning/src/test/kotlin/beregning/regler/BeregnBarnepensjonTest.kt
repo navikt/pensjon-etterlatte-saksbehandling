@@ -17,40 +17,40 @@ import java.time.Month
 
 internal class BeregnBarnepensjonTest {
     @Test
-    fun `beregnBarnepensjon skal gi 3716,00 ved 40 aars trygdetid og ingen soesken`() {
+    fun `beregnBarnepensjon skal gi 3715,90 ved 40 aars trygdetid og ingen soesken`() {
         val resultat =
             beregnBarnepensjon.anvend(
                 grunnlag = barnepensjonGrunnlag(),
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
-        resultat.verdi shouldBe 3716.00.toBeregningstall()
+        resultat.verdi shouldBe 3715.9.toBeregningstall()
     }
 
     @Test
-    fun `beregnBarnepensjon skal gi 3019,25 ved 40 aars trygdetid og et soesken`() {
+    fun `beregnBarnepensjon skal gi 3019,17 ved 40 aars trygdetid og et soesken`() {
         val resultat =
             beregnBarnepensjon.anvend(
                 grunnlag = barnepensjonGrunnlag(listOf(HELSOESKEN_FOEDSELSNUMMER)),
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
-        resultat.verdi shouldBe 3019.25.toBeregningstall()
+        resultat.verdi shouldBe 3019.16875.toBeregningstall()
     }
 
     @Test
-    fun `beregnBarnepensjon skal gi 2787,00 ved 40 aars trygdetid og to soesken`() {
+    fun `beregnBarnepensjon skal gi 2786,93 ved 40 aars trygdetid og to soesken`() {
         val resultat =
             beregnBarnepensjon.anvend(
                 grunnlag = barnepensjonGrunnlag(listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)),
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
-        resultat.verdi shouldBe 2787.00.toBeregningstall()
+        resultat.verdi shouldBe 2786.925.toBeregningstall()
     }
 
     @Test
-    fun `beregnBarnepensjon gi 2670,875 ved 40 aars trygdetid og tre soesken`() {
+    fun `beregnBarnepensjon gi 2670,80 ved 40 aars trygdetid og tre soesken`() {
         val resultat =
             beregnBarnepensjon.anvend(
                 grunnlag =
@@ -64,11 +64,11 @@ internal class BeregnBarnepensjonTest {
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
-        resultat.verdi shouldBe 2670.875.toBeregningstall()
+        resultat.verdi shouldBe 2670.803125.toBeregningstall()
     }
 
     @Test
-    fun `beregnBarnepensjon gi 1335,875 ved 20 aars trygdetid og tre soesken`() {
+    fun `beregnBarnepensjon gi 1335,40 ved 20 aars trygdetid og tre soesken`() {
         val resultat =
             beregnBarnepensjon.anvend(
                 grunnlag =
@@ -84,7 +84,7 @@ internal class BeregnBarnepensjonTest {
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
-        resultat.verdi shouldBe 1335.4375.toBeregningstall()
+        resultat.verdi shouldBe 1335.4015625.toBeregningstall()
     }
 
     @Test
@@ -104,7 +104,7 @@ internal class BeregnBarnepensjonTest {
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
-        resultat.verdi shouldBe 929.toBeregningstall()
+        resultat.verdi shouldBe 928.975.toBeregningstall()
     }
 
     @Test
@@ -125,7 +125,7 @@ internal class BeregnBarnepensjonTest {
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
-        resultat.verdi shouldBe 929.toBeregningstall()
+        resultat.verdi shouldBe 928.975.toBeregningstall()
     }
 
     @Test
@@ -225,6 +225,6 @@ internal class BeregnBarnepensjonTest {
             )
 
         Assertions.assertEquals(resultatMedSoeskenjustering.verdi, resultatUtenSoeskenjustering.verdi)
-        Assertions.assertEquals(929.0.toBeregningstall(), resultatUtenSoeskenjustering.verdi)
+        Assertions.assertEquals(928.975.toBeregningstall(), resultatUtenSoeskenjustering.verdi)
     }
 }

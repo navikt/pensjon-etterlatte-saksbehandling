@@ -42,11 +42,11 @@ data class OmstillingsstoenadRevurderingData(
     val bosattUtland: Boolean,
     val erInnvilgelsesaar: Boolean,
     val tidligereFamiliepleier: Boolean,
+    val innholdForhaandsvarsel: List<Slate.Element>,
 )
 
 data class OmstillingsstoenadRevurdering(
     override val innhold: List<Slate.Element>,
-    val innholdForhaandsvarsel: List<Slate.Element>,
     override val data: OmstillingsstoenadRevurderingData,
 ) : BrevDataFerdigstilling {
     init {
@@ -91,13 +91,13 @@ data class OmstillingsstoenadRevurdering(
 
             return OmstillingsstoenadRevurdering(
                 innhold = innholdMedVedlegg.innhold(),
-                innholdForhaandsvarsel =
-                    vedleggHvisFeilutbetaling(
-                        feilutbetaling,
-                        innholdMedVedlegg,
-                        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
-                    ),
                 data = OmstillingsstoenadRevurderingData(
+                    innholdForhaandsvarsel =
+                        vedleggHvisFeilutbetaling(
+                            feilutbetaling,
+                            innholdMedVedlegg,
+                            BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
                     erEndret =
                         avkortingsinfo.endringIUtbetalingVedVirk ||
                             revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,

@@ -38,11 +38,11 @@ data class BarnepensjonRevurderingData(
     val feilutbetaling: FeilutbetalingType,
     val erMigrertYrkesskade: Boolean,
     val erEtterbetaling: Boolean,
+    val innholdForhaandsvarsel: List<Slate.Element>,
 )
 
 data class BarnepensjonRevurdering(
     override val innhold: List<Slate.Element>,
-    val innholdForhaandsvarsel: List<Slate.Element>,
     override val data: BarnepensjonRevurderingData,
 ) : BrevDataFerdigstilling {
     companion object {
@@ -69,13 +69,13 @@ data class BarnepensjonRevurdering(
 
             return BarnepensjonRevurdering(
                 innhold = innhold.innhold(),
-                innholdForhaandsvarsel =
-                    vedleggHvisFeilutbetaling(
-                        feilutbetaling,
-                        innhold,
-                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                    ),
                 data = BarnepensjonRevurderingData(
+                    innholdForhaandsvarsel =
+                        vedleggHvisFeilutbetaling(
+                            feilutbetaling,
+                            innhold,
+                            BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
                     beregning =
                         barnepensjonBeregning(
                             innhold,

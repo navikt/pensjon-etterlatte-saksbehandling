@@ -19,11 +19,11 @@ data class BarnepensjonOpphoerData(
     val bosattUtland: Boolean,
     val virkningsdato: LocalDate,
     val feilutbetaling: FeilutbetalingType,
+    val innholdForhaandsvarsel: List<Slate.Element>,
 )
 
 data class BarnepensjonOpphoer(
     override val innhold: List<Slate.Element>,
-    val innholdForhaandsvarsel: List<Slate.Element>,
     override val data: BarnepensjonOpphoerData,
 ) : BrevDataFerdigstilling {
     companion object {
@@ -40,13 +40,13 @@ data class BarnepensjonOpphoer(
 
             return BarnepensjonOpphoer(
                 innhold = innhold.innhold(),
-                innholdForhaandsvarsel =
-                    vedleggHvisFeilutbetaling(
-                        feilutbetaling,
-                        innhold,
-                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                    ),
                 data = BarnepensjonOpphoerData(
+                    innholdForhaandsvarsel =
+                        vedleggHvisFeilutbetaling(
+                            feilutbetaling,
+                            innhold,
+                            BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
                     brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                     bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                     virkningsdato = krevIkkeNull(virkningsdato) { "Virkningsdato mangler" },

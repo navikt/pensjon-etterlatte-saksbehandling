@@ -17,11 +17,11 @@ data class OmstillingsstoenadOpphoerData(
     val bosattUtland: Boolean,
     val virkningsdato: LocalDate,
     val feilutbetaling: FeilutbetalingType,
+    val innholdForhaandsvarsel: List<Slate.Element>,
 )
 
 data class OmstillingsstoenadOpphoer(
     override val innhold: List<Slate.Element>,
-    val innholdForhaandsvarsel: List<Slate.Element>,
     override val data: OmstillingsstoenadOpphoerData,
 ) : BrevDataFerdigstilling {
     companion object {
@@ -38,13 +38,13 @@ data class OmstillingsstoenadOpphoer(
 
             return OmstillingsstoenadOpphoer(
                 innhold = innholdMedVedlegg.innhold(),
-                innholdForhaandsvarsel =
-                    vedleggHvisFeilutbetaling(
-                        feilutbetaling,
-                        innholdMedVedlegg,
-                        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
-                    ),
                 data = OmstillingsstoenadOpphoerData(
+                    innholdForhaandsvarsel =
+                        vedleggHvisFeilutbetaling(
+                            feilutbetaling,
+                            innholdMedVedlegg,
+                            BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
                     bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
                     virkningsdato =
                         krevIkkeNull(virkningsdato) {

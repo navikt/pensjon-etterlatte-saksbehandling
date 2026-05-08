@@ -10,7 +10,6 @@ include(
     "apps:etterlatte-behandling-kafka",
     "apps:etterlatte-beregning",
     "apps:etterlatte-beregning-kafka",
-    "apps:etterlatte-vedtaksvurdering",
     "apps:etterlatte-vedtaksvurdering-kafka",
     "apps:etterlatte-brev-api",
     "apps:etterlatte-brev-kafka",

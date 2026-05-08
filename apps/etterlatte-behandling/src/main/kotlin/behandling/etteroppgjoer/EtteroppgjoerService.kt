@@ -178,7 +178,12 @@ class EtteroppgjoerService(
 
             FERDIGSTILT -> {
                 if (pensjonsgivendeInntektHarEndretSegForFerdigstiltEtteroppgjoer(etteroppgjoer, sak.ident)) {
-                    etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sak.id, etteroppgjoer.inntektsaar)
+                    if (endringenErIkkeUtelukkendePgaTidligereEtteroppgjørIGjenny()) {
+                        etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
+                            sak.id,
+                            etteroppgjoer.inntektsaar,
+                        )
+                    }
                     logger.info(
                         "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt har endret seg siden ferdigstilt etteroppgjør for ${etteroppgjoer.inntektsaar} - oppretter vurder konsekvens oppgave",
                     )
@@ -187,6 +192,7 @@ class EtteroppgjoerService(
                         "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt er uendret siden ferdigstilt etteroppgjør for ${etteroppgjoer.inntektsaar} - ingen oppgave opprettes",
                     )
                 }
+                throw InternfeilException("Vi vil logge FERDIGSTILT oppgjør, ikke lage oppgave, eller fortsette")
             }
 
             MANGLER_SKATTEOPPGJOER,

@@ -34,16 +34,21 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjusteringVedta
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelse
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingData
+import no.nav.etterlatte.brev.model.oms.utledBeregningsperioderOpphoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.LocalDate
 import java.time.YearMonth
@@ -96,7 +101,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
             return when (kode) {
-                BP_REVURDERING ->
+                BP_REVURDERING -> {
                     barnepensjonRevurdering(
                         bruker,
                         innholdMedVedlegg,
@@ -109,10 +114,11 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         klage,
                     )
+                }
 
                 BP_INNVILGELSE,
                 BP_INNVILGELSE_FORELDRELOES,
-                ->
+                -> {
                     barnepensjonInnvilgelse(
                         bruker,
                         innholdMedVedlegg,
@@ -125,15 +131,17 @@ class BrevDataMapperFerdigstillingVedtak(
                         systemkilde,
                         klage,
                     )
+                }
 
-                BP_AVSLAG ->
+                BP_AVSLAG -> {
                     barnepensjonAvslag(
                         innholdMedVedlegg,
                         soekerUnder18,
                         utlandstilknytningType,
                     )
+                }
 
-                BP_OPPHOER ->
+                BP_OPPHOER -> {
                     barnepensjonOpphoer(
                         bruker,
                         innholdMedVedlegg,
@@ -141,8 +149,9 @@ class BrevDataMapperFerdigstillingVedtak(
                         utlandstilknytningType,
                         virkningstidspunkt?.atDay(1),
                     )
+                }
 
-                OMS_INNVILGELSE ->
+                OMS_INNVILGELSE -> {
                     omstillingsstoenadInnvilgelse(
                         bruker,
                         innholdMedVedlegg,
@@ -154,8 +163,9 @@ class BrevDataMapperFerdigstillingVedtak(
                         utlandstilknytningType,
                         klage,
                     )
+                }
 
-                OMS_REVURDERING ->
+                OMS_REVURDERING -> {
                     omstillingsstoenadRevurdering(
                         bruker,
                         innholdMedVedlegg,
@@ -167,14 +177,16 @@ class BrevDataMapperFerdigstillingVedtak(
                         klage,
                         utlandstilknytningType,
                     )
+                }
 
-                OMS_AVSLAG ->
+                OMS_AVSLAG -> {
                     omstillingsstoenadAvslag(
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
                     )
+                }
 
-                OMS_INNTEKTSJUSTERING_VEDTAK ->
+                OMS_INNTEKTSJUSTERING_VEDTAK -> {
                     omstillingsstoenadInntektsjusteringVedtak(
                         bruker,
                         innholdMedVedlegg,
@@ -184,8 +196,9 @@ class BrevDataMapperFerdigstillingVedtak(
                         vedtakType!!,
                         virkningstidspunkt!!,
                     )
+                }
 
-                OMS_OPPHOER ->
+                OMS_OPPHOER -> {
                     omstillingsstoenadOpphoer(
                         bruker,
                         innholdMedVedlegg,
@@ -193,17 +206,23 @@ class BrevDataMapperFerdigstillingVedtak(
                         virkningstidspunkt?.atDay(1),
                         utlandstilknytningType,
                     )
+                }
 
-                TILBAKEKREVING -> throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
+                TILBAKEKREVING -> {
+                    throw InternfeilException("Brevkode for ${request.vedtakType} skal ikke utledes her")
+                }
 
-                AVVIST_KLAGE ->
+                AVVIST_KLAGE -> {
                     AvvistKlageFerdigData.fra(
                         innholdMedVedlegg,
                         klage,
                         utlandstilknytningType,
                     )
+                }
 
-                else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
+                else -> {
+                    throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
+                }
             }
         }
     }
@@ -477,32 +496,79 @@ class BrevDataMapperFerdigstillingVedtak(
         utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
         val avkortingsinfo =
-            async {
-                beregningService.finnAvkortingsinfo(
-                    behandlingId,
-                    sakType,
-                    virkningstidspunkt,
-                    vedtakType,
-                    bruker,
-                )
-            }
+            async { beregningService.finnAvkortingsinfo(behandlingId, sakType, virkningstidspunkt, vedtakType, bruker) }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
         val land = async { behandlingService.hentLand(bruker) }
 
-        OmstillingsstoenadRevurdering.fra(
-            innholdMedVedlegg,
-            avkortingsinfo.await(),
-            krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
-            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
-            revurderingaarsak,
-            krevIkkeNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
-            klage?.datoVedtakOmgjoering(),
-            utlandstilknytningType,
-            behandling,
-            land.await(),
+        val avkortingsinfo1 = avkortingsinfo.await()
+        val trygdetid1 = krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" }.single()
+        val beregningsperioder =
+            avkortingsinfo1.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
+        val feilutbetaling =
+            krevIkkeNull(
+                (
+                    brevutfall.await()
+                        ?: throw ManglerBrevutfall(behandlingId)
+                ).feilutbetaling?.valg?.let(::toFeilutbetalingType),
+            ) {
+                "Feilutbetaling mangler i brevutfall"
+            }
+        val beregningsperioderOpphoer =
+            utledBeregningsperioderOpphoer(
+                behandling,
+                beregningsperioder,
+            )
+        val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
+        val omsRettUtenTidsbegrensning =
+            krevIkkeNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" }.vilkaar.single {
+                it.hovedvilkaar.type in
+                    listOf(
+                        VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                    )
+            }
+        OmstillingsstoenadRevurdering(
+            innhold = innholdMedVedlegg.innhold(),
+            innholdForhaandsvarsel = emptyList(), // TODO
+//                vedleggHvisFeilutbetaling(
+//                    feilutbetaling,
+//                    innholdMedVedlegg,
+//                    BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+//                ),
+            data =
+                OmstillingsstoenadRevurderingData(
+                    erEndret =
+                        avkortingsinfo1.endringIUtbetalingVedVirk ||
+                            revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
+                    erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+                    datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                    beregning =
+                        OmstillingsstoenadBeregning(
+                            innhold = emptyList(), // TODO
+                            virkningsdato = avkortingsinfo1.virkningsdato,
+                            beregningsperioder = beregningsperioder,
+                            sisteBeregningsperiode = sisteBeregningsperiode,
+                            sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+                            trygdetid =
+                                trygdetid1.fromDto(
+                                    beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                                    beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
+                                    navnAvdoed = null,
+                                    landKodeverk = land.await(),
+                                ),
+                            oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                            opphoerNesteAar =
+                                beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                            erYrkesskade = trygdetid1.erYrkesskade(),
+                        ),
+                    omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
+                    feilutbetaling = feilutbetaling,
+                    bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                    erInnvilgelsesaar = avkortingsinfo1.erInnvilgelsesaar,
+                    tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
+                ),
         )
     }
 

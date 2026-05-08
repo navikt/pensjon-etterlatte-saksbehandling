@@ -19,7 +19,7 @@ import java.time.LocalDate
 
 internal class VedtakServiceImplTest {
     @Test
-    fun `kaller paa vedtakklient med riktig formatert url`() {
+    fun `henter loepende vedtak med riktig formatert url`() {
         lateinit var request: Url
         val mockEngine =
             MockEngine { req ->

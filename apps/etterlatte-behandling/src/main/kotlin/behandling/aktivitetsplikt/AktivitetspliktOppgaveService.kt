@@ -17,8 +17,6 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -41,16 +39,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
-
-enum class AktivitetspliktOppgaveToggles(
-    private val key: String,
-) : FeatureToggle {
-    UNNTAK_UTEN_FRIST("aktivitetsplikt-oppgave-unntak-ingen-frist"),
-    UNNTAK_MED_FRIST("aktivitetsplikt-oppgave-unntak-med-frist"),
-    ;
-
-    override fun key(): String = key
-}
 
 data class OppfoelgingsOppgave(
     val kanOpprette: Boolean,

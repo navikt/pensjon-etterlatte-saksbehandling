@@ -16,12 +16,14 @@ import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -30,8 +32,11 @@ import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
+import no.nav.etterlatte.logger
 import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
@@ -43,6 +48,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -71,7 +77,7 @@ internal class TrygdetidServiceIntegrationTest(
 
     @BeforeAll
     fun beforeAll() {
-        no.nav.etterlatte.logger
+        logger
             .info(dbExtension.properties().toString())
         trygdetidService =
             TrygdetidServiceImpl(
@@ -82,9 +88,7 @@ internal class TrygdetidServiceIntegrationTest(
                 mockk<PesysKlient>(),
                 avtaleService,
                 vedtaksvurderingKlient,
-                DummyFeatureToggleService().also {
-                    it.settBryter(TrygdetidToggles.OPPDATER_BEREGNET_TRYGDETID_VED_KOPIERING, true)
-                },
+                DummyFeatureToggleService(),
             )
     }
 
@@ -153,6 +157,7 @@ internal class TrygdetidServiceIntegrationTest(
             mockk {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
             }
@@ -246,6 +251,62 @@ internal class TrygdetidServiceIntegrationTest(
         with(trygdetider.first()) {
             ident shouldBe UKJENT_AVDOED
             opplysningerDifferanse!! shouldBeEqual OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt())
+        }
+    }
+
+    @Test
+    fun `skal forkaste forrige behandlings trygdetid hvis den feilaktig setter UKJENT_AVDOED`() {
+        val sakId = randomSakId()
+        val forrigeBehandlingId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        val grunnlagTestData = GrunnlagTestData()
+        val standardOpplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
+
+        coEvery {
+            grunnlagKlient.hentGrunnlag(any(), any())
+        } returns standardOpplysningsgrunnlag
+        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+            mockk {
+                every { id } returns behandlingId
+                every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
+                every { behandlingType } returns BehandlingType.REVURDERING
+                every { tidligereFamiliepleier } returns null
+                every { revurderingsaarsak } returns Revurderingaarsak.AKTIVITETSPLIKT
+                every { prosesstype } returns Prosesstype.MANUELL
+            }
+        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler) } returns
+            listOf(
+                VedtakSammendragDto(
+                    id = "1",
+                    behandlingId = forrigeBehandlingId,
+                    vedtakType = VedtakType.INNVILGELSE,
+                    behandlendeSaksbehandler = null,
+                    datoFattet = Tidspunkt.now().toNorskTid(),
+                    attesterendeSaksbehandler = null,
+                    datoAttestert = Tidspunkt.now().toNorskTid(),
+                    virkningstidspunkt = YearMonth.of(2024, 5),
+                    opphoerFraOgMed = null,
+                    iverksettelsesTidspunkt = Tidspunkt.now(),
+                ),
+            )
+        every { avtaleService.hentAvtaleForBehandling(any()) } returns null
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+
+        repository.opprettTrygdetid(
+            trygdetid(
+                behandlingId = forrigeBehandlingId,
+                sakId = sakId,
+                ident = UKJENT_AVDOED,
+                opplysninger = emptyList(),
+            ),
+        )
+
+        val trygdetider = runBlocking { trygdetidService.opprettTrygdetiderForBehandling(behandlingId, saksbehandler) }
+
+        with(trygdetider.single()) {
+            ident shouldNotBe UKJENT_AVDOED
         }
     }
 

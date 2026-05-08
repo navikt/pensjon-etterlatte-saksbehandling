@@ -1,5 +1,0 @@
-ALTER TABLE vedtak
-ADD COLUMN fnr TEXT,
-ADD COLUMN datoFattet TEXT,
-ADD COLUMN datoattestert TEXT,
-ADD COLUMN attestant TEXT;

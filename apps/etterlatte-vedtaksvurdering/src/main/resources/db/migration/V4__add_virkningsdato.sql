@@ -1,2 +1,0 @@
-ALTER TABLE vedtak
-ADD COLUMN datoVirkFom DATE;

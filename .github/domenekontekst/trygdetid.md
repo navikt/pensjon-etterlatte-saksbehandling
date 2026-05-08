@@ -25,4 +25,4 @@ Håndterer og beregner trygdetid for avdøde – dvs. perioder med opptjening i 
 
 ## Avhengigheter
 
-Kaller: `etterlatte-behandling` (behandlingskontekst, tilgangskontroll og grunnlag inkl. persondata for avdøde), Pesys (kun lesing – henter trygdetid for avdøde med uføretrygd eller alderspensjon fra legacy-systemet), `etterlatte-vedtaksvurdering` (kobling mot vedtak)
+Kaller: `etterlatte-behandling` (behandlingskontekst, vedtak, tilgangskontroll og grunnlag inkl. persondata for avdøde), Pesys (kun lesing – henter trygdetid for avdøde med uføretrygd eller alderspensjon fra legacy-systemet)

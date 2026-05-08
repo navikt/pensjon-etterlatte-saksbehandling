@@ -39,7 +39,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
       - name: Setup Node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # ratchet:actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # ratchet:actions/setup-node@v6
         with:
           node-version: '24.x'
           registry-url: "https://npm.pkg.github.com"
@@ -96,7 +96,7 @@ jobs:
           echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build.outputs.digest }}" >> $GITHUB_ENV
       - name: Generate SBOM, attest and sign image
         id: attest-sign
-        uses: nais/attest-sign@9f718bc53c1379a59982d425d1e7456f632af881 # ratchet:nais/attest-sign@v2.0.4
+        uses: nais/attest-sign@75ea4636c578affaf49d98d98d280879b3ae54b6 # ratchet:nais/attest-sign@v2.0.7
         env:
           TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
         with:
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
-      - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@2f28259ff29ea37915f5a0c9e2a8e3542c429df7 # ratchet:nais/deploy/actions/deploy@v2
         env:
           TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           CLUSTER: dev-gcp
@@ -123,7 +123,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
-      - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@2f28259ff29ea37915f5a0c9e2a8e3542c429df7 # ratchet:nais/deploy/actions/deploy@v2
         env:
           TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           CLUSTER: prod-gcp

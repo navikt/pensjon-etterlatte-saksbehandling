@@ -26,9 +26,13 @@ data class BarnepensjonAvslag(
     }
 }
 
-data class BarnepensjonAvslagRedigerbar(
+data class BarnepensjonAvslagRedigerbartData(
     val erSluttbehandling: Boolean,
     val avdoedNavn: String,
+)
+
+data class BarnepensjonAvslagRedigerbar(
+    override val data: BarnepensjonAvslagRedigerbartData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -36,10 +40,12 @@ data class BarnepensjonAvslagRedigerbar(
             erSluttbehandling: Boolean,
         ): BarnepensjonAvslagRedigerbar =
             BarnepensjonAvslagRedigerbar(
-                erSluttbehandling = erSluttbehandling,
-                avdoedNavn =
-                    avdoede.firstOrNull()?.navn
-                        ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
+                data = BarnepensjonAvslagRedigerbartData(
+                    erSluttbehandling = erSluttbehandling,
+                    avdoedNavn =
+                        avdoede.firstOrNull()?.navn
+                            ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
+                ),
             )
     }
 }

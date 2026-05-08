@@ -2,7 +2,9 @@ package no.nav.etterlatte.brev.varselbrev
 
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarselRedigerbartUtfall
+import no.nav.etterlatte.brev.model.bp.BarnepensjonVarselRedigerbartUtfallData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarselUtfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarselUtfallData
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -22,14 +24,16 @@ object BrevDataMapperRedigerbartUtfallVarsel {
     ) = when (sakType) {
         SakType.BARNEPENSJON ->
             BarnepensjonVarselRedigerbartUtfall(
-                automatiskBehandla = bruker is Systembruker,
-                erBosattUtlandet = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                data = BarnepensjonVarselRedigerbartUtfallData(
+                    automatiskBehandla = bruker is Systembruker,
+                    erBosattUtlandet = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                ),
             )
 
         SakType.OMSTILLINGSSTOENAD ->
             if (revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
                 val er12Mndvarsel = gjelderAktivitetspliktVarselOver12mnd(detaljertBehandling, grunnlag)
-                OmstillingsstoenadAktivitetspliktVarselUtfall(er12Mndvarsel)
+                OmstillingsstoenadAktivitetspliktVarselUtfall(OmstillingsstoenadAktivitetspliktVarselUtfallData(er12Mndvarsel))
             } else {
                 ManueltBrevData()
             }

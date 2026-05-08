@@ -101,7 +101,7 @@ data class OmstillingsstoenadInnvilgelse(
     }
 }
 
-data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
+data class OmstillingsstoenadInnvilgelseRedigerbartUtfallData(
     val virkningsdato: LocalDate,
     val utbetalingsbeloep: Kroner,
     val etterbetaling: Boolean,
@@ -111,6 +111,10 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
     val erSluttbehandling: Boolean = false,
     val tidligereFamiliepleier: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
+)
+
+data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
+    override val data: OmstillingsstoenadInnvilgelseRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -124,26 +128,28 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
             trygdetid: TrygdetidDto,
         ): OmstillingsstoenadInnvilgelseRedigerbartUtfall =
             OmstillingsstoenadInnvilgelseRedigerbartUtfall(
-                virkningsdato = avkortingsinfo.virkningsdato,
-                utbetalingsbeloep =
-                    avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
-                        ?: throw UgyldigForespoerselException(
-                            "MANGLER_BEREGNINGSPERIODER_AVKORTING",
-                            "Mangler beregningsperioder i avkorting",
+                data = OmstillingsstoenadInnvilgelseRedigerbartUtfallData(
+                    virkningsdato = avkortingsinfo.virkningsdato,
+                    utbetalingsbeloep =
+                        avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
+                            ?: throw UgyldigForespoerselException(
+                                "MANGLER_BEREGNINGSPERIODER_AVKORTING",
+                                "Mangler beregningsperioder i avkorting",
+                            ),
+                    etterbetaling = etterbetaling != null,
+                    tidligereFamiliepleier = tidligereFamiliepleier,
+                    datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                    avdoed = if (tidligereFamiliepleier) null else avdoede.single(),
+                    erSluttbehandling = erSluttbehandling ?: false,
+                    harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    beregning =
+                        omsBeregning(
+                            behandling = behandling,
+                            trygdetid = trygdetid,
+                            avkortingsinfo = avkortingsinfo,
+                            landKodeverk = emptyList(),
                         ),
-                etterbetaling = etterbetaling != null,
-                tidligereFamiliepleier = tidligereFamiliepleier,
-                datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
-                avdoed = if (tidligereFamiliepleier) null else avdoede.single(),
-                erSluttbehandling = erSluttbehandling ?: false,
-                harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                beregning =
-                    omsBeregning(
-                        behandling = behandling,
-                        trygdetid = trygdetid,
-                        avkortingsinfo = avkortingsinfo,
-                        landKodeverk = emptyList(),
-                    ),
+                ),
             )
     }
 }

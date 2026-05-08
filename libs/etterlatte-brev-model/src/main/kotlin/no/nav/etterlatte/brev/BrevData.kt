@@ -22,7 +22,9 @@ interface BrevDataFerdigstilling : BrevData {
     val innhold: List<Slate.Element>
 }
 
-interface BrevDataRedigerbar : BrevData
+interface BrevDataRedigerbar : BrevData {
+    val data: Any?
+}
 
 interface HarVedlegg : BrevData {
     val innhold: List<Slate.Element>
@@ -30,6 +32,7 @@ interface HarVedlegg : BrevData {
 
 data class ManueltBrevData(
     val innhold: List<Slate.Element> = emptyList(),
+    override val data: Any? = null,
 ) : BrevDataRedigerbar
 
 data class ManueltBrevMedTittelData(
@@ -46,11 +49,11 @@ data class BrevDataFerdigstillingNy(
 ) : BrevDataFerdigstilling
 
 data class BrevDataRedigerbarNy(
-    val data: BrevRedigerbarInnholdData?,
+    override val data: BrevRedigerbarInnholdData?,
 ) : BrevDataRedigerbar
 
 data class BrevVedleggRedigerbarNy(
-    val data: BrevVedleggInnholdData?,
+    override val data: BrevVedleggInnholdData?,
     val vedlegg: Vedlegg,
     val vedleggId: BrevVedleggKey,
 ) : BrevDataRedigerbar
@@ -100,6 +103,7 @@ abstract class BrevFastInnholdData : BrevData {
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder
     abstract val type: String
+    override val data: Any? = null
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -112,6 +116,7 @@ abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
 abstract class BrevVedleggInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Vedlegg
     abstract val type: String
+    override val data: Any? = null
 }
 
 data class BrevInnholdVedlegg(

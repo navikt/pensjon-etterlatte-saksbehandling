@@ -137,7 +137,7 @@ data class OmstillingsstoenadRevurdering(
     }
 }
 
-data class OmstillingsstoenadRevurderingRedigerbartUtfall(
+data class OmstillingsstoenadRevurderingRedigerbartUtfallData(
     val beregning: OmstillingsstoenadBeregningRedigerbartUtfall,
     val erEndret: Boolean,
     val erEtterbetaling: Boolean,
@@ -148,6 +148,10 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val inntekt: Kroner,
     val inntektsAar: Int,
     val mottattInntektendringAutomatisk: LocalDate?,
+)
+
+data class OmstillingsstoenadRevurderingRedigerbartUtfall(
+    override val data: OmstillingsstoenadRevurderingRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -164,44 +168,46 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
             val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
 
             return OmstillingsstoenadRevurderingRedigerbartUtfall(
-                beregning =
-                    OmstillingsstoenadBeregningRedigerbartUtfall(
-                        virkningsdato = avkortingsinfo.virkningsdato,
-                        beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = sisteBeregningsperiode,
-                        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                        opphoerNesteAar =
-                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
-                    ),
-                erEndret =
-                    avkortingsinfo.endringIUtbetalingVedVirk ||
-                        revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
-                erEtterbetaling = etterbetaling != null,
-                etterbetaling =
-                    etterbetaling?.let {
-                        Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
-                            etterbetaling,
-                            beregningsperioder,
-                        )
-                    },
-                feilutbetaling =
-                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                        "Feilutbetaling mangler i brevutfall"
-                    },
-                harFlereUtbetalingsperioder = beregningsperioder.size > 1,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                inntekt = sisteBeregningsperiode.inntekt,
-                inntektsAar = sisteBeregningsperiode.datoFOM.year,
-                mottattInntektendringAutomatisk =
-                    if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
-                        behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING
-                    ) {
-                        behandling.mottattDato?.toLocalDate()
-                            ?: throw InternfeilException("Automatisk inntektsendring må ha mottatt dato")
-                    } else {
-                        null
-                    },
+                data = OmstillingsstoenadRevurderingRedigerbartUtfallData(
+                    beregning =
+                        OmstillingsstoenadBeregningRedigerbartUtfall(
+                            virkningsdato = avkortingsinfo.virkningsdato,
+                            beregningsperioder = beregningsperioder,
+                            sisteBeregningsperiode = sisteBeregningsperiode,
+                            sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+                            oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                            opphoerNesteAar =
+                                beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        ),
+                    erEndret =
+                        avkortingsinfo.endringIUtbetalingVedVirk ||
+                            revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
+                    erEtterbetaling = etterbetaling != null,
+                    etterbetaling =
+                        etterbetaling?.let {
+                            Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
+                                etterbetaling,
+                                beregningsperioder,
+                            )
+                        },
+                    feilutbetaling =
+                        krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                            "Feilutbetaling mangler i brevutfall"
+                        },
+                    harFlereUtbetalingsperioder = beregningsperioder.size > 1,
+                    harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    inntekt = sisteBeregningsperiode.inntekt,
+                    inntektsAar = sisteBeregningsperiode.datoFOM.year,
+                    mottattInntektendringAutomatisk =
+                        if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
+                            behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING
+                        ) {
+                            behandling.mottattDato?.toLocalDate()
+                                ?: throw InternfeilException("Automatisk inntektsendring må ha mottatt dato")
+                        } else {
+                            null
+                        },
+                ),
             )
         }
     }

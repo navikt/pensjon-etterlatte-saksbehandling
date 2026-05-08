@@ -23,10 +23,14 @@ data class OmstillingsstoenadAvslag(
     }
 }
 
-data class OmstillingsstoenadAvslagRedigerbartUtfall(
+data class OmstillingsstoenadAvslagRedigerbartUtfallData(
     val avdoedNavn: String,
     val erSluttbehandling: Boolean,
     val tidligereFamiliepleier: Boolean,
+)
+
+data class OmstillingsstoenadAvslagRedigerbartUtfall(
+    override val data: OmstillingsstoenadAvslagRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -34,11 +38,13 @@ data class OmstillingsstoenadAvslagRedigerbartUtfall(
             erSluttbehandling: Boolean,
             tidligereFamiliepleier: TidligereFamiliepleier?,
         ) = OmstillingsstoenadAvslagRedigerbartUtfall(
-            avdoedNavn =
-                avdoede.firstOrNull()?.navn
-                    ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
-            erSluttbehandling = erSluttbehandling,
-            tidligereFamiliepleier = tidligereFamiliepleier?.svar ?: false,
+            data = OmstillingsstoenadAvslagRedigerbartUtfallData(
+                avdoedNavn =
+                    avdoede.firstOrNull()?.navn
+                        ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
+                erSluttbehandling = erSluttbehandling,
+                tidligereFamiliepleier = tidligereFamiliepleier?.svar ?: false,
+            ),
         )
     }
 }

@@ -108,13 +108,17 @@ data class BarnepensjonRevurdering(
     }
 }
 
-data class BarnepensjonRevurderingRedigerbartUtfall(
+data class BarnepensjonRevurderingRedigerbartUtfallData(
     val erEtterbetaling: Boolean,
     val harUtbetaling: Boolean,
     val feilutbetaling: FeilutbetalingType,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val frivilligSkattetrekk: Boolean,
+)
+
+data class BarnepensjonRevurderingRedigerbartUtfall(
+    override val data: BarnepensjonRevurderingRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -127,18 +131,20 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
                 brevutfall.frivilligSkattetrekk ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
 
             return BarnepensjonRevurderingRedigerbartUtfall(
-                erEtterbetaling = etterbetaling != null,
-                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                feilutbetaling =
-                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                        "Feilutbetaling mangler i brevutfall"
-                    },
-                brukerUnder18Aar =
-                    krevIkkeNull(brevutfall.aldersgruppe) {
-                        "Aldersgruppe mangler i brevutfall"
-                    } == Aldersgruppe.UNDER_18,
-                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                frivilligSkattetrekk = frivilligSkattetrekk,
+                data = BarnepensjonRevurderingRedigerbartUtfallData(
+                    erEtterbetaling = etterbetaling != null,
+                    harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    feilutbetaling =
+                        krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                            "Feilutbetaling mangler i brevutfall"
+                        },
+                    brukerUnder18Aar =
+                        krevIkkeNull(brevutfall.aldersgruppe) {
+                            "Aldersgruppe mangler i brevutfall"
+                        } == Aldersgruppe.UNDER_18,
+                    bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                    frivilligSkattetrekk = frivilligSkattetrekk,
+                ),
             )
         }
     }

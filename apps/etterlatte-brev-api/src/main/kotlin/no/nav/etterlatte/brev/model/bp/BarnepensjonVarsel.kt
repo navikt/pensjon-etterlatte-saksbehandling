@@ -12,7 +12,11 @@ data class BarnepensjonVarsel(
     val erBosattUtlandet: Boolean,
 ) : BrevDataFerdigstilling
 
-data class BarnepensjonVarselRedigerbartUtfall(
+data class BarnepensjonVarselRedigerbartUtfallData(
     val automatiskBehandla: Boolean,
     val erBosattUtlandet: Boolean,
+)
+
+data class BarnepensjonVarselRedigerbartUtfall(
+    override val data: BarnepensjonVarselRedigerbartUtfallData,
 ) : BrevDataRedigerbar

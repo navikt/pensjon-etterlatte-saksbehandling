@@ -51,16 +51,22 @@ data class BarnepensjonOpphoer(
     }
 }
 
-data class BarnepensjonOpphoerRedigerbarUtfall(
+data class BarnepensjonOpphoerRedigerbarUtfallData(
     val feilutbetaling: FeilutbetalingType,
+)
+
+data class BarnepensjonOpphoerRedigerbarUtfall(
+    override val data: BarnepensjonOpphoerRedigerbarUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(brevutfall: BrevutfallDto): BarnepensjonOpphoerRedigerbarUtfall =
             BarnepensjonOpphoerRedigerbarUtfall(
-                feilutbetaling =
-                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                        "Feilutbetaling mangler i brevutfall"
-                    },
+                data = BarnepensjonOpphoerRedigerbarUtfallData(
+                    feilutbetaling =
+                        krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                            "Feilutbetaling mangler i brevutfall"
+                        },
+                ),
             )
     }
 }

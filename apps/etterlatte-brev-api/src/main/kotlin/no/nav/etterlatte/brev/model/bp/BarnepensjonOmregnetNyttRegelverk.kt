@@ -16,11 +16,15 @@ import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
-data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
+data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfallData(
     val utbetaltFoerReform: Kroner,
     val utbetaltEtterReform: Kroner,
     val erForeldreloes: Boolean,
     val erBosattUtlandet: Boolean,
+)
+
+data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
+    override val data: BarnepensjonOmregnetNyttRegelverkRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -31,7 +35,7 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
             erSystembruker: Boolean,
         ): BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall {
             val defaultBrevdataOmregning =
-                BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
+                BarnepensjonOmregnetNyttRegelverkRedigerbartUtfallData(
                     utbetaltFoerReform = Kroner(0),
                     utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
                     erBosattUtlandet = false,
@@ -48,13 +52,15 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                             "Dette skal ikke skje, siden dette brevet må redigeres av saksbehandler",
                     )
                 }
-                return defaultBrevdataOmregning.copy(
-                    utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
-                    erBosattUtlandet = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                return BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
+                    data = defaultBrevdataOmregning.copy(
+                        utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
+                        erBosattUtlandet = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                    ),
                 )
             }
 
-            return defaultBrevdataOmregning
+            return BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(data = defaultBrevdataOmregning)
         }
     }
 }

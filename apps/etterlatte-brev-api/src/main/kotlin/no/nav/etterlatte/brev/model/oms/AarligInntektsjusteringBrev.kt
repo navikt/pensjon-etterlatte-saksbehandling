@@ -19,9 +19,13 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
+data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfallData(
     val inntektsbeloep: Kroner,
     val inntektsaar: Int,
+)
+
+data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
+    override val data: OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -38,8 +42,10 @@ data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
                     }.maxBy { it.datoFOM }
 
             return OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
-                inntektsbeloep = sisteBeregningsperiode.inntekt,
-                inntektsaar = virkningstidspunkt.year,
+                data = OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfallData(
+                    inntektsbeloep = sisteBeregningsperiode.inntekt,
+                    inntektsaar = virkningstidspunkt.year,
+                ),
             )
         }
     }

@@ -51,16 +51,22 @@ data class OmstillingsstoenadOpphoer(
     }
 }
 
-data class OmstillingsstoenadOpphoerRedigerbartUtfall(
+data class OmstillingsstoenadOpphoerRedigerbartUtfallData(
     val feilutbetaling: FeilutbetalingType,
+)
+
+data class OmstillingsstoenadOpphoerRedigerbartUtfall(
+    override val data: OmstillingsstoenadOpphoerRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(brevutfall: BrevutfallDto): OmstillingsstoenadOpphoerRedigerbartUtfall =
             OmstillingsstoenadOpphoerRedigerbartUtfall(
-                feilutbetaling =
-                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                        "Feilutbetaling mangler i brevutfall"
-                    },
+                data = OmstillingsstoenadOpphoerRedigerbartUtfallData(
+                    feilutbetaling =
+                        krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                            "Feilutbetaling mangler i brevutfall"
+                        },
+                ),
             )
     }
 }

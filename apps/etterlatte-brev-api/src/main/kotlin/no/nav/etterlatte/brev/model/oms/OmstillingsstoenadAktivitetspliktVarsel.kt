@@ -9,6 +9,10 @@ data class OmstillingsstoenadAktivitetspliktVarsel(
     val bosattUtland: Boolean,
 ) : BrevDataFerdigstilling
 
-class OmstillingsstoenadAktivitetspliktVarselUtfall(
+data class OmstillingsstoenadAktivitetspliktVarselUtfallData(
     val er12MndVarsel: Boolean,
+)
+
+class OmstillingsstoenadAktivitetspliktVarselUtfall(
+    override val data: OmstillingsstoenadAktivitetspliktVarselUtfallData,
 ) : BrevDataRedigerbar

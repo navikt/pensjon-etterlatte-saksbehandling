@@ -86,8 +86,6 @@ jobs:
         uses: nais/login@d6ab5d83f735e9f155eb9d7d29cd20ae46820ea9 # ratchet:nais/login@v0
         id: login
         with:
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           team: etterlatte
       - name: Lag image-referanse med digest
         run: |

@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 data class AvvistKlageFerdigData(
     override val innhold: List<Slate.Element>,
-    val data: AvvistKlageInnholdBrevData,
+override val data: AvvistKlageInnholdBrevData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(

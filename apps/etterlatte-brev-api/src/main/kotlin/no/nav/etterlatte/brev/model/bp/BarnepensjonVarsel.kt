@@ -5,11 +5,15 @@ import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 
-data class BarnepensjonVarsel(
-    override val innhold: List<Slate.Element>,
+data class BarnepensjonVarselData(
     val beregning: BarnepensjonBeregning?,
     val erUnder18Aar: Boolean,
     val erBosattUtlandet: Boolean,
+)
+
+data class BarnepensjonVarsel(
+    override val innhold: List<Slate.Element>,
+    override val data: BarnepensjonVarselData,
 ) : BrevDataFerdigstilling
 
 data class BarnepensjonVarselRedigerbartUtfallData(

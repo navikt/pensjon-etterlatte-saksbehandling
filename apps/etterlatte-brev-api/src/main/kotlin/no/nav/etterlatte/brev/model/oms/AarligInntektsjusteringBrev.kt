@@ -51,8 +51,7 @@ data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
     }
 }
 
-class OmstillingsstoenadInntektsjusteringVedtak(
-    override val innhold: List<Slate.Element>,
+data class OmstillingsstoenadInntektsjusteringVedtakData(
     val beregning: OmstillingsstoenadBeregning,
     val omsRettUtenTidsbegrensning: Boolean = false,
     val tidligereFamiliepleier: Boolean = false,
@@ -61,6 +60,11 @@ class OmstillingsstoenadInntektsjusteringVedtak(
     val endringIUtbetaling: Boolean,
     val virkningstidspunkt: LocalDate,
     val bosattUtland: Boolean,
+)
+
+class OmstillingsstoenadInntektsjusteringVedtak(
+    override val innhold: List<Slate.Element>,
+    override val data: OmstillingsstoenadInntektsjusteringVedtakData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -88,32 +92,34 @@ class OmstillingsstoenadInntektsjusteringVedtak(
 
             return OmstillingsstoenadInntektsjusteringVedtak(
                 innhold = innholdMedVedlegg.innhold(),
-                beregning =
-                    OmstillingsstoenadBeregning(
-                        innhold = emptyList(), // Skal ikke sende med noe vedlegg for denne brevtypen
-                        virkningsdato = virk,
-                        beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = sisteBeregningsperiode,
-                        sisteBeregningsperiodeNesteAar = null,
-                        trygdetid =
-                            trygdetid.fromDto(
-                                beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = null,
-                                landKodeverk = landKodeverk,
-                            ),
-                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                        opphoerNesteAar =
-                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
-                        erYrkesskade = trygdetid.erYrkesskade(),
-                    ),
-                omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning,
-                tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
-                inntektsaar = virk.year,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                endringIUtbetaling = avkortingsinfo.endringIUtbetalingVedVirk,
-                virkningstidspunkt = virk,
-                bosattUtland = behandling.erBosattUtland(),
+                data = OmstillingsstoenadInntektsjusteringVedtakData(
+                    beregning =
+                        OmstillingsstoenadBeregning(
+                            innhold = emptyList(), // Skal ikke sende med noe vedlegg for denne brevtypen
+                            virkningsdato = virk,
+                            beregningsperioder = beregningsperioder,
+                            sisteBeregningsperiode = sisteBeregningsperiode,
+                            sisteBeregningsperiodeNesteAar = null,
+                            trygdetid =
+                                trygdetid.fromDto(
+                                    beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                                    beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
+                                    navnAvdoed = null,
+                                    landKodeverk = landKodeverk,
+                                ),
+                            oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                            opphoerNesteAar =
+                                beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                            erYrkesskade = trygdetid.erYrkesskade(),
+                        ),
+                    omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning,
+                    tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
+                    inntektsaar = virk.year,
+                    harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    endringIUtbetaling = avkortingsinfo.endringIUtbetalingVedVirk,
+                    virkningstidspunkt = virk,
+                    bosattUtland = behandling.erBosattUtland(),
+                ),
             )
         }
     }

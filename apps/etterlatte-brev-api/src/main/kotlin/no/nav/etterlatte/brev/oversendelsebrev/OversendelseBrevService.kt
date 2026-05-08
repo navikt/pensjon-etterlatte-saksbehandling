@@ -240,7 +240,7 @@ class OversendelseBrevServiceImpl(
     }
 }
 
-data class OversendelseBrevFerdigstillingData(
+data class OversendelseBrevFerdigstillingDataData(
     val sakType: SakType,
     val klageDato: LocalDate,
     val vedtakDato: LocalDate,
@@ -248,8 +248,12 @@ data class OversendelseBrevFerdigstillingData(
     val under18Aar: Boolean,
     val harVerge: Boolean,
     val bosattIUtlandet: Boolean,
+)
+
+data class OversendelseBrevFerdigstillingData(
+    override val innhold: List<Slate.Element> = emptyList(),
+    override val data: OversendelseBrevFerdigstillingDataData,
 ) : BrevDataFerdigstilling {
-    override val innhold: List<Slate.Element> = emptyList()
 
     companion object {
         fun fra(
@@ -273,23 +277,25 @@ data class OversendelseBrevFerdigstillingData(
                 }
 
             return OversendelseBrevFerdigstillingData(
-                sakType = request.sakType,
-                klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
-                vedtakDato =
-                    krevIkkeNull(
-                        klage.formkrav
-                            ?.formkrav
-                            ?.vedtaketKlagenGjelder
-                            ?.datoAttestert
-                            ?.toLocalDate(),
-                    ) {
-                        "Klagen har en ugyldig referanse til når originalt vedtak ble attestert, klageId=${klage.id}"
-                    },
-                innstillingTekst = innstilling.innstillingTekst,
-                under18Aar = request.soekerUnder18 ?: false,
-                harVerge = request.harVerge,
-                // TODO: støtte bosatt utland klage
-                bosattIUtlandet = false,
+                data = OversendelseBrevFerdigstillingDataData(
+                    sakType = request.sakType,
+                    klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
+                    vedtakDato =
+                        krevIkkeNull(
+                            klage.formkrav
+                                ?.formkrav
+                                ?.vedtaketKlagenGjelder
+                                ?.datoAttestert
+                                ?.toLocalDate(),
+                        ) {
+                            "Klagen har en ugyldig referanse til når originalt vedtak ble attestert, klageId=${klage.id}"
+                        },
+                    innstillingTekst = innstilling.innstillingTekst,
+                    under18Aar = request.soekerUnder18 ?: false,
+                    harVerge = request.harVerge,
+                    // TODO: støtte bosatt utland klage
+                    bosattIUtlandet = false,
+                ),
             )
         }
     }

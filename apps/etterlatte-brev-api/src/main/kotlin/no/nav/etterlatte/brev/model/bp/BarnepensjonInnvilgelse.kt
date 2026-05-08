@@ -20,8 +20,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
-data class BarnepensjonInnvilgelse(
-    override val innhold: List<Slate.Element>,
+data class BarnepensjonInnvilgelseData(
     val beregning: BarnepensjonBeregning,
     val frivilligSkattetrekk: Boolean,
     val brukerUnder18Aar: Boolean,
@@ -33,6 +32,11 @@ data class BarnepensjonInnvilgelse(
     val erSluttbehandling: Boolean,
     val erEtterbetaling: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
+)
+
+data class BarnepensjonInnvilgelse(
+    override val innhold: List<Slate.Element>,
+    override val data: BarnepensjonInnvilgelseData,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -54,21 +58,23 @@ data class BarnepensjonInnvilgelse(
         ): BarnepensjonInnvilgelse =
             BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
-                beregning =
-                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, trygdetid, erForeldreloes = false, landKodeverk),
-                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
-                erGjenoppretting = erGjenoppretting,
-                erMigrertYrkesskade = erMigrertYrkesskade,
-                frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
-                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                kunNyttRegelverk =
-                    utbetalingsinfo.beregningsperioder.all {
-                        it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
-                    },
-                erSluttbehandling = erSluttbehandling,
-                erEtterbetaling = etterbetaling != null,
-                datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                data = BarnepensjonInnvilgelseData(
+                    beregning =
+                        barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, trygdetid, erForeldreloes = false, landKodeverk),
+                    bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                    brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
+                    erGjenoppretting = erGjenoppretting,
+                    erMigrertYrkesskade = erMigrertYrkesskade,
+                    frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
+                    harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    kunNyttRegelverk =
+                        utbetalingsinfo.beregningsperioder.all {
+                            it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
+                        },
+                    erSluttbehandling = erSluttbehandling,
+                    erEtterbetaling = etterbetaling != null,
+                    datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                ),
             )
     }
 }

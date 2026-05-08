@@ -7,9 +7,11 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
+data class OmstillingsstoenadAvslagData(val bosattUtland: Boolean)
+
 data class OmstillingsstoenadAvslag(
     override val innhold: List<Slate.Element>,
-    val bosattUtland: Boolean,
+    override val data: OmstillingsstoenadAvslagData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -17,8 +19,10 @@ data class OmstillingsstoenadAvslag(
             utlandstilknytningType: UtlandstilknytningType?,
         ): OmstillingsstoenadAvslag =
             OmstillingsstoenadAvslag(
-                bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
                 innhold = innhold,
+                data = OmstillingsstoenadAvslagData(
+                    bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                ),
             )
     }
 }

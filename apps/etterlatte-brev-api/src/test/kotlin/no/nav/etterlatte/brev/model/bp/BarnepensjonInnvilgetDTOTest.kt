@@ -135,7 +135,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                 beregningsperiodeHele2023().toBarnepensjonBeregningsperiode(),
                 beregningsperiode2024OgUtover().toBarnepensjonBeregningsperiode(),
             ),
-            barnepensjonInnvilgelse.beregning.beregningsperioder,
+            barnepensjonInnvilgelse.data.beregning.beregningsperioder,
         )
     }
 

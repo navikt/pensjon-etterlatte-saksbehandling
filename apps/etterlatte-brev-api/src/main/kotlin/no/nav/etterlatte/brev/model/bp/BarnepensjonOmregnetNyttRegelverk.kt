@@ -65,13 +65,17 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
     }
 }
 
-data class BarnepensjonOmregnetNyttRegelverk(
-    override val innhold: List<Slate.Element>,
+data class BarnepensjonOmregnetNyttRegelverkData(
     val beregning: BarnepensjonBeregning,
     val frivilligSkattetrekk: Boolean?,
     val erUnder18Aar: Boolean,
     val erBosattUtlandet: Boolean,
     val erEtterbetaling: Boolean,
+)
+
+data class BarnepensjonOmregnetNyttRegelverk(
+    override val innhold: List<Slate.Element>,
+    override val data: BarnepensjonOmregnetNyttRegelverkData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -93,21 +97,23 @@ data class BarnepensjonOmregnetNyttRegelverk(
 
             return BarnepensjonOmregnetNyttRegelverk(
                 innhold = innhold.innhold(),
-                erUnder18Aar = erUnder18AarNonNull,
-                beregning =
-                    barnepensjonBeregning(
-                        innhold,
-                        avdoede,
-                        utbetalingsinfo,
-                        grunnbeloep,
-                        trygdetid,
-                        erForeldreloes = false,
-                        landKodeverk,
-                    ),
-                frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
-                erBosattUtlandet =
-                    krevIkkeNull(utlandstilknytning) { "Utlandstilknytning mangler" } == UtlandstilknytningType.BOSATT_UTLAND,
-                erEtterbetaling = etterbetaling != null,
+                data = BarnepensjonOmregnetNyttRegelverkData(
+                    erUnder18Aar = erUnder18AarNonNull,
+                    beregning =
+                        barnepensjonBeregning(
+                            innhold,
+                            avdoede,
+                            utbetalingsinfo,
+                            grunnbeloep,
+                            trygdetid,
+                            erForeldreloes = false,
+                            landKodeverk,
+                        ),
+                    frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
+                    erBosattUtlandet =
+                        krevIkkeNull(utlandstilknytning) { "Utlandstilknytning mangler" } == UtlandstilknytningType.BOSATT_UTLAND,
+                    erEtterbetaling = etterbetaling != null,
+                ),
             )
         }
     }

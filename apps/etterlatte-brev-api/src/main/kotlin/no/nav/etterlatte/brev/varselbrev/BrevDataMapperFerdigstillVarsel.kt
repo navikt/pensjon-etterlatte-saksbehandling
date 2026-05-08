@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.ManueltBrevMedTittelData
+import no.nav.etterlatte.brev.ManueltBrevMedTittelDataData
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
@@ -11,8 +12,10 @@ import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.Vilkaarsvurderin
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
+import no.nav.etterlatte.brev.model.bp.BarnepensjonVarselData
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarsel
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarselData
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -39,13 +42,15 @@ class BrevDataMapperFerdigstillVarsel(
         coroutineScope {
             if (request.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
                 OmstillingsstoenadAktivitetspliktVarsel(
-                    request.innholdMedVedlegg.innhold(),
-                    request.utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                    innhold = request.innholdMedVedlegg.innhold(),
+                    data = OmstillingsstoenadAktivitetspliktVarselData(
+                        bosattUtland = request.utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                    ),
                 )
             } else {
                 ManueltBrevMedTittelData(
-                    request.innholdMedVedlegg.innhold(),
-                    Brevkoder.OMS_VARSEL.tittel,
+                    innhold = request.innholdMedVedlegg.innhold(),
+                    data = ManueltBrevMedTittelDataData(tittel = Brevkoder.OMS_VARSEL.tittel),
                 )
             }
         }
@@ -61,9 +66,11 @@ class BrevDataMapperFerdigstillVarsel(
                 }
             BarnepensjonVarsel(
                 innhold = request.innholdMedVedlegg.innhold(),
-                beregning = beregning,
-                erUnder18Aar = request.soekerUnder18 ?: true,
-                erBosattUtlandet = request.utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                data = BarnepensjonVarselData(
+                    beregning = beregning,
+                    erUnder18Aar = request.soekerUnder18 ?: true,
+                    erBosattUtlandet = request.utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                ),
             )
         }
 

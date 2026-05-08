@@ -4,9 +4,11 @@ import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
 
+data class OmstillingsstoenadAktivitetspliktVarselData(val bosattUtland: Boolean)
+
 data class OmstillingsstoenadAktivitetspliktVarsel(
     override val innhold: List<Slate.Element>,
-    val bosattUtland: Boolean,
+    override val data: OmstillingsstoenadAktivitetspliktVarselData,
 ) : BrevDataFerdigstilling
 
 data class OmstillingsstoenadAktivitetspliktVarselUtfallData(

@@ -20,6 +20,7 @@ interface BrevData
 
 interface BrevDataFerdigstilling : BrevData {
     val innhold: List<Slate.Element>
+    val data: Any?
 }
 
 interface BrevDataRedigerbar : BrevData {
@@ -35,9 +36,11 @@ data class ManueltBrevData(
     override val data: Any? = null,
 ) : BrevDataRedigerbar
 
+data class ManueltBrevMedTittelDataData(val tittel: String? = null)
+
 data class ManueltBrevMedTittelData(
     override val innhold: List<Slate.Element>,
-    val tittel: String? = null,
+    override val data: ManueltBrevMedTittelDataData = ManueltBrevMedTittelDataData(),
 ) : BrevDataFerdigstilling
 
 // TODO Når alt er over på ny løsning bør gamle klasser slettes og nye renames
@@ -45,7 +48,7 @@ data class ManueltBrevMedTittelData(
 data class BrevDataFerdigstillingNy(
     override val innhold: List<Slate.Element>,
     // TODO: få inn vedleggInnhold?
-    val data: BrevFastInnholdData,
+    override val data: BrevFastInnholdData,
 ) : BrevDataFerdigstilling
 
 data class BrevDataRedigerbarNy(

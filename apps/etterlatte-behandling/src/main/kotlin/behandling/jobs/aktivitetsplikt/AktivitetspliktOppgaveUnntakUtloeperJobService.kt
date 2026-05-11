@@ -4,7 +4,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktOppgaveToggles
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -27,16 +26,12 @@ class AktivitetspliktOppgaveUnntakUtloeperJobService(
 
     @OptIn(DelicateCoroutinesApi::class)
     fun run() {
-        if (featureToggleService.isEnabled(AktivitetspliktOppgaveToggles.UNNTAK_MED_FRIST, false)) {
-            logger.info("Starter jobb for å lage oppfølgingsoppgaver for unntak med frist")
-            newSingleThreadContext("aktivitetspliktOppgaveUnntakUtloeperJob").use { ctx ->
-                Runtime.getRuntime().addShutdownHook(Thread { ctx.close() })
-                runBlocking(ctx) {
-                    opprettOppfoelgingsOppgaveForAktivitetspliktUnntakUtloeper()
-                }
+        logger.info("Starter jobb for å lage oppfølgingsoppgaver for unntak med frist")
+        newSingleThreadContext("aktivitetspliktOppgaveUnntakUtloeperJob").use { ctx ->
+            Runtime.getRuntime().addShutdownHook(Thread { ctx.close() })
+            runBlocking(ctx) {
+                opprettOppfoelgingsOppgaveForAktivitetspliktUnntakUtloeper()
             }
-        } else {
-            logger.info("Jobb for å lage oppfølgingsoppgaver for unntak med frist er skrudd av")
         }
     }
 

@@ -51,8 +51,6 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-brev-api/.default
     - name: TRYGDETID_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
-    - name: VEDTAKSVURDERING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
@@ -61,15 +59,12 @@ spec:
       value: dev-gcp.etterlatte.etterlatte-brev-api
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-trygdetid
-    - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-trygdetid
-        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-brev-api
         - application: logging
           namespace: nais-system

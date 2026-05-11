@@ -164,9 +164,12 @@ class EtteroppgjoerService(
                 )
             }
 
-            VENTER_PAA_SVAR -> {
+            VENTER_PAA_SVAR,
+            UNDER_FORBEHANDLING,
+            UNDER_REVURDERING,
+            -> {
                 // Vi gjør ikke noe for hendelser hvor vi allerede har startet behandling. Vi vil fange opp inntektsendringer i validering før iverksetting i slike tilfeller.
-                logger.info("Mottok skatteoppgjørhendelse for sakId=${sak.id}: status $etteroppgjoer.")
+                logger.info("Mottok skatteoppgjørhendelse for sakId=${sak.id}: status ${etteroppgjoer.status}")
             }
 
             FERDIGSTILT -> {
@@ -177,8 +180,6 @@ class EtteroppgjoerService(
             }
 
             MANGLER_SKATTEOPPGJOER,
-            UNDER_FORBEHANDLING,
-            UNDER_REVURDERING,
             OMGJOERING,
             -> {
                 logger.error(

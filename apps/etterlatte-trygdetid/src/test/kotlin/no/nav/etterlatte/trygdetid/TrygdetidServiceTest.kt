@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -164,6 +165,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
             }
@@ -266,6 +268,7 @@ internal class TrygdetidServiceTest {
         verify {
             behandling.id
             behandling.sak
+            behandling.sakType
             behandling.behandlingType
             behandling.tidligereFamiliepleier
         }
@@ -279,6 +282,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.DOEDSFALL
             }
@@ -315,7 +319,6 @@ internal class TrygdetidServiceTest {
 
         coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
-            repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
@@ -337,8 +340,10 @@ internal class TrygdetidServiceTest {
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
         }
         verify {
+            repository.hentTrygdetiderForBehandling(behandlingId)
             behandling.behandlingType
             behandling.sak
+            behandling.sakType
             behandling.id
             behandling.revurderingsaarsak
             vedtakSammendrag.behandlingId
@@ -361,6 +366,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.BARNEPENSJON
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.DOEDSFALL
             }
@@ -390,7 +396,6 @@ internal class TrygdetidServiceTest {
         }
         coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
-            repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
@@ -408,8 +413,10 @@ internal class TrygdetidServiceTest {
             }
         }
         verify {
+            repository.hentTrygdetiderForBehandling(behandlingId)
             behandling.id
             behandling.sak
+            behandling.sakType
             behandling.behandlingType
             behandling.revurderingsaarsak
             vedtakSammendrag.behandlingId
@@ -425,6 +432,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling> {
                 every { id } returns behandlingId
                 every { sak } returns randomSakId()
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { status } returns BehandlingStatus.VILKAARSVURDERT
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
@@ -472,6 +480,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling> {
                 every { id } returns behandlingId
                 every { sak } returns randomSakId()
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { status } returns BehandlingStatus.VILKAARSVURDERT
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { soeker } returns SOEKER_FOEDSELSNUMMER.value
@@ -521,6 +530,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.SOESKENJUSTERING
             }
@@ -587,6 +597,7 @@ internal class TrygdetidServiceTest {
             behandling.revurderingsaarsak
             behandling.id
             behandling.sak
+            behandling.sakType
             behandling.behandlingType
             vedtakSammendrag.behandlingId
             vedtakSammendrag.vedtakType
@@ -601,6 +612,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
                 every { prosesstype } returns Prosesstype.AUTOMATISK
@@ -651,6 +663,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
                 every { prosesstype } returns Prosesstype.MANUELL
@@ -724,6 +737,7 @@ internal class TrygdetidServiceTest {
             behandling.prosesstype
             behandling.id
             behandling.sak
+            behandling.sakType
             behandling.behandlingType
             vedtakSammendrag.behandlingId
             vedtakSammendrag.vedtakType
@@ -762,6 +776,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
             }
@@ -840,6 +855,7 @@ internal class TrygdetidServiceTest {
         verify {
             behandling.id
             behandling.sak
+            behandling.sakType
             behandling.behandlingType
             behandling.tidligereFamiliepleier
         }
@@ -1229,9 +1245,11 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
             }
 
         coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns regulering
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
         every { repository.hentTrygdetiderForBehandling(forrigeBehandlingId) } returns listOf(forrigeTrygdetid)
         every { repository.opprettTrygdetid(any()) } answers { firstArg() }
@@ -1252,6 +1270,7 @@ internal class TrygdetidServiceTest {
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
             repository.opprettTrygdetid(
                 match {
                     it.behandlingId == behandlingId &&
@@ -1300,6 +1319,8 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
+                every { prosesstype } returns Prosesstype.MANUELL
             }
 
         val doedsdato = LocalDate.of(2023, 11, 12)
@@ -1315,9 +1336,11 @@ internal class TrygdetidServiceTest {
             )
 
         coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns revurdering
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(eksisterendeTrygdetid)
         every { repository.hentTrygdetiderForBehandling(forrigeBehandlingId) } returns listOf(forrigeTrygdetid)
         every { repository.opprettTrygdetid(any()) } answers { firstArg() }
+        every { repository.oppdaterTrygdetid(any()) } returnsArgument 0
         every { avtaleService.hentAvtaleForBehandling(any()) } returns null
 
         coEvery {
@@ -1344,14 +1367,23 @@ internal class TrygdetidServiceTest {
             repository.opprettTrygdetid(match { it.behandlingId == behandlingId })
         }
         coVerify(exactly = 2) {
+            repository.oppdaterTrygdetid(any())
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
+        }
+        coVerify(exactly = 2) {
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
         }
         verify {
             revurdering.id
             revurdering.sak
+            revurdering.prosesstype
 
             avtaleService.hentAvtaleForBehandling(forrigeBehandlingId)
+        }
+        verify(exactly = 2) {
+            avtaleService.hentAvtaleForBehandling(behandlingId)
+            beregningService.beregnTrygdetid(any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -1649,6 +1681,7 @@ internal class TrygdetidServiceTest {
             mockk {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { status } returns BehandlingStatus.OPPRETTET
             }
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
@@ -1702,6 +1735,7 @@ internal class TrygdetidServiceTest {
             mockk {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { status } returns BehandlingStatus.OPPRETTET
                 every { tidligereFamiliepleier } returns null
             }
@@ -1758,6 +1792,7 @@ internal class TrygdetidServiceTest {
             mockk {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { status } returns BehandlingStatus.OPPRETTET
                 every { soeker } returns "12345678901"
                 every { tidligereFamiliepleier } returns
@@ -1829,6 +1864,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
+                every { sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
             }
@@ -1904,6 +1940,7 @@ internal class TrygdetidServiceTest {
         verify {
             behandling.id
             behandling.sak
+            behandling.sakType
             behandling.behandlingType
             behandling.tidligereFamiliepleier
         }

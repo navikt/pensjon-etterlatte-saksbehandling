@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
@@ -65,7 +66,7 @@ class VedtaksvurderingService(
      * Tar bare med vedtak som er attestert.
      */
     fun hentInnvilgedePerioder(sakId: SakId): List<InnvilgetPeriode> {
-        val vedtak = hentVedtakISak(sakId)
+        val vedtak = hentVedtakISak(sakId).filter { it.type != VedtakType.AVSLAG }
         val tidslinje = Vedtakstidslinje(vedtak)
         return tidslinje.innvilgedePerioder()
     }

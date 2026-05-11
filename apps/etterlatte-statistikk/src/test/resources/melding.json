@@ -12,20 +12,6 @@
       "service": "etterlatte-api",
       "instance": "etterlatte-api-69b6955cfd-mql52",
       "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-api:b14d4ca5827af4db2ca7dd226df9202b7ced33dd"
-    },
-    {
-      "id": "e162d8d5-981c-430a-a8ac-e13210321a96",
-      "time": "2022-09-20T13:43:18.978181323",
-      "service": "etterlatte-vedtaksvurdering",
-      "instance": "etterlatte-vedtaksvurdering-7c9f6ff55c-f9nk9",
-      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-vedtaksvurdering:b14d4ca5827af4db2ca7dd226df9202b7ced33dd"
-    },
-    {
-      "id": "75bb1b63-e012-4e29-b16b-bbb027c33f74",
-      "time": "2022-09-20T13:43:19.050270859",
-      "service": "etterlatte-vedtaksvurdering",
-      "instance": "etterlatte-vedtaksvurdering-7c9f6ff55c-f9nk9",
-      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-vedtaksvurdering:b14d4ca5827af4db2ca7dd226df9202b7ced33dd"
     }
   ],
   "vedtak": {

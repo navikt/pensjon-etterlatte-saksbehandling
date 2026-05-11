@@ -16,9 +16,6 @@ spec:
     - application: etterlatte-brev-api
       cluster: dev-gcp
       namespace: etterlatte
-    - application: etterlatte-vedtaksvurdering
-      cluster: dev-gcp
-      namespace: etterlatte
     - application: etterlatte-behandling
       cluster: dev-gcp
       namespace: etterlatte

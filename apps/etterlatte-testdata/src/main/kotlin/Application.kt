@@ -11,8 +11,6 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
@@ -38,12 +36,12 @@ import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.TestKey.DEV
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_BROKERS
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_TARGET_TOPIC
+import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.EnvEnum
@@ -63,9 +61,9 @@ import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.dolly.TestnavClient
 import no.nav.etterlatte.testdata.features.OpprettOgBehandle
 import no.nav.etterlatte.testdata.features.automatisk.Familieoppretter
+import no.nav.etterlatte.testdata.features.dolly.BehandlingKlient
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
 import no.nav.etterlatte.testdata.features.dolly.VedtakService
-import no.nav.etterlatte.testdata.features.dolly.VedtaksvurderingKlient
 import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeature
 import no.nav.etterlatte.testdata.features.index.IndexFeature
 import no.nav.etterlatte.testdata.features.opprettFamilie.OpprettFamilie
@@ -107,7 +105,7 @@ val dollyService =
         DollyClientImpl(config, httpClient),
         TestnavClient(config, httpClient),
     )
-val vedtakService = VedtakService(VedtaksvurderingKlient(config, httpClient))
+val vedtakService = VedtakService(BehandlingKlient(config, httpClient))
 val features: List<TestDataFeature> =
     listOf(
         IndexFeature,

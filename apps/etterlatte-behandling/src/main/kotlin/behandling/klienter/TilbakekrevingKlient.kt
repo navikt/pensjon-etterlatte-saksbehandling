@@ -9,7 +9,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -96,20 +95,23 @@ class TilbakekrevingKlientImpl(
         kravgrunnlagId: Long,
     ): Kravgrunnlag? {
         logger.info("Henter oppdatert kravgrunnlag tilknyttet tilbakekreving for sak $sakId")
-        val response =
-            client.get("$url/api/tilbakekreving/${sakId.sakId}/kravgrunnlag/$kravgrunnlagId") {
-                contentType(ContentType.Application.Json)
+
+        try {
+            val response =
+                client.get("$url/api/tilbakekreving/${sakId.sakId}/kravgrunnlag/$kravgrunnlagId") {
+                    contentType(ContentType.Application.Json)
+                }
+            if (response.status == HttpStatusCode.NoContent) {
+                return null
             }
-        if (response.status == HttpStatusCode.NoContent) {
-            return null
-        }
-        if (!response.status.isSuccess()) {
+
+            return response.body<Kravgrunnlag>()
+        } catch (e: ClientRequestException) {
             throw TilbakekrevingKlientException(
                 "Henting av kravgrunnlag tilknyttet tilbakekreving for sak $sakId feilet",
+                e,
             )
         }
-
-        return response.body<Kravgrunnlag>()
     }
 
     override suspend fun hentKravgrunnlagOmgjoering(
@@ -117,28 +119,29 @@ class TilbakekrevingKlientImpl(
         sak: Sak,
         brukerTokenInfo: BrukerTokenInfo,
     ): Kravgrunnlag? {
-        val response =
-            client.post("$url/api/tilbakekreving/${sak.id.sakId}/omgjoering") {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    HentOmgjoeringKravgrunnlagRequest(
-                        saksbehandler = brukerTokenInfo.ident(),
-                        enhet = sak.enhet,
-                        kravgrunnlagId = kravgrunnlagId,
-                    ),
-                )
+        try {
+            val response =
+                client.post("$url/api/tilbakekreving/${sak.id.sakId}/omgjoering") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        HentOmgjoeringKravgrunnlagRequest(
+                            saksbehandler = brukerTokenInfo.ident(),
+                            enhet = sak.enhet,
+                            kravgrunnlagId = kravgrunnlagId,
+                        ),
+                    )
+                }
+            if (response.status == HttpStatusCode.NoContent) {
+                return null
             }
-        if (response.status == HttpStatusCode.NoContent) {
-            return null
-        }
-        if (!response.status.isSuccess()) {
+            return response.body<Kravgrunnlag>()
+        } catch (e: ClientRequestException) {
             throw TilbakekrevingKlientException(
                 "Henting av kravgrunnlag for omgjøring av tilbakekreving for sak ${sak.id.sakId} og " +
                     "kravgrunnlagId=$kravgrunnlagId feilet",
+                e,
             )
         }
-
-        return response.body<Kravgrunnlag>()
     }
 
     override val serviceName: String
@@ -159,4 +162,5 @@ class TilbakekrevingKlientImpl(
 
 class TilbakekrevingKlientException(
     override val message: String,
-) : Exception(message)
+    override val cause: Throwable? = null,
+) : Exception(message, cause)

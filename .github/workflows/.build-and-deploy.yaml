@@ -31,6 +31,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # ratchet:gradle/actions/setup-gradle@v6.1.0
         with:
+          cache-provider: basic
           cache-encryption-key: ${{ secrets.gradlekey }}
           dependency-graph: generate-and-submit
       - name: Gradle test and build
@@ -70,6 +71,8 @@ jobs:
           java-version: 21
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # ratchet:gradle/actions/setup-gradle@v6.1.0
+        with:
+          cache-provider: basic
       - name: Validate licenses
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

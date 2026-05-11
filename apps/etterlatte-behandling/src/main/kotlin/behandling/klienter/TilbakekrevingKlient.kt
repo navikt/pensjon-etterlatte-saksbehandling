@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.klienter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -53,14 +54,15 @@ class TilbakekrevingKlientImpl(
         tilbakekrevingVedtak: TilbakekrevingVedtak,
     ) {
         logger.info("Sender tilbakekrevingsvedtak til tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId}")
-        val response =
+        try {
             client.post("$url/api/tilbakekreving/${tilbakekrevingVedtak.sakId}/vedtak") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     tilbakekrevingVedtak,
                 )
             }
-        if (!response.status.isSuccess()) {
+        } catch (e: ClientRequestException) {
+            val response = e.response
             val fallbackFeil =
                 TilbakekrevingKlientException(
                     "Lagre tilbakekrevingsvedtak for tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId} feilet",

@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus.VENTER_PAA
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeEtteroppgjoer
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektBeregning
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
@@ -57,6 +58,7 @@ class EtteroppgjoerService(
     val beregningKlient: BeregningKlient,
     val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     val sigrunKlient: SigrunKlient,
+    val inntektskomponentService: InntektskomponentService,
     val hendelseDao: HendelseDao,
 ) {
     fun hentEtteroppgjoerMedSvarfristUtloept(svarfrist: EtteroppgjoerSvarfrist): List<Etteroppgjoer> =
@@ -178,7 +180,7 @@ class EtteroppgjoerService(
             }
 
             FERDIGSTILT -> {
-                loggInntektsSjekkForFerdigstiltEtteroppgjoer(etteroppgjoer, sak)
+                haandterSkatteoppgjoerForFerdigstiltEtteroppgjoer(etteroppgjoer, sak)
             }
 
             MANGLER_SKATTEOPPGJOER,
@@ -411,12 +413,12 @@ class EtteroppgjoerService(
         return overstyrtBeregningsgrunnlag != null
     }
 
-    private fun loggInntektsSjekkForFerdigstiltEtteroppgjoer(
+    private fun haandterSkatteoppgjoerForFerdigstiltEtteroppgjoer(
         etteroppgjoer: Etteroppgjoer,
         sak: Sak,
     ) {
         krev(etteroppgjoer.status == FERDIGSTILT) {
-            "loggInntektsSjekkForFerdigstiltEtteroppgjoer kan kun kalles for etteroppgjør med status FERDIGSTILT, " +
+            "haandterSkatteoppgjoerForFerdigstiltEtteroppgjoer kan kun kalles for etteroppgjør med status FERDIGSTILT, " +
                 "men etteroppgjør for sakId: ${etteroppgjoer.sakId} og inntektsaar: ${etteroppgjoer.inntektsaar} har status ${etteroppgjoer.status}"
         }
 
@@ -428,37 +430,45 @@ class EtteroppgjoerService(
                 )
 
         val resultatType = forbehandlingDao.hentForbehandling(forbehandlingId)?.etteroppgjoerResultatType
-        val lagretInntekt = forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)
-
-        val nyInntekt =
+        val lagretPgi = forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)
+        val lagretAInntekt = forbehandlingDao.hentSummertAInntekt(forbehandlingId)
+        val (nyPgi, nyAInntekt) =
             runBlocking {
-                val respons = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, etteroppgjoer.inntektsaar)
-                PensjonsgivendeInntektBeregning.beregnInntekt(respons, etteroppgjoer.inntektsaar).verdi
+                val pgiRespons = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, etteroppgjoer.inntektsaar)
+                val pgi = PensjonsgivendeInntektBeregning.beregnInntekt(pgiRespons, etteroppgjoer.inntektsaar).verdi
+                val aInntekt = inntektskomponentService.hentSummerteInntekter(sak.ident, etteroppgjoer.inntektsaar)
+                pgi to aInntekt
             }
 
-        val harEndretSeg =
-            lagretInntekt == null ||
-                lagretInntekt.loensinntekt != nyInntekt.loensinntekt ||
-                lagretInntekt.naeringsinntekt != nyInntekt.naeringsinntekt
+        val naeringErEndret = lagretPgi?.naeringsinntekt != nyPgi.naeringsinntekt
+        val afpErEndret = lagretAInntekt?.afp != nyAInntekt.afp
+        val loennErEndret = lagretAInntekt?.loenn != nyAInntekt.loenn
+        val harEndring = naeringErEndret || afpErEndret || loennErEndret
 
-        if (harEndretSeg) {
+        sikkerLogg.info(
+            "Skatteoppgjørhendelse for ferdigstilt etteroppgjør - sakId=${sak.id}, inntektsaar=${etteroppgjoer.inntektsaar}. " +
+                "Lagret PGI næring=${lagretPgi?.naeringsinntekt}, ny=${nyPgi.naeringsinntekt}. " +
+                "Lagret A-inntekt AFP=${lagretAInntekt?.afp}, ny=${nyAInntekt.afp}. " +
+                "Lagret A-inntekt lønn=${lagretAInntekt?.loenn}, ny=${nyAInntekt.loenn}. " +
+                "Resultat av etteroppgjør var $resultatType.",
+        )
+
+        if (harEndring) {
+            val endredeFelter =
+                listOfNotNull(
+                    "PGI næring".takeIf { naeringErEndret },
+                    "A-inntekt AFP".takeIf { afpErEndret },
+                    "A-inntekt lønn".takeIf { loennErEndret },
+                ).joinToString()
             logger.info(
-                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt har endret seg siden ferdigstilt " +
-                    "etteroppgjør for ${etteroppgjoer.inntektsaar}. " +
-                    "Resultat av etteroppgjør var $resultatType. Oppretter ikke oppgave - observerer.",
-            )
-            sikkerLogg.info(
-                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt har endret seg siden ferdigstilt " +
-                    "etteroppgjør for ${etteroppgjoer.inntektsaar}. " +
-                    "Lagret PGI: lønn=${lagretInntekt?.loensinntekt}, næring=${lagretInntekt?.naeringsinntekt}. " +
-                    "Ny PGI: lønn=${nyInntekt.loensinntekt}, næring=${nyInntekt.naeringsinntekt}. " +
-                    "Resultat av etteroppgjør var $resultatType.",
+                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, endring i interessante felter siden ferdigstilt " +
+                    "etteroppgjør for ${etteroppgjoer.inntektsaar}: $endredeFelter. " +
+                    "Resultat av etteroppgjør var $resultatType. Observerer kun - ingen oppgave opprettes.",
             )
         } else {
             logger.info(
-                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt er uendret siden ferdigstilt " +
-                    "etteroppgjør for ${etteroppgjoer.inntektsaar}. " +
-                    "Resultat av etteroppgjør var $resultatType. Ingen oppgave opprettes.",
+                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, ingen endring i interessante felter siden ferdigstilt " +
+                    "etteroppgjør for ${etteroppgjoer.inntektsaar}. Resultat av etteroppgjør var $resultatType.",
             )
         }
     }

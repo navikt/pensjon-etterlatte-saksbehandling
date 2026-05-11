@@ -175,6 +175,7 @@ class ServiceModule(
             behandlingService = behandlingService,
             beregningKlient = klientModule.beregningKlient,
             sigrunKlient = klientModule.sigrunKlient,
+            inntektskomponentService = inntektskomponentService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             hendelseDao = daoModule.hendelseDao,
         )

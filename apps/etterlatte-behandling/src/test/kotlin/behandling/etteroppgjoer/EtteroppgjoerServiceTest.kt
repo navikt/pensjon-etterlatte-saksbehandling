@@ -13,6 +13,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
@@ -61,6 +63,7 @@ class EtteroppgjoerServiceTest {
         val dao: EtteroppgjoerDao = mockk()
         val forbehandlingDao: EtteroppgjoerForbehandlingDao = mockk()
         val sigrunKlient: SigrunKlient = mockk()
+        val inntektskomponentService: InntektskomponentService = mockk()
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakInternalService: VedtakInternalService = mockk()
@@ -75,6 +78,7 @@ class EtteroppgjoerServiceTest {
                 behandlingService = behandlingService,
                 beregningKlient = beregningKlient,
                 sigrunKlient = sigrunKlient,
+                inntektskomponentService = inntektskomponentService,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
                 hendelseDao = hendelsesDao,
             )
@@ -446,7 +450,7 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `haandterSkatteoppgjoerMottatt logger endring og oppretter ikke oppgave naar inntekt har endret seg siden ferdigstilt`() {
+    fun `haandterSkatteoppgjoerMottatt logger og oppretter ikke oppgave naar inntekt har endret seg siden ferdigstilt etteroppgjoer`() {
         val ctx = TestContext(sakId)
         val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
@@ -461,13 +465,15 @@ class EtteroppgjoerServiceTest {
 
         every { ctx.forbehandlingDao.hentForbehandling(forbehandlingId) } returns null
         every { ctx.forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) } returns
-            SummertePensjonsgivendeInntekter(loensinntekt = 500_000, naeringsinntekt = 0, tidspunktBeregnet = null)
+            SummertePensjonsgivendeInntekter(loensinntekt = 0, naeringsinntekt = 100_000, tidspunktBeregnet = null)
+        every { ctx.forbehandlingDao.hentSummertAInntekt(forbehandlingId) } returns mockk(relaxed = true)
         coEvery { ctx.sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) } returns
             PensjonsgivendeInntektAarResponse(
                 inntektsaar = inntektsaar,
                 norskPersonidentifikator = sak.ident,
                 pensjonsgivendeInntekt = emptyList(),
             )
+        coEvery { ctx.inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) } returns mockk(relaxed = true)
 
         ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
 
@@ -489,16 +495,19 @@ class EtteroppgjoerServiceTest {
                 sisteFerdigstilteForbehandling = forbehandlingId,
             )
         val sak = sak(sakId = sakId)
+        val sammeAInntekt: SummerteInntekterAOrdningen = mockk(relaxed = true)
 
         every { ctx.forbehandlingDao.hentForbehandling(forbehandlingId) } returns null
         every { ctx.forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) } returns
             SummertePensjonsgivendeInntekter(loensinntekt = 0, naeringsinntekt = 0, tidspunktBeregnet = null)
+        every { ctx.forbehandlingDao.hentSummertAInntekt(forbehandlingId) } returns sammeAInntekt
         coEvery { ctx.sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) } returns
             PensjonsgivendeInntektAarResponse(
                 inntektsaar = inntektsaar,
                 norskPersonidentifikator = sak.ident,
                 pensjonsgivendeInntekt = emptyList(),
             )
+        coEvery { ctx.inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) } returns sammeAInntekt
 
         ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
 

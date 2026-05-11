@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
+import no.nav.etterlatte.sikkerLogg
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -177,22 +178,7 @@ class EtteroppgjoerService(
             }
 
             FERDIGSTILT -> {
-                if (pensjonsgivendeInntektHarEndretSegForFerdigstiltEtteroppgjoer(etteroppgjoer, sak.ident)) {
-                    if (endringenErIkkeUtelukkendePgaTidligereEtteroppgjørIGjenny()) {
-                        etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
-                            sak.id,
-                            etteroppgjoer.inntektsaar,
-                        )
-                    }
-                    logger.info(
-                        "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt har endret seg siden ferdigstilt etteroppgjør for ${etteroppgjoer.inntektsaar} - oppretter vurder konsekvens oppgave",
-                    )
-                } else {
-                    logger.info(
-                        "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt er uendret siden ferdigstilt etteroppgjør for ${etteroppgjoer.inntektsaar} - ingen oppgave opprettes",
-                    )
-                }
-                throw InternfeilException("Vi vil logge FERDIGSTILT oppgjør, ikke lage oppgave, eller fortsette")
+                loggInntektsSjekkForFerdigstiltEtteroppgjoer(etteroppgjoer, sak)
             }
 
             MANGLER_SKATTEOPPGJOER,
@@ -409,9 +395,9 @@ class EtteroppgjoerService(
                         sisteIverksatteBehandling.sak.erSkjermet == true,
                 harAktivitetskrav =
                     utledAktivitetskrav(
-                        sisteIverksatteBehandling.id,
-                        sisteIverksatteBehandling.sak.sakType,
-                        inntektsaar,
+                        behandlingId = sisteIverksatteBehandling.id,
+                        sakType = sisteIverksatteBehandling.sak.sakType,
+                        inntektsaar = inntektsaar,
                     ),
                 harOverstyrtBeregning = utledOverstyrtBeregning(sisteIverksatteBehandling.id),
                 sisteFerdigstilteForbehandling = sisteFerdigstilteForbehandling,
@@ -425,13 +411,13 @@ class EtteroppgjoerService(
         return overstyrtBeregningsgrunnlag != null
     }
 
-    private fun pensjonsgivendeInntektHarEndretSegForFerdigstiltEtteroppgjoer(
+    private fun loggInntektsSjekkForFerdigstiltEtteroppgjoer(
         etteroppgjoer: Etteroppgjoer,
-        ident: String,
-    ): Boolean {
+        sak: Sak,
+    ) {
         krev(etteroppgjoer.status == FERDIGSTILT) {
-            "pensjonsgivendeInntektHarEndretSegForFerdigstiltEtteroppgjoer kan kun kalles for etteroppgjør med status FERDIGSTILT, " +
-                "men etteroppgjør for sakId=${etteroppgjoer.sakId} og inntektsaar=${etteroppgjoer.inntektsaar} har status ${etteroppgjoer.status}"
+            "loggInntektsSjekkForFerdigstiltEtteroppgjoer kan kun kalles for etteroppgjør med status FERDIGSTILT, " +
+                "men etteroppgjør for sakId: ${etteroppgjoer.sakId} og inntektsaar: ${etteroppgjoer.inntektsaar} har status ${etteroppgjoer.status}"
         }
 
         val forbehandlingId =
@@ -441,15 +427,40 @@ class EtteroppgjoerService(
                         "har status FERDIGSTILT men mangler sisteFerdigstilteForbehandling",
                 )
 
-        val lagretInntekt = forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) ?: return true
+        val resultatType = forbehandlingDao.hentForbehandling(forbehandlingId)?.etteroppgjoerResultatType
+        val lagretInntekt = forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId)
 
         val nyInntekt =
             runBlocking {
-                val respons = sigrunKlient.hentPensjonsgivendeInntekt(ident, etteroppgjoer.inntektsaar)
+                val respons = sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, etteroppgjoer.inntektsaar)
                 PensjonsgivendeInntektBeregning.beregnInntekt(respons, etteroppgjoer.inntektsaar).verdi
             }
 
-        return lagretInntekt.loensinntekt != nyInntekt.loensinntekt || lagretInntekt.naeringsinntekt != nyInntekt.naeringsinntekt
+        val harEndretSeg =
+            lagretInntekt == null ||
+                lagretInntekt.loensinntekt != nyInntekt.loensinntekt ||
+                lagretInntekt.naeringsinntekt != nyInntekt.naeringsinntekt
+
+        if (harEndretSeg) {
+            logger.info(
+                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt har endret seg siden ferdigstilt " +
+                    "etteroppgjør for ${etteroppgjoer.inntektsaar}. " +
+                    "Resultat av etteroppgjør var $resultatType. Oppretter ikke oppgave - observerer.",
+            )
+            sikkerLogg.info(
+                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt har endret seg siden ferdigstilt " +
+                    "etteroppgjør for ${etteroppgjoer.inntektsaar}. " +
+                    "Lagret PGI: lønn=${lagretInntekt?.loensinntekt}, næring=${lagretInntekt?.naeringsinntekt}. " +
+                    "Ny PGI: lønn=${nyInntekt.loensinntekt}, næring=${nyInntekt.naeringsinntekt}. " +
+                    "Resultat av etteroppgjør var $resultatType.",
+            )
+        } else {
+            logger.info(
+                "Mottok skatteoppgjørhendelse for sakId=${sak.id}, inntekt er uendret siden ferdigstilt " +
+                    "etteroppgjør for ${etteroppgjoer.inntektsaar}. " +
+                    "Resultat av etteroppgjør var $resultatType. Ingen oppgave opprettes.",
+            )
+        }
     }
 
     private fun utledAktivitetskrav(

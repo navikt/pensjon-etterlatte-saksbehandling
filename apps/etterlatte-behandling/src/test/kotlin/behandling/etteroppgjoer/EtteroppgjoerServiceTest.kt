@@ -450,7 +450,7 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `haandterSkatteoppgjoerMottatt logger og oppretter ikke oppgave naar inntekt har endret seg siden ferdigstilt etteroppgjoer`() {
+    fun `haandterSkatteoppgjoerMottatt oppretter oppgave naar inntekt har endret seg siden ferdigstilt etteroppgjoer`() {
         val ctx = TestContext(sakId)
         val inntektsaar = 2024
         val forbehandlingId = UUID.randomUUID()
@@ -474,11 +474,17 @@ class EtteroppgjoerServiceTest {
                 pensjonsgivendeInntekt = emptyList(),
             )
         coEvery { ctx.inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) } returns mockk(relaxed = true)
+        every {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any())
+        } just Runs
 
         ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
 
-        verify(exactly = 0) {
-            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any())
+        verify(exactly = 1) {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
+                sakId = sak.id,
+                inntektsAar = inntektsaar,
+            )
         }
     }
 

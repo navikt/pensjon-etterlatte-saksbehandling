@@ -463,7 +463,11 @@ class EtteroppgjoerService(
             logger.info(
                 "Mottok skatteoppgjørhendelse for sakId=${sak.id}, endring i interessante felter siden ferdigstilt " +
                     "etteroppgjør for ${etteroppgjoer.inntektsaar}: $endredeFelter. " +
-                    "Resultat av etteroppgjør var $resultatType. Observerer kun - ingen oppgave opprettes.",
+                    "Resultat av etteroppgjør var $resultatType. Oppretter oppgave for å vurdere konsekvens.",
+            )
+            etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
+                sakId = sak.id,
+                inntektsAar = etteroppgjoer.inntektsaar,
             )
         } else {
             logger.info(

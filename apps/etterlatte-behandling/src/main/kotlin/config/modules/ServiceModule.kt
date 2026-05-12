@@ -170,10 +170,12 @@ class ServiceModule(
     val etteroppgjoerService: EtteroppgjoerService by lazy {
         EtteroppgjoerService(
             dao = daoModule.etteroppgjoerDao,
+            forbehandlingDao = daoModule.etteroppgjoerForbehandlingDao,
             vedtakInternalService = vedtakInternalService,
             behandlingService = behandlingService,
             beregningKlient = klientModule.beregningKlient,
             sigrunKlient = klientModule.sigrunKlient,
+            inntektskomponentService = inntektskomponentService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             hendelseDao = daoModule.hendelseDao,
         )

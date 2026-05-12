@@ -18,6 +18,9 @@ spec:
     - team: etterlatte
       application: etterlatte-behandling
       access: readwrite
+    - team: etterlatte
+      application: etterlatte-kafka-manager
+      access: read
     - team: pensjon-q0
       application: pensjon-pen-q0
       access: read
@@ -29,4 +32,7 @@ spec:
       access: read
     - team: pensjon-q5
       application: pensjon-pen-q5
+      access: read
+    - team: teamdagpenger
+      application: dp-andre-ytelser
       access: read

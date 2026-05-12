@@ -12,7 +12,11 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
+import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
+import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -57,7 +61,9 @@ class EtteroppgjoerServiceTest {
         val sakId: SakId,
     ) {
         val dao: EtteroppgjoerDao = mockk()
+        val forbehandlingDao: EtteroppgjoerForbehandlingDao = mockk()
         val sigrunKlient: SigrunKlient = mockk()
+        val inntektskomponentService: InntektskomponentService = mockk()
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakInternalService: VedtakInternalService = mockk()
@@ -67,10 +73,12 @@ class EtteroppgjoerServiceTest {
         val service =
             EtteroppgjoerService(
                 dao = dao,
+                forbehandlingDao = forbehandlingDao,
                 vedtakInternalService = vedtakInternalService,
                 behandlingService = behandlingService,
                 beregningKlient = beregningKlient,
                 sigrunKlient = sigrunKlient,
+                inntektskomponentService = inntektskomponentService,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
                 hendelseDao = hendelsesDao,
             )
@@ -117,7 +125,10 @@ class EtteroppgjoerServiceTest {
                     sakId = sakId,
                     sakType = SakType.OMSTILLINGSSTOENAD,
                     status = BehandlingStatus.ATTESTERT,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+                    virkningstidspunkt =
+                        VirkningstidspunktTestData.virkningstidsunkt(
+                            dato = YearMonth.now().minusYears(1),
+                        ),
                 )
         }
 
@@ -236,7 +247,8 @@ class EtteroppgjoerServiceTest {
                 sisteIverksatteBehandling = behandling.id,
             )
 
-        val etteropgjoerResultat = listOf(EtteroppgjoerResultatType.ETTERBETALING, EtteroppgjoerResultatType.TILBAKEKREVING)
+        val etteropgjoerResultat =
+            listOf(EtteroppgjoerResultatType.ETTERBETALING, EtteroppgjoerResultatType.TILBAKEKREVING)
 
         etteropgjoerResultat.forEach { type ->
             val forbehandlingMedresultat =
@@ -246,9 +258,19 @@ class EtteroppgjoerServiceTest {
                 )
             ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandlingMedresultat)
             verify {
-                ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedresultat.aar, EtteroppgjoerStatus.VENTER_PAA_SVAR)
+                ctx.dao.oppdaterEtteroppgjoerStatus(
+                    sakId,
+                    forbehandlingMedresultat.aar,
+                    EtteroppgjoerStatus.VENTER_PAA_SVAR,
+                )
             }
-            verify { ctx.dao.oppdaterFerdigstiltForbehandlingId(sakId, forbehandlingMedresultat.aar, forbehandlingMedresultat.id) }
+            verify {
+                ctx.dao.oppdaterFerdigstiltForbehandlingId(
+                    sakId,
+                    forbehandlingMedresultat.aar,
+                    forbehandlingMedresultat.id,
+                )
+            }
         }
     }
 
@@ -283,9 +305,19 @@ class EtteroppgjoerServiceTest {
                 )
             ctx.service.oppdaterEtteroppgjoerEtterFerdigstiltForbehandling(forbehandlingMedResultat)
             verify {
-                ctx.dao.oppdaterEtteroppgjoerStatus(sakId, forbehandlingMedResultat.aar, EtteroppgjoerStatus.FERDIGSTILT)
+                ctx.dao.oppdaterEtteroppgjoerStatus(
+                    sakId,
+                    forbehandlingMedResultat.aar,
+                    EtteroppgjoerStatus.FERDIGSTILT,
+                )
             }
-            verify { ctx.dao.oppdaterFerdigstiltForbehandlingId(sakId, forbehandlingMedResultat.aar, forbehandlingMedResultat.id) }
+            verify {
+                ctx.dao.oppdaterFerdigstiltForbehandlingId(
+                    sakId,
+                    forbehandlingMedResultat.aar,
+                    forbehandlingMedResultat.id,
+                )
+            }
         }
     }
 
@@ -366,7 +398,10 @@ class EtteroppgjoerServiceTest {
                 sakId = sakId,
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 status = BehandlingStatus.ATTESTERT,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.now().minusYears(1)),
+                virkningstidspunkt =
+                    VirkningstidspunktTestData.virkningstidsunkt(
+                        dato = YearMonth.now().minusYears(1),
+                    ),
                 utlandstilknytning = utlandstilsnitt(),
             )
 
@@ -398,26 +433,93 @@ class EtteroppgjoerServiceTest {
     fun kildeSaksbehandler() = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now()))
 
     @Test
-    fun `haandterSkatteoppgjoerMottatt oppretter vurder konsekvens oppgave naar etteroppgjoer allerede er ferdigstilt`() {
+    fun `haandterSkatteoppgjoerMottatt kaster exception hvis etteroppgjoer er ferdigstilt men mangler sisteFerdigstilteForbehandling`() {
+        val ctx = TestContext(sakId)
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.FERDIGSTILT,
+                sisteFerdigstilteForbehandling = null,
+            )
+        val sak = sak(sakId = sakId)
+
+        assertThrows<InternfeilException> {
+            ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
+        }
+    }
+
+    @Test
+    fun `haandterSkatteoppgjoerMottatt oppretter oppgave naar inntekt har endret seg siden ferdigstilt etteroppgjoer`() {
         val ctx = TestContext(sakId)
         val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
         val etteroppgjoer =
             Etteroppgjoer(
                 sakId = sakId,
                 inntektsaar = inntektsaar,
                 status = EtteroppgjoerStatus.FERDIGSTILT,
+                sisteFerdigstilteForbehandling = forbehandlingId,
             )
         val sak = sak(sakId = sakId)
 
-        every { ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any()) } just Runs
+        every { ctx.forbehandlingDao.hentForbehandling(forbehandlingId) } returns null
+        every { ctx.forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) } returns
+            SummertePensjonsgivendeInntekter(loensinntekt = 0, naeringsinntekt = 100_000, tidspunktBeregnet = null)
+        every { ctx.forbehandlingDao.hentSummertAInntekt(forbehandlingId) } returns mockk(relaxed = true)
+        coEvery { ctx.sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) } returns
+            PensjonsgivendeInntektAarResponse(
+                inntektsaar = inntektsaar,
+                norskPersonidentifikator = sak.ident,
+                pensjonsgivendeInntekt = emptyList(),
+            )
+        coEvery { ctx.inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) } returns mockk(relaxed = true)
+        every {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any())
+        } just Runs
 
         ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
 
         verify(exactly = 1) {
-            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(sakId, inntektsaar)
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
+                sakId = sak.id,
+                inntektsAar = inntektsaar,
+            )
         }
-        verify(exactly = 0) { ctx.dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) }
-        verify(exactly = 0) { ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
+    }
+
+    @Test
+    fun `haandterSkatteoppgjoerMottatt oppretter ikke oppgave naar inntekt er uendret siden ferdigstilt etteroppgjoer`() {
+        val ctx = TestContext(sakId)
+        val inntektsaar = 2024
+        val forbehandlingId = UUID.randomUUID()
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = sakId,
+                inntektsaar = inntektsaar,
+                status = EtteroppgjoerStatus.FERDIGSTILT,
+                sisteFerdigstilteForbehandling = forbehandlingId,
+            )
+        val sak = sak(sakId = sakId)
+        val sammeAInntekt: SummerteInntekterAOrdningen = mockk(relaxed = true)
+
+        every { ctx.forbehandlingDao.hentForbehandling(forbehandlingId) } returns null
+        every { ctx.forbehandlingDao.hentPensjonsgivendeInntekt(forbehandlingId) } returns
+            SummertePensjonsgivendeInntekter(loensinntekt = 0, naeringsinntekt = 0, tidspunktBeregnet = null)
+        every { ctx.forbehandlingDao.hentSummertAInntekt(forbehandlingId) } returns sammeAInntekt
+        coEvery { ctx.sigrunKlient.hentPensjonsgivendeInntekt(sak.ident, inntektsaar) } returns
+            PensjonsgivendeInntektAarResponse(
+                inntektsaar = inntektsaar,
+                norskPersonidentifikator = sak.ident,
+                pensjonsgivendeInntekt = emptyList(),
+            )
+        coEvery { ctx.inntektskomponentService.hentSummerteInntekter(sak.ident, inntektsaar) } returns sammeAInntekt
+
+        ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
+
+        verify(exactly = 0) {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any())
+        }
     }
 
     @Test
@@ -432,12 +534,23 @@ class EtteroppgjoerServiceTest {
             )
         val sak = sak(sakId = sakId)
 
-        every { ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any()) } just Runs
+        every {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
+                any(),
+                any(),
+            )
+        } just Runs
 
         ctx.service.haandterSkatteoppgjoerMottatt(etteroppgjoer, sak)
 
         verify(exactly = 0) { ctx.dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) }
-        verify(exactly = 0) { ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
+        verify(exactly = 0) {
+            ctx.etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
+                any(),
+                any(),
+                any(),
+            )
+        }
     }
 
     @Test

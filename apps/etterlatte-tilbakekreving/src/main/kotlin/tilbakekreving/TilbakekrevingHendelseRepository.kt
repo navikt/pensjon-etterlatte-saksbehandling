@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving
 
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -99,17 +100,8 @@ class TilbakekrevingHendelseRepository(
             ).let {
                 session.run(
                     it
-                        .map { row ->
-                            TilbakekrevingHendelse(
-                                id = UUID.fromString(row.string("id")),
-                                opprettet = row.tidspunkt("opprettet"),
-                                sakId = SakId(row.long("sak_id")),
-                                payload = row.string("payload"),
-                                status = TilbakekrevingHendelseStatus.valueOf(row.string("status")),
-                                type = TilbakekrevingHendelseType.valueOf(row.string("type")),
-                                jmsTimestamp = row.tidspunktOrNull("jms_timestamp"),
-                            )
-                        }.asSingle,
+                        .map(Row::tilTilbakekrevingHendelse)
+                        .asSingle,
                 )
             }
         }
@@ -139,4 +131,34 @@ class TilbakekrevingHendelseRepository(
                 id
             }
         }
+
+    fun finnHendelserForSak(sakId: SakId): List<TilbakekrevingHendelse> =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement =
+                    """
+                    SELECT id, opprettet, sak_id, payload, status, type, jms_timestamp 
+                        FROM tilbakekreving_hendelse 
+                        WHERE sak_id = :sakId
+                        ORDER BY opprettet DESC
+                    """.trimIndent(),
+                paramMap =
+                    mapOf(
+                        "sakId" to sakId.sakId,
+                    ),
+            ).let { query ->
+                session.run(query.map(Row::tilTilbakekrevingHendelse).asList)
+            }
+        }
 }
+
+private fun Row.tilTilbakekrevingHendelse(): TilbakekrevingHendelse =
+    TilbakekrevingHendelse(
+        id = UUID.fromString(this.string("id")),
+        opprettet = this.tidspunkt("opprettet"),
+        sakId = SakId(this.long("sak_id")),
+        payload = this.string("payload"),
+        status = TilbakekrevingHendelseStatus.valueOf(this.string("status")),
+        type = TilbakekrevingHendelseType.valueOf(this.string("type")),
+        jmsTimestamp = this.tidspunktOrNull("jms_timestamp"),
+    )

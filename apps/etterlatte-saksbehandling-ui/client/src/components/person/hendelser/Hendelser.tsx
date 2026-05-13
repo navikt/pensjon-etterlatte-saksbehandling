@@ -18,12 +18,14 @@ enum HendelseValg {
   ARKIVERTE = 'ARKIVERTE',
 }
 
-const erArkivertHendelse = ({ status }: Grunnlagsendringshendelse) =>
-  [
-    GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT,
-    GrunnlagsendringStatus.HISTORISK,
-    GrunnlagsendringStatus.FORKASTET,
-  ].includes(status)
+const arkivertHendelseStatus = [
+  GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT,
+  GrunnlagsendringStatus.HISTORISK,
+  GrunnlagsendringStatus.FORKASTET,
+]
+
+const erNyHendelse = ({ status }: Grunnlagsendringshendelse) => !arkivertHendelseStatus.includes(status)
+const erArkivertHendelse = ({ status }: Grunnlagsendringshendelse) => arkivertHendelseStatus.includes(status)
 
 export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }): ReactNode => {
   const [hendelseValg, setHendelseValg] = useState<HendelseValg>(HendelseValg.NYE)
@@ -32,7 +34,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
   const [stoettedeRevurderingerResult, stoettedeRevurderingerFetch] = useApiCall(hentStoettedeRevurderinger)
 
   const nyeHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] =>
-    hendelser.filter((hendelse) => hendelse.status !== GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT)
+    hendelser.filter(erNyHendelse)
 
   const arkiverteHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] =>
     hendelser.filter(erArkivertHendelse)

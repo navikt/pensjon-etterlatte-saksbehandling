@@ -54,6 +54,14 @@ class NotatService(
                 notater.single()
             }
 
+        if (!notat.kanRedigeres()) {
+            logger.info(
+                "Notat for klage=${blankett.klage.id} er allerede journalført på journalpostId=${notat.journalpostId}. " +
+                    "Returnerer eksisterende journalpostId uten nytt kall til Joark.",
+            )
+            return OpprettJournalpostResponse(notat.journalpostId!!, journalpostferdigstilt = true)
+        }
+
         try {
             val notatPdf = genererPdf(blankett, bruker)
 

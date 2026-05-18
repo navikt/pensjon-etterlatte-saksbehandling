@@ -113,27 +113,27 @@ val beloepHvertBarnEnForelderAvdoed2024 =
     RegelMeta(
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Prosentsats benyttet for hvert barn når en forelder er død",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-EN-FORELDER-AVDOED"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-EN-FORELDER-AVDOED", versjon = "2"),
     ) benytter prosentsatsHvertBarnEnForelderAvdoed2024 og grunnbeloep med { sats, grunnbeloep ->
-        sats.multiply(grunnbeloep.grunnbeloepPerMaaned)
+        sats.multiply(grunnbeloep.grunnbeloep).divide(12)
     }
 
 val beloepHvertBarnToForeldreAvdoed2024 =
     RegelMeta(
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Prosentsats benyttet for hvert barn når to foreldre er døde",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-TO-FORELDRE-AVDOED"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-TO-FORELDRE-AVDOED", versjon = "2"),
     ) benytter prosentsatsHvertBarnToForeldreAvdoed2024 og grunnbeloep med { sats, grunnbeloep ->
-        sats.multiply(grunnbeloep.grunnbeloepPerMaaned)
+        sats.multiply(grunnbeloep.grunnbeloep).divide(12)
     }
 
 val belopForFoersteBarn1967 =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Satser i kr for første barn",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ETTBARN"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ETTBARN", versjon = "2"),
     ) benytter prosentsatsFoersteBarnKonstant1967 og grunnbeloep med { prosentsatsFoersteBarn, grunnbeloep ->
-        prosentsatsFoersteBarn.multiply(grunnbeloep.grunnbeloepPerMaaned)
+        prosentsatsFoersteBarn.multiply(grunnbeloep.grunnbeloep).divide(12)
     }
 
 val prosentsatsEtterfoelgendeBarnKonstant1967 =
@@ -148,9 +148,9 @@ val belopForEtterfoelgendeBarn1967 =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Satser i kr for etterfølgende barn",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-FLERBARN"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-FLERBARN", versjon = "2"),
     ) benytter prosentsatsEtterfoelgendeBarnKonstant1967 og grunnbeloep med { prosentsatsEtterfoelgendeBarn, grunnbeloep ->
-        prosentsatsEtterfoelgendeBarn.multiply(grunnbeloep.grunnbeloepPerMaaned)
+        prosentsatsEtterfoelgendeBarn.multiply(grunnbeloep.grunnbeloep).divide(12)
     }
 
 val barnepensjonSatsRegel1967 =

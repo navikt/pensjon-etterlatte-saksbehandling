@@ -32,69 +32,72 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.etterlatte.libs.common.sak.SakId as CommonSakId
 
 fun readFile(file: String) =
     object {}.javaClass.getResource(file)?.readText()
         ?: throw FileNotFoundException("Fant ikke filen $file")
 
-fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
-    TilbakekrevingVedtak(
-        sakId = sakId1,
-        vedtakId = vedtakId,
-        fattetVedtak =
-            FattetVedtak(
-                saksbehandler = "Z123456",
-                enhet = Enhetsnummer("1234"),
-                dato = LocalDate.now(),
-            ),
-        perioder =
-            listOf(
-                TilbakekrevingPeriode(
-                    maaned = YearMonth.of(2023, 1),
-                    tilbakekrevingsbeloep =
-                        listOf(
-                            Tilbakekrevingsbelop(
-                                id = UUID.randomUUID(),
-                                klasseKode = "",
-                                klasseType = "YTEL",
-                                bruttoUtbetaling = 1000,
-                                nyBruttoUtbetaling = 500,
-                                skatteprosent = BigDecimal.valueOf(10),
-                                beregnetFeilutbetaling = 500,
-                                bruttoTilbakekreving = 500,
-                                nettoTilbakekreving = 550,
-                                skatt = 50,
-                                skyld = TilbakekrevingSkyld.BRUKER,
-                                resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
-                                tilbakekrevingsprosent = 100,
-                                rentetillegg = 50,
-                                overstyrBehandletNettoTilBrutto = null,
-                            ),
-                            Tilbakekrevingsbelop(
-                                id = UUID.randomUUID(),
-                                klasseKode = "",
-                                klasseType = "Feil",
-                                bruttoUtbetaling = 0,
-                                nyBruttoUtbetaling = 500,
-                                skatteprosent = BigDecimal.valueOf(0),
-                                beregnetFeilutbetaling = null,
-                                bruttoTilbakekreving = 0,
-                                nettoTilbakekreving = null,
-                                skatt = null,
-                                skyld = null,
-                                resultat = null,
-                                tilbakekrevingsprosent = null,
-                                rentetillegg = null,
-                                overstyrBehandletNettoTilBrutto = null,
-                            ),
+fun tilbakekrevingsvedtak(
+    vedtakId: Long = 1,
+    sakId: CommonSakId = sakId1,
+) = TilbakekrevingVedtak(
+    sakId = sakId,
+    vedtakId = vedtakId,
+    fattetVedtak =
+        FattetVedtak(
+            saksbehandler = "Z123456",
+            enhet = Enhetsnummer("1234"),
+            dato = LocalDate.now(),
+        ),
+    perioder =
+        listOf(
+            TilbakekrevingPeriode(
+                maaned = YearMonth.of(2023, 1),
+                tilbakekrevingsbeloep =
+                    listOf(
+                        Tilbakekrevingsbelop(
+                            id = UUID.randomUUID(),
+                            klasseKode = "",
+                            klasseType = "YTEL",
+                            bruttoUtbetaling = 1000,
+                            nyBruttoUtbetaling = 500,
+                            skatteprosent = BigDecimal.valueOf(10),
+                            beregnetFeilutbetaling = 500,
+                            bruttoTilbakekreving = 500,
+                            nettoTilbakekreving = 550,
+                            skatt = 50,
+                            skyld = TilbakekrevingSkyld.BRUKER,
+                            resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
+                            tilbakekrevingsprosent = 100,
+                            rentetillegg = 50,
+                            overstyrBehandletNettoTilBrutto = null,
                         ),
-                ),
+                        Tilbakekrevingsbelop(
+                            id = UUID.randomUUID(),
+                            klasseKode = "",
+                            klasseType = "Feil",
+                            bruttoUtbetaling = 0,
+                            nyBruttoUtbetaling = 500,
+                            skatteprosent = BigDecimal.valueOf(0),
+                            beregnetFeilutbetaling = null,
+                            bruttoTilbakekreving = 0,
+                            nettoTilbakekreving = null,
+                            skatt = null,
+                            skyld = null,
+                            resultat = null,
+                            tilbakekrevingsprosent = null,
+                            rentetillegg = null,
+                            overstyrBehandletNettoTilBrutto = null,
+                        ),
+                    ),
             ),
-        aarsak = TilbakekrevingAarsak.ANNET,
-        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD,
-        kravgrunnlagId = "1",
-        kontrollfelt = "2023-09-19-10.01.03.842916",
-    )
+        ),
+    aarsak = TilbakekrevingAarsak.ANNET,
+    hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD,
+    kravgrunnlagId = "1",
+    kontrollfelt = "2023-09-19-10.01.03.842916",
+)
 
 fun kravgrunnlag(
     sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, sakId1, Enhetsnummer("1234"), null, null),

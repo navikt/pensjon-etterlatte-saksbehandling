@@ -37,3 +37,7 @@
 **2026-05-04 — Testskriving**
 - Observation: Jeg la inn mock for `SaksbehandlerInfoDao` uten å vurdere om real-DB var mulig og bedre. Brukeren måtte eksplisitt be om det.
 - Action: Når en DAO er enkel og DatabaseExtension finnes i modulen, vurder real-DB som default – ikke mock.
+
+**2026-05-07 — Regelendring / beregning**
+- Observation: Før jeg endret reglene sjekket jeg OMS-koden for å se hvordan de løste det samme problemet – det gav meg korrekt mønster direkte (`multiply(grunnbeloep).divide(12)`), og samsvarte med planens antagelser.
+- Action: Ved beregningsregelendringer, alltid finn den tilsvarende regelen i det andre regelsettet (BP/OMS) som referanseimplementasjon.

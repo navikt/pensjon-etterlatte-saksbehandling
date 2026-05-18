@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -36,7 +37,9 @@ data class ManueltBrevData(
     override val data: Any? = null,
 ) : BrevDataRedigerbar
 
-data class ManueltBrevMedTittelDataData(val tittel: String? = null)
+data class ManueltBrevMedTittelDataData(
+    val tittel: String? = null,
+)
 
 data class ManueltBrevMedTittelData(
     override val innhold: List<Slate.Element>,
@@ -82,6 +85,7 @@ data class BrevRequest(
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.Forhaandsvarsel::class, name = "OMS_EO_FORHAANDSVARSEL"),
     JsonSubTypes.Type(value = EtteroppgjoerBrevData.Vedtak::class, name = "OMS_EO_VEDTAK"),
     JsonSubTypes.Type(value = OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak::class, name = "OMSTILLINGSSTOENAD_INNVILGELSE"),
+    JsonSubTypes.Type(value = OmstillingsstoenadRevurderingVedtakBrevData.Vedtak::class, name = "OMSTILLINGSSTOENAD_REVURDERING"),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder

@@ -4,8 +4,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.BrevapiKlient
-import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
@@ -39,7 +39,7 @@ class ApplicationBuilder {
         )
     }
     private val brevapiKlient = BrevapiKlient(config, brevhttpKlient)
-    private val grunnlagKlient = GrunnlagKlient(config, grunnlagHttpKlient)
+    private val behandlingKlient = BehandlingKlient(config, grunnlagHttpKlient)
     private val connection =
         initRogR(
             applikasjonsnavn = "brev-kafka",
@@ -54,7 +54,7 @@ class ApplicationBuilder {
 
             OpprettJournalfoerOgDistribuerRiver(
                 brevapiKlient,
-                grunnlagKlient,
+                behandlingKlient,
                 rapidsConnection,
             )
             JournalfoerVedtaksbrevRiver(rapidsConnection, brevapiKlient)

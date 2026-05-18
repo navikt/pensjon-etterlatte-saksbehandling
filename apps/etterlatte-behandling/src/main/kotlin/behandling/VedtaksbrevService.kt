@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
+import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.mapAvdoede
@@ -20,29 +21,38 @@ import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Etterbetaling
+import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.erYrkesskade
+import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.omsBeregning
 import no.nav.etterlatte.brev.model.oms.toAvkortetBeregningsperiode
+import no.nav.etterlatte.brev.model.oms.utledBeregningsperioderOpphoer
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.OMGJOERING_ETTER_KLAGE
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class VedtaksbrevService(
@@ -240,6 +250,106 @@ class VedtaksbrevService(
                     ),
             )
         }
+
+    private suspend fun omstillingsstoenadRevurdering(
+        bruker: BrukerTokenInfo,
+        innholdMedVedlegg: InnholdMedVedlegg,
+        revurderingaarsak: Revurderingaarsak?,
+        behandlingId: UUID,
+        sakType: SakType,
+        vedtakType: VedtakType,
+        virkningstidspunkt: YearMonth,
+        klage: Klage?,
+        utlandstilknytningType: UtlandstilknytningType?,
+    ) = coroutineScope {
+        val avkortingsinfo =
+            async {
+                beregningService.finnAvkortingsinfo(
+                    behandlingId,
+                    sakType,
+                    virkningstidspunkt,
+                    vedtakType,
+                    bruker,
+                )
+            }
+        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
+        val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
+        val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+        val land = async { behandlingService.hentLand(bruker) }
+
+        val avkortingsinfo1 = avkortingsinfo.await()
+        val trygdetid1 = krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" }.single()
+        val beregningsperioder =
+            avkortingsinfo1.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
+        val feilutbetaling =
+            krevIkkeNull(
+                (
+                    brevutfall.await()
+                        ?: throw ManglerBrevutfall(behandlingId)
+                ).feilutbetaling?.valg?.let(::toFeilutbetalingType),
+            ) {
+                "Feilutbetaling mangler i brevutfall"
+            }
+        val beregningsperioderOpphoer =
+            utledBeregningsperioderOpphoer(
+                behandling,
+                beregningsperioder,
+            )
+        val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
+        val omsRettUtenTidsbegrensning =
+            krevIkkeNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" }.vilkaar.single {
+                it.hovedvilkaar.type in
+                    listOf(
+                        VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                    )
+            }
+        OmstillingsstoenadRevurdering(
+            innhold = innholdMedVedlegg.innhold(),
+            data =
+                OmstillingsstoenadRevurderingData(
+                    innholdForhaandsvarsel =
+                        vedleggHvisFeilutbetaling(
+                            feilutbetaling,
+                            innholdMedVedlegg,
+                            BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
+                    erEndret =
+                        avkortingsinfo1.endringIUtbetalingVedVirk ||
+                            revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
+                    erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+                    datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                    beregning =
+                        OmstillingsstoenadBeregning(
+                            innhold =
+                                OmstillingsstoenadRevurdering.Companion.innholdMedVedlegg(
+                                    innholdMedVedlegg,
+                                    behandling,
+                                ),
+                            virkningsdato = avkortingsinfo1.virkningsdato,
+                            beregningsperioder = beregningsperioder,
+                            sisteBeregningsperiode = sisteBeregningsperiode,
+                            sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+                            trygdetid =
+                                trygdetid1.fromDto(
+                                    beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                                    beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
+                                    navnAvdoed = null,
+                                    landKodeverk = land.await(),
+                                ),
+                            oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                            opphoerNesteAar =
+                                beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                            erYrkesskade = trygdetid1.erYrkesskade(),
+                        ),
+                    omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
+                    feilutbetaling = feilutbetaling,
+                    bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                    erInnvilgelsesaar = avkortingsinfo1.erInnvilgelsesaar,
+                    tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
+                ),
+        )
+    }
 
     fun hentKlageForBehandling(behandling: DetaljertBehandling): Klage? {
         validerRevurderingOmgjoringHarRelatertBehandlingId(behandling)

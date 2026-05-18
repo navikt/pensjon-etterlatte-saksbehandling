@@ -251,9 +251,9 @@ class VedtaksbrevService(
             )
         }
 
+    // TODO fikse setting av innhold et annet sted
     private suspend fun omstillingsstoenadRevurdering(
         bruker: BrukerTokenInfo,
-        innholdMedVedlegg: InnholdMedVedlegg,
         revurderingaarsak: Revurderingaarsak?,
         behandlingId: UUID,
         sakType: SakType,
@@ -305,13 +305,11 @@ class VedtaksbrevService(
                     )
             }
         OmstillingsstoenadRevurdering(
-            innhold = innholdMedVedlegg.innhold(),
             data =
                 OmstillingsstoenadRevurderingData(
                     innholdForhaandsvarsel =
                         vedleggHvisFeilutbetaling(
                             feilutbetaling,
-                            innholdMedVedlegg,
                             BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
                         ),
                     erEndret =
@@ -321,11 +319,6 @@ class VedtaksbrevService(
                     datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
                     beregning =
                         OmstillingsstoenadBeregning(
-                            innhold =
-                                OmstillingsstoenadRevurdering.Companion.innholdMedVedlegg(
-                                    innholdMedVedlegg,
-                                    behandling,
-                                ),
                             virkningsdato = avkortingsinfo1.virkningsdato,
                             beregningsperioder = beregningsperioder,
                             sisteBeregningsperiode = sisteBeregningsperiode,

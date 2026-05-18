@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import kotlinx.coroutines.runBlocking
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevParametereAutomatisk
@@ -20,8 +21,8 @@ import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
+import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.BrevapiKlient
-import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -34,6 +35,7 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.brevId
 import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.rapidsandrivers.sikkerLogg
 import org.slf4j.LoggerFactory
 
 class OpprettJournalfoerOgDistribuerRiverException(
@@ -43,7 +45,7 @@ class OpprettJournalfoerOgDistribuerRiverException(
 
 class OpprettJournalfoerOgDistribuerRiver(
     private val brevapiKlient: BrevapiKlient,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val behandlingKlient: BehandlingKlient,
     rapidsConnection: RapidsConnection,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -65,6 +67,15 @@ class OpprettJournalfoerOgDistribuerRiver(
     ) {
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
+            val sakForPakke = behandlingKlient.hentSak(packet.sakId)
+            if (sakForPakke == null) {
+                logger.info(
+                    "Sak med id=${packet.sakId} finnes ikke i behandling, hopper over pakke ${packet.id}." +
+                        " Se sikkerlogg for hele pakken.",
+                )
+                sikkerLogg.info("Sak med id=${packet.sakId} finnes ikke i behandling, hopper over pakke ${packet.id}", kv("packet", packet))
+                return@runBlocking
+            }
             val brevErdistribuert = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, packet)
             packet.brevId = brevErdistribuert.brevId
             if (brevErdistribuert.erDistribuert) {
@@ -114,7 +125,9 @@ class OpprettJournalfoerOgDistribuerRiver(
                 OmstillingsstoenadInformasjonDoedsfallRedigerbar(brevdata.borIutland, brevdata.avdoedNavn)
             }
 
-            else -> throw Exception("Støtter ikke brevtype $brevKode i sak $sakId")
+            else -> {
+                throw Exception("Støtter ikke brevtype $brevKode i sak $sakId")
+            }
         }
 
     private suspend fun opprettJournalfoerOgDistribuer(
@@ -172,7 +185,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         hentAvdoede(sakId),
     )
 
-    private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> = grunnlagKlient.hentGrunnlagForSak(sakId).mapAvdoede()
+    private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> = behandlingKlient.hentGrunnlagForSak(sakId).mapAvdoede()
 }
 
 private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {

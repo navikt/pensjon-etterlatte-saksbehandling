@@ -65,6 +65,10 @@ class OpprettJournalfoerOgDistribuerRiver(
     ) {
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
+            // Vi har en melding som refererer til en sak som ikke finnes, den må hoppes over
+            if (packet.sakId == SakId(30499)) {
+                return@runBlocking
+            }
             val brevErdistribuert = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, packet)
             packet.brevId = brevErdistribuert.brevId
             if (brevErdistribuert.erDistribuert) {
@@ -114,7 +118,9 @@ class OpprettJournalfoerOgDistribuerRiver(
                 OmstillingsstoenadInformasjonDoedsfallRedigerbar(brevdata.borIutland, brevdata.avdoedNavn)
             }
 
-            else -> throw Exception("Støtter ikke brevtype $brevKode i sak $sakId")
+            else -> {
+                throw Exception("Støtter ikke brevtype $brevKode i sak $sakId")
+            }
         }
 
     private suspend fun opprettJournalfoerOgDistribuer(

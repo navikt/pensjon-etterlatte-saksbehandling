@@ -24,6 +24,9 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import java.time.LocalDate
 
 data class BarnepensjonRevurderingData(
+    /** Skal være true bare hvis det er en endring i beløp på siste beregningsperiode sammenlignet med
+     * forrige iverksatte behandling. Hvis forrige iverksatte behandling ikke har beregningsperioder i Beregning
+     * så er det sannsynligvis et opphør og da lander vi på at vi ikke kan dokumentere en endring. */
     val erEndret: Boolean,
     val erOmgjoering: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
@@ -69,43 +72,44 @@ data class BarnepensjonRevurdering(
 
             return BarnepensjonRevurdering(
                 innhold = innhold.innhold(),
-                data = BarnepensjonRevurderingData(
-                    innholdForhaandsvarsel =
-                        vedleggHvisFeilutbetaling(
-                            feilutbetaling,
-                            innhold,
-                            BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                        ),
-                    beregning =
-                        barnepensjonBeregning(
-                            innhold,
-                            avdoede,
-                            utbetalingsinfo,
-                            grunnbeloep,
-                            trygdetid,
-                            erForeldreloes,
-                            landKodeverk,
-                        ),
-                    bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                    brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
-                    datoVedtakOmgjoering = datoVedtakOmgjoering,
-                    erEndret = forrigeUtbetalingsinfo != null && forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
-                    erMigrertYrkesskade = erMigrertYrkesskade,
-                    erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                    etterbetaling = etterbetaling,
-                    feilutbetaling = feilutbetaling,
-                    frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
-                    harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
-                    harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                    kunNyttRegelverk =
-                        utbetalingsinfo.beregningsperioder.all {
-                            it.datoFOM.isAfter(BarnepensjonInnvilgelse.tidspunktNyttRegelverk) ||
-                                it.datoFOM.isEqual(
-                                    BarnepensjonInnvilgelse.tidspunktNyttRegelverk,
-                                )
-                        },
-                    erEtterbetaling = etterbetaling != null,
-                ),
+                data =
+                    BarnepensjonRevurderingData(
+                        innholdForhaandsvarsel =
+                            vedleggHvisFeilutbetaling(
+                                feilutbetaling,
+                                innhold,
+                                BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                            ),
+                        beregning =
+                            barnepensjonBeregning(
+                                innhold,
+                                avdoede,
+                                utbetalingsinfo,
+                                grunnbeloep,
+                                trygdetid,
+                                erForeldreloes,
+                                landKodeverk,
+                            ),
+                        bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                        brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
+                        datoVedtakOmgjoering = datoVedtakOmgjoering,
+                        erEndret = forrigeUtbetalingsinfo != null && forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
+                        erMigrertYrkesskade = erMigrertYrkesskade,
+                        erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+                        etterbetaling = etterbetaling,
+                        feilutbetaling = feilutbetaling,
+                        frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
+                        harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
+                        harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                        kunNyttRegelverk =
+                            utbetalingsinfo.beregningsperioder.all {
+                                it.datoFOM.isAfter(BarnepensjonInnvilgelse.tidspunktNyttRegelverk) ||
+                                    it.datoFOM.isEqual(
+                                        BarnepensjonInnvilgelse.tidspunktNyttRegelverk,
+                                    )
+                            },
+                        erEtterbetaling = etterbetaling != null,
+                    ),
             )
         }
     }
@@ -134,20 +138,21 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
                 brevutfall.frivilligSkattetrekk ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
 
             return BarnepensjonRevurderingRedigerbartUtfall(
-                data = BarnepensjonRevurderingRedigerbartUtfallData(
-                    erEtterbetaling = etterbetaling != null,
-                    harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                    feilutbetaling =
-                        krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                            "Feilutbetaling mangler i brevutfall"
-                        },
-                    brukerUnder18Aar =
-                        krevIkkeNull(brevutfall.aldersgruppe) {
-                            "Aldersgruppe mangler i brevutfall"
-                        } == Aldersgruppe.UNDER_18,
-                    bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                    frivilligSkattetrekk = frivilligSkattetrekk,
-                ),
+                data =
+                    BarnepensjonRevurderingRedigerbartUtfallData(
+                        erEtterbetaling = etterbetaling != null,
+                        harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                        feilutbetaling =
+                            krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                                "Feilutbetaling mangler i brevutfall"
+                            },
+                        brukerUnder18Aar =
+                            krevIkkeNull(brevutfall.aldersgruppe) {
+                                "Aldersgruppe mangler i brevutfall"
+                            } == Aldersgruppe.UNDER_18,
+                        bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                        frivilligSkattetrekk = frivilligSkattetrekk,
+                    ),
             )
         }
     }

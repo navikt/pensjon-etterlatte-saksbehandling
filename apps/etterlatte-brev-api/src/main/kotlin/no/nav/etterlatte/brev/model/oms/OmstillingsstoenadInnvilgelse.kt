@@ -23,8 +23,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
-data class OmstillingsstoenadInnvilgelse(
-    override val innhold: List<Slate.Element>,
+data class OmstillingsstoenadInnvilgelseData(
     val beregning: OmstillingsstoenadBeregning,
     val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
     val omsRettUtenTidsbegrensning: Boolean,
@@ -34,6 +33,11 @@ data class OmstillingsstoenadInnvilgelse(
     val erSluttbehandling: Boolean,
     val tidligereFamiliepleier: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
+)
+
+data class OmstillingsstoenadInnvilgelse(
+    override val innhold: List<Slate.Element>,
+    override val data: OmstillingsstoenadInnvilgelseData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -70,27 +74,29 @@ data class OmstillingsstoenadInnvilgelse(
 
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
-                beregning =
-                    omsBeregning(
-                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
-                        behandling = behandling,
-                        trygdetid = trygdetid,
-                        avkortingsinfo = avkortingsinfo,
-                        landKodeverk = landKodeverk,
-                    ),
-                innvilgetMindreEnnFireMndEtterDoedsfall =
-                    innvilgetMindreEnnFireMndEtterDoedsfall(
-                        doedsdatoEllerOpphoertPleieforhold = doedsdatoEllerOpphoertPleieforhold,
-                    ),
-                omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                etterbetaling =
-                    etterbetaling
-                        ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
-                erSluttbehandling = behandling.erSluttbehandling,
-                tidligereFamiliepleier = erTidligereFamiliepleier,
-                datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                data = OmstillingsstoenadInnvilgelseData(
+                    beregning =
+                        omsBeregning(
+                            innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
+                            behandling = behandling,
+                            trygdetid = trygdetid,
+                            avkortingsinfo = avkortingsinfo,
+                            landKodeverk = landKodeverk,
+                        ),
+                    innvilgetMindreEnnFireMndEtterDoedsfall =
+                        innvilgetMindreEnnFireMndEtterDoedsfall(
+                            doedsdatoEllerOpphoertPleieforhold = doedsdatoEllerOpphoertPleieforhold,
+                        ),
+                    omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
+                    harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                    etterbetaling =
+                        etterbetaling
+                            ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
+                    erSluttbehandling = behandling.erSluttbehandling,
+                    tidligereFamiliepleier = erTidligereFamiliepleier,
+                    datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                ),
             )
         }
 
@@ -101,7 +107,7 @@ data class OmstillingsstoenadInnvilgelse(
     }
 }
 
-data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
+data class OmstillingsstoenadInnvilgelseRedigerbartUtfallData(
     val virkningsdato: LocalDate,
     val utbetalingsbeloep: Kroner,
     val etterbetaling: Boolean,
@@ -111,6 +117,10 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
     val erSluttbehandling: Boolean = false,
     val tidligereFamiliepleier: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
+)
+
+data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
+    override val data: OmstillingsstoenadInnvilgelseRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -124,26 +134,28 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
             trygdetid: TrygdetidDto,
         ): OmstillingsstoenadInnvilgelseRedigerbartUtfall =
             OmstillingsstoenadInnvilgelseRedigerbartUtfall(
-                virkningsdato = avkortingsinfo.virkningsdato,
-                utbetalingsbeloep =
-                    avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
-                        ?: throw UgyldigForespoerselException(
-                            "MANGLER_BEREGNINGSPERIODER_AVKORTING",
-                            "Mangler beregningsperioder i avkorting",
+                data = OmstillingsstoenadInnvilgelseRedigerbartUtfallData(
+                    virkningsdato = avkortingsinfo.virkningsdato,
+                    utbetalingsbeloep =
+                        avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
+                            ?: throw UgyldigForespoerselException(
+                                "MANGLER_BEREGNINGSPERIODER_AVKORTING",
+                                "Mangler beregningsperioder i avkorting",
+                            ),
+                    etterbetaling = etterbetaling != null,
+                    tidligereFamiliepleier = tidligereFamiliepleier,
+                    datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                    avdoed = if (tidligereFamiliepleier) null else avdoede.single(),
+                    erSluttbehandling = erSluttbehandling ?: false,
+                    harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    beregning =
+                        omsBeregning(
+                            behandling = behandling,
+                            trygdetid = trygdetid,
+                            avkortingsinfo = avkortingsinfo,
+                            landKodeverk = emptyList(),
                         ),
-                etterbetaling = etterbetaling != null,
-                tidligereFamiliepleier = tidligereFamiliepleier,
-                datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
-                avdoed = if (tidligereFamiliepleier) null else avdoede.single(),
-                erSluttbehandling = erSluttbehandling ?: false,
-                harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                beregning =
-                    omsBeregning(
-                        behandling = behandling,
-                        trygdetid = trygdetid,
-                        avkortingsinfo = avkortingsinfo,
-                        landKodeverk = emptyList(),
-                    ),
+                ),
             )
     }
 }

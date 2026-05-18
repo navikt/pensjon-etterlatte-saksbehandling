@@ -907,4 +907,7 @@ internal class VedtaksbrevServiceTest {
 
 data class ManueltBrevDataTest(
     override val innhold: List<Slate.Element> = emptyList(),
-) : BrevDataFerdigstilling
+) : BrevDataFerdigstilling {
+    override val data: Any?
+        get() = null
+}

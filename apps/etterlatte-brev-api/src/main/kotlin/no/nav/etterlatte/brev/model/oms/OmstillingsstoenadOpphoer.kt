@@ -13,12 +13,16 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import java.time.LocalDate
 
-data class OmstillingsstoenadOpphoer(
-    override val innhold: List<Slate.Element>,
-    val innholdForhaandsvarsel: List<Slate.Element>,
+data class OmstillingsstoenadOpphoerData(
     val bosattUtland: Boolean,
     val virkningsdato: LocalDate,
     val feilutbetaling: FeilutbetalingType,
+    val innholdForhaandsvarsel: List<Slate.Element>,
+)
+
+data class OmstillingsstoenadOpphoer(
+    override val innhold: List<Slate.Element>,
+    override val data: OmstillingsstoenadOpphoerData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -34,33 +38,41 @@ data class OmstillingsstoenadOpphoer(
 
             return OmstillingsstoenadOpphoer(
                 innhold = innholdMedVedlegg.innhold(),
-                innholdForhaandsvarsel =
-                    vedleggHvisFeilutbetaling(
-                        feilutbetaling,
-                        innholdMedVedlegg,
-                        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
-                    ),
-                bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
-                virkningsdato =
-                    krevIkkeNull(virkningsdato) {
-                        "Virkningsdato mangler i brevutfall"
-                    },
-                feilutbetaling = feilutbetaling,
+                data = OmstillingsstoenadOpphoerData(
+                    innholdForhaandsvarsel =
+                        vedleggHvisFeilutbetaling(
+                            feilutbetaling,
+                            innholdMedVedlegg,
+                            BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
+                    bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                    virkningsdato =
+                        krevIkkeNull(virkningsdato) {
+                            "Virkningsdato mangler i brevutfall"
+                        },
+                    feilutbetaling = feilutbetaling,
+                ),
             )
         }
     }
 }
 
-data class OmstillingsstoenadOpphoerRedigerbartUtfall(
+data class OmstillingsstoenadOpphoerRedigerbartUtfallData(
     val feilutbetaling: FeilutbetalingType,
+)
+
+data class OmstillingsstoenadOpphoerRedigerbartUtfall(
+    override val data: OmstillingsstoenadOpphoerRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(brevutfall: BrevutfallDto): OmstillingsstoenadOpphoerRedigerbartUtfall =
             OmstillingsstoenadOpphoerRedigerbartUtfall(
-                feilutbetaling =
-                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                        "Feilutbetaling mangler i brevutfall"
-                    },
+                data = OmstillingsstoenadOpphoerRedigerbartUtfallData(
+                    feilutbetaling =
+                        krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                            "Feilutbetaling mangler i brevutfall"
+                        },
+                ),
             )
     }
 }

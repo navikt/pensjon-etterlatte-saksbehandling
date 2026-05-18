@@ -81,7 +81,7 @@ class BrevService(
                     )
                 },
                 brevKodeMapping = { req.brevKode },
-                brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+                brevDataMapping = { ManueltBrevMedTittelData(innhold = it.innholdMedVedlegg.innhold(), data = ManueltBrevMedTittelDataData(tittel = it.tittel)) },
             )
 
             logger.info("Journalfører brev med id: $brevId")
@@ -125,7 +125,7 @@ class BrevService(
                         )
                     },
                     brevKodeMapping = { hentBrev.brevkoder!! },
-                    brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+                    brevDataMapping = { ManueltBrevMedTittelData(innhold = it.innholdMedVedlegg.innhold(), data = ManueltBrevMedTittelDataData(tittel = it.tittel)) },
                 )
             }
 
@@ -412,7 +412,7 @@ class BrevService(
             bruker,
             avsenderRequest = { b, vedtak, enhet -> opprettAvsenderRequest(b, vedtak, enhet) },
             brevKodeMapping = { Brevkoder.TOMT_INFORMASJONSBREV },
-            brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+            brevDataMapping = { ManueltBrevMedTittelData(innhold = it.innholdMedVedlegg.innhold(), data = ManueltBrevMedTittelDataData(tittel = it.tittel)) },
         )
 
     // EY-4963

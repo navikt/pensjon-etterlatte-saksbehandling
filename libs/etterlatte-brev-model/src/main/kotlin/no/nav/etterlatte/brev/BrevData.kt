@@ -20,9 +20,12 @@ interface BrevData
 
 interface BrevDataFerdigstilling : BrevData {
     val innhold: List<Slate.Element>
+    val data: Any?
 }
 
-interface BrevDataRedigerbar : BrevData
+interface BrevDataRedigerbar : BrevData {
+    val data: Any?
+}
 
 interface HarVedlegg : BrevData {
     val innhold: List<Slate.Element>
@@ -30,11 +33,14 @@ interface HarVedlegg : BrevData {
 
 data class ManueltBrevData(
     val innhold: List<Slate.Element> = emptyList(),
+    override val data: Any? = null,
 ) : BrevDataRedigerbar
+
+data class ManueltBrevMedTittelDataData(val tittel: String? = null)
 
 data class ManueltBrevMedTittelData(
     override val innhold: List<Slate.Element>,
-    val tittel: String? = null,
+    override val data: ManueltBrevMedTittelDataData = ManueltBrevMedTittelDataData(),
 ) : BrevDataFerdigstilling
 
 // TODO Når alt er over på ny løsning bør gamle klasser slettes og nye renames
@@ -42,15 +48,15 @@ data class ManueltBrevMedTittelData(
 data class BrevDataFerdigstillingNy(
     override val innhold: List<Slate.Element>,
     // TODO: få inn vedleggInnhold?
-    val data: BrevFastInnholdData,
+    override val data: BrevFastInnholdData,
 ) : BrevDataFerdigstilling
 
 data class BrevDataRedigerbarNy(
-    val data: BrevRedigerbarInnholdData?,
+    override val data: BrevRedigerbarInnholdData?,
 ) : BrevDataRedigerbar
 
 data class BrevVedleggRedigerbarNy(
-    val data: BrevVedleggInnholdData?,
+    override val data: BrevVedleggInnholdData?,
     val vedlegg: Vedlegg,
     val vedleggId: BrevVedleggKey,
 ) : BrevDataRedigerbar
@@ -100,6 +106,7 @@ abstract class BrevFastInnholdData : BrevData {
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Brevkoder
     abstract val type: String
+    override val data: Any? = null
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -112,6 +119,7 @@ abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
 abstract class BrevVedleggInnholdData : BrevDataRedigerbar {
     abstract val brevKode: Vedlegg
     abstract val type: String
+    override val data: Any? = null
 }
 
 data class BrevInnholdVedlegg(

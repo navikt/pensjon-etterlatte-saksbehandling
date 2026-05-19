@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -28,6 +29,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingskomponentenFeil
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelse
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
@@ -94,7 +96,7 @@ class TilbakekrevingskomponentenKlient(
             type = TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
         )
 
-        return kontrollerResponse(response)
+        return kontrollerResponse(response, request, vedtak.sakId)
     }
 
     fun hentKravgrunnlag(
@@ -243,7 +245,8 @@ class TilbakekrevingskomponentenKlient(
                 kodeKlasse = klasseKode
                 belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
                 belopNy = nyBruttoUtbetaling.medToDesimaler()
-                belopTilbakekreves = krevIkkeNull(bruttoTilbakekreving?.medToDesimaler()) { "Tilbakekrevingsbeløp mangler" }
+                belopTilbakekreves =
+                    krevIkkeNull(bruttoTilbakekreving?.medToDesimaler()) { "Tilbakekrevingsbeløp mangler" }
                 belopSkatt = krevIkkeNull(skatt?.medToDesimaler()) { "Skattebeløp mangler" }
                 kodeResultat = krevIkkeNull(resultat?.name) { "Resultatkode mangler" }
                 kodeAarsak = mapFraTilbakekrevingAarsak(aarsak)
@@ -315,25 +318,62 @@ class TilbakekrevingskomponentenKlient(
         HENT_OMGJOERING("5"),
     }
 
-    private fun kontrollerResponse(response: TilbakekrevingsvedtakResponse) =
-        when (val alvorlighetsgrad = Alvorlighetsgrad.fromString(response.mmel.alvorlighetsgrad)) {
-            Alvorlighetsgrad.OK,
-            Alvorlighetsgrad.OK_MED_VARSEL,
-            -> {
-                Unit
-            }
+    private fun kontrollerResponse(
+        response: TilbakekrevingsvedtakResponse,
+        request: TilbakekrevingsvedtakRequest,
+        sakId: SakId,
+    ) = when (val alvorlighetsgrad = Alvorlighetsgrad.fromString(response.mmel.alvorlighetsgrad)) {
+        Alvorlighetsgrad.OK,
+        Alvorlighetsgrad.OK_MED_VARSEL,
+        -> {
+            Unit
+        }
 
-            Alvorlighetsgrad.ALVORLIG_FEIL -> {
+        Alvorlighetsgrad.ALVORLIG_FEIL -> {
+            val viHarbehandletDetteOkFoer =
+                if (response.mmel.beskrMelding.startsWith("Vedtaket er behandlet(BEHA)")) {
+                    // Vi har _kanskje_ behandlet dette før, så la oss dobbeltsjekke det
+                    val kvitteringer = hendelseRepository.finnHendelserForSak(sakId)
+                    val samlet = tilSendingOgKvittering(kvitteringer)
+                    val vedtakViProverAaSende = request.tilbakekrevingsvedtak.vedtakId
+                    val viHarBehandletOk =
+                        samlet.any {
+                            it.kvittering.mmel.alvorlighetsgrad in
+                                listOf(
+                                    Alvorlighetsgrad.OK.value,
+                                    Alvorlighetsgrad.OK_MED_VARSEL.value,
+                                ) &&
+                                it.sendt.tilbakekrevingsvedtak.vedtakId == vedtakViProverAaSende
+                        }
+                    viHarBehandletOk
+                } else {
+                    false
+                }
+
+            if (!viHarbehandletDetteOkFoer) {
                 val err = "Tilbakekreving ikke godkjent i tilbakekrevingskomponenten: ${response.mmel.beskrMelding}"
                 sikkerLogg.error(err, kv("response", response.toJson()))
                 throw TilbakekrevingskomponentenFeil(err)
-            }
-            Alvorlighetsgrad.SQL_FEIL -> {
-                val err = "Tilbakekrevingsvedtak feilet med alvorlighetsgrad $alvorlighetsgrad"
-                sikkerLogg.error(err, kv("response", response.toJson()))
-                throw InternfeilException(err)
+            } else {
+                logger.warn(
+                    "Tilbakekrevingsvedtak med id=${request.tilbakekrevingsvedtak.vedtakId} i sak $sakId " +
+                        "er allerede behandlet. Rapporterer at det er ingen feil i sendingen.",
+                )
+                sikkerLogg.warn(
+                    "Tilbakekrevingsvedtak er allerede behandlet, fikk feil ${response.mmel.beskrMelding} " +
+                        "på ny behandling",
+                    kv("request", request),
+                    kv("response", response),
+                )
             }
         }
+
+        Alvorlighetsgrad.SQL_FEIL -> {
+            val err = "Tilbakekrevingsvedtak feilet med alvorlighetsgrad $alvorlighetsgrad"
+            sikkerLogg.error(err, kv("response", response.toJson()))
+            throw InternfeilException(err)
+        }
+    }
 
     enum class Alvorlighetsgrad(
         val value: String,
@@ -375,6 +415,41 @@ class TilbakekrevingskomponentenKlient(
     private fun LocalDate.toXMLDate(): XMLGregorianCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(toString())
 
     private fun Int.medToDesimaler() = this.toBigDecimal().setScale(2)
+}
+
+data class TilbakekrevingSendtMedKvittering(
+    val sendt: TilbakekrevingsvedtakRequest,
+    val kvittering: TilbakekrevingsvedtakResponse,
+    val hendelsePar: Pair<TilbakekrevingHendelse, TilbakekrevingHendelse>,
+)
+
+fun tilSendingOgKvittering(hendelser: List<TilbakekrevingHendelse>): List<TilbakekrevingSendtMedKvittering> {
+    val relevanteHendelserIStigendeRekkefolge =
+        hendelser
+            .filter {
+                it.type == TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT ||
+                    it.type == TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING
+            }.sortedBy { it.opprettet }
+
+    // ZipWithNext gir oss nå par av (SENDT, KVITTERING) og (KVITTERING, SENDT) -- vi er kun interessert i (SENDT, _),
+    // så alle par som starter med (KVITTERING, _) filterer vi ut
+    val hendelserKombinert =
+        relevanteHendelserIStigendeRekkefolge
+            .zipWithNext()
+            .filter { it.first.type == TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT }
+            .map { hendelsePar ->
+                val (sendt, kvittering) = hendelsePar
+                if (kvittering.type == TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING) {
+                    TilbakekrevingSendtMedKvittering(
+                        sendt = objectMapper.readValue(sendt.payload),
+                        kvittering = objectMapper.readValue(kvittering.payload),
+                        hendelsePar = hendelsePar,
+                    )
+                } else {
+                    throw InternfeilException("Vi har inkonsekvente hendelser mellom sendt/mottatt kvittering")
+                }
+            }
+    return hendelserKombinert
 }
 
 private class CustomXMLGregorianCalendarModule : SimpleModule() {

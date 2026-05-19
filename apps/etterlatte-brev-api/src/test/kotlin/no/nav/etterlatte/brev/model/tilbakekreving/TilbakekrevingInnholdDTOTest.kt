@@ -36,7 +36,7 @@ class TilbakekrevingInnholdDTOTest {
                 brevData().sak.sakType,
                 brevData().utlandstilknytning?.type,
                 brevData().personerISak.soeker.formaterNavn(),
-            ).sakType shouldBe SakType.OMSTILLINGSSTOENAD
+            ).data.sakType shouldBe SakType.OMSTILLINGSSTOENAD
     }
 
     @Test
@@ -63,7 +63,7 @@ class TilbakekrevingInnholdDTOTest {
                 brevData.sak.sakType,
                 brevData.utlandstilknytning?.type,
                 brevData.personerISak.soeker.formaterNavn(),
-            )
+            ).data
 
         data.tilbakekreving.perioder.size shouldBe 1
         with(data.tilbakekreving.perioder[0]) {
@@ -110,7 +110,7 @@ class TilbakekrevingInnholdDTOTest {
                 brevData.sak.sakType,
                 brevData.utlandstilknytning?.type,
                 brevData.personerISak.soeker.formaterNavn(),
-            ).tilbakekreving.summer shouldBe
+            ).data.tilbakekreving.summer shouldBe
             TilbakekrevingBeloeperData(
                 feilutbetaling = Kroner(200),
                 bruttoTilbakekreving = Kroner(400),

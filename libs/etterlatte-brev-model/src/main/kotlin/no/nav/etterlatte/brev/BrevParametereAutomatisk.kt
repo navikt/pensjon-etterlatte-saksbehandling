@@ -20,7 +20,7 @@ sealed class BrevParametereAutomatisk {
         override val brevkode: Brevkoder = Brevkoder.BP_INFORMASJON_DOEDSFALL,
     ) : BrevParametereAutomatisk() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            BarnepensjonInformasjonDoedsfall(
+            BarnepensjonInformasjonDoedsfall.fra(
                 avdoedNavn = avdoedNavn,
                 borIutland = bosattUtland,
                 erOver18aar = erOver18Aar,
@@ -34,7 +34,7 @@ sealed class BrevParametereAutomatisk {
         override val brevkode: Brevkoder = Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT,
     ) : BrevParametereAutomatisk() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
+            BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt.fra(
                 avdoedNavn = avdoedNavn,
                 borIutland = borIutland,
             )
@@ -47,7 +47,7 @@ sealed class BrevParametereAutomatisk {
         override val brevkode: Brevkoder = Brevkoder.OMS_INFORMASJON_DOEDSFALL,
     ) : BrevParametereAutomatisk() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            OmstillingsstoenadInformasjonDoedsfall(
+            OmstillingsstoenadInformasjonDoedsfall.fra(
                 avdoedNavn = avdoedNavn,
                 borIutland = bosattUtland,
             )

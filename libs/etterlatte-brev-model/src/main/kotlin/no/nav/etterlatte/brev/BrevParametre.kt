@@ -6,16 +6,22 @@ import no.nav.etterlatte.brev.model.KlageSaksbehandlingstidData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknad
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknadData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnhentingAvOpplysninger
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInnhentingAvOpplysningerData
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon10mndBrevdata
+import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon10mndBrevdataData
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon4MndBrevdata
+import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon4MndBrevdataData
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon6MndBrevdata
+import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon6MndBrevdataData
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonMottattSoeknad
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonMottattSoeknadData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnhentingAvOpplysninger
-import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnhentingAvOpplysningerData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 
@@ -37,7 +43,7 @@ sealed class BrevParametre {
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            AktivitetspliktInformasjon4MndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland, halvtGrunnbeloep)
+            AktivitetspliktInformasjon4MndBrevdata(AktivitetspliktInformasjon4MndBrevdataData(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland, halvtGrunnbeloep))
     }
 
     @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND")
@@ -51,7 +57,7 @@ sealed class BrevParametre {
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            AktivitetspliktInformasjon10mndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland, halvtGrunnbeloep)
+            AktivitetspliktInformasjon10mndBrevdata(AktivitetspliktInformasjon10mndBrevdataData(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland, halvtGrunnbeloep))
     }
 
     // Denne brukes kun til varig unntak som har egen manuel flyt
@@ -64,7 +70,7 @@ sealed class BrevParametre {
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            AktivitetspliktInformasjon6MndBrevdata(redusertEtterInntekt, nasjonalEllerUtland, halvtGrunnbeloep)
+            AktivitetspliktInformasjon6MndBrevdata(AktivitetspliktInformasjon6MndBrevdataData(redusertEtterInntekt, nasjonalEllerUtland, halvtGrunnbeloep))
     }
 
     @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD")
@@ -76,8 +82,10 @@ sealed class BrevParametre {
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
             OmstillingsstoenadInformasjonMottattSoeknad(
-                mottattDato = mottattDato,
-                borINorgeEllerIkkeAvtaleland = borINorgeEllerIkkeAvtaleland,
+                data = OmstillingsstoenadInformasjonMottattSoeknadData(
+                    mottattDato = mottattDato,
+                    borINorgeEllerIkkeAvtaleland = borINorgeEllerIkkeAvtaleland,
+                ),
             )
     }
 
@@ -87,7 +95,7 @@ sealed class BrevParametre {
         val borIUtlandet: Boolean,
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
     ) : BrevParametre() {
-        override fun brevDataMapping(): BrevDataRedigerbar = OmstillingsstoenadInnhentingAvOpplysninger(borIUtlandet = borIUtlandet)
+        override fun brevDataMapping(): BrevDataRedigerbar = OmstillingsstoenadInnhentingAvOpplysninger(data = OmstillingsstoenadInnhentingAvOpplysningerData(borIUtlandet = borIUtlandet))
     }
 
     @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD")
@@ -98,7 +106,7 @@ sealed class BrevParametre {
         override val brevkode: Brevkoder = Brevkoder.OMS_INFORMASJON_DOEDSFALL,
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            OmstillingsstoenadInformasjonDoedsfall(
+            OmstillingsstoenadInformasjonDoedsfall.fra(
                 avdoedNavn = avdoedNavn,
                 borIutland = bosattUtland,
             )
@@ -113,7 +121,7 @@ sealed class BrevParametre {
         override val brevkode: Brevkoder = Brevkoder.BP_INFORMASJON_DOEDSFALL,
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
-            BarnepensjonInformasjonDoedsfall(
+            BarnepensjonInformasjonDoedsfall.fra(
                 avdoedNavn = avdoedNavn,
                 borIutland = bosattUtland,
                 erOver18aar = erOver18Aar,
@@ -131,10 +139,12 @@ sealed class BrevParametre {
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
             BarnepensjonInformasjonMottattSoeknad(
-                mottattDato = mottattDato,
-                borINorgeEllerIkkeAvtaleland = borINorgeEllerIkkeAvtaleland,
-                erOver18aar = erOver18aar,
-                bosattUtland = bosattUtland,
+                data = BarnepensjonInformasjonMottattSoeknadData(
+                    mottattDato = mottattDato,
+                    borINorgeEllerIkkeAvtaleland = borINorgeEllerIkkeAvtaleland,
+                    erOver18aar = erOver18aar,
+                    bosattUtland = bosattUtland,
+                ),
             )
     }
 
@@ -147,8 +157,10 @@ sealed class BrevParametre {
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
             BarnepensjonInnhentingAvOpplysninger(
-                erOver18aar = erOver18aar,
-                borIUtlandet = borIUtlandet,
+                data = BarnepensjonInnhentingAvOpplysningerData(
+                    erOver18aar = erOver18aar,
+                    borIUtlandet = borIUtlandet,
+                ),
             )
     }
 
@@ -163,7 +175,7 @@ sealed class BrevParametre {
         override val brevkode: Brevkoder = Brevkoder.KLAGE_SAKSBEHANDLINGSTID
 
         override fun brevDataMapping(): BrevDataRedigerbar =
-            KlageSaksbehandlingstidData(
+            KlageSaksbehandlingstidData.fra(
                 datoMottatKlage = datoMottatKlage,
                 datoForVedtak = datoForVedtak,
                 borIUtlandet = borIUtlandet,

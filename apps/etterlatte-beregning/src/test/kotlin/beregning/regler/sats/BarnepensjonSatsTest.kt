@@ -98,62 +98,62 @@ internal class BarnepensjonSatsTest {
     }
 
     @Test
-    fun `belopForFoersteBarn skal returnere 3716,00 kroner`() {
+    fun `belopForFoersteBarn skal returnere 3715,90 kroner`() {
         val resultat =
             belopForFoersteBarn1967.anvend(
                 grunnlag = barnepensjonGrunnlag(),
                 periode = REGEL_PERIODE,
             )
 
-        resultat.verdi shouldBe 3716.00.toBeregningstall(DESIMALER_DELBEREGNING)
+        resultat.verdi shouldBe 3715.9.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
-    fun `belopForEtterfoelgendeBarn skal returnere 2322,50 kroner`() {
+    fun `belopForEtterfoelgendeBarn skal returnere 2322,44 kroner`() {
         val resultat =
             belopForEtterfoelgendeBarn1967.anvend(
                 grunnlag = barnepensjonGrunnlag(),
                 periode = REGEL_PERIODE,
             )
 
-        resultat.verdi shouldBe 2322.50.toBeregningstall(DESIMALER_DELBEREGNING)
+        resultat.verdi shouldBe 2322.4375.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
-    fun `barnepensjonSatsRegel skal returnere 3716,00 kroner ved 0 soesken`() {
+    fun `barnepensjonSatsRegel skal returnere 3715,90 kroner ved 0 soesken`() {
         val resultat =
             barnepensjonSatsRegel.anvend(
                 grunnlag = barnepensjonGrunnlag(),
                 periode = REGEL_PERIODE,
             )
 
-        resultat.verdi shouldBe 3716.00.toBeregningstall(DESIMALER_DELBEREGNING)
+        resultat.verdi shouldBe 3715.9.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
-    fun `barnepensjonSatsRegel skal returnere 3019,25 kroner ved 1 soesken`() {
+    fun `barnepensjonSatsRegel skal returnere 3019,17 kroner ved 1 soesken`() {
         val resultat =
             barnepensjonSatsRegel.anvend(
                 grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER)),
                 periode = REGEL_PERIODE,
             )
 
-        resultat.verdi shouldBe 3019.25.toBeregningstall(DESIMALER_DELBEREGNING)
+        resultat.verdi shouldBe 3019.16875.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
-    fun `barnepensjonSatsRegel skal returnere 2787,00 kroner ved 2 soesken`() {
+    fun `barnepensjonSatsRegel skal returnere 2786,93 kroner ved 2 soesken`() {
         val resultat =
             barnepensjonSatsRegel.anvend(
                 grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)),
                 periode = REGEL_PERIODE,
             )
 
-        resultat.verdi shouldBe 2787.00.toBeregningstall(DESIMALER_DELBEREGNING)
+        resultat.verdi shouldBe 2786.925.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test
-    fun `barnepensjonSatsRegel skal returnere 2670,887 kroner ved 3 soesken`() {
+    fun `barnepensjonSatsRegel skal returnere 2670,80 kroner ved 3 soesken`() {
         val resultat =
             barnepensjonSatsRegel.anvend(
                 grunnlag =
@@ -163,7 +163,7 @@ internal class BarnepensjonSatsTest {
                 periode = REGEL_PERIODE,
             )
 
-        resultat.verdi shouldBe 2670.875.toBeregningstall(DESIMALER_DELBEREGNING)
+        resultat.verdi shouldBe 2670.803125.toBeregningstall(DESIMALER_DELBEREGNING)
     }
 
     @Test

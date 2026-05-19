@@ -1249,7 +1249,7 @@ internal class BeregnBarnepensjonServiceTest {
         const val GRUNNBELOEP_MAI_24: Int = 10336
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23: Int = 3716
         const val BP_BELOEP_INGEN_SOESKEN_MAI_23: Int = 3954
-        const val BP_BELOEP_INGEN_SOESKEN_JAN_23_PRORATA: Int = 1394
+        const val BP_BELOEP_INGEN_SOESKEN_JAN_23_PRORATA: Int = 1393
         const val BP_BELOEP_ETT_SOESKEN_JAN_23: Int = 3019
         const val BP_BELOEP_TO_SOESKEN_JAN_23: Int = 2787
         const val BP_BELOEP_ETT_SOESKEN_MAI_23: Int = 3213

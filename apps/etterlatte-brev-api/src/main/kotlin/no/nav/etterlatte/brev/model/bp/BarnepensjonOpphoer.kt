@@ -14,13 +14,17 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import java.time.LocalDate
 
-data class BarnepensjonOpphoer(
-    override val innhold: List<Slate.Element>,
-    val innholdForhaandsvarsel: List<Slate.Element>,
+data class BarnepensjonOpphoerData(
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val virkningsdato: LocalDate,
     val feilutbetaling: FeilutbetalingType,
+    val innholdForhaandsvarsel: List<Slate.Element>,
+)
+
+data class BarnepensjonOpphoer(
+    override val innhold: List<Slate.Element>,
+    override val data: BarnepensjonOpphoerData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -36,31 +40,39 @@ data class BarnepensjonOpphoer(
 
             return BarnepensjonOpphoer(
                 innhold = innhold.innhold(),
-                innholdForhaandsvarsel =
-                    vedleggHvisFeilutbetaling(
-                        feilutbetaling,
-                        innhold,
-                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                    ),
-                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
-                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                virkningsdato = krevIkkeNull(virkningsdato) { "Virkningsdato mangler" },
-                feilutbetaling = feilutbetaling,
+                data = BarnepensjonOpphoerData(
+                    innholdForhaandsvarsel =
+                        vedleggHvisFeilutbetaling(
+                            feilutbetaling,
+                            innhold,
+                            BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
+                    brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
+                    bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                    virkningsdato = krevIkkeNull(virkningsdato) { "Virkningsdato mangler" },
+                    feilutbetaling = feilutbetaling,
+                ),
             )
         }
     }
 }
 
-data class BarnepensjonOpphoerRedigerbarUtfall(
+data class BarnepensjonOpphoerRedigerbarUtfallData(
     val feilutbetaling: FeilutbetalingType,
+)
+
+data class BarnepensjonOpphoerRedigerbarUtfall(
+    override val data: BarnepensjonOpphoerRedigerbarUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(brevutfall: BrevutfallDto): BarnepensjonOpphoerRedigerbarUtfall =
             BarnepensjonOpphoerRedigerbarUtfall(
-                feilutbetaling =
-                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                        "Feilutbetaling mangler i brevutfall"
-                    },
+                data = BarnepensjonOpphoerRedigerbarUtfallData(
+                    feilutbetaling =
+                        krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                            "Feilutbetaling mangler i brevutfall"
+                        },
+                ),
             )
     }
 }

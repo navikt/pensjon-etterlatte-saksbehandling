@@ -602,7 +602,7 @@ class EtteroppgjoerForbehandlingService(
                 innvilgetPeriode = innvilgetPeriode,
                 sisteIverksatteBehandling = sisteVedtakMedAvkorting.behandlingId,
                 harVedtakAvTypeOpphoer = vedtakMedGjeldendeOpphoer != null,
-            )
+            ).also { dao.lagreForbehandling(it) }
     }
 
     private fun utledInnvilgetPeriode(

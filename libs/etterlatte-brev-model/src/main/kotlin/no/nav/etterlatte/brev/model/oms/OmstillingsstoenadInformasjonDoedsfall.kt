@@ -1,20 +1,25 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.BrevDataRedigerbar
-import no.nav.etterlatte.brev.behandling.Avdoed
 
-class OmstillingsstoenadInformasjonDoedsfall(
+data class OmstillingsstoenadInformasjonDoedsfallData(
     val avdoedNavn: String,
     val borIutland: Boolean,
+)
+
+class OmstillingsstoenadInformasjonDoedsfall(
+    override val data: OmstillingsstoenadInformasjonDoedsfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             borIutland: Boolean,
-            avdoede: List<Avdoed>,
+            avdoedNavn: String,
         ): OmstillingsstoenadInformasjonDoedsfall =
             OmstillingsstoenadInformasjonDoedsfall(
-                avdoedNavn = avdoede.first().navn,
-                borIutland = borIutland,
+                data = OmstillingsstoenadInformasjonDoedsfallData(
+                    avdoedNavn = avdoedNavn,
+                    borIutland = borIutland,
+                ),
             )
     }
 }

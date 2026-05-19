@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Sanksjon
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.junit.jupiter.api.Nested
@@ -517,6 +517,134 @@ class AvkortingValiderTest {
                 true,
             )
         krav shouldContainExactly listOf(2024, 2025)
+    }
+
+    @Nested
+    inner class VirkFlyttetBakoverForFoersteAarsoppgjoerFom {
+        private val eksisterendeAvkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        aarsoppgjoer(aar = 2025, fom = YearMonth.of(2025, Month.MARCH)),
+                    ),
+            )
+
+        @Test
+        fun `Kaster feil når ny inntekt mangler for utvidet år`() {
+            val virk = YearMonth.of(2025, Month.JANUARY)
+            val ex =
+                assertThrows<UgyldigForespoerselException> {
+                    validerInntekter(
+                        behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                        beregning =
+                            beregning(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2025, Month.MARCH),
+                                    datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                                ),
+                            ),
+                        eksisterendeAvkorting = eksisterendeAvkorting,
+                        nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.MARCH))),
+                        sanksjoner = emptyList(),
+                        krevInntektForNesteAar = false,
+                        naa = virk,
+                    )
+                }
+            assertEquals("MANGLER_NY_INNTEKT_UTVIDET_AAR", ex.code)
+        }
+
+        @Test
+        fun `Kaster ikke feil når ny inntekt er oppgitt fra januar for utvidet år`() {
+            val virk = YearMonth.of(2025, Month.JANUARY)
+            validerInntekter(
+                behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                beregning =
+                    beregning(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2025, Month.JANUARY),
+                            datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                        ),
+                    ),
+                eksisterendeAvkorting = eksisterendeAvkorting,
+                nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.JANUARY))),
+                sanksjoner = emptyList(),
+                krevInntektForNesteAar = false,
+                naa = virk,
+            )
+        }
+
+        @Test
+        fun `Kaster ikke feil når ny inntekt er oppgitt fra virk for utvidet år`() {
+            val virk = YearMonth.of(2025, Month.FEBRUARY)
+            validerInntekter(
+                behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                beregning =
+                    beregning(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2025, Month.FEBRUARY),
+                            datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                        ),
+                    ),
+                eksisterendeAvkorting = eksisterendeAvkorting,
+                nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.FEBRUARY))),
+                sanksjoner = emptyList(),
+                krevInntektForNesteAar = false,
+                naa = virk,
+            )
+        }
+
+        @Test
+        fun `Kaster ikke feil når tidligste aarsoppgjoer allerede starter fra januar`() {
+            val eksisterendeMedJanuarFom =
+                Avkorting(
+                    aarsoppgjoer = listOf(aarsoppgjoer(aar = 2025, fom = YearMonth.of(2025, Month.JANUARY))),
+                )
+            validerInntekter(
+                behandling = behandling(BehandlingType.REVURDERING, virk = YearMonth.of(2025, Month.JANUARY)),
+                beregning =
+                    beregning(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2025, Month.JANUARY),
+                            datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                        ),
+                    ),
+                eksisterendeAvkorting = eksisterendeMedJanuarFom,
+                nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.MARCH))),
+                sanksjoner = emptyList(),
+                krevInntektForNesteAar = false,
+                naa = YearMonth.of(2025, Month.JANUARY),
+            )
+        }
+
+        @Test
+        fun `Kaster ikke feil når virk er etter tidligste aarsoppgjoer fom`() {
+            val virk = YearMonth.of(2025, Month.MARCH)
+            validerInntekter(
+                behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                beregning =
+                    beregning(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2025, Month.MARCH),
+                            datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                        ),
+                    ),
+                eksisterendeAvkorting = eksisterendeAvkorting,
+                nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.APRIL))),
+                sanksjoner = emptyList(),
+                krevInntektForNesteAar = false,
+                naa = virk,
+            )
+        }
+
+        private fun inntektDto(fom: YearMonth) =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 0,
+                spesifikasjon = "",
+                fom = fom,
+            )
     }
 
     private fun behandling(

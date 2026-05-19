@@ -83,8 +83,26 @@ class AvkortingService(
                     sanksjoner = sanksjonService.hentSanksjon(behandlingId),
                     krevInntektForNesteAar = skalKreveInntektNesteAar,
                 ).toSet()
+        // Hvis vi har en eksisterende avkorting der den første inntekten ikke gjelder fra januar, og vi har
+        // i denne behandlingen som er før den første virk vi allerede har på årsoppgjør må vi også kreve det
+        // året som en ny inntekt
+        val tidligsteInntektFom =
+            avkorting
+                ?.aarsoppgjoer
+                .orEmpty()
+                .minByOrNull { it.fom }
+                ?.fom
+        val ekstraAar =
+            if (tidligsteInntektFom != null && tidligsteInntektFom.month != Month.JANUARY &&
+                tidligsteInntektFom > behandling.virkningstidspunkt!!.dato
+            ) {
+                tidligsteInntektFom.year
+            } else {
+                null
+            }
         val manglendeAar = paakrevdeAar - aarMedAvkorting
-        return manglendeAar.sorted()
+        val alleAarMedBehovForNyInntekt = manglendeAar.toList() + ekstraAar
+        return alleAarMedBehovForNyInntekt.filterNotNull().sorted()
     }
 
     suspend fun hentOpprettEllerReberegnAvkorting(
@@ -455,7 +473,8 @@ class AvkortingService(
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): MaanederMedGammelSanksjonIAvkorting {
-        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
+        val avkorting =
+            avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
 
         val aarsoppgjoerInntektsaarEksisterende =
             avkorting.aarsoppgjoer.singleOrNull { it.aar == inntektsaar }

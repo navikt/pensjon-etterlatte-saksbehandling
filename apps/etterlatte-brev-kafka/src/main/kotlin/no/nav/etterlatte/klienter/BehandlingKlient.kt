@@ -5,19 +5,45 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
-class GrunnlagKlient(
+class BehandlingKlient(
     config: Config,
     private val httpClient: HttpClient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val baseUrl = config.getString("behandling.resource.url")
+
+    internal suspend fun hentSak(sakId: SakId): Sak? {
+        try {
+            logger.info("Henter sak $sakId")
+            return retryOgPakkUt { httpClient.get("$baseUrl/api/sak/$sakId").body<Sak>() }
+        } catch (responseException: ResponseException) {
+            logger.info("Feil ved henting av sak $sakId", responseException)
+            val responseBody =
+                try {
+                    responseException.response.body<ExceptionResponse>()
+                } catch (parseException: Exception) {
+                    logger.error("Feil ved parsing av feil fra behandling ved henting av sak $sakId", parseException)
+                    throw responseException
+                }
+            if (responseBody.code == GenerellIkkeFunnetException().code) {
+                // Denne saken finnes ikke
+                return null
+            } else {
+                // Vi vet ikke hvorfor vi har fått en feil i hentingen av sak, bobler opp
+                throw responseException
+            }
+        }
+    }
 
     internal suspend fun hentGrunnlagForSak(sakid: SakId): Grunnlag {
         try {

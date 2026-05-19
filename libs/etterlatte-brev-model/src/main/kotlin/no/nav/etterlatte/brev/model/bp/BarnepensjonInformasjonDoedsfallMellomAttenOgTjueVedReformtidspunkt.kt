@@ -1,20 +1,25 @@
 package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.BrevDataRedigerbar
-import no.nav.etterlatte.brev.behandling.Avdoed
 
-data class BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
+data class BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktData(
     val avdoedNavn: String,
     val borIutland: Boolean,
+)
+
+data class BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
+    override val data: BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             borIutland: Boolean,
-            avdoede: List<Avdoed>,
+            avdoedNavn: String,
         ): BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt =
             BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
-                avdoedNavn = avdoede.first().navn,
-                borIutland = borIutland,
+                data = BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktData(
+                    avdoedNavn = avdoedNavn,
+                    borIutland = borIutland,
+                ),
             )
     }
 }

@@ -32,7 +32,7 @@ val institusjonsoppholdSatsRegel =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finner satsen for institusjonsoppholdberegning",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUKSJON-INSTITUSJON"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUKSJON-INSTITUSJON", versjon = "2"),
     ) benytter grunnbeloep og institusjonsoppholdRegel med { grunnbeloep, prosent ->
-        Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned)
+        Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloep).divide(12)
     }

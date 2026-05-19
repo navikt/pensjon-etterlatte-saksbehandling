@@ -5,6 +5,9 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
@@ -17,6 +20,8 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.etteroppgjoer
 import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
@@ -26,15 +31,49 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 import kotlin.test.assertEquals
 
 internal class AvkortingTest {
+    @BeforeEach
+    fun `mock grunnbeloep`() {
+        mockkObject(GrunnbeloepRepository)
+        every { GrunnbeloepRepository.historiskeGrunnbeloep } returns
+            listOf(
+                Grunnbeloep(
+                    dato = YearMonth.of(2023, 5),
+                    grunnbeloep = 118620,
+                    grunnbeloepPerMaaned = 9885,
+                    omregningsfaktor = BigDecimal("1.045591"),
+                ),
+                Grunnbeloep(
+                    dato = YearMonth.of(2024, 5),
+                    grunnbeloep = 124028,
+                    grunnbeloepPerMaaned = 10336,
+                    omregningsfaktor = BigDecimal("1.064076"),
+                ),
+                Grunnbeloep(
+                    dato = YearMonth.of(2025, 5),
+                    grunnbeloep = 130160,
+                    grunnbeloepPerMaaned = 10847,
+                    omregningsfaktor = BigDecimal("1.049440"),
+                ),
+            )
+    }
+
+    @AfterEach
+    fun `unmock grunnbeloep`() {
+        unmockkObject(GrunnbeloepRepository)
+    }
+
     @Nested
     inner class AvkortigTilDto {
         val avkorting =

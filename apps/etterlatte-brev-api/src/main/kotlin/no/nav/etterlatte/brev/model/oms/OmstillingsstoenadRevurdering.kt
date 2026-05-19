@@ -32,9 +32,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
-data class OmstillingsstoenadRevurdering(
-    override val innhold: List<Slate.Element>,
-    val innholdForhaandsvarsel: List<Slate.Element>,
+data class OmstillingsstoenadRevurderingData(
     val erEndret: Boolean,
     val erOmgjoering: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
@@ -44,9 +42,15 @@ data class OmstillingsstoenadRevurdering(
     val bosattUtland: Boolean,
     val erInnvilgelsesaar: Boolean,
     val tidligereFamiliepleier: Boolean,
+    val innholdForhaandsvarsel: List<Slate.Element>,
+)
+
+data class OmstillingsstoenadRevurdering(
+    override val innhold: List<Slate.Element>,
+    override val data: OmstillingsstoenadRevurderingData,
 ) : BrevDataFerdigstilling {
     init {
-        if (erOmgjoering && datoVedtakOmgjoering == null) {
+        if (data.erOmgjoering && data.datoVedtakOmgjoering == null) {
             throw InternfeilException(
                 "Kunne ikke lage revurderingsbrevet for omstillingsstønad siden vi ikke" +
                     " fikk dato vedtak for omgjøring, i en revurdering som er omgjøring.",
@@ -87,41 +91,43 @@ data class OmstillingsstoenadRevurdering(
 
             return OmstillingsstoenadRevurdering(
                 innhold = innholdMedVedlegg.innhold(),
-                innholdForhaandsvarsel =
-                    vedleggHvisFeilutbetaling(
-                        feilutbetaling,
-                        innholdMedVedlegg,
-                        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
-                    ),
-                erEndret =
-                    avkortingsinfo.endringIUtbetalingVedVirk ||
-                        revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
-                erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                datoVedtakOmgjoering = datoVedtakOmgjoering,
-                beregning =
-                    OmstillingsstoenadBeregning(
-                        innhold = innholdMedVedlegg(innholdMedVedlegg, behandling),
-                        virkningsdato = avkortingsinfo.virkningsdato,
-                        beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = sisteBeregningsperiode,
-                        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-                        trygdetid =
-                            trygdetid.fromDto(
-                                beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = null,
-                                landKodeverk = landKodeverk,
-                            ),
-                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                        opphoerNesteAar =
-                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
-                        erYrkesskade = trygdetid.erYrkesskade(),
-                    ),
-                omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
-                feilutbetaling = feilutbetaling,
-                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                erInnvilgelsesaar = avkortingsinfo.erInnvilgelsesaar,
-                tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
+                data = OmstillingsstoenadRevurderingData(
+                    innholdForhaandsvarsel =
+                        vedleggHvisFeilutbetaling(
+                            feilutbetaling,
+                            innholdMedVedlegg,
+                            BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
+                    erEndret =
+                        avkortingsinfo.endringIUtbetalingVedVirk ||
+                            revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
+                    erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+                    datoVedtakOmgjoering = datoVedtakOmgjoering,
+                    beregning =
+                        OmstillingsstoenadBeregning(
+                            innhold = innholdMedVedlegg(innholdMedVedlegg, behandling),
+                            virkningsdato = avkortingsinfo.virkningsdato,
+                            beregningsperioder = beregningsperioder,
+                            sisteBeregningsperiode = sisteBeregningsperiode,
+                            sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+                            trygdetid =
+                                trygdetid.fromDto(
+                                    beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                                    beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
+                                    navnAvdoed = null,
+                                    landKodeverk = landKodeverk,
+                                ),
+                            oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                            opphoerNesteAar =
+                                beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                            erYrkesskade = trygdetid.erYrkesskade(),
+                        ),
+                    omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
+                    feilutbetaling = feilutbetaling,
+                    bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                    erInnvilgelsesaar = avkortingsinfo.erInnvilgelsesaar,
+                    tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
+                ),
             )
         }
 
@@ -137,7 +143,7 @@ data class OmstillingsstoenadRevurdering(
     }
 }
 
-data class OmstillingsstoenadRevurderingRedigerbartUtfall(
+data class OmstillingsstoenadRevurderingRedigerbartUtfallData(
     val beregning: OmstillingsstoenadBeregningRedigerbartUtfall,
     val erEndret: Boolean,
     val erEtterbetaling: Boolean,
@@ -148,6 +154,10 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val inntekt: Kroner,
     val inntektsAar: Int,
     val mottattInntektendringAutomatisk: LocalDate?,
+)
+
+data class OmstillingsstoenadRevurderingRedigerbartUtfall(
+    override val data: OmstillingsstoenadRevurderingRedigerbartUtfallData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -164,44 +174,46 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
             val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
 
             return OmstillingsstoenadRevurderingRedigerbartUtfall(
-                beregning =
-                    OmstillingsstoenadBeregningRedigerbartUtfall(
-                        virkningsdato = avkortingsinfo.virkningsdato,
-                        beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = sisteBeregningsperiode,
-                        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                        opphoerNesteAar =
-                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
-                    ),
-                erEndret =
-                    avkortingsinfo.endringIUtbetalingVedVirk ||
-                        revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
-                erEtterbetaling = etterbetaling != null,
-                etterbetaling =
-                    etterbetaling?.let {
-                        Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
-                            etterbetaling,
-                            beregningsperioder,
-                        )
-                    },
-                feilutbetaling =
-                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
-                        "Feilutbetaling mangler i brevutfall"
-                    },
-                harFlereUtbetalingsperioder = beregningsperioder.size > 1,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                inntekt = sisteBeregningsperiode.inntekt,
-                inntektsAar = sisteBeregningsperiode.datoFOM.year,
-                mottattInntektendringAutomatisk =
-                    if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
-                        behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING
-                    ) {
-                        behandling.mottattDato?.toLocalDate()
-                            ?: throw InternfeilException("Automatisk inntektsendring må ha mottatt dato")
-                    } else {
-                        null
-                    },
+                data = OmstillingsstoenadRevurderingRedigerbartUtfallData(
+                    beregning =
+                        OmstillingsstoenadBeregningRedigerbartUtfall(
+                            virkningsdato = avkortingsinfo.virkningsdato,
+                            beregningsperioder = beregningsperioder,
+                            sisteBeregningsperiode = sisteBeregningsperiode,
+                            sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+                            oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                            opphoerNesteAar =
+                                beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        ),
+                    erEndret =
+                        avkortingsinfo.endringIUtbetalingVedVirk ||
+                            revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
+                    erEtterbetaling = etterbetaling != null,
+                    etterbetaling =
+                        etterbetaling?.let {
+                            Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
+                                etterbetaling,
+                                beregningsperioder,
+                            )
+                        },
+                    feilutbetaling =
+                        krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                            "Feilutbetaling mangler i brevutfall"
+                        },
+                    harFlereUtbetalingsperioder = beregningsperioder.size > 1,
+                    harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    inntekt = sisteBeregningsperiode.inntekt,
+                    inntektsAar = sisteBeregningsperiode.datoFOM.year,
+                    mottattInntektendringAutomatisk =
+                        if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
+                            behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING
+                        ) {
+                            behandling.mottattDato?.toLocalDate()
+                                ?: throw InternfeilException("Automatisk inntektsendring må ha mottatt dato")
+                        } else {
+                            null
+                        },
+                ),
             )
         }
     }

@@ -7,10 +7,11 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
+data class BarnepensjonAvslagData(val brukerUnder18Aar: Boolean, val bosattUtland: Boolean)
+
 data class BarnepensjonAvslag(
     override val innhold: List<Slate.Element>,
-    val brukerUnder18Aar: Boolean,
-    val bosattUtland: Boolean,
+    override val data: BarnepensjonAvslagData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -20,15 +21,21 @@ data class BarnepensjonAvslag(
         ): BarnepensjonAvslag =
             BarnepensjonAvslag(
                 innhold = innhold.innhold(),
-                brukerUnder18Aar = brukerUnder18Aar,
-                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                data = BarnepensjonAvslagData(
+                    brukerUnder18Aar = brukerUnder18Aar,
+                    bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                ),
             )
     }
 }
 
-data class BarnepensjonAvslagRedigerbar(
+data class BarnepensjonAvslagRedigerbartData(
     val erSluttbehandling: Boolean,
     val avdoedNavn: String,
+)
+
+data class BarnepensjonAvslagRedigerbar(
+    override val data: BarnepensjonAvslagRedigerbartData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -36,10 +43,12 @@ data class BarnepensjonAvslagRedigerbar(
             erSluttbehandling: Boolean,
         ): BarnepensjonAvslagRedigerbar =
             BarnepensjonAvslagRedigerbar(
-                erSluttbehandling = erSluttbehandling,
-                avdoedNavn =
-                    avdoede.firstOrNull()?.navn
-                        ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
+                data = BarnepensjonAvslagRedigerbartData(
+                    erSluttbehandling = erSluttbehandling,
+                    avdoedNavn =
+                        avdoede.firstOrNull()?.navn
+                            ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
+                ),
             )
     }
 }

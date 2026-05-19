@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 data class AvvistKlageFerdigData(
     override val innhold: List<Slate.Element>,
-    val data: AvvistKlageInnholdBrevData,
+override val data: AvvistKlageInnholdBrevData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -26,11 +26,15 @@ data class AvvistKlageFerdigData(
     }
 }
 
-data class AvvistKlageInnholdBrevData(
+data class AvvistKlageInnholdBrevDataData(
     val sakType: SakType,
     val klageDato: LocalDate,
     val datoForVedtaketKlagenGjelder: LocalDate?,
     val bosattUtland: Boolean,
+)
+
+data class AvvistKlageInnholdBrevData(
+    override val data: AvvistKlageInnholdBrevDataData,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -39,15 +43,17 @@ data class AvvistKlageInnholdBrevData(
         ): AvvistKlageInnholdBrevData {
             val klage = muligKlage ?: throw IllegalArgumentException("Vedtak mangler klage")
             return AvvistKlageInnholdBrevData(
-                sakType = klage.sak.sakType,
-                klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
-                datoForVedtaketKlagenGjelder =
-                    klage.formkrav
-                        ?.formkrav
-                        ?.vedtaketKlagenGjelder
-                        ?.datoAttestert
-                        ?.toLocalDate(),
-                bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                data = AvvistKlageInnholdBrevDataData(
+                    sakType = klage.sak.sakType,
+                    klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
+                    datoForVedtaketKlagenGjelder =
+                        klage.formkrav
+                            ?.formkrav
+                            ?.vedtaketKlagenGjelder
+                            ?.datoAttestert
+                            ?.toLocalDate(),
+                    bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                ),
             )
         }
     }

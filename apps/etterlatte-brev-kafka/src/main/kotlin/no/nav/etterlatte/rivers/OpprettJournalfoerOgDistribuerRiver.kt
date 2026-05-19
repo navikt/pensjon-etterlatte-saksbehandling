@@ -97,7 +97,7 @@ class OpprettJournalfoerOgDistribuerRiver(
             Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                 val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
-                val brevdata = opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
+                val brevdata = opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar).data
                 BarnepensjonInformasjonDoedsfallRedigerbar(
                     brevdata.borIutland,
                     brevdata.avdoedNavn,
@@ -109,6 +109,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                 val brevdata =
                     opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
+                        .data
                 BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar(
                     brevdata.avdoedNavn,
                     brevdata.borIutland,
@@ -121,7 +122,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                     opprettOmstillingsstoenadInformasjonDoedsfall(
                         sakId,
                         borIutland,
-                    )
+                    ).data
                 OmstillingsstoenadInformasjonDoedsfallRedigerbar(brevdata.borIutland, brevdata.avdoedNavn)
             }
 
@@ -166,7 +167,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     ) = BarnepensjonInformasjonDoedsfall.fra(
         borIutland,
         erOver18aar,
-        hentAvdoede(sakId),
+        hentAvdoede(sakId).first().navn,
     )
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
@@ -174,7 +175,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         borIutland: Boolean,
     ) = BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt.fra(
         borIutland,
-        hentAvdoede(sakId),
+        hentAvdoede(sakId).first().navn,
     )
 
     private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(
@@ -182,7 +183,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         borIutland: Boolean,
     ) = OmstillingsstoenadInformasjonDoedsfall.fra(
         borIutland,
-        hentAvdoede(sakId),
+        hentAvdoede(sakId).first().navn,
     )
 
     private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> = behandlingKlient.hentGrunnlagForSak(sakId).mapAvdoede()

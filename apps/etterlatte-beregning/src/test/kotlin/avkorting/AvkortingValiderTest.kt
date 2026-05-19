@@ -647,6 +647,90 @@ class AvkortingValiderTest {
             )
     }
 
+    @Nested
+    inner class VirkFlyttetBakoverTilNyttAar {
+        // Scenario: sak starter 2025, virk flyttes tilbake til 2024 – et år som ikke finnes i eksisterende avkorting
+        private val eksisterendeAvkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        aarsoppgjoer(aar = 2025, fom = YearMonth.of(2025, Month.JANUARY)),
+                    ),
+            )
+
+        @Test
+        fun `Kaster feil når inntekt for nytt tidligere år ikke starter fra januar eller virk`() {
+            val virk = YearMonth.of(2024, Month.JUNE)
+            assertThrows<NyeAarMedInntektMaaStarteIJanuar> {
+                validerInntekter(
+                    behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                    beregning =
+                        beregning(
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2024, Month.JUNE),
+                                datoTOM = YearMonth.of(2024, Month.DECEMBER),
+                            ),
+                        ),
+                    eksisterendeAvkorting = eksisterendeAvkorting,
+                    nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2024, Month.MARCH))),
+                    sanksjoner = emptyList(),
+                    krevInntektForNesteAar = false,
+                    naa = virk,
+                )
+            }
+        }
+
+        @Test
+        fun `Kaster ikke feil når inntekt for nytt tidligere år starter fra januar`() {
+            val virk = YearMonth.of(2024, Month.JUNE)
+            validerInntekter(
+                behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                beregning =
+                    beregning(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2024, Month.JUNE),
+                            datoTOM = YearMonth.of(2024, Month.DECEMBER),
+                        ),
+                    ),
+                eksisterendeAvkorting = eksisterendeAvkorting,
+                nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2024, Month.JANUARY))),
+                sanksjoner = emptyList(),
+                krevInntektForNesteAar = false,
+                naa = virk,
+            )
+        }
+
+        @Test
+        fun `Kaster ikke feil når inntekt for nytt tidligere år starter fra virk`() {
+            val virk = YearMonth.of(2024, Month.JUNE)
+            validerInntekter(
+                behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                beregning =
+                    beregning(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2024, Month.JUNE),
+                            datoTOM = YearMonth.of(2024, Month.DECEMBER),
+                        ),
+                    ),
+                eksisterendeAvkorting = eksisterendeAvkorting,
+                nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2024, Month.JUNE))),
+                sanksjoner = emptyList(),
+                krevInntektForNesteAar = false,
+                naa = virk,
+            )
+        }
+
+        private fun inntektDto(fom: YearMonth) =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 0,
+                spesifikasjon = "",
+                fom = fom,
+            )
+    }
+
     private fun behandling(
         type: BehandlingType,
         virk: YearMonth? = YearMonth.of(2024, Month.APRIL),

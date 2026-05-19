@@ -128,15 +128,6 @@ object AvkortingValider {
             throw NyeAarMedInntektMaaStarteIJanuar()
         }
 
-        if (behandling.behandlingType == BehandlingType.REVURDERING && nyeAarMedInntekt.isNotEmpty()) {
-            if (YearMonth.of(nyeAarMedInntekt.min(), Month.JANUARY) < virk) {
-                throw UgyldigForespoerselException(
-                    "NYTT_INNTEKTSAAR_IKKE_FRA_START",
-                    "Revurdering med ny inntekt må ha virkningstidspunkt før det nye inntektsåret",
-                )
-            }
-        }
-
         val tidligsteFomAarsoppgjoer = eksisterendeAvkorting.aarsoppgjoer.minOfOrNull { it.fom }
         val trengerNyInntektForFoersteAarIAvkorting =
             tidligsteFomAarsoppgjoer != null && tidligsteFomAarsoppgjoer.month != Month.JANUARY && virk < tidligsteFomAarsoppgjoer

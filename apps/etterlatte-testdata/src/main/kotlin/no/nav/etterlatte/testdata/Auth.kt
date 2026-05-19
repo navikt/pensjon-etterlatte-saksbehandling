@@ -18,7 +18,7 @@ suspend inline fun RoutingContext.kunEtterlatte(onSuccess: () -> Unit) {
             is Saksbehandler -> (call.brukerTokenInfo as Saksbehandler).groups
             is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
         }
-    if (rollerEllerAdGrupper.any { it == ADGruppe.ETTERLATTE }) {
+    if (rollerEllerAdGrupper.any { it == ADGruppe.ETTERLATTE || it == ADGruppe.ETTERLATTE_UTVIKLING }) {
         onSuccess()
     } else {
         call.respond(HttpStatusCode.Unauthorized, "Mangler etterlatte-rolle")

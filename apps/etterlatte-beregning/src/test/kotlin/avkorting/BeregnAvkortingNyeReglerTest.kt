@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import junit.framework.TestCase.assertEquals
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
@@ -30,7 +31,6 @@ import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.test.assertEquals
 
 class BeregnAvkortingNyeReglerTest {
     @BeforeEach

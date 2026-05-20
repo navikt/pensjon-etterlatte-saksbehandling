@@ -2129,7 +2129,10 @@ class BeregnAvkortingNyeReglerTest {
             get(0).asClue {
                 it.periode.fom shouldBe YearMonth.of(2026, Month.JANUARY)
                 it.periode.tom shouldBe YearMonth.of(2026, Month.FEBRUARY)
-                // TODO det er noe off med denne
+                it.ytelseEtterAvkorting shouldBe 13231
+                it.restanse shouldBe null
+                it.avkortingsbeloep shouldBe 11174
+                it.ytelseFoerAvkorting shouldBe 24405
             }
         }
     }
@@ -2714,12 +2717,12 @@ class BeregnAvkortingNyeReglerTest {
                         ),
                         avkortinggrunnlagLagreDto(
                             id = UUID.randomUUID(),
-                            aarsinntekt = 475_000,
+                            aarsinntekt = 60_000,
                             fratrekkInnAar = 0,
                             fom = YearMonth.of(2026, Month.JANUARY),
                             overstyrtInnvilgaMaaneder =
                                 AvkortingOverstyrtInnvilgaMaanederDto(
-                                    antall = 3,
+                                    antall = 2,
                                     aarsak = OverstyrtInnvilgaMaanederAarsak.ANNEN.name,
                                     begrunnelse = "",
                                 ),
@@ -2738,7 +2741,7 @@ class BeregnAvkortingNyeReglerTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
-                opphoerFom = null,
+                opphoerFom = YearMonth.of(2026, Month.MARCH),
                 brukNyeReglerAvkorting = true,
                 aldersovergang = null,
             )

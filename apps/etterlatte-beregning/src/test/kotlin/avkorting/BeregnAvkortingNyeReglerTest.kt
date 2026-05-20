@@ -10,6 +10,7 @@ import junit.framework.TestCase.assertEquals
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
 import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
@@ -21,6 +22,7 @@ import no.nav.etterlatte.beregning.regler.restanse
 import no.nav.etterlatte.beregning.regler.sanksjon
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
+import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -2085,7 +2087,52 @@ class BeregnAvkortingNyeReglerTest {
         }
     }
 
-    // TODO Revurdering opphør midt i et år
+    @Test
+    fun `flytting av første virk virker`() {
+        val avkorting = `revurdering flytte første virk 2024`()
+        val oppgjoer2024 = avkorting.aarsoppgjoer.single { it.aar == 2024 }
+        val oppgjoer2025 = avkorting.aarsoppgjoer.single { it.aar == 2025 }
+        val oppgjoer2026 = avkorting.aarsoppgjoer.single { it.aar == 2026 }
+
+        with(oppgjoer2024.avkortetYtelse) {
+            size shouldBe 1
+            get(0).asClue {
+                it.periode.fom shouldBe YearMonth.of(2024, Month.NOVEMBER)
+                it.periode.tom shouldBe YearMonth.of(2024, Month.DECEMBER)
+                it.ytelseEtterAvkorting shouldBe 9831
+                it.restanse shouldBe null
+                it.avkortingsbeloep shouldBe 13424
+                it.ytelseFoerAvkorting shouldBe 23255
+            }
+        }
+        with(oppgjoer2025.avkortetYtelse) {
+            size shouldBe 2
+            get(0).asClue {
+                it.periode.fom shouldBe YearMonth.of(2025, Month.JANUARY)
+                it.periode.tom shouldBe YearMonth.of(2025, Month.APRIL)
+                it.ytelseEtterAvkorting shouldBe 8706
+                it.restanse shouldBe null
+                it.avkortingsbeloep shouldBe 14549
+                it.ytelseFoerAvkorting shouldBe 23255
+            }
+            get(1).asClue {
+                it.periode.fom shouldBe YearMonth.of(2025, Month.MAY)
+                it.periode.tom shouldBe YearMonth.of(2025, Month.DECEMBER)
+                it.ytelseEtterAvkorting shouldBe 9856
+                it.restanse shouldBe null
+                it.avkortingsbeloep shouldBe 14549
+                it.ytelseFoerAvkorting shouldBe 24405
+            }
+        }
+        with(oppgjoer2026.avkortetYtelse) {
+            size shouldBe 1
+            get(0).asClue {
+                it.periode.fom shouldBe YearMonth.of(2026, Month.JANUARY)
+                it.periode.tom shouldBe YearMonth.of(2026, Month.FEBRUARY)
+                // TODO det er noe off med denne
+            }
+        }
+    }
 
     private fun `Avkorting foerstegangsbehandling`() =
         Avkorting()
@@ -2322,7 +2369,10 @@ class BeregnAvkortingNyeReglerTest {
                     beregning(
                         beregninger =
                             listOf(
-                                beregningsperiode(datoFOM = YearMonth.of(2024, Month.SEPTEMBER), utbetaltBeloep = 16682),
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.SEPTEMBER),
+                                    utbetaltBeloep = 16682,
+                                ),
                             ),
                     ),
                 sanksjoner =
@@ -2649,4 +2699,91 @@ class BeregnAvkortingNyeReglerTest {
             aldersovergang = null,
             brukNyeReglerAvkorting = true,
         )
+
+    private fun `innvilgelse september 2025`() =
+        Avkorting()
+            .beregnAvkortingMedNyeGrunnlag(
+                nyttGrunnlag =
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            id = UUID.randomUUID(),
+                            aarsinntekt = 450_000,
+                            fratrekkInnAar = 300_000,
+                            fom = YearMonth.of(2025, Month.SEPTEMBER),
+                            overstyrtInnvilgaMaaneder = null,
+                        ),
+                        avkortinggrunnlagLagreDto(
+                            id = UUID.randomUUID(),
+                            aarsinntekt = 475_000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(2026, Month.JANUARY),
+                            overstyrtInnvilgaMaaneder =
+                                AvkortingOverstyrtInnvilgaMaanederDto(
+                                    antall = 3,
+                                    aarsak = OverstyrtInnvilgaMaanederAarsak.ANNEN.name,
+                                    begrunnelse = "",
+                                ),
+                        ),
+                    ),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2025, Month.SEPTEMBER),
+                                    datoTOM = null,
+                                    utbetaltBeloep = 24_405,
+                                ),
+                            ),
+                    ),
+                sanksjoner = emptyList(),
+                opphoerFom = null,
+                brukNyeReglerAvkorting = true,
+                aldersovergang = null,
+            )
+
+    private fun `revurdering flytte første virk 2024`() =
+        `innvilgelse september 2025`()
+            .kopierAvkorting()
+            .beregnAvkortingMedNyeGrunnlag(
+                nyttGrunnlag =
+                    listOf(
+                        avkortinggrunnlagLagreDto(
+                            id = UUID.randomUUID(),
+                            aarsinntekt = 400_000,
+                            fratrekkInnAar = 330_000,
+                            fom = YearMonth.of(2024, Month.NOVEMBER),
+                            overstyrtInnvilgaMaaneder = null,
+                        ),
+                        avkortinggrunnlagLagreDto(
+                            id = UUID.randomUUID(),
+                            aarsinntekt = 450_000,
+                            fratrekkInnAar = 0,
+                            fom = YearMonth.of(2025, Month.JANUARY),
+                            overstyrtInnvilgaMaaneder = null,
+                        ),
+                    ),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.NOVEMBER),
+                                    datoTOM = YearMonth.of(2025, Month.APRIL),
+                                    utbetaltBeloep = 23_255,
+                                ),
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2025, Month.MAY),
+                                    datoTOM = YearMonth.of(2026, Month.FEBRUARY),
+                                    utbetaltBeloep = 24_405,
+                                ),
+                            ),
+                    ),
+                sanksjoner = listOf(),
+                opphoerFom = YearMonth.of(2026, Month.MARCH),
+                brukNyeReglerAvkorting = true,
+                aldersovergang = null,
+            )
 }

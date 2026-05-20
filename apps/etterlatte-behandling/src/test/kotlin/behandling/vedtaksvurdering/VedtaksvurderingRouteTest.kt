@@ -28,6 +28,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.azureAdAttestantGjennyClaim
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.klagevedtakRoute
@@ -146,7 +147,7 @@ internal class VedtaksvurderingRouteTest(
             val response =
                 client.get("/api/vedtak/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                 }
 
             response.status shouldBe HttpStatusCode.InternalServerError
@@ -166,7 +167,7 @@ internal class VedtaksvurderingRouteTest(
             val response =
                 client.get("/api/vedtak/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                 }
 
             response.status shouldBe HttpStatusCode.NotFound
@@ -188,7 +189,7 @@ internal class VedtaksvurderingRouteTest(
                 client
                     .get("/api/vedtak/${UUID.randomUUID()}") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
                         deserialize<VedtakDto>(it.bodyAsText())
@@ -234,7 +235,7 @@ internal class VedtaksvurderingRouteTest(
                 client
                     .get("/api/vedtak/${UUID.randomUUID()}") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
                         deserialize<VedtakDto>(it.bodyAsText())
@@ -280,7 +281,7 @@ internal class VedtaksvurderingRouteTest(
                 client
                     .get("/api/vedtak/${UUID.randomUUID()}") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
                         deserialize<VedtakDto>(it.bodyAsText())
@@ -320,7 +321,7 @@ internal class VedtaksvurderingRouteTest(
                 client
                     .get("/api/vedtak/${UUID.randomUUID()}/sammendrag") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
                         objectMapper.readValue<VedtakSammendragDto>(it.bodyAsText())
@@ -358,7 +359,7 @@ internal class VedtaksvurderingRouteTest(
                 client
                     .get("/api/vedtak/loepende/${sakId.sakId}?dato=${loependeYtelse.dato}") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
                         deserialize<LoependeYtelseDTO>(it.bodyAsText())
@@ -384,7 +385,7 @@ internal class VedtaksvurderingRouteTest(
                 client
                     .post("/api/vedtak/${UUID.randomUUID()}/upsert") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
                         deserialize<VedtakDto>(it.bodyAsText())
@@ -439,7 +440,7 @@ internal class VedtaksvurderingRouteTest(
                 client
                     .post("/api/vedtak/${UUID.randomUUID()}/fattvedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
                         deserialize<VedtakDto>(it.bodyAsText())
@@ -490,6 +491,10 @@ internal class VedtaksvurderingRouteTest(
                 mockk(),
             )
         coEvery { rapidService.sendToRapid(any()) } just runs
+        every { user.saksbehandlerMedRoller } returns
+            mockk {
+                every { harRolleAttestant() } returns true
+            }
 
         withTestApplication(context) { client ->
 
@@ -498,7 +503,7 @@ internal class VedtaksvurderingRouteTest(
                     .post("/api/vedtak/${UUID.randomUUID()}/attester") {
                         setBody(attestertVedtakKommentar.toJson())
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $attestantToken")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
                         deserialize<VedtakDto>(it.bodyAsText())
@@ -531,7 +536,7 @@ internal class VedtaksvurderingRouteTest(
                 vedtakBehandlingService.attesterVedtak(
                     any(),
                     match { it == attestertVedtakKommentar.kommentar },
-                    match { it.ident() == SAKSBEHANDLER_1 },
+                    match { it.ident() == SAKSBEHANDLER_2 },
                     any(),
                 )
                 rapidService.sendToRapid(any())
@@ -557,7 +562,7 @@ internal class VedtaksvurderingRouteTest(
                     .post("/api/vedtak/${UUID.randomUUID()}/underkjenn") {
                         setBody(begrunnelse.toJson())
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
                         deserialize<VedtakDto>(it.bodyAsText())
@@ -610,7 +615,7 @@ internal class VedtaksvurderingRouteTest(
             client
                 .patch("/api/vedtak/${UUID.randomUUID()}/tilbakestill") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
                 }
@@ -640,7 +645,7 @@ internal class VedtaksvurderingRouteTest(
                 client
                     .post("/vedtak/klage/${klage.id}/upsert") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                         setBody(klage.toJson())
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
@@ -656,7 +661,10 @@ internal class VedtaksvurderingRouteTest(
         }
     }
 
-    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
+    private val saksbehandlerToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
+    private val attestantToken: String by lazy {
+        mockOAuth2Server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_2, groups = listOf(azureAdAttestantGjennyClaim))
+    }
 
     private fun klage(): Klage =
         Klage.ny(

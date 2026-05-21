@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sak
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -51,7 +52,6 @@ import java.time.Instant
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.test.assertTrue
 import no.nav.etterlatte.libs.common.vedtak.Periode as VedtakPeriode
 
 class EtteroppgjoerServiceTest {

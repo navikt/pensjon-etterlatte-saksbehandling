@@ -121,6 +121,39 @@ class NotatServiceTest(
     }
 
     @Test
+    fun `journalfoerNotatISak er idempotent - returnerer eksisterende journalpostId hvis notat allerede er journalfoert`() {
+        val sakId = randomSakId()
+        val klage = klageForInnstilling(sakId)
+
+        coEvery {
+            grunnlagService.hentGrunnlagForSak(sakId, any())
+        } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { pdfGeneratorKlient.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()
+        coEvery { dokarkivService.journalfoer(any(), any()) } returns OpprettJournalpostResponse("123", true)
+
+        val bruker = simpleSaksbehandler()
+        val blankett = StrukturertNotat.KlageBlankett(klage)
+
+        runBlocking {
+            notatService.journalfoerNotatISak(blankett, bruker)
+        }
+
+        val andreKall =
+            runBlocking {
+                notatService.journalfoerNotatISak(blankett, bruker)
+            }
+
+        assert(andreKall.journalpostId == "123")
+
+        coVerify(exactly = 1) {
+            dokarkivService.journalfoer(any(), any())
+        }
+        coVerify(exactly = 0) {
+            notatRepository.slett(any())
+        }
+    }
+
+    @Test
     fun `hvis journalføring feiler settes brevet til slettet`() {
         val sakId = randomSakId()
         val klage = klageForInnstilling(sakId)

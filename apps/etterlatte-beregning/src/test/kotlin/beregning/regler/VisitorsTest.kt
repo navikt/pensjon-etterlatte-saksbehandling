@@ -20,7 +20,6 @@ import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
-import kotlin.test.fail
 
 class VisitorsTest {
     @Test
@@ -31,7 +30,7 @@ class VisitorsTest {
                     grunnlag = opprettBeregningsgrunnlag(),
                     periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1), tilDato = LocalDate.of(2024, Month.JULY, 31)),
                 ).let {
-                    if (it is RegelkjoeringResultat.Suksess) it.periodiserteResultater else fail("Regelkjøring feilet")
+                    if (it is RegelkjoeringResultat.Suksess) it.periodiserteResultater else throw Exception("Regelkjøring feilet")
                 }
 
         // Perioder tom 2023 skal returnere BP_REGELVERK_TOM_2023

@@ -230,8 +230,8 @@ internal class OpprettVedtakforespoerselRiver(
     private fun List<Utbetalingsperiode>.beloepPaaDato(dato: LocalDate): BigDecimal? =
         this
             .filter { it.periode.fom.erFoerEllerPaa(dato) }
-            .first { it.periode.tom.erEtter(dato) }
-            .beloep
+            .firstOrNull { it.periode.tom.erEtter(dato) }
+            ?.beloep
 
     private fun VedtakDto.utbetalingsperioder() =
         (this.innhold as VedtakInnholdDto.VedtakBehandlingDto)

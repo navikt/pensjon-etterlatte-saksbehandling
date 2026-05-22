@@ -92,28 +92,32 @@ internal class OpprettVedtakforespoerselRiver(
         vedtakOgRapid: VedtakOgRapid,
         packet: JsonMessage,
     ) {
-        val forrigeVedtakMedUtbetaling = krevIkkeNull(vedtak.hentVedtak(omregningData.hentForrigeBehandlingid())) { "Vedtak mangler" }
-        val sisteAttesterteVedtakISak = hentSisteAttesterteVedtakISak(omregningData.sakId)
+        try {
+            val forrigeVedtakMedUtbetaling = krevIkkeNull(vedtak.hentVedtak(omregningData.hentForrigeBehandlingid())) { "Vedtak mangler" }
+            val sisteAttesterteVedtakISak = hentSisteAttesterteVedtakISak(omregningData.sakId)
 
-        forrigeVedtakMedUtbetaling.utbetalingsperioder().beloepPaaDato(omregningData.hentFraDato())?.let {
-            packet[ReguleringEvents.VEDTAK_BELOEP_FOER] = it
-        }
-        vedtakOgRapid.utbetalingsperioder().beloepPaaDato(omregningData.hentFraDato())?.let {
-            packet[ReguleringEvents.VEDTAK_BELOEP_ETTER] = it
-        }
+            forrigeVedtakMedUtbetaling.utbetalingsperioder().beloepPaaDato(omregningData.hentFraDato())?.let {
+                packet[ReguleringEvents.VEDTAK_BELOEP_FOER] = it
+            }
+            vedtakOgRapid.utbetalingsperioder().beloepPaaDato(omregningData.hentFraDato())?.let {
+                packet[ReguleringEvents.VEDTAK_BELOEP_ETTER] = it
+            }
 
-        sisteAttesterteVedtakISak?.let {
-            packet[ReguleringEvents.VEDTAK_OPPHOER_FOER] = it
-        }
-        (vedtakOgRapid.vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).opphoerFraOgMed?.let {
-            packet[ReguleringEvents.VEDTAK_OPPHOER_ETTER] = it
-        }
+            sisteAttesterteVedtakISak?.let {
+                packet[ReguleringEvents.VEDTAK_OPPHOER_FOER] = it
+            }
+            (vedtakOgRapid.vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).opphoerFraOgMed?.let {
+                packet[ReguleringEvents.VEDTAK_OPPHOER_ETTER] = it
+            }
 
-        packet[ReguleringEvents.INNVILGEDE_PERIODER_FOER] =
-            hentInnvilgedePerioderForSak(omregningData.sakId)
-        if (!skalStoppeEtterFattet(omregningData.revurderingaarsak)) {
-            packet[ReguleringEvents.INNVILGEDE_PERIODER_ETTER] =
-                hentInnvilgedePerioderForBehandling(omregningData.hentBehandlingId())
+            packet[ReguleringEvents.INNVILGEDE_PERIODER_FOER] =
+                hentInnvilgedePerioderForSak(omregningData.sakId)
+            if (!skalStoppeEtterFattet(omregningData.revurderingaarsak)) {
+                packet[ReguleringEvents.INNVILGEDE_PERIODER_ETTER] =
+                    hentInnvilgedePerioderForBehandling(omregningData.hentBehandlingId())
+            }
+        } catch (e: Exception) {
+            logger.error("Vi fikk en feil i utregning av kontrollsjekker. Stopper ikke videre prosessering av vedtaket", e)
         }
     }
 

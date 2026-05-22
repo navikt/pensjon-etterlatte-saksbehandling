@@ -125,7 +125,7 @@ internal class OpprettVedtakforespoerselRiverTest {
                 fattetRapidInfo(vedtakDto),
                 attestertRapidInfo(vedtakDto),
             )
-        every { vedtakServiceMock.hentInnvilgedePerioder(forrigeBehandlingId) } returns
+        every { vedtakServiceMock.hentInnvilgedePerioder(vedtakDto.behandlingId) } returns
             listOf(
                 InnvilgetPeriodeDto(Periode(YearMonth.of(2024, 1), null), emptyList()),
             )
@@ -134,12 +134,15 @@ internal class OpprettVedtakforespoerselRiverTest {
                 InnvilgetPeriodeDto(Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 4)), emptyList()),
                 InnvilgetPeriodeDto(Periode(YearMonth.of(2024, 5), null), emptyList()),
             )
+        every { vedtakServiceMock.hentVedtakForSak(sakId) } returns
+            listOf(vedtakDto)
 
         val inspector = TestRapid().apply { river() }
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             verify { vedtakServiceMock.opprettVedtakFattOgAttester(sakId, behandlingId) }
             verify { vedtakServiceMock.hentVedtak(forrigeBehandlingId) }
+            verify { vedtakServiceMock.hentVedtakForSak(sakId) }
 
             size shouldBe 2
             field(0, EVENT_NAME_KEY).asText() shouldBe VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType()
@@ -181,6 +184,7 @@ internal class OpprettVedtakforespoerselRiverTest {
 
         verify { vedtakServiceMock.opprettVedtakOgFatt(sakId, behandlingId) }
         verify { vedtakServiceMock.hentVedtak(forrigeBehandlingId) }
+        verify { vedtakServiceMock.hentVedtakForSak(sakId) }
     }
 
     @Test
@@ -200,6 +204,7 @@ internal class OpprettVedtakforespoerselRiverTest {
 
         verify { vedtakServiceMock.opprettVedtakFattOgAttester(sakId, behandlingId) }
         verify { vedtakServiceMock.hentVedtak(forrigeBehandlingId) }
+        verify { vedtakServiceMock.hentVedtakForSak(sakId) }
     }
 
     @Test
@@ -234,6 +239,7 @@ internal class OpprettVedtakforespoerselRiverTest {
         verify { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
         verify { vedtakServiceMock.hentVedtak(forrigeBehandlingId) }
         verify { utbetalingKlientMock.simuler(behandlingId) }
+        verify { vedtakServiceMock.hentVedtakForSak(sakId) }
     }
 
     @Test
@@ -316,6 +322,7 @@ internal class OpprettVedtakforespoerselRiverTest {
         verify { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
         verify { brevKlientMock.opprettBrev(behandlingId, sakId) }
         verify { brevKlientMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, any()) }
+        verify { vedtakServiceMock.hentVedtakForSak(any()) }
     }
 
     @Test
@@ -338,6 +345,7 @@ internal class OpprettVedtakforespoerselRiverTest {
         verify { vedtakServiceMock.hentVedtak(forrigeBehandlingId) }
         verify { vedtakServiceMock.opprettVedtakOgFatt(sakId, behandlingId) }
         verify { brevKlientMock.opprettBrev(behandlingId, sakId) }
+        verify { vedtakServiceMock.hentVedtakForSak(sakId) }
 
         verify(exactly = 0) { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
         verify(exactly = 0) { brevKlientMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, any()) }

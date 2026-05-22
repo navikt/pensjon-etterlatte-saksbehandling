@@ -93,25 +93,26 @@ internal class OpprettVedtakforespoerselRiver(
         packet: JsonMessage,
     ) {
         try {
-            val forrigeVedtak =
-                krevIkkeNull(vedtak.hentVedtak(omregningData.hentForrigeBehandlingid())) { "Vedtak mangler" }
+            val forrigeVedtakMedUtbetaling = krevIkkeNull(vedtak.hentVedtak(omregningData.hentForrigeBehandlingid())) { "Vedtak mangler" }
+            val sisteAttesterteVedtakISak = hentSisteAttesterteVedtakISak(omregningData.sakId)
 
-            forrigeVedtak.utbetalingsperioder().beloepPaaDato(omregningData.hentFraDato())?.let {
+            forrigeVedtakMedUtbetaling.utbetalingsperioder().beloepPaaDato(omregningData.hentFraDato())?.let {
                 packet[ReguleringEvents.VEDTAK_BELOEP_FOER] = it
             }
             vedtakOgRapid.utbetalingsperioder().beloepPaaDato(omregningData.hentFraDato())?.let {
                 packet[ReguleringEvents.VEDTAK_BELOEP_ETTER] = it
             }
 
-            forrigeVedtak.opphoerFraOgMed()?.let {
+            sisteAttesterteVedtakISak?.let {
                 packet[ReguleringEvents.VEDTAK_OPPHOER_FOER] = it
             }
             (vedtakOgRapid.vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).opphoerFraOgMed?.let {
                 packet[ReguleringEvents.VEDTAK_OPPHOER_ETTER] = it
             }
 
-            packet[ReguleringEvents.INNVILGEDE_PERIODER_FOER] =
-                hentInnvilgedePerioderForBehandling(omregningData.hentForrigeBehandlingid())
+            sisteAttesterteVedtakISak?.let {
+                packet[ReguleringEvents.INNVILGEDE_PERIODER_FOER] = hentInnvilgedePerioderForBehandling(it.behandlingId)
+            }
             if (!skalStoppeEtterFattet(omregningData.revurderingaarsak)) {
                 packet[ReguleringEvents.INNVILGEDE_PERIODER_ETTER] =
                     hentInnvilgedePerioderForBehandling(omregningData.hentBehandlingId())
@@ -244,6 +245,12 @@ internal class OpprettVedtakforespoerselRiver(
     private fun VedtakOgRapid.utbetalingsperioder(): List<Utbetalingsperiode> =
         (this.vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
             .utbetalingsperioder
+
+    private fun hentSisteAttesterteVedtakISak(sakId: SakId): VedtakDto? =
+        vedtak
+            .hentVedtakForSak(sakId)
+            .filter { it.attestasjon != null }
+            .maxByOrNull { it.attestasjon!!.tidspunkt }
 
     private fun hentInnvilgedePerioderForBehandling(behandlingId: UUID): List<Periode> =
         vedtak

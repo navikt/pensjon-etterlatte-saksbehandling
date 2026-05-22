@@ -148,7 +148,7 @@ class AutomatiskRevurderingService(
                                 )
                             }
                         } catch (e: Exception) {
-                            logger.error(
+                            logger.warn(
                                 "Vi kunne ikke hente avkorting for å sjekke om det er en inntekt for " +
                                     "reguleringsåret. Går videre uten sjekking.",
                                 e,

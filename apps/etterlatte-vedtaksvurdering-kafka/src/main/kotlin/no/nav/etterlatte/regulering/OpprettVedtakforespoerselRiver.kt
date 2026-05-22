@@ -110,8 +110,9 @@ internal class OpprettVedtakforespoerselRiver(
                 packet[ReguleringEvents.VEDTAK_OPPHOER_ETTER] = it
             }
 
-            packet[ReguleringEvents.INNVILGEDE_PERIODER_FOER] =
-                hentInnvilgedePerioderForSak(omregningData.sakId)
+            sisteAttesterteVedtakISak?.let {
+                packet[ReguleringEvents.INNVILGEDE_PERIODER_FOER] = hentInnvilgedePerioderForBehandling(it.behandlingId)
+            }
             if (!skalStoppeEtterFattet(omregningData.revurderingaarsak)) {
                 packet[ReguleringEvents.INNVILGEDE_PERIODER_ETTER] =
                     hentInnvilgedePerioderForBehandling(omregningData.hentBehandlingId())
@@ -244,12 +245,6 @@ internal class OpprettVedtakforespoerselRiver(
     private fun VedtakOgRapid.utbetalingsperioder(): List<Utbetalingsperiode> =
         (this.vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
             .utbetalingsperioder
-
-    private fun hentInnvilgedePerioderForSak(sakId: SakId): List<Periode> =
-        vedtak
-            .hentInnvilgedePerioderForSak(sakId)
-            .map { it.periode }
-            .sortedBy { it.fom }
 
     private fun hentSisteAttesterteVedtakISak(sakId: SakId): VedtakDto? =
         vedtak

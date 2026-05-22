@@ -150,7 +150,7 @@ class VedtakServiceImpl(
 
     override fun hentVedtakForSak(sakId: SakId): List<VedtakDto> =
         runBlocking {
-            httpClient.get("$url/api/vedtak/sak").body()
+            httpClient.get("$url/api/vedtak/sak/$sakId").body()
         }
 }
 

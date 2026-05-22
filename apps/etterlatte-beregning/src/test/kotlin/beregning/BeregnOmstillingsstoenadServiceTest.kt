@@ -127,7 +127,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
@@ -171,7 +170,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2024, Month.JANUARY)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
@@ -182,7 +180,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe OMS_BELOEP_SANKSJON
                     datoFOM shouldBe YearMonth.of(2024, Month.FEBRUARY)
                     datoTOM shouldBe YearMonth.of(2024, Month.MARCH)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
@@ -193,7 +190,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe YearMonth.of(2024, Month.APRIL)
                     datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
@@ -233,7 +229,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24_PRORATA
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe PRORATA_TRYGDETID_30_AAR / 2
                     regelResultat shouldNotBe null
@@ -272,7 +267,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
@@ -316,7 +310,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                 }
             }
@@ -356,7 +349,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe 0
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     this.trygdetid shouldBe 0
                 }
             }

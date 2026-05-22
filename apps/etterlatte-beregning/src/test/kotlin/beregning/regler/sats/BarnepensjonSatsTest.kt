@@ -38,7 +38,6 @@ internal class BarnepensjonSatsTest {
         with(resultat.verdi) {
             dato shouldBe YearMonth.of(2022, 5)
             grunnbeloep shouldBeExactly 111477
-            grunnbeloepPerMaaned shouldBeExactly 9290
         }
     }
 
@@ -48,7 +47,6 @@ internal class BarnepensjonSatsTest {
         with(resultat.verdi) {
             dato shouldBe YearMonth.of(2021, 5)
             grunnbeloep shouldBeExactly 106399
-            grunnbeloepPerMaaned shouldBeExactly 8867
         }
     }
 

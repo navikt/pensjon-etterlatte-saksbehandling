@@ -41,13 +41,11 @@ class BeregnAvkortingNyeReglerTest {
                 Grunnbeloep(
                     dato = YearMonth.of(2023, 5),
                     grunnbeloep = 118620,
-                    grunnbeloepPerMaaned = 9885,
                     omregningsfaktor = BigDecimal("1.045591"),
                 ),
                 Grunnbeloep(
                     dato = YearMonth.of(2024, 5),
                     grunnbeloep = 124028,
-                    grunnbeloepPerMaaned = 10336,
                     omregningsfaktor = BigDecimal("1.064076"),
                 ),
             )

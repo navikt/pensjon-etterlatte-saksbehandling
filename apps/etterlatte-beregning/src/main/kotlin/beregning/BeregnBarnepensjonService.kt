@@ -368,7 +368,6 @@ class BeregnBarnepensjonService(
                                         .finnGrunnlagForPeriode(
                                             periodisertResultat.periode.fraDato,
                                         ).verdi,
-                                grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid = anvendtTrygdetid.trygdetid.toInteger(),
                                 trygdetidForIdent = anvendtTrygdetidId,
@@ -419,7 +418,6 @@ class BeregnBarnepensjonService(
                         datoTOM = null,
                         utbetaltBeloep = 0,
                         soeskenFlokk = null,
-                        grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                         grunnbelop = grunnbeloep.grunnbeloep,
                         trygdetid = 0,
                     ),

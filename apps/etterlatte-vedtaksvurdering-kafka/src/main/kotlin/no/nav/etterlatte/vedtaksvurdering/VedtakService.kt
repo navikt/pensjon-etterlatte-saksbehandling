@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.migrering.MigreringKjoringVariant
 import java.time.LocalDate
 import java.util.UUID
@@ -52,6 +53,8 @@ interface VedtakService {
     fun hentInnvilgedePerioder(behandlingId: UUID): List<InnvilgetPeriodeDto>
 
     fun hentVedtak(behandlingId: UUID): VedtakDto?
+
+    fun hentVedtakForSak(sakId: SakId): List<VedtakSammendragDto>
 }
 
 class VedtakServiceImpl(
@@ -144,6 +147,11 @@ class VedtakServiceImpl(
     override fun hentVedtak(behandlingId: UUID): VedtakDto? =
         runBlocking {
             httpClient.get("$url/api/vedtak/$behandlingId").body()
+        }
+
+    override fun hentVedtakForSak(sakId: SakId): List<VedtakSammendragDto> =
+        runBlocking {
+            httpClient.get("$url/api/vedtak/sak/$sakId").body()
         }
 }
 

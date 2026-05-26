@@ -103,10 +103,8 @@ internal class NySoeknadRiver(
                 // Opprett oppgave for tilleggsinformasjon
                 // Sett fordelt til false slik at det ikke opprettes ny behandling.
                 opprettOppgaveTilleggsinformasjon(sak.id, journalpostResponse.journalpostId)
-                logger.info("Søknaden har en behandling under arbeid, sak=$sak")
                 context.publish(packet.oppdaterMed(sak.id, false, journalpostResponse).toJson())
             } else {
-                logger.info("Søknaden har ikke en behandling under arbeid, dermed er den fordelt, sak=$sak")
                 context.publish(packet.oppdaterMed(sak.id, true, journalpostResponse).toJson())
             }
         } catch (e: JsonMappingException) {

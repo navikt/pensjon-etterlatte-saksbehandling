@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -25,6 +26,7 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -35,6 +37,8 @@ class AutomatiskRevurderingService(
     private val vedtakInternalService: VedtakInternalService,
     private val beregningKlient: BeregningKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     /*
      * Denne tjenesten er tiltenkt automatiske jobber der det kan utføres mange samtidig.
      * Det er derfor behov for retries rundt oppfølgingsmetoder.
@@ -63,7 +67,7 @@ class AutomatiskRevurderingService(
             inTransaction { behandlingService.hentSisteIverksatteBehandling(request.sakId) }
                 ?: throw RevurderingManglerIverksattBehandling(request.sakId)
 
-        gyldigForAutomatiskRevurdering(request, loepende, systembruker)
+        gyldigForAutomatiskRevurdering(request, loepende, forrigeIverksatteBehandling, systembruker)
 
         val persongalleri =
             krevIkkeNull(grunnlagService.hentPersongalleri(request.sakId)) {
@@ -115,6 +119,7 @@ class AutomatiskRevurderingService(
     private suspend fun gyldigForAutomatiskRevurdering(
         request: AutomatiskRevurderingRequest,
         vedtak: LoependeYtelseDTO,
+        forrigeIverksattBehandling: Behandling,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         when (request.revurderingAarsak) {
@@ -131,6 +136,28 @@ class AutomatiskRevurderingService(
                 // TODO utfører per nå sjekkene i egne Rivers før dette gjør derfor ingenting her
                 if (vedtak.underSamordning) {
                     throw OmregningAvSakUnderSamordning()
+                }
+                if (forrigeIverksattBehandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+                    val avkorting =
+                        try {
+                            // Vi vil dobbeltsjekke om den har en inntekt for tidspunktet vi regulerer fra
+                            retryOgPakkUt {
+                                beregningKlient.hentAvkorting(
+                                    forrigeIverksattBehandling.id,
+                                    brukerTokenInfo,
+                                )
+                            }
+                        } catch (e: Exception) {
+                            logger.warn(
+                                "Vi kunne ikke hente avkorting for å sjekke om det er en inntekt for " +
+                                    "reguleringsåret. Går videre uten sjekking.",
+                                e,
+                            )
+                            null
+                        }
+                    if (avkorting?.avkortingGrunnlag?.none { it.fom.year == request.fraDato.year } == true) {
+                        throw ManglerInntektForOmregningsaaret()
+                    }
                 }
             }
 
@@ -212,6 +239,13 @@ class OmregningAvSakUnderSamordning :
     UgyldigForespoerselException(
         "OMREGNING_SAK_UNDER_SAMORDNING",
         "Omregning kan ikke utføres om sak er under samordning",
+    )
+
+class ManglerInntektForOmregningsaaret :
+    UgyldigForespoerselException(
+        "OMREGNING_MANGLER_INNTEKT",
+        "Omregning mangler inntekt for omregningsåret i regulering, sannsynligvis på grunn av løpende sanksjon." +
+            " Dette må sjekkes manuelt av saksbehandler, men regulering hoppes over.",
     )
 
 class OmregningOverstyrtBeregning :

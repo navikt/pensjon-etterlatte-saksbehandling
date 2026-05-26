@@ -309,6 +309,19 @@ class AvkortingService(
         logger.info("Kopierer avkorting fra forrige behandling med behandlingId=$forrigeBehandlingId")
         val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val virkIBehandling =
+            behandling.virkningstidspunkt?.dato ?: throw UgyldigForespoerselException(
+                "MANGLER_VIRKNINGSTIDSPUNKT",
+                "Mangler virkningstidspunkt i behandling vi skal omregne i, behandlingId=${behandling.id}, sakId=${behandling.sak.sakId}",
+            )
+        if (forrigeAvkorting.aarsoppgjoer.none { it.aar == virkIBehandling.year }) {
+            throw UgyldigForespoerselException(
+                "MANGLER_AVKORTING_FOR_AAR",
+                "Behandling med id=$behandlingId prøver å omregne fra en forrige avkorting i behandling med " +
+                    "id=$forrigeBehandlingId, som ikke har et årsoppgjør for omregningsdatoen $virkIBehandling. " +
+                    "Dette vil ikke gå. SakId=${behandling.sak.sakId}",
+            )
+        }
         return kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
     }
 

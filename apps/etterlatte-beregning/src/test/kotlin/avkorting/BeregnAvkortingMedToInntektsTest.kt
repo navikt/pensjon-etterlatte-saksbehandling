@@ -2,6 +2,9 @@ package no.nav.etterlatte.beregning.regler.avkorting
 
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
@@ -11,13 +14,49 @@ import no.nav.etterlatte.beregning.regler.beregning
 import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.inntektsavkorting
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.common.periode.Periode
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
 
 class BeregnAvkortingMedToInntektsTest {
+    @BeforeEach
+    fun `mock grunnbeloep`() {
+        mockkObject(GrunnbeloepRepository)
+        every { GrunnbeloepRepository.historiskeGrunnbeloep } returns
+            listOf(
+                Grunnbeloep(
+                    dato = YearMonth.of(2023, 5),
+                    grunnbeloep = 118620,
+                    grunnbeloepPerMaaned = 9885,
+                    omregningsfaktor = BigDecimal("1.045591"),
+                ),
+                Grunnbeloep(
+                    dato = YearMonth.of(2024, 5),
+                    grunnbeloep = 124028,
+                    grunnbeloepPerMaaned = 10336,
+                    omregningsfaktor = BigDecimal("1.064076"),
+                ),
+                Grunnbeloep(
+                    dato = YearMonth.of(2025, 5),
+                    grunnbeloep = 130160,
+                    grunnbeloepPerMaaned = 10847,
+                    omregningsfaktor = BigDecimal("1.049440"),
+                ),
+            )
+    }
+
+    @AfterEach
+    fun `unmock grunnbeloep`() {
+        unmockkObject(GrunnbeloepRepository)
+    }
+
     @Test
     @Order(0)
     fun `Beregner avkortet ytelse for foerstegangsbehandling`() {

@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
@@ -30,6 +31,7 @@ internal class LagreIverksattVedtakRiver(
         context: MessageContext,
     ) {
         val respons = objectMapper.readValue<UtbetalingResponseDto>(packet[UTBETALING_RESPONSE].toString())
+        logger.info("Leser melding med eventName ${packet.eventName}, id ${packet.id} og status ${respons.status}")
 
         try {
             when (respons.status) {

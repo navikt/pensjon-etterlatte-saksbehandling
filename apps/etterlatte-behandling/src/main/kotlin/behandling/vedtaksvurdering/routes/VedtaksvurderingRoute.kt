@@ -180,7 +180,16 @@ fun Route.vedtaksvurderingRoute(
             kunSkrivetilgang {
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak =
-                    inTransaction { runBlocking { vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo) } }
+                    withSerializableRetry {
+                        inTransaction {
+                            runBlocking {
+                                vedtakBehandlingService.fattVedtak(
+                                    behandlingId,
+                                    brukerTokenInfo,
+                                )
+                            }
+                        }
+                    }
                 rapidService.sendToRapid(fattetVedtak)
 
                 call.respond(fattetVedtak.vedtak)
@@ -193,13 +202,15 @@ fun Route.vedtaksvurderingRoute(
                     logger.info("Attesterer vedtak for behandling $behandlingId")
                     val (kommentar) = call.receive<AttesterVedtakDto>()
                     val attestert =
-                        inTransaction {
-                            runBlocking {
-                                vedtakBehandlingService.attesterVedtak(
-                                    behandlingId,
-                                    kommentar,
-                                    brukerTokenInfo,
-                                )
+                        withSerializableRetry {
+                            inTransaction {
+                                runBlocking {
+                                    vedtakBehandlingService.attesterVedtak(
+                                        behandlingId,
+                                        kommentar,
+                                        brukerTokenInfo,
+                                    )
+                                }
                             }
                         }
                     try {

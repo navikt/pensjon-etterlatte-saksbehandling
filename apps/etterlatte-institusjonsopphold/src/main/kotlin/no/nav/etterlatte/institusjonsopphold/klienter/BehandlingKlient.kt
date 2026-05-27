@@ -19,7 +19,7 @@ class BehandlingKlient(
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    suspend fun haandterHendelse(record: ConsumerRecord<String, KafkaOppholdHendelse>) {
+    suspend fun haandterHendelse(record: ConsumerRecord<Long, KafkaOppholdHendelse>) {
         logger.debug(
             "Behandler institusjonsopphold record med id: {}, partition {}, offset: {}",
             record.key(),

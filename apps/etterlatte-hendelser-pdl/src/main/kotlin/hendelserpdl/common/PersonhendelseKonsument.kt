@@ -15,7 +15,7 @@ class PersonhendelseKonsument(
     topic: String,
     kafkaProperties: Properties,
     private val personHendelseFordeler: PersonHendelseFordeler,
-) : Kafkakonsument<Personhendelse>(
+) : Kafkakonsument<String, Personhendelse>(
         logger = LoggerFactory.getLogger(KafkaConsumer::class.java.name),
         consumer = KafkaConsumer<String, Personhendelse>(kafkaProperties),
         topic = topic,

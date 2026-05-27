@@ -30,7 +30,7 @@ private const val SERIALIZABLE_RETRY_MAX = 3
  *
  * Hver retry starter en ny transaksjon (kalt via [inTransaction] i [block]).
  */
-private fun <T> withSerializableRetry(block: () -> T): T {
+fun <T> withSerializableRetry(block: () -> T): T {
     for (attempt in 1..SERIALIZABLE_RETRY_MAX) {
         try {
             return block()

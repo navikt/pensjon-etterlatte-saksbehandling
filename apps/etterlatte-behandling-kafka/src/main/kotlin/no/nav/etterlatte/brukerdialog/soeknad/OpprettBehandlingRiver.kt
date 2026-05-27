@@ -87,9 +87,8 @@ internal class OpprettBehandlingRiver(
                     }.toJson(),
             )
         } catch (e: Exception) {
-            // Vi lar ny innsending av søknaden håndtere retry
-            val soeknadId = packet[GyldigSoeknadVurdert.lagretSoeknadIdKey].asText().takeIf { it.isNotBlank() }
-            logger.error("Uhåndtert feil ved opprettelse av behandling for søknad med id=$soeknadId", e)
+            logger.error("Uhåndtert feil ved opprettelse av behandling for søknad", e)
+            throw e
         }
     }
 

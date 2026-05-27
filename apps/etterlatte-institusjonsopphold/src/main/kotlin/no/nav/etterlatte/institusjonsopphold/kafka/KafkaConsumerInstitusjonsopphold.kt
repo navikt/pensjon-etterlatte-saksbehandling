@@ -9,7 +9,9 @@ import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
 import no.nav.etterlatte.kafka.Kafkakonsument
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -23,11 +25,18 @@ class KafkaConsumerInstitusjonsopphold(
         topic = env.requireEnvValue(INSTITUSJONSOPPHOLD_TOPIC),
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
+    val sikkerLogg: Logger = sikkerlogger()
+
     override fun stream() {
         stream { meldinger ->
             meldinger.forEach {
                 runBlocking {
-                    behandlingKlient.haandterHendelse(it)
+                    try {
+                        behandlingKlient.haandterHendelse(it)
+                    } catch (e: RuntimeException) {
+                        sikkerLogg.error("Feil i institusjonshendelse: ", e)
+                        throw e
+                    }
                 }
             }
         }

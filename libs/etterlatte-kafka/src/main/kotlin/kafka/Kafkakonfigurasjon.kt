@@ -19,7 +19,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import java.time.Duration
 import java.util.Properties
 
-fun interface KafkaConsumerConfiguration {
+interface KafkaConsumerConfiguration {
     fun generateKafkaConsumerProperties(env: Miljoevariabler): Properties
 }
 

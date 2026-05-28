@@ -45,7 +45,7 @@ class KafkaConsumerInstitusjonsopphold(
     }
 }
 
-private fun properties(
+internal fun properties(
     kafkaEnvironment: KafkaConsumerConfiguration,
     env: Miljoevariabler,
 ): Properties =

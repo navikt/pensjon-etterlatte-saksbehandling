@@ -23,7 +23,7 @@ class KafkaConsumerInstitusjonsopphold(
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
 ) : Kafkakonsument<Long, KafkaOppholdHendelse>(
         logger = LoggerFactory.getLogger(KafkaConsumerInstitusjonsopphold::class.java.name),
-        consumer = KafkaConsumer<Long, KafkaOppholdHendelse>(properties(kafkaEnvironment, env)),
+        consumer = KafkaConsumer<Long, KafkaOppholdHendelse>(lagInstitusjonsoppholdProperties(kafkaEnvironment, env)),
         topic = env.requireEnvValue(INSTITUSJONSOPPHOLD_TOPIC),
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
@@ -45,7 +45,7 @@ class KafkaConsumerInstitusjonsopphold(
     }
 }
 
-internal fun properties(
+internal fun lagInstitusjonsoppholdProperties(
     kafkaEnvironment: KafkaConsumerConfiguration,
     env: Miljoevariabler,
 ): Properties =

@@ -18,7 +18,7 @@ class KafkaConsumerInstitusjonsoppholdTest {
             }
         val env = Miljoevariabler.httpClient(emptyMap())
 
-        val props = properties(stubConfig, env)
+        val props = lagInstitusjonsoppholdProperties(stubConfig, env)
 
         assertEquals(1, props[ConsumerConfig.MAX_POLL_RECORDS_CONFIG])
     }

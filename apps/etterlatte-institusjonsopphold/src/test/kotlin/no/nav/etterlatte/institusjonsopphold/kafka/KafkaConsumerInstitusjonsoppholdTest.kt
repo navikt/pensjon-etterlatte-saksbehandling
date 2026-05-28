@@ -11,10 +11,11 @@ class KafkaConsumerInstitusjonsoppholdTest {
     @Test
     fun `properties overstyrer MAX_POLL_RECORDS_CONFIG til 1`() {
         val stubConfig =
-            KafkaConsumerConfiguration { _ ->
-                Properties().apply {
-                    put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
-                }
+            object : KafkaConsumerConfiguration {
+                override fun generateKafkaConsumerProperties(env: Miljoevariabler) =
+                    Properties().apply {
+                        put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
+                    }
             }
         val env = Miljoevariabler.httpClient(emptyMap())
 

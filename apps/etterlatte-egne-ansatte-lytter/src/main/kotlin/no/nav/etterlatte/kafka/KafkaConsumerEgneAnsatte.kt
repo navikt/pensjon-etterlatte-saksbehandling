@@ -12,7 +12,7 @@ class KafkaConsumerEgneAnsatte(
     kafkaProperties: Properties,
     pollTimeoutInSeconds: Duration = Duration.ofSeconds(10L),
     closed: AtomicBoolean = AtomicBoolean(false),
-) : Kafkakonsument<String>(
+) : Kafkakonsument<String, String>(
         logger = LoggerFactory.getLogger(KafkaConsumerEgneAnsatte::class.java.name),
         consumer = KafkaConsumer<String, String>(kafkaProperties),
         topic = topic,

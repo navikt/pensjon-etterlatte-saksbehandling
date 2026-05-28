@@ -7,9 +7,9 @@ import org.slf4j.Logger
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class Kafkakonsument<T>(
+abstract class Kafkakonsument<K, T>(
     val logger: Logger,
-    val consumer: KafkaConsumer<String, T>,
+    val consumer: KafkaConsumer<K, T>,
     val topic: String,
     val pollTimeoutInSeconds: Duration,
     protected val closed: AtomicBoolean = AtomicBoolean(false),
@@ -25,12 +25,12 @@ abstract class Kafkakonsument<T>(
 
     abstract fun stream()
 
-    fun stream(haandter: (ConsumerRecords<String, T>) -> Unit) {
+    fun stream(haandter: (ConsumerRecords<K, T>) -> Unit) {
         try {
             logger.info("Starter å lese hendelser fra ${this.javaClass.name}")
             consumer.subscribe(listOf(topic))
             while (!closed.get()) {
-                val meldinger: ConsumerRecords<String, T> = consumer.poll(pollTimeoutInSeconds)
+                val meldinger: ConsumerRecords<K, T> = consumer.poll(pollTimeoutInSeconds)
                 haandter(meldinger)
                 consumer.commitSync()
 

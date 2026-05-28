@@ -1,13 +1,13 @@
 package no.nav.etterlatte.behandling.omregning
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.vedtaksvurdering.routes.withSerializableRetry
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
@@ -22,8 +22,11 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
         put("kjoering") {
             val request = call.receive<KjoeringRequest>()
             logger.info("Motter hendelse om at regulering har status ${request.status.name} i sak ${request.sakId}")
-            inTransaction {
-                omregningService.oppdaterKjoering(request, brukerTokenInfo)
+
+            withSerializableRetry {
+                inTransaction {
+                    omregningService.oppdaterKjoering(request, brukerTokenInfo)
+                }
             }
             call.respond(HttpStatusCode.OK)
         }

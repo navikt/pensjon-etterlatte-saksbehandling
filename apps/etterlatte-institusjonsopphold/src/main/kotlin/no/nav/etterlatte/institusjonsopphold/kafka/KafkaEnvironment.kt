@@ -7,6 +7,7 @@ import no.nav.etterlatte.kafka.Avrokonstanter
 import no.nav.etterlatte.kafka.Kafkakonfigurasjon
 import org.apache.kafka.common.IsolationLevel
 import org.apache.kafka.common.serialization.Deserializer
+import org.apache.kafka.common.serialization.LongDeserializer
 import java.util.Locale
 
 class KafkaEnvironment :
@@ -16,6 +17,7 @@ class KafkaEnvironment :
         userInfoConfigKey = Avrokonstanter.USER_INFO_CONFIG,
         schemaRegistryUrlConfigKey = Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG,
         isolationLevelConfig = IsolationLevel.READ_COMMITTED.toString().lowercase(Locale.getDefault()),
+        keyDeserializerClass = LongDeserializer::class.java,
     ) {
     class JsonDeserializer : Deserializer<KafkaOppholdHendelse> {
         private val mapper = jacksonObjectMapper()

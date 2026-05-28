@@ -13,7 +13,7 @@ class JoarkhendelseKonsument(
     topic: String,
     kafkaProperties: Properties,
     private val joarkHendelseHandler: JoarkHendelseHandler,
-) : Kafkakonsument<JournalfoeringHendelseRecord>(
+) : Kafkakonsument<String, JournalfoeringHendelseRecord>(
         logger = LoggerFactory.getLogger(JoarkhendelseKonsument::class.java.name),
         consumer = KafkaConsumer<String, JournalfoeringHendelseRecord>(kafkaProperties),
         topic = topic,

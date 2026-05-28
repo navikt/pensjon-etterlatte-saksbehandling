@@ -11,7 +11,7 @@ class SamordningHendelseKonsument(
     topic: String,
     kafkaProperties: Properties,
     private val handler: SamordningHendelseHandler,
-) : Kafkakonsument<SamordningVedtakHendelse>(
+) : Kafkakonsument<String, SamordningVedtakHendelse>(
         logger = LoggerFactory.getLogger(SamordningHendelseKonsument::class.java.name),
         consumer = KafkaConsumer<String, SamordningVedtakHendelse>(kafkaProperties),
         topic = topic,

@@ -14,7 +14,7 @@ class KlageKafkakonsument(
     env: Miljoevariabler,
     topic: String,
     private val behandlingKlient: BehandlingKlient,
-) : Kafkakonsument<String>(
+) : Kafkakonsument<String, String>(
         logger = LoggerFactory.getLogger(KlageKafkakonsument::class.java.name),
         consumer = KafkaConsumer<String, String>(KafkaEnvironment().generateKafkaConsumerProperties(env)),
         topic = topic,

@@ -21,7 +21,7 @@ class KlageKafkakonsument(
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
     override fun start() {
-        `kjørKonsumerLoop` { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
+        kjørKonsumerLoop { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
     }
 }
 

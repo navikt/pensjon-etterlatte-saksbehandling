@@ -20,7 +20,7 @@ class JoarkhendelseKonsument(
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
     override fun start() {
-        `kjørKonsumerLoop` { hendelser ->
+        kjørKonsumerLoop { hendelser ->
             hendelser.forEach {
                 runBlocking {
                     joarkHendelseHandler.haandterHendelse(it.value())

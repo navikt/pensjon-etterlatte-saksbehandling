@@ -22,7 +22,7 @@ class PersonhendelseKonsument(
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
     override fun start() {
-        `kjørKonsumerLoop` { hendelser ->
+        kjørKonsumerLoop { hendelser ->
             runBlocking {
                 val ventbareHendelser =
                     hendelser.map {

@@ -23,8 +23,8 @@ class UfoerehendelseKonsument(
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { hendelser ->
+    override fun start() {
+        `kjørKonsumerLoop` { hendelser ->
             runBlocking {
                 val ventbareHendelser =
                     hendelser.map { hendelse ->

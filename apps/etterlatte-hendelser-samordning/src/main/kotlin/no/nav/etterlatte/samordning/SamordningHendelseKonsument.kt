@@ -17,8 +17,8 @@ class SamordningHendelseKonsument(
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { meldinger ->
+    override fun start() {
+        `kjørKonsumerLoop` { meldinger ->
             meldinger
                 .forEach {
                     withLogContext {

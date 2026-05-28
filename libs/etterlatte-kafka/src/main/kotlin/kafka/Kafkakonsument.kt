@@ -1,5 +1,6 @@
 package no.nav.etterlatte.kafka
 
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.WakeupException
@@ -18,14 +19,16 @@ abstract class Kafkakonsument<K, T>(
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 closed.set(true)
-                consumer.wakeup(); // trådsikker, avbryter konsumer fra polling
+                consumer.wakeup() // trådsikker, avbryter konsumer fra polling
             },
         )
     }
 
-    abstract fun stream()
+    private val sikkerLogg = sikkerlogger()
 
-    fun stream(haandter: (ConsumerRecords<K, T>) -> Unit) {
+    abstract fun start()
+
+    protected fun kjørKonsumerLoop(haandter: (ConsumerRecords<K, T>) -> Unit) {
         try {
             logger.info("Starter å lese hendelser fra ${this.javaClass.name}")
             consumer.subscribe(listOf(topic))
@@ -33,14 +36,17 @@ abstract class Kafkakonsument<K, T>(
                 val meldinger: ConsumerRecords<K, T> = consumer.poll(pollTimeoutInSeconds)
                 haandter(meldinger)
                 consumer.commitSync()
-
-                if (meldinger.isEmpty) Thread.sleep(500L)
             }
-        } catch (e: WakeupException) {
-            // Ignorerer exception hvis vi stenger ned
-            if (!closed.get()) throw e
+        } catch (e: Exception) {
+            if (e is WakeupException && closed.get()) {
+                logger.info("Konsument ble bedt om å stenge ned")
+            } else {
+                logger.error("Uventet feil – avslutter konsumer - [se sikkerlogg for detaljer]")
+                sikkerLogg.error("Uventet feil – avslutter konsumer", e)
+                throw e
+            }
         } finally {
-            logger.info("Ferdig med å lese hendelser fra $${this.javaClass.name} - lukker consumer")
+            logger.info("Ferdig med å lese hendelser fra ${this.javaClass.name} - lukker consumer")
             consumer.close()
         }
     }

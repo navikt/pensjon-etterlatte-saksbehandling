@@ -19,8 +19,8 @@ class JoarkhendelseKonsument(
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { hendelser ->
+    override fun start() {
+        `kjørKonsumerLoop` { hendelser ->
             hendelser.forEach {
                 runBlocking {
                     joarkHendelseHandler.haandterHendelse(it.value())

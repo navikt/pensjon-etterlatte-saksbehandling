@@ -29,14 +29,14 @@ class KafkaConsumerInstitusjonsopphold(
     ) {
     val sikkerLogg: Logger = sikkerlogger()
 
-    override fun stream() {
-        stream { meldinger ->
+    override fun start() {
+        `kjørKonsumerLoop` { meldinger ->
             meldinger.forEach {
                 runBlocking {
                     try {
                         behandlingKlient.haandterHendelse(it)
                     } catch (e: RuntimeException) {
-                        sikkerLogg.error("Feil i institusjonshendelse: ", e)
+                        sikkerLogg.error("Feil med håndtering av institusjonshendelse: ", e)
                         throw e
                     }
                 }

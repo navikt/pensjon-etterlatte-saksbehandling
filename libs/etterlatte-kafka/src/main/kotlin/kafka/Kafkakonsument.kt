@@ -23,10 +23,6 @@ abstract class Kafkakonsument<T>(
         )
     }
 
-    private var antallMeldinger = 0
-
-    fun getAntallMeldinger() = antallMeldinger
-
     abstract fun stream()
 
     fun stream(haandter: (ConsumerRecords<String, T>) -> Unit) {
@@ -38,7 +34,6 @@ abstract class Kafkakonsument<T>(
                 haandter(meldinger)
                 consumer.commitSync()
 
-                antallMeldinger += meldinger.count()
                 if (meldinger.isEmpty) Thread.sleep(500L)
             }
         } catch (e: WakeupException) {

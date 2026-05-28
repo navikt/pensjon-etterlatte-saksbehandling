@@ -10,10 +10,12 @@ import no.nav.etterlatte.kafka.Kafkakonsument
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.util.Properties
 
 class KafkaConsumerInstitusjonsopphold(
     env: Miljoevariabler,
@@ -21,7 +23,7 @@ class KafkaConsumerInstitusjonsopphold(
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
 ) : Kafkakonsument<Long, KafkaOppholdHendelse>(
         logger = LoggerFactory.getLogger(KafkaConsumerInstitusjonsopphold::class.java.name),
-        consumer = KafkaConsumer<Long, KafkaOppholdHendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env)),
+        consumer = KafkaConsumer<Long, KafkaOppholdHendelse>(lagInstitusjonsoppholdProperties(kafkaEnvironment, env)),
         topic = env.requireEnvValue(INSTITUSJONSOPPHOLD_TOPIC),
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
@@ -42,6 +44,14 @@ class KafkaConsumerInstitusjonsopphold(
         }
     }
 }
+
+internal fun lagInstitusjonsoppholdProperties(
+    kafkaEnvironment: KafkaConsumerConfiguration,
+    env: Miljoevariabler,
+): Properties =
+    kafkaEnvironment.generateKafkaConsumerProperties(env).apply {
+        put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
+    }
 
 data class KafkaOppholdHendelse(
     val hendelseId: Long,

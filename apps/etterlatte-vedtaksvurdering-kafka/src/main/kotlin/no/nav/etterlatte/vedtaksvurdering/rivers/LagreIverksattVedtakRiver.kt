@@ -13,6 +13,7 @@ import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class LagreIverksattVedtakRiver(
     rapidsConnection: RapidsConnection,
@@ -37,7 +38,9 @@ internal class LagreIverksattVedtakRiver(
             when (respons.status) {
                 UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
                     respons.behandlingId?.also { behandlingId ->
-                        vedtaksvurderingService.iverksattVedtak(behandlingId)
+                        if (behandlingId != UUID.fromString("f0b5858e-6c68-4ea3-ba9f-b3d4244dca0a")) {
+                            vedtaksvurderingService.iverksattVedtak(behandlingId)
+                        }
                     }
                         ?: logger.error(
                             "Utbetaling mangler behandlingId. " +

@@ -48,7 +48,7 @@ class SkjermingslesingTest {
                 closed.set(true)
                 kafkaConsumerEgneAnsatte.consumer.wakeup()
             }
-        kafkaConsumerEgneAnsatte.stream()
+        kafkaConsumerEgneAnsatte.start()
         thread.join()
         verify(exactly = 1) { producer.sendMelding(any(), any(), any()) }
         verify(exactly = 1) { behandlingKlient.haandterHendelse(any()) }

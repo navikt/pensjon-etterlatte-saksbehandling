@@ -20,8 +20,8 @@ class KlageKafkakonsument(
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
+    override fun start() {
+        pollLoop { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
     }
 }
 

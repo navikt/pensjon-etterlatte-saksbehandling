@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.YearMonth
+import java.util.concurrent.atomic.AtomicInteger
 
 class SakLesDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
@@ -32,54 +33,52 @@ class SakLesDao(
         rekjoereManuellUtenOppgave: Boolean = false,
     ): List<Sak> =
         connectionAutoclosing.hentConnection { connection ->
+            val statuserSomRekjoeres: List<KjoeringStatus> =
+                rekjoereManuellUtenOppgave.let {
+                    when (it) {
+                        true -> listOf(KjoeringStatus.FEILA, KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE)
+                        false -> listOf(KjoeringStatus.FEILA)
+                    }
+                }
             with(connection) {
                 val statement =
                     prepareStatement(
                         """
-                            WITH siste_kjoering AS (
-                                SELECT DISTINCT ON (sak_id) sak_id, status
-                                FROM omregningskjoering
-                                WHERE kjoering = '$kjoering'
-                                ORDER BY sak_id, tidspunkt DESC
-                            )
-                            SELECT s.id, s.sakType, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet
-                            FROM sak s
-                            WHERE (
-                                NOT EXISTS (SELECT 1 FROM siste_kjoering k WHERE k.sak_id = s.id)
-                                    OR EXISTS (SELECT 1 FROM siste_kjoering k WHERE k.sak_id = s.id AND k.status IN ${
-                            rekjoereManuellUtenOppgave.let {
-                                when (it) {
-                                    true -> "('${KjoeringStatus.FEILA.name}', '${KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE.name}')"
-                                    false -> "('${KjoeringStatus.FEILA.name}')"
-                                }
-                            }
-                        }
-                                )
-                            )
-                            AND EXISTS (SELECT 1 FROM behandling b WHERE b.sak_id = s.id)
-                            ${if (spesifikkeSaker.isEmpty()) "" else " AND id = ANY(?)"}
-                            ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(id = ANY(?))"}
-                            ${if (sakType == null) "" else " AND s.saktype = ?"}
-                            order by id ASC
-                            limit $antall                            
+                        WITH siste_kjoering AS (
+                            SELECT DISTINCT ON (sak_id) sak_id, status
+                            FROM omregningskjoering
+                            WHERE kjoering = ?
+                            ORDER BY sak_id, tidspunkt DESC
+                        )
+                        SELECT s.id, s.sakType, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet
+                        FROM sak s
+                        WHERE (
+                            NOT EXISTS (SELECT 1 FROM siste_kjoering k WHERE k.sak_id = s.id)
+                            OR EXISTS (SELECT 1 FROM siste_kjoering k WHERE k.sak_id = s.id AND k.status = ANY (?))
+                        )
+                        AND EXISTS (SELECT 1 FROM behandling b WHERE b.sak_id = s.id)
+                        ${if (spesifikkeSaker.isEmpty()) "" else " AND id = ANY(?)"}
+                        ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(id = ANY(?))"}
+                        ${if (sakType == null) "" else " AND s.saktype = ?"}
+                        order by id ASC
+                        limit $antall
                         """.trimMargin(),
-                    )
-                var paramIndex = 1
-                if (spesifikkeSaker.isNotEmpty()) {
-                    statement.setArray(paramIndex, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
-                    paramIndex += 1
-                }
-                if (ekskluderteSaker.isNotEmpty()) {
-                    statement.setArray(paramIndex, createArrayOf("bigint", ekskluderteSaker.toTypedArray()))
-                    paramIndex += 1
-                }
-                if (sakType != null) {
-                    statement.setString(paramIndex, sakType.name)
-                }
+                    ).apply {
+                        val paramIndex = AtomicInteger(1)
 
-                statement
-                    .executeQuery()
-                    .toList(mapTilSak)
+                        setString(paramIndex.getAndIncrement(), kjoering)
+                        setArray(paramIndex.getAndIncrement(), createArrayOf("text", statuserSomRekjoeres.map { it.name }.toTypedArray()))
+                        if (spesifikkeSaker.isNotEmpty()) {
+                            setArray(paramIndex.getAndIncrement(), createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                        }
+                        if (ekskluderteSaker.isNotEmpty()) {
+                            setArray(paramIndex.getAndIncrement(), createArrayOf("bigint", ekskluderteSaker.toTypedArray()))
+                        }
+                        if (sakType != null) {
+                            setString(paramIndex.get(), sakType.name)
+                        }
+                    }
+                statement.executeQuery().toList(mapTilSak)
             }
         }
 

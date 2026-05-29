@@ -12,14 +12,14 @@ class KafkaConsumerEgneAnsatte(
     kafkaProperties: Properties,
     pollTimeoutInSeconds: Duration = Duration.ofSeconds(10L),
     closed: AtomicBoolean = AtomicBoolean(false),
-) : Kafkakonsument<String>(
+) : Kafkakonsument<String, String>(
         logger = LoggerFactory.getLogger(KafkaConsumerEgneAnsatte::class.java.name),
         consumer = KafkaConsumer<String, String>(kafkaProperties),
         topic = topic,
         pollTimeoutInSeconds = pollTimeoutInSeconds,
         closed = closed,
     ) {
-    override fun stream() {
-        stream { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
+    override fun start() {
+        pollLoop { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
     }
 }

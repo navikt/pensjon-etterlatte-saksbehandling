@@ -17,14 +17,14 @@ class UfoerehendelseKonsument(
     topic: String,
     kafkaProperties: Properties,
     private val ufoereHendelseFordeler: UfoereHendelseFordeler,
-) : Kafkakonsument<String>(
+) : Kafkakonsument<String, String>(
         logger = LoggerFactory.getLogger(KafkaConsumer::class.java.name),
         consumer = KafkaConsumer<String, String>(kafkaProperties),
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { hendelser ->
+    override fun start() {
+        pollLoop { hendelser ->
             runBlocking {
                 val ventbareHendelser =
                     hendelser.map { hendelse ->

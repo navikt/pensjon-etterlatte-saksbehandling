@@ -47,6 +47,7 @@ import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -468,9 +469,14 @@ class VedtakBehandlingService(
         }
     }
 
-    fun iverksattVedtak(behandlingId: UUID): VedtakOgRapid {
+    fun iverksattVedtak(behandlingId: UUID): KanskjeAlleredeUtfoertOppdatering {
         logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
+
+        if (vedtak.status == VedtakStatus.IVERKSATT) {
+            logger.warn("Vi har allerede satt dette vedtaket til iverksatt. Returnerer iverksatt vedtak")
+            return KanskjeAlleredeUtfoertOppdatering.AlleredeUtfoert(vedtak.toDto())
+        }
 
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT, VedtakStatus.SAMORDNET))
         runBlocking {
@@ -484,13 +490,15 @@ class VedtakBehandlingService(
         }
         val iverksattVedtak = vedtaksvurderingRepository.iverksattVedtak(behandlingId)
 
-        return VedtakOgRapid(
-            iverksattVedtak.toDto(),
-            RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseHendelseType.IVERKSATT,
-                vedtak = iverksattVedtak.toDto(),
-                tekniskTid = Tidspunkt.now(),
-                behandlingId = behandlingId,
+        return KanskjeAlleredeUtfoertOppdatering.NyOppdatering(
+            VedtakOgRapid(
+                iverksattVedtak.toDto(),
+                RapidInfo(
+                    vedtakhendelse = VedtakKafkaHendelseHendelseType.IVERKSATT,
+                    vedtak = iverksattVedtak.toDto(),
+                    tekniskTid = Tidspunkt.now(),
+                    behandlingId = behandlingId,
+                ),
             ),
         )
     }
@@ -823,6 +831,20 @@ class VedtakBehandlingService(
     private fun Vedtak.isRegulering() =
         this.innhold is VedtakInnhold.Behandling &&
             Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
+}
+
+sealed class KanskjeAlleredeUtfoertOppdatering {
+    abstract val vedtak: VedtakDto
+
+    data class AlleredeUtfoert(
+        override val vedtak: VedtakDto,
+    ) : KanskjeAlleredeUtfoertOppdatering()
+
+    data class NyOppdatering(
+        val vedtakOgRapid: VedtakOgRapid,
+    ) : KanskjeAlleredeUtfoertOppdatering() {
+        override val vedtak: VedtakDto = vedtakOgRapid.vedtak
+    }
 }
 
 class ManglerAvkortetYtelse :

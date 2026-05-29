@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -119,7 +120,12 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
             kunSystembruker {
                 val oppholdsHendelse = call.receive<InstitusjonsoppholdHendelseBeriket>()
                 logger.info("Mottar institusjons-hendelse med ID ${oppholdsHendelse.hendelseId} fra inst2")
-                grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
+                try {
+                    grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
+                } catch (e: Exception) {
+                    sikkerLogg.error("Mottak av institusjons-hendelse feilet: $oppholdsHendelse", e)
+                    throw e
+                }
                 call.respond(HttpStatusCode.OK)
             }
         }

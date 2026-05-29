@@ -28,7 +28,7 @@ abstract class Kafkakonsument<K, T>(
 
     abstract fun start()
 
-    protected fun kjørKonsumerLoop(haandter: (ConsumerRecords<K, T>) -> Unit) {
+    protected fun pollLoop(haandter: (ConsumerRecords<K, T>) -> Unit) {
         try {
             logger.info("Starter å lese hendelser fra ${this.javaClass.name}")
             consumer.subscribe(listOf(topic))

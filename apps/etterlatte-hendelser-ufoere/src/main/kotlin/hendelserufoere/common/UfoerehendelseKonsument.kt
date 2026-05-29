@@ -24,7 +24,7 @@ class UfoerehendelseKonsument(
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
     override fun start() {
-        kjørKonsumerLoop { hendelser ->
+        pollLoop { hendelser ->
             runBlocking {
                 val ventbareHendelser =
                     hendelser.map { hendelse ->

@@ -28,7 +28,7 @@ class KafkaConsumerInstitusjonsopphold(
     val sikkerLogg: Logger = sikkerlogger()
 
     override fun start() {
-        kjørKonsumerLoop { meldinger ->
+        pollLoop { meldinger ->
             meldinger.forEach {
                 runBlocking {
                     try {

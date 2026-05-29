@@ -20,6 +20,6 @@ class KafkaConsumerEgneAnsatte(
         closed = closed,
     ) {
     override fun start() {
-        kjørKonsumerLoop { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
+        pollLoop { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
     }
 }

@@ -35,21 +35,18 @@ class SakLesDao(
             with(connection) {
                 val statement =
                     prepareStatement(
-                        """SELECT id, sakType, fnr, enhet, adressebeskyttelse, erSkjermet FROM sak s 
-                    WHERE
-                    (
-                    -- ikke kjørt i det hele tatt
-                    NOT EXISTS (
-                        SELECT 1 FROM omregningskjoering k WHERE k.sak_id=s.id 
-                        AND k.kjoering='$kjoering' 
-                        AND k.status!='${KjoeringStatus.KLAR_TIL_REGULERING.name}'
-                    )
-                    OR EXISTS(
-                        -- nyeste kjøring har feila eller har satt til manuell uten oppgave (hvis bryter er på)
-                        SELECT 1 FROM omregningskjoering k
-                            WHERE k.sak_id=s.id 
-                            AND k.kjoering='$kjoering' 
-                            AND k.status in ${
+                        """
+                            WITH siste_kjoering AS (
+                                SELECT DISTINCT ON (sak_id) sak_id, status
+                                FROM omregningskjoering
+                                WHERE kjoering = '$kjoering'
+                                ORDER BY sak_id, tidspunkt DESC
+                            )
+                            SELECT s.id, s.sakType, s.fnr, s.enhet, s.adressebeskyttelse, s.erSkjermet
+                            FROM sak s
+                            WHERE (
+                                NOT EXISTS (SELECT 1 FROM siste_kjoering k WHERE k.sak_id = s.id)
+                                    OR EXISTS (SELECT 1 FROM siste_kjoering k WHERE k.sak_id = s.id AND k.status IN ${
                             rekjoereManuellUtenOppgave.let {
                                 when (it) {
                                     true -> "('${KjoeringStatus.FEILA.name}', '${KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE.name}')"
@@ -57,16 +54,14 @@ class SakLesDao(
                                 }
                             }
                         }
-                            AND k.tidspunkt >= (SELECT MAX(o.tidspunkt) FROM omregningskjoering o WHERE o.sak_id=k.sak_id AND o.kjoering=k.kjoering)
-                    )
-                    )
-                    AND EXISTS(SELECT 1 FROM behandling b WHERE b.sak_id= s.id)
-                    ${if (spesifikkeSaker.isEmpty()) "" else " AND id = ANY(?)"}
-                    ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(id = ANY(?))"}
-                    ${if (sakType == null) "" else " AND s.saktype = ?"}
-                    
-                    ORDER BY id ASC
-                    LIMIT $antall
+                                )
+                            )
+                            AND EXISTS (SELECT 1 FROM behandling b WHERE b.sak_id = s.id)
+                            ${if (spesifikkeSaker.isEmpty()) "" else " AND id = ANY(?)"}
+                            ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(id = ANY(?))"}
+                            ${if (sakType == null) "" else " AND s.saktype = ?"}
+                            order by id ASC
+                            limit $antall                            
                         """.trimMargin(),
                     )
                 var paramIndex = 1

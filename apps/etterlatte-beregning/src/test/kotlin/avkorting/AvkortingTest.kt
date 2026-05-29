@@ -133,13 +133,16 @@ internal class AvkortingTest {
                     ),
             )
 
-        // Åpen beregningsperiode: tomSluttenAvAaret=null (ingen neste årsoppgjør) → beregningen må dekke frem i tid
+        // Lukket beregningsperiode: setter opphoerFom 2026-01 slik at tomSluttenAvAaret blir 2025-12.
+        // Uten opphør ville reglene splittet på G-skifte i mai 2025 og endt opp med en periode
+        // som krysser kalenderår – det er ikke relevant for det testen verifiserer.
         val beregningForAaret =
             beregning(
                 beregninger =
                     listOf(
                         beregningsperiode(
                             datoFOM = YearMonth.of(2025, Month.APRIL),
+                            datoTOM = YearMonth.of(2025, Month.DECEMBER),
                             utbetaltBeloep = 15_000,
                         ),
                     ),
@@ -159,7 +162,7 @@ internal class AvkortingTest {
                     bruker = bruker,
                     beregning = beregningForAaret,
                     sanksjoner = emptyList(),
-                    opphoerFom = null,
+                    opphoerFom = YearMonth.of(2026, Month.JANUARY),
                     brukNyeReglerAvkorting = true,
                 )
 

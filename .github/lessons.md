@@ -41,3 +41,7 @@
 **2026-05-07 — Regelendring / beregning**
 - Observation: Før jeg endret reglene sjekket jeg OMS-koden for å se hvordan de løste det samme problemet – det gav meg korrekt mønster direkte (`multiply(grunnbeloep).divide(12)`), og samsvarte med planens antagelser.
 - Action: Ved beregningsregelendringer, alltid finn den tilsvarende regelen i det andre regelsettet (BP/OMS) som referanseimplementasjon.
+
+**2026-05-29 — Estimering**
+- Observation: Jeg antok at en mock var "bare bekvemmelighet" og estimerte fjerning som trivielt – uten å verifisere det.
+- Action: Anta at en mock er en del av testkontrakten til det motsatte er bevist. Verifiser antagelsen med en rask sjekk før du estimerer.

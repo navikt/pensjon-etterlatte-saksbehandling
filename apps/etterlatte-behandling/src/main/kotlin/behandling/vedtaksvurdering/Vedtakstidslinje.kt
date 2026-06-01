@@ -34,13 +34,14 @@ class Vedtakstidslinje(
 
         val senesteVedtakPaaDato = hentSenesteVedtakSomKanLoepePaaDato(dato)
         val erLoepende =
-            senesteVedtakPaaDato?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING) &&
-                (!sjekkNullBeloep || senesteVedtakPaaDato!!.harYtelseOver0FraDato(dato))
+            senesteVedtakPaaDato?.let {
+                it.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING) && (!sjekkNullBeloep || it.harYtelseOver0FraDato(dato))
+            } ?: false
         return LoependeYtelse(
             erLoepende = erLoepende,
             underSamordning = erUnderSamordning,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato,
-            behandlingId = if (erLoepende) senesteVedtakPaaDato!!.behandlingId else null,
+            behandlingId = if (erLoepende) senesteVedtakPaaDato.behandlingId else null,
             sisteLoependeBehandlingId =
                 if (erLoepende) {
                     sammenstill(YearMonth.from(dato))
@@ -174,7 +175,7 @@ class Vedtakstidslinje(
         return (innhold as VedtakInnhold.Behandling)
             .utbetalingsperioder
             .filter { it.type == UtbetalingsperiodeType.UTBETALING }
-            .filter { !it.periode.fom.isAfter(maaned) && (it.periode.tom == null || !it.periode.tom!!.isBefore(maaned)) }
+            .filter { it.periode.tom == null || it.periode.tom!! < maaned }
             .any { (it.beloep ?: BigDecimal.ZERO) > BigDecimal.ZERO }
     }
 

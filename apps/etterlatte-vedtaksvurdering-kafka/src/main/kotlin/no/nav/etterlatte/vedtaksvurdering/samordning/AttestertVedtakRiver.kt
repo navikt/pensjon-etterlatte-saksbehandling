@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class AttestertVedtakRiver(
     rapidsConnection: RapidsConnection,
@@ -38,6 +39,10 @@ internal class AttestertVedtakRiver(
         context: MessageContext,
     ) {
         val vedtak = objectMapper.readValue<VedtakDto>(packet["vedtak"].toJson())
+        if (vedtak.behandlingId == UUID.fromString("2e6e31e6-05e1-4d23-b77a-05ebe36e6f62")) {
+            // hopper over stuck melding
+            return
+        }
         logger.info("Behandle til_samordning for vedtak [behandlingId=${vedtak.behandlingId}]")
 
         try {

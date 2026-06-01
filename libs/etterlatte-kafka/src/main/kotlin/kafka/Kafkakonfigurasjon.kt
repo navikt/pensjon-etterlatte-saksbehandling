@@ -30,6 +30,7 @@ abstract class Kafkakonfigurasjon<T>(
     private val schemaRegistryUrlConfigKey: String,
     private val isolationLevelConfig: String? = null,
     private val specificAvroReaderConfig: Boolean? = null,
+    private val keyDeserializerClass: Class<*> = StringDeserializer::class.java,
 ) : KafkaConsumerConfiguration {
     override fun generateKafkaConsumerProperties(env: Miljoevariabler): Properties =
         if (appIsInGCP()) {
@@ -48,13 +49,13 @@ abstract class Kafkakonfigurasjon<T>(
                 // Nais doc: Password needed to use the keystore and truststore
 
                 put(ConsumerConfig.GROUP_ID_CONFIG, env[groupId])
-                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
+                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
                 put(ConsumerConfig.CLIENT_ID_CONFIG, env[NAIS_APP_NAME])
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                 put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, Duration.ofMinutes(8L).toMillis().toInt())
                 put(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, Duration.ofSeconds(20L).toMillis().toInt())
-                put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
+                put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializerClass)
                 put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass)
 
                 put(Avrokonstanter.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
@@ -76,7 +77,7 @@ abstract class Kafkakonfigurasjon<T>(
             Properties().apply {
                 put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env[KAFKA_BROKERS])
                 put(ConsumerConfig.GROUP_ID_CONFIG, env[groupId])
-                put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
+                put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializerClass)
                 put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass)
             }
         }

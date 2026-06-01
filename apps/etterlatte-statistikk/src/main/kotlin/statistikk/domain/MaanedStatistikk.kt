@@ -120,7 +120,7 @@ class MaanedStatistikk(
                         avkortingData.ytelseEtterAvkorting
                     } else {
                         aktuellBeregning?.utbetaltBeloep
-                            ?: sisteVedtak.nettoYtelse?.toInt()
+                            ?: sisteVedtak.nettoYtelse?.takeIf { it != "null" }?.toInt()
                             ?: 0
                     }
 

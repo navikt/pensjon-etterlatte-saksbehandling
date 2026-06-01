@@ -14,14 +14,14 @@ class KlageKafkakonsument(
     env: Miljoevariabler,
     topic: String,
     private val behandlingKlient: BehandlingKlient,
-) : Kafkakonsument<String>(
+) : Kafkakonsument<String, String>(
         logger = LoggerFactory.getLogger(KlageKafkakonsument::class.java.name),
         consumer = KafkaConsumer<String, String>(KafkaEnvironment().generateKafkaConsumerProperties(env)),
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
+    override fun start() {
+        pollLoop { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
     }
 }
 

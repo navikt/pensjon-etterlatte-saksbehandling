@@ -100,10 +100,8 @@ internal class NySoeknadRiver(
                     .any { it.status in BehandlingStatus.underBehandling() }
 
             if (harBehandlingUnderArbeid) {
-                /**
-                 * Opprett oppgave for tilleggsinformasjon
-                 * Sett fordelt til false slik at det ikke opprettes ny behandling.
-                 **/
+                // Opprett oppgave for tilleggsinformasjon
+                // Sett fordelt til false slik at det ikke opprettes ny behandling.
                 opprettOppgaveTilleggsinformasjon(sak.id, journalpostResponse.journalpostId)
                 context.publish(packet.oppdaterMed(sak.id, false, journalpostResponse).toJson())
             } else {

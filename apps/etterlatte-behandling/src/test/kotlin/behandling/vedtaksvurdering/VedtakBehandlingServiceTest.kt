@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.Called
@@ -28,6 +29,7 @@ import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.UnderkjennVedtakDto
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.KanskjeAlleredeUtfoertOppdatering
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VirkningstidspunktEtterOpphoerException
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VirkningstidspunktOgOpphoerFomPaaSammeDatoException
@@ -1077,8 +1079,9 @@ internal class VedtakBehandlingServiceTest(
 
         iverksattVedtak shouldNotBe null
         iverksattVedtak.vedtak.status shouldBe VedtakStatus.IVERKSATT
+        val nyOppdatering = iverksattVedtak as KanskjeAlleredeUtfoertOppdatering.NyOppdatering
 
-        Assertions.assertEquals(VedtakKafkaHendelseHendelseType.IVERKSATT, iverksattVedtak.rapidInfo1.vedtakhendelse)
+        Assertions.assertEquals(VedtakKafkaHendelseHendelseType.IVERKSATT, nyOppdatering.vedtakOgRapid.rapidInfo1.vedtakhendelse)
     }
 
     @Test
@@ -1126,9 +1129,12 @@ internal class VedtakBehandlingServiceTest(
             service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
             service.iverksattVedtak(behandlingId)
 
-            assertThrows<InternfeilException> {
-                service.iverksattVedtak(behandlingId)
-            }
+            val vedtak =
+                assertDoesNotThrow {
+                    service.iverksattVedtak(behandlingId)
+                }
+
+            (vedtak as? KanskjeAlleredeUtfoertOppdatering.AlleredeUtfoert).shouldNotBeNull()
         }
     }
 

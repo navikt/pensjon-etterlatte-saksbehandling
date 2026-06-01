@@ -28,6 +28,7 @@ class OmregningService(
         request: KjoeringRequest,
         bruker: BrukerTokenInfo,
     ) {
+        logger.info("Oppdaterer kjøring ${request.kjoering} for sak ${request.sakId} med status ${request.status}")
         if (request.status == KjoeringStatus.FEILA) {
             omregningDao.hentNyligsteLinjeForKjoering(request.kjoering, request.sakId)?.let { (_, sisteStatus) ->
                 if (sisteStatus.erFerdigstilt()) {
@@ -40,7 +41,9 @@ class OmregningService(
 
             behandlingService.hentAapenOmregning(request.sakId)?.let { omregning ->
                 when (omregning.revurderingsaarsak) {
-                    Revurderingaarsak.INNTEKTSENDRING -> endreTilManuell(omregning.id)
+                    Revurderingaarsak.INNTEKTSENDRING -> {
+                        endreTilManuell(omregning.id)
+                    }
 
                     else -> {
                         if (omregning.status.kanAvbrytes()) {

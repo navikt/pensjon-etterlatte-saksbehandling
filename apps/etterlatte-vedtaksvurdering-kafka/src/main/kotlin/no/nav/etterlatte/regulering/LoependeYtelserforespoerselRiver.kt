@@ -54,7 +54,7 @@ internal class LoependeYtelserforespoerselRiver(
             }
         }
 
-        val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
+        val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato, sjekkNullBeloep = true)
         if (respons.underSamordning) {
             throw SakErUnderSamordning()
         }

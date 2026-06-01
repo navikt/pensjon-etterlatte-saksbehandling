@@ -23,6 +23,7 @@ interface VedtakService {
     fun harLoependeYtelserFra(
         sakId: SakId,
         dato: LocalDate,
+        sjekkNullBeloep: Boolean,
     ): LoependeYtelseDTO
 
     fun opprettVedtakFattOgAttester(
@@ -64,9 +65,10 @@ class VedtakServiceImpl(
     override fun harLoependeYtelserFra(
         sakId: SakId,
         dato: LocalDate,
+        sjekkNullBeloep: Boolean,
     ): LoependeYtelseDTO =
         runBlocking {
-            httpClient.get("$url/api/vedtak/loepende/${sakId.sakId}?dato=$dato").body()
+            httpClient.get("$url/api/vedtak/loepende/${sakId.sakId}?dato=$dato&sjekkNullBeloep=$sjekkNullBeloep").body()
         }
 
     override fun opprettVedtakFattOgAttester(

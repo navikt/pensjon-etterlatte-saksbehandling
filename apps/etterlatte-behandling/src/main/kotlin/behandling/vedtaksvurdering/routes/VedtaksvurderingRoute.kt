@@ -302,9 +302,10 @@ fun Route.vedtaksvurderingRoute(
             val dato =
                 call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
                     ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
+            val sjekkNullBeloep = call.request.queryParameters["sjekkNullBeloep"]?.toBoolean() ?: false
 
-            logger.info("Sjekker om sak har løpende for vedtak $sakId på dato $dato")
-            val loependeYtelse = inTransaction { vedtakService.sjekkOmVedtakErLoependePaaDato(sakId, dato) }
+            logger.info("Sjekker om sak har løpende for vedtak $sakId på dato $dato (sjekkNullBeloep=$sjekkNullBeloep)")
+            val loependeYtelse = inTransaction { vedtakService.sjekkOmVedtakErLoependePaaDato(sakId, dato, sjekkNullBeloep) }
             call.respond(loependeYtelse.toDto())
         }
 

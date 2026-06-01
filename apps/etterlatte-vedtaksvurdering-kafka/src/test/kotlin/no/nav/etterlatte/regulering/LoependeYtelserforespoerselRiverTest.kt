@@ -56,7 +56,7 @@ internal class LoependeYtelserforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
-            vedtakServiceMock.harLoependeYtelserFra(sakId, LocalDate.of(2023, 5, 1))
+            vedtakServiceMock.harLoependeYtelserFra(sakId, LocalDate.of(2023, 5, 1), sjekkNullBeloep = true)
         }
     }
 
@@ -66,7 +66,7 @@ internal class LoependeYtelserforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         every { vedtakServiceMock.tilbakestillVedtak(any()) } just runs
-        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023, sjekkNullBeloep = true) } returns
             LoependeYtelseDTO(
                 erLoepende = true,
                 underSamordning = false,
@@ -89,7 +89,7 @@ internal class LoependeYtelserforespoerselRiverTest {
     fun `sender avbryt-melding dersom det ikke er en loepende ytelse`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023, sjekkNullBeloep = true) } returns
             LoependeYtelseDTO(
                 erLoepende = false,
                 underSamordning = false,
@@ -125,7 +125,7 @@ internal class LoependeYtelserforespoerselRiverTest {
             ).let { JsonMessage.newMessage(it) }
 
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023, sjekkNullBeloep = true) } returns
             LoependeYtelseDTO(
                 erLoepende = true,
                 underSamordning = false,
@@ -142,7 +142,7 @@ internal class LoependeYtelserforespoerselRiverTest {
     fun `avbryter hvis sak er under samordning`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023, sjekkNullBeloep = true) } returns
             LoependeYtelseDTO(
                 erLoepende = true,
                 underSamordning = true,

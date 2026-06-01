@@ -4,8 +4,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -21,14 +23,19 @@ class Vedtakstidslinje(
         attesterteBehandlingVedtak
             .filter { it.status == VedtakStatus.IVERKSATT }
 
-    fun harLoependeVedtakPaaEllerEtter(dato: LocalDate): LoependeYtelse {
+    fun harLoependeVedtakPaaEllerEtter(
+        dato: LocalDate,
+        sjekkNullBeloep: Boolean,
+    ): LoependeYtelse {
         val erUnderSamordning =
             attesterteBehandlingVedtak.any { listOf(VedtakStatus.TIL_SAMORDNING, VedtakStatus.SAMORDNET).contains(it.status) }
 
         if (iverksatteBehandlingVedtak.isEmpty()) return LoependeYtelse(false, erUnderSamordning, dato)
 
         val senesteVedtakPaaDato = hentSenesteVedtakSomKanLoepePaaDato(dato)
-        val erLoepende = senesteVedtakPaaDato?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
+        val erLoepende =
+            senesteVedtakPaaDato?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING) &&
+                (!sjekkNullBeloep || senesteVedtakPaaDato!!.harYtelseOver0FraDato(dato))
         return LoependeYtelse(
             erLoepende = erLoepende,
             underSamordning = erUnderSamordning,
@@ -156,6 +163,19 @@ class Vedtakstidslinje(
         }
 
         return innvilgedePerioder
+    }
+
+    /**
+     * Sjekker om vedtaket har minst én utbetalingsperiode med beloep > 0 som dekker gitt dato.
+     * Brukes kun i reguleringsflyt for å skille saker uten faktisk ytelse fra løpende saker.
+     */
+    private fun Vedtak.harYtelseOver0FraDato(dato: LocalDate): Boolean {
+        val maaned = YearMonth.from(dato)
+        return (innhold as VedtakInnhold.Behandling)
+            .utbetalingsperioder
+            .filter { it.type == UtbetalingsperiodeType.UTBETALING }
+            .filter { !it.periode.fom.isAfter(maaned) && (it.periode.tom == null || !it.periode.tom!!.isBefore(maaned)) }
+            .any { (it.beloep ?: BigDecimal.ZERO) > BigDecimal.ZERO }
     }
 
     private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {

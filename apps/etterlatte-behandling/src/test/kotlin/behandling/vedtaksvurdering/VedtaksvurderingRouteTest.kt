@@ -351,7 +351,7 @@ internal class VedtaksvurderingRouteTest(
         val sakId = sakId1
         val loependeYtelse = LoependeYtelse(erLoepende = true, underSamordning = false, LocalDate.now(), UUID.randomUUID())
 
-        every { vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(any(), any()) } returns loependeYtelse
+        every { vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(any(), any(), any()) } returns loependeYtelse
 
         withTestApplication(context) { client ->
 
@@ -369,7 +369,7 @@ internal class VedtaksvurderingRouteTest(
             hentetLoependeYtelse.dato shouldBe loependeYtelse.dato
 
             coVerify(exactly = 1) {
-                vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(any(), any())
+                vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(any(), any(), any())
             }
         }
     }

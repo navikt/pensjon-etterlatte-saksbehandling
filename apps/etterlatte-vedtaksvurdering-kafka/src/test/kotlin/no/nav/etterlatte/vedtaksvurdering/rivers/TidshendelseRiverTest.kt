@@ -39,12 +39,13 @@ class TidshendelseRiverTest {
 
     @Test
     fun `skal lese melding og sjekke loepende ytelse`() {
-        every { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) } returns
+        every { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1), sjekkNullBeloep = false) } returns
             LoependeYtelseDTO(erLoepende = true, underSamordning = false, dato = datoFom, behandlingId = behandlingId)
         every {
             vedtakService.harLoependeYtelserFra(
                 sakId,
                 datoFomJanuar2024,
+                sjekkNullBeloep = false,
             )
         } returns
             LoependeYtelseDTO(
@@ -78,13 +79,13 @@ class TidshendelseRiverTest {
             field(0, DRYRUN).asBoolean() shouldBe false
         }
 
-        verify { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) }
-        verify { vedtakService.harLoependeYtelserFra(sakId, datoFomJanuar2024) }
+        verify { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1), sjekkNullBeloep = false) }
+        verify { vedtakService.harLoependeYtelserFra(sakId, datoFomJanuar2024, sjekkNullBeloep = false) }
     }
 
     @Test
     fun `skal lese melding og returnere negativt svar for loepende ytelse`() {
-        every { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) } returns
+        every { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1), sjekkNullBeloep = false) } returns
             LoependeYtelseDTO(erLoepende = false, underSamordning = false, dato = datoFom)
 
         val melding =
@@ -110,7 +111,7 @@ class TidshendelseRiverTest {
             field(0, DRYRUN).asBoolean() shouldBe true
         }
 
-        verify { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) }
+        verify { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1), sjekkNullBeloep = false) }
     }
 
     @Test

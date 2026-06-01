@@ -42,8 +42,8 @@ internal class VedtakServiceImplTest {
             }
         val vedtakService = VedtakServiceImpl(httpClientMock, "http://test")
         val dato = LocalDate.of(2023, 1, 1)
-        vedtakService.harLoependeYtelserFra(sakId1, dato)
+        vedtakService.harLoependeYtelserFra(sakId1, dato, sjekkNullBeloep = false)
 
-        Assertions.assertEquals("/api/vedtak/loepende/1?dato=2023-01-01", request.encodedPathAndQuery)
+        Assertions.assertEquals("/api/vedtak/loepende/1?dato=2023-01-01&sjekkNullBeloep=false", request.encodedPathAndQuery)
     }
 }

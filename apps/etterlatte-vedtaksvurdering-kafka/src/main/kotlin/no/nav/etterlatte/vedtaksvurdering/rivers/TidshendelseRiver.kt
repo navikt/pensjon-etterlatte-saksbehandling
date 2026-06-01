@@ -116,7 +116,7 @@ class TidshendelseRiver(
         val maanedEtterBehandlingsdato = behandlingsdato.plusMonths(1)
         logger.info("Sjekker løpende ytelse for sak $sakId, behandlingsmåned=$behandlingsdato, dryrun=$dryrun")
 
-        val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, maanedEtterBehandlingsdato)
+        val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, maanedEtterBehandlingsdato, sjekkNullBeloep = false)
         logger.info("Sak $sakId har løpende ytelse per $maanedEtterBehandlingsdato? ${loependeYtelse.erLoepende}")
         hendelseData["loependeYtelse"] = loependeYtelse.erLoepende
         loependeYtelse.behandlingId?.let {
@@ -124,7 +124,12 @@ class TidshendelseRiver(
         }
 
         if (loependeYtelse.erLoepende && type == "AO_BP20") {
-            val loependeYtelsePerJanuar2024 = vedtakService.harLoependeYtelserFra(sakId, ikrafttredenEtterlattereformen)
+            val loependeYtelsePerJanuar2024 =
+                vedtakService.harLoependeYtelserFra(
+                    sakId,
+                    ikrafttredenEtterlattereformen,
+                    sjekkNullBeloep = false,
+                )
             hendelseData["loependeYtelse_januar2024"] = loependeYtelsePerJanuar2024.erLoepende
             loependeYtelsePerJanuar2024.behandlingId?.let {
                 hendelseData["loependeYtelse_januar2024_behandlingId"] = it.toString()

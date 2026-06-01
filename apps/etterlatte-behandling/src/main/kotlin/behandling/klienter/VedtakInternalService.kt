@@ -218,7 +218,7 @@ class VedtakInternalServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO {
         logger.info("Sjekker om sak $sakId er løpende på $dato")
-        val loependeYtelse = vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(sakId, dato)
+        val loependeYtelse = vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(sakId, dato, sjekkNullBeloep = false)
         return loependeYtelse.toDto()
     }
 

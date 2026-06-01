@@ -39,7 +39,7 @@ internal class VedtakstidslinjeTest {
      * */
     @Test
     fun `sak uten vedtak er ikke loepende`() {
-        val actual = Vedtakstidslinje(emptyList()).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual = Vedtakstidslinje(emptyList()).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
         assertNull(actual.sisteLoependeBehandlingId)
@@ -58,7 +58,7 @@ internal class VedtakstidslinjeTest {
                 virkningsDato = LocalDate.of(2023, 1, 1),
                 vedtakStatus = VedtakStatus.FATTET_VEDTAK,
             )
-        val actual = Vedtakstidslinje(listOf(fattetVedtak)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual = Vedtakstidslinje(listOf(fattetVedtak)).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
         assertNull(actual.sisteLoependeBehandlingId)
@@ -82,7 +82,7 @@ internal class VedtakstidslinjeTest {
                 vedtakType = VedtakType.INNVILGELSE,
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual = Vedtakstidslinje(listOf(iverksattDato)).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
         assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
@@ -121,7 +121,7 @@ internal class VedtakstidslinjeTest {
                     iverksattDato,
                     opphoertDato,
                 ),
-            ).harLoependeVedtakPaaEllerEtter(fraOgMed)
+            ).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
         assertNull(actual.sisteLoependeBehandlingId)
@@ -163,7 +163,7 @@ internal class VedtakstidslinjeTest {
                     iverksattDato,
                     opphoertDato,
                 ),
-            ).harLoependeVedtakPaaEllerEtter(fraOgMed)
+            ).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
         assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
@@ -189,7 +189,7 @@ internal class VedtakstidslinjeTest {
                 datoAttestert = attesteringsdato,
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual = Vedtakstidslinje(listOf(iverksattDato)).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
         assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
@@ -225,7 +225,7 @@ internal class VedtakstidslinjeTest {
                 datoAttestert = attesteringsdato.plus(1, DAYS),
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
         assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
@@ -258,7 +258,7 @@ internal class VedtakstidslinjeTest {
                 datoAttestert = attesteringsdato.plus(1, DAYS),
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
         assertNull(actual.sisteLoependeBehandlingId)
@@ -312,6 +312,7 @@ internal class VedtakstidslinjeTest {
                     6,
                     4,
                 ),
+                sjekkNullBeloep = false,
             )
         assertEquals(false, actual.erLoepende)
     }
@@ -345,7 +346,7 @@ internal class VedtakstidslinjeTest {
                 datoAttestert = attesteringsdato.plus(1, DAYS),
             )
 
-        val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+        val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
         assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
@@ -378,7 +379,7 @@ internal class VedtakstidslinjeTest {
             )
 
         val actual =
-            Vedtakstidslinje(listOf(iverksattDato, vedtakTilSamordning)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+            Vedtakstidslinje(listOf(iverksattDato, vedtakTilSamordning)).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(true, actual.erLoepende)
         assertEquals(true, actual.underSamordning)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
@@ -430,7 +431,7 @@ internal class VedtakstidslinjeTest {
                     opphoertDato,
                     revurdertDato,
                 ),
-            ).harLoependeVedtakPaaEllerEtter(fraOgMed)
+            ).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
         assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
@@ -481,7 +482,7 @@ internal class VedtakstidslinjeTest {
                     opphoertDato,
                     revurdertDato,
                 ),
-            ).harLoependeVedtakPaaEllerEtter(fraOgMed)
+            ).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(false, actual.erLoepende)
         assertEquals(fraOgMed, actual.dato)
         assertNull(actual.sisteLoependeBehandlingId)
@@ -526,6 +527,7 @@ internal class VedtakstidslinjeTest {
         val actual =
             Vedtakstidslinje(listOf(iverksattDato, revurderingDato, opphoerDato)).harLoependeVedtakPaaEllerEtter(
                 fraOgMed,
+                sjekkNullBeloep = false,
             )
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
@@ -572,7 +574,7 @@ internal class VedtakstidslinjeTest {
             )
 
         val actual =
-            Vedtakstidslinje(listOf(innvilgelse, revurdering, opphoer)).harLoependeVedtakPaaEllerEtter(fraOgMed)
+            Vedtakstidslinje(listOf(innvilgelse, revurdering, opphoer)).harLoependeVedtakPaaEllerEtter(fraOgMed, sjekkNullBeloep = false)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
         assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)

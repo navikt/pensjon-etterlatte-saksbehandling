@@ -8,7 +8,9 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.institusjonsopphold.kafka.KafkaOppholdHendelse
 import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdEkstern
 import no.nav.etterlatte.institusjonsopphold.model.InstitusjonsoppholdHendelseBeriket
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.rapidsandrivers.sikkerLogg
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
@@ -32,8 +34,12 @@ class BehandlingKlient(
                 "${oppholdHendelse.norskident.maskerFnr()} hendelseId: ${oppholdHendelse.hendelseId}",
         )
 
+        if (!Folkeregisteridentifikator.isValid(oppholdHendelse.norskident)) {
+            logger.info("Institusjonsoppholdshendelse med ugyldig personident. Ikke relevant. Se sikker-logg. ")
+            sikkerLogg.info("Institusjonsoppholdshendelse med ugyldig personident. Ikke relevant. ${oppholdHendelse.norskident}")
+            return
+        }
         val opphold: InstitusjonsoppholdEkstern = institusjonsoppholdKlient.hentDataForHendelse(oppholdHendelse.oppholdId)
-
         postTilBehandling(
             oppholdHendelse =
                 InstitusjonsoppholdHendelseBeriket(
@@ -50,7 +56,6 @@ class BehandlingKlient(
                     organisasjonsnummer = opphold.organisasjonsnummer,
                 ),
         )
-
         logger.info("Hendelse ${oppholdHendelse.hendelseId} sendt til behandling")
     }
 

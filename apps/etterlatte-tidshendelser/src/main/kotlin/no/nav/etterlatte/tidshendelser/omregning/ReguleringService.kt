@@ -14,8 +14,8 @@ import java.util.UUID
 
 private fun kjoering(konfigurasjon: Omregningskonfigurasjon) =
     when (konfigurasjon.kjoeringId) {
-        null -> "Regulering-${konfigurasjon.dato.year}"
-        else -> "Regulering-${konfigurasjon.dato.year}-${konfigurasjon.kjoeringId}"
+        null -> "Regulering-${konfigurasjon.datoVirkFom.year}"
+        else -> "Regulering-${konfigurasjon.datoVirkFom.year}-${konfigurasjon.kjoeringId}"
     }
 
 class ReguleringService(
@@ -52,7 +52,7 @@ class ReguleringService(
                 .newMessage(
                     mapOf(
                         ReguleringHendelseType.FINN_SAKER_TIL_REGULERING.lagParMedEventNameKey(),
-                        ReguleringEvents.DATO to konfigurasjon.dato.toString(),
+                        ReguleringEvents.DATO to konfigurasjon.datoVirkFom.toString(),
                         RapidEvents.KJOERING to kjoering(konfigurasjon),
                     ),
                 ).toJson(),
@@ -66,7 +66,7 @@ fun createRecord(konfigurasjon: Omregningskonfigurasjon) =
         .newMessage(
             mapOf(
                 ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
-                ReguleringEvents.DATO to konfigurasjon.dato.toString(),
+                ReguleringEvents.DATO to konfigurasjon.datoVirkFom.toString(),
                 RapidEvents.KJOERING to kjoering(konfigurasjon),
                 RapidEvents.ANTALL to konfigurasjon.antall,
                 RapidEvents.SPESIFIKKE_SAKER to konfigurasjon.spesifikkeSaker.tilSeparertString(),

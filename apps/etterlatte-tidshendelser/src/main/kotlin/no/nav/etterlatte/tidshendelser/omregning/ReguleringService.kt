@@ -27,6 +27,11 @@ class ReguleringService(
     fun execute(jobb: HendelserJobb): List<Long> {
         logger.info("Handling jobb ${jobb.id}, type ${jobb.type} (${jobb.type.beskrivelse})")
         val konfigurasjon = omregningDao.hentNyesteKonfigurasjon()
+
+        if (jobb.behandlingsmaaned != konfigurasjon.datoVirkFom) {
+            logger.error("Behandlingsmåned er forskjellig fra datoVirkFom i omregningskonfigurasjon. Avbryter")
+            return emptyList()
+        }
         when (jobb.type) {
             JobbType.REGULERING -> startRegulering(konfigurasjon)
             JobbType.FINN_SAKER_TIL_REGULERING -> finnSakerTilRegulering(konfigurasjon)

@@ -302,7 +302,7 @@ fun Route.vedtaksvurderingRoute(
                     ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
             logger.info("Sjekker om sak har løpende for vedtak $sakId på dato $dato")
-            val loependeYtelse = vedtakService.sjekkOmVedtakErLoependeMedSanksjonPaaDato(sakId, dato, brukerTokenInfo)
+            val loependeYtelse = vedtakService.sjekkOmVedtakErLoepende(sakId, dato, brukerTokenInfo)
 
             call.respond(loependeYtelse)
         }

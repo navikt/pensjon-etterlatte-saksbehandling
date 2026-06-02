@@ -51,7 +51,7 @@ class VedtaksvurderingService(
         return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
     }
 
-    suspend fun sjekkOmVedtakErLoependeMedSanksjonPaaDato(
+    suspend fun sjekkOmVedtakErLoepende(
         sakId: SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,

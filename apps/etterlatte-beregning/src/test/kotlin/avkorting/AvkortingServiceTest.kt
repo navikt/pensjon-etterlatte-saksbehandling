@@ -224,7 +224,6 @@ internal class AvkortingServiceTest {
                     any(),
                     any(),
                 )
-                eksisterendeAvkorting.aarsoppgjoer
             }
             coVerify(exactly = 2) {
                 featureToggleService.isEnabled(any(), any(), any())
@@ -232,6 +231,9 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(behandlingId)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 sanksjonService.hentSanksjon(behandlingId)
+            }
+            verify {
+                eksisterendeAvkorting.aarsoppgjoer
             }
         }
 
@@ -312,7 +314,6 @@ internal class AvkortingServiceTest {
                     any(),
                     any(),
                 )
-                eksisterendeAvkorting.aarsoppgjoer
                 featureToggleService.isEnabled(any(), any(), any())
                 vedtaksvurderingKlient.hentInnvilgedePerioder(behandling.sak, bruker)
                 sanksjonService.hentSanksjon(behandlingId)
@@ -408,11 +409,13 @@ internal class AvkortingServiceTest {
             }
             coVerify(exactly = 2) {
                 sanksjonService.hentSanksjon(behandlingId)
-                forrigeAvkorting.aarsoppgjoer
                 featureToggleService.isEnabled(any(), any(), any())
                 beregningService.hentBeregningNonnull(behandlingId)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
+            }
+            verify {
+                forrigeAvkorting.aarsoppgjoer
             }
         }
 
@@ -498,7 +501,6 @@ internal class AvkortingServiceTest {
                     any(),
                     any(),
                 )
-                eksisterendeAvkorting.aarsoppgjoer
                 vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
             }
             coVerify(exactly = 2) {
@@ -507,6 +509,9 @@ internal class AvkortingServiceTest {
                 avkortingRepository.hentAvkorting(behandlingId)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 sanksjonService.hentSanksjon(behandlingId)
+            }
+            verify {
+                eksisterendeAvkorting.aarsoppgjoer
             }
         }
     }
@@ -824,6 +829,132 @@ internal class AvkortingServiceTest {
         coVerify {
             avkortingRepository.hentAvkorting(forrigeBehandlingId)
             vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+        }
+    }
+
+    @Nested
+    inner class HentManglendeInntektsaar {
+        @Test
+        fun `Returnerer ekstra år når virk er bakover for tidligste fom i aarsoppgjoer`() {
+            val behandlingId = UUID.randomUUID()
+            val avkorting =
+                Avkorting(
+                    aarsoppgjoer =
+                        listOf(
+                            aarsoppgjoer(aar = 2025, fom = YearMonth.of(2025, 3)),
+                        ),
+                )
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2025, 1)),
+                )
+            val beregning = mockk<Beregning>()
+
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning
+            mockkObject(AvkortingValider)
+            every {
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
+            } returns emptyList()
+
+            val result =
+                runBlocking {
+                    service.manglendeInntektsaar(behandlingId, avkorting, bruker)
+                }
+
+            result shouldBe listOf(2025)
+
+            coVerify {
+                behandlingKlient.hentBehandling(behandlingId, bruker)
+                beregningService.hentBeregningNonnull(behandlingId)
+                featureToggleService.isEnabled(any(), any(), any())
+                sanksjonService.hentSanksjon(behandlingId)
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(avkorting, beregning, BehandlingType.REVURDERING, any(), any())
+            }
+        }
+
+        @Test
+        fun `Returnerer ikke ekstra år når tidligste fom er januar`() {
+            val behandlingId = UUID.randomUUID()
+            val avkorting =
+                Avkorting(
+                    aarsoppgjoer =
+                        listOf(
+                            aarsoppgjoer(aar = 2025, fom = YearMonth.of(2025, 1)),
+                        ),
+                )
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2025, 1)),
+                )
+            val beregning = mockk<Beregning>()
+
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning
+            mockkObject(AvkortingValider)
+            every {
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
+            } returns emptyList()
+
+            val result =
+                runBlocking {
+                    service.manglendeInntektsaar(behandlingId, avkorting, bruker)
+                }
+
+            result shouldBe emptyList()
+
+            coVerify {
+                behandlingKlient.hentBehandling(behandlingId, bruker)
+                beregningService.hentBeregningNonnull(behandlingId)
+                featureToggleService.isEnabled(any(), any(), any())
+                sanksjonService.hentSanksjon(behandlingId)
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(avkorting, beregning, BehandlingType.REVURDERING, any(), any())
+            }
+        }
+
+        @Test
+        fun `Returnerer ikke ekstra år når virk er etter tidligste fom i aarsoppgjoer`() {
+            val behandlingId = UUID.randomUUID()
+            val avkorting =
+                Avkorting(
+                    aarsoppgjoer =
+                        listOf(
+                            aarsoppgjoer(aar = 2025, fom = YearMonth.of(2025, 3)),
+                        ),
+                )
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2025, 5)),
+                )
+            val beregning = mockk<Beregning>()
+
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning
+            mockkObject(AvkortingValider)
+            every {
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
+            } returns emptyList()
+
+            val result =
+                runBlocking {
+                    service.manglendeInntektsaar(behandlingId, avkorting, bruker)
+                }
+
+            result shouldBe emptyList()
+
+            coVerify {
+                behandlingKlient.hentBehandling(behandlingId, bruker)
+                beregningService.hentBeregningNonnull(behandlingId)
+                featureToggleService.isEnabled(any(), any(), any())
+                sanksjonService.hentSanksjon(behandlingId)
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(avkorting, beregning, BehandlingType.REVURDERING, any(), any())
+            }
         }
     }
 

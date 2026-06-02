@@ -16,7 +16,8 @@ update behandling set status = 'IVERKSATT'
 'e006cd3a-88e0-4f41-abc7-c639a8add364');
 
 update vedtak
-set vedtakstatus = 'IVERKSATT'
+set vedtakstatus = 'IVERKSATT',
+    datoiverksatt = datoattestert::timestamptz + interval '1 second'
 where behandlingid in (
                        '67db5c28-63bc-44da-aa10-7d780bf07a41',
                        '7415d64d-f65f-4e3a-a74a-e45401dc684b',

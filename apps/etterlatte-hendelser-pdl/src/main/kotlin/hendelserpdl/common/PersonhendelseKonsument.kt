@@ -21,8 +21,8 @@ class PersonhendelseKonsument(
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { hendelser ->
+    override fun start() {
+        pollLoop { hendelser ->
             runBlocking {
                 val ventbareHendelser =
                     hendelser.map {

@@ -12,7 +12,7 @@ fun <K, T> startLytting(
         Thread {
             try {
                 logger.info("Starter å lytte på ${konsument.topic}")
-                konsument.stream()
+                konsument.start()
             } catch (e: Exception) {
                 logger.error("App avsluttet med en feil", e)
                 exitProcess(1)

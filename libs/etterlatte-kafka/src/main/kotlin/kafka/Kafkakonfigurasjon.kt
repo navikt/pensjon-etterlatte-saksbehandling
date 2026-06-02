@@ -49,7 +49,7 @@ abstract class Kafkakonfigurasjon<T>(
                 // Nais doc: Password needed to use the keystore and truststore
 
                 put(ConsumerConfig.GROUP_ID_CONFIG, env[groupId])
-                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
+                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
                 put(ConsumerConfig.CLIENT_ID_CONFIG, env[NAIS_APP_NAME])
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")

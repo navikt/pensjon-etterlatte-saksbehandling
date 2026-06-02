@@ -393,7 +393,10 @@ class ServiceModule(
     }
 
     val vedtaksvurderingService by lazy {
-        VedtaksvurderingService(daoModule.vedtaksvurderingRepository)
+        VedtaksvurderingService(
+            repository = daoModule.vedtaksvurderingRepository,
+            beregningKlient = klientModule.beregningKlient,
+        )
     }
 
     val vedtaksvurderingRapidService by lazy {

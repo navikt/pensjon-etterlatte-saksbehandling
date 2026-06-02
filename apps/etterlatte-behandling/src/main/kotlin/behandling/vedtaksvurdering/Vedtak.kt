@@ -125,6 +125,7 @@ data class LoependeYtelse(
     val erLoepende: Boolean,
     val underSamordning: Boolean,
     val dato: LocalDate,
+    val sakType: SakType? = null,
     val behandlingId: UUID? = null,
     val sisteLoependeBehandlingId: UUID? = null,
 )

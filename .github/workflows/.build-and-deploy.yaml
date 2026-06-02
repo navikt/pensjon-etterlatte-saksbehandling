@@ -129,7 +129,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
-      - uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # ratchet:andstor/file-existence-action@v3
+      - uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029 # ratchet:andstor/file-existence-action@v3
         id: check_files
         with:
           files: "apps/${{ github.workflow }}/.nais/prod.yaml"

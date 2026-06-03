@@ -213,7 +213,13 @@ internal class BehandlingStatusServiceTest {
             VedtakEndringDTO(SakIdOgReferanse(sakId, behandlingId.toString()), vedtakHendelse, VedtakType.AVSLAG)
 
         every { oppgaveService.tilAttestering(any(), any(), any()) } returns mockk()
-        every { vilkaarsvurderingDao.hent(behandlingId) } returns null
+        every { vilkaarsvurderingDao.hent(behandlingId) } returns
+            mockk<Vilkaarsvurdering> {
+                every { resultat } returns
+                    mockk<VilkaarsvurderingResultat> {
+                        every { utfall } returns VilkaarsvurderingUtfall.OPPFYLT
+                    }
+            }
 
         inTransaction {
             sut.settFattetVedtak(behandling, vedtakEndringDto, brukerTokenInfo)

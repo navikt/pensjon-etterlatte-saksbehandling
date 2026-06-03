@@ -13,7 +13,7 @@ export function Vurderinger(props: { doedsdato?: Date }) {
   const oppgaveErRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
   return (
-    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <VStack gap="space-24">
         <VStack gap="space-8">
           <Heading size="medium">Vurdering av aktivitetsplikt</Heading>

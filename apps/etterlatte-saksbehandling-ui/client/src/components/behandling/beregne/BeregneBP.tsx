@@ -115,7 +115,7 @@ export const BeregneBP = (props: { behandling: IBehandlingReducer }) => {
         errorMessage: 'Vedtaksoppdatering feilet',
         wrapperComponent: { component: HStack, props: { justify: 'center' } },
       })}
-      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             {visAttesteringsmodal ? (

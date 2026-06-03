@@ -70,7 +70,7 @@ export const TidligereFamiliepleier = ({
         minWidth="18.75rem"
         width="10rem"
         borderWidth="0 0 0 2"
-        borderColor="border-subtle"
+        borderColor="neutral-subtle"
       >
         {vurdert && (
           <TidligereFamiliepleierVurdering

@@ -47,7 +47,7 @@ export const ViderefoereOpphoer = ({
         minWidth="18.75rem"
         width="10rem"
         borderWidth="0 0 0 2"
-        borderColor="border-subtle"
+        borderColor="neutral-subtle"
       >
         {mapResult(hentVilkaartyperResult, {
           initial: <Alert variant="warning">Virkningstidspunkt må være satt for å sette opphør fra og med</Alert>,

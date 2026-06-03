@@ -135,7 +135,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </BodyShort>
         )}
       </Box>
-      <Box paddingBlock="space-16 space-0" borderWidth="1 0 1 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 1 0" borderColor="neutral-subtle">
         <Familieforhold behandling={behandling} redigerbar={redigerbar} personopplysninger={personopplysninger} />
       </Box>
       <Box paddingBlock="space-32" paddingInline="space-64 space-32">
@@ -190,7 +190,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         )}
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
-      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar && ikkeGyldigFremsattSoeknad && (
           <Box paddingInline="space-64" paddingBlock="space-24 space-64" maxWidth="42rem">
             <Alert variant="warning">Kan ikke gå videre når søknad ikke er gyldig fremsatt. </Alert>

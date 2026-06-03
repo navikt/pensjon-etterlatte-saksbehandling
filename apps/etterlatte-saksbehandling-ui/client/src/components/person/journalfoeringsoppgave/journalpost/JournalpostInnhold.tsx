@@ -51,7 +51,7 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
       </HStack>
     </VStack>
 
-    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <VStack gap="space-16">
         <Info label="Bruker" tekst={journalpost.bruker?.id ? <KopierbarVerdi value={journalpost.bruker.id} /> : '-'} />
 
@@ -68,7 +68,7 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
     </Box>
 
     <br />
-    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <VStack gap="space-16">
         <Info label="SakID" tekst={journalpost.sak?.fagsakId || '-'} />
         <Info

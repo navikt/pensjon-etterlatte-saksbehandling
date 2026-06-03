@@ -28,7 +28,7 @@ export function VurderingInfoBrevOgOppsummering() {
 export function InfobrevKnapperad(props: { children?: React.ReactElement }) {
   const navigate = useNavigate()
   return (
-    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <HStack gap="space-16" justify="center">
         <Button
           variant="secondary"

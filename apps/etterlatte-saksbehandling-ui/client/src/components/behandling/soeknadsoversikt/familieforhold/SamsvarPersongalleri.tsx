@@ -29,7 +29,7 @@ function PersonerUtenIdenterVisning(props: { saktype: SakType; personer: Array<P
   return (
     <PersonUtenIdentWrapper>
       {personer.map((person, index) => (
-        <Box background="surface-alt-3-subtle" paddingInline="space-16" key={index}>
+        <Box background="brand-blue-soft" paddingInline="space-16" key={index}>
           <UstiletListe>
             <li>Rolle: {relativPersonrolleTekst[saktype][person.rolle]}</li>
             <li>Navn: {person.person.navn ? formaterKanskjeNavn(person.person.navn) || 'Ukjent' : 'Ukjent'} </li>

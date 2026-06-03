@@ -48,8 +48,8 @@ export const HaandterAvvikModal = ({
             borderWidth="1"
             padding="space-16"
             borderRadius="4"
-            borderColor="border-subtle"
-            background="surface-neutral-subtle"
+            borderColor="neutral-subtle"
+            background="neutral-soft"
           >
             <Heading size="xsmall" spacing>
               Journalpostdetaljer

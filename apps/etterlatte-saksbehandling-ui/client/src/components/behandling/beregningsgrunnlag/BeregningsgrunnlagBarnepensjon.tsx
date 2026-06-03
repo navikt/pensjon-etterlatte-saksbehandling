@@ -234,7 +234,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
         apiResult: lagreBeregningsgrunnlagResult,
         errorMessage: 'Kunne ikke lagre beregningsgrunnlag',
       })}
-      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
             <Button

@@ -76,7 +76,7 @@ export default function NyttBrev() {
 
               <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
             </VStack>
-            <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-subtle">
+            <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="neutral-subtle">
               {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (
                 <ForhaandsvisningBrev brev={brev} />
               ) : (

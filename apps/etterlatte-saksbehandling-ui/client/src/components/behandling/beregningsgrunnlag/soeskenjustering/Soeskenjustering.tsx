@@ -19,7 +19,7 @@ import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/s
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-const Success600 = 'var(--a-green-600)'
+import { Success600 } from '@navikt/ds-tokens/js'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -183,7 +183,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
           />
         )}
       </FamilieforholdWrapper>
-      <Box borderWidth="1 0 0 0" borderColor="border-subtle">
+      <Box borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {visFeil && feil.length > 0 && redigerbar ? <FeilIPerioder feil={feil} /> : null}
         <form id="formsoeskenjustering">
           <UstiletListe>

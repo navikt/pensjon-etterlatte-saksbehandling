@@ -1,8 +1,6 @@
 import { CheckmarkCircleIcon, ExclamationmarkTriangleIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 
-const Success600 = 'var(--a-green-600)'
-const Warning700 = 'var(--a-orange-700)'
-const TextLogo = 'var(--a-nav-red)'
+import { Warning700, Success600, TextLogo } from '@navikt/ds-tokens/js'
 
 export type StatusIconProps = 'warning' | 'success' | 'error'
 

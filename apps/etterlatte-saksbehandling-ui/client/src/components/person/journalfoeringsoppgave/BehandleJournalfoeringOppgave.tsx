@@ -122,7 +122,7 @@ export default function BehandleJournalfoeringOppgave() {
           })}
         </Box>
 
-        <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-subtle">
+        <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="neutral-subtle">
           <VelgJournalpost journalpostStatus={journalpostStatus} />
         </Box>
 

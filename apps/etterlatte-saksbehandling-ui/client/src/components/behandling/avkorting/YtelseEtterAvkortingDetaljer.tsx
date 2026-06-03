@@ -9,7 +9,7 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
   const ytelse = props.ytelse
 
   return (
-    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+    <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
       <Wrapper>
         <ul>
           <Rad>
@@ -41,7 +41,7 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
             </Rad>
           )}
 
-          <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="border-subtle">
+          <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
             <Rad>
               {ytelse.sanksjon ? (
                 <Navn>Brutto stønad etter sanksjon</Navn>

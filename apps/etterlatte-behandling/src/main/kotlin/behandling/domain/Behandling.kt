@@ -194,6 +194,8 @@ sealed class Behandling {
 
     open fun tilFattetVedtak(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.FATTET_VEDTAK)
 
+    open fun tilFattetVedtakIkkeOppfyltVilkaar(): Behandling = tilFattetVedtak()
+
     open fun tilAttestert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.ATTESTERT)
 
     open fun tilAvslag(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.AVSLAG)

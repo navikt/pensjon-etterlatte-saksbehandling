@@ -45,3 +45,7 @@
 **2026-05-29 — Estimering**
 - Observation: Jeg antok at en mock var "bare bekvemmelighet" og estimerte fjerning som trivielt – uten å verifisere det.
 - Action: Anta at en mock er en del av testkontrakten til det motsatte er bevist. Verifiser antagelsen med en rask sjekk før du estimerer.
+
+**2026-06-03 — Statussmaskin / fikse logikk**
+- Observation: Jeg byttet til en status-basert løsning fordi DAO-tilnærmingen hadde en RETURNERT-bug, men den status-baserte løsningen fikset ikke den faktiske buggen (TRYGDETID_OPPDATERT rutes til tilFattetVedtakUtvidet som tillater TRYGDETID_OPPDATERT). Brukeren måtte si ifra.
+- Action: Når en bug handler om at en status _urettmessig_ passerer en sperre, sjekk at den nye løsningen faktisk _sperrer_ den statusen i det problematiske tilfellet — ikke bare at koden ser logisk ut.

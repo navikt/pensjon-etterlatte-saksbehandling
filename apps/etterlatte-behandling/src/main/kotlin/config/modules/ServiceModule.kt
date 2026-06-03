@@ -389,6 +389,7 @@ class ServiceModule(
             etteroppgjoerService = etteroppgjoerService,
             forbehandlingService = etteroppgjoerForbehandlingService,
             grunnlagService = grunnlagService,
+            vilkaarsvurderingDao = daoModule.vilkaarsvurderingDao,
         )
     }
 

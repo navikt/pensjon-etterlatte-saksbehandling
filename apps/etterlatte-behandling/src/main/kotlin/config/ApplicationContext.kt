@@ -131,6 +131,7 @@ internal class ApplicationContext(
     val behandlingInfoDao get() = daoModule.behandlingInfoDao
     val sakTilgangDao get() = daoModule.sakTilgangDao
     val opplysningDao get() = daoModule.opplysningDao
+    val vilkaarsvurderingDao get() = daoModule.vilkaarsvurderingDao
 
     // Klient
     val norg2Klient get() = klientModule.norg2Klient

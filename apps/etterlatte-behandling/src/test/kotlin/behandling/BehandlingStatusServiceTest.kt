@@ -52,12 +52,16 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -85,6 +89,7 @@ internal class BehandlingStatusServiceTest {
     private val etteroppgjoerService: EtteroppgjoerService = mockk()
     private val etteroppgjoerForbehandlingService: EtteroppgjoerForbehandlingService = mockk()
     private val grunnlagService: GrunnlagService = mockk()
+    private val vilkaarsvurderingDao = mockk<VilkaarsvurderingDao>()
 
     private val brukerTokenInfo = simpleSaksbehandler("Z123456")
 
@@ -101,6 +106,7 @@ internal class BehandlingStatusServiceTest {
             etteroppgjoerService,
             etteroppgjoerForbehandlingService,
             grunnlagService,
+            vilkaarsvurderingDao,
         )
 
     @BeforeEach
@@ -171,7 +177,6 @@ internal class BehandlingStatusServiceTest {
     @ParameterizedTest
     @CsvSource(
         value = [
-            "VILKAARSVURDERT",
             "BEREGNET",
             "AVKORTET",
             "RETURNERT",
@@ -208,6 +213,70 @@ internal class BehandlingStatusServiceTest {
             VedtakEndringDTO(SakIdOgReferanse(sakId, behandlingId.toString()), vedtakHendelse, VedtakType.AVSLAG)
 
         every { oppgaveService.tilAttestering(any(), any(), any()) } returns mockk()
+        every { vilkaarsvurderingDao.hent(behandlingId) } returns
+            mockk<Vilkaarsvurdering> {
+                every { resultat } returns
+                    mockk<VilkaarsvurderingResultat> {
+                        every { utfall } returns VilkaarsvurderingUtfall.OPPFYLT
+                    }
+            }
+
+        inTransaction {
+            sut.settFattetVedtak(behandling, vedtakEndringDto, brukerTokenInfo)
+        }
+
+        verify {
+            behandlingDao.lagreStatus(any())
+            behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.FATTET)
+            oppgaveService.tilAttestering(
+                behandlingId.toString(),
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                any<String>(),
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "VILKAARSVURDERT",
+            "TRYGDETID_OPPDATERT",
+        ],
+    )
+    fun `Foerstegangsbehandling med ikke-oppfylt vilkaarsvurdering kan fatte vedtak uten beregning`(status: BehandlingStatus) {
+        val sakId = sakId1
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                status = status,
+                gyldighetsproeving =
+                    GyldighetsResultat(
+                        resultat = VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+                        vurderinger = emptyList(),
+                        vurdertDato = LocalDateTime.now(),
+                    ),
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        dato = YearMonth.now(),
+                        kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
+                        begrunnelse = "Ingen",
+                    ),
+                kommerBarnetTilgode =
+                    KommerBarnetTilgode(
+                        JaNei.JA,
+                        "",
+                        Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
+                    ),
+            )
+        val behandlingId = behandling.id
+        val vedtakHendelse = VedtakHendelse(1L, Tidspunkt.now(), "saksbehandler")
+        val vedtakEndringDto =
+            VedtakEndringDTO(SakIdOgReferanse(sakId, behandlingId.toString()), vedtakHendelse, VedtakType.AVSLAG)
+        val mockResultat = mockk<VilkaarsvurderingResultat> { every { utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT }
+        val mockVilkaarsvurdering = mockk<Vilkaarsvurdering> { every { resultat } returns mockResultat }
+
+        every { oppgaveService.tilAttestering(any(), any(), any()) } returns mockk()
+        every { vilkaarsvurderingDao.hent(behandlingId) } returns mockVilkaarsvurdering
 
         inTransaction {
             sut.settFattetVedtak(behandling, vedtakEndringDto, brukerTokenInfo)

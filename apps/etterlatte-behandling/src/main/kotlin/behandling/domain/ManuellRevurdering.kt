@@ -149,10 +149,7 @@ data class ManuellRevurdering(
             BehandlingStatus.AVKORTET,
         ) { endreTilStatus(it) }
 
-    /**
-     Utforskning av mulighet for vilkaarsvurdert -> fattet_vedtak i kontekst av opphør
-     */
-    fun tilFattetVedtakUtvidet(): Revurdering {
+    override fun tilFattetVedtakIkkeOppfyltVilkaar(): Revurdering {
         if (!erFyltUt()) {
             throw TilstandException.IkkeFyltUt(
                 "Behandling ($id) må ha satt virkningstidspunkt " +

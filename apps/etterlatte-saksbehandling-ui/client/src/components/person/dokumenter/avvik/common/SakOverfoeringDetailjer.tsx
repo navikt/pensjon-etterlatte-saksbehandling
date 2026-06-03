@@ -4,7 +4,13 @@ import { formaterSakstype } from '~utils/formatering/formatering'
 import React from 'react'
 
 export const SakOverfoeringDetailjer = ({ fra, til }: { fra: ISak; til: ISak }) => (
-  <Box borderWidth="1" padding="space-16" borderRadius="4" borderColor="neutral-subtle" background="neutral-soft">
+  <Box
+    borderWidth="1"
+    padding="space-16"
+    borderRadius="4"
+    borderColor="border-subtle"
+    background="surface-neutral-subtle"
+  >
     <Heading size="xsmall" spacing>
       Flyttedetaljer
     </Heading>

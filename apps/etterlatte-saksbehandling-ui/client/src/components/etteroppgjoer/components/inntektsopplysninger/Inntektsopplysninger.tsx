@@ -36,8 +36,8 @@ export const Inntektsopplysninger = ({ forbehandling, erRedigerbar }: Props) => 
       <Box
         paddingInline="space-24"
         paddingBlock="space-16"
-        background="accent-soft"
-        borderColor="accent"
+        background="surface-action-subtle"
+        borderColor="border-action"
         borderWidth="0 0 0 4"
       >
         <VStack gap="space-32">

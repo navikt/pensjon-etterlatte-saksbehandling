@@ -33,7 +33,7 @@ export const EnigUenigTilbakemelding = ({ spoersmaal, clickEvent, behandlingId }
 
   return (
     !tilbakemeldingAlleredeGitt && (
-      <Box borderRadius="8" width="fit-content" background="neutral-soft">
+      <Box borderRadius="8" width="fit-content" background="surface-neutral-subtle">
         <VStack gap="space-8" padding="space-32">
           {harGittTilbakemelding ? (
             <Heading size="small" level="3">

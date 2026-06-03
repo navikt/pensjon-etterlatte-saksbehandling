@@ -11,7 +11,9 @@ import { isPending, mapFailure } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiError } from '~shared/api/apiClient'
 
-import { Accent600, Neutral1000, TextLogo } from '@navikt/ds-tokens/js'
+const Accent600 = 'var(--a-blue-600)'
+const Neutral1000 = 'var(--a-gray-900)'
+const TextLogo = 'var(--a-nav-red)'
 
 export const Search = () => {
   const navigate = useNavigate()

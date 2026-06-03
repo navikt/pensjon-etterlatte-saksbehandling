@@ -90,7 +90,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
         ),
       })}
       <Box
-        borderColor="neutral-subtle"
+        borderColor="border-subtle"
         borderWidth="1 0 0 0"
         paddingBlock="space-16 space-0"
         marginBlock="space-16 space-0"

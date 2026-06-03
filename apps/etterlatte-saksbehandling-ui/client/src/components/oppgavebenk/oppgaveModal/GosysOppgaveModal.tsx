@@ -106,9 +106,9 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
           <Box
             padding="space-16"
             borderRadius="4"
-            borderColor="neutral-subtle"
+            borderColor="border-subtle"
             borderWidth="1"
-            background="neutral-soft"
+            background="surface-neutral-subtle"
           >
             <Label>Beskrivelse</Label>
             <BodyShort style={{ whiteSpace: 'pre-wrap' }}>{beskrivelse || <i>Mangler beskrivelse</i>}</BodyShort>

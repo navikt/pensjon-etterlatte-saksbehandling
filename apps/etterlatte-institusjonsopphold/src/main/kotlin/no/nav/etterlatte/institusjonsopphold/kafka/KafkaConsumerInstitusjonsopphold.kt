@@ -9,7 +9,9 @@ import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
 import no.nav.etterlatte.kafka.Kafkakonsument
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -17,17 +19,24 @@ class KafkaConsumerInstitusjonsopphold(
     env: Miljoevariabler,
     private val behandlingKlient: BehandlingKlient,
     kafkaEnvironment: KafkaConsumerConfiguration = KafkaEnvironment(),
-) : Kafkakonsument<KafkaOppholdHendelse>(
+) : Kafkakonsument<Long, KafkaOppholdHendelse>(
         logger = LoggerFactory.getLogger(KafkaConsumerInstitusjonsopphold::class.java.name),
-        consumer = KafkaConsumer<String, KafkaOppholdHendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env)),
+        consumer = KafkaConsumer<Long, KafkaOppholdHendelse>(kafkaEnvironment.generateKafkaConsumerProperties(env)),
         topic = env.requireEnvValue(INSTITUSJONSOPPHOLD_TOPIC),
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { meldinger ->
+    val sikkerLogg: Logger = sikkerlogger()
+
+    override fun start() {
+        pollLoop { meldinger ->
             meldinger.forEach {
                 runBlocking {
-                    behandlingKlient.haandterHendelse(it)
+                    try {
+                        behandlingKlient.haandterHendelse(it)
+                    } catch (e: RuntimeException) {
+                        sikkerLogg.error("Feil med håndtering av institusjonshendelse: ", e)
+                        throw e
+                    }
                 }
             }
         }

@@ -4,15 +4,15 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import org.slf4j.Logger
 import kotlin.system.exitProcess
 
-fun <T> startLytting(
-    konsument: Kafkakonsument<in T>,
+fun <K, T> startLytting(
+    konsument: Kafkakonsument<K, in T>,
     logger: Logger,
 ) {
     withLogContext {
         Thread {
             try {
                 logger.info("Starter å lytte på ${konsument.topic}")
-                konsument.stream()
+                konsument.start()
             } catch (e: Exception) {
                 logger.error("App avsluttet med en feil", e)
                 exitProcess(1)

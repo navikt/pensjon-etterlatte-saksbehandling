@@ -15,14 +15,14 @@ class PersonhendelseKonsument(
     topic: String,
     kafkaProperties: Properties,
     private val personHendelseFordeler: PersonHendelseFordeler,
-) : Kafkakonsument<Personhendelse>(
+) : Kafkakonsument<String, Personhendelse>(
         logger = LoggerFactory.getLogger(KafkaConsumer::class.java.name),
         consumer = KafkaConsumer<String, Personhendelse>(kafkaProperties),
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { hendelser ->
+    override fun start() {
+        pollLoop { hendelser ->
             runBlocking {
                 val ventbareHendelser =
                     hendelser.map {

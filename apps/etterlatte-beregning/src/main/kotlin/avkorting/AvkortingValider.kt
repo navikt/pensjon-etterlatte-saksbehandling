@@ -23,7 +23,8 @@ object AvkortingValider {
     ): List<Int> {
         val sortertePerioder = beregning.beregningsperioder.sortedBy { it.datoFOM }
 
-        val alleAarViHarAvkortingEllerBeregning = avkorting.aarsoppgjoer.map { it.aar } + sortertePerioder.map { it.datoFOM.year }
+        val alleAarViHarAvkortingEllerBeregning =
+            avkorting.aarsoppgjoer.map { it.aar } + sortertePerioder.map { it.datoFOM.year }
         val foersteAar = alleAarViHarAvkortingEllerBeregning.min()
         val sisteAarFom = alleAarViHarAvkortingEllerBeregning.max()
 
@@ -89,12 +90,20 @@ object AvkortingValider {
         val virkFoerstegangsbehandling =
             virk.takeIf { behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING }
 
-        // Nye år:
+        val tidligsteAarMedEksisterendeInntekt = eksisterendeAvkorting.aarsoppgjoer.minOfOrNull { it.aar }
+
         val nyeAarMedInntekt =
             nyeGrunnlag.map { it.fom.year }.toSet() - eksisterendeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
+        val nyeAarFramITid =
+            nyeAarMedInntekt.filter {
+                tidligsteAarMedEksisterendeInntekt == null ||
+                    tidligsteAarMedEksisterendeInntekt <= it
+            }
+        val nyeAarFoerFoersteAvkorting =
+            nyeAarMedInntekt.filter { tidligsteAarMedEksisterendeInntekt != null && tidligsteAarMedEksisterendeInntekt > it }
 
-        val alleNyeAarHarInntektFraStart =
-            nyeAarMedInntekt.all { aar ->
+        val alleNyeAarFramITidHarInntektFraStart =
+            nyeAarFramITid.all { aar ->
                 // Start på et år er enten 1. januar eller virk i førstegangsbehandlinger
                 nyeGrunnlag.find {
                     it.fom ==
@@ -105,18 +114,32 @@ object AvkortingValider {
                         it.fom == virkFoerstegangsbehandling
                 } != null
             }
-        if (!alleNyeAarHarInntektFraStart) {
+        if (!alleNyeAarFramITidHarInntektFraStart) {
             // kast feil vi må ha kontinuerlige inntekter
             throw NyeAarMedInntektMaaStarteIJanuar()
         }
-
-        if (behandling.behandlingType == BehandlingType.REVURDERING && nyeAarMedInntekt.isNotEmpty()) {
-            if (YearMonth.of(nyeAarMedInntekt.min(), Month.JANUARY) < virk) {
-                throw UgyldigForespoerselException(
-                    "NYTT_INNTEKTSAAR_IKKE_FRA_START",
-                    "Revurdering med ny inntekt må ha virkningstidspunkt før det nye inntektsåret",
-                )
+        val alleNyeAarFoerFoersteAvkortingStarterRiktig =
+            nyeAarFoerFoersteAvkorting.all { aar ->
+                nyeGrunnlag.find {
+                    it.fom == YearMonth.of(aar, Month.JANUARY) || it.fom == virk
+                } != null
             }
+        if (!alleNyeAarFoerFoersteAvkortingStarterRiktig) {
+            throw NyeAarMedInntektMaaStarteIJanuar()
+        }
+
+        val tidligsteFomAarsoppgjoer = eksisterendeAvkorting.aarsoppgjoer.minOfOrNull { it.fom }
+        val trengerNyInntektForFoersteAarIAvkorting =
+            tidligsteFomAarsoppgjoer != null && tidligsteFomAarsoppgjoer.month != Month.JANUARY && virk < tidligsteFomAarsoppgjoer
+        val manglerNyInntektForUtvidetAar =
+            nyeGrunnlag.none {
+                it.fom.year == tidligsteFomAarsoppgjoer?.year && (it.fom.month == Month.JANUARY || it.fom == virk)
+            }
+        if (trengerNyInntektForFoersteAarIAvkorting && manglerNyInntektForUtvidetAar) {
+            throw UgyldigForespoerselException(
+                "MANGLER_NY_INNTEKT_UTVIDET_AAR",
+                "Tidligste virk i saken er flyttet bakover fra $tidligsteFomAarsoppgjoer, men det mangler ny inntekt for ${tidligsteFomAarsoppgjoer.year}",
+            )
         }
 
         if (nyeGrunnlag.map { it.fom }.toSet().size < nyeGrunnlag.size) {

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.InnvilgetPeriode
 import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
@@ -11,14 +12,18 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository,
+    private val beregningKlient: BeregningKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -45,6 +50,36 @@ class VedtaksvurderingService(
                 .filter { it.vedtakFattet != null && it.attestasjon != null }
         return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
     }
+
+    suspend fun sjekkOmVedtakErLoepende(
+        sakId: SakId,
+        dato: LocalDate,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): LoependeYtelseDTO {
+        val loependeYtelse = sjekkOmVedtakErLoependePaaDato(sakId, dato)
+        val harAktivSanksjon =
+            if (loependeYtelse.erLoepende &&
+                loependeYtelse.behandlingId != null &&
+                loependeYtelse.sakType == SakType.OMSTILLINGSSTOENAD
+            ) {
+                val sanksjoner =
+                    beregningKlient.hentSanksjoner(loependeYtelse.behandlingId, brukerTokenInfo) ?: emptyList()
+                sanksjoner.any { it.fom <= YearMonth.from(dato) && it.tom == null }
+            } else {
+                false
+            }
+        return loependeYtelse.toDto(harAktivSanksjon)
+    }
+
+    private fun LoependeYtelse.toDto(harAktivSanksjon: Boolean) =
+        LoependeYtelseDTO(
+            erLoepende = erLoepende,
+            underSamordning = underSamordning,
+            dato = dato,
+            behandlingId = behandlingId,
+            sisteLoependeBehandlingId = sisteLoependeBehandlingId,
+            harAktivSanksjon = harAktivSanksjon,
+        )
 
     fun hentIverksatteVedtakISak(sakId: SakId): List<Vedtak> =
         repository

@@ -5,6 +5,9 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
@@ -17,6 +20,8 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.etteroppgjoer
 import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
@@ -26,15 +31,147 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
 internal class AvkortingTest {
+    @BeforeEach
+    fun `mock grunnbeloep`() {
+        mockkObject(GrunnbeloepRepository)
+        every { GrunnbeloepRepository.historiskeGrunnbeloep } returns
+            listOf(
+                Grunnbeloep(
+                    dato = YearMonth.of(2023, 5),
+                    grunnbeloep = 118620,
+                    grunnbeloepPerMaaned = 9885,
+                    omregningsfaktor = BigDecimal("1.045591"),
+                ),
+                Grunnbeloep(
+                    dato = YearMonth.of(2024, 5),
+                    grunnbeloep = 124028,
+                    grunnbeloepPerMaaned = 10336,
+                    omregningsfaktor = BigDecimal("1.064076"),
+                ),
+                Grunnbeloep(
+                    dato = YearMonth.of(2025, 5),
+                    grunnbeloep = 130160,
+                    grunnbeloepPerMaaned = 10847,
+                    omregningsfaktor = BigDecimal("1.049440"),
+                ),
+            )
+    }
+
+    @AfterEach
+    fun `unmock grunnbeloep`() {
+        unmockkObject(GrunnbeloepRepository)
+    }
+
+    @Test
+    fun `skal haandtere gammelt grunnlag uten maanederInnvilget naar ny inntekt legges inn`() {
+        // Simulerer prod-scenario: to gamle inntektsgrunnlag (maanederInnvilget=null) fra forrige behandling,
+        // og saksbehandler legger inn ny inntekt fra april i en ny revurdering.
+        // Grunnlagene ble opprettet før maanederInnvilget-kolonnen ble innført → null i DB.
+        // kopierAvkorting populerer maanederInnvilget fra innvilgaMaaneder ved opprettelse av ny revurdering,
+        // slik at beregnRestanse ikke møter null når lukkSisteInntektsperiode har endret periode.tom.
+
+        val regelKilde = Grunnlagsopplysning.RegelKilde(navn = "regel", ts = Tidspunkt.now(), versjon = "1")
+
+        fun gammeltGrunnlag(fom: YearMonth) =
+            ForventetInntekt(
+                id = UUID.randomUUID(),
+                periode = Periode(fom = fom, tom = null),
+                inntektTom = 300_000,
+                fratrekkInnAar = 0,
+                inntektUtlandTom = 0,
+                fratrekkInnAarUtland = 0,
+                innvilgaMaaneder = 12,
+                spesifikasjon = "",
+                kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+                overstyrtInnvilgaMaanederAarsak = null,
+                overstyrtInnvilgaMaanederBegrunnelse = null,
+                inntektInnvilgetPeriode =
+                    BenyttetInntektInnvilgetPeriode(
+                        verdi = 300_000,
+                        tidspunkt = Tidspunkt.now(),
+                        regelResultat = "{}".toJsonNode(),
+                        kilde = regelKilde,
+                    ),
+                maanederInnvilget = null,
+                maanederInnvilgetRegelResultat = null,
+            )
+
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        AarsoppgjoerLoepende(
+                            id = UUID.randomUUID(),
+                            aar = 2025,
+                            fom = YearMonth.of(2025, Month.JANUARY),
+                            inntektsavkorting =
+                                listOf(
+                                    Inntektsavkorting(gammeltGrunnlag(YearMonth.of(2025, Month.JANUARY))),
+                                    Inntektsavkorting(gammeltGrunnlag(YearMonth.of(2025, Month.FEBRUARY))),
+                                ),
+                            ytelseFoerAvkorting =
+                                listOf(
+                                    YtelseFoerAvkorting(
+                                        beregning = 15_000,
+                                        periode = Periode(YearMonth.of(2025, Month.JANUARY), null),
+                                        beregningsreferanse = UUID.randomUUID(),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        // Lukket beregningsperiode: setter opphoerFom 2026-01 slik at tomSluttenAvAaret blir 2025-12.
+        // Uten opphør ville reglene splittet på G-skifte i mai 2025 og endt opp med en periode
+        // som krysser kalenderår – det er ikke relevant for det testen verifiserer.
+        val beregningForAaret =
+            beregning(
+                beregninger =
+                    listOf(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2025, Month.APRIL),
+                            datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                            utbetaltBeloep = 15_000,
+                        ),
+                    ),
+            )
+
+        val resultat =
+            avkorting
+                .kopierAvkorting()
+                .beregnAvkortingMedNyeGrunnlag(
+                    nyttGrunnlag =
+                        listOf(
+                            avkortinggrunnlagLagreDto(
+                                aarsinntekt = 200_000,
+                                fom = YearMonth.of(2025, Month.APRIL),
+                            ),
+                        ),
+                    bruker = bruker,
+                    beregning = beregningForAaret,
+                    sanksjoner = emptyList(),
+                    opphoerFom = YearMonth.of(2026, Month.JANUARY),
+                    brukNyeReglerAvkorting = true,
+                )
+
+        resultat.aarsoppgjoer
+            .single()
+            .inntektsavkorting()
+            .size shouldBe 3
+    }
+
     @Nested
     inner class AvkortigTilDto {
         val avkorting =
@@ -1074,104 +1211,6 @@ internal class AvkortingTest {
                 overstyrtInnvilgaMaanederAarsak shouldBe OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
                 overstyrtInnvilgaMaanederBegrunnelse shouldBe "Begrunnelse"
             }
-        }
-    }
-
-    @Nested
-    inner class BeregnAvkortingMedNyeGrunnlag {
-        @Test
-        fun `skal haandtere gammelt grunnlag uten maanederInnvilget naar ny inntekt legges inn`() {
-            // Simulerer prod-scenario: to gamle inntektsgrunnlag (maanederInnvilget=null) fra forrige behandling,
-            // og saksbehandler legger inn ny inntekt fra april i en ny revurdering.
-            // Grunnlagene ble opprettet før maanederInnvilget-kolonnen ble innført → null i DB.
-            // kopierAvkorting populerer maanederInnvilget fra innvilgaMaaneder ved opprettelse av ny revurdering,
-            // slik at beregnRestanse ikke møter null når lukkSisteInntektsperiode har endret periode.tom.
-
-            val regelKilde = Grunnlagsopplysning.RegelKilde(navn = "regel", ts = Tidspunkt.now(), versjon = "1")
-
-            fun gammeltGrunnlag(fom: YearMonth) =
-                ForventetInntekt(
-                    id = UUID.randomUUID(),
-                    periode = Periode(fom = fom, tom = null),
-                    inntektTom = 300_000,
-                    fratrekkInnAar = 0,
-                    inntektUtlandTom = 0,
-                    fratrekkInnAarUtland = 0,
-                    innvilgaMaaneder = 12,
-                    spesifikasjon = "",
-                    kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
-                    overstyrtInnvilgaMaanederAarsak = null,
-                    overstyrtInnvilgaMaanederBegrunnelse = null,
-                    inntektInnvilgetPeriode =
-                        BenyttetInntektInnvilgetPeriode(
-                            verdi = 300_000,
-                            tidspunkt = Tidspunkt.now(),
-                            regelResultat = "{}".toJsonNode(),
-                            kilde = regelKilde,
-                        ),
-                    maanederInnvilget = null,
-                    maanederInnvilgetRegelResultat = null,
-                )
-
-            val avkorting =
-                Avkorting(
-                    aarsoppgjoer =
-                        listOf(
-                            AarsoppgjoerLoepende(
-                                id = UUID.randomUUID(),
-                                aar = 2025,
-                                fom = YearMonth.of(2025, Month.JANUARY),
-                                inntektsavkorting =
-                                    listOf(
-                                        Inntektsavkorting(gammeltGrunnlag(YearMonth.of(2025, Month.JANUARY))),
-                                        Inntektsavkorting(gammeltGrunnlag(YearMonth.of(2025, Month.FEBRUARY))),
-                                    ),
-                                ytelseFoerAvkorting =
-                                    listOf(
-                                        YtelseFoerAvkorting(
-                                            beregning = 15_000,
-                                            periode = Periode(YearMonth.of(2025, Month.JANUARY), null),
-                                            beregningsreferanse = UUID.randomUUID(),
-                                        ),
-                                    ),
-                            ),
-                        ),
-                )
-
-            // Åpen beregningsperiode: tomSluttenAvAaret=null (ingen neste årsoppgjør) → beregningen må dekke frem i tid
-            val beregningForAaret =
-                beregning(
-                    beregninger =
-                        listOf(
-                            beregningsperiode(
-                                datoFOM = YearMonth.of(2025, Month.APRIL),
-                                utbetaltBeloep = 15_000,
-                            ),
-                        ),
-                )
-
-            val resultat =
-                avkorting
-                    .kopierAvkorting()
-                    .beregnAvkortingMedNyeGrunnlag(
-                        nyttGrunnlag =
-                            listOf(
-                                avkortinggrunnlagLagreDto(
-                                    aarsinntekt = 200_000,
-                                    fom = YearMonth.of(2025, Month.APRIL),
-                                ),
-                            ),
-                        bruker = bruker,
-                        beregning = beregningForAaret,
-                        sanksjoner = emptyList(),
-                        opphoerFom = null,
-                        brukNyeReglerAvkorting = true,
-                    )
-
-            resultat.aarsoppgjoer
-                .single()
-                .inntektsavkorting()
-                .size shouldBe 3
         }
     }
 

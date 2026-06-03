@@ -11,14 +11,14 @@ class SamordningHendelseKonsument(
     topic: String,
     kafkaProperties: Properties,
     private val handler: SamordningHendelseHandler,
-) : Kafkakonsument<SamordningVedtakHendelse>(
+) : Kafkakonsument<String, SamordningVedtakHendelse>(
         logger = LoggerFactory.getLogger(SamordningHendelseKonsument::class.java.name),
         consumer = KafkaConsumer<String, SamordningVedtakHendelse>(kafkaProperties),
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    override fun stream() {
-        stream { meldinger ->
+    override fun start() {
+        pollLoop { meldinger ->
             meldinger
                 .forEach {
                     withLogContext {

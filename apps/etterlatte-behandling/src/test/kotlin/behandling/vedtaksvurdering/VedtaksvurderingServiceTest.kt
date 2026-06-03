@@ -26,7 +26,7 @@ import java.util.UUID
 
 internal class VedtaksvurderingServiceTest {
     private val repository = mockk<VedtaksvurderingRepository>()
-    private val service = VedtaksvurderingService(repository)
+    private val service = VedtaksvurderingService(repository, mockk())
 
     @Nested
     inner class HentInnvilgedePerioder {

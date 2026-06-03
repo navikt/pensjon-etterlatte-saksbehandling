@@ -158,7 +158,7 @@ export function BrevMottakerPanel({
       {!!mottaker.bestillingId && (
         <Box
           borderWidth="1 0 0 0"
-          borderColor="neutral-subtle"
+          borderColor="border-subtle"
           paddingBlock="space-16 space-0"
           marginBlock="space-16 space-0"
         >
@@ -168,7 +168,7 @@ export function BrevMottakerPanel({
       )}
       <Box
         borderWidth="1 0 0 0"
-        borderColor="neutral-subtle"
+        borderColor="border-subtle"
         paddingBlock="space-16 space-0"
         marginBlock="space-16 space-0"
       >

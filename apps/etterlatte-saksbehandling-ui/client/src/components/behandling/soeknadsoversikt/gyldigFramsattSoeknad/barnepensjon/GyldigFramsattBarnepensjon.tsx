@@ -84,7 +84,7 @@ export const GyldigFramsattBarnepensjon = ({
             minWidth="18.75rem"
             width="10rem"
             borderWidth="0 0 0 2"
-            borderColor="neutral-subtle"
+            borderColor="border-subtle"
           >
             <GyldigFramsattVurdering
               behandlingId={behandling.id}

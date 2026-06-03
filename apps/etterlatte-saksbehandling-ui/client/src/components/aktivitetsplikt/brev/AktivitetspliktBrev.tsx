@@ -76,7 +76,7 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
 
             <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
           </VStack>
-          <Box borderWidth="0 1" borderColor="neutral-subtle">
+          <Box borderWidth="0 1" borderColor="border-subtle">
             <VStack gap="space-16" width="50rem">
               {brevErFerdigstilt ? (
                 <>

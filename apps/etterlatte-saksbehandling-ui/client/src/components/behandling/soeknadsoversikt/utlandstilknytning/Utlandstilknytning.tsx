@@ -30,7 +30,7 @@ export const Utlandstilknytning = ({
         minWidth="18.75rem"
         width="10rem"
         borderWidth="0 0 0 2"
-        borderColor="neutral-subtle"
+        borderColor="border-subtle"
       >
         <UtlandstilknytningVurdering
           utlandstilknytning={behandling.utlandstilknytning}

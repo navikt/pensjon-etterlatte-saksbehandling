@@ -59,7 +59,13 @@ const Dokument = ({
   return (
     <div key={dokument.dokumentInfoId}>
       {rediger ? (
-        <Box background="neutral-soft" padding="space-16" borderColor="neutral-subtle" borderWidth="1" borderRadius="4">
+        <Box
+          background="surface-neutral-subtle"
+          padding="space-16"
+          borderColor="border-subtle"
+          borderWidth="1"
+          borderRadius="4"
+        >
           <VStack gap="space-16">
             <TextField label="Dokumenttittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} />
 

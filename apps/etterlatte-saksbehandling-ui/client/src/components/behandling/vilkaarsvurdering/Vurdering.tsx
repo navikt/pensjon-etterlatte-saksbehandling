@@ -147,7 +147,7 @@ export const Vurdering = ({
       minWidth="18.75rem"
       width="10rem"
       borderWidth="0 0 0 2"
-      borderColor="neutral-subtle"
+      borderColor="border-subtle"
     >
       <VurderingsboksWrapper
         tittel={overskrift()}

@@ -217,7 +217,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         </Alert>
       )}
 
-      <Box borderWidth="1 0 0 0" borderColor="neutral-subtle" paddingBlock="space-32 space-64">
+      <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="space-32 space-64">
         <HStack width="100%" justify="center">
           {navigasjon()}
         </HStack>

@@ -26,11 +26,11 @@ export default function SlateEditor({ value, onChange, readonly, editKey = '' }:
       <Slate editor={editor} onChange={(text) => onChange(text, editKey)} initialValue={value}>
         {!readonly && (
           <Box
-            background="neutral-soft"
+            background="surface-neutral-subtle"
             paddingInline="space-16"
             paddingBlock="space-8"
             borderWidth="0 0 1 0"
-            borderColor="neutral-subtle"
+            borderColor="border-subtle"
           >
             <HStack gap="space-16">
               <BlockButton format="heading-two" icon="H2" />

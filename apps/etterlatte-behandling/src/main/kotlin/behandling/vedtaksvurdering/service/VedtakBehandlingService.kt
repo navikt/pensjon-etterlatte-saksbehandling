@@ -469,7 +469,7 @@ class VedtakBehandlingService(
         }
     }
 
-    fun iverksattVedtak(behandlingId: UUID): KanskjeAlleredeUtfoertOppdatering {
+    fun iverksettVedtak(behandlingId: UUID): KanskjeAlleredeUtfoertOppdatering {
         logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 

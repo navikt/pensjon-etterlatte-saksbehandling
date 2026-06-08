@@ -287,7 +287,7 @@ fun Route.vedtaksvurderingRoute(
         post("/{$BEHANDLINGID_CALL_PARAMETER}/iverksett") {
             kunSkrivetilgang {
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
-                val vedtak = inTransaction { vedtakBehandlingService.iverksattVedtak(behandlingId) }
+                val vedtak = inTransaction { vedtakBehandlingService.iverksettVedtak(behandlingId) }
                 if (vedtak is KanskjeAlleredeUtfoertOppdatering.NyOppdatering) {
                     rapidService.sendToRapid(vedtak.vedtakOgRapid)
                 }

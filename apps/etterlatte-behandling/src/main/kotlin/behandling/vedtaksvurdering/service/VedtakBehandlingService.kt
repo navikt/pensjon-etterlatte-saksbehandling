@@ -488,7 +488,7 @@ class VedtakBehandlingService(
                 ),
             )
         }
-        val iverksattVedtak = vedtaksvurderingRepository.iverksattVedtak(behandlingId)
+        val iverksattVedtak = vedtaksvurderingRepository.iverksettVedtak(behandlingId)
 
         return KanskjeAlleredeUtfoertOppdatering.NyOppdatering(
             VedtakOgRapid(

@@ -405,7 +405,7 @@ internal class VedtaksvurderingRepositoryTest(
             Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
         )
 
-        val iverksattVedtak = repository.iverksattVedtak(vedtak.behandlingId)
+        val iverksattVedtak = repository.iverksettVedtak(vedtak.behandlingId)
 
         iverksattVedtak shouldNotBe null
         iverksattVedtak.status shouldBe VedtakStatus.IVERKSATT
@@ -507,7 +507,7 @@ internal class VedtaksvurderingRepositoryTest(
                 status = VedtakStatus.TIL_SAMORDNING,
             ),
         ).map { repository.opprettVedtak(it) }
-            .forEach { repository.iverksattVedtak(it.behandlingId) }
+            .forEach { repository.iverksettVedtak(it.behandlingId) }
 
         val results = repository.hentFerdigstilteVedtak(soeker2, SakType.BARNEPENSJON)
 
@@ -552,7 +552,7 @@ internal class VedtaksvurderingRepositoryTest(
                 sakType = SakType.BARNEPENSJON,
             ),
         ).map { repository.opprettVedtak(it) }
-            .forEach { repository.iverksattVedtak(it.behandlingId) }
+            .forEach { repository.iverksettVedtak(it.behandlingId) }
 
         val results = repository.harSakUtbetalingForInntektsaar(sakid, 2023, SakType.OMSTILLINGSSTOENAD)
         results shouldBe true
@@ -570,7 +570,7 @@ internal class VedtaksvurderingRepositoryTest(
                 status = VedtakStatus.IVERKSATT,
             )
         repository.opprettVedtak(vedtak)
-        repository.iverksattVedtak(vedtak.behandlingId)
+        repository.iverksettVedtak(vedtak.behandlingId)
 
         val results = repository.hentFerdigstilteVedtak(soeker1)
 

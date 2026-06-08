@@ -153,7 +153,7 @@ internal class VedtakKlageServiceTest(
         val klage = klageMedFormkravOgInitieltUtfall()
         vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
         vedtakKlageService.fattVedtak(klage, saksbehandler)
-        vedtaksvurderingRepository.iverksattVedtak(klage.id)
+        vedtaksvurderingRepository.iverksettVedtak(klage.id)
 
         assertThrows<InternfeilException> {
             vedtakKlageService.attesterVedtak(klage, attestant)

@@ -113,7 +113,7 @@ class EtteroppgjoerOppgaveService(
             referanse = "",
             sakId = sakId,
             kilde = OppgaveKilde.HENDELSE,
-            type = OppgaveType.VURDER_KONSEKVENS,
+            type = OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING,
             merknad =
                 "Nye inntektsopplysninger fra skatt på ferdigstilt etteroppgjør $inntektsAar - vurder " +
                     "om det har betydning for stønaden",

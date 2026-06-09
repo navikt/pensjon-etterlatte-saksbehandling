@@ -2,6 +2,7 @@ package grunnlagsendring.doedshendelse
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.finnEktefelleSafe
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.under20PaaDato
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -106,6 +107,40 @@ internal class DoedshendelseUtilTest {
             )
 
         finnEktefelleSafe(person) shouldBe null
+    }
+
+    @Test
+    fun `under20PaaDato - barn paa 5 aar er under 20`() {
+        val person = lagUtilPersonDto().copy(foedselsdato = OpplysningDTO(LocalDate.now().minusYears(5), null))
+        person.under20PaaDato(LocalDate.now()) shouldBe true
+    }
+
+    @Test
+    fun `under20PaaDato - barn paa 20 aar er ikke under 20`() {
+        val person = lagUtilPersonDto().copy(foedselsdato = OpplysningDTO(LocalDate.now().minusYears(20), null))
+        person.under20PaaDato(LocalDate.now()) shouldBe false
+    }
+
+    @Test
+    fun `under20PaaDato - barn paa 61 aar er ikke under 20`() {
+        val person = lagUtilPersonDto().copy(foedselsdato = OpplysningDTO(LocalDate.now().minusYears(61), null))
+        person.under20PaaDato(LocalDate.now()) shouldBe false
+    }
+
+    @Test
+    fun `under20PaaDato - bruker 1 januar som fallback naar kun foedselsaar er kjent`() {
+        val iAar = LocalDate.now().year
+        val yngrePerson = lagUtilPersonDto().copy(foedselsdato = null, foedselsaar = OpplysningDTO(iAar, null))
+        yngrePerson.under20PaaDato(LocalDate.now()) shouldBe true
+
+        val eldre = lagUtilPersonDto().copy(foedselsdato = null, foedselsaar = OpplysningDTO(iAar - 20, null))
+        eldre.under20PaaDato(LocalDate.now()) shouldBe false
+    }
+
+    @Test
+    fun `under20PaaDato - returnerer true naar foedselsdato og foedselsaar er null`() {
+        val person = lagUtilPersonDto().copy(foedselsdato = null, foedselsaar = null)
+        person.under20PaaDato(LocalDate.now()) shouldBe true
     }
 
     private fun sivilstand(

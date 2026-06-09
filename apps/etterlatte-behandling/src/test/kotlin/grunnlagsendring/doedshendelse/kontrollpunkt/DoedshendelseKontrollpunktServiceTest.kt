@@ -455,6 +455,26 @@ class DoedshendelseKontrollpunktServiceTest {
     fun `Skal ikke opprette kontrollpunkt hvis alle sjekker er OK`() {
         kontrollpunktService.identifiserKontrollpunkter(doedshendelseInternalBP, bruker) shouldBe emptyList()
     }
+
+    @Test
+    fun `Skal gi kontrollpunkt BarnForGammeltForBarnepensjon naar barn er 61 aar`() {
+        every {
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
+                foedselsnummer = doedshendelseInternalBP.beroertFnr,
+                rolle = PersonRolle.BARN,
+                saktype = SakType.BARNEPENSJON,
+            )
+        } returns
+            lagKsPersonDto().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr), null),
+                foedselsdato = OpplysningDTO(LocalDate.now().minusYears(61), null),
+                bostedsadresse = listOf(OpplysningDTO(Adresse(AdresseType.VEGADRESSE, true, kilde = "FREG"), null)),
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollpunkter(doedshendelseInternalBP, bruker)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnForGammeltForBarnepensjon)
+    }
 }
 
 private fun lagKsPersonDto(

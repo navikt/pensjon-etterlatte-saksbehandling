@@ -2,25 +2,40 @@ package grunnlagsendring.doedshendelse.kontrollpunkt
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.JOVIAL_LAMA
-import no.nav.etterlatte.KONTANT_FOT
-import no.nav.etterlatte.LITE_BARN
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktEktefelleService
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.mockDoedshendelsePerson
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
+private val AVDOED_FNR = Folkeregisteridentifikator.of("10418305857")
+private val GJENLEVENDE_FNR = Folkeregisteridentifikator.of("09498230323")
+private val BARN_FNR = Folkeregisteridentifikator.of("22511075258")
+
 internal class DoedshendelseKontrollpunktEktefelleServiceTest {
     private val kontrollpunktService = DoedshendelseKontrollpunktEktefelleService()
+
+    private val doedsdato: LocalDate = LocalDate.now()
+    private val doedshendelse =
+        DoedshendelseInternal.nyHendelse(
+            avdoedFnr = AVDOED_FNR.value,
+            avdoedDoedsdato = doedsdato,
+            beroertFnr = GJENLEVENDE_FNR.value,
+            relasjon = Relasjon.EKTEFELLE,
+            endringstype = Endringstype.OPPRETTET,
+        )
+    private val avdoed =
+        lagEktefellePersonDto(foedselsnummer = AVDOED_FNR, doedsdato = doedsdato)
+    private val gjenlevende =
+        lagEktefellePersonDto(foedselsnummer = GJENLEVENDE_FNR)
 
     @Test
     fun `Skal ikke opprette kontrollpunkt for ektefeller som har vaert gift siste 5 aar`() {
@@ -79,7 +94,7 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
 
         kontrollpunkter shouldContainExactly
             listOf(
-                DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(doedsdato, avdoed.foedselsnummer.verdi.value),
+                DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(doedsdato, gjenlevende.foedselsnummer.verdi.value),
             )
     }
 
@@ -329,52 +344,53 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
             )
     }
 
-    companion object {
-        private val doedsdato: LocalDate = LocalDate.now()
-        private val doedshendelse =
-            DoedshendelseInternal.nyHendelse(
-                avdoedFnr = KONTANT_FOT.value,
-                avdoedDoedsdato = doedsdato,
-                beroertFnr = JOVIAL_LAMA.value,
-                relasjon = Relasjon.EKTEFELLE,
-                endringstype = Endringstype.OPPRETTET,
-            )
-        private val avdoed =
-            mockDoedshendelsePerson().copy(
-                foedselsnummer = OpplysningDTO(JOVIAL_LAMA, null),
-                doedsdato = OpplysningDTO(doedsdato, null),
-            )
-        private val gjenlevende =
-            mockDoedshendelsePerson().copy(
-                foedselsnummer = OpplysningDTO(JOVIAL_LAMA, null),
-            )
-
-        fun sivilstand(
-            antallAarSiden: Long,
-            sivilstatus: Sivilstatus = Sivilstatus.GIFT,
-            relatertPerson: String? = doedshendelse.beroertFnr,
-        ) = listOf(
-            OpplysningDTO(
-                verdi =
-                    Sivilstand(
-                        sivilstatus = sivilstatus,
-                        relatertVedSiviltilstand = relatertPerson?.let { Folkeregisteridentifikator.of(it) },
-                        gyldigFraOgMed = doedsdato.minusYears(antallAarSiden),
-                        bekreftelsesdato = null,
-                        kilde = "",
-                    ),
-                opplysningsid = "sivilstand",
-            ),
-        )
-
-        fun familieRelasjonMedBarn() =
-            OpplysningDTO(
-                FamilieRelasjon(
-                    ansvarligeForeldre = emptyList(),
-                    foreldre = emptyList(),
-                    barn = listOf(LITE_BARN),
+    private fun sivilstand(
+        antallAarSiden: Long,
+        sivilstatus: Sivilstatus = Sivilstatus.GIFT,
+        relatertPerson: String? = doedshendelse.beroertFnr,
+    ) = listOf(
+        OpplysningDTO(
+            verdi =
+                Sivilstand(
+                    sivilstatus = sivilstatus,
+                    relatertVedSiviltilstand = relatertPerson?.let { Folkeregisteridentifikator.of(it) },
+                    gyldigFraOgMed = doedsdato.minusYears(antallAarSiden),
+                    bekreftelsesdato = null,
+                    kilde = "",
                 ),
-                "familierelasjon",
-            )
-    }
+            opplysningsid = "sivilstand",
+        ),
+    )
+
+    private fun familieRelasjonMedBarn() =
+        OpplysningDTO(
+            FamilieRelasjon(
+                ansvarligeForeldre = emptyList(),
+                foreldre = emptyList(),
+                barn = listOf(BARN_FNR),
+            ),
+            "familierelasjon",
+        )
 }
+
+private fun lagEktefellePersonDto(
+    foedselsnummer: Folkeregisteridentifikator,
+    foedselsdato: LocalDate? = LocalDate.now().minusYears(45),
+    doedsdato: LocalDate? = null,
+    familieRelasjon: OpplysningDTO<FamilieRelasjon>? = null,
+): PersonDoedshendelseDto =
+    PersonDoedshendelseDto(
+        foedselsnummer = OpplysningDTO(foedselsnummer, null),
+        foedselsdato = foedselsdato?.let { OpplysningDTO(it, null) },
+        foedselsaar = null,
+        doedsdato = doedsdato?.let { OpplysningDTO(it, null) },
+        bostedsadresse = null,
+        deltBostedsadresse = null,
+        kontaktadresse = null,
+        oppholdsadresse = null,
+        sivilstand = null,
+        utland = null,
+        familieRelasjon = familieRelasjon,
+        avdoedesBarn = null,
+        avdoedesBarnUtenIdent = null,
+    )

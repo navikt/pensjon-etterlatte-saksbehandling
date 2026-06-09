@@ -6,27 +6,30 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.JOVIAL_LAMA
-import no.nav.etterlatte.KONTANT_FOT
-import no.nav.etterlatte.LITE_BARN
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
-import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
-import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.ktor.token.systembruker
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
@@ -34,20 +37,37 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.mockDoedshendelsePerson
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporing
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.SakLesDao
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
+
+private val KS_AVDOED_FNR = Folkeregisteridentifikator.of("10418305857")
+private val KS_GJENLEVENDE_FNR = Folkeregisteridentifikator.of("09498230323")
+private val KS_BARN_FNR = Folkeregisteridentifikator.of("22511075258")
+private val KS_SAK_ID = SakId(1L)
 
 class DoedshendelseKontrollpunktServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val pesysKlient = mockk<PesysKlient>()
-    private val oppgaveService = mockk<OppgaveService>()
+    private val oppgaveDao = mockk<OppgaveDaoMedEndringssporing>()
+    private val oppgaveService =
+        OppgaveService(
+            oppgaveDao = oppgaveDao,
+            sakDao = mockk<SakLesDao>(),
+            hendelseDao = mockk<HendelseDao>(),
+            hendelser = mockk<BehandlingHendelserKafkaProducer>(),
+            saksbehandlerService = mockk<SaksbehandlerService>(),
+        )
     private val sakService = mockk<SakService>()
-    private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
+    private val grunnlagsendringshendelseDao = FakeGrunnlagsendringshendelseDao()
     private val behandlingService = mockk<BehandlingService>()
     private val kontrollpunktService =
         DoedshendelseKontrollpunktService(
@@ -60,18 +80,18 @@ class DoedshendelseKontrollpunktServiceTest {
         )
     private val doedshendelseInternalBP =
         DoedshendelseInternal.nyHendelse(
-            avdoedFnr = KONTANT_FOT.value,
+            avdoedFnr = KS_AVDOED_FNR.value,
             avdoedDoedsdato = LocalDate.now(),
-            beroertFnr = LITE_BARN.value,
+            beroertFnr = KS_BARN_FNR.value,
             relasjon = Relasjon.BARN,
             endringstype = Endringstype.OPPRETTET,
         )
 
     private val doedshendelseInternalOMS =
         DoedshendelseInternal.nyHendelse(
-            avdoedFnr = KONTANT_FOT.value,
+            avdoedFnr = KS_AVDOED_FNR.value,
             avdoedDoedsdato = LocalDate.now(),
-            beroertFnr = JOVIAL_LAMA.value,
+            beroertFnr = KS_GJENLEVENDE_FNR.value,
             relasjon = Relasjon.EKTEFELLE,
             endringstype = Endringstype.OPPRETTET,
         )
@@ -80,6 +100,8 @@ class DoedshendelseKontrollpunktServiceTest {
 
     @BeforeEach
     fun oppsett() {
+        grunnlagsendringshendelseDao.reset()
+        every { oppgaveDao.hentOppgaverForReferanse(any()) } returns emptyList()
         coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr, bruker) } returns emptyList()
         coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr, bruker) } returns emptyList()
 
@@ -90,7 +112,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 saktype = any(),
             )
         } returns
-            mockDoedshendelsePerson().copy(
+            lagKsPersonDto().copy(
                 foedselsnummer =
                     OpplysningDTO(
                         Folkeregisteridentifikator.of(doedshendelseInternalBP.avdoedFnr),
@@ -105,17 +127,25 @@ class DoedshendelseKontrollpunktServiceTest {
                 saktype = SakType.BARNEPENSJON,
             )
         } returns
-            mockDoedshendelsePerson().copy(
+            lagKsPersonDto().copy(
                 foedselsnummer =
                     OpplysningDTO(
                         Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr),
                         null,
                     ),
+                foedselsdato = OpplysningDTO(LocalDate.now().minusYears(5), null),
+                bostedsadresse =
+                    listOf(
+                        OpplysningDTO(
+                            Adresse(AdresseType.VEGADRESSE, true, kilde = "FREG"),
+                            null,
+                        ),
+                    ),
                 familieRelasjon =
                     OpplysningDTO(
                         FamilieRelasjon(
                             ansvarligeForeldre = emptyList(),
-                            foreldre = listOf(KONTANT_FOT, JOVIAL_LAMA),
+                            foreldre = listOf(KS_AVDOED_FNR, KS_GJENLEVENDE_FNR),
                             barn = emptyList(),
                         ),
                         null,
@@ -123,12 +153,12 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         every {
             pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
-                foedselsnummer = JOVIAL_LAMA.value,
+                foedselsnummer = KS_GJENLEVENDE_FNR.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns
-            mockDoedshendelsePerson().copy(
+            lagKsPersonDto().copy(
                 foedselsnummer =
                     OpplysningDTO(
                         Folkeregisteridentifikator.of(doedshendelseInternalOMS.beroertFnr),
@@ -136,27 +166,20 @@ class DoedshendelseKontrollpunktServiceTest {
                     ),
             )
         every { sakService.finnSak(any(), any()) } returns null
-        every {
-            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
-                any(),
-                any(),
-            )
-        } returns emptyList()
-        every { oppgaveService.hentOppgaverForReferanse(any()) } returns emptyList()
     }
 
     @Test
     fun `Skal gi kontrollpunkt AvdoedHarYtelse dersom relasjon avdød og har sak med iverksatt behandling`() {
         val doedshendelseInternalAvdoed =
             DoedshendelseInternal.nyHendelse(
-                avdoedFnr = KONTANT_FOT.value,
+                avdoedFnr = KS_AVDOED_FNR.value,
                 avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = JOVIAL_LAMA.value,
+                beroertFnr = KS_GJENLEVENDE_FNR.value,
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
         val sak =
-            Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakId1, Enheter.defaultEnhet.enhetNr, null, false)
+            Sak(KS_AVDOED_FNR.value, SakType.OMSTILLINGSSTOENAD, KS_SAK_ID, Enheter.defaultEnhet.enhetNr, null, false)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -166,7 +189,7 @@ class DoedshendelseKontrollpunktServiceTest {
             behandlingService.hentSisteIverksatteBehandling(
                 sak.id,
             )
-        } returns foerstegangsbehandling(sakId = sak.id, status = BehandlingStatus.IVERKSATT)
+        } returns lagKsForstegangsbehandling(sakId = sak.id, status = BehandlingStatus.IVERKSATT)
         every {
             pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
@@ -174,7 +197,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 saktype = any(),
             )
         } returns
-            mockDoedshendelsePerson().copy(
+            lagKsPersonDto().copy(
                 foedselsnummer =
                     OpplysningDTO(
                         Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr),
@@ -196,14 +219,14 @@ class DoedshendelseKontrollpunktServiceTest {
     fun `Skal gi kontrollpunkt AvdoedHarIkkeYtelse dersom relasjon avdød og kun har sak ikke iverksatt behandling`() {
         val doedshendelseInternalAvdoed =
             DoedshendelseInternal.nyHendelse(
-                avdoedFnr = KONTANT_FOT.value,
+                avdoedFnr = KS_AVDOED_FNR.value,
                 avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = JOVIAL_LAMA.value,
+                beroertFnr = KS_GJENLEVENDE_FNR.value,
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
         val sak =
-            Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakId1, Enheter.defaultEnhet.enhetNr, null, false)
+            Sak(KS_AVDOED_FNR.value, SakType.OMSTILLINGSSTOENAD, KS_SAK_ID, Enheter.defaultEnhet.enhetNr, null, false)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -217,7 +240,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 saktype = any(),
             )
         } returns
-            mockDoedshendelsePerson().copy(
+            lagKsPersonDto().copy(
                 foedselsnummer =
                     OpplysningDTO(
                         Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr),
@@ -239,9 +262,9 @@ class DoedshendelseKontrollpunktServiceTest {
     fun `Skal gi kontrollpunkt AvdoedHarIkkeYtelse dersom relasjon avdoed og ikke har noen sak`() {
         val doedshendelseInternalAvdoed =
             DoedshendelseInternal.nyHendelse(
-                avdoedFnr = KONTANT_FOT.value,
+                avdoedFnr = KS_AVDOED_FNR.value,
                 avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = JOVIAL_LAMA.value,
+                beroertFnr = KS_GJENLEVENDE_FNR.value,
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
@@ -258,7 +281,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 saktype = any(),
             )
         } returns
-            mockDoedshendelsePerson().copy(
+            lagKsPersonDto().copy(
                 foedselsnummer =
                     OpplysningDTO(
                         Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr),
@@ -280,15 +303,15 @@ class DoedshendelseKontrollpunktServiceTest {
     fun `Skal gi kontrollpunkt AvdoedHarYtelse, DuplikatGrunnlagsendringsHendelse for avdød med tidligere hendelse`() {
         val doedshendelseInternalAvdoed =
             DoedshendelseInternal.nyHendelse(
-                avdoedFnr = KONTANT_FOT.value,
+                avdoedFnr = KS_AVDOED_FNR.value,
                 avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = JOVIAL_LAMA.value,
+                beroertFnr = KS_GJENLEVENDE_FNR.value,
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sakIdd = sakId1
+        val sakIdd = KS_SAK_ID
         val sak =
-            Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr, null, false)
+            Sak(KS_AVDOED_FNR.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr, null, false)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -298,7 +321,7 @@ class DoedshendelseKontrollpunktServiceTest {
             behandlingService.hentSisteIverksatteBehandling(
                 sakIdd,
             )
-        } returns foerstegangsbehandling(sakId = sakIdd, status = BehandlingStatus.IVERKSATT)
+        } returns lagKsForstegangsbehandling(sakId = sakIdd, status = BehandlingStatus.IVERKSATT)
         every {
             pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
                 foedselsnummer = doedshendelseInternalAvdoed.avdoedFnr,
@@ -306,7 +329,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 saktype = any(),
             )
         } returns
-            mockDoedshendelsePerson().copy(
+            lagKsPersonDto().copy(
                 foedselsnummer =
                     OpplysningDTO(
                         Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr),
@@ -315,23 +338,18 @@ class DoedshendelseKontrollpunktServiceTest {
                 doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
             )
 
-        val oppgaveIntern =
-            mockk<OppgaveIntern> {
-                every { id } returns UUID.randomUUID()
-            }
         val grunnlagshendelseID = UUID.randomUUID()
         val grunnlagsendringshendelse =
-            mockk<Grunnlagsendringshendelse> {
-                every { id } returns grunnlagshendelseID
-                every { gjelderPerson } returns doedshendelseInternalAvdoed.avdoedFnr
-                every { type } returns GrunnlagsendringsType.DOEDSFALL
-                every { sakId } returns sakIdd
-            }
+            Grunnlagsendringshendelse(
+                id = grunnlagshendelseID,
+                sakId = KS_SAK_ID,
+                type = GrunnlagsendringsType.DOEDSFALL,
+                opprettet = LocalDateTime.now(),
+                hendelseGjelderRolle = Saksrolle.AVDOED,
+                gjelderPerson = doedshendelseInternalAvdoed.avdoedFnr,
+            )
 
-        every {
-            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
-        } returns listOf(grunnlagsendringshendelse)
-        every { oppgaveService.hentOppgaverForReferanse(grunnlagshendelseID.toString()) } returns listOf(oppgaveIntern)
+        grunnlagsendringshendelseDao.settHendelser(listOf(grunnlagsendringshendelse))
 
         val kontrollpunkter =
             kontrollpunktService.identifiserKontrollpunkter(
@@ -344,7 +362,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 DoedshendelseKontrollpunkt.AvdoedHarYtelse(sak),
                 DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(
                     grunnlagsendringshendelse.id,
-                    oppgaveIntern.id,
+                    oppgaveId = null,
                 ),
             )
     }
@@ -355,31 +373,24 @@ class DoedshendelseKontrollpunktServiceTest {
             Sak(
                 ident = doedshendelseInternalBP.beroertFnr,
                 sakType = doedshendelseInternalBP.sakTypeForEpsEllerBarn(),
-                id = sakId1,
+                id = KS_SAK_ID,
                 enhet = Enheter.defaultEnhet.enhetNr,
                 null,
                 false,
             )
-        val oppgaveIntern =
-            mockk<OppgaveIntern> {
-                every { id } returns UUID.randomUUID()
-            }
         val grunnlagsendringshendelseId = UUID.randomUUID()
         val grunnlagsendringshendelse =
-            mockk<Grunnlagsendringshendelse> {
-                every { id } returns grunnlagsendringshendelseId
-                every { gjelderPerson } returns doedshendelseInternalBP.avdoedFnr
-                every { type } returns GrunnlagsendringsType.DOEDSFALL
-            }
-        every { sakService.finnSak(any(), any()) } returns sak
-        every {
-            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
-        } returns listOf(grunnlagsendringshendelse)
-        every { oppgaveService.hentOppgaverForReferanse(grunnlagsendringshendelseId.toString()) } returns
-            listOf(
-                oppgaveIntern,
+            Grunnlagsendringshendelse(
+                id = grunnlagsendringshendelseId,
+                sakId = KS_SAK_ID,
+                type = GrunnlagsendringsType.DOEDSFALL,
+                opprettet = LocalDateTime.now(),
+                hendelseGjelderRolle = Saksrolle.AVDOED,
+                gjelderPerson = doedshendelseInternalBP.avdoedFnr,
             )
-        every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
+        every { sakService.finnSak(any(), any()) } returns sak
+        grunnlagsendringshendelseDao.settHendelser(listOf(grunnlagsendringshendelse))
+        every { behandlingService.hentBehandlingerForSak(KS_SAK_ID) } returns emptyList()
 
         val kontrollpunkter =
             kontrollpunktService.identifiserKontrollpunkter(
@@ -391,7 +402,7 @@ class DoedshendelseKontrollpunktServiceTest {
             listOf(
                 DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(
                     grunnlagsendringshendelseId = grunnlagsendringshendelse.id,
-                    oppgaveId = oppgaveIntern.id,
+                    oppgaveId = null,
                 ),
             )
     }
@@ -405,12 +416,13 @@ class DoedshendelseKontrollpunktServiceTest {
                 saktype = SakType.BARNEPENSJON,
             )
         } returns
-            mockDoedshendelsePerson().copy(
+            lagKsPersonDto().copy(
                 foedselsnummer =
                     OpplysningDTO(
                         Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr),
                         null,
                     ),
+                foedselsdato = OpplysningDTO(LocalDate.now().minusYears(5), null),
                 bostedsadresse =
                     listOf(
                         OpplysningDTO(
@@ -424,7 +436,7 @@ class DoedshendelseKontrollpunktServiceTest {
                     OpplysningDTO(
                         FamilieRelasjon(
                             ansvarligeForeldre = emptyList(),
-                            foreldre = listOf(KONTANT_FOT, JOVIAL_LAMA),
+                            foreldre = listOf(KS_AVDOED_FNR, KS_GJENLEVENDE_FNR),
                             barn = emptyList(),
                         ),
                         null,
@@ -443,4 +455,79 @@ class DoedshendelseKontrollpunktServiceTest {
     fun `Skal ikke opprette kontrollpunkt hvis alle sjekker er OK`() {
         kontrollpunktService.identifiserKontrollpunkter(doedshendelseInternalBP, bruker) shouldBe emptyList()
     }
+}
+
+private fun lagKsPersonDto(
+    foedselsnummer: Folkeregisteridentifikator = KS_AVDOED_FNR,
+    doedsdato: LocalDate? = null,
+): PersonDoedshendelseDto =
+    PersonDoedshendelseDto(
+        foedselsnummer = OpplysningDTO(foedselsnummer, null),
+        foedselsdato = OpplysningDTO(LocalDate.now().minusYears(45), null),
+        foedselsaar = null,
+        doedsdato = doedsdato?.let { OpplysningDTO(it, null) },
+        bostedsadresse = null,
+        deltBostedsadresse = null,
+        kontaktadresse = null,
+        oppholdsadresse = null,
+        sivilstand = null,
+        utland = null,
+        familieRelasjon = null,
+        avdoedesBarn = null,
+        avdoedesBarnUtenIdent = null,
+    )
+
+private fun lagKsForstegangsbehandling(
+    sakId: SakId,
+    status: BehandlingStatus = BehandlingStatus.IVERKSATT,
+): Foerstegangsbehandling =
+    Foerstegangsbehandling(
+        id = UUID.randomUUID(),
+        sak =
+            Sak(
+                ident = KS_AVDOED_FNR.value,
+                sakType = SakType.BARNEPENSJON,
+                id = sakId,
+                enhet = Enheter.defaultEnhet.enhetNr,
+                adressebeskyttelse = null,
+                erSkjermet = false,
+            ),
+        behandlingOpprettet = LocalDateTime.now(),
+        sistEndret = LocalDateTime.now(),
+        status = status,
+        kommerBarnetTilgode = null,
+        virkningstidspunkt = null,
+        utlandstilknytning = null,
+        boddEllerArbeidetUtlandet = null,
+        soeknadMottattDato = null,
+        gyldighetsproeving = null,
+        vedtaksloesning = Vedtaksloesning.GJENNY,
+        sendeBrev = true,
+    )
+
+/**
+ * Fake DAO som omgår MockK sitt problem med value class-parametere (SakId → mangled JVM-navn).
+ * Bruk [settHendelser] for å styre hva som returneres fra hentGrunnlagsendringshendelserMedStatuserISak.
+ */
+private class FakeGrunnlagsendringshendelseDao : GrunnlagsendringshendelseDao(NoopConnectionAutoclosing) {
+    private var hendelser: List<Grunnlagsendringshendelse> = emptyList()
+
+    fun settHendelser(h: List<Grunnlagsendringshendelse>) {
+        hendelser = h
+    }
+
+    fun reset() {
+        hendelser = emptyList()
+    }
+
+    override fun hentGrunnlagsendringshendelserMedStatuserISak(
+        sakId: SakId,
+        statuser: List<GrunnlagsendringStatus>,
+    ): List<Grunnlagsendringshendelse> = hendelser
+}
+
+private object NoopConnectionAutoclosing : ConnectionAutoclosing() {
+    override fun <T> hentConnection(block: (java.sql.Connection) -> T): T = error("Not implemented in tests")
+
+    override fun <T> hentKotliquerySession(block: (kotliquery.Session) -> T): T = error("Not implemented in tests")
 }

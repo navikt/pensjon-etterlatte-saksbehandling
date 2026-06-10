@@ -1,5 +1,5 @@
 INSERT INTO utbetalingshendelse(id, utbetaling_id, tidspunkt, status)
-VALUES ('59c2163b-22ae-464b-bd63-40e9afa7dabf', '1d7d791b-fce8-4d8c-ae49-34904813ee56', now(), 'GODKJENT')
+VALUES ('59c2163b-22ae-464b-bd63-40e9afa7dabf', '1d7d791b-fce8-4d8c-ae49-34904813ee56', now(), 'GODKJENT');
 
 UPDATE utbetaling
 SET kvittering = replace(oppdrag, '<oppdrag-110>', '<mmel>

@@ -234,6 +234,10 @@ data class EtteroppgjoerBeregnFaktiskInntektRequest(
     val harDoedsfall: Boolean,
     val innvilgetPeriodeIEtteroppgjoersAar: Periode,
     val opphoerFom: YearMonth?,
+    // Satt kun ved klage-omgjøring: forbehandlingen vi omgjør. Da skal etteroppgjøret sammenlignes
+    // mot samme utbetalte stønad som det opprinnelige etteroppgjøret, ikke mot dagens vedtaksliste
+    // (som nå også inneholder det iverksatte etteroppgjørsvedtaket).
+    val omgjoeringAvForbehandlingId: UUID? = null,
 )
 
 data class EtteroppgjoerHentBeregnetResultatRequest(

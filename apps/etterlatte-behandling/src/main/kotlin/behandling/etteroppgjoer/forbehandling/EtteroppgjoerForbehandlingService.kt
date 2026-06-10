@@ -418,6 +418,7 @@ class EtteroppgjoerForbehandlingService(
                         forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.NEI,
                 innvilgetPeriodeIEtteroppgjoersAar = forbehandling.innvilgetPeriode,
                 opphoerFom = opphoerFom,
+                omgjoeringAvForbehandlingId = forbehandling.kopiertFra.takeIf { forbehandling.klageOmgjoering != null },
             )
 
         val beregnetEtteroppgjoerResultat =

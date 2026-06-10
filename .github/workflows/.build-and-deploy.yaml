@@ -40,13 +40,13 @@ jobs:
         run: ./gradlew :apps:${{ github.workflow }}:build --configuration-cache
 
       - name: Build and publish docker image
-        uses: nais/docker-build-push@078e460885ed0424b60d45ce9220b4be1748be9d # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@751a312f0803eb96a05a41fadf51be19b7be362c # ratchet:nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: etterlatte
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          salsa: false
+          salsa: true
           dockerfile: docker/Dockerfile
           docker_context: apps/${{ github.workflow }}/
           image_suffix: ${{ github.workflow }}
@@ -76,31 +76,7 @@ jobs:
       - name: Validate licenses
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew checkLicense --no-configuration-cache
-  salsa:
-    name: Generate SBOM, attest and sign image
-    runs-on: ubuntu-latest
-    needs: build-and-publish
-    permissions:
-      id-token: write
-    steps:
-      - name: NAIS login
-        uses: nais/login@d6ab5d83f735e9f155eb9d7d29cd20ae46820ea9 # ratchet:nais/login@v0
-        id: login
-        with:
-          team: etterlatte
-      - name: Lag image-referanse med digest
-        run: |
-          IMAGE_WITH_TAG="${{ needs.build-and-publish.outputs.image }}"
-          IMAGE="${IMAGE_WITH_TAG%%:*}"
-          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build-and-publish.outputs.digest }}" >> $GITHUB_ENV
-      - name: Generate SBOM, attest and sign image
-        id: attest-sign
-        uses: nais/attest-sign@75ea4636c578affaf49d98d98d280879b3ae54b6 # ratchet:nais/attest-sign@v2.0.7
-        env:
-          TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
-        with:
-          image_ref: ${{ env.IMAGE_WITH_DIGEST }}
+        run: ./gradlew checkLicense --no-parallel --no-configuration-cache
   deploy-to-dev-gcp:
     name: dev-gcp
     runs-on: ubuntu-latest

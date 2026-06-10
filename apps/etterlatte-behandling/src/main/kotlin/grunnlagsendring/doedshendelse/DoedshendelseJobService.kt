@@ -148,7 +148,20 @@ class DoedshendelseJobService(
             false -> {
                 logger.info("Skal håndtere dødshendelse ${doedshendelse.id}")
                 val sak: Sak =
-                    kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
+                    kontrollpunkter.finnSak() ?: try {
+                        opprettSakOgLagGrunnlag(doedshendelse)
+                    } catch (e: Exception) {
+                        if (!isProd()) {
+                            logger.error(
+                                "Kunne ikke opprette sak for dødshendelse ${doedshendelse.id}, ignorerer i " +
+                                    "dev. HVIS DETTE SKJER I PRODUKSJON MÅ VI FIKSE DETTE ASAP.",
+                                e,
+                            )
+                            return
+                        } else {
+                            throw e
+                        }
+                    }
 
                 val brevSendt = sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
                 val (oppgaveOpprettet, oppgave) = opprettOppgaveHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)

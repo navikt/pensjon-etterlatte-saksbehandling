@@ -276,37 +276,32 @@
   dependencies:
     "@tybys/wasm-util" "^0.10.1"
 
-"@navikt/aksel-icons@^8.10.2", "@navikt/aksel-icons@^8.10.6":
+"@navikt/aksel-icons@^8.10.2", "@navikt/aksel-icons@^8.11.1":
   version "8.11.1"
   resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-8.11.1.tgz#3e09f9941a2cb819aaa2fe83771ab061b0a13456"
   integrity sha512-hXvm/5T8s7fcSlZpg2RWrs870PkH2SeCSQBMmDgI4rm+t5gsw+nDa4qOSCrQQJLiNjMx3jbCO10rL4po9QtfdQ==
 
-"@navikt/ds-css@~8.10.2":
-  version "8.10.6"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-8.10.6.tgz#5a49d9b7c2bf0326289ff0a69505df89f36a3e68"
-  integrity sha512-ZoVz0CHluHor1q7AojDJ04Pj92YnWmnY43m91i32jGYiaIF0MNp9Qn0qr2GOm+1x50aGqtGx998TWj7ZYso1mw==
+"@navikt/ds-css@~8.11.1":
+  version "8.11.1"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-8.11.1.tgz#d2edadc20c615f882b95093aea06cdb5960fadd8"
+  integrity sha512-fOJ3j4oMkPjS2r1DUIpIDBklUM+XU42fN4b0GcqtAUanB9hJoAIw7Pr2pvR+dF8RCGsPTabX9uGW5mIRm6fPVw==
 
-"@navikt/ds-react@~8.10.2":
-  version "8.10.6"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-8.10.6.tgz#6b1f5751a41ab6025ac61a8375e9c59f8add65d7"
-  integrity sha512-XfuMhct9i6no6soZnvmzzn9CuqUDmk6FBQg0aNiKEpAkZUyp8l9AX1Hq2EQld3QTUEN9ldZDmoP8jBmtz7Kl3g==
+"@navikt/ds-react@~8.11.1":
+  version "8.11.1"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-8.11.1.tgz#ca7cc25e52c58a890ff5a721238a991b8a4a071e"
+  integrity sha512-KnJmlKuGxN1+EQ85WxbQBphlYfeG27D061N804otrSnBTAzMM3TVtXI9NAr3IYf++lgPr5c4UPge0nOSuG3zvA==
   dependencies:
     "@floating-ui/react" "0.27.19"
     "@floating-ui/react-dom" "^2.1.8"
-    "@navikt/aksel-icons" "^8.10.6"
-    "@navikt/ds-tokens" "^8.10.6"
+    "@navikt/aksel-icons" "^8.11.1"
+    "@navikt/ds-tokens" "^8.11.1"
     date-fns "^4.0.0"
     react-day-picker "9.14.0"
 
-"@navikt/ds-tokens@^8.10.6":
+"@navikt/ds-tokens@^8.11.1", "@navikt/ds-tokens@~8.11.1":
   version "8.11.1"
   resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-8.11.1.tgz#15883c8c993965a47c8e12dcf588687095a70a4e"
   integrity sha512-jsPer8drVa+TxqdfHHanZVrsUNjowx+3ZcXQ7/+Nb3q81FTnrXmpvV2VeN7TTzSToWdX5/6oGH9LzrSyiN5UGw==
-
-"@navikt/ds-tokens@~8.10.2":
-  version "8.10.6"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-8.10.6.tgz#3070167a2ab8445b7f04935d47175c87cc0167a3"
-  integrity sha512-tsYS9Wy5/t6fryllnQfbzNkjD8lTA4b+enkbDj0SLTYfB4naCeXO4cog1jl3u/y3IhqqVTIMnyO7ujv1mLbYTg==
 
 "@npmcli/fs@^3.1.0":
   version "3.1.1"

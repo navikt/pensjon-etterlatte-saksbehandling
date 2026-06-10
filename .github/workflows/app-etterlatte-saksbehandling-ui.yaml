@@ -70,35 +70,12 @@ jobs:
           team: etterlatte
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          salsa: false
+          salsa: true
           docker_context: apps/${{ env.APP_NAME }}/
           image_suffix: ${{ github.workflow }}
           tag: ${{ env.GITHUB_REF_SLUG }}
 
-  salsa:
-    name: Generate SBOM, attest and sign image
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write
-    steps:
-      - name: NAIS login
-        uses: nais/login@d6ab5d83f735e9f155eb9d7d29cd20ae46820ea9 # ratchet:nais/login@v0
-        id: login
-        with:
-          team: etterlatte
-      - name: Lag image-referanse med digest
-        run: |
-          IMAGE_WITH_TAG="${{ needs.build.outputs.image }}"
-          IMAGE="${IMAGE_WITH_TAG%%:*}"
-          echo "IMAGE_WITH_DIGEST=${IMAGE}@${{ needs.build.outputs.digest }}" >> $GITHUB_ENV
-      - name: Generate SBOM, attest and sign image
-        id: attest-sign
-        uses: nais/attest-sign@75ea4636c578affaf49d98d98d280879b3ae54b6 # ratchet:nais/attest-sign@v2.0.7
-        env:
-          TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
-        with:
-          image_ref: ${{ env.IMAGE_WITH_DIGEST }}
+
   deploy-to-dev-gcp:
     if: github.event_name != 'pull_request'
     name: Deploy to dev-gcp

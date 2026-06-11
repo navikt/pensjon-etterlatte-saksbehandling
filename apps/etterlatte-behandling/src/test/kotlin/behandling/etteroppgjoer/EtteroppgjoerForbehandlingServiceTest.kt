@@ -4,8 +4,10 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingHendelseService
@@ -18,10 +20,14 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
+import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -30,6 +36,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -147,6 +154,48 @@ class EtteroppgjoerForbehandlingServiceTest {
 
         fun returnsEtteroppgjoer(etteroppgjoer: Etteroppgjoer) {
             coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(any(), any()) } returns etteroppgjoer
+        }
+
+        fun faktiskInntektRequest() =
+            BeregnFaktiskInntektRequest(
+                loennsinntekt = 100,
+                afp = 0,
+                naeringsinntekt = 0,
+                utlandsinntekt = 0,
+                spesifikasjon = "",
+            )
+
+        fun stubLagreOgBeregnFaktiskInntekt(
+            forbehandling: EtteroppgjoerForbehandling,
+            vararg ekstraForbehandlinger: EtteroppgjoerForbehandling,
+        ): io.mockk.CapturingSlot<EtteroppgjoerBeregnFaktiskInntektRequest> {
+            (listOf(forbehandling) + ekstraForbehandlinger).forEach {
+                coEvery { dao.hentForbehandling(it.id) } returns it
+            }
+            coEvery { vedtakInternalService.hentInnvilgedePerioder(any(), any()) } returns
+                listOf(
+                    InnvilgetPeriodeDto(
+                        periode =
+                            no.nav.etterlatte.libs.common.vedtak.Periode(
+                                fom = forbehandling.innvilgetPeriode.fom,
+                                tom = forbehandling.innvilgetPeriode.tom,
+                            ),
+                        vedtak = emptyList(),
+                    ),
+                )
+            every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
+            every { behandlingService.hentUtlandstilknytningForSak(any()) } returns null
+            every { hendelserService.registrerOgSendHendelse(any(), any(), any(), any(), any()) } returns Unit
+
+            val resultat =
+                mockk<BeregnetEtteroppgjoerResultatDto> {
+                    every { resultatType } returns EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
+                }
+            val requestSlot = slot<EtteroppgjoerBeregnFaktiskInntektRequest>()
+            coEvery {
+                beregningKlient.beregnAvkortingFaktiskInntekt(capture(requestSlot), any())
+            } returns resultat
+            return requestSlot
         }
     }
 
@@ -374,5 +423,51 @@ class EtteroppgjoerForbehandlingServiceTest {
             ctx.dao.kopierSummerteInntekter(forbehandling.id, kopiertForbehandling.id)
             ctx.dao.kopierPensjonsgivendeInntekt(forbehandling.id, kopiertForbehandling.id)
         }
+    }
+
+    @Test
+    fun `ved klage-omgjoering sammenlignes det mot baseline fra forbehandlingen som omgjoeres`() {
+        val ctx = TestContext()
+
+        val baselineBehandlingId = UUID.randomUUID()
+        val omgjortForbehandling =
+            EtteroppgjoerForbehandling
+                .opprett(
+                    sak = ctx.behandling.sak,
+                    innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                    sisteIverksatteBehandling = baselineBehandlingId,
+                )
+        val omgjoeringForbehandling =
+            omgjortForbehandling.copy(
+                id = UUID.randomUUID(),
+                kopiertFra = omgjortForbehandling.id,
+                klageOmgjoering = UUID.randomUUID(),
+                sisteIverksatteBehandlingId = UUID.randomUUID(),
+            )
+
+        val request = ctx.stubLagreOgBeregnFaktiskInntekt(omgjoeringForbehandling, omgjortForbehandling)
+
+        ctx.service.lagreOgBeregnFaktiskInntekt(omgjoeringForbehandling.id, ctx.faktiskInntektRequest(), simpleSaksbehandler())
+
+        // Baseline = den omgjorte forbehandlingens sisteIverksatteBehandling (ytelsen før det opprinnelige etteroppgjøret)
+        request.captured.sammenlignTilOgMedBehandlingId shouldBe baselineBehandlingId
+    }
+
+    @Test
+    fun `uten klage-omgjoering avgrenses ikke sammenligningen til en behandling`() {
+        val ctx = TestContext()
+
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                sak = ctx.behandling.sak,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                sisteIverksatteBehandling = UUID.randomUUID(),
+            )
+
+        val request = ctx.stubLagreOgBeregnFaktiskInntekt(forbehandling)
+
+        ctx.service.lagreOgBeregnFaktiskInntekt(forbehandling.id, ctx.faktiskInntektRequest(), simpleSaksbehandler())
+
+        request.captured.sammenlignTilOgMedBehandlingId shouldBe null
     }
 }

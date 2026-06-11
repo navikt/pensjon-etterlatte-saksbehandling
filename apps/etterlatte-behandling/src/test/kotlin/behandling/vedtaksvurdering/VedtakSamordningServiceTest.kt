@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
@@ -14,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -397,6 +399,110 @@ class VedtakSamordningServiceTest {
             { resultat[1].perioder shouldHaveSize 1 },
             { resultat[1].perioder[0].tom shouldBe null },
         )
+    }
+
+    @Test
+    fun `skal avgrense vedtakstidslinjen til og med en gitt behandling`() {
+        val ident = Folkeregisteridentifikator.of(FNR_2)
+        val virkFom2024Januar = YearMonth.of(2024, Month.JANUARY)
+
+        val behandlingFoerEtteroppgjoer = UUID.randomUUID()
+        val behandlingEtteroppgjoer = UUID.randomUUID()
+        val attestertFoer = Tidspunkt.parse("2024-06-01T10:00:00Z")
+
+        val vedtakFoerEtteroppgjoer =
+            lagVedtak(
+                id = 1,
+                behandlingId = behandlingFoerEtteroppgjoer,
+                virkningsDato = LocalDate.of(2024, 1, 1),
+                vedtakStatus = VedtakStatus.IVERKSATT,
+                datoAttestert = attestertFoer,
+                utbetalingsperioder =
+                    listOf(
+                        Utbetalingsperiode(
+                            id = null,
+                            periode = Periode(virkFom2024Januar, null),
+                            beloep = BigDecimal(2500),
+                            type = UtbetalingsperiodeType.UTBETALING,
+                            regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
+                        ),
+                    ),
+            )
+        // Etteroppgjør-revurderingen er iverksatt og attestert senere – den skal IKKE telle med når vi avgrenser
+        val etteroppgjoerVedtak =
+            lagVedtak(
+                id = 2,
+                behandlingId = behandlingEtteroppgjoer,
+                virkningsDato = LocalDate.of(2024, 1, 1),
+                vedtakStatus = VedtakStatus.IVERKSATT,
+                behandlingType = BehandlingType.REVURDERING,
+                vedtakType = VedtakType.ENDRING,
+                datoAttestert = attestertFoer.plus(180, DAYS),
+                utbetalingsperioder =
+                    listOf(
+                        Utbetalingsperiode(
+                            id = null,
+                            periode = Periode(virkFom2024Januar, null),
+                            beloep = BigDecimal(1000),
+                            type = UtbetalingsperiodeType.UTBETALING,
+                            regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
+                        ),
+                    ),
+            )
+
+        every { vedtakRepository.hentFerdigstilteVedtak(ident, SakType.OMSTILLINGSSTOENAD) } returns
+            listOf(vedtakFoerEtteroppgjoer, etteroppgjoerVedtak)
+        every { vedtakRepository.hentAvkortetYtelsePerioder(setOf(1)) } returns
+            listOf(
+                AvkortetYtelsePeriode(
+                    id = UUID.randomUUID(),
+                    vedtakId = 1,
+                    fom = virkFom2024Januar,
+                    tom = null,
+                    type = "FORVENTET_INNTEKT",
+                    ytelseFoerAvkorting = 3000,
+                    ytelseEtterAvkorting = 2500,
+                ),
+            )
+
+        val resultat =
+            samordningService.hentVedtaksliste(
+                fnr = ident,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                fomDato = LocalDate.of(2024, Month.JANUARY, 1),
+                tilOgMedBehandlingId = behandlingFoerEtteroppgjoer,
+            )
+
+        // Kun vedtaket før etteroppgjøret er igjen i tidslinjen
+        verify { vedtakRepository.hentAvkortetYtelsePerioder(setOf(1)) }
+        assertAll(
+            { resultat shouldHaveSize 1 },
+            { resultat[0].vedtakId shouldBe 1 },
+            { resultat[0].perioder[0].ytelseEtterAvkorting shouldBe 2500 },
+        )
+    }
+
+    @Test
+    fun `skal kaste feil naar behandlingen det avgrenses til mangler attestert vedtak`() {
+        val ident = Folkeregisteridentifikator.of(FNR_2)
+
+        every { vedtakRepository.hentFerdigstilteVedtak(ident, SakType.OMSTILLINGSSTOENAD) } returns
+            listOf(
+                lagVedtak(
+                    id = 1,
+                    virkningsDato = LocalDate.of(2024, 1, 1),
+                    vedtakStatus = VedtakStatus.IVERKSATT,
+                ),
+            )
+
+        shouldThrow<InternfeilException> {
+            samordningService.hentVedtaksliste(
+                fnr = ident,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                fomDato = LocalDate.of(2024, Month.JANUARY, 1),
+                tilOgMedBehandlingId = UUID.randomUUID(),
+            )
+        }
     }
 
     private fun avkortingDto(

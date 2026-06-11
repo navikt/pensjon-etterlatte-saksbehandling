@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
 import java.time.LocalDate
+import java.util.UUID
 
 class VedtakEtteroppgjoerService(
     private val repository: VedtaksvurderingRepository,
@@ -16,13 +17,20 @@ class VedtakEtteroppgjoerService(
     fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
+        tilOgMedBehandlingId: UUID? = null,
     ): List<VedtakEtteroppgjoerDto> {
         val vedtak = repository.hentVedtakForSak(sakId).firstOrNull()
         krevIkkeNull(vedtak) { "Fant ingen vedtak for sakId=$sakId" }
 
         val fnr = Folkeregisteridentifikator.Companion.of(vedtak.soeker.value)
 
-        val vedtaksliste = vedtakSamordningService.hentVedtaksliste(fnr, SakType.OMSTILLINGSSTOENAD, LocalDate.of(etteroppgjoersAar, 1, 1))
+        val vedtaksliste =
+            vedtakSamordningService.hentVedtaksliste(
+                fnr,
+                SakType.OMSTILLINGSSTOENAD,
+                LocalDate.of(etteroppgjoersAar, 1, 1),
+                tilOgMedBehandlingId,
+            )
 
         return vedtaksliste.map { vedtak ->
             VedtakEtteroppgjoerDto(

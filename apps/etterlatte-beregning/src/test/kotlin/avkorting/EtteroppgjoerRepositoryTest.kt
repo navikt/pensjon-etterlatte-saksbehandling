@@ -69,23 +69,6 @@ internal class EtteroppgjoerRepositoryTest(
             etteroppgjoerBeregnetResultat
     }
 
-    @Test
-    fun `hentVedtakReferanseForForbehandling skal hente lagret vedtakreferanse uavhengig av siste iverksatte behandling`() {
-        val forbehandlingId = UUID.randomUUID()
-        val aar = 2024
-        val resultat =
-            beregnetEtteroppgjoerResultat(aar, forbehandlingId, UUID.randomUUID(), 1000, 1000)
-                .let { it.copy(referanseAvkorting = it.referanseAvkorting.copy(vedtakReferanse = listOf(42L, 43L))) }
-        etteroppgjoerRepository.lagreEtteroppgjoerResultat(resultat)
-
-        etteroppgjoerRepository.hentVedtakReferanseForForbehandling(aar, forbehandlingId) shouldBe listOf(42L, 43L)
-    }
-
-    @Test
-    fun `hentVedtakReferanseForForbehandling skal returnere null naar det ikke finnes et resultat`() {
-        etteroppgjoerRepository.hentVedtakReferanseForForbehandling(2024, UUID.randomUUID()) shouldBe null
-    }
-
     private fun beregnetEtteroppgjoerResultat(
         aar: Int,
         forbehandlingId: UUID,

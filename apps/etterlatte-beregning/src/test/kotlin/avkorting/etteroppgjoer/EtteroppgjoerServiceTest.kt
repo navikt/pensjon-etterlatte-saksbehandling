@@ -3,6 +3,7 @@ package no.nav.etterlatte.avkorting.etteroppgjoer
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -51,32 +52,32 @@ internal class EtteroppgjoerServiceTest {
     private val aar = 2024
     private val sakId = SakId(1L)
 
+    // To vedtak i etteroppgjørsåret, hvert dekker et halvår med 1000 kr/mnd = 6000 kr hver
+    private val vedtakHeleAaret =
+        listOf(
+            VedtakEtteroppgjoerDto(
+                vedtakId = 100L,
+                perioder =
+                    listOf(
+                        VedtakEtteroppgjoerPeriode(YearMonth.of(aar, 1), YearMonth.of(aar, 6), ytelseEtterAvkorting = 1000),
+                    ),
+            ),
+            VedtakEtteroppgjoerDto(
+                vedtakId = 200L,
+                perioder =
+                    listOf(
+                        VedtakEtteroppgjoerPeriode(YearMonth.of(aar, 7), YearMonth.of(aar, 12), ytelseEtterAvkorting = 1000),
+                    ),
+            ),
+        )
+
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
     }
 
-    private fun settOppTesterOmgjoering() {
+    private fun mockForbehandlingMedAvkorting() {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling(sak = sakId)
-
-        // To vedtak i etteroppgjørsåret, hvert dekker et halvår med 1000 kr/mnd = 6000 kr hver
-        coEvery { vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(any(), any(), any()) } returns
-            listOf(
-                VedtakEtteroppgjoerDto(
-                    vedtakId = 100L,
-                    perioder =
-                        listOf(
-                            VedtakEtteroppgjoerPeriode(YearMonth.of(aar, 1), YearMonth.of(aar, 6), ytelseEtterAvkorting = 1000),
-                        ),
-                ),
-                VedtakEtteroppgjoerDto(
-                    vedtakId = 200L,
-                    perioder =
-                        listOf(
-                            VedtakEtteroppgjoerPeriode(YearMonth.of(aar, 7), YearMonth.of(aar, 12), ytelseEtterAvkorting = 1000),
-                        ),
-                ),
-            )
 
         val forbehandlingAvkorting =
             etteroppgjoer(
@@ -94,9 +95,9 @@ internal class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `uten omgjoering sammenlignes det mot hele vedtakslisten i etteroppgjoersaaret`() {
-        settOppTesterOmgjoering()
-        every { etteroppgjoerRepository.hentVedtakReferanseForForbehandling(any(), any()) } returns null
+    fun `uten omgjoering hentes hele vedtakslisten og det avgrenses ikke til en behandling`() {
+        mockForbehandlingMedAvkorting()
+        coEvery { vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(any(), any(), any(), any()) } returns vedtakHeleAaret
 
         val resultat =
             runBlocking {
@@ -105,21 +106,26 @@ internal class EtteroppgjoerServiceTest {
                     sisteIverksatteBehandlingId = UUID.randomUUID(),
                     etteroppgjoersAar = aar,
                     harDoedsfall = false,
-                    omgjoeringAvForbehandlingId = null,
+                    sammenlignTilOgMedBehandlingId = null,
                 )
             }
 
         // Begge vedtakene teller med: 6000 + 6000
         resultat.utbetaltStoenad shouldBe 12000
         resultat.referanseAvkorting.vedtakReferanse shouldBe listOf(100L, 200L)
+        coVerify {
+            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(sakId, aar, any(), null)
+        }
     }
 
     @Test
-    fun `ved klage-omgjoering sammenlignes det kun mot vedtakene det opprinnelige etteroppgjoeret brukte`() {
-        settOppTesterOmgjoering()
-        val omgjoeringAvForbehandlingId = UUID.randomUUID()
-        // Det opprinnelige etteroppgjøret sammenlignet kun mot vedtak 100
-        every { etteroppgjoerRepository.hentVedtakReferanseForForbehandling(aar, omgjoeringAvForbehandlingId) } returns listOf(100L)
+    fun `ved klage-omgjoering avgrenses vedtakslisten til og med sammenlign-behandlingen`() {
+        mockForbehandlingMedAvkorting()
+        val sammenlignTilOgMedBehandlingId = UUID.randomUUID()
+        // Behandling-id-en vi avgrenser tidslinjen til – returnerer kun vedtaket som gjaldt før det opprinnelige etteroppgjøret
+        coEvery {
+            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(any(), any(), any(), sammenlignTilOgMedBehandlingId)
+        } returns vedtakHeleAaret.take(1)
 
         val resultat =
             runBlocking {
@@ -128,12 +134,15 @@ internal class EtteroppgjoerServiceTest {
                     sisteIverksatteBehandlingId = UUID.randomUUID(),
                     etteroppgjoersAar = aar,
                     harDoedsfall = false,
-                    omgjoeringAvForbehandlingId = omgjoeringAvForbehandlingId,
+                    sammenlignTilOgMedBehandlingId = sammenlignTilOgMedBehandlingId,
                 )
             }
 
         // Kun vedtak 100 teller med: 6000
         resultat.utbetaltStoenad shouldBe 6000
         resultat.referanseAvkorting.vedtakReferanse shouldBe listOf(100L)
+        coVerify {
+            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(sakId, aar, any(), sammenlignTilOgMedBehandlingId)
+        }
     }
 }

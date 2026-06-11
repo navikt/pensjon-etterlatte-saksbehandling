@@ -100,42 +100,6 @@ class EtteroppgjoerRepository(
             }
         }
 
-    fun hentVedtakReferanseForForbehandling(
-        aar: Int,
-        forbehandlingId: UUID,
-    ): List<Long>? =
-        dataSource.transaction { tx ->
-            queryOf(
-                """
-                SELECT vedtak_referanse FROM etteroppgjoer_beregnet_resultat 
-                WHERE aar = :aar 
-                    AND forbehandling_id = :forbehandling_id
-                """.trimIndent(),
-                paramMap =
-                    mapOf(
-                        "aar" to aar,
-                        "forbehandling_id" to forbehandlingId,
-                    ),
-            ).let { query ->
-                val results =
-                    tx.run(
-                        query
-                            .map { row ->
-                                row.stringOrNull("vedtak_referanse")?.let { objectMapper.readValue<List<Long>>(it) }
-                            }.asList,
-                    )
-                when {
-                    results.isEmpty() -> null
-
-                    results.size == 1 -> results.first()
-
-                    else -> throw IllegalStateException(
-                        "Forventet maks én rad, men fikk ${results.size} for forbehandling med id $forbehandlingId",
-                    )
-                }
-            }
-        }
-
     private fun Row.toBeregnetEtteroppgjoerResultat(): BeregnetEtteroppgjoerResultat =
         BeregnetEtteroppgjoerResultat(
             id = uuid("id"),

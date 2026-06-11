@@ -59,7 +59,7 @@ class EtteroppgjoerService(
         sisteIverksatteBehandlingId: UUID,
         etteroppgjoersAar: Int,
         harDoedsfall: Boolean,
-        omgjoeringAvForbehandlingId: UUID?,
+        sammenlignTilOgMedBehandlingId: UUID?,
     ): BeregnetEtteroppgjoerResultat {
         val etteroppgjoerResultat =
             beregnEtteroppgjoerResultat(
@@ -67,7 +67,7 @@ class EtteroppgjoerService(
                 forbehandlingId,
                 sisteIverksatteBehandlingId,
                 harDoedsfall,
-                omgjoeringAvForbehandlingId,
+                sammenlignTilOgMedBehandlingId,
             )
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
         return etteroppgjoerResultat
@@ -148,7 +148,7 @@ class EtteroppgjoerService(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
         harDoedsfall: Boolean,
-        omgjoeringAvForbehandlingId: UUID?,
+        sammenlignTilOgMedBehandlingId: UUID?,
     ): BeregnetEtteroppgjoerResultat {
         // For å sikre at rettsgebyret forblir konsekvent i senere kjøringer, setter vi regelperioden basert på etteroppgjørsåret og ikke tidspunktet for kjøringen.
         // vi skal og bruke siste gjeldene rettsgebyr for etteroppgjoersAaret dvs det som er gjeldende 31. Desember
@@ -157,17 +157,8 @@ class EtteroppgjoerService(
 
         val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
 
-        // Ved omgjøring skal vi sammenligne mot samme utbetalte stønad som det opprinnelige etteroppgjøret,
-        // ikke mot dagens vedtaksliste (som nå også inneholder det iverksatte etteroppgjørsvedtaket). Vi begrenser
-        // derfor vedtakslisten til de vedtakene det etteroppgjøret vi omgjør faktisk sammenlignet mot.
-        val begrensTilVedtak =
-            omgjoeringAvForbehandlingId?.let {
-                krevIkkeNull(etteroppgjoerRepository.hentVedtakReferanseForForbehandling(etteroppgjoersAar, it)) {
-                    "Fant ingen vedtakreferanse fra forrige etteroppgjør (forbehandling=$it) å sammenligne mot ved klage-omgjøring"
-                }
-            }
-
-        val (vedtakReferanse, vedtakPerioder) = hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, begrensTilVedtak)
+        val (vedtakReferanse, vedtakPerioder) =
+            hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, sammenlignTilOgMedBehandlingId)
         val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId)
 
         val inntektsgrunnlag =
@@ -230,18 +221,15 @@ class EtteroppgjoerService(
     private suspend fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
-        begrensTilVedtak: List<Long>? = null,
+        tilOgMedBehandlingId: UUID?,
     ): Pair<List<Long>, List<VedtakEtteroppgjoerPeriode>> {
         val vedtaksliste =
-            vedtakKlient
-                .hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, HardkodaSystembruker.etteroppgjoer)
-                .let { liste ->
-                    if (begrensTilVedtak != null) {
-                        liste.filter { it.vedtakId in begrensTilVedtak }
-                    } else {
-                        liste
-                    }
-                }
+            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(
+                sakId,
+                etteroppgjoersAar,
+                HardkodaSystembruker.etteroppgjoer,
+                tilOgMedBehandlingId,
+            )
 
         val vedtakReferanse = vedtaksliste.map { it.vedtakId }
         val vedtakPerioder =

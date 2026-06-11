@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtakstidslinje
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.AvkortetYtelsePeriode
@@ -15,6 +16,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 class VedtakSamordningService(
     private val repository: VedtaksvurderingRepository,
@@ -33,9 +35,13 @@ class VedtakSamordningService(
         fnr: Folkeregisteridentifikator,
         sakType: SakType,
         fomDato: LocalDate,
+        tilOgMedBehandlingId: UUID? = null,
     ): List<VedtakSamordningDto> {
         logger.debug("Henter og sammenstiller vedtaksliste")
-        val vedtaksliste = repository.hentFerdigstilteVedtak(fnr, sakType)
+        val vedtaksliste =
+            repository
+                .hentFerdigstilteVedtak(fnr, sakType)
+                .begrensTilOgMedBehandling(tilOgMedBehandlingId)
         val tidslinjeJustert =
             Vedtakstidslinje(vedtaksliste)
                 .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
@@ -49,6 +55,23 @@ class VedtakSamordningService(
             val avkortetYtelsePerioder = avkortetYtelsePerioderByVedtak[it.id] ?: emptyList()
             it.toSamordningsvedtakDto(avkortetYtelsePerioder)
         }
+    }
+}
+
+/**
+ * Avgrenser vedtakene til de som er attestert til og med [tilOgMedBehandlingId] sitt vedtak.
+ */
+private fun List<Vedtak>.begrensTilOgMedBehandling(tilOgMedBehandlingId: UUID?): List<Vedtak> {
+    if (tilOgMedBehandlingId == null) {
+        return this
+    }
+    val tilOgMedVedtak =
+        firstOrNull { it.behandlingId == tilOgMedBehandlingId && it.attestasjon != null }
+            ?: throw InternfeilException(
+                "Fant ingen attestert vedtak for behandling=$tilOgMedBehandlingId å avgrense vedtakstidslinjen til",
+            )
+    return filter {
+        it.attestasjon != null && !it.attestasjon.tidspunkt.isAfter(tilOgMedVedtak.attestasjon!!.tidspunkt)
     }
 }
 

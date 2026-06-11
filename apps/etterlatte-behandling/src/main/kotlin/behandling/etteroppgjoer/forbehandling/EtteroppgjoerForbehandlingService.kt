@@ -402,6 +402,13 @@ class EtteroppgjoerForbehandlingService(
                 .periode.tom
                 ?.plusMonths(1)
 
+        // Ved omgjøring skal utbetalt stønad sammenlignes mot ytelsen slik den sto før det opprinnelige
+        // etteroppgjøret. Vi peker derfor på siste iverksatte behandling som den opprinnelige forbehandlingen brukte
+        val sammenlignTilOgMedBehandlingId =
+            forbehandling.kopiertFra
+                ?.takeIf { forbehandling.klageOmgjoering != null }
+                ?.let { hentForbehandling(it).sisteIverksatteBehandlingId }
+
         val beregningRequest =
             EtteroppgjoerBeregnFaktiskInntektRequest(
                 sakId = forbehandling.sak.id,
@@ -418,7 +425,7 @@ class EtteroppgjoerForbehandlingService(
                         forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.NEI,
                 innvilgetPeriodeIEtteroppgjoersAar = forbehandling.innvilgetPeriode,
                 opphoerFom = opphoerFom,
-                omgjoeringAvForbehandlingId = forbehandling.kopiertFra.takeIf { forbehandling.klageOmgjoering != null },
+                sammenlignTilOgMedBehandlingId = sammenlignTilOgMedBehandlingId,
             )
 
         val beregnetEtteroppgjoerResultat =

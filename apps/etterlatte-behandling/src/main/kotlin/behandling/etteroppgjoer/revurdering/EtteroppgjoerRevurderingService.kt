@@ -57,14 +57,15 @@ class EtteroppgjoerRevurderingService(
         inntektsaar: Int,
         opprinnelse: BehandlingOpprinnelse,
         klageId: UUID? = null,
+        omgjoerForbehandlingId: UUID? = null,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val etteroppgjoer =
             inTransaction { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) }
-        val sisteFerdigstilteForbehandlingId = etteroppgjoer.sisteFerdigstilteForbehandling
+        val kildeForbehandlingId = omgjoerForbehandlingId ?: etteroppgjoer.sisteFerdigstilteForbehandling
 
-        krevIkkeNull(sisteFerdigstilteForbehandlingId) {
-            "Fant ikke sisteFerdigstilteForbehandling for sakId=$sakId"
+        krevIkkeNull(kildeForbehandlingId) {
+            "Fant ikke kildeforbehandling for etteroppgjør revurdering for sakId=$sakId"
         }
 
         val (revurdering, sisteIverksatteBehandling) =
@@ -72,7 +73,7 @@ class EtteroppgjoerRevurderingService(
                 revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
                 val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
 
-                sjekkKanOppretteEtteroppgjoerRevurdering(etteroppgjoer, sisteFerdigstilteForbehandlingId)
+                sjekkKanOppretteEtteroppgjoerRevurdering(etteroppgjoer, kildeForbehandlingId, erOmgjoering = omgjoerForbehandlingId != null)
 
                 val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sakId, brukerTokenInfo)
                 val sisteIverksatteBehandlingMedAvkorting =
@@ -83,7 +84,7 @@ class EtteroppgjoerRevurderingService(
                     opprettRevurdering(
                         sakId = sakId,
                         sisteIverksatteBehandling = sisteIverksatteBehandlingMedAvkorting,
-                        sisteFerdigstilteForbehandlingId = sisteFerdigstilteForbehandlingId,
+                        kildeForbehandlingId = kildeForbehandlingId,
                         opprinnelse = opprinnelse,
                         opphoerFraTidligereBehandling =
                             if (vedtakMedGjeldendeOpphoer != null) {
@@ -133,7 +134,7 @@ class EtteroppgjoerRevurderingService(
 
         return inTransaction {
             kopierFaktiskInntekt(
-                fraForbehandlingId = sisteFerdigstilteForbehandlingId,
+                fraForbehandlingId = kildeForbehandlingId,
                 tilForbehandlingId = revurdering.relatertBehandlingId!!,
                 brukerTokenInfo = brukerTokenInfo,
             )
@@ -179,6 +180,7 @@ class EtteroppgjoerRevurderingService(
             inntektsaar = forbehandling.aar,
             opprinnelse = behandling.opprinnelse,
             klageId = forbehandling.klageOmgjoering,
+            omgjoerForbehandlingId = forbehandling.kopiertFra?.takeIf { forbehandling.klageOmgjoering != null },
             brukerTokenInfo = brukerTokenInfo,
         )
     }
@@ -217,6 +219,7 @@ class EtteroppgjoerRevurderingService(
             opprinnelse = behandling.opprinnelse,
             brukerTokenInfo = brukerTokenInfo,
             klageId = klageId,
+            omgjoerForbehandlingId = forbehandling.id,
         )
     }
 
@@ -254,7 +257,7 @@ class EtteroppgjoerRevurderingService(
     private fun opprettRevurdering(
         sakId: SakId,
         sisteIverksatteBehandling: Behandling,
-        sisteFerdigstilteForbehandlingId: UUID,
+        kildeForbehandlingId: UUID,
         opprinnelse: BehandlingOpprinnelse,
         opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling?,
         klageId: UUID? = null,
@@ -262,7 +265,7 @@ class EtteroppgjoerRevurderingService(
     ): Revurdering {
         val forbehandling =
             etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(
-                sisteFerdigstilteForbehandlingId,
+                kildeForbehandlingId,
                 sakId,
                 klageId,
                 brukerTokenInfo,
@@ -333,6 +336,7 @@ class EtteroppgjoerRevurderingService(
     private fun sjekkKanOppretteEtteroppgjoerRevurdering(
         etteroppgjoer: Etteroppgjoer,
         forventetForbehandlingId: UUID,
+        erOmgjoering: Boolean,
     ) {
         if (!etteroppgjoer.kanOppretteRevurdering()) {
             throw InternfeilException(
@@ -341,7 +345,18 @@ class EtteroppgjoerRevurderingService(
             )
         }
 
-        if (etteroppgjoer.sisteFerdigstilteForbehandling != forventetForbehandlingId) {
+        if (erOmgjoering) {
+            val forbehandling = etteroppgjoerForbehandlingService.hentForbehandling(forventetForbehandlingId)
+            if (forbehandling.sak.id != etteroppgjoer.sakId ||
+                forbehandling.aar != etteroppgjoer.inntektsaar ||
+                !forbehandling.erFerdigstilt()
+            ) {
+                throw InternfeilException(
+                    "Forbehandling $forventetForbehandlingId er ikke en ferdigstilt forbehandling for etteroppgjøret " +
+                        "til sak ${etteroppgjoer.sakId} og inntektsår ${etteroppgjoer.inntektsaar}, og kan ikke omgjøres",
+                )
+            }
+        } else if (etteroppgjoer.sisteFerdigstilteForbehandling != forventetForbehandlingId) {
             throw InternfeilException(
                 "Fant ingen aktive etteroppgjoer for sak ${etteroppgjoer.sakId} og forbehandling $forventetForbehandlingId",
             )

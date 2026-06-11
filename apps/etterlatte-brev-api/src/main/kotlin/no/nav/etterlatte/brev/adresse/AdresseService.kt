@@ -53,7 +53,8 @@ class AdresseService(
                 if (sakType == SakType.BARNEPENSJON &&
                     gjenlevende.isNotEmpty() &&
                     gjenlevende.first() != soeker.fnr.value &&
-                    gjenlevende.first() != innsender?.fnr?.value
+                    gjenlevende.first() != innsender?.fnr?.value &&
+                    innsender?.fnr?.value != soeker.fnr.value
                 ) {
                     hentMottakerAdresse(
                         sakType,
@@ -87,7 +88,7 @@ class AdresseService(
                         tomVergeMottaker(type = vergeMottakerType)
                     }
 
-                    else ->
+                    else -> {
                         if (
                             Folkeregisteridentifikator.isValid(innsender?.fnr?.value) &&
                             innsender!!.fnr.value != soeker.fnr.value
@@ -96,6 +97,7 @@ class AdresseService(
                         } else {
                             null
                         }
+                    }
                 }
 
             listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse)

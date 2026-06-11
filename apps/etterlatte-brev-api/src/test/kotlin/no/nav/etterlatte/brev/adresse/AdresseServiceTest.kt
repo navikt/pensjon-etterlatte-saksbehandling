@@ -140,6 +140,34 @@ internal class AdresseServiceTest {
     }
 
     @Test
+    fun `BP søker over 18 som søker for seg selv skal kun ha søker som mottaker – ikke forelder`() {
+        val sakType = SakType.BARNEPENSJON
+        val personerISak =
+            PersonerISak(
+                innsender = Innsender(Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                soeker = Soeker("RETRO", null, "TELEFONKIOSK", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
+                verge = null,
+                gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+            )
+
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.now().minusYears(19)
+
+        val mottakere =
+            runBlocking {
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+            }
+        mottakere.size shouldBe 1
+        mottakere.single().type shouldBe MottakerType.HOVED
+        mottakere.single().foedselsnummer?.value shouldBe SOEKER_FOEDSELSNUMMER.value
+
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, SOEKER_FOEDSELSNUMMER.value)
+        }
+    }
+
+    @Test
     fun `BP skal ha med gjenlevende på HOVED om den er ulik innsender og søker hvis søker er under 18`() {
         val sakType = SakType.BARNEPENSJON
         val personerISak =

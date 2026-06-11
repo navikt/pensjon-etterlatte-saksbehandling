@@ -23,14 +23,14 @@ fun PersonDoedshendelseDto.under18aarPaaDato(dato: LocalDate): Boolean {
     return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < aar18
 }
 
-fun PersonDoedshendelseDto.under20PaaDato(dato: LocalDate): Boolean {
+fun PersonDoedshendelseDto.under23PaaDato(dato: LocalDate): Boolean {
     if (foedselsdato == null && foedselsaar == null) {
         return true // Settes til true for å være på den sikre siden. Heller en oppgave for mye enn for lite.
     }
-    // Bruker 1. januar som fallback (konservativt for en maks-alderssjekk: barnet fremstår eldst mulig)
+    // Bruker 1. januar som fallback (konservativt for en maks-alderssjekk, barnet fremstår eldst mulig)
     val benyttetFoedselsdato = foedselsdato?.verdi ?: LocalDate.of(foedselsaar!!.verdi, 1, 1)
 
-    return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < 20
+    return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < 23
 }
 
 fun harAktivAdresse(person: PersonDoedshendelseDto): Boolean = person.alleAdresser().any { it.aktiv }

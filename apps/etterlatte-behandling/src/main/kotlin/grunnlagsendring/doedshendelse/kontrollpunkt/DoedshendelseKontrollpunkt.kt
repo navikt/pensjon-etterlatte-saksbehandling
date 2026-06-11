@@ -61,7 +61,7 @@ sealed class DoedshendelseKontrollpunkt {
     @JsonTypeName("BARN_FOR_GAMMELT_FOR_BARNEPENSJON")
     data object BarnForGammeltForBarnepensjon : DoedshendelseKontrollpunkt() {
         override val kode = "BARN_FOR_GAMMELT_FOR_BARNEPENSJON"
-        override val beskrivelse: String = "Barn er 20 år eller eldre og kan ikke ha krav på barnepensjon"
+        override val beskrivelse: String = "Barn er 23 år eller eldre og kan ikke ha krav på barnepensjon"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
         override val avbryt: Boolean = true

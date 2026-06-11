@@ -3,7 +3,7 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.under20PaaDato
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.under23PaaDato
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -20,7 +20,7 @@ internal class DoedshendelseKontrollpunktBarnService(
         sak: Sak?,
         barn: PersonDoedshendelseDto,
     ): List<DoedshendelseKontrollpunkt> {
-        val aldersKontrollpunkt = kontrollerBarnErUnder20IDag(barn)
+        val aldersKontrollpunkt = kontrollerBarnErUnder23IDag(barn)
         if (aldersKontrollpunkt != null) return listOf(aldersKontrollpunkt)
 
         return listOfNotNull(
@@ -29,8 +29,8 @@ internal class DoedshendelseKontrollpunktBarnService(
         )
     }
 
-    private fun kontrollerBarnErUnder20IDag(barn: PersonDoedshendelseDto): DoedshendelseKontrollpunkt? =
-        if (!barn.under20PaaDato(LocalDate.now())) {
+    private fun kontrollerBarnErUnder23IDag(barn: PersonDoedshendelseDto): DoedshendelseKontrollpunkt? =
+        if (!barn.under23PaaDato(LocalDate.now())) {
             DoedshendelseKontrollpunkt.BarnForGammeltForBarnepensjon
         } else {
             null

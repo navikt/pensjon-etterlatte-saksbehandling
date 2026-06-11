@@ -49,3 +49,7 @@
 **2026-06-03 — Fikse logikk / verifisering**
 - Observation: To ganger har en løsning som "så logisk ut" ikke faktisk fikset problemet: en status-basert fix sperret ikke statusen som urettmessig passerte, og en filtrering baserte seg på et felt (`vedtak_referanse`) som ikke er garantert befolket for historiske data.
 - Action: Verifiser at løsningen treffer det faktiske problemet i det problematiske tilfellet — at en sperre faktisk sperrer, og at et felt løsningen avhenger av alltid finnes (særlig historisk). Foretrekk kjernedata som alltid finnes fremfor avledede/valgfrie felt.
+
+**2026-06-11 - Omskriving av tester**
+- Observation: Jeg gjorde om på flere tester sitt testoppsett som endring av felles mock og util-metoder, ved skriving av enhetstester til ny funksjonalitet uten å spørre.
+- Action: Når det skal skrives tester til ny funksjonalitet, ikke gjør om eksisterende mocking, testoppsett og util-metoder samtidig, med mindre det er helt nødvendig. Spør om testoppsett skal skrives om først ved tvil.

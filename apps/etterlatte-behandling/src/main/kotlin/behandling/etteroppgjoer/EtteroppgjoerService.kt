@@ -158,6 +158,9 @@ class EtteroppgjoerService(
             MOTTATT_SKATTEOPPGJOER,
             VENTER_PAA_SKATTEOPPGJOER,
             -> {
+                logger.info(
+                    "Mottok skatteoppgjørhendelse for sakId=${sak.id}: oppdater status og opprett oppgave da status er: ${etteroppgjoer.status} OPPRETT-OPPGAVE",
+                )
                 oppdaterEtteroppgjoerStatus(
                     sak.id,
                     etteroppgjoer.inntektsaar,
@@ -447,6 +450,7 @@ class EtteroppgjoerService(
 
         sikkerLogg.info(
             "Skatteoppgjørhendelse for ferdigstilt etteroppgjør - sakId=${sak.id}, inntektsaar=${etteroppgjoer.inntektsaar}. " +
+                "(har relevant endring: $harEndring)" +
                 "Lagret PGI næring=${lagretPgi?.naeringsinntekt}, ny=${nyPgi.naeringsinntekt}. " +
                 "Lagret A-inntekt AFP=${lagretAInntekt?.afp}, ny=${nyAInntekt.afp}. " +
                 "Lagret A-inntekt lønn=${lagretAInntekt?.loenn}, ny=${nyAInntekt.loenn}. " +

@@ -423,7 +423,7 @@ class VedtaksvurderingRepository(
             hentVedtakNonNull(behandlingId)
         }
 
-    fun iverksattVedtak(behandlingId: UUID): Vedtak =
+    fun iverksettVedtak(behandlingId: UUID): Vedtak =
         connection.hentKotliquerySession { session ->
             session
                 .oppdater(

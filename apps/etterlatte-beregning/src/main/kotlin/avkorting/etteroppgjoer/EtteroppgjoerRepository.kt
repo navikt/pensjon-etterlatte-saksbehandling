@@ -90,7 +90,9 @@ class EtteroppgjoerRepository(
                 val results = tx.run(query.map { row -> row.toBeregnetEtteroppgjoerResultat() }.asList)
                 when {
                     results.isEmpty() -> null
+
                     results.size == 1 -> results.first()
+
                     else -> throw IllegalStateException(
                         "Forventet maks én rad, men fikk ${results.size} for forbehandling med id $forbehandlingId",
                     )

@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 interface VedtaksvurderingKlient {
     suspend fun hentIverksatteVedtak(
@@ -28,6 +29,7 @@ interface VedtaksvurderingKlient {
         sakId: SakId,
         etteroppgjoersAar: Int,
         brukerTokenInfo: BrukerTokenInfo,
+        tilOgMedBehandlingId: UUID? = null,
     ): List<VedtakEtteroppgjoerDto>
 
     suspend fun hentInnvilgedePerioder(
@@ -90,6 +92,7 @@ class VedtaksvurderingKlientImpl(
         sakId: SakId,
         etteroppgjoersAar: Int,
         brukerTokenInfo: BrukerTokenInfo,
+        tilOgMedBehandlingId: UUID?,
     ): List<VedtakEtteroppgjoerDto> =
         retry<List<VedtakEtteroppgjoerDto>> {
             downstreamResourceClient
@@ -100,7 +103,7 @@ class VedtaksvurderingKlientImpl(
                             url = "$resourceUrl/vedtak/etteroppgjoer/$sakId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody = VedtakslisteEtteroppgjoerRequest(sakId, etteroppgjoersAar),
+                    postBody = VedtakslisteEtteroppgjoerRequest(etteroppgjoersAar, tilOgMedBehandlingId),
                 ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },

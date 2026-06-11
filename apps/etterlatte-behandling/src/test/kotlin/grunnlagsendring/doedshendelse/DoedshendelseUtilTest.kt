@@ -121,13 +121,20 @@ internal class DoedshendelseUtilTest {
     }
 
     @Test
-    fun `under23PaaDato - bruker 1 januar som fallback naar kun foedselsaar er kjent`() {
-        val iAar = LocalDate.now().year
-        val yngrePerson = mockDoedshendelsePerson().copy(foedselsdato = null, foedselsaar = OpplysningDTO(iAar, null))
-        yngrePerson.under23PaaDato(LocalDate.now()) shouldBe true
+    fun `under23PaaDato - bruker 31 desember som fallback naar kun foedselsaar er kjent`() {
+        val personInnenforÅr =
+            mockDoedshendelsePerson().copy(
+                foedselsdato = null,
+                foedselsaar = OpplysningDTO(LocalDate.now().year - 23, null),
+            )
+        personInnenforÅr.under23PaaDato(LocalDate.now()) shouldBe true
 
-        val eldre = mockDoedshendelsePerson().copy(foedselsdato = null, foedselsaar = OpplysningDTO(iAar - 23, null))
-        eldre.under23PaaDato(LocalDate.now()) shouldBe false
+        val personEldreEnn23 =
+            mockDoedshendelsePerson().copy(
+                foedselsdato = null,
+                foedselsaar = OpplysningDTO(LocalDate.now().year - 24, null),
+            )
+        personEldreEnn23.under23PaaDato(LocalDate.now()) shouldBe false
     }
 
     @Test

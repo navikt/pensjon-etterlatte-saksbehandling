@@ -3,10 +3,12 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.under23PaaDato
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
+import java.time.LocalDate
 
 internal class DoedshendelseKontrollpunktBarnService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
@@ -17,11 +19,22 @@ internal class DoedshendelseKontrollpunktBarnService(
         avdoed: PersonDoedshendelseDto,
         sak: Sak?,
         barn: PersonDoedshendelseDto,
-    ): List<DoedshendelseKontrollpunkt> =
-        listOfNotNull(
+    ): List<DoedshendelseKontrollpunkt> {
+        val aldersKontrollpunkt = kontrollerBarnErUnder23IDag(barn)
+        if (aldersKontrollpunkt != null) return listOf(aldersKontrollpunkt)
+
+        return listOfNotNull(
             kontrollerBarnErSoektFor(sak),
             kontrollerSamtidigDoedsfall(avdoed, hendelse, barn),
         )
+    }
+
+    private fun kontrollerBarnErUnder23IDag(barn: PersonDoedshendelseDto): DoedshendelseKontrollpunkt? =
+        if (!barn.under23PaaDato(LocalDate.now())) {
+            DoedshendelseKontrollpunkt.BarnForGammeltForBarnepensjon
+        } else {
+            null
+        }
 
     private fun kontrollerBarnErSoektFor(sak: Sak?): DoedshendelseKontrollpunkt.BarnErSoektFor? {
         if (sak == null) {

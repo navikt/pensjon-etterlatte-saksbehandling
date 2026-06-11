@@ -61,7 +61,7 @@ internal class LoependeYtelserforespoerselRiver(
 
         omregningData.endreFraDato(respons.dato)
         packet.omregningData = omregningData
-        if (respons.erLoepende) {
+        if (respons.erLoepende && !respons.harAktivSanksjon) {
             packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
             context.publish(packet.toJson())
             logger.info("Grunnbeløpsreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")

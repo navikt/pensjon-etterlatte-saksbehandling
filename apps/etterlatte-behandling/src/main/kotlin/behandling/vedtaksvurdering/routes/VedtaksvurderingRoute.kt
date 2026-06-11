@@ -10,7 +10,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.vedtaksvurdering.InnvilgetPeriode
-import no.nav.etterlatte.behandling.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.behandling.vedtaksvurdering.OppdaterSamordningsmelding
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.KanskjeAlleredeUtfoertOppdatering
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
@@ -23,7 +22,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -289,7 +287,7 @@ fun Route.vedtaksvurderingRoute(
         post("/{$BEHANDLINGID_CALL_PARAMETER}/iverksett") {
             kunSkrivetilgang {
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
-                val vedtak = inTransaction { vedtakBehandlingService.iverksattVedtak(behandlingId) }
+                val vedtak = inTransaction { vedtakBehandlingService.iverksettVedtak(behandlingId) }
                 if (vedtak is KanskjeAlleredeUtfoertOppdatering.NyOppdatering) {
                     rapidService.sendToRapid(vedtak.vedtakOgRapid)
                 }
@@ -304,8 +302,10 @@ fun Route.vedtaksvurderingRoute(
                     ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
             logger.info("Sjekker om sak har løpende for vedtak $sakId på dato $dato")
-            val loependeYtelse = inTransaction { vedtakService.sjekkOmVedtakErLoependePaaDato(sakId, dato) }
-            call.respond(loependeYtelse.toDto())
+            val loependeYtelse =
+                inTransaction { runBlocking { vedtakService.sjekkOmVedtakErLoepende(sakId, dato, brukerTokenInfo) } }
+
+            call.respond(loependeYtelse)
         }
 
         patch("/{$BEHANDLINGID_CALL_PARAMETER}/tilbakestill") {
@@ -347,12 +347,3 @@ fun Route.vedtaksvurderingRoute(
         }
     }
 }
-
-private fun LoependeYtelse.toDto() =
-    LoependeYtelseDTO(
-        erLoepende = erLoepende,
-        underSamordning = underSamordning,
-        dato = dato,
-        behandlingId = behandlingId,
-        sisteLoependeBehandlingId = sisteLoependeBehandlingId,
-    )

@@ -3,6 +3,7 @@ package grunnlagsendring.doedshendelse
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.finnEktefelleSafe
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.under23PaaDato
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Sivilstand
@@ -105,6 +106,41 @@ internal class DoedshendelseUtilTest {
             )
 
         finnEktefelleSafe(person) shouldBe null
+    }
+
+    @Test
+    fun `under20PaaDato - barn paa 5 aar er under 23`() {
+        val person = mockDoedshendelsePerson().copy(foedselsdato = OpplysningDTO(LocalDate.now().minusYears(5), null))
+        person.under23PaaDato(LocalDate.now()) shouldBe true
+    }
+
+    @Test
+    fun `under23PaaDato - barn paa 23 aar er ikke under 23`() {
+        val person = mockDoedshendelsePerson().copy(foedselsdato = OpplysningDTO(LocalDate.now().minusYears(23), null))
+        person.under23PaaDato(LocalDate.now()) shouldBe false
+    }
+
+    @Test
+    fun `under23PaaDato - bruker 31 desember som fallback naar kun foedselsaar er kjent`() {
+        val personInnenforÅr =
+            mockDoedshendelsePerson().copy(
+                foedselsdato = null,
+                foedselsaar = OpplysningDTO(LocalDate.now().year - 23, null),
+            )
+        personInnenforÅr.under23PaaDato(LocalDate.now()) shouldBe true
+
+        val personEldreEnn23 =
+            mockDoedshendelsePerson().copy(
+                foedselsdato = null,
+                foedselsaar = OpplysningDTO(LocalDate.now().year - 24, null),
+            )
+        personEldreEnn23.under23PaaDato(LocalDate.now()) shouldBe false
+    }
+
+    @Test
+    fun `under23PaaDato - returnerer true naar foedselsdato og foedselsaar er null`() {
+        val person = mockDoedshendelsePerson().copy(foedselsdato = null, foedselsaar = null)
+        person.under23PaaDato(LocalDate.now()) shouldBe true
     }
 
     private fun sivilstand(

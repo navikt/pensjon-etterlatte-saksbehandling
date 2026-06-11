@@ -127,6 +127,7 @@ internal class VilkaarsvurderingIntegrationTest(
                 etteroppgjoerService = applicationContext.etteroppgjoerService,
                 forbehandlingService = applicationContext.etteroppgjoerForbehandlingService,
                 grunnlagService = applicationContext.grunnlagService,
+                vilkaarsvurderingDao = applicationContext.vilkaarsvurderingDao,
             )
         // Må bruke ConnectionAutoclosingImpl for å at den skal kaste exception hvis ikke den er wrappet med inTransaction
         vilkaarsvurderingServiceImpl =

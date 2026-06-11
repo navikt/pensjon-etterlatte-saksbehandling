@@ -15,8 +15,8 @@
 - Action: Før første løsningsskisse – les koden, kartlegg constraints, avklar om systemet eller saksbehandler skal eie løsningen, og spør om scope.
 
 **2026-04-10 — Redigering**
-- Observation: Jeg fjerner viktig innhold når jeg gjør målrettede edits – ser ikke nøye nok på hva som forsvinner.
-- Action: Ved edits: les old_str nøye, sjekk at ny tekst bevarer alt som ikke eksplisitt skal bort.
+- Observation: Edits fjerner viktig innhold – enten ved å ikke se nøye på `old_str`, eller ved å bruke et for lite ankerpunkt slik at resten av signaturen forsvinner.
+- Action: Ved edits: ta med nok kontekst i `old_str` til å være unik, og les den nøye for å sikre at alt som ikke skal bort er med i `new_str`.
 
 **2026-04-10 — Dokumentasjon med usikkerhet**
 - Observation: Jeg la inn "ikke referert i kodebasen" som plassholder i stedet for å bare spørre. Det er mer respektfullt og presist å stille spørsmålet direkte.
@@ -41,3 +41,15 @@
 **2026-05-07 — Regelendring / beregning**
 - Observation: Før jeg endret reglene sjekket jeg OMS-koden for å se hvordan de løste det samme problemet – det gav meg korrekt mønster direkte (`multiply(grunnbeloep).divide(12)`), og samsvarte med planens antagelser.
 - Action: Ved beregningsregelendringer, alltid finn den tilsvarende regelen i det andre regelsettet (BP/OMS) som referanseimplementasjon.
+
+**2026-05-29 — Estimering**
+- Observation: Jeg antok at en mock var "bare bekvemmelighet" og estimerte fjerning som trivielt – uten å verifisere det.
+- Action: Anta at en mock er en del av testkontrakten til det motsatte er bevist. Verifiser antagelsen med en rask sjekk før du estimerer.
+
+**2026-06-03 — Fikse logikk / verifisering**
+- Observation: To ganger har en løsning som "så logisk ut" ikke faktisk fikset problemet: en status-basert fix sperret ikke statusen som urettmessig passerte, og en filtrering baserte seg på et felt (`vedtak_referanse`) som ikke er garantert befolket for historiske data.
+- Action: Verifiser at løsningen treffer det faktiske problemet i det problematiske tilfellet — at en sperre faktisk sperrer, og at et felt løsningen avhenger av alltid finnes (særlig historisk). Foretrekk kjernedata som alltid finnes fremfor avledede/valgfrie felt.
+
+**2026-06-11 - Omskriving av tester**
+- Observation: Jeg gjorde om på flere tester sitt testoppsett som endring av felles mock og util-metoder, ved skriving av enhetstester til ny funksjonalitet uten å spørre.
+- Action: Når det skal skrives tester til ny funksjonalitet, ikke gjør om eksisterende mocking, testoppsett og util-metoder samtidig, med mindre det er helt nødvendig. Spør om testoppsett skal skrives om først ved tvil.

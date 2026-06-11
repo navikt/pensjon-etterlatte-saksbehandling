@@ -166,8 +166,8 @@ data class VedtakEtteroppgjoerDto(
 )
 
 data class VedtakslisteEtteroppgjoerRequest(
-    val sakId: SakId,
     val etteroppgjoersAar: Int,
+    val tilOgMedBehandlingId: UUID? = null,
 )
 
 data class VedtakEtteroppgjoerPeriode(

@@ -211,7 +211,7 @@ class JobModule(
                 } else {
                     Duration.of(20, ChronoUnit.MINUTES).toMillis()
                 },
-            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(10, ChronoUnit.MINUTES),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(10, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = daoModule.sakTilgangDao,
         )

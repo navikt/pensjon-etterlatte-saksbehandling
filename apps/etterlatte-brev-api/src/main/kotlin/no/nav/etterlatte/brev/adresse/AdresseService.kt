@@ -5,8 +5,6 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.adresse.saksbehandler.SaksbehandlerKlient
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandling.Soeker
-import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
@@ -41,46 +39,33 @@ class AdresseService(
     ): List<Mottaker> =
         with(personerISak) {
             val soekerFoedselsdato = pdltjenesterKlient.hentFoedselsdato(soeker.fnr.value, brukerTokenInfo)
-            val soekerErMyndig = (soekerFoedselsdato != null && soekerFoedselsdato.hentAlder() >= 18)
+            val soekerSkalHaBrev = soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() >= 15
 
-            val soekerAdresse =
-                if (soekerFoedselsdato == null || soekerErMyndig) {
-                    hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.HOVED)
-                } else if (soekerFoedselsdato.hentAlder() >= 15) {
-                    hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.KOPI)
-                } else {
-                    null
-                }
+            val soekerMottaker: Mottaker? =
+                if (soekerSkalHaBrev) hentMottakerAdresse(sakType, soeker.fnr.value) else null
+
             // soekerAdresse er gjenlevende hvis det er en OMS saktype, men hvis det er BP må vi sjekke det opp
-            val gjenlevendeAdresse =
+            val gjenlevendeMottaker: Mottaker? =
                 if (sakType == SakType.BARNEPENSJON &&
                     gjenlevende.isNotEmpty() &&
-                    gjenlevende.first() !in listOfNotNull(soeker.fnr.value, innsender?.fnr?.value) &&
-                    !soekerErMyndig // TODO høre med Øyvind/Liv inger
+                    gjenlevende.first() !in listOfNotNull(soeker.fnr.value, innsender?.fnr?.value)
+                    // TODO høre med Øyvind/Liv inger om gjenlevende skal være mottaker om soeker er over 18
                 ) {
-                    val mottakerType = MottakerType.KOPI.takeIf { soekerAdresse?.type == MottakerType.HOVED } ?: MottakerType.HOVED
-                    hentMottakerAdresse(sakType, gjenlevende.first(), mottakerType)
+                    hentMottakerAdresse(sakType, gjenlevende.first())
                 } else {
                     null
                 }
 
-            val vergeMottakerType =
-                if (soekerAdresse?.type == MottakerType.HOVED || gjenlevendeAdresse?.type == MottakerType.HOVED) {
-                    MottakerType.KOPI
-                } else {
-                    MottakerType.HOVED
-                }
-
-            val vergeAdresse: Mottaker? =
+            val vergeMottaker: Mottaker? =
                 when (verge) {
                     is Vergemaal -> {
                         logger.warn("Er verge, kan ikke ferdigstille uten å legge til adresse manuelt.")
-                        tomVergeMottaker(MottakerFoedselsnummer(verge.foedselsnummer.value), vergeMottakerType)
+                        tomVergeMottaker(MottakerFoedselsnummer(verge.foedselsnummer.value))
                     }
 
                     is UkjentVergemaal -> {
                         logger.warn("Verge med ukjent vergemål, kan ikke ferdigstille uten å legge til adresse manuelt.")
-                        tomVergeMottaker(type = vergeMottakerType)
+                        tomVergeMottaker()
                     }
 
                     else -> {
@@ -88,14 +73,24 @@ class AdresseService(
                             Folkeregisteridentifikator.isValid(innsender?.fnr?.value) &&
                             innsender!!.fnr.value != soeker.fnr.value
                         ) {
-                            hentMottakerAdresse(sakType, innsender.fnr.value, vergeMottakerType)
+                            hentMottakerAdresse(sakType, innsender.fnr.value)
                         } else {
                             null
                         }
                     }
                 }
 
-            listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse)
+            val mottakereIPrioritertRekkefoelge: List<Mottaker?> =
+                if (soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() >= 18) {
+                    listOf(soekerMottaker, gjenlevendeMottaker, vergeMottaker)
+                } else {
+                    listOf(gjenlevendeMottaker, vergeMottaker, soekerMottaker)
+                }
+
+            // Default er .HOVED, og setter alle som kommer etter til .KOPI avhengig av prioritet som bestemt over
+            mottakereIPrioritertRekkefoelge
+                .filterNotNull()
+                .mapIndexed { i, mottaker -> mottaker.copy(type = if (i == 0) MottakerType.HOVED else MottakerType.KOPI) }
         }
 
     suspend fun hentAvsender(
@@ -119,6 +114,11 @@ class AdresseService(
 
             mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn.await())
         }
+
+    private suspend fun hentMottakerAdresse(
+        sakType: SakType,
+        ident: String,
+    ): Mottaker = hentMottakerAdresse(sakType, ident, MottakerType.HOVED)
 
     private suspend fun hentMottakerAdresse(
         sakType: SakType,
@@ -161,16 +161,12 @@ class AdresseService(
         )
     }
 
-    private fun tomVergeMottaker(
-        fnr: MottakerFoedselsnummer? = null,
-        type: MottakerType,
-    ): Mottaker =
+    private fun tomVergeMottaker(fnr: MottakerFoedselsnummer? = null): Mottaker =
         Mottaker(
             UUID.randomUUID(),
             navn = VERGENAVN_FOR_MOTTAKER,
             foedselsnummer = fnr,
             orgnummer = null,
             adresse = Adresse(adresseType = "", landkode = "", land = ""),
-            type = type,
         )
 }

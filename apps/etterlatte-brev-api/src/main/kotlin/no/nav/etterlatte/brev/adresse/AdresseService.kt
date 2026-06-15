@@ -41,9 +41,10 @@ class AdresseService(
     ): List<Mottaker> =
         with(personerISak) {
             val soekerFoedselsdato = pdltjenesterKlient.hentFoedselsdato(soeker.fnr.value, brukerTokenInfo)
+            val soekerErMyndig = (soekerFoedselsdato != null && soekerFoedselsdato.hentAlder() >= 18)
 
             val soekerAdresse =
-                if (soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() >= 18) {
+                if (soekerFoedselsdato == null || soekerErMyndig) {
                     hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.HOVED)
                 } else if (soekerFoedselsdato.hentAlder() >= 15) {
                     hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.KOPI)
@@ -54,19 +55,11 @@ class AdresseService(
             val gjenlevendeAdresse =
                 if (sakType == SakType.BARNEPENSJON &&
                     gjenlevende.isNotEmpty() &&
-                    gjenlevende.first() != soeker.fnr.value &&
-                    gjenlevende.first() != innsender?.fnr?.value &&
-                    innsender?.fnr?.value != soeker.fnr.value
+                    gjenlevende.first() !in listOfNotNull(soeker.fnr.value, innsender?.fnr?.value) &&
+                    !soekerErMyndig // TODO høre med Øyvind/Liv inger
                 ) {
-                    hentMottakerAdresse(
-                        sakType,
-                        gjenlevende.first(),
-                        if (soekerAdresse?.type == MottakerType.HOVED) {
-                            MottakerType.KOPI
-                        } else {
-                            MottakerType.HOVED
-                        },
-                    )
+                    val mottakerType = MottakerType.KOPI.takeIf { soekerAdresse?.type == MottakerType.HOVED } ?: MottakerType.HOVED
+                    hentMottakerAdresse(sakType, gjenlevende.first(), mottakerType)
                 } else {
                     null
                 }

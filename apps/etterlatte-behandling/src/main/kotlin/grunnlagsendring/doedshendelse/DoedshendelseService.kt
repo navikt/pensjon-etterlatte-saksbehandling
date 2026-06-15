@@ -218,7 +218,7 @@ class DoedshendelseService(
         return with(avdoed.avdoedesBarn ?: emptyList()) {
             this
                 .filter { barn -> barn.doedsdato == null }
-                .filter { barn -> barn.under20PaaDato(maanedenEtterDoedsfall) }
+                .filter { barn -> barn.under23PaaDato(maanedenEtterDoedsfall) }
                 .map { PersonFnrMedRelasjon(it.foedselsnummer.value, Relasjon.BARN) }
         }
     }
@@ -339,7 +339,7 @@ class DoedshendelseService(
     }
 }
 
-private fun Person.under20PaaDato(dato: LocalDate): Boolean {
+private fun Person.under23PaaDato(dato: LocalDate): Boolean {
     // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
     // for å sikre at vi får med alle som er under 20 år.
     val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)

@@ -8,6 +8,8 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
+import no.nav.etterlatte.brev.KlageAvvistBrevService
+import no.nav.etterlatte.brev.NyBrevflytToggles
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -162,6 +164,7 @@ class KlageServiceImpl(
     private val vedtakInternalService: VedtakInternalService,
     private val featureToggleService: FeatureToggleService,
     private val klageBrevService: KlageBrevService,
+    private val klageAvvistBrevService: KlageAvvistBrevService,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -721,8 +724,14 @@ class KlageServiceImpl(
             else -> {
                 runBlocking {
                     val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
-                    val vedtaksbrevId = klageBrevService.vedtaksbrev(klage, saksbehandler)
-                    Pair(vedtakId, vedtaksbrevId)
+                    val brev =
+                        if (featureToggleService.isEnabled(NyBrevflytToggles.KLAGE, false)) {
+                            val opprettetBrev = klageAvvistBrevService.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler)
+                            KlageVedtaksbrev(opprettetBrev.id)
+                        } else {
+                            klageBrevService.vedtaksbrev(klage, saksbehandler)
+                        }
+                    Pair(vedtakId, brev)
                 }
             }
         }

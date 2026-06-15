@@ -157,6 +157,14 @@ class DoedshendelseJobService(
                                     "dev. HVIS DETTE SKJER I PRODUKSJON MÅ VI FIKSE DETTE ASAP.",
                                 e,
                             )
+                            doedshendelseDao.oppdaterDoedshendelse(
+                                doedshendelse.tilBehandlet(
+                                    utfall = Utfall.AVBRUTT,
+                                    sakId = null,
+                                    oppgaveId = null,
+                                    kontrollpunkter = kontrollpunkter,
+                                ),
+                            )
                             return
                         } else {
                             throw e

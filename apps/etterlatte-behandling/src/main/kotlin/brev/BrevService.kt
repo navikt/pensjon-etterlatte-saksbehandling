@@ -13,6 +13,8 @@ import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -35,9 +37,11 @@ class BrevService(
     private val brevApiKlient: BrevApiKlient, // Gammel løsning (brev-api bygger brevdata)
     private val vedtakInternalService: VedtakInternalService,
     private val tilbakekrevingBrevService: TilbakekrevingBrevService,
+    private val klageAvvistBrevService: KlageAvvistBrevService,
     private val etteroppgjoerForbehandlingBrevService: EtteroppgjoerForbehandlingBrevService,
     private val etteroppgjoerRevurderingBrevService: EtteroppgjoerRevurderingBrevService,
     private val vedtaksbrevService: VedtaksbrevService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -57,6 +61,16 @@ class BrevService(
         return when (behandlingMedBrevType) {
             BehandlingMedBrevType.TILBAKEKREVING -> {
                 tilbakekrevingBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+            }
+
+            BehandlingMedBrevType.KLAGE -> {
+                if (klageNyBrevflytErAktivert()) {
+                    klageAvvistBrevService.opprettVedtaksbrev(behandlingId, sakId, bruker)
+                } else {
+                    videresendInterneFeil {
+                        brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
+                    }
+                }
             }
 
             BehandlingMedBrevType.ETTEROPPGJOER -> {
@@ -154,6 +168,16 @@ class BrevService(
                 tilbakekrevingBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
             }
 
+            BehandlingMedBrevType.KLAGE -> {
+                if (klageNyBrevflytErAktivert()) {
+                    klageAvvistBrevService.genererPdf(brevID, behandlingId, sakId, bruker, skalLagrePdf)
+                } else {
+                    videresendInterneFeil {
+                        brevApiKlient.genererPdf(brevID, behandlingId, bruker)
+                    }
+                }
+            }
+
             BehandlingMedBrevType.ETTEROPPGJOER -> {
                 etteroppgjoerForbehandlingBrevService.genererPdf(brevID, behandlingId, bruker)
             }
@@ -207,6 +231,16 @@ class BrevService(
                 }
             }
 
+            BehandlingMedBrevType.KLAGE -> {
+                videresendInterneFeil {
+                    if (klageNyBrevflytErAktivert()) {
+                        klageAvvistBrevService.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                    } else {
+                        brevApiKlient.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
+                    }
+                }
+            }
+
             BehandlingMedBrevType.ETTEROPPGJOER -> {
                 etteroppgjoerForbehandlingBrevService.ferdigstillForbehandlingMedBrev(
                     behandlingId,
@@ -251,6 +285,16 @@ class BrevService(
         return when (behandlingMedBrevType) {
             BehandlingMedBrevType.TILBAKEKREVING -> {
                 tilbakekrevingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+            }
+
+            BehandlingMedBrevType.KLAGE -> {
+                if (klageNyBrevflytErAktivert()) {
+                    klageAvvistBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
+                } else {
+                    videresendInterneFeil {
+                        brevApiKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
+                    }
+                }
             }
 
             BehandlingMedBrevType.ETTEROPPGJOER -> {
@@ -350,6 +394,10 @@ class BrevService(
                 tilbakekrevingBrevService.hentVedtaksbrev(behandlingId, bruker)
             }
 
+            BehandlingMedBrevType.KLAGE -> {
+                klageAvvistBrevService.hentVedtaksbrev(behandlingId, bruker)
+            }
+
             BehandlingMedBrevType.ETTEROPPGJOER -> {
                 etteroppgjoerForbehandlingBrevService.hentVarselBrev(behandlingId, bruker)
             }
@@ -373,6 +421,17 @@ class BrevService(
             }
         }
     }
+
+    private fun klageNyBrevflytErAktivert(): Boolean = featureToggleService.isEnabled(NyBrevflytToggles.KLAGE, false)
+}
+
+enum class NyBrevflytToggles(
+    private val unleashId: String,
+) : FeatureToggle {
+    KLAGE("avvist-klage-ny-brevflyt"),
+    ;
+
+    override fun key(): String = unleashId
 }
 
 class KanIkkeOppretteVedtaksbrev(

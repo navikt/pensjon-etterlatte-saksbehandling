@@ -1,0 +1,398 @@
+[
+  {
+    "kode" : "AUS",
+    "beskrivelse" : "Australia",
+    "fraDato" : "1899-12-31",
+    "datoer" : []
+  },
+  {
+    "kode" : "AUT",
+    "beskrivelse" : "Østerrike",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "AUT1986",
+        "beskrivelse" : "01.06.1986",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "AUT1994",
+        "beskrivelse" : "EØS 01.01.1994",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "AUT1998",
+        "beskrivelse" : "01.06.1998",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "BIH",
+    "beskrivelse" : "Bosnia-Hercegovina",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "BIH1992",
+        "beskrivelse" : "01.03.1992",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "CAN",
+    "beskrivelse" : "Canada",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "CAN1987",
+        "beskrivelse" : "01.01.1987",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "CAN2014",
+        "beskrivelse" : "01.01.2014",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "CHE",
+    "beskrivelse" : "Sveits",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "CHE1980",
+        "beskrivelse" : "01.11.1980",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "CHE1994",
+        "beskrivelse" : "EØS 01.01.1994",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "CHE2002",
+        "beskrivelse" : "EØS 01.06.2002",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "CHL",
+    "beskrivelse" : "Chile",
+    "fraDato" : "1899-12-31",
+    "datoer" : []
+  },
+  {
+    "kode" : "EOS_NOR",
+    "beskrivelse" : "Eøs-Avtalen/Nordisk Konvensjon",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "EOS1994",
+        "beskrivelse" : "01.01.1994",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "EOS2004",
+        "beskrivelse" : "01.05.2004",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "EOS2007",
+        "beskrivelse" : "01.01.2007",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "EOS2010",
+        "beskrivelse" : "01.06.2012",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "EOS2014",
+        "beskrivelse" : "12.04.2014",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "FRA",
+    "beskrivelse" : "Frankrike",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "FRA1956",
+        "beskrivelse" : "01.07.1956",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "FRA1994",
+        "beskrivelse" : "EØS 01.01.1994",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "GBR",
+    "beskrivelse" : "Storbritannia",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "GBR1958",
+        "beskrivelse" : "01.04.1958",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "GBR1991",
+        "beskrivelse" : "01.04.1991",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "GBR1994",
+        "beskrivelse" : "EØS 01.01.1994",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "HRV",
+    "beskrivelse" : "Kroatia",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "HRV1991",
+        "beskrivelse" : "08.10.1991",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "HRV2014",
+        "beskrivelse" : "EØS 12.04.2014",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "IND",
+    "beskrivelse" : "India",
+    "fraDato" : "2015-01-01",
+    "datoer" : [
+      {
+        "kode" : "IND2015",
+        "beskrivelse" : "01.01.2015",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "ISR",
+    "beskrivelse" : "Israel",
+    "fraDato" : "1899-12-31",
+    "datoer" : []
+  },
+  {
+    "kode" : "ITA",
+    "beskrivelse" : "Italia",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "ITA1962",
+        "beskrivelse" : "01.02.1962",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "ITA1994",
+        "beskrivelse" : "EØS 01.01.1994",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "KONVENSJON_DSF",
+    "beskrivelse" : "KONVENSJON fra DSF",
+    "fraDato" : "1899-12-31",
+    "datoer" : []
+  },
+  {
+    "kode" : "KOR",
+    "beskrivelse" : "Sør-Korea",
+    "fraDato" : "2015-01-01",
+    "datoer" : []
+  },
+  {
+    "kode" : "LUX",
+    "beskrivelse" : "Luxembourg",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "LUX1992",
+        "beskrivelse" : "01.03.1992",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "LUX1994",
+        "beskrivelse" : "EØS 01.01.1994",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "LUX1998",
+        "beskrivelse" : "01.09.1998",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "MNE",
+    "beskrivelse" : "Montenegro",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "MNE2006",
+        "beskrivelse" : "03.06.2006",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "NLD",
+    "beskrivelse" : "Nederland",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "NLD1990",
+        "beskrivelse" : "01.10.1990",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "NLD1994",
+        "beskrivelse" : "EØS 01.01.1994",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "NLD1997",
+        "beskrivelse" : "01.04.1997",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "NOR_KONV",
+    "beskrivelse" : "Nordisk Konvensjon",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "NOR1956",
+        "beskrivelse" : "01.11.1956",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "NOR1956",
+        "beskrivelse" : "01.01.1982",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "NOR1994",
+        "beskrivelse" : "EØS 01.01.1994",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "NOR2004",
+        "beskrivelse" : "01.09.2004",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "PRT",
+    "beskrivelse" : "Portugal",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "PRT1981",
+        "beskrivelse" : "01.09.1981",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "PRT1994",
+        "beskrivelse" : "EØS 01.01.1994",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "QEB",
+    "beskrivelse" : "Quebec",
+    "fraDato" : "1899-12-31",
+    "datoer" : []
+  },
+  {
+    "kode" : "SRB",
+    "beskrivelse" : "Serbia",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "SRB2003",
+        "beskrivelse" : "29.05.2003",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "SVN",
+    "beskrivelse" : "Slovenia",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "SVN1991",
+        "beskrivelse" : "25.06.1991",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "TUR",
+    "beskrivelse" : "Tyrkia",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "TUR1981",
+        "beskrivelse" : "01.06.1981",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "USA",
+    "beskrivelse" : "USA",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "USA1968",
+        "beskrivelse" : "Noteveksling av 26.06.1968",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "USA1984",
+        "beskrivelse" : "01.07.1984",
+        "fraDato" : "1899-12-31"
+      },
+      {
+        "kode" : "USA2003",
+        "beskrivelse" : "01.09.2003",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  },
+  {
+    "kode" : "YUG",
+    "beskrivelse" : "Jugoslavia",
+    "fraDato" : "1899-12-31",
+    "datoer" : [
+      {
+        "kode" : "YUG1976",
+        "beskrivelse" : "01.08.1976",
+        "fraDato" : "1899-12-31"
+      }
+    ]
+  }
+]

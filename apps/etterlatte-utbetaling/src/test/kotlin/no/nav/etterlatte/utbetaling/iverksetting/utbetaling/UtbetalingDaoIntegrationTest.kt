@@ -21,7 +21,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -423,7 +422,7 @@ internal class UtbetalingDaoIntegrationTest(
                 vedtakId = 2L,
                 utbetalingslinjeId = 2L,
                 periodeFra = LocalDate.now().plusDays(1),
-                opprettet = Tidspunkt.ofNorskTidssone(LocalDate.now().plusDays(1), LocalTime.MIDNIGHT),
+                opprettet = Tidspunkt.now().plus(1, ChronoUnit.DAYS),
             )
         val oppdrag2 = oppdrag(utbetaling2)
         val utbetalingId3 = UUID.randomUUID()

@@ -53,8 +53,7 @@ class AdresseService(
                 if (sakType == SakType.BARNEPENSJON &&
                     gjenlevende.isNotEmpty() &&
                     gjenlevende.first() != soeker.fnr.value &&
-                    gjenlevende.first() != innsender?.fnr?.value &&
-                    innsender?.fnr?.value != soeker.fnr.value
+                    gjenlevende.first() != innsender?.fnr?.value
                 ) {
                     hentMottakerAdresse(
                         sakType,

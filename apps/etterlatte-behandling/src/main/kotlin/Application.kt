@@ -67,6 +67,8 @@ import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
 import no.nav.etterlatte.tilgangsstyring.SpesialTilgangPlugin
+import no.nav.etterlatte.trygdetid.avtale.avtale
+import no.nav.etterlatte.trygdetid.trygdetid
 import no.nav.etterlatte.vilkaarsvurdering.aldersovergang
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import org.slf4j.Logger
@@ -255,6 +257,12 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     kodeverk(applicationContext.kodeverkService)
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
+
+    trygdetid(
+        trygdetidService = applicationContext.trygdetidService,
+        behandlingsStatusService = applicationContext.behandlingsStatusService,
+    )
+    avtale(applicationContext.avtaleService)
 
     arbeidOgInntekt(applicationContext.arbeidOgInntektKlient)
 

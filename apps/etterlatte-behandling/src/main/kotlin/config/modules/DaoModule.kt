@@ -40,6 +40,8 @@ import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
+import no.nav.etterlatte.trygdetid.TrygdetidRepository
+import no.nav.etterlatte.trygdetid.avtale.AvtaleRepository
 import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import javax.sql.DataSource
@@ -108,4 +110,7 @@ class DaoModule(
     val sjekkAdressebeskyttelseJobDao by lazy { SjekkAdressebeskyttelseJobDao(autoClosingDatabase) }
 
     val outboxRepository by lazy { OutboxRepository(dataSource) }
+
+    val trygdetidRepository by lazy { TrygdetidRepository(dataSource) }
+    val avtaleRepository by lazy { AvtaleRepository(dataSource) }
 }

@@ -53,6 +53,11 @@ import no.nav.etterlatte.sak.TilgangServiceSjekkerImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
+import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
+import no.nav.etterlatte.trygdetid.avtale.AvtaleService
+import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlientAdapter
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 
 class ServiceModule(
@@ -467,6 +472,22 @@ class ServiceModule(
             outboxRepository = daoModule.outboxRepository,
             vedtaksvurderingService = vedtaksvurderingService,
             vedtakshendelseEksternProdusent = kafkaModule.vedtakshendelserEksternProdusent,
+        )
+    }
+
+    val avtaleService: AvtaleService by lazy { AvtaleService(daoModule.avtaleRepository) }
+
+    val trygdetidService: TrygdetidService by lazy {
+        TrygdetidServiceImpl(
+            trygdetidRepository = daoModule.trygdetidRepository,
+            behandlingService = behandlingService,
+            grunnlagService = grunnlagService,
+            beregnTrygdetidService = TrygdetidBeregningService,
+            pesysKlient = klientModule.trygdetidPesysKlient,
+            avtaleService = avtaleService,
+            behandlingsStatusService = behandlingsStatusService,
+            vedtaksvurderingKlient = VedtaksvurderingKlientAdapter(vedtaksvurderingService),
+            featureToggleService = featureToggleService,
         )
     }
 }

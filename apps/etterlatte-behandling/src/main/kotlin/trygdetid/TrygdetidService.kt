@@ -2,8 +2,10 @@ package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVKORTET
@@ -44,8 +46,6 @@ import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.avtale.AvtaleService
-import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
-import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
 import no.nav.etterlatte.trygdetid.klienter.Trygdetidsgrunnlag
 import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
@@ -195,15 +195,25 @@ private const val AUTOMATISK_FREMTIDIG_BEGRUNNELSE = "Automatisk beregnet fremti
 
 class TrygdetidServiceImpl(
     private val trygdetidRepository: TrygdetidRepository,
-    private val behandlingKlient: BehandlingKlient,
-    private val grunnlagKlient: GrunnlagKlient,
+    private val behandlingService: BehandlingService,
+    private val grunnlagService: GrunnlagService,
     private val beregnTrygdetidService: TrygdetidBeregningService,
     private val pesysKlient: PesysKlient,
     private val avtaleService: AvtaleService,
+    private val behandlingsStatusService: BehandlingStatusService,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val featureToggleService: FeatureToggleService,
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    private fun sjekkInternTrygdetidAktivert() {
+        if (!featureToggleService.isEnabled(toggleId = TrygdetidFeatureToggle.BrukInternTrygdetid, defaultValue = false)) {
+            throw IkkeTillattException(
+                code = "INTERN_TRYGDETID_IKKE_AKTIVERT",
+                detail = "Intern trygdetid i behandling er ikke aktivert ennå",
+            )
+        }
+    }
 
     companion object {
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
@@ -212,20 +222,24 @@ class TrygdetidServiceImpl(
     override suspend fun hentTrygdetiderIBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<Trygdetid> =
-        trygdetidRepository
+    ): List<Trygdetid> {
+        sjekkInternTrygdetidAktivert()
+        return trygdetidRepository
             .hentTrygdetiderForBehandling(behandlingId)
             .mapNotNull { trygdetid -> sjekkTrygdetidMotGrunnlag(trygdetid, brukerTokenInfo) }
             .sortedBy { it.ident }
+    }
 
     override suspend fun hentTrygdetidIBehandlingMedId(
         behandlingId: UUID,
         trygdetidId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? =
-        trygdetidRepository
+    ): Trygdetid? {
+        sjekkInternTrygdetidAktivert()
+        return trygdetidRepository
             .hentTrygdetidMedId(behandlingId, trygdetidId)
             ?.let { trygdetid -> sjekkTrygdetidMotGrunnlag(trygdetid, brukerTokenInfo) }
+    }
 
     override suspend fun opprettTrygdetiderForBehandling(
         behandlingId: UUID,
@@ -236,7 +250,9 @@ class TrygdetidServiceImpl(
             behandlingId,
             brukerTokenInfo,
         ) {
-            val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+            val avdoede =
+                grunnlagService.hentOpplysningsgrunnlag(behandlingId)?.hentAvdoede()
+                    ?: throw InternfeilException("Grunnlag mangler for behandling $behandlingId")
             val eksisterendeTrygdetider =
                 trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).let { trygdetider ->
                     if (overskriv) {
@@ -252,7 +268,9 @@ class TrygdetidServiceImpl(
                 throw TrygdetidAlleredeOpprettetException()
             }
 
-            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            val behandling =
+                behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+                    ?: throw GenerellIkkeFunnetException()
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
@@ -293,7 +311,7 @@ class TrygdetidServiceImpl(
                     }
                 }
             }
-        }.also { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) }
+        }.also { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
 
     private suspend fun opprettTrygdetiderForRevurdering(
         behandling: DetaljertBehandling,
@@ -395,7 +413,10 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
-        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        sjekkInternTrygdetidAktivert()
+        val avdoede =
+            grunnlagService.hentOpplysningsgrunnlag(behandlingId)?.hentAvdoede()
+                ?: throw InternfeilException("Grunnlag mangler for behandling $behandlingId")
         val perioderIPesys =
             avdoede
                 .map { avdoed ->
@@ -426,14 +447,19 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        sjekkInternTrygdetidAktivert()
+        val behandling =
+            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+                ?: throw GenerellIkkeFunnetException()
         if (!behandling.status.kanEndres()) {
             throw UgyldigForespoerselException(
                 code = "UGYLDIG_TILSTAND_TRYGDETID",
                 detail = "Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand",
             )
         }
-        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        val avdoede =
+            grunnlagService.hentOpplysningsgrunnlag(behandlingId)?.hentAvdoede()
+                ?: throw InternfeilException("Grunnlag mangler for behandling $behandlingId")
         when (behandling.behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 val ukjentAvdoed = avdoede.isEmpty()
@@ -677,7 +703,10 @@ class TrygdetidServiceImpl(
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        sjekkInternTrygdetidAktivert()
+        val behandling =
+            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+                ?: throw GenerellIkkeFunnetException()
 
         logger.info("Kopierer trygdetid for behandling ${behandling.id} fra behandling $forrigeBehandlingId")
 
@@ -701,7 +730,7 @@ class TrygdetidServiceImpl(
             if (!erOverstyrt && behandling.prosesstype != Prosesstype.AUTOMATISK) {
                 oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
             } else {
-                behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
+                behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
             }
         }
         return alleTrygdetider
@@ -815,7 +844,14 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         block: suspend () -> T,
     ): T {
-        val kanFastsetteTrygdetid = behandlingKlient.kanOppdatereTrygdetid(behandlingId, brukerTokenInfo)
+        sjekkInternTrygdetidAktivert()
+        val kanFastsetteTrygdetid =
+            try {
+                behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true)
+                true
+            } catch (_: Exception) {
+                false
+            }
         return if (kanFastsetteTrygdetid) {
             block()
         } else {
@@ -833,7 +869,10 @@ class TrygdetidServiceImpl(
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        sjekkInternTrygdetidAktivert()
+        val behandling =
+            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+                ?: throw GenerellIkkeFunnetException()
 
         // Merk: vi kan ikke bruke den vanlige sjekken på kanOppdatereTrygdetid, siden dette kallet skjer typisk
         // når behandlingen akkurat er opprettet. Men det er viktig at vi ikke tillater endringer hvis behandlingen
@@ -858,9 +897,10 @@ class TrygdetidServiceImpl(
         logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
 
         val avdoede =
-            grunnlagKlient
-                .hentGrunnlag(behandling.id, brukerTokenInfo)
-                .hentAvdoede()
+            grunnlagService
+                .hentOpplysningsgrunnlag(behandling.id)
+                ?.hentAvdoede()
+                ?: throw InternfeilException("Grunnlag mangler for behandling ${behandling.id}")
         val avdoed =
             if (avdoede.isNotEmpty()) {
                 val avdoedViKoblerTrygdetidPaa =
@@ -973,6 +1013,7 @@ class TrygdetidServiceImpl(
         ident: String,
         beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
     ): Trygdetid {
+        sjekkInternTrygdetidAktivert()
         val trygdetid =
             trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).find { it.ident == ident }
                 ?: throw GenerellIkkeFunnetException()
@@ -995,14 +1036,19 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
+        sjekkInternTrygdetidAktivert()
         val trygdetidList = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
         if (trygdetidList.isEmpty()) {
             throw IngenTrygdetidFunnetForAvdoede()
         }
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val behandling =
+            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+                ?: throw GenerellIkkeFunnetException()
         logger.info("Oppdaterer opplysningsgrunnlag for trygdetider (behandlingId=$behandlingId)")
 
-        val avdoede = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede()
+        val avdoede =
+            grunnlagService.hentOpplysningsgrunnlag(behandling.id)?.hentAvdoede()
+                ?: throw InternfeilException("Grunnlag mangler for behandling ${behandling.id}")
         return trygdetidList
             .map { trygdetid -> medOppdaterteOpplysningerOmAvdoede(trygdetid, avdoede, behandlingId) }
             .map { trygdetid -> oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo) }
@@ -1026,7 +1072,9 @@ class TrygdetidServiceImpl(
     ): Boolean =
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
             val trygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
-            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            val behandling =
+                behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+                    ?: throw GenerellIkkeFunnetException()
 
             if (trygdetider.isEmpty()) {
                 throw IngenTrygdetidFunnetForAvdoede()
@@ -1039,7 +1087,8 @@ class TrygdetidServiceImpl(
             // Dersom forrige steg (vilkårsvurdering) har blitt endret vil statusen være VILKAARSVURDERT. Når man
             // trykker videre fra vilkårsvurdering skal denne validere tilstand og sette status TRYGDETID_OPPDATERT.
             if (behandling.status == BehandlingStatus.VILKAARSVURDERT) {
-                behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
+                behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+                true
             } else {
                 false
             }
@@ -1049,12 +1098,15 @@ class TrygdetidServiceImpl(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        val soeker = grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).soeker
+        val grunnlag =
+            grunnlagService.hentOpplysningsgrunnlag(trygdetid.behandlingId)
+                ?: throw InternfeilException("Grunnlag mangler for behandling ${trygdetid.behandlingId}")
+        val soeker = grunnlag.soeker
         if (trygdetid.ident == UKJENT_AVDOED || trygdetid.ident == soeker.hentFoedselsnummer()?.verdi?.value) {
             return trygdetid
                 .copy(opplysningerDifferanse = OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt()))
         }
-        val nyAvdoedGrunnlag = grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).hentAvdoede()
+        val nyAvdoedGrunnlag = grunnlag.hentAvdoede()
         val avdoedeFnr = nyAvdoedGrunnlag.mapNotNull { it.hentFoedselsnummer()?.verdi?.value }
         if (!avdoedeFnr.contains(trygdetid.ident)) {
             trygdetidRepository.slettTrygdetid(trygdetid.id)
@@ -1159,7 +1211,7 @@ class TrygdetidServiceImpl(
             else -> trygdetid.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
         }.also { nyTrygdetid ->
             trygdetidRepository.oppdaterTrygdetid(nyTrygdetid)
-            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
+            behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
         }
     }
 
@@ -1186,11 +1238,13 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): UUID? {
+        sjekkInternTrygdetidAktivert()
         val avdoede: List<Folkeregisteridentifikator> =
-            grunnlagKlient
-                .hentGrunnlag(behandlingId, brukerTokenInfo)
-                .hentAvdoede()
-                .mapNotNull { it.hentFoedselsnummer()?.verdi }
+            grunnlagService
+                .hentOpplysningsgrunnlag(behandlingId)
+                ?.hentAvdoede()
+                ?.mapNotNull { it.hentFoedselsnummer()?.verdi }
+                ?: throw InternfeilException("Grunnlag mangler for behandling $behandlingId")
         if (avdoede.isEmpty()) {
             return null
         }
@@ -1226,18 +1280,18 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =
-        runBlocking {
-            behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).status in
-                listOf(
-                    IVERKSATT,
-                    BEREGNET,
-                    AVKORTET,
-                    FATTET_VEDTAK,
-                    ATTESTERT,
-                    TIL_SAMORDNING,
-                    SAMORDNET,
-                )
-        }
+        behandlingService
+            .hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+            ?.status in
+            listOf(
+                IVERKSATT,
+                BEREGNET,
+                AVKORTET,
+                FATTET_VEDTAK,
+                ATTESTERT,
+                TIL_SAMORDNING,
+                SAMORDNET,
+            )
 
     private fun sjekkAtTrygdetideneGjelderSammeAvdoede(
         trygdetiderMaal: List<Trygdetid>,

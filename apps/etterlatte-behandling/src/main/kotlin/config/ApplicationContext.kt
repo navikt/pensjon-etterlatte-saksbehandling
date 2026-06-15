@@ -204,6 +204,9 @@ internal class ApplicationContext(
 
     val automatiskVedtakBehandlingService get() = highLevelServiceModule.automatiskVedtakBehandlingService
 
+    val trygdetidService get() = serviceModule.trygdetidService
+    val avtaleService get() = serviceModule.avtaleService
+
     val lesSkatteoppgjoerHendelserJobService get() = jobModule.lesSkatteoppgjoerHendelserJobService
     val aarligInntektsjusteringJobbService get() = jobModule.aarligInntektsjusteringJobbService
 

@@ -2,10 +2,8 @@ package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.shouldBe
-import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -29,7 +27,6 @@ import java.util.UUID
 class GrunnlagmapperTest {
     private val pdlVergeOekonomiskFnr = "17418340118"
     private val pdlVergePersonligFnr = "27458328671"
-    private val adresseService = mockk<AdresseService>()
 
     @Test
     fun `mapVerge henter ukjent vergemaal hvis flere verger i grunnlag for søker`() {
@@ -51,8 +48,7 @@ class GrunnlagmapperTest {
                 opplysningsmapSakOverrides = emptyMap(),
             ).hentOpplysningsgrunnlag()
 
-        coEvery { adresseService.hentNavn(any(), pdlVergeOekonomiskFnr) } returns "Vera Verge"
-        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val grunnlagService = GrunnlagService(mockk())
         val verge = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, opplysningsgrunnlag)!! }
 
         Assertions.assertTrue(verge is UkjentVergemaal)
@@ -65,7 +61,7 @@ class GrunnlagmapperTest {
                 .copy(
                     vergemaalEllerFremtidsfullmakt =
                         listOf(
-                            vergemaal(pdlVergeOekonomiskFnr, "", "personligeOgOekonomiskeInteresser"),
+                            vergemaal(pdlVergeOekonomiskFnr, "Vera Verge", "personligeOgOekonomiskeInteresser"),
                         ),
                 )
         val opplysningsgrunnlag =
@@ -77,9 +73,7 @@ class GrunnlagmapperTest {
                 opplysningsmapSakOverrides = emptyMap(),
             ).hentOpplysningsgrunnlag()
 
-        coEvery { adresseService.hentNavn(any(), pdlVergeOekonomiskFnr) } returns "Vera Verge"
-
-        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val grunnlagService = GrunnlagService(mockk())
         val verge =
             runBlocking {
                 grunnlagService.hentVergeForSak(

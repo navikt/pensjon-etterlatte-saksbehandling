@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.hentinformasjon.grunnlag
 
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.erOver18
 import no.nav.etterlatte.brev.behandling.hentForelderVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
@@ -24,7 +23,6 @@ import java.util.UUID
 
 class GrunnlagService(
     private val klient: BehandlingKlient,
-    private val adresseService: AdresseService,
 ) {
     suspend fun hentGrunnlag(
         vedtakType: VedtakType?,
@@ -37,6 +35,7 @@ class GrunnlagService(
         -> hentGrunnlagForSak(sakId, bruker)
 
         null -> hentGrunnlagForSak(sakId, bruker)
+
         else -> klient.hentGrunnlag(behandlingId!!, bruker)
     }
 
@@ -83,13 +82,15 @@ class GrunnlagService(
                 )
                 UkjentVergemaal()
             } else {
-                // TODO: Hente navn direkte fra Grunnlag eller PDL
-                val vergenavn = adresseService.hentNavn(sakType, vergeFnr.value)
-
-                Vergemaal(
-                    vergenavn,
-                    vergeFnr,
-                )
+                val vergenavn = verger.first().vergeEllerFullmektig.navn
+                if (vergenavn == null) {
+                    logger.error(
+                        "Verge mangler navn i grunnlaget for sak med id=${grunnlag.metadata.sakId}.",
+                    )
+                    UkjentVergemaal()
+                } else {
+                    Vergemaal(vergenavn, vergeFnr)
+                }
             }
         } else if (verger.size > 1) {
             logger.info(

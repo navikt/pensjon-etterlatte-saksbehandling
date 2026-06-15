@@ -125,12 +125,6 @@ class AdresseService(
             mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn.await())
         }
 
-    @Deprecated(message = "Midlertidig løsning for å støtte gammel flyt. Burde hente navn fra Grunnlag eller PDL")
-    suspend fun hentNavn(
-        sakType: SakType,
-        ident: String,
-    ): String = hentMottakerAdresse(sakType, ident, MottakerType.KOPI).navn
-
     private suspend fun hentMottakerAdresse(
         sakType: SakType,
         ident: String,

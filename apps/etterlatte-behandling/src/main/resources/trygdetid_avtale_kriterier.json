@@ -1,0 +1,37 @@
+[
+  {
+    "kode" : "IK_YRK_BO",
+    "beskrivelse" : "Ikke yrkesaktiv, 3 års botid",
+    "fraDato" : "1899-12-31"
+  },
+  {
+    "kode" : "IK_YRK_TRYGD",
+    "beskrivelse" : "Ikke yrkesaktiv, 1 års trygdetid",
+    "fraDato" : "1899-12-31"
+  },
+  {
+    "kode" : "OMF_BES_EKSP",
+    "beskrivelse" : "Omfattet av bestemmelsene i eksportavtale",
+    "fraDato" : "1899-12-31"
+  },
+  {
+    "kode" : "YRK_ARB",
+    "beskrivelse" : "Yrkesaktiv, 1 års arbeid",
+    "fraDato" : "1899-12-31"
+  },
+  {
+    "kode" : "YRK_MEDL",
+    "beskrivelse" : "Yrkesaktiv i Norge eller EØS, ett års medlemskap i Norge",
+    "fraDato" : "1899-12-31"
+  },
+  {
+    "kode" : "YRK_MEDL_ALT",
+    "beskrivelse" : "Yrkesaktiv i Norge eller EØS",
+    "fraDato" : "1899-12-31"
+  },
+  {
+    "kode" : "YRK_TRYGD",
+    "beskrivelse" : "Yrkesaktiv, 1 års trygdetid",
+    "fraDato" : "1899-12-31"
+  }
+]

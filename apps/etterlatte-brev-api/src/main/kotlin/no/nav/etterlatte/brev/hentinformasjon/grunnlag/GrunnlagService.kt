@@ -72,7 +72,9 @@ class GrunnlagService(
                 grunnlag.soeker.hentFoedselsnummer()?.verdi,
             )
         return if (verger.size == 1) {
-            val vergeFnr = verger.first().vergeEllerFullmektig.motpartsPersonident
+            val vergeEllerFullmektig = verger.single().vergeEllerFullmektig
+            val vergeFnr = vergeEllerFullmektig.motpartsPersonident
+            val vergenavn = vergeEllerFullmektig.navn
             if (vergeFnr == null) {
                 logger.error(
                     "Vi genererer et brev til en person som har verge uten ident. Det er verdt å følge " +
@@ -81,16 +83,11 @@ class GrunnlagService(
                         " er kvalitetssikret.",
                 )
                 UkjentVergemaal()
+            } else if (vergenavn == null) {
+                logger.warn("Verge mangler navn i grunnlaget for sak med id=${grunnlag.metadata.sakId}.")
+                UkjentVergemaal()
             } else {
-                val vergenavn = verger.first().vergeEllerFullmektig.navn
-                if (vergenavn == null) {
-                    logger.error(
-                        "Verge mangler navn i grunnlaget for sak med id=${grunnlag.metadata.sakId}.",
-                    )
-                    UkjentVergemaal()
-                } else {
-                    Vergemaal(vergenavn, vergeFnr)
-                }
+                Vergemaal(vergenavn, vergeFnr)
             }
         } else if (verger.size > 1) {
             logger.info(

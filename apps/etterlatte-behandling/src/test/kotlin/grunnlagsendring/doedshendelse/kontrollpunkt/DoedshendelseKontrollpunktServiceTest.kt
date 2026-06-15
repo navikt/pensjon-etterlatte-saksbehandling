@@ -440,6 +440,47 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
+    fun `Skal gi kontrollpunkt BarnForGammeltForBarnepensjon`() {
+        every {
+            pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(
+                foedselsnummer = doedshendelseInternalBP.beroertFnr,
+                rolle = PersonRolle.BARN,
+                saktype = SakType.BARNEPENSJON,
+            )
+        } returns
+            mockDoedshendelsePerson().copy(
+                foedselsnummer =
+                    OpplysningDTO(
+                        Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr),
+                        null,
+                    ),
+                foedselsdato =
+                    OpplysningDTO(
+                        LocalDate.now().minusYears(61),
+                        null,
+                    ),
+                kontaktadresse = emptyList(),
+                oppholdsadresse = emptyList(),
+                familieRelasjon =
+                    OpplysningDTO(
+                        FamilieRelasjon(
+                            ansvarligeForeldre = emptyList(),
+                            foreldre = listOf(KONTANT_FOT, JOVIAL_LAMA),
+                            barn = emptyList(),
+                        ),
+                        null,
+                    ),
+            )
+        val kontrollpunkter =
+            kontrollpunktService.identifiserKontrollpunkter(
+                doedshendelseInternalBP,
+                bruker,
+            )
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnForGammeltForBarnepensjon)
+    }
+
+    @Test
     fun `Skal ikke opprette kontrollpunkt hvis alle sjekker er OK`() {
         kontrollpunktService.identifiserKontrollpunkter(doedshendelseInternalBP, bruker) shouldBe emptyList()
     }

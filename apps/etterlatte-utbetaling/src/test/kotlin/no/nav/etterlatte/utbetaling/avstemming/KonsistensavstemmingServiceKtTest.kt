@@ -77,7 +77,7 @@ internal class KonsistensavstemmingServiceKtTest {
 
     @Test
     fun `konsistensavstemmingErKjoertIDag skal returnere false dersom konsistensavstemming ikke er kjoert i dag`() {
-        val idag = LocalDate.now()
+        val idag = Tidspunkt.now().toNorskLocalDate()
         val igaar = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         every {
             avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(Saktype.BARNEPENSJON)
@@ -96,8 +96,8 @@ internal class KonsistensavstemmingServiceKtTest {
 
     @Test
     fun `konsistensavstemmingErKjoertIDag skal returnere true dersom konsistensavstemming er kjoert i dag`() {
-        val idagDato = LocalDate.now()
         val idagTidspunkt = Tidspunkt.now()
+        val idagDato = idagTidspunkt.toNorskLocalDate()
         every {
             avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(Saktype.BARNEPENSJON)
         } returns idagTidspunkt
@@ -134,7 +134,7 @@ internal class KonsistensavstemmingServiceKtTest {
                 avstemmingsdataSender = avstemmingsdataSender,
             )
 
-        val konsistensavstemming = service.lagKonsistensavstemming(LocalDate.now(), Saktype.BARNEPENSJON)
+        val konsistensavstemming = service.lagKonsistensavstemming(idag, Saktype.BARNEPENSJON)
         assertEquals(emptyList<OppdragForKonsistensavstemming>(), konsistensavstemming.loependeUtbetalinger)
     }
 
@@ -172,7 +172,7 @@ internal class KonsistensavstemmingServiceKtTest {
                 avstemmingsdataSender = avstemmingsdataSender,
             )
 
-        val konsistensavstemming = service.lagKonsistensavstemming(LocalDate.now(), Saktype.BARNEPENSJON)
+        val konsistensavstemming = service.lagKonsistensavstemming(idag, Saktype.BARNEPENSJON)
         assertEquals(emptyList<OppdragForKonsistensavstemming>(), konsistensavstemming.loependeUtbetalinger)
     }
 

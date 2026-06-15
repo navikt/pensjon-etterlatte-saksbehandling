@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoer
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.vedtak.VedtakslisteEtteroppgjoerRequest
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 fun Route.etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService: VedtakEtteroppgjoerService) {
@@ -20,8 +21,9 @@ fun Route.etteroppgjoerSystembrukerVedtakRoute(vedtakEtteroppgjoerService: Vedta
                 val vedtaksliste =
                     inTransaction {
                         vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
-                            sakId = request.sakId,
+                            sakId = sakId,
                             etteroppgjoersAar = request.etteroppgjoersAar,
+                            tilOgMedBehandlingId = request.tilOgMedBehandlingId,
                         )
                     }
                 call.respond(vedtaksliste)

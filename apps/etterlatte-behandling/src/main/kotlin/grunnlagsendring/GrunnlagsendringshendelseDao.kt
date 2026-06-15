@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.util.UUID
 
-class GrunnlagsendringshendelseDao(
+open class GrunnlagsendringshendelseDao(
     val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     fun opprettGrunnlagsendringshendelse(hendelse: Grunnlagsendringshendelse): Grunnlagsendringshendelse =
@@ -197,7 +197,7 @@ class GrunnlagsendringshendelseDao(
             }
         }
 
-    fun hentGrunnlagsendringshendelserMedStatuserISak(
+    open fun hentGrunnlagsendringshendelserMedStatuserISak(
         sakId: SakId,
         statuser: List<GrunnlagsendringStatus>,
     ): List<Grunnlagsendringshendelse> =

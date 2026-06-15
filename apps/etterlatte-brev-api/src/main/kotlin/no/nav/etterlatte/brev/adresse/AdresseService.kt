@@ -5,6 +5,8 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.adresse.saksbehandler.SaksbehandlerKlient
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.Soeker
+import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
@@ -41,12 +43,12 @@ class AdresseService(
             val soekerFoedselsdato = pdltjenesterKlient.hentFoedselsdato(soeker.fnr.value, brukerTokenInfo)
 
             val soekerAdresse =
-                if (soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() > 18) {
+                if (soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() >= 18) {
                     hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.HOVED)
-                } else if (soekerFoedselsdato.hentAlder() < 15) {
-                    null
-                } else {
+                } else if (soekerFoedselsdato.hentAlder() >= 15) {
                     hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.KOPI)
+                } else {
+                    null
                 }
             // soekerAdresse er gjenlevende hvis det er en OMS saktype, men hvis det er BP må vi sjekke det opp
             val gjenlevendeAdresse =

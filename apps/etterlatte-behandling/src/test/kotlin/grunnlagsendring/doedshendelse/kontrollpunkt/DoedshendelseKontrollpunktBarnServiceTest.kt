@@ -33,6 +33,27 @@ class DoedshendelseKontrollpunktBarnServiceTest {
     private val kontrollpunktService = DoedshendelseKontrollpunktBarnService(pdlTjenesterKlient, behandlingService)
 
     @Test
+    fun `Skal avbryte dersom barn er 23 aar eller eldre i dag`() {
+        val barnet =
+            barnet.copy(
+                familieRelasjon =
+                    OpplysningDTO(
+                        FamilieRelasjon(
+                            ansvarligeForeldre = emptyList(),
+                            foreldre = listOf(KONTANT_FOT),
+                            barn = emptyList(),
+                        ),
+                        null,
+                    ),
+                foedselsdato = OpplysningDTO(LocalDate.now().minusYears(23), null),
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, null, barnet)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnForGammeltForBarnepensjon)
+    }
+
+    @Test
     fun `Skal opprette kontrollpunkt ved samtidig doedsfall`() {
         every {
             pdlTjenesterKlient.hentPdlModellDoedshendelseForSaktype(

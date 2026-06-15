@@ -96,7 +96,7 @@ fun Grunnlag.mapSpraak(): Spraak =
 fun Grunnlag.hentForelderVerge(): ForelderVerge? {
     val gjenlevende = hentPotensiellGjenlevende()
     return if (gjenlevende != null && erAnsvarligForelder(gjenlevende)) {
-        return forelderVerge(gjenlevende)
+        forelderVerge(gjenlevende)
     } else {
         null
     }

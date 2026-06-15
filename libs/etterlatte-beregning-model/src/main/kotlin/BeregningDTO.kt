@@ -234,6 +234,7 @@ data class EtteroppgjoerBeregnFaktiskInntektRequest(
     val harDoedsfall: Boolean,
     val innvilgetPeriodeIEtteroppgjoersAar: Periode,
     val opphoerFom: YearMonth?,
+    val sammenlignTilOgMedBehandlingId: UUID? = null,
 )
 
 data class EtteroppgjoerHentBeregnetResultatRequest(

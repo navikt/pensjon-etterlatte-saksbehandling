@@ -23,6 +23,16 @@ fun PersonDoedshendelseDto.under18aarPaaDato(dato: LocalDate): Boolean {
     return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < aar18
 }
 
+fun PersonDoedshendelseDto.under23PaaDato(dato: LocalDate): Boolean {
+    if (foedselsdato == null && foedselsaar == null) {
+        return true // Settes til true for å være på den sikre siden. Heller en oppgave for mye enn for lite.
+    }
+
+    val benyttetFoedselsdato = foedselsdato?.verdi ?: LocalDate.of(foedselsaar!!.verdi, 12, 31)
+
+    return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < 23
+}
+
 fun harAktivAdresse(person: PersonDoedshendelseDto): Boolean = person.alleAdresser().any { it.aktiv }
 
 fun personBorIUtlandet(person: PersonDoedshendelseDto): Boolean {

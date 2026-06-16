@@ -1,4 +1,4 @@
-FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24 as base
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24-dev as base
 
 WORKDIR /app
 COPY ./client/dist ./client

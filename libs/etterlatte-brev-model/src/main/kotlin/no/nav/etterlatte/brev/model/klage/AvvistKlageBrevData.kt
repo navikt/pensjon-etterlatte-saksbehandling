@@ -10,10 +10,7 @@ import java.time.LocalDate
 
 @JsonTypeName("AVVIST_KLAGE")
 data class AvvistKlageBrevInnholdDataNy(
-    val sakType: SakType,
-    val bosattUtland: Boolean,
-    val klageDato: LocalDate,
-    val datoForVedtaketKlagenGjelder: LocalDate?,
+    val data: AvvistKlageBrevDataInnholdData,
 ) : BrevFastInnholdData() {
     override val type: String = "AVVIST_KLAGE"
 
@@ -21,6 +18,13 @@ data class AvvistKlageBrevInnholdDataNy(
 
     override val brevKode: Brevkoder = Brevkoder.AVVIST_KLAGE
 }
+
+data class AvvistKlageBrevDataInnholdData(
+    val sakType: SakType,
+    val bosattUtland: Boolean,
+    val klageDato: LocalDate,
+    val datoForVedtaketKlagenGjelder: LocalDate?,
+)
 
 @JsonTypeName("AVVIST_KLAGE_UTFALL")
 data class AvvistKlageBrevRedigerbarInnholdData(

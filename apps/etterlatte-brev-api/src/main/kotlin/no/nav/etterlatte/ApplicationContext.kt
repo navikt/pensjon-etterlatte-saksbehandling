@@ -119,7 +119,7 @@ internal class ApplicationContext {
     val norg2Klient = Norg2Klient(env.requireEnvValue(NORG2_URL), httpClient())
     val adresseService = AdresseService(norg2Klient, saksbehandlerKlient, regoppslagKlient, pdltjenesterKlient)
 
-    val grunnlagService = GrunnlagService(behandlingKlient, adresseService)
+    val grunnlagService = GrunnlagService(behandlingKlient)
     val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
     val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
 

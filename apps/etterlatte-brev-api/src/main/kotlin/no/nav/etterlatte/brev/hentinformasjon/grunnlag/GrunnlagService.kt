@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.hentinformasjon.grunnlag
 
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.erOver18
 import no.nav.etterlatte.brev.behandling.hentForelderVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
@@ -24,7 +23,6 @@ import java.util.UUID
 
 class GrunnlagService(
     private val klient: BehandlingKlient,
-    private val adresseService: AdresseService,
 ) {
     suspend fun hentGrunnlag(
         vedtakType: VedtakType?,
@@ -37,6 +35,7 @@ class GrunnlagService(
         -> hentGrunnlagForSak(sakId, bruker)
 
         null -> hentGrunnlagForSak(sakId, bruker)
+
         else -> klient.hentGrunnlag(behandlingId!!, bruker)
     }
 
@@ -73,7 +72,9 @@ class GrunnlagService(
                 grunnlag.soeker.hentFoedselsnummer()?.verdi,
             )
         return if (verger.size == 1) {
-            val vergeFnr = verger.first().vergeEllerFullmektig.motpartsPersonident
+            val vergeEllerFullmektig = verger.single().vergeEllerFullmektig
+            val vergeFnr = vergeEllerFullmektig.motpartsPersonident
+            val vergenavn = vergeEllerFullmektig.navn
             if (vergeFnr == null) {
                 logger.error(
                     "Vi genererer et brev til en person som har verge uten ident. Det er verdt å følge " +
@@ -82,14 +83,11 @@ class GrunnlagService(
                         " er kvalitetssikret.",
                 )
                 UkjentVergemaal()
+            } else if (vergenavn == null) {
+                logger.warn("Verge mangler navn i grunnlaget for sak med id=${grunnlag.metadata.sakId}.")
+                UkjentVergemaal()
             } else {
-                // TODO: Hente navn direkte fra Grunnlag eller PDL
-                val vergenavn = adresseService.hentNavn(sakType, vergeFnr.value)
-
-                Vergemaal(
-                    vergenavn,
-                    vergeFnr,
-                )
+                Vergemaal(vergenavn, vergeFnr)
             }
         } else if (verger.size > 1) {
             logger.info(

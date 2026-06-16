@@ -1,10 +1,8 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.beregningsperiode
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Spraak
@@ -44,8 +42,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BehandlingTest {
-    private val adresseService: AdresseService = mockk()
-
     @Test
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
@@ -201,7 +197,7 @@ internal class BehandlingTest {
                                                 VergemaalEllerFremtidsfullmakt(
                                                     null,
                                                     null,
-                                                    VergeEllerFullmektig(vergesFnr, "Vergenavn", null, false),
+                                                    VergeEllerFullmektig(vergesFnr, "Viggo Verge", null, false),
                                                     opphoerstidspunkt = null,
                                                 ),
                                             ),
@@ -213,9 +209,7 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        coEvery { adresseService.hentNavn(any<SakType>(), vergesFnr.value) } returns "Viggo Verge"
-
-        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val grunnlagService = GrunnlagService(mockk())
         val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertEquals("Viggo Verge", vergeBarnepensjon!!.navn())
 
@@ -281,7 +275,7 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val grunnlagService = GrunnlagService(mockk())
         val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn())
 
@@ -334,7 +328,7 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val grunnlagService = GrunnlagService(mockk())
         val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertNull(vergeBarnepensjon)
 
@@ -396,7 +390,7 @@ internal class BehandlingTest {
                 frivilligSkattetrekk = true,
                 Grunnlagsopplysning.Saksbehandler("Casey", Tidspunkt.now()),
             )
-        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val grunnlagService = GrunnlagService(mockk())
 
         val vergeBarnepensjon =
             runBlocking {
@@ -444,7 +438,7 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val grunnlagService = GrunnlagService(mockk(), adresseService)
+        val grunnlagService = GrunnlagService(mockk())
         val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }
         assertNull(vergeBarnepensjon, "Verge skal ikke settes for barnepensjon hvis barnet er over 18 år")
 

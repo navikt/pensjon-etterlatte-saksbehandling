@@ -52,7 +52,9 @@ class AdresseService(
             val soekerSkalHaBrev = soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() >= 15
 
             val soekerMottaker: Mottaker? =
-                if (soekerSkalHaBrev) hentMottakerAdresse(sakType, soeker.fnr.value) else null
+                soeker.fnr.value
+                    .takeIf { soekerSkalHaBrev }
+                    ?.let { hentMottakerAdresse(sakType, it) }
 
             // soekerAdresse er gjenlevende hvis det er en OMS saktype, men hvis det er BP må vi sjekke det opp
             // TODO kan sjekken mot innsender fjernes?
@@ -77,22 +79,19 @@ class AdresseService(
                     }
 
                     else -> {
-                        if (
-                            Folkeregisteridentifikator.isValid(innsender?.fnr?.value) &&
-                            innsender!!.fnr.value != soeker.fnr.value
-                        ) {
-                            hentMottakerAdresse(sakType, innsender.fnr.value)
-                        } else {
-                            null
-                        }
+                        innsender
+                            ?.fnr
+                            ?.value
+                            ?.takeIf { Folkeregisteridentifikator.isValid(it) && it != soeker.fnr.value }
+                            ?.let { hentMottakerAdresse(sakType, it) }
                     }
                 }
 
             val mottakereIPrioritertRekkefoelge: List<Mottaker?> =
                 if (soekerErMyndig || soekerFoedselsdato == null) {
-                    listOf(soekerMottaker, gjenlevendeMottaker, vergeMottaker)
+                    listOf(vergeMottaker, soekerMottaker, gjenlevendeMottaker)
                 } else {
-                    listOf(gjenlevendeMottaker, vergeMottaker, soekerMottaker)
+                    listOf(vergeMottaker, gjenlevendeMottaker, soekerMottaker)
                 }
 
             // Default er .HOVED, og setter alle som kommer etter til .KOPI avhengig av prioritet som bestemt over
@@ -126,22 +125,10 @@ class AdresseService(
     private suspend fun hentMottakerAdresse(
         sakType: SakType,
         ident: String,
-    ): Mottaker = hentMottakerAdresse(sakType, ident, MottakerType.HOVED)
-
-    private suspend fun hentMottakerAdresse(
-        sakType: SakType,
-        ident: String,
-        type: MottakerType,
     ): Mottaker {
         val regoppslag = regoppslagKlient.hentMottakerAdresse(sakType, ident)
-
         val fnr = Folkeregisteridentifikator.of(ident)
-
-        return if (regoppslag == null) {
-            tomMottaker(fnr, type)
-        } else {
-            mottakerFraAdresse(fnr, regoppslag, type)
-        }
+        return if (regoppslag == null) tomMottaker(fnr, MottakerType.HOVED) else mottakerFraAdresse(fnr, regoppslag, MottakerType.HOVED)
     }
 
     private suspend fun hentSaksbehandlerNavn(

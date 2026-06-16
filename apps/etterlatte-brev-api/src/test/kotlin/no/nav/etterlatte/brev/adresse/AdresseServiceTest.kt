@@ -109,7 +109,7 @@ internal class AdresseServiceTest {
     }
 
     @Test
-    fun `BP skal ha med gjenlevende på kopi om den er ulik innsender og søker hvis søker er over 18`() {
+    fun `BP skal ikke ha med gjenlevende på kopi om den er ulik innsender og søker hvis søker er over 18`() {
         val sakType = SakType.BARNEPENSJON
         val personerISak =
             PersonerISak(
@@ -127,15 +127,14 @@ internal class AdresseServiceTest {
             runBlocking {
                 adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
             }
-        mottakere.size shouldBe 3
+        mottakere.size shouldBe 2
         mottakere.count { it.type == MottakerType.HOVED && it.foedselsnummer?.value == SOEKER_FOEDSELSNUMMER.value } shouldBe 1
         mottakere.count { it.type == MottakerType.KOPI && it.foedselsnummer?.value == INNSENDER_FOEDSELSNUMMER.value } shouldBe 1
-        mottakere.count { it.type == MottakerType.KOPI && it.foedselsnummer?.value == GJENLEVENDE_FOEDSELSNUMMER.value } shouldBe 1
+        mottakere.count { it.type == MottakerType.KOPI && it.foedselsnummer?.value == GJENLEVENDE_FOEDSELSNUMMER.value } shouldBe 0
 
         coVerify(exactly = 1) {
             regoppslagMock.hentMottakerAdresse(sakType, INNSENDER_FOEDSELSNUMMER.value)
             regoppslagMock.hentMottakerAdresse(sakType, SOEKER_FOEDSELSNUMMER.value)
-            regoppslagMock.hentMottakerAdresse(sakType, GJENLEVENDE_FOEDSELSNUMMER.value)
         }
     }
 

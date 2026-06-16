@@ -11,11 +11,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerKonfigurasjon
 import java.time.Duration
 import java.time.YearMonth
 
@@ -97,36 +95,8 @@ class BehandlingKlient(
                     contentType(ContentType.Application.Json)
                 }.body()
         }
-
-    fun startOpprettelseAvEtteroppgjoerForbehandling(etteroppgjoerKonfigurasjon: EtteroppgjoerKonfigurasjon) {
-        runBlocking {
-            behandlingHttpClient.post("$behandlingUrl/api/etteroppgjoer/forbehandling/bulk") {
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    StartOpprettelseAvEtteroppgjoerForbehandlingRequest(
-                        inntektsaar = etteroppgjoerKonfigurasjon.inntektsaar,
-                        antall = etteroppgjoerKonfigurasjon.antall,
-                        etteroppgjoerFilter = etteroppgjoerKonfigurasjon.etteroppgjoerFilter,
-                        spesifikkeSaker = etteroppgjoerKonfigurasjon.spesifikkeSaker,
-                        ekskluderteSaker = etteroppgjoerKonfigurasjon.ekskluderteSaker,
-                        spesifikkeEnheter = etteroppgjoerKonfigurasjon.spesifikkeEnheter,
-                    ),
-                )
-            }
-        }
-    }
 }
 
 data class SakerDto(
     val saker: Map<SakId, Sak>,
-)
-
-data class StartOpprettelseAvEtteroppgjoerForbehandlingRequest(
-    val inntektsaar: Int,
-    val antall: Int,
-    val etteroppgjoerFilter: EtteroppgjoerFilter,
-    val spesifikkeSaker: List<SakId>,
-    val ekskluderteSaker: List<SakId>,
-    val spesifikkeEnheter: List<String>,
 )

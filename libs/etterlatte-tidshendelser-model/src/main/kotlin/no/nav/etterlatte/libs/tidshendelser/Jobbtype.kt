@@ -66,6 +66,8 @@ enum class JobbType(
         JobbKategori.OPPDATERING_SKJERMING_BP,
         sakType = SakType.BARNEPENSJON,
     ),
+
+    // OPPRETT_ETTEROPPGJOER_FORBEHANDLING skal ikke brukes, vi trigger ikke lenger forbehandlinger via tidshendelser
     OPPRETT_ETTEROPPGJOER_FORBEHANDLING(
         beskrivelse = "Opprettelse av forbehandlinger for etteroppgjør",
         kategori = JobbKategori.OPPRETT_ETTEROPPGJOER_FORBEHANDLING,

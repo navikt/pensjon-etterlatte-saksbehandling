@@ -15,7 +15,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -93,7 +92,8 @@ internal class TrygdetidServiceIntegrationTest(
                 avtaleService,
                 behandlingsStatusService,
                 vedtaksvurderingKlient,
-                mockk<FeatureToggleService> { every { isEnabled(any(), any(), any()) } returns true },
+                brukInternTrygdetid = true,
+                brukEgenDatabaseForTrygdetid = true,
             )
     }
 

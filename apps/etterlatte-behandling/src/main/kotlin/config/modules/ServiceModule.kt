@@ -1,5 +1,7 @@
 package no.nav.etterlatte.config.modules
 
+import no.nav.etterlatte.EnvKey.BRUK_EGEN_DATABASE_FOR_TRYGDETID
+import no.nav.etterlatte.EnvKey.BRUK_INTERN_TRYGDETID
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BrukerService
@@ -475,7 +477,17 @@ class ServiceModule(
         )
     }
 
-    val avtaleService: AvtaleService by lazy { AvtaleService(daoModule.avtaleRepository) }
+    // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
+    private val brukInternTrygdetid: Boolean by lazy { env[BRUK_INTERN_TRYGDETID] == "ja" }
+    private val brukEgenDatabaseForTrygdetid: Boolean by lazy { env[BRUK_EGEN_DATABASE_FOR_TRYGDETID] == "ja" }
+
+    val avtaleService: AvtaleService by lazy {
+        AvtaleService(
+            avtaleRepository = daoModule.avtaleRepository,
+            brukInternTrygdetid = brukInternTrygdetid,
+            brukEgenDatabaseForTrygdetid = brukEgenDatabaseForTrygdetid,
+        )
+    }
 
     val trygdetidService: TrygdetidService by lazy {
         TrygdetidServiceImpl(
@@ -487,7 +499,8 @@ class ServiceModule(
             avtaleService = avtaleService,
             behandlingsStatusService = behandlingsStatusService,
             vedtaksvurderingKlient = VedtaksvurderingKlientAdapter(vedtaksvurderingService),
-            featureToggleService = featureToggleService,
+            brukInternTrygdetid = brukInternTrygdetid,
+            brukEgenDatabaseForTrygdetid = brukEgenDatabaseForTrygdetid,
         )
     }
 }

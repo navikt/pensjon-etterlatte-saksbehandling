@@ -21,7 +21,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -86,7 +85,6 @@ internal class TrygdetidServiceTest {
     private val avtaleService = mockk<AvtaleService>()
     private val pesysklient = mockk<PesysKlient>()
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
-    private val featureToggleService = mockk<FeatureToggleService> { every { isEnabled(any(), any(), any()) } returns true }
     private val service: TrygdetidService =
         TrygdetidServiceImpl(
             repository,
@@ -97,7 +95,8 @@ internal class TrygdetidServiceTest {
             avtaleService,
             behandlingsStatusService,
             vedtaksvurderingKlient,
-            featureToggleService,
+            brukInternTrygdetid = true,
+            brukEgenDatabaseForTrygdetid = true,
         )
 
     private fun trygdeavtale(behandlingId: UUID) =
@@ -120,8 +119,6 @@ internal class TrygdetidServiceTest {
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
-        every { featureToggleService.isEnabled(any(), any(), any()) } returns true
-        excludeRecords { featureToggleService.isEnabled(any(), any(), any()) }
         every { behandlingsStatusService.settTrygdetidOppdatert(any(), any(), dryRun = true) } just Runs
         every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { pesysklient.hentTrygdetidsgrunnlag(any(), any()) } returns TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(null, null)

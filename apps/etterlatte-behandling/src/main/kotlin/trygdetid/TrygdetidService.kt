@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
@@ -202,12 +201,13 @@ class TrygdetidServiceImpl(
     private val avtaleService: AvtaleService,
     private val behandlingsStatusService: BehandlingStatusService,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
-    private val featureToggleService: FeatureToggleService,
+    private val brukInternTrygdetid: Boolean,
+    private val brukEgenDatabaseForTrygdetid: Boolean,
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private fun sjekkInternTrygdetidAktivert() {
-        if (!featureToggleService.isEnabled(toggleId = TrygdetidFeatureToggle.BrukInternTrygdetid, defaultValue = false)) {
+        if (!brukInternTrygdetid || !brukEgenDatabaseForTrygdetid) {
             throw IkkeTillattException(
                 code = "INTERN_TRYGDETID_IKKE_AKTIVERT",
                 detail = "Intern trygdetid i behandling er ikke aktivert ennå",

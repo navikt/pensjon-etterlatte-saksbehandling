@@ -32,6 +32,15 @@ class AdresseService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    /*
+     *
+     * Er verge alltid hovedmottaker dersom tilstede? Ja
+     * Kan du ha flere på kopi? Eller vil det alltid være en hoved og en kopi
+     * Takeif barnepensjon, isNotEmpty og harforeldreansvar
+     *
+     * Gjenlevende skal ikke motta om over 18
+     */
+
     suspend fun hentMottakere(
         sakType: SakType,
         personerISak: PersonerISak,
@@ -39,22 +48,21 @@ class AdresseService(
     ): List<Mottaker> =
         with(personerISak) {
             val soekerFoedselsdato = pdltjenesterKlient.hentFoedselsdato(soeker.fnr.value, brukerTokenInfo)
+            val soekerErMyndig = soekerFoedselsdato != null && soekerFoedselsdato.hentAlder() >= 18
             val soekerSkalHaBrev = soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() >= 15
 
             val soekerMottaker: Mottaker? =
                 if (soekerSkalHaBrev) hentMottakerAdresse(sakType, soeker.fnr.value) else null
 
             // soekerAdresse er gjenlevende hvis det er en OMS saktype, men hvis det er BP må vi sjekke det opp
+            // TODO kan sjekken mot innsender fjernes?
             val gjenlevendeMottaker: Mottaker? =
-                if (sakType == SakType.BARNEPENSJON &&
-                    gjenlevende.isNotEmpty() &&
-                    gjenlevende.first() !in listOfNotNull(soeker.fnr.value, innsender?.fnr?.value)
-                    // TODO høre med Øyvind/Liv inger om gjenlevende skal være mottaker om soeker er over 18
-                ) {
-                    hentMottakerAdresse(sakType, gjenlevende.first())
-                } else {
-                    null
-                }
+                gjenlevende
+                    .firstOrNull()
+                    ?.takeIf {
+                        sakType == SakType.BARNEPENSJON && !soekerErMyndig &&
+                            it !in listOfNotNull(soeker.fnr.value, innsender?.fnr?.value)
+                    }?.let { hentMottakerAdresse(sakType, it) }
 
             val vergeMottaker: Mottaker? =
                 when (verge) {
@@ -81,7 +89,7 @@ class AdresseService(
                 }
 
             val mottakereIPrioritertRekkefoelge: List<Mottaker?> =
-                if (soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() >= 18) {
+                if (soekerErMyndig || soekerFoedselsdato == null) {
                     listOf(soekerMottaker, gjenlevendeMottaker, vergeMottaker)
                 } else {
                     listOf(gjenlevendeMottaker, vergeMottaker, soekerMottaker)

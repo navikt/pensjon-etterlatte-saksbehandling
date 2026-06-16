@@ -258,11 +258,13 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
 
-    trygdetid(
-        trygdetidService = applicationContext.trygdetidService,
-        behandlingsStatusService = applicationContext.behandlingsStatusService,
-    )
-    avtale(applicationContext.avtaleService)
+    if (applicationContext.internTrygdetidAktivert) {
+        trygdetid(
+            trygdetidService = applicationContext.trygdetidService,
+            behandlingsStatusService = applicationContext.behandlingsStatusService,
+        )
+        avtale(applicationContext.avtaleService)
+    }
 
     arbeidOgInntekt(applicationContext.arbeidOgInntektKlient)
 

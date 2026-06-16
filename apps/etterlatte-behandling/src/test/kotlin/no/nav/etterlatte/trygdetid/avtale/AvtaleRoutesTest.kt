@@ -39,6 +39,7 @@ internal class AvtaleRoutesTest {
     @BeforeAll
     fun before() {
         server.start()
+        every { applicationContext.internTrygdetidAktivert } returns true
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true

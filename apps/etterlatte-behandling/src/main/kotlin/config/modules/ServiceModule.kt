@@ -478,8 +478,10 @@ class ServiceModule(
     }
 
     // Må gjøre en sånn stygg sjekk som dette. toBoolean() fungerer ikke.
-    private val brukInternTrygdetid: Boolean by lazy { env[BRUK_INTERN_TRYGDETID] == "ja" }
-    private val brukEgenDatabaseForTrygdetid: Boolean by lazy { env[BRUK_EGEN_DATABASE_FOR_TRYGDETID] == "ja" }
+    private val brukInternTrygdetid: Boolean by lazy { env[BRUK_INTERN_TRYGDETID] == "true" }
+    private val brukEgenDatabaseForTrygdetid: Boolean by lazy { env[BRUK_EGEN_DATABASE_FOR_TRYGDETID] == "true" }
+
+    val internTrygdetidAktivert: Boolean by lazy { brukInternTrygdetid && brukEgenDatabaseForTrygdetid }
 
     val avtaleService: AvtaleService by lazy {
         AvtaleService(

@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.klage.AvvistKlageBrevDataInnholdData
 import no.nav.etterlatte.brev.model.klage.AvvistKlageBrevInnholdDataNy
 import no.nav.etterlatte.brev.model.klage.AvvistKlageBrevRedigerbarInnholdData
 import no.nav.etterlatte.grunnlag.GrunnlagService
@@ -127,17 +128,20 @@ class KlageAvvistBrevService(
                 skalLagre = skalLagres,
                 brevFastInnholdData =
                     AvvistKlageBrevInnholdDataNy(
-                        sakType = sak.sakType,
-                        bosattUtland = false,
-                        klageDato =
-                            klage.innkommendeDokument?.mottattDato
-                                ?: klage.opprettet.toLocalDate(),
-                        datoForVedtaketKlagenGjelder =
-                            klage.formkrav
-                                ?.formkrav
-                                ?.vedtaketKlagenGjelder
-                                ?.datoAttestert
-                                ?.toLocalDate(),
+                        data =
+                            AvvistKlageBrevDataInnholdData(
+                                sakType = sak.sakType,
+                                bosattUtland = false,
+                                klageDato =
+                                    klage.innkommendeDokument?.mottattDato
+                                        ?: klage.opprettet.toLocalDate(),
+                                datoForVedtaketKlagenGjelder =
+                                    klage.formkrav
+                                        ?.formkrav
+                                        ?.vedtaketKlagenGjelder
+                                        ?.datoAttestert
+                                        ?.toLocalDate(),
+                            ),
                     ),
                 brevRedigerbarInnholdData =
                     AvvistKlageBrevRedigerbarInnholdData(

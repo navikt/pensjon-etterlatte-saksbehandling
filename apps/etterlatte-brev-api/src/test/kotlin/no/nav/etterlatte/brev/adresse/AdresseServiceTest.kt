@@ -295,6 +295,39 @@ internal class AdresseServiceTest {
 
     @ParameterizedTest
     @EnumSource(SakType::class)
+    fun `Setter søker som kopimottaker hvis man har verge`(sakType: SakType) {
+        val personerISak =
+            PersonerISak(
+                innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
+                soeker = Soeker("LITEN", null, "FLASKE", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
+                verge = Vergemaal("Verg Vergesen", VERGE_FOEDSELSNUMMER),
+            )
+
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns null
+
+        val mottakere =
+            runBlocking {
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+            }
+
+        mottakere.size shouldBe 2
+
+        val verge =
+            mottakere.single { it.foedselsnummer!!.value == (personerISak.verge as Vergemaal).foedselsnummer.value }
+        verge.type shouldBe MottakerType.HOVED
+
+        val soeker = mottakere.single { it.foedselsnummer!!.value == personerISak.soeker.fnr.value }
+        soeker.type shouldBe MottakerType.KOPI
+
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, personerISak.soeker.fnr.value)
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class)
     fun `Setter søker som hovedmottaker hvis fødselsdato mangler`(sakType: SakType) {
         val personerISak =
             PersonerISak(
@@ -316,10 +349,10 @@ internal class AdresseServiceTest {
 
         val verge =
             mottakere.single { it.foedselsnummer!!.value == (personerISak.verge as Vergemaal).foedselsnummer.value }
-        verge.type shouldBe MottakerType.KOPI
+        verge.type shouldBe MottakerType.HOVED
 
         val soeker = mottakere.single { it.foedselsnummer!!.value == personerISak.soeker.fnr.value }
-        soeker.type shouldBe MottakerType.HOVED
+        soeker.type shouldBe MottakerType.KOPI
 
         coVerify(exactly = 1) {
             regoppslagMock.hentMottakerAdresse(sakType, personerISak.soeker.fnr.value)

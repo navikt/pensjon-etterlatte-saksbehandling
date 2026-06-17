@@ -354,37 +354,6 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    fun opprettEtteroppgjoerForbehandlingIBulk(
-        inntektsaar: Int,
-        antall: Int,
-        etteroppgjoerFilter: EtteroppgjoerFilter,
-        spesifikkeSaker: List<SakId>,
-        ekskluderteSaker: List<SakId>,
-        spesifikkeEnheter: List<String>,
-    ) {
-        val relevanteSaker: List<SakId> =
-            etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
-                inntektsaar = inntektsaar,
-                antall = antall,
-                etteroppgjoerFilter = etteroppgjoerFilter,
-                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                spesifikkeSaker = spesifikkeSaker,
-                ekskluderteSaker = ekskluderteSaker,
-                spesifikkeEnheter = spesifikkeEnheter,
-            )
-
-        relevanteSaker.map { sakId ->
-            try {
-                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
-                    sakId = sakId,
-                    inntektsAar = inntektsaar,
-                )
-            } catch (e: Exception) {
-                logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
-            }
-        }
-    }
-
     fun lagreOgBeregnFaktiskInntekt(
         forbehandlingId: UUID,
         request: BeregnFaktiskInntektRequest,

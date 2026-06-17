@@ -167,6 +167,10 @@ spec:
       value: https://sam-q2.dev-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://dev-fss.pensjonsamhandling.sam-q2/.default
+    - name: BRUK_INTERN_TRYGDETID
+      value: "false"
+    - name: BRUK_EGEN_DATABASE_FOR_TRYGDETID
+      value: "false"
 
   envFrom:
     - secret: my-application-unleash-api-token

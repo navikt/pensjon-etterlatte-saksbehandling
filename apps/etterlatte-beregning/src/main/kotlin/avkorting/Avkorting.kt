@@ -145,7 +145,10 @@ data class Avkorting(
                                                         ),
                                                     maanederInnvilget =
                                                         inntektsavkorting.grunnlag.maanederInnvilget
-                                                            ?: fallbackMaanederInnvilget(inntektsavkorting, aarsoppgjoerFom),
+                                                            ?: fallbackMaanederInnvilget(
+                                                                inntektsavkorting,
+                                                                aarsoppgjoerFom,
+                                                            ),
                                                 ),
                                             avkortingsperioder =
                                                 if (nullstillAvkortetYtelse) {
@@ -582,7 +585,9 @@ data class Avkorting(
                 )
             } else {
                 reberegnetInntektsavkorting.first().let {
-                    val tomSluttenAvAaret = tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, opphoerFom)
+                    val tomSluttenAvAaret =
+                        tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
+
                     val sistePeriode =
                         when (val tomForPeriode = it.grunnlag.periode.tom) {
                             null -> {
@@ -639,7 +644,7 @@ data class Avkorting(
                 .sortedBy { it.fom }
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
 
-        val tomSluttenAvAaret = tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, opphoerFom)
+        val tomSluttenAvAaret = tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
 
         reberegnetInntektsavkorting.forEachIndexed { i, inntektsavkorting ->
             // Kun de sanksjonene som er lagt inn fom < denne inntektsavkortingen er tidligere beregnet med
@@ -749,6 +754,7 @@ data class Avkorting(
      */
     private fun tomSluttenAvAaretForAvkortetYtelse(
         aarsoppgjoer: AarsoppgjoerLoepende,
+        ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         opphoerFom: YearMonth?,
     ): YearMonth? {
         val harAaroppgjoerNesteAaar =
@@ -767,7 +773,19 @@ data class Avkorting(
                 if (opphoerFom != null && opphoerFom.minusMonths(1).year == aarsoppgjoer.aar) {
                     opphoerFom.minusMonths(1)
                 } else {
-                    null
+                    // Har vi beregning som krysser året uten et neste årsoppgjør må vi lukke dette året.
+                    // Dette er kun trygt å gjøre hvis vi beregner 0 for denne perioden
+                    val harBeregningSenereEnnDetteAarsoppgjoer =
+                        ytelseFoerAvkorting.any { ytelse ->
+                            val tom = ytelse.periode.tom
+                            ytelse.periode.fom.year == aarsoppgjoer.aar && tom != null && tom.year > aarsoppgjoer.aar &&
+                                ytelse.beregning == 0
+                        }
+                    if (harBeregningSenereEnnDetteAarsoppgjoer) {
+                        YearMonth.of(aarsoppgjoer.aar, 12)
+                    } else {
+                        null
+                    }
                 }
             }
         }

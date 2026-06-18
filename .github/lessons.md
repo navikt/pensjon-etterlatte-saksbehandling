@@ -61,3 +61,11 @@
 **2026-06-12 — Implementasjon vs. test-kontrakten**
 - Observation: Ny implementasjon konsoliderte to `hentGrunnlag`-kall til ett, men testene forventet `exactly = 2`. Dette var en korrekt forbedring, men det krevde oppdatering av testpåstander som ikke var åpenbare i forkant.
 - Action: Ved refaktorering fra HTTP-klient til intern service: tell forventede kall i den NYE impl., ikke den gamle. Den nye kan optimalisere (f.eks. cache grunnlag lokalt i scope) — sjekk om `exactly = N` i testene reflekterer ny eller gammel oppførsel.
+
+**2026-06-15 — Feilsøking / valideringslogikk**
+- Observation: Jeg gikk mange runder med å spore hele avkortingsflyten manuelt uten å zoome inn på den konkrete feilmeldingen brukeren ville fått. Det hadde spart mange iterasjoner å se etter `throw`-statements i valideringslogikken med en gang.
+- Action: Ved feilsøking av valideringsfeil: finn alle `throw`-statements i den relevante koden først, og sjekk hvilke betingelser som trigger dem for scenariet brukeren beskriver — ikke spor hele flyten line-by-line fra topp til bunn.
+
+**2026-06-15 — Feilsøking / loopstopp**
+- Observation: Jeg fortsatte å lese kode i loop uten å gjenskape feilen — og kjente igjen at jeg ikke klarte å finne rotårsaken, men fortsatte likevel i stedet for å stoppe og spørre.
+- Action: Hvis samme problem er undersøkt 3+ ganger uten at feilen er gjenskapt eller rootcause funnet: bryt ut, oppsummer hva som er utelukket, og spør brukeren om mer kontekst (eksakt feilmelding, steg for å reprodusere, logg-output).

@@ -162,7 +162,7 @@ class TrygdetidRepository(
                         tx,
                     )
                 } else {
-                    nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
+                    nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id, tx)
                 }
             }.let { hentTrygdetidMedIdNotNull(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id) }
 
@@ -534,6 +534,7 @@ class TrygdetidRepository(
 
     private fun nullstillBeregnetTrygdetid(
         behandlingId: UUID,
+        trygdetidId: UUID,
         tx: TransactionalSession,
     ) = queryOf(
         statement =
@@ -561,9 +562,9 @@ class TrygdetidRepository(
                 beregnet_trygdetid_overstyrt = false,
                 yrkesskade = false,
                 overstyrt_begrunnelse = null
-            WHERE behandling_id = :behandlingId
+            WHERE behandling_id = :behandlingId AND id = :trygdetidId
             """.trimIndent(),
-        paramMap = mapOf("behandlingId" to behandlingId),
+        paramMap = mapOf("behandlingId" to behandlingId, "trygdetidId" to trygdetidId),
     ).let { query -> tx.update(query) }
 
     private fun hentTrygdetidGrunnlag(trygdetidId: UUID): List<TrygdetidGrunnlag> =

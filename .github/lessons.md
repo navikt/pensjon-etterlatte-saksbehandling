@@ -53,3 +53,11 @@
 **2026-06-11 - Omskriving av tester**
 - Observation: Jeg gjorde om på flere tester sitt testoppsett som endring av felles mock og util-metoder, ved skriving av enhetstester til ny funksjonalitet uten å spørre.
 - Action: Når det skal skrives tester til ny funksjonalitet, ikke gjør om eksisterende mocking, testoppsett og util-metoder samtidig, med mindre det er helt nødvendig. Spør om testoppsett skal skrives om først ved tvil.
+
+**2026-06-12 — Bulk Python-erstatning**
+- Observation: Python regex-basert bulk-erstatning av `coEvery`-blokker med parens som inneholdt `any()` stoppa regex-matching tidlig (`[^)]+` stoppet ved første `)` inne i `any()`), og etterlot halvferdige linjer i koden.
+- Action: Regex-basert bulk-erstatning av Kotlin multi-arg kall er risikabelt når argumentene selv inneholder parens (som `any()`). Valider alltid output: kjør kompilering umiddelbart etter slike erstatninger – forvent og se etter syntaxfeil og linjefragmenter.
+
+**2026-06-12 — Implementasjon vs. test-kontrakten**
+- Observation: Ny implementasjon konsoliderte to `hentGrunnlag`-kall til ett, men testene forventet `exactly = 2`. Dette var en korrekt forbedring, men det krevde oppdatering av testpåstander som ikke var åpenbare i forkant.
+- Action: Ved refaktorering fra HTTP-klient til intern service: tell forventede kall i den NYE impl., ikke den gamle. Den nye kan optimalisere (f.eks. cache grunnlag lokalt i scope) — sjekk om `exactly = N` i testene reflekterer ny eller gammel oppførsel.

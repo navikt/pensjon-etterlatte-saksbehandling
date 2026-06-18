@@ -71,25 +71,6 @@ class EtteroppgjoerService(
 
     fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
 
-    fun hentEtteroppgjoerSakerIBulk(
-        inntektsaar: Int,
-        antall: Int,
-        etteroppgjoerFilter: EtteroppgjoerFilter,
-        status: EtteroppgjoerStatus,
-        spesifikkeSaker: List<SakId> = emptyList(),
-        ekskluderteSaker: List<SakId> = emptyList(),
-        spesifikkeEnheter: List<String> = emptyList(),
-    ): List<SakId> =
-        dao.hentEtteroppgjoerSakerIBulk(
-            inntektsaar = inntektsaar,
-            antall = antall,
-            etteroppgjoerFilter = etteroppgjoerFilter,
-            status = status,
-            spesifikkeSaker = spesifikkeSaker,
-            ekskluderteSaker = ekskluderteSaker,
-            spesifikkeEnheter = spesifikkeEnheter,
-        )
-
     fun oppdaterEtteroppgjoerStatus(
         sakId: SakId,
         inntektsaar: Int,

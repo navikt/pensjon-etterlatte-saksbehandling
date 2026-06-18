@@ -71,25 +71,6 @@ class EtteroppgjoerService(
 
     fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
 
-    fun hentEtteroppgjoerSakerIBulk(
-        inntektsaar: Int,
-        antall: Int,
-        etteroppgjoerFilter: EtteroppgjoerFilter,
-        status: EtteroppgjoerStatus,
-        spesifikkeSaker: List<SakId> = emptyList(),
-        ekskluderteSaker: List<SakId> = emptyList(),
-        spesifikkeEnheter: List<String> = emptyList(),
-    ): List<SakId> =
-        dao.hentEtteroppgjoerSakerIBulk(
-            inntektsaar = inntektsaar,
-            antall = antall,
-            etteroppgjoerFilter = etteroppgjoerFilter,
-            status = status,
-            spesifikkeSaker = spesifikkeSaker,
-            ekskluderteSaker = ekskluderteSaker,
-            spesifikkeEnheter = spesifikkeEnheter,
-        )
-
     fun oppdaterEtteroppgjoerStatus(
         sakId: SakId,
         inntektsaar: Int,
@@ -158,6 +139,9 @@ class EtteroppgjoerService(
             MOTTATT_SKATTEOPPGJOER,
             VENTER_PAA_SKATTEOPPGJOER,
             -> {
+                logger.info(
+                    "Mottok skatteoppgjørhendelse for sakId=${sak.id}: oppdater status og opprett oppgave da status er: ${etteroppgjoer.status} OPPRETT-OPPGAVE",
+                )
                 oppdaterEtteroppgjoerStatus(
                     sak.id,
                     etteroppgjoer.inntektsaar,
@@ -447,6 +431,7 @@ class EtteroppgjoerService(
 
         sikkerLogg.info(
             "Skatteoppgjørhendelse for ferdigstilt etteroppgjør - sakId=${sak.id}, inntektsaar=${etteroppgjoer.inntektsaar}. " +
+                "(har relevant endring: $harEndring)" +
                 "Lagret PGI næring=${lagretPgi?.naeringsinntekt}, ny=${nyPgi.naeringsinntekt}. " +
                 "Lagret A-inntekt AFP=${lagretAInntekt?.afp}, ny=${nyAInntekt.afp}. " +
                 "Lagret A-inntekt lønn=${lagretAInntekt?.loenn}, ny=${nyAInntekt.loenn}. " +

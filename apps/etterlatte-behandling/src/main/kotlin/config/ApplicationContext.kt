@@ -131,6 +131,7 @@ internal class ApplicationContext(
     val behandlingInfoDao get() = daoModule.behandlingInfoDao
     val sakTilgangDao get() = daoModule.sakTilgangDao
     val opplysningDao get() = daoModule.opplysningDao
+    val vilkaarsvurderingDao get() = daoModule.vilkaarsvurderingDao
 
     // Klient
     val norg2Klient get() = klientModule.norg2Klient
@@ -202,6 +203,10 @@ internal class ApplicationContext(
     val behandlingsHendelser get() = kafkaModule.behandlingsHendelser
 
     val automatiskVedtakBehandlingService get() = highLevelServiceModule.automatiskVedtakBehandlingService
+
+    val trygdetidService get() = serviceModule.trygdetidService
+    val avtaleService get() = serviceModule.avtaleService
+    val internTrygdetidAktivert get() = serviceModule.internTrygdetidAktivert
 
     val lesSkatteoppgjoerHendelserJobService get() = jobModule.lesSkatteoppgjoerHendelserJobService
     val aarligInntektsjusteringJobbService get() = jobModule.aarligInntektsjusteringJobbService

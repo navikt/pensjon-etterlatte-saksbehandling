@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktAvdoedService
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland

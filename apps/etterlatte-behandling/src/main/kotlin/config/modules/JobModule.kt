@@ -279,7 +279,7 @@ class JobModule(
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             interval =
                 if (isProd()) {
-                    Duration.of(1, ChronoUnit.HOURS)
+                    Duration.of(5, ChronoUnit.MINUTES)
                 } else {
                     Duration.of(5, ChronoUnit.MINUTES)
                 },

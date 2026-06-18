@@ -252,6 +252,7 @@ data class Avkorting(
                     bruker,
                     opphoerFom,
                     aldersovergang,
+                    beregning,
                     brukNyeReglerAvkorting,
                 )
         }
@@ -273,6 +274,7 @@ data class Avkorting(
         bruker: BrukerTokenInfo,
         opphoerFom: YearMonth? = null,
         aldersovergang: YearMonth? = null,
+        beregning: Beregning? = null,
         brukNyeReglerAvkorting: Boolean = false,
     ): Avkorting {
         val aarsoppgjoer =
@@ -291,15 +293,14 @@ data class Avkorting(
 
         // Ved revurdering tilbake i tid - betyr det at fom i årsoppgjøret også må flyttes til fom i nytt inntektsgrunnlag
         val gjeldendeAaarsoppgjoerFom = if (nyttGrunnlag.fom < aarsoppgjoer.fom) nyttGrunnlag.fom else aarsoppgjoer.fom
+        val ytelseFoerAvkorting = ytelseFoerAvkortingForBeregning(aarsoppgjoer, beregning)
 
         val maanederInnvilget =
             finnAntallInnvilgaMaanederForAar(
                 fom = gjeldendeAaarsoppgjoerFom,
                 tom = tom,
                 aldersovergang = aldersovergang,
-                ytelse =
-                    this.aarsoppgjoer.singleOrNull { it.aar == nyttGrunnlag.fom.year }?.ytelseFoerAvkorting
-                        ?: emptyList(),
+                ytelse = ytelseFoerAvkorting,
                 brukNyeReglerAvkorting = brukNyeReglerAvkorting,
             )
 
@@ -350,6 +351,20 @@ data class Avkorting(
                 fom = gjeldendeAaarsoppgjoerFom,
             )
         return erstattAarsoppgjoer(oppdatertAarsoppjoer)
+    }
+
+    private fun ytelseFoerAvkortingForBeregning(
+        aarsoppgjoer: Aarsoppgjoer,
+        beregning: Beregning?,
+    ): List<YtelseFoerAvkorting> {
+        val virkningstidspunktAar = beregning?.beregningsperioder?.minOf { it.datoFOM }?.year
+        val ytelseFoerAvkorting =
+            if (virkningstidspunktAar != null && aarsoppgjoer.aar >= virkningstidspunktAar) {
+                aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
+            } else {
+                aarsoppgjoer.ytelseFoerAvkorting
+            }
+        return ytelseFoerAvkorting
     }
 
     /**
@@ -456,19 +471,12 @@ data class Avkorting(
         opphoerFom: YearMonth?,
         brukNyeReglerAvkorting: Boolean,
     ): Avkorting {
-        val virkningstidspunktAar = virkningstidspunkt.year
-
         val oppdaterteOppgjoer =
             (aarsoppgjoer)
                 .filter { it.aar <= (opphoerFom?.year ?: it.aar) }
                 .map { aarsoppgjoer ->
 
-                    val ytelseFoerAvkorting =
-                        if (beregning != null && aarsoppgjoer.aar >= virkningstidspunktAar) {
-                            aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
-                        } else {
-                            aarsoppgjoer.ytelseFoerAvkorting
-                        }
+                    val ytelseFoerAvkorting = ytelseFoerAvkortingForBeregning(aarsoppgjoer, beregning)
 
                     when (aarsoppgjoer) {
                         is AarsoppgjoerLoepende -> {

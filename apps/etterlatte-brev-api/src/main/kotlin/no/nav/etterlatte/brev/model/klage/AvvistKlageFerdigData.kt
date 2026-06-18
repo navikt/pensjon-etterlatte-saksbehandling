@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 data class AvvistKlageFerdigData(
     override val innhold: List<Slate.Element>,
-override val data: AvvistKlageInnholdBrevData,
+    override val data: AvvistKlageInnholdBrevData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -43,17 +43,18 @@ data class AvvistKlageInnholdBrevData(
         ): AvvistKlageInnholdBrevData {
             val klage = muligKlage ?: throw IllegalArgumentException("Vedtak mangler klage")
             return AvvistKlageInnholdBrevData(
-                data = AvvistKlageInnholdBrevDataData(
-                    sakType = klage.sak.sakType,
-                    klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
-                    datoForVedtaketKlagenGjelder =
-                        klage.formkrav
-                            ?.formkrav
-                            ?.vedtaketKlagenGjelder
-                            ?.datoAttestert
-                            ?.toLocalDate(),
-                    bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
-                ),
+                data =
+                    AvvistKlageInnholdBrevDataData(
+                        sakType = klage.sak.sakType,
+                        klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
+                        datoForVedtaketKlagenGjelder =
+                            klage.formkrav
+                                ?.formkrav
+                                ?.vedtaketKlagenGjelder
+                                ?.datoAttestert
+                                ?.toLocalDate(),
+                        bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                    ),
             )
         }
     }

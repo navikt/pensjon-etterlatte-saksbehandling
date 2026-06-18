@@ -59,9 +59,16 @@ class EtteroppgjoerService(
         sisteIverksatteBehandlingId: UUID,
         etteroppgjoersAar: Int,
         harDoedsfall: Boolean,
+        sammenlignTilOgMedBehandlingId: UUID?,
     ): BeregnetEtteroppgjoerResultat {
         val etteroppgjoerResultat =
-            beregnEtteroppgjoerResultat(etteroppgjoersAar, forbehandlingId, sisteIverksatteBehandlingId, harDoedsfall)
+            beregnEtteroppgjoerResultat(
+                etteroppgjoersAar,
+                forbehandlingId,
+                sisteIverksatteBehandlingId,
+                harDoedsfall,
+                sammenlignTilOgMedBehandlingId,
+            )
         etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
         return etteroppgjoerResultat
     }
@@ -141,6 +148,7 @@ class EtteroppgjoerService(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
         harDoedsfall: Boolean,
+        sammenlignTilOgMedBehandlingId: UUID?,
     ): BeregnetEtteroppgjoerResultat {
         // For å sikre at rettsgebyret forblir konsekvent i senere kjøringer, setter vi regelperioden basert på etteroppgjørsåret og ikke tidspunktet for kjøringen.
         // vi skal og bruke siste gjeldene rettsgebyr for etteroppgjoersAaret dvs det som er gjeldende 31. Desember
@@ -149,7 +157,8 @@ class EtteroppgjoerService(
 
         val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
 
-        val (vedtakReferanse, vedtakPerioder) = hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar)
+        val (vedtakReferanse, vedtakPerioder) =
+            hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, sammenlignTilOgMedBehandlingId)
         val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId)
 
         val inntektsgrunnlag =
@@ -212,8 +221,15 @@ class EtteroppgjoerService(
     private suspend fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
+        tilOgMedBehandlingId: UUID?,
     ): Pair<List<Long>, List<VedtakEtteroppgjoerPeriode>> {
-        val vedtaksliste = vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, HardkodaSystembruker.etteroppgjoer)
+        val vedtaksliste =
+            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(
+                sakId,
+                etteroppgjoersAar,
+                HardkodaSystembruker.etteroppgjoer,
+                tilOgMedBehandlingId,
+            )
 
         val vedtakReferanse = vedtaksliste.map { it.vedtakId }
         val vedtakPerioder =

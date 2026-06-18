@@ -81,8 +81,8 @@ class AvtaleRepository(
             queryOf(
                 statement =
                     """
-                    INSERT INTO trygdeavtale(id, behandling_id, avtale_kode, avtale_dato_kode, avtale_kriteria_kode, arb_inntekt, arb_inntekt_kommentar, bereg_art, bereg_art_kommentar, nordisk_trygdeavtale, nordisk_trygdeavtale_kommentar, kilde)
-                    VALUES(:id, :behandlingId, :avtaleKode, :avtaleDatoKode, :avtaleKriteriaKode, :arbInntekt1G, :arbInntekt1GKommentar, :beregArt50, :beregArt50Kommentar, :nordiskTrygdeAvtale, :nordiskTrygdeAvtaleKommentar, :kilde)
+                    INSERT INTO trygdeavtale(id, behandling_id, avtale_kode, avtale_dato_kode, avtale_kriteria_kode, person_krets, arb_inntekt, arb_inntekt_kommentar, bereg_art, bereg_art_kommentar, nordisk_trygdeavtale, nordisk_trygdeavtale_kommentar, kilde)
+                    VALUES(:id, :behandlingId, :avtaleKode, :avtaleDatoKode, :avtaleKriteriaKode, :personKrets, :arbInntekt1G, :arbInntekt1GKommentar, :beregArt50, :beregArt50Kommentar, :nordiskTrygdeAvtale, :nordiskTrygdeAvtaleKommentar, :kilde)
                     """.trimIndent(),
                 paramMap =
                     mapOf(
@@ -97,7 +97,7 @@ class AvtaleRepository(
                         "beregArt50" to trygdeavtale.beregArt50?.name,
                         "beregArt50Kommentar" to trygdeavtale.beregArt50Kommentar,
                         "nordiskTrygdeAvtale" to trygdeavtale.nordiskTrygdeAvtale?.name,
-                        "nordiskTrygdeAvtaleKommentarto" to trygdeavtale.nordiskTrygdeAvtaleKommentar,
+                        "nordiskTrygdeAvtaleKommentar" to trygdeavtale.nordiskTrygdeAvtaleKommentar,
                         "kilde" to trygdeavtale.kilde.toJson(),
                     ),
             ).let { query ->

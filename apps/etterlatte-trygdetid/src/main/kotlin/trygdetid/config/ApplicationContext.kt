@@ -29,7 +29,7 @@ class ApplicationContext {
             password = properties.dbPassword,
         )
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
-    private val avtaleRepository = AvtaleRepository(dataSource)
+    val avtaleRepository = AvtaleRepository(dataSource)
 
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val avtaleService = AvtaleService(avtaleRepository)
@@ -37,7 +37,7 @@ class ApplicationContext {
     val vedtaksvurderingKlient = VedtaksvurderingBehandlingKlient(config, httpClient())
 
     val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
-    private val trygdetidRepository = TrygdetidRepository(dataSource)
+    val trygdetidRepository = TrygdetidRepository(dataSource)
 
     val trygdetidService =
         TrygdetidServiceImpl(

@@ -61,3 +61,6 @@
 **2026-06-12 — Implementasjon vs. test-kontrakten**
 - Observation: Ny implementasjon konsoliderte to `hentGrunnlag`-kall til ett, men testene forventet `exactly = 2`. Dette var en korrekt forbedring, men det krevde oppdatering av testpåstander som ikke var åpenbare i forkant.
 - Action: Ved refaktorering fra HTTP-klient til intern service: tell forventede kall i den NYE impl., ikke den gamle. Den nye kan optimalisere (f.eks. cache grunnlag lokalt i scope) — sjekk om `exactly = N` i testene reflekterer ny eller gammel oppførsel.
+**2026-06-17 — REST-databaselag med toggle**
+- Observation: Toggle-logikk for kilde-valg hørte hjemme på wiring-nivå (ServiceModule), ikke spredt som sjekker i service-metodene. Når servicen alltid "oppfører seg", og korrekt implementasjon er injisert via interface, trengs ingen toggle-sjekk i logikken.
+- Action: Flytt toggle-logikk til komposeringsnivå (ApplicationContext/ServiceModule). Serviceklasser skal aldri sjekke toggles for å velge datakilde – det er DI sin jobb.

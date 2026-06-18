@@ -24,15 +24,15 @@ import javax.sql.DataSource
 
 class TrygdetidRepository(
     private val dataSource: DataSource,
-) {
-    fun hentTrygdetidMedId(
+) : TrygdetidRepositoryOperasjoner {
+    override fun hentTrygdetidMedId(
         behandlingId: UUID,
         trygdetidId: UUID,
     ): Trygdetid? = hentTrygdetiderForBehandling(behandlingId).find { it.id == trygdetidId }
 
-    fun hentTrygdetid(behandlingId: UUID): Trygdetid? = hentTrygdetiderForBehandling(behandlingId).minByOrNull { it.ident }
+    override fun hentTrygdetid(behandlingId: UUID): Trygdetid? = hentTrygdetiderForBehandling(behandlingId).minByOrNull { it.ident }
 
-    fun hentTrygdetiderForBehandling(behandlingId: UUID): List<Trygdetid> =
+    override fun hentTrygdetiderForBehandling(behandlingId: UUID): List<Trygdetid> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
@@ -85,7 +85,7 @@ class TrygdetidRepository(
             }
         }
 
-    fun opprettTrygdetid(trygdetid: Trygdetid): Trygdetid =
+    override fun opprettTrygdetid(trygdetid: Trygdetid): Trygdetid =
         dataSource
             .transaction { tx ->
                 opprettTrygdetid(trygdetid, tx)
@@ -97,7 +97,7 @@ class TrygdetidRepository(
                 }
             }.let { hentTrygdetidMedIdNotNull(behandlingId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
 
-    fun oppdaterTrygdetid(oppdatertTrygdetid: Trygdetid): Trygdetid =
+    override fun oppdaterTrygdetid(oppdatertTrygdetid: Trygdetid): Trygdetid =
         dataSource
             .transaction { tx ->
                 val gjeldendeTrygdetid =
@@ -166,7 +166,7 @@ class TrygdetidRepository(
                 }
             }.let { hentTrygdetidMedIdNotNull(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id) }
 
-    fun slettTrygdetid(trygdetidId: UUID) =
+    override fun slettTrygdetid(trygdetidId: UUID) {
         dataSource.transaction { tx ->
             queryOf(
                 statement =
@@ -181,8 +181,9 @@ class TrygdetidRepository(
                 tx.update(query)
             }
         }
+    }
 
-    fun hentTrygdetiderForAvdoede(avdoede: List<String>) =
+    override fun hentTrygdetiderForAvdoede(avdoede: List<String>) =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(

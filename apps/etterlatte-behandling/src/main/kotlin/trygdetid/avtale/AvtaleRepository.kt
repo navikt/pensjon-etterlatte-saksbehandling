@@ -13,8 +13,8 @@ import javax.sql.DataSource
 
 class AvtaleRepository(
     private val dataSource: DataSource,
-) {
-    fun hentAvtale(behandlingId: UUID): Trygdeavtale? =
+) : AvtaleRepositoryOperasjoner {
+    override fun hentAvtale(behandlingId: UUID): Trygdeavtale? =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
@@ -34,7 +34,7 @@ class AvtaleRepository(
             }
         }
 
-    fun lagreAvtale(trygdeavtale: Trygdeavtale) {
+    override fun lagreAvtale(trygdeavtale: Trygdeavtale) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
@@ -76,7 +76,7 @@ class AvtaleRepository(
         }
     }
 
-    fun opprettAvtale(trygdeavtale: Trygdeavtale) {
+    override fun opprettAvtale(trygdeavtale: Trygdeavtale) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =

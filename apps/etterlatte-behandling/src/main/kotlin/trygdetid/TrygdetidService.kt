@@ -193,7 +193,7 @@ private fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
 private const val AUTOMATISK_FREMTIDIG_BEGRUNNELSE = "Automatisk beregnet fremtidig trygdetid"
 
 class TrygdetidServiceImpl(
-    private val trygdetidRepository: TrygdetidRepository,
+    private val trygdetidRepository: TrygdetidRepositoryOperasjoner,
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagService,
     private val beregnTrygdetidService: TrygdetidBeregningService,
@@ -201,19 +201,8 @@ class TrygdetidServiceImpl(
     private val avtaleService: AvtaleService,
     private val behandlingsStatusService: BehandlingStatusService,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
-    private val brukInternTrygdetid: Boolean,
-    private val brukEgenDatabaseForTrygdetid: Boolean,
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    private fun sjekkInternTrygdetidAktivert() {
-        if (!brukInternTrygdetid || !brukEgenDatabaseForTrygdetid) {
-            throw IkkeTillattException(
-                code = "INTERN_TRYGDETID_IKKE_AKTIVERT",
-                detail = "Intern trygdetid i behandling er ikke aktivert ennå",
-            )
-        }
-    }
 
     companion object {
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
@@ -222,24 +211,20 @@ class TrygdetidServiceImpl(
     override suspend fun hentTrygdetiderIBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<Trygdetid> {
-        sjekkInternTrygdetidAktivert()
-        return trygdetidRepository
+    ): List<Trygdetid> =
+        trygdetidRepository
             .hentTrygdetiderForBehandling(behandlingId)
             .mapNotNull { trygdetid -> sjekkTrygdetidMotGrunnlag(trygdetid, brukerTokenInfo) }
             .sortedBy { it.ident }
-    }
 
     override suspend fun hentTrygdetidIBehandlingMedId(
         behandlingId: UUID,
         trygdetidId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? {
-        sjekkInternTrygdetidAktivert()
-        return trygdetidRepository
+    ): Trygdetid? =
+        trygdetidRepository
             .hentTrygdetidMedId(behandlingId, trygdetidId)
             ?.let { trygdetid -> sjekkTrygdetidMotGrunnlag(trygdetid, brukerTokenInfo) }
-    }
 
     override suspend fun opprettTrygdetiderForBehandling(
         behandlingId: UUID,
@@ -413,7 +398,6 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
-        sjekkInternTrygdetidAktivert()
         val avdoede =
             grunnlagService.hentOpplysningsgrunnlag(behandlingId)?.hentAvdoede()
                 ?: throw InternfeilException("Grunnlag mangler for behandling $behandlingId")
@@ -447,7 +431,6 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        sjekkInternTrygdetidAktivert()
         val behandling =
             behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
                 ?: throw GenerellIkkeFunnetException()
@@ -703,7 +686,6 @@ class TrygdetidServiceImpl(
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        sjekkInternTrygdetidAktivert()
         val behandling =
             behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
                 ?: throw GenerellIkkeFunnetException()
@@ -844,7 +826,6 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         block: suspend () -> T,
     ): T {
-        sjekkInternTrygdetidAktivert()
         val kanFastsetteTrygdetid =
             try {
                 behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true)
@@ -869,7 +850,6 @@ class TrygdetidServiceImpl(
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        sjekkInternTrygdetidAktivert()
         val behandling =
             behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
                 ?: throw GenerellIkkeFunnetException()
@@ -1013,7 +993,6 @@ class TrygdetidServiceImpl(
         ident: String,
         beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
     ): Trygdetid {
-        sjekkInternTrygdetidAktivert()
         val trygdetid =
             trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).find { it.ident == ident }
                 ?: throw GenerellIkkeFunnetException()
@@ -1036,7 +1015,6 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        sjekkInternTrygdetidAktivert()
         val trygdetidList = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
         if (trygdetidList.isEmpty()) {
             throw IngenTrygdetidFunnetForAvdoede()
@@ -1238,7 +1216,6 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): UUID? {
-        sjekkInternTrygdetidAktivert()
         val avdoede: List<Folkeregisteridentifikator> =
             grunnlagService
                 .hentOpplysningsgrunnlag(behandlingId)

@@ -57,14 +57,11 @@ class AdresseService(
                     ?.let { hentMottakerAdresse(sakType, it) }
 
             // soekerAdresse er gjenlevende hvis det er en OMS saktype, men hvis det er BP må vi sjekke det opp
-            // TODO kan sjekken mot innsender fjernes?
             val gjenlevendeMottaker: Mottaker? =
                 gjenlevende
                     .firstOrNull()
-                    ?.takeIf {
-                        sakType == SakType.BARNEPENSJON && !soekerErMyndig &&
-                            it !in listOfNotNull(soeker.fnr.value, innsender?.fnr?.value)
-                    }?.let { hentMottakerAdresse(sakType, it) }
+                    ?.takeIf { sakType == SakType.BARNEPENSJON && !soekerErMyndig }
+                    ?.let { hentMottakerAdresse(sakType, it) }
 
             val vergeMottaker: Mottaker? =
                 when (verge) {
@@ -79,19 +76,29 @@ class AdresseService(
                     }
 
                     else -> {
-                        innsender
-                            ?.fnr
-                            ?.value
-                            ?.takeIf { Folkeregisteridentifikator.isValid(it) && it != soeker.fnr.value }
-                            ?.let { hentMottakerAdresse(sakType, it) }
+                        null
                     }
                 }
 
+            // Legger til innsender som mottaker dersom innsender ikke er gjenlevende, soeker eller verge
+            val innsenderMottaker: Mottaker? =
+                innsender
+                    ?.fnr
+                    ?.value
+                    ?.takeIf {
+                        Folkeregisteridentifikator.isValid(it) && it !in
+                            listOfNotNull(
+                                soeker.fnr.value,
+                                gjenlevende.firstOrNull(),
+                                (verge as? Vergemaal)?.foedselsnummer?.value,
+                            )
+                    }?.let { hentMottakerAdresse(sakType, it) }
+
             val mottakereIPrioritertRekkefoelge: List<Mottaker?> =
                 if (soekerErMyndig || soekerFoedselsdato == null) {
-                    listOf(vergeMottaker, soekerMottaker, gjenlevendeMottaker)
+                    listOf(vergeMottaker, soekerMottaker)
                 } else {
-                    listOf(vergeMottaker, gjenlevendeMottaker, soekerMottaker)
+                    listOf(vergeMottaker, gjenlevendeMottaker, innsenderMottaker, soekerMottaker)
                 }
 
             // Default er .HOVED, og setter alle som kommer etter til .KOPI avhengig av prioritet som bestemt over

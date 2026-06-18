@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.adresse
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -109,7 +110,7 @@ internal class AdresseServiceTest {
     }
 
     @Test
-    fun `BP skal ikke ha med gjenlevende på kopi om den er ulik innsender og søker hvis søker er over 18`() {
+    fun `BP Hvis søker er over 18 og ikke har verge, skal kun soeker være mottaker`() {
         val sakType = SakType.BARNEPENSJON
         val personerISak =
             PersonerISak(
@@ -127,10 +128,11 @@ internal class AdresseServiceTest {
             runBlocking {
                 adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
             }
-        mottakere.size shouldBe 2
+        mottakere.size shouldBe 1
         mottakere.count { it.type == MottakerType.HOVED && it.foedselsnummer?.value == SOEKER_FOEDSELSNUMMER.value } shouldBe 1
-        mottakere.count { it.type == MottakerType.KOPI && it.foedselsnummer?.value == INNSENDER_FOEDSELSNUMMER.value } shouldBe 1
-        mottakere.count { it.type == MottakerType.KOPI && it.foedselsnummer?.value == GJENLEVENDE_FOEDSELSNUMMER.value } shouldBe 0
+        mottakere.count { it.foedselsnummer?.value == INNSENDER_FOEDSELSNUMMER.value } shouldBe 0
+        mottakere.count { it.foedselsnummer?.value == GJENLEVENDE_FOEDSELSNUMMER.value } shouldBe 0
+        mottakere.count { it.foedselsnummer?.value == VERGE_FOEDSELSNUMMER.value } shouldBe 0
 
         coVerify(exactly = 1) {
             regoppslagMock.hentMottakerAdresse(sakType, INNSENDER_FOEDSELSNUMMER.value)
@@ -228,7 +230,7 @@ internal class AdresseServiceTest {
 
     @ParameterizedTest
     @EnumSource(SakType::class)
-    fun `Skal sende kopi til innsender hvis verge mangler`(sakType: SakType) {
+    fun `Skal ikke sende kopi til innsender når søker er over 18`(sakType: SakType) {
         val personerISak =
             PersonerISak(
                 innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
@@ -245,10 +247,7 @@ internal class AdresseServiceTest {
                 adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
             }
 
-        mottakere.size shouldBe 2
-
-        val innsender = mottakere.single { it.foedselsnummer!!.value == personerISak.innsender!!.fnr.value }
-        innsender.type shouldBe MottakerType.KOPI
+        mottakere.size shouldBe 1
 
         val soeker = mottakere.single { it.foedselsnummer!!.value == personerISak.soeker.fnr.value }
         soeker.type shouldBe MottakerType.HOVED
@@ -261,7 +260,7 @@ internal class AdresseServiceTest {
 
     @ParameterizedTest
     @EnumSource(SakType::class)
-    fun `Skal sende kopi til verge hvis verge finnes`(sakType: SakType) {
+    fun `Verge skal være hovedmottaker hvis verge finnes`(sakType: SakType) {
         val personerISak =
             PersonerISak(
                 innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
@@ -282,15 +281,18 @@ internal class AdresseServiceTest {
 
         val verge =
             mottakere.single { it.foedselsnummer!!.value == (personerISak.verge as Vergemaal).foedselsnummer.value }
-        verge.type shouldBe MottakerType.KOPI
+        verge.type shouldBe MottakerType.HOVED
 
         val soeker = mottakere.single { it.foedselsnummer!!.value == personerISak.soeker.fnr.value }
-        soeker.type shouldBe MottakerType.HOVED
+        soeker.type shouldBe MottakerType.KOPI
 
         coVerify(exactly = 1) {
             regoppslagMock.hentMottakerAdresse(sakType, personerISak.soeker.fnr.value)
-            // Skal ikke hente mottaker adresse for verge
         }
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, personerISak.innsender!!.fnr.value)
+        }
+        // Skal ikke hente mottaker adresse for verge
     }
 
     @ParameterizedTest
@@ -323,6 +325,9 @@ internal class AdresseServiceTest {
 
         coVerify(exactly = 1) {
             regoppslagMock.hentMottakerAdresse(sakType, personerISak.soeker.fnr.value)
+        }
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, personerISak.innsender!!.fnr.value)
         }
     }
 
@@ -358,6 +363,9 @@ internal class AdresseServiceTest {
             regoppslagMock.hentMottakerAdresse(sakType, personerISak.soeker.fnr.value)
             // Skal ikke hente mottaker adresse for verge
         }
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, personerISak.innsender!!.fnr.value)
+        }
     }
 
     @ParameterizedTest
@@ -379,11 +387,14 @@ internal class AdresseServiceTest {
                 adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
             }
 
-        mottakere.size shouldBe 2
+        mottakere.size shouldBe 3
 
         val verge =
             mottakere.single { it.foedselsnummer!!.value == (personerISak.verge as Vergemaal).foedselsnummer.value }
         verge.type shouldBe MottakerType.HOVED
+
+        val innsender = mottakere.single { it.foedselsnummer!!.value == personerISak.innsender!!.fnr.value }
+        innsender.type shouldBe MottakerType.KOPI
 
         val soeker = mottakere.single { it.foedselsnummer!!.value == personerISak.soeker.fnr.value }
         soeker.type shouldBe MottakerType.KOPI
@@ -391,6 +402,9 @@ internal class AdresseServiceTest {
         coVerify(exactly = 1) {
             regoppslagMock.hentMottakerAdresse(sakType, personerISak.soeker.fnr.value)
             // Skal ikke hente mottaker adresse for verge
+        }
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, personerISak.innsender!!.fnr.value)
         }
     }
 
@@ -413,7 +427,7 @@ internal class AdresseServiceTest {
                 adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
             }
 
-        mottakere.size shouldBe 1
+        mottakere.size shouldBe 2
 
         val verge =
             mottakere.single { it.foedselsnummer!!.value == (personerISak.verge as Vergemaal).foedselsnummer.value }
@@ -422,10 +436,10 @@ internal class AdresseServiceTest {
         val soeker = mottakere.find { it.foedselsnummer!!.value == personerISak.soeker.fnr.value }
         soeker shouldBe null
 
-        coVerify {
-            // Skal ikke hente mottaker adresse for verge eller søker
-            regoppslagMock wasNot Called
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, personerISak.innsender!!.fnr.value)
         }
+        // Skal ikke hente mottaker adresse for verge eller søker
     }
 
     private fun opprettRegoppslagResponse() =

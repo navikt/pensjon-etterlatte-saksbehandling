@@ -115,10 +115,9 @@ class BeregnAvkortingNyeReglerTest {
                 )
         avkorting.aarsoppgjoer shouldHaveSize 1
         avkorting.aarsoppgjoer.single().aar shouldBe 2024
-        avkorting.aarsoppgjoer
-            .single()
-            .avkortetYtelse
-            .shouldNotBeEmpty()
+        val avkortetYtelse = avkorting.aarsoppgjoer.single().avkortetYtelse
+        avkortetYtelse.shouldNotBeEmpty()
+        avkortetYtelse.last().periode.tom shouldBe null
     }
 
     @Test

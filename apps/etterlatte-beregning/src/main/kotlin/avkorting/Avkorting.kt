@@ -613,11 +613,56 @@ data class Avkorting(
                 }
             }
 
+        val avkortetYtelseJustert =
+            aapneSistePeriodeHvisBeregningErAapen(avkortetYtelse, aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
+
         return aarsoppgjoer.copy(
             ytelseFoerAvkorting = ytelseFoerAvkorting,
             inntektsavkorting = reberegnetInntektsavkorting,
-            avkortetYtelse = avkortetYtelse,
+            avkortetYtelse = avkortetYtelseJustert,
         )
+    }
+
+    /**
+     * Hvis dette er det siste årsoppgjøret og den underliggende beregningen har åpen TOM (f.eks. permanent stans),
+     * skal siste periode i avkortet ytelse også ha åpen TOM. Beregningen kjøres trygt med lukket periode
+     * (tom=desember) for å unngå problemer i regelkjøringen, og siste periode åpnes i etterkant.
+     */
+    private fun aapneSistePeriodeHvisBeregningErAapen(
+        avkortetYtelse: List<AvkortetYtelse>,
+        aarsoppgjoer: AarsoppgjoerLoepende,
+        ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
+        opphoerFom: YearMonth?,
+    ): List<AvkortetYtelse> {
+        if (avkortetYtelse.isEmpty()) {
+            return avkortetYtelse
+        }
+        val harAarsoppgjoerNesteAar = this.aarsoppgjoer.any { it.aar == aarsoppgjoer.aar + 1 }
+        if (harAarsoppgjoerNesteAar) {
+            return avkortetYtelse
+        }
+        if (opphoerFom != null) {
+            return avkortetYtelse
+        }
+        val sisteBeregning = ytelseFoerAvkorting.maxByOrNull { it.periode.fom } ?: return avkortetYtelse
+        if (sisteBeregning.periode.tom != null) {
+            return avkortetYtelse
+        }
+        val harBeregningsperioderSomIkkeErNullEtterSisteAarsoppgjoeret =
+            ytelseFoerAvkorting.any {
+                it.beregning != 0 && it.periode.fom.year > aarsoppgjoer.aar
+            }
+        if (harBeregningsperioderSomIkkeErNullEtterSisteAarsoppgjoeret) {
+            throw InternfeilException(
+                "Vi har ikke nok grunnlag for å beregne avkortingen for årsoppgjør ${aarsoppgjoer.id}, " +
+                    "siden vi har en åpen beregningsperiode med fom > det siste årsoppgjøret vi har grunnlag for, " +
+                    "med en beregning som ikke er 0 kr. Dette betyr at vi har ytelse som skal avkortes som ikke " +
+                    "blir det, avbryter derfor beregning av avkorting. " +
+                    "${ytelseFoerAvkorting.joinToString { "${it.periode to it.beregningsreferanse}" }}",
+            )
+        }
+        val sistePeriode = avkortetYtelse.last()
+        return avkortetYtelse.dropLast(1) + sistePeriode.copy(periode = sistePeriode.periode.copy(tom = null))
     }
 
     /**

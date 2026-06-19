@@ -2,12 +2,15 @@ package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Slate
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 object OmstillingsstoenadRevurderingVedtakBrevData {
@@ -52,6 +55,22 @@ object OmstillingsstoenadRevurderingVedtakBrevData {
                         ?: emptyList(),
             )
 
-        override val brevKode: Brevkoder = Brevkoder.OMS_INNVILGELSE
+        override val brevKode: Brevkoder = Brevkoder.OMS_REVURDERING
+    }
+
+    data class VedtakInnhold(
+        val virkningsdato: LocalDate,
+        val utbetalingsbeloep: Kroner,
+        val etterbetaling: Boolean,
+        val avdoed: Avdoed?,
+        val harUtbetaling: Boolean,
+        val beregning: OmstillingsstoenadBeregning,
+        val erSluttbehandling: Boolean = false,
+        val tidligereFamiliepleier: Boolean,
+        val datoVedtakOmgjoering: LocalDate?,
+    ) : BrevRedigerbarInnholdData() {
+        override val type: String = "OMSTILLINGSSTOENAD_REVURDERING_UTFALL"
+
+        override val brevKode: Brevkoder = Brevkoder.OMS_REVURDERING
     }
 }

@@ -109,6 +109,10 @@ abstract class BrevFastInnholdData : BrevData {
         value = OmstillingsstoenadInnvilgelseVedtakBrevData.VedtakInnhold::class,
         name = "OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL",
     ),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnhold::class,
+        name = "OMSTILLINGSSTOENAD_REVURDERING_UTFALL",
+    ),
     JsonSubTypes.Type(value = AvvistKlageBrevRedigerbarInnholdData::class, name = "AVVIST_KLAGE_UTFALL"),
 )
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {

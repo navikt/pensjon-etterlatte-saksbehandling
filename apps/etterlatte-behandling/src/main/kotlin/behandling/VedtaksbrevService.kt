@@ -22,8 +22,10 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.erYrkesskade
 import no.nav.etterlatte.brev.model.fromDto
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnhold
 import no.nav.etterlatte.brev.model.oms.omsBeregning
 import no.nav.etterlatte.brev.model.oms.toAvkortetBeregningsperiode
 import no.nav.etterlatte.brev.model.oms.utledBeregningsperioderOpphoer
@@ -32,7 +34,9 @@ import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.etterlatte.libs.common.behandling.BehandlingType.REVURDERING
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.NY_SOEKNAD
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.OMGJOERING_ETTER_KLAGE
@@ -284,23 +288,49 @@ class VedtaksbrevService(
                     tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
                 ),
             brevRedigerbarInnholdData =
-                OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnhold(
-                    virkningsdato = fellesData.virkningsdato,
-                    utbetalingsbeloep =
-                        fellesData.avkortingsinfo.beregningsperioder
-                            .firstOrNull()
-                            ?.utbetaltBeloep
-                            ?: throw UgyldigForespoerselException(
-                                "MANGLER_BEREGNINGSPERIODER_AVKORTING",
-                                "Mangler beregningsperioder i avkorting",
-                            ),
-                    etterbetaling = fellesData.etterbetaling != null,
-                    avdoed = if (behandling.tidligereFamiliepleier?.svar ?: false) null else fellesData.avdoede.single(),
-                    harUtbetaling = fellesData.harUtbetaling(),
-                    beregning = beregning,
-                    erSluttbehandling = behandling.erSluttbehandling,
-                    tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
-                    datoVedtakOmgjoering = fellesData.klage?.datoVedtakOmgjoering(),
+                VedtakInnhold(
+                    beregning =
+                        OmstillingsstoenadBeregningRedigerbartUtfall(
+                            virkningsdato = fellesData.avkortingsinfo.virkningsdato,
+                            beregningsperioder = fellesData.beregningsperioder,
+                            sisteBeregningsperiode = sisteBeregningsperiode,
+                            sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+                            oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                            opphoerNesteAar =
+                                beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        ),
+                    erEndret =
+                        fellesData.avkortingsinfo.endringIUtbetalingVedVirk ||
+                            behandling.revurderingsaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
+                    erEtterbetaling = fellesData.etterbetaling != null,
+                    etterbetaling =
+                        fellesData.etterbetaling?.let {
+                            Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
+                                it,
+                                fellesData.beregningsperioder,
+                            )
+                        },
+                    feilutbetaling =
+                        krevIkkeNull(
+                            fellesData.brevutfall.feilutbetaling
+                                ?.valg
+                                ?.let(::toFeilutbetalingType),
+                        ) {
+                            "Feilutbetaling mangler i brevutfall"
+                        },
+                    harFlereUtbetalingsperioder = fellesData.beregningsperioder.size > 1,
+                    harUtbetaling = fellesData.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    inntekt = sisteBeregningsperiode.inntekt,
+                    inntektsAar = sisteBeregningsperiode.datoFOM.year,
+                    mottattInntektendringAutomatisk =
+                        if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
+                            behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING
+                        ) {
+                            behandling.mottattDato?.toLocalDate()
+                                ?: throw InternfeilException("Automatisk inntektsendring må ha mottatt dato")
+                        } else {
+                            null
+                        },
                 ),
             brevVedleggData =
                 listOf(
@@ -403,3 +433,11 @@ fun innvilgetMindreEnnFireMndEtterDoedsfall(
 ): Boolean = innvilgelsesDato.isBefore(doedsdatoEllerOpphoertPleieforhold.plusMonths(4))
 
 private fun OmsVedtaksbrevGrunnlag.harUtbetaling(): Boolean = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 }
+
+private fun toFeilutbetalingType(feilutbetalingValg: FeilutbetalingValg) =
+    when (feilutbetalingValg) {
+        FeilutbetalingValg.NEI -> FeilutbetalingType.INGEN_FEILUTBETALING
+        FeilutbetalingValg.JA_INGEN_TK -> FeilutbetalingType.FEILUTBETALING_4RG_UTEN_VARSEL
+        FeilutbetalingValg.JA_INGEN_VARSEL_MOTREGNES -> FeilutbetalingType.FEILUTBETALING_UTEN_VARSEL
+        FeilutbetalingValg.JA_VARSEL -> FeilutbetalingType.FEILUTBETALING_MED_VARSEL
+    }

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.config.modules
 
+import no.nav.etterlatte.EnvKey.BRUK_EGEN_DATABASE_FOR_TRYGDETID
+import no.nav.etterlatte.EnvKey.BRUK_INTERN_TRYGDETID
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BrukerService
@@ -53,6 +55,11 @@ import no.nav.etterlatte.sak.TilgangServiceSjekkerImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
+import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
+import no.nav.etterlatte.trygdetid.avtale.AvtaleService
+import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlientAdapter
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 
 class ServiceModule(
@@ -467,6 +474,34 @@ class ServiceModule(
             outboxRepository = daoModule.outboxRepository,
             vedtaksvurderingService = vedtaksvurderingService,
             vedtakshendelseEksternProdusent = kafkaModule.vedtakshendelserEksternProdusent,
+        )
+    }
+
+    private val brukInternTrygdetid: Boolean by lazy { env[BRUK_INTERN_TRYGDETID] == "true" }
+    private val brukEgenDatabaseForTrygdetid: Boolean by lazy { env[BRUK_EGEN_DATABASE_FOR_TRYGDETID] == "true" }
+
+    val internTrygdetidAktivert: Boolean by lazy { brukInternTrygdetid && brukEgenDatabaseForTrygdetid }
+
+    val avtaleService: AvtaleService by lazy {
+        AvtaleService(
+            avtaleRepository = daoModule.avtaleRepository,
+            brukInternTrygdetid = brukInternTrygdetid,
+            brukEgenDatabaseForTrygdetid = brukEgenDatabaseForTrygdetid,
+        )
+    }
+
+    val trygdetidService: TrygdetidService by lazy {
+        TrygdetidServiceImpl(
+            trygdetidRepository = daoModule.trygdetidRepository,
+            behandlingService = behandlingService,
+            grunnlagService = grunnlagService,
+            beregnTrygdetidService = TrygdetidBeregningService,
+            pesysKlient = klientModule.trygdetidPesysKlient,
+            avtaleService = avtaleService,
+            behandlingsStatusService = behandlingsStatusService,
+            vedtaksvurderingKlient = VedtaksvurderingKlientAdapter(vedtaksvurderingService),
+            brukInternTrygdetid = brukInternTrygdetid,
+            brukEgenDatabaseForTrygdetid = brukEgenDatabaseForTrygdetid,
         )
     }
 }

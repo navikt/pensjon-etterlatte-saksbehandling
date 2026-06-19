@@ -339,30 +339,6 @@ fun Route.etteroppgjoerRoutes(
                     }
                 }
             }
-
-            post("bulk") {
-                sjekkEtteroppgjoerEnabled(featureToggleService)
-
-                kunSystembruker {
-                    val request = call.receive<EtteroppgjoerForbehandlingBulkRequest>()
-                    logger.info("Starter bulk opprettelse av etteroppgjør forbehandlinger")
-
-                    inTransaction {
-                        forbehandlingService.opprettEtteroppgjoerForbehandlingIBulk(
-                            inntektsaar = request.inntektsaar,
-                            antall = request.antall,
-                            etteroppgjoerFilter = request.etteroppgjoerFilter,
-                            spesifikkeSaker = request.spesifikkeSaker,
-                            ekskluderteSaker = request.ekskluderteSaker,
-                            spesifikkeEnheter = request.spesifikkeEnheter,
-                        )
-                    }
-
-                    logger.info("Ferdig med bulk opprettelse av etteroppgjør forbehandlinger")
-
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
         }
 
         get("/forbehandlinger/{$SAKID_CALL_PARAMETER}") {
@@ -424,13 +400,4 @@ private fun sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService: Fea
 
 data class OpprettEtteroppgjoerForbehandlingRequest(
     val inntektsaar: Int,
-)
-
-data class EtteroppgjoerForbehandlingBulkRequest(
-    val inntektsaar: Int,
-    val antall: Int,
-    val etteroppgjoerFilter: EtteroppgjoerFilter,
-    val spesifikkeSaker: List<SakId>,
-    val ekskluderteSaker: List<SakId>,
-    val spesifikkeEnheter: List<String>,
 )

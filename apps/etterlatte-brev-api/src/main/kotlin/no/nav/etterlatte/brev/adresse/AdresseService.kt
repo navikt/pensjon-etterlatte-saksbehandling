@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.mottakerFraAdresse
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
@@ -85,17 +86,18 @@ class AdresseService(
                             )
                     }?.let { hentMottakerAdresse(sakType, it) }
 
-            val mottakereIPrioritertRekkefoelge: List<Mottaker?> =
+            val mottakereIPrioritertRekkefoelge: List<Mottaker> =
                 if (soekerErMyndig || soekerFoedselsdato == null) {
-                    listOf(vergeMottaker, soekerMottaker)
+                    listOfNotNull(vergeMottaker, soekerMottaker)
                 } else {
-                    listOf(vergeMottaker, gjenlevendeMottaker, innsenderMottaker, soekerMottaker)
+                    listOfNotNull(vergeMottaker, gjenlevendeMottaker, innsenderMottaker, soekerMottaker)
                 }
 
-            // Default er .HOVED, og setter alle som kommer etter til .KOPI avhengig av prioritet som bestemt over
-            mottakereIPrioritertRekkefoelge
-                .filterNotNull()
-                .mapIndexed { i, mottaker -> mottaker.copy(type = if (i == 0) MottakerType.HOVED else MottakerType.KOPI) }
+            val hovedmottaker =
+                mottakereIPrioritertRekkefoelge.firstOrNull()
+                    ?: throw InternfeilException("Dette skal ikke skje, men vi har ingen gyldige mottakere")
+            val kopimottakere = mottakereIPrioritertRekkefoelge.drop(1)
+            listOf(hovedmottaker.copy(type = MottakerType.HOVED)) + kopimottakere.map { it.copy(type = MottakerType.KOPI) }
         }
 
     suspend fun hentAvsender(

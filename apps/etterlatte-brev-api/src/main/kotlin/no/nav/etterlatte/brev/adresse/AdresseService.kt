@@ -59,7 +59,7 @@ class AdresseService(
             // soekerAdresse er gjenlevende hvis det er en OMS saktype, men hvis det er BP må vi sjekke det opp
             val gjenlevendeMottaker: Mottaker? =
                 gjenlevende
-                    .firstOrNull()
+                    .firstOrNull { soeker.ansvarligeForeldre.contains(it) }
                     ?.takeIf { sakType == SakType.BARNEPENSJON && !soekerErMyndig }
                     ?.let { hentMottakerAdresse(sakType, it) }
 

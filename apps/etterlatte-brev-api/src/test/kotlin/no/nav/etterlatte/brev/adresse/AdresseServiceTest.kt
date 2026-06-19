@@ -146,7 +146,14 @@ internal class AdresseServiceTest {
         val personerISak =
             PersonerISak(
                 innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
-                soeker = Soeker("RETRO", null, "TELEFONKIOSK", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                soeker =
+                    Soeker(
+                        "RETRO",
+                        null,
+                        "TELEFONKIOSK",
+                        Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                        ansvarligeForeldre = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+                    ),
                 avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
                 verge = null,
                 gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
@@ -176,7 +183,14 @@ internal class AdresseServiceTest {
         val personerISak =
             PersonerISak(
                 innsender = Innsender(Foedselsnummer(GJENLEVENDE_FOEDSELSNUMMER.value)),
-                soeker = Soeker("RETRO", null, "TELEFONKIOSK", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                soeker =
+                    Soeker(
+                        "RETRO",
+                        null,
+                        "TELEFONKIOSK",
+                        Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                        ansvarligeForeldre = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+                    ),
                 avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
                 verge = null,
                 gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),

@@ -21,4 +21,5 @@ data class Soeker(
     val under18: Boolean? = null,
     val foreldreloes: Boolean = false,
     val ufoere: Boolean = false,
+    val ansvarligeForeldre: List<String> = emptyList(),
 )

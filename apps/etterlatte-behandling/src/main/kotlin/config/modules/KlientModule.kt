@@ -48,6 +48,8 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
+import no.nav.etterlatte.trygdetid.klienter.PesysKlient as TrygdetidPesysKlient
+import no.nav.etterlatte.trygdetid.klienter.PesysKlientImpl as TrygdetidPesysKlientImpl
 
 class KlientModule(
     private val config: Config,
@@ -188,6 +190,10 @@ class KlientModule(
             client = standardHttpClient,
             url = config.getString("arbeidOgInntekt.url"),
         )
+    }
+
+    val trygdetidPesysKlient: TrygdetidPesysKlient by lazy {
+        TrygdetidPesysKlientImpl(config = config, httpClient = standardHttpClient)
     }
 
     val leaderElectionHttpClient: HttpClient by lazy {

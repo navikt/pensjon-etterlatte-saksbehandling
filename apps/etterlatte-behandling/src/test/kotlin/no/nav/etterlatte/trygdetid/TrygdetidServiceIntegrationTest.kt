@@ -4,14 +4,18 @@ import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -38,8 +42,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.trygdetid.avtale.AvtaleService
-import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
-import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
 import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlient
 import org.junit.jupiter.api.AfterEach
@@ -69,9 +71,10 @@ internal class TrygdetidServiceIntegrationTest(
     private val pdlKilde: Grunnlagsopplysning.Pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
     private val regelKilde: Grunnlagsopplysning.RegelKilde = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
 
-    private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
+    private val grunnlagService: GrunnlagService = mockk()
 
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val behandlingsStatusService = mockk<BehandlingStatusService>()
     private val avtaleService = mockk<AvtaleService>()
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
 
@@ -82,13 +85,15 @@ internal class TrygdetidServiceIntegrationTest(
         trygdetidService =
             TrygdetidServiceImpl(
                 repository,
-                behandlingKlient,
-                grunnlagKlient,
+                behandlingService,
+                grunnlagService,
                 TrygdetidBeregningService,
                 mockk<PesysKlient>(),
                 avtaleService,
+                behandlingsStatusService,
                 vedtaksvurderingKlient,
-                DummyFeatureToggleService(),
+                brukInternTrygdetid = true,
+                brukEgenDatabaseForTrygdetid = true,
             )
     }
 
@@ -107,9 +112,7 @@ internal class TrygdetidServiceIntegrationTest(
                 .first()
                 .doedsdato!!
                 .plusDays(6)
-        coEvery {
-            grunnlagKlient.hentGrunnlag(any(), any())
-        } returns grunnlagMedNyDoedsdato(nyDoedsdato)
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlagMedNyDoedsdato(nyDoedsdato)
 
         repository.opprettTrygdetid(
             trygdetid(
@@ -151,9 +154,9 @@ internal class TrygdetidServiceIntegrationTest(
         val grunnlagTestData = GrunnlagTestData()
 
         coEvery { avtaleService.hentAvtaleForBehandling(any()) } returns null
-        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
-        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
-        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = true) } just Runs
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = false) } just Runs
+        every { behandlingService.hentDetaljertBehandling(behandlingId, saksbehandler) } returns
             mockk {
                 every { id } returns behandlingId
                 every { sak } returns sakId
@@ -161,7 +164,7 @@ internal class TrygdetidServiceIntegrationTest(
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
             }
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlagTestData.hentOpplysningsgrunnlag()
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlagTestData.hentOpplysningsgrunnlag()
 
         val trygdetidOpprinnelig =
             repository.opprettTrygdetid(
@@ -186,9 +189,7 @@ internal class TrygdetidServiceIntegrationTest(
         val behandlingId = UUID.randomUUID()
         val grunnlagTestData = GrunnlagTestData()
 
-        coEvery {
-            grunnlagKlient.hentGrunnlag(any(), any())
-        } returns grunnlagTestData.hentOpplysningsgrunnlag()
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlagTestData.hentOpplysningsgrunnlag()
 
         repository.opprettTrygdetid(
             trygdetid(
@@ -228,9 +229,7 @@ internal class TrygdetidServiceIntegrationTest(
         val grunnlagTestData = GrunnlagTestData()
         val standardOpplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
 
-        coEvery {
-            grunnlagKlient.hentGrunnlag(any(), any())
-        } returns
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns
             Grunnlag(
                 soeker = standardOpplysningsgrunnlag.soeker,
                 familie = emptyList(),
@@ -262,10 +261,8 @@ internal class TrygdetidServiceIntegrationTest(
         val grunnlagTestData = GrunnlagTestData()
         val standardOpplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
 
-        coEvery {
-            grunnlagKlient.hentGrunnlag(any(), any())
-        } returns standardOpplysningsgrunnlag
-        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns standardOpplysningsgrunnlag
+        every { behandlingService.hentDetaljertBehandling(behandlingId, saksbehandler) } returns
             mockk {
                 every { id } returns behandlingId
                 every { sak } returns sakId
@@ -275,7 +272,7 @@ internal class TrygdetidServiceIntegrationTest(
                 every { revurderingsaarsak } returns Revurderingaarsak.AKTIVITETSPLIKT
                 every { prosesstype } returns Prosesstype.MANUELL
             }
-        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = true) } just Runs
         coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler) } returns
             listOf(
                 VedtakSammendragDto(
@@ -292,7 +289,7 @@ internal class TrygdetidServiceIntegrationTest(
                 ),
             )
         every { avtaleService.hentAvtaleForBehandling(any()) } returns null
-        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = false) } just Runs
 
         repository.opprettTrygdetid(
             trygdetid(
@@ -315,9 +312,7 @@ internal class TrygdetidServiceIntegrationTest(
         val behandlingId = UUID.randomUUID()
         val grunnlagTestData = GrunnlagTestData()
 
-        coEvery {
-            grunnlagKlient.hentGrunnlag(any(), any())
-        } returns grunnlagTestData.hentOpplysningsgrunnlag()
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlagTestData.hentOpplysningsgrunnlag()
 
         repository.opprettTrygdetid(
             trygdetid(
@@ -340,15 +335,13 @@ internal class TrygdetidServiceIntegrationTest(
         val grunnlagTestData = GrunnlagTestData()
 
         val opplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
-        coEvery {
-            grunnlagKlient.hentGrunnlag(any(), any())
-        } returns opplysningsgrunnlag
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns opplysningsgrunnlag
 
-        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
-        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = true) } just Runs
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = false) } just Runs
         every { avtaleService.hentAvtaleForBehandling(any()) } returns opprettTrygdeavtale(kildeBehandlingId)
         justRun { avtaleService.opprettAvtale(any()) }
-        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+        every { behandlingService.hentDetaljertBehandling(behandlingId, saksbehandler) } returns
             mockk {
                 every { id } returns behandlingId
                 every { sak } returns randomSakId()
@@ -415,15 +408,13 @@ internal class TrygdetidServiceIntegrationTest(
         val grunnlagTestData = GrunnlagTestData()
 
         val opplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
-        coEvery {
-            grunnlagKlient.hentGrunnlag(any(), any())
-        } returns opplysningsgrunnlag
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns opplysningsgrunnlag
 
-        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
-        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = true) } just Runs
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = false) } just Runs
         every { avtaleService.hentAvtaleForBehandling(any()) } returns opprettTrygdeavtale(kildeBehandlingId)
         justRun { avtaleService.opprettAvtale(any()) }
-        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+        every { behandlingService.hentDetaljertBehandling(behandlingId, saksbehandler) } returns
             mockk {
                 every { id } returns behandlingId
                 every { sak } returns randomSakId()
@@ -481,15 +472,13 @@ internal class TrygdetidServiceIntegrationTest(
         val grunnlagTestData = GrunnlagTestData()
 
         val opplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
-        coEvery {
-            grunnlagKlient.hentGrunnlag(any(), any())
-        } returns opplysningsgrunnlag
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns opplysningsgrunnlag
 
-        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
-        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = true) } just Runs
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = false) } just Runs
         every { avtaleService.hentAvtaleForBehandling(any()) } returns opprettTrygdeavtale(kildeBehandlingId)
         justRun { avtaleService.opprettAvtale(any()) }
-        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+        every { behandlingService.hentDetaljertBehandling(behandlingId, saksbehandler) } returns
             mockk {
                 every { id } returns behandlingId
                 every { sak } returns randomSakId()
@@ -546,8 +535,8 @@ internal class TrygdetidServiceIntegrationTest(
         val grunnlagTestData = GrunnlagTestData()
         val begrunnelseTekst = "En begrunnelse"
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlagTestData.hentOpplysningsgrunnlag()
-        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
+        every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlagTestData.hentOpplysningsgrunnlag()
+        every { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, saksbehandler, dryRun = true) } just Runs
 
         val opprettetTrygdetid =
             repository.opprettTrygdetid(

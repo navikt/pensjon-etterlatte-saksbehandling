@@ -460,7 +460,7 @@ class GrunnlagsendringshendelseService(
             grunnlagsendringshendelseDao
                 .hentGrunnlagsendringshendelserMedStatuserISak(
                     sakId,
-                    listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                    listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
                 ).filter {
                     it.gjelderPerson == grunnlagsendringshendelse.gjelderPerson && it.type == grunnlagsendringshendelse.type
                 }

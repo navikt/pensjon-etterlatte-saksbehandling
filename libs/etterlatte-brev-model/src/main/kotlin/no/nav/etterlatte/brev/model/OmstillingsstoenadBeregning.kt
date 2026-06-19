@@ -5,7 +5,7 @@ import no.nav.etterlatte.brev.Slate
 import java.time.LocalDate
 
 data class OmstillingsstoenadBeregning(
-    override val innhold: List<Slate.Element>,
+    override val innhold: List<Slate.Element> = emptyList(),
     val virkningsdato: LocalDate,
     val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
     val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,

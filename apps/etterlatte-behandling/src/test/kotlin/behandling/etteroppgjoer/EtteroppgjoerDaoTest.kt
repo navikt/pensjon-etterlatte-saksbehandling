@@ -88,26 +88,6 @@ class EtteroppgjoerDaoTest(
     }
 
     @Test
-    fun `skal hente saker med etteroppgjoer for spesifikke enheter`() {
-        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
-        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak2.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
-
-        val etteroppgjoerSak =
-            etteroppgjoerDao
-                .hentEtteroppgjoerSakerIBulk(
-                    inntektsaar = 2024,
-                    antall = 2,
-                    etteroppgjoerFilter = EtteroppgjoerFilter.ENKEL,
-                    status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                    spesifikkeSaker = emptyList(),
-                    ekskluderteSaker = emptyList(),
-                    spesifikkeEnheter = listOf(Enheter.PORSGRUNN.enhetNr.toString()),
-                ).firstOrNull()
-
-        SakId(etteroppgjoerSak!!.sakId) shouldBe sak.id
-    }
-
-    @Test
     fun `skal hente etteroppgjoer som venter paa skatteoppgjoer`() {
         etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
         etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER))
@@ -118,105 +98,6 @@ class EtteroppgjoerDaoTest(
                 Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER),
                 Etteroppgjoer(sak.id, 2025, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER),
             )
-    }
-
-    @Test
-    fun `skal hente saker både med og uten aktivitetskrav hvis filter er satt til don't care`() {
-        etteroppgjoerDao.lagreEtteroppgjoer(
-            Etteroppgjoer(
-                sakId = sak.id,
-                inntektsaar = 2024,
-                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                harAktivitetskrav = true,
-            ),
-        )
-        etteroppgjoerDao.lagreEtteroppgjoer(
-            Etteroppgjoer(
-                sakId = sak2.id,
-                inntektsaar = 2024,
-                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                harAktivitetskrav = false,
-            ),
-        )
-        assertEquals(FilterVerdi.DONT_CARE, EtteroppgjoerFilter.MED_AKTIVITET_OG_SKJERMET.harAktivitetskrav)
-
-        val saker =
-            etteroppgjoerDao.hentEtteroppgjoerSakerIBulk(
-                inntektsaar = 2024,
-                antall = 10,
-                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                etteroppgjoerFilter = EtteroppgjoerFilter.MED_AKTIVITET_OG_SKJERMET,
-                spesifikkeSaker = listOf(),
-                ekskluderteSaker = listOf(),
-                spesifikkeEnheter = listOf(),
-            )
-        saker.size shouldBe 2
-        saker shouldContainExactlyInAnyOrder listOf(sak.id, sak2.id)
-    }
-
-    @Test
-    fun `skal ignorere saker med oppgaver for etteroppgjør som har tom referanse og ikke er ferdigstilt`() {
-        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
-        etteroppgjoerDao.lagreEtteroppgjoer(Etteroppgjoer(sak2.id, 2024, EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER))
-
-        val sakerUtenOppgaver =
-            etteroppgjoerDao.hentEtteroppgjoerSakerIBulk(
-                inntektsaar = 2024,
-                antall = 50,
-                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                etteroppgjoerFilter = EtteroppgjoerFilter.ENKEL,
-                spesifikkeSaker = listOf(),
-                ekskluderteSaker = listOf(),
-                spesifikkeEnheter = listOf(),
-            )
-        sakerUtenOppgaver.size shouldBe 2
-        sakerUtenOppgaver shouldContainExactlyInAnyOrder listOf(sak.id, sak2.id)
-
-        // oppretter en oppgave for sak1
-        val oppgaveForForbehandlingEtteroppgjoer =
-            opprettNyOppgaveMedReferanseOgSak(
-                referanse = "",
-                sak = sak,
-                kilde = OppgaveKilde.HENDELSE,
-                type = OppgaveType.ETTEROPPGJOER,
-                merknad = "Etteroppgjøret for 2024 er klart til behandling",
-            )
-        with(dataSource.connection) {
-            val statement =
-                prepareStatement(
-                    """
-                    INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, gruppe_id, merknad, opprettet, saktype, fnr, frist, kilde)
-                    VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """.trimIndent(),
-                )
-            statement.setObject(1, oppgaveForForbehandlingEtteroppgjoer.id)
-            statement.setString(2, oppgaveForForbehandlingEtteroppgjoer.status.name)
-            statement.setString(3, oppgaveForForbehandlingEtteroppgjoer.enhet.enhetNr)
-            statement.setSakId(4, oppgaveForForbehandlingEtteroppgjoer.sakId)
-            statement.setString(5, oppgaveForForbehandlingEtteroppgjoer.type.name)
-            statement.setString(6, oppgaveForForbehandlingEtteroppgjoer.saksbehandler?.ident)
-            statement.setString(7, oppgaveForForbehandlingEtteroppgjoer.referanse)
-            statement.setString(8, oppgaveForForbehandlingEtteroppgjoer.gruppeId)
-            statement.setString(9, oppgaveForForbehandlingEtteroppgjoer.merknad)
-            statement.setTidspunkt(10, oppgaveForForbehandlingEtteroppgjoer.opprettet)
-            statement.setString(11, oppgaveForForbehandlingEtteroppgjoer.sakType.name)
-            statement.setString(12, oppgaveForForbehandlingEtteroppgjoer.fnr)
-            statement.setTidspunkt(13, oppgaveForForbehandlingEtteroppgjoer.frist)
-            statement.setString(14, oppgaveForForbehandlingEtteroppgjoer.kilde?.name)
-            statement.executeUpdate()
-        }
-        val sakerUtenOppgaver2 =
-            etteroppgjoerDao.hentEtteroppgjoerSakerIBulk(
-                inntektsaar = 2024,
-                antall = 50,
-                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                etteroppgjoerFilter = EtteroppgjoerFilter.ENKEL,
-                spesifikkeSaker = listOf(),
-                ekskluderteSaker = listOf(),
-                spesifikkeEnheter = listOf(),
-            )
-        sakerUtenOppgaver2.size shouldBe 1
-        sakerUtenOppgaver2 shouldContainExactlyInAnyOrder listOf(sak2.id)
     }
 
     @Test

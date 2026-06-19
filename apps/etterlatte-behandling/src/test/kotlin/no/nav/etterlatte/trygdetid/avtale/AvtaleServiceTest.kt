@@ -22,7 +22,12 @@ import java.util.UUID.randomUUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AvtaleServiceTest {
     private val repository = mockk<AvtaleRepository>()
-    private val service = AvtaleService(repository)
+    private val service =
+        AvtaleService(
+            avtaleRepository = repository,
+            brukInternTrygdetid = true,
+            brukEgenDatabaseForTrygdetid = true,
+        )
 
     @BeforeEach
     fun beforeEach() {

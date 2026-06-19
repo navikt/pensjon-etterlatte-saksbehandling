@@ -32,15 +32,6 @@ class AdresseService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    /*
-     *
-     * Er verge alltid hovedmottaker dersom tilstede? Ja
-     * Kan du ha flere på kopi? Eller vil det alltid være en hoved og en kopi
-     * Takeif barnepensjon, isNotEmpty og harforeldreansvar
-     *
-     * Gjenlevende skal ikke motta om over 18
-     */
-
     suspend fun hentMottakere(
         sakType: SakType,
         personerISak: PersonerISak,

@@ -1,4 +1,4 @@
-package brev
+package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import java.util.UUID

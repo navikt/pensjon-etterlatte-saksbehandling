@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import brev.ManglerBrevutfall
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
@@ -12,6 +11,7 @@ import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.ManglerBrevutfall
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender

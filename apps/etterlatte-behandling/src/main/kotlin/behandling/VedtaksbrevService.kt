@@ -37,7 +37,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.INNTEKTSENDRING
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.NY_SOEKNAD
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.OMGJOERING_ETTER_KLAGE
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -277,8 +278,8 @@ class VedtaksbrevService(
                 OmstillingsstoenadRevurderingVedtakBrevData.Vedtak(
                     erEndret =
                         fellesData.avkortingsinfo.endringIUtbetalingVedVirk ||
-                            behandling.revurderingsaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
-                    erOmgjoering = behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+                            behandling.revurderingsaarsak == FRA_0UTBETALING_TIL_UTBETALING,
+                    erOmgjoering = behandling.revurderingsaarsak == OMGJOERING_ETTER_KLAGE,
                     datoVedtakOmgjoering = fellesData.klage?.datoVedtakOmgjoering(),
                     beregning = beregning,
                     omsRettUtenTidsbegrensning = fellesData.omsRettUtenTidsbegrensning,
@@ -301,7 +302,7 @@ class VedtaksbrevService(
                         ),
                     erEndret =
                         fellesData.avkortingsinfo.endringIUtbetalingVedVirk ||
-                            behandling.revurderingsaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
+                            behandling.revurderingsaarsak == FRA_0UTBETALING_TIL_UTBETALING,
                     erEtterbetaling = fellesData.etterbetaling != null,
                     etterbetaling =
                         fellesData.etterbetaling?.let {
@@ -324,7 +325,7 @@ class VedtaksbrevService(
                     inntektsAar = sisteBeregningsperiode.datoFOM.year,
                     mottattInntektendringAutomatisk =
                         if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
-                            behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING
+                            behandling.revurderingsaarsak == INNTEKTSENDRING
                         ) {
                             behandling.mottattDato?.toLocalDate()
                                 ?: throw InternfeilException("Automatisk inntektsendring må ha mottatt dato")

@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.klage.AvvistKlageBrevInnholdDataNy
 import no.nav.etterlatte.brev.model.klage.AvvistKlageBrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
@@ -126,6 +127,10 @@ abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     JsonSubTypes.Type(
         value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,
         name = "OMS_EO_BEREGNINGVEDLEGG_INNHOLD",
+    ),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadBeregningRedigerbartUtfall::class,
+        name = "OMS_BEREGNINGVEDLEGG_UTFALL",
     ),
 )
 abstract class BrevVedleggInnholdData : BrevDataRedigerbar {

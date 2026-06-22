@@ -10,8 +10,11 @@ import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
+import no.nav.etterlatte.brev.BrevVedleggKey
+import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.ManglerBrevutfall
+import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.model.Brev
@@ -335,7 +338,21 @@ class VedtaksbrevService(
                 ),
             brevVedleggData =
                 listOf(
-                    OmstillingsstoenadInnvilgelseVedtakBrevData.beregningsvedleggInnhold(),
+                    BrevVedleggRedigerbarNy(
+                        data =
+                            OmstillingsstoenadBeregningRedigerbartUtfall(
+                                virkningsdato = fellesData.avkortingsinfo.virkningsdato,
+                                beregningsperioder = fellesData.beregningsperioder,
+                                sisteBeregningsperiode = sisteBeregningsperiode,
+                                sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+                                oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                                opphoerNesteAar =
+                                    beregningsperioderOpphoer.forventetOpphoerDato?.year ==
+                                        (behandling.virkningstidspunkt().dato.year + 1),
+                            ),
+                        vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                        vedleggId = BrevVedleggKey.OMS_BEREGNING,
+                    ),
                 ),
         )
     }

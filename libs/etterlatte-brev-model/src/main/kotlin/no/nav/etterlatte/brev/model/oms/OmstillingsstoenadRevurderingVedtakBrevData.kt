@@ -4,9 +4,11 @@ import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.BrevRedigerbarInnholdData
+import no.nav.etterlatte.brev.BrevVedleggInnholdData
 import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Slate
+import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
@@ -85,4 +87,7 @@ data class OmstillingsstoenadBeregningRedigerbartUtfall(
     val sisteBeregningsperiodeNesteAar: OmstillingsstoenadBeregningsperiode?,
     val oppphoersdato: LocalDate?,
     val opphoerNesteAar: Boolean,
-) : BrevData
+) : BrevVedleggInnholdData() {
+    override val type: String = "OMS_BEREGNINGVEDLEGG_UTFALL"
+    override val brevKode: Vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL
+}

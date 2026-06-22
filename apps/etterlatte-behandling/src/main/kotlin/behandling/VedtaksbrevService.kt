@@ -26,6 +26,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.erYrkesskade
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartUtfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartVedleggData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnhold
@@ -340,15 +341,9 @@ class VedtaksbrevService(
                 listOf(
                     BrevVedleggRedigerbarNy(
                         data =
-                            OmstillingsstoenadBeregningRedigerbartUtfall(
-                                virkningsdato = fellesData.avkortingsinfo.virkningsdato,
-                                beregningsperioder = fellesData.beregningsperioder,
-                                sisteBeregningsperiode = sisteBeregningsperiode,
-                                sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-                                oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                                opphoerNesteAar =
-                                    beregningsperioderOpphoer.forventetOpphoerDato?.year ==
-                                        (behandling.virkningstidspunkt().dato.year + 1),
+                            OmstillingsstoenadBeregningRedigerbartVedleggData(
+                                omstillingsstoenadBeregning = beregning,
+                                erInnvilgelsesAar = fellesData.avkortingsinfo.erInnvilgelsesaar,
                             ),
                         vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
                         vedleggId = BrevVedleggKey.OMS_BEREGNING,

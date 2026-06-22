@@ -87,6 +87,11 @@ data class OmstillingsstoenadBeregningRedigerbartUtfall(
     val sisteBeregningsperiodeNesteAar: OmstillingsstoenadBeregningsperiode?,
     val oppphoersdato: LocalDate?,
     val opphoerNesteAar: Boolean,
+) : BrevData
+
+data class OmstillingsstoenadBeregningRedigerbartVedleggData(
+    val omstillingsstoenadBeregning: OmstillingsstoenadBeregning,
+    val erInnvilgelsesAar: Boolean,
 ) : BrevVedleggInnholdData() {
     override val type: String = "OMS_BEREGNINGVEDLEGG_UTFALL"
     override val brevKode: Vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL

@@ -12,7 +12,7 @@ import javax.sql.DataSource
 class BehandlingMetrikkerDao(
     private val dataSource: DataSource,
 ) {
-    fun hentAttestertEldreEnnTimer(terskelTimer: Long): List<AttestertHengendeAntall> =
+    fun hentAttestertEldreEnnTimer(antallTimer: Long): List<AttestertHengendeAntall> =
         dataSource.connection.use {
             val statement =
                 it.prepareStatement(
@@ -21,7 +21,7 @@ class BehandlingMetrikkerDao(
                     FROM behandling b
                     JOIN sak s ON b.sak_id = s.id
                     WHERE b.status = 'ATTESTERT'
-                      AND b.sist_endret < NOW() - INTERVAL '$terskelTimer hours'
+                      AND b.sist_endret < NOW() - INTERVAL '$antallTimer hours'
                     GROUP BY s.saktype
                     """.trimIndent(),
                 )

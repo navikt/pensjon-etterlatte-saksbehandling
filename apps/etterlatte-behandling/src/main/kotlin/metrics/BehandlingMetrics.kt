@@ -20,8 +20,8 @@ class BehandlingMetrics(
         oppgaveMetrikkerDao.hentOppgaveAntall().forEach { tellOppgaver(it) }
         oppgaveMetrikkerDao.hentDistinkteSaksbehandlere().forEach { tellSaksbehandlere(it) }
         behandlingerMetrikkerDao.hent().forEach { tellBehandlinger(it) }
-        behandlingerMetrikkerDao.hentAttestertEldreEnnTimer(TERSKEL_ATTESTERT_HENGENDE_TIMER).forEach {
-            tellAttestertHengende(it)
+        behandlingerMetrikkerDao.hentAttestertEldreEnnTimer(ANTALL_TIMER_I_STATUS_ATTESTERING).forEach {
+            tellBehandlingerSomSitterFastIAttestert(it)
         }
         gjenopprettingDao.gjenopprettinger().forEach { tellGjenopprettinger(it) }
         gjenopprettingDao.avbruttGrunnetSoeknad().forEach { tellAvbruttGrunnetSoeknad(it) }
@@ -75,7 +75,7 @@ class BehandlingMetrics(
             .register(registry)
     }
 
-    private fun tellAttestertHengende(it: AttestertHengendeAntall) {
+    private fun tellBehandlingerSomSitterFastIAttestert(it: AttestertHengendeAntall) {
         Gauge
             .builder("etterlatte_behandlinger_attestert_hengende") { it.antall.toDouble() }
             .description("Antall behandlinger med status ATTESTERT som ikke har blitt iverksatt innen forventet tid")
@@ -84,6 +84,6 @@ class BehandlingMetrics(
     }
 
     companion object {
-        const val TERSKEL_ATTESTERT_HENGENDE_TIMER = 2L
+        const val ANTALL_TIMER_I_STATUS_ATTESTERING = 2L
     }
 }

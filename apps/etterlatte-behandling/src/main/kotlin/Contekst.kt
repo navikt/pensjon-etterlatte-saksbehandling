@@ -135,4 +135,13 @@ fun <T> inTransaction(block: () -> T): T =
         block()
     }
 
+fun <T> inTransactionIfNeeded(block: () -> T): T {
+    val kontekst = Kontekst.get()
+    return if (kontekst != null && !kontekst.databasecontxt.harIntransaction()) {
+        kontekst.databasecontxt.inTransaction(block)
+    } else {
+        block()
+    }
+}
+
 fun databaseContext() = Kontekst.get().databasecontxt

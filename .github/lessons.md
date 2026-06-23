@@ -64,3 +64,7 @@
 **2026-06-17 — REST-databaselag med toggle**
 - Observation: Toggle-logikk for kilde-valg hørte hjemme på wiring-nivå (ServiceModule), ikke spredt som sjekker i service-metodene. Når servicen alltid "oppfører seg", og korrekt implementasjon er injisert via interface, trengs ingen toggle-sjekk i logikken.
 - Action: Flytt toggle-logikk til komposeringsnivå (ApplicationContext/ServiceModule). Serviceklasser skal aldri sjekke toggles for å velge datakilde – det er DI sin jobb.
+
+**2026-06-22 — Transaksjonskontext ved intern migrering**
+- Observation: Brute-force lesing av kode for å finne logikkforskjeller – uten å trace infrastruktur-forutsetningene – kostet mange omganger. Feilen lå ikke i forretningslogikken, men i at `ConnectionAutoclosing.hentConnection` krever en åpen transaksjon når `Kontekst` er satt, og den nye route-laget manglet `inTransaction`.
+- Action: Ved migrering av logikk fra en app til en annen – sjekk infrastruktur-kontrakten (transaksjonsoppsett, Kontekst, DB-tilkoblingsmønster) like grundig som forretningslogikken. Finn tidlig "hvem setter opp DB-konteksten i den nye appen?"

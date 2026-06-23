@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVKORTET
@@ -296,7 +297,7 @@ class TrygdetidServiceImpl(
                     }
                 }
             }
-        }.also { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
+        }.also { inTransactionIfNeeded { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) } }
 
     private suspend fun opprettTrygdetiderForRevurdering(
         behandling: DetaljertBehandling,
@@ -712,7 +713,7 @@ class TrygdetidServiceImpl(
             if (!erOverstyrt && behandling.prosesstype != Prosesstype.AUTOMATISK) {
                 oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
             } else {
-                behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+                inTransactionIfNeeded { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
             }
         }
         return alleTrygdetider
@@ -828,7 +829,9 @@ class TrygdetidServiceImpl(
     ): T {
         val kanFastsetteTrygdetid =
             try {
-                behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true)
+                inTransactionIfNeeded {
+                    behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true)
+                }
                 true
             } catch (_: Exception) {
                 false
@@ -1065,7 +1068,7 @@ class TrygdetidServiceImpl(
             // Dersom forrige steg (vilkårsvurdering) har blitt endret vil statusen være VILKAARSVURDERT. Når man
             // trykker videre fra vilkårsvurdering skal denne validere tilstand og sette status TRYGDETID_OPPDATERT.
             if (behandling.status == BehandlingStatus.VILKAARSVURDERT) {
-                behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+                inTransactionIfNeeded { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
                 true
             } else {
                 false
@@ -1189,7 +1192,7 @@ class TrygdetidServiceImpl(
             else -> trygdetid.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
         }.also { nyTrygdetid ->
             trygdetidRepository.oppdaterTrygdetid(nyTrygdetid)
-            behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+            inTransactionIfNeeded { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
         }
     }
 

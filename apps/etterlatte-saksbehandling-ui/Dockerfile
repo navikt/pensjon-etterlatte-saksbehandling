@@ -3,6 +3,7 @@ FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24-slim
 WORKDIR /app
 COPY ./client/dist ./client
 COPY ./server/build ./server
+COPY ./server/node_modules ./server
 COPY ./server/package.json ./server
 
 USER nonroot

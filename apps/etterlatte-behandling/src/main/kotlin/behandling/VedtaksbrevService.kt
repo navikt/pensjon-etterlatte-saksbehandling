@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.AARLIG_INNTEKTSJUSTERING
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.INNTEKTSENDRING
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.NY_SOEKNAD
@@ -145,6 +146,8 @@ class VedtaksbrevService(
                 (behandling.behandlingType == REVURDERING && behandling.revurderingsaarsak == NY_SOEKNAD)
             ) {
                 utledBrevRequestInnvilgelse(brukerTokenInfo, behandling, vedtak, skalLagres)
+            } else if (behandling.revurderingsaarsak == AARLIG_INNTEKTSJUSTERING) {
+                utledBrevRequestAarligInntektsjustering(brukerTokenInfo, behandling, vedtak, skalLagres)
             } else {
                 utledBrevRequestRevurdering(brukerTokenInfo, behandling, vedtak, skalLagres)
             }
@@ -336,6 +339,86 @@ class VedtaksbrevService(
                         } else {
                             null
                         },
+                ),
+            brevVedleggData =
+                listOf(
+                    BrevVedleggRedigerbarNy(
+                        data =
+                            OmstillingsstoenadBeregningRedigerbartVedleggData(
+                                omstillingsstoenadBeregning = beregning,
+                                erInnvilgelsesAar = fellesData.avkortingsinfo.erInnvilgelsesaar,
+                            ),
+                        vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                        vedleggId = BrevVedleggKey.OMS_BEREGNING,
+                    ),
+                ),
+        )
+    }
+
+    private suspend fun utledBrevRequestAarligInntektsjustering(
+        brukerTokenInfo: BrukerTokenInfo,
+        behandling: DetaljertBehandling,
+        vedtak: VedtakDto,
+        skalLagres: Boolean = false,
+    ): BrevRequest {
+        val fellesData = hentFellesData(behandling, vedtak, brukerTokenInfo)
+
+        val trygdetid = krevIkkeNull(fellesData.trygdetid) { "Mangler trygdetid" }.single()
+        val beregningsperioder =
+            fellesData.avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
+        val beregningsperioderOpphoer =
+            utledBeregningsperioderOpphoer(
+                behandling = behandling,
+                beregningsperioder = beregningsperioder,
+            )
+        val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
+        val virk = behandling.virkningstidspunkt!!.dato.atDay(1)
+        val omsRettUtenTidsbegrensning = fellesData.omsRettUtenTidsbegrensning
+
+        val beregning =
+            OmstillingsstoenadBeregning(
+                virkningsdato = virk,
+                beregningsperioder = beregningsperioder,
+                sisteBeregningsperiode = sisteBeregningsperiode,
+                sisteBeregningsperiodeNesteAar = null,
+                trygdetid =
+                    trygdetid.fromDto(
+                        beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                        beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
+                        navnAvdoed = null,
+                        landKodeverk = fellesData.alleLand,
+                    ),
+                oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                opphoerNesteAar =
+                    beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                erYrkesskade = trygdetid.erYrkesskade(),
+            )
+        return BrevRequest(
+            sak = fellesData.sak,
+            innsender = fellesData.innsender(),
+            soeker = fellesData.soeker(),
+            avdoede = fellesData.avdoede,
+            verge = fellesData.verge(),
+            spraak = fellesData.spraak(),
+            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
+            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            skalLagre = skalLagres,
+            brevFastInnholdData =
+                OmstillingsstoenadRevurderingVedtakBrevData.VedtakAarligInntektsjustering(
+                    beregning =
+                    beregning,
+                    omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning,
+                    tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
+                    inntektsaar = virk.year,
+                    harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    endringIUtbetaling = fellesData.avkortingsinfo.endringIUtbetalingVedVirk,
+                    virkningstidspunkt = virk,
+                    bosattUtland = behandling.erBosattUtland(),
+                ),
+            brevRedigerbarInnholdData =
+                OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdAarligInntektsjustering(
+                    inntektsbeloep = sisteBeregningsperiode.inntekt,
+                    inntektsaar = virk.year,
                 ),
             brevVedleggData =
                 listOf(

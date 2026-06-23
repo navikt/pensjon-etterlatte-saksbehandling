@@ -90,6 +90,10 @@ data class BrevRequest(
     JsonSubTypes.Type(value = OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak::class, name = "OMSTILLINGSSTOENAD_INNVILGELSE"),
     JsonSubTypes.Type(value = OmstillingsstoenadRevurderingVedtakBrevData.Vedtak::class, name = "OMSTILLINGSSTOENAD_REVURDERING"),
     JsonSubTypes.Type(value = AvvistKlageBrevInnholdDataNy::class, name = "AVVIST_KLAGE"),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakAarligInntektsjustering::class,
+        name = "OMS_AARLIG_INNTEKTSJUSTERING",
+    ),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder
@@ -115,9 +119,13 @@ abstract class BrevFastInnholdData : BrevData {
         name = "OMSTILLINGSSTOENAD_REVURDERING_UTFALL",
     ),
     JsonSubTypes.Type(value = AvvistKlageBrevRedigerbarInnholdData::class, name = "AVVIST_KLAGE_UTFALL"),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdAarligInntektsjustering::class,
+        name = "OMS_AARLIG_INNTEKTSJUSTERING_UTFALL",
+    ),
 )
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
-    abstract val brevKode: Brevkoder
+    abstract val brevKode: Brevkoder // TODO Ikke i bruk?
     abstract val type: String
     override val data: Any? = null
 }

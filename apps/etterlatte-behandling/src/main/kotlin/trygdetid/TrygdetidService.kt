@@ -255,7 +255,7 @@ class TrygdetidServiceImpl(
             }
 
             val behandling =
-                behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+                inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
                     ?: throw GenerellIkkeFunnetException()
 
             when (behandling.behandlingType) {
@@ -433,7 +433,7 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
         val behandling =
-            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+            inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
                 ?: throw GenerellIkkeFunnetException()
         if (!behandling.status.kanEndres()) {
             throw UgyldigForespoerselException(
@@ -688,7 +688,7 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
         val behandling =
-            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+            inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
                 ?: throw GenerellIkkeFunnetException()
 
         logger.info("Kopierer trygdetid for behandling ${behandling.id} fra behandling $forrigeBehandlingId")
@@ -854,7 +854,7 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
         val behandling =
-            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+            inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
                 ?: throw GenerellIkkeFunnetException()
 
         // Merk: vi kan ikke bruke den vanlige sjekken på kanOppdatereTrygdetid, siden dette kallet skjer typisk
@@ -1023,7 +1023,7 @@ class TrygdetidServiceImpl(
             throw IngenTrygdetidFunnetForAvdoede()
         }
         val behandling =
-            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+            inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
                 ?: throw GenerellIkkeFunnetException()
         logger.info("Oppdaterer opplysningsgrunnlag for trygdetider (behandlingId=$behandlingId)")
 
@@ -1054,7 +1054,7 @@ class TrygdetidServiceImpl(
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
             val trygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
             val behandling =
-                behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+                inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
                     ?: throw GenerellIkkeFunnetException()
 
             if (trygdetider.isEmpty()) {
@@ -1260,8 +1260,7 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =
-        behandlingService
-            .hentDetaljertBehandling(behandlingId, brukerTokenInfo)
+        inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
             ?.status in
             listOf(
                 IVERKSATT,

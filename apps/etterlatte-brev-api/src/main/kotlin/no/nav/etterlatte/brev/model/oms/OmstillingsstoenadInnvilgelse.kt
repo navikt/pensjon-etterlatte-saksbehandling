@@ -74,30 +74,29 @@ data class OmstillingsstoenadInnvilgelse(
 
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
-                data =
-                    OmstillingsstoenadInnvilgelseData(
-                        beregning =
-                            omsBeregning(
-                                innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
-                                behandling = behandling,
-                                trygdetid = trygdetid,
-                                avkortingsinfo = avkortingsinfo,
-                                landKodeverk = landKodeverk,
-                            ),
-                        innvilgetMindreEnnFireMndEtterDoedsfall =
-                            innvilgetMindreEnnFireMndEtterDoedsfall(
-                                doedsdatoEllerOpphoertPleieforhold = doedsdatoEllerOpphoertPleieforhold,
-                            ),
-                        omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
-                        harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                        bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                        etterbetaling =
-                            etterbetaling
-                                ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
-                        erSluttbehandling = behandling.erSluttbehandling,
-                        tidligereFamiliepleier = erTidligereFamiliepleier,
-                        datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
-                    ),
+                data = OmstillingsstoenadInnvilgelseData(
+                    beregning =
+                        omsBeregning(
+                            innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
+                            behandling = behandling,
+                            trygdetid = trygdetid,
+                            avkortingsinfo = avkortingsinfo,
+                            landKodeverk = landKodeverk,
+                        ),
+                    innvilgetMindreEnnFireMndEtterDoedsfall =
+                        innvilgetMindreEnnFireMndEtterDoedsfall(
+                            doedsdatoEllerOpphoertPleieforhold = doedsdatoEllerOpphoertPleieforhold,
+                        ),
+                    omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
+                    harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                    etterbetaling =
+                        etterbetaling
+                            ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
+                    erSluttbehandling = behandling.erSluttbehandling,
+                    tidligereFamiliepleier = erTidligereFamiliepleier,
+                    datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                ),
             )
         }
 
@@ -135,29 +134,28 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
             trygdetid: TrygdetidDto,
         ): OmstillingsstoenadInnvilgelseRedigerbartUtfall =
             OmstillingsstoenadInnvilgelseRedigerbartUtfall(
-                data =
-                    OmstillingsstoenadInnvilgelseRedigerbartUtfallData(
-                        virkningsdato = avkortingsinfo.virkningsdato,
-                        utbetalingsbeloep =
-                            avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
-                                ?: throw UgyldigForespoerselException(
-                                    "MANGLER_BEREGNINGSPERIODER_AVKORTING",
-                                    "Mangler beregningsperioder i avkorting",
-                                ),
-                        etterbetaling = etterbetaling != null,
-                        tidligereFamiliepleier = tidligereFamiliepleier,
-                        datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
-                        avdoed = if (tidligereFamiliepleier) null else avdoede.single(),
-                        erSluttbehandling = erSluttbehandling ?: false,
-                        harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                        beregning =
-                            omsBeregning(
-                                behandling = behandling,
-                                trygdetid = trygdetid,
-                                avkortingsinfo = avkortingsinfo,
-                                landKodeverk = emptyList(),
+                data = OmstillingsstoenadInnvilgelseRedigerbartUtfallData(
+                    virkningsdato = avkortingsinfo.virkningsdato,
+                    utbetalingsbeloep =
+                        avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
+                            ?: throw UgyldigForespoerselException(
+                                "MANGLER_BEREGNINGSPERIODER_AVKORTING",
+                                "Mangler beregningsperioder i avkorting",
                             ),
-                    ),
+                    etterbetaling = etterbetaling != null,
+                    tidligereFamiliepleier = tidligereFamiliepleier,
+                    datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
+                    avdoed = if (tidligereFamiliepleier) null else avdoede.single(),
+                    erSluttbehandling = erSluttbehandling ?: false,
+                    harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    beregning =
+                        omsBeregning(
+                            behandling = behandling,
+                            trygdetid = trygdetid,
+                            avkortingsinfo = avkortingsinfo,
+                            landKodeverk = emptyList(),
+                        ),
+                ),
             )
     }
 }

@@ -9,10 +9,12 @@ import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.person.Verge
@@ -41,4 +43,11 @@ internal data class OmsVedtaksbrevGrunnlag(
     fun spraak(): Spraak = grunnlag.mapSpraak()
 
     fun verge(): Verge? = hentVergeForSak(sak.sakType, brevutfall, grunnlag)
+
+    fun feilutbetalingFraBrevutfall(): FeilutbetalingType =
+        krevIkkeNull(
+            brevutfall.feilutbetaling
+                ?.valg
+                ?.let(FeilutbetalingType::fromFeilutbetalingValg),
+        ) { "Feilutbetaling mangler i brevutfall" }
 }

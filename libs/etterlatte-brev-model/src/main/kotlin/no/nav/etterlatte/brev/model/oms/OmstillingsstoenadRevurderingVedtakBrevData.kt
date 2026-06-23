@@ -113,6 +113,33 @@ object OmstillingsstoenadRevurderingVedtakBrevData {
         override val brevKode: Brevkoder = Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK
         override val type: String = "OMS_AARLIG_INNTEKTSJUSTERING_UTFALL"
     }
+
+    data class VedtakOpphoer(
+        val bosattUtland: Boolean,
+        val virkningsdato: LocalDate,
+        val feilutbetaling: FeilutbetalingType,
+        val innholdForhaandsvarsel: List<Slate.Element> = emptyList(),
+    ) : BrevFastInnholdData() {
+        override val brevKode: Brevkoder = Brevkoder.OMS_OPPHOER
+        override val type: String = "OMSTILLINGSSTOENAD_OPPHOER"
+
+        override fun medVedleggInnhold(innhold: () -> List<BrevInnholdVedlegg>): BrevFastInnholdData =
+            this.copy(
+                innholdForhaandsvarsel =
+                    innhold()
+                        .takeIf { feilutbetaling == FeilutbetalingType.FEILUTBETALING_MED_VARSEL }
+                        ?.single { it.key == BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING }
+                        ?.let { it.payload!!.elements }
+                        ?: emptyList(),
+            )
+    }
+
+    data class VedtakInnholdOpphoer(
+        val feilutbetaling: FeilutbetalingType,
+    ) : BrevRedigerbarInnholdData() {
+        override val brevKode: Brevkoder = Brevkoder.OMS_OPPHOER
+        override val type: String = "OMSTILLINGSSTOENAD_OPPHOER"
+    }
 }
 
 data class OmstillingsstoenadBeregningRedigerbartUtfall(

@@ -94,6 +94,10 @@ data class BrevRequest(
         value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakAarligInntektsjustering::class,
         name = "OMS_AARLIG_INNTEKTSJUSTERING",
     ),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakOpphoer::class,
+        name = "OMSTILLINGSSTOENAD_OPPHOER",
+    ),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder
@@ -122,6 +126,10 @@ abstract class BrevFastInnholdData : BrevData {
     JsonSubTypes.Type(
         value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdAarligInntektsjustering::class,
         name = "OMS_AARLIG_INNTEKTSJUSTERING_UTFALL",
+    ),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdOpphoer::class,
+        name = "OMSTILLINGSSTOENAD_OPPHOER",
     ),
 )
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {

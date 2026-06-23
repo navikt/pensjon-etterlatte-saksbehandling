@@ -146,6 +146,8 @@ class VedtaksbrevService(
                 (behandling.behandlingType == REVURDERING && behandling.revurderingsaarsak == NY_SOEKNAD)
             ) {
                 utledBrevRequestInnvilgelse(brukerTokenInfo, behandling, vedtak, skalLagres)
+            } else if (vedtak.type == VedtakType.OPPHOER) {
+                utledBrevRequestOpphoer(brukerTokenInfo, behandling, vedtak, skalLagres)
             } else if (behandling.revurderingsaarsak == AARLIG_INNTEKTSJUSTERING) {
                 utledBrevRequestAarligInntektsjustering(brukerTokenInfo, behandling, vedtak, skalLagres)
             } else {
@@ -432,6 +434,37 @@ class VedtaksbrevService(
                         vedleggId = BrevVedleggKey.OMS_BEREGNING,
                     ),
                 ),
+        )
+    }
+
+    private suspend fun utledBrevRequestOpphoer(
+        brukerTokenInfo: BrukerTokenInfo,
+        behandling: DetaljertBehandling,
+        vedtak: VedtakDto,
+        skalLagres: Boolean = false,
+    ): BrevRequest {
+        val fellesData = hentFellesData(behandling, vedtak, brukerTokenInfo)
+        return BrevRequest(
+            sak = fellesData.sak,
+            innsender = fellesData.innsender(),
+            soeker = fellesData.soeker(),
+            avdoede = fellesData.avdoede,
+            verge = fellesData.verge(),
+            spraak = fellesData.spraak(),
+            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
+            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            skalLagre = skalLagres,
+            brevFastInnholdData =
+                OmstillingsstoenadRevurderingVedtakBrevData.VedtakOpphoer(
+                    bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                    virkningsdato = fellesData.virkningsdato,
+                    feilutbetaling = fellesData.feilutbetalingFraBrevutfall(),
+                ),
+            brevRedigerbarInnholdData =
+                OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdOpphoer(
+                    feilutbetaling = fellesData.feilutbetalingFraBrevutfall(),
+                ),
+            brevVedleggData = emptyList(),
         )
     }
 

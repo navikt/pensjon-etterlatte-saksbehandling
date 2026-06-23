@@ -43,7 +43,6 @@ data class OmstillingsstoenadRevurderingData(
     val erInnvilgelsesaar: Boolean,
     val tidligereFamiliepleier: Boolean,
     val innholdForhaandsvarsel: List<Slate.Element>,
-    val nyRedigerbarDelBeregning: Boolean,
 )
 
 data class OmstillingsstoenadRevurdering(
@@ -129,7 +128,6 @@ data class OmstillingsstoenadRevurdering(
                         bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                         erInnvilgelsesaar = avkortingsinfo.erInnvilgelsesaar,
                         tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
-                        nyRedigerbarDelBeregning = true,
                     ),
             )
         }

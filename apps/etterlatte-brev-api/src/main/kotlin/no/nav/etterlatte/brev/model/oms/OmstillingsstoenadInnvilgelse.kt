@@ -33,7 +33,6 @@ data class OmstillingsstoenadInnvilgelseData(
     val erSluttbehandling: Boolean,
     val tidligereFamiliepleier: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
-    val nyRedigerbarDelBeregning: Boolean,
 )
 
 data class OmstillingsstoenadInnvilgelse(
@@ -98,7 +97,6 @@ data class OmstillingsstoenadInnvilgelse(
                         erSluttbehandling = behandling.erSluttbehandling,
                         tidligereFamiliepleier = erTidligereFamiliepleier,
                         datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
-                        nyRedigerbarDelBeregning = true,
                     ),
             )
         }

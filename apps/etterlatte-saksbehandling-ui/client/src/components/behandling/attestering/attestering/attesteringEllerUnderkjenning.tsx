@@ -43,7 +43,8 @@ export const AttesteringEllerUnderkjenning = ({
             </Alert>
           ) : (
             <Alert variant="info" size="small">
-              Kontroller opplysninger og faglige vurderinger gjort under behandling.
+              Sjekk opplysningene og de faglige vurderinger som er gjort av saksbehandler. Når du klikker "Godkjenn",
+              bekrefter du at alt er kontrollert og vurdert.
             </Alert>
           )}
 

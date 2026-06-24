@@ -495,7 +495,7 @@ class EtteroppgjoerService(
                 beregningKlient.hentBeregningsgrunnlag(behandlingId, HardkodaSystembruker.etteroppgjoer)
             } catch (e: Exception) {
                 logger.warn(
-                    "Behandling ($behandlingId) har ikke beregningsgrunnlag. Kan returnere false da harInstitusjonsopphold på Etteroppgjør ikke lenger er i bruk.",
+                    "Behandling ($behandlingId) har ikke beregningsgrunnlag. Kan returnere false da harInstitusjonsopphold på Etteroppgjør ikke lenger er i bruk.", e
                 )
                 return false
             }

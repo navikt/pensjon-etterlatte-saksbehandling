@@ -1586,7 +1586,12 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal sjekke gyldighet og oppdatere status hvis behandlingstatus er VILKAARSVURDERT`() {
         val behandlingId = randomUUID()
-        val eksisterendeTrygdetid = trygdetid(behandlingId, beregnetTrygdetid = beregnetTrygdetid())
+        val eksisterendeTrygdetid =
+            trygdetid(
+                behandlingId = behandlingId,
+                beregnetTrygdetid = beregnetTrygdetid(),
+                begrunnelse = "Begrunnelse for trygdetid",
+            )
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)

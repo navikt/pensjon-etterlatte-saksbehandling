@@ -23,7 +23,6 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -492,7 +491,14 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): Boolean {
         val beregningsGrunnlag =
-            beregningKlient.hentBeregningsgrunnlag(behandlingId, HardkodaSystembruker.etteroppgjoer)
+            try {
+                beregningKlient.hentBeregningsgrunnlag(behandlingId, HardkodaSystembruker.etteroppgjoer)
+            } catch (e: Exception) {
+                logger.warn(
+                    "Behandling ($behandlingId) har ikke beregningsgrunnlag. Kan returnere false da harInstitusjonsopphold på Etteroppgjør ikke lenger er i bruk.", e
+                )
+                return false
+            }
         return beregningsGrunnlag.institusjonsopphold.any {
             it.fom.year <= inntektsaar && (it.tom?.year ?: inntektsaar) >= inntektsaar
         }

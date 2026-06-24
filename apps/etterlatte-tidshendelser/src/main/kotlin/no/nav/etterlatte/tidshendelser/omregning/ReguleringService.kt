@@ -57,7 +57,7 @@ class ReguleringService(
                 .newMessage(
                     mapOf(
                         ReguleringHendelseType.FINN_SAKER_TIL_REGULERING.lagParMedEventNameKey(),
-                        ReguleringEvents.DATO to konfigurasjon.datoVirkFom.toString(),
+                        ReguleringEvents.DATO to konfigurasjon.datoVirkFom.atDay(1).toString(),
                         RapidEvents.KJOERING to kjoering(konfigurasjon),
                     ),
                 ).toJson(),
@@ -71,7 +71,7 @@ fun createRecord(konfigurasjon: Omregningskonfigurasjon) =
         .newMessage(
             mapOf(
                 ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
-                ReguleringEvents.DATO to konfigurasjon.datoVirkFom.toString(),
+                ReguleringEvents.DATO to konfigurasjon.datoVirkFom.atDay(1).toString(),
                 RapidEvents.KJOERING to kjoering(konfigurasjon),
                 RapidEvents.ANTALL to konfigurasjon.antall,
                 RapidEvents.SPESIFIKKE_SAKER to konfigurasjon.spesifikkeSaker.tilSeparertString(),

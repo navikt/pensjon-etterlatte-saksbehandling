@@ -343,7 +343,7 @@ class VedtaksbrevService(
                         },
                 ),
             brevVedleggData =
-                listOf(
+                listOfNotNull(
                     BrevVedleggRedigerbarNy(
                         data =
                             OmstillingsstoenadBeregningRedigerbartVedleggData(
@@ -353,6 +353,15 @@ class VedtaksbrevService(
                         vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
                         vedleggId = BrevVedleggKey.OMS_BEREGNING,
                     ),
+                    if (harFeilutbetalingMedVarsel(behandling.id)) {
+                        BrevVedleggRedigerbarNy(
+                            data = null,
+                            vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                            vedleggId = BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                        )
+                    } else {
+                        null
+                    },
                 ),
         )
     }
@@ -464,7 +473,18 @@ class VedtaksbrevService(
                 OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdOpphoer(
                     feilutbetaling = fellesData.feilutbetalingFraBrevutfall(),
                 ),
-            brevVedleggData = emptyList(),
+            brevVedleggData =
+                if (harFeilutbetalingMedVarsel(behandling.id)) {
+                    listOf(
+                        BrevVedleggRedigerbarNy(
+                            data = null,
+                            vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                            vedleggId = BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
+                    )
+                } else {
+                    emptyList()
+                },
         )
     }
 
@@ -488,7 +508,8 @@ class VedtaksbrevService(
                     endringIUtbetalingVedVirk = avkorting.endringIUtbetalingVedVirk,
                     erInnvilgelsesaar = avkorting.erInnvilgelsesaar,
                 )
-            val beregningsperioder = avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
+            val beregningsperioder =
+                avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
 
             val sak = krevIkkeNull(sakService.finnSak(behandling.sak)) { "Sak må finnes" }
             val grunnlag =
@@ -533,6 +554,15 @@ class VedtaksbrevService(
             return klageService.hentKlage(relatertBehandlingId) // returnerer null hvis vi ikke finner klage
         }
         return null
+    }
+
+    private fun harFeilutbetalingMedVarsel(behandlingId: UUID): Boolean {
+        val brevutfall = behandlingInfoService.hentBrevutfall(behandlingId)
+        val brevutfallHentet =
+            krevIkkeNull(brevutfall) {
+                "Fant ingen brevutfall"
+            }
+        return brevutfallHentet.feilutbetaling?.valg == FeilutbetalingValg.JA_VARSEL
     }
 }
 

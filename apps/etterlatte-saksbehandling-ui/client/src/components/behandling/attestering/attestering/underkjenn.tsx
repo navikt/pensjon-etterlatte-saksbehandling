@@ -36,7 +36,7 @@ export const Underkjenn = () => {
       </Select>
       <Textarea
         style={{ padding: '10px' }}
-        label="Tilbakemelding fra attestant"
+        label="Kommentar fra attestant"
         placeholder="Forklar hvorfor vedtak er underkjent og hva som må rettes"
         value={tilbakemeldingFraAttestant}
         onChange={(e) => setTilbakemeldingFraAttestant(e.target.value)}

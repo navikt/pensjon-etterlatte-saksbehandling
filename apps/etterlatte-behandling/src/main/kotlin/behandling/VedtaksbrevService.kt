@@ -21,10 +21,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.FeilutbetalingType
-import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.erYrkesskade
-import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartVedleggData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
@@ -244,33 +241,15 @@ class VedtaksbrevService(
     ): BrevRequest {
         val fellesData = hentFellesData(behandling, vedtak, brukerTokenInfo)
 
-        val feilutbetaling =
-            krevIkkeNull(
-                fellesData.brevutfall.feilutbetaling
-                    ?.valg
-                    ?.let(FeilutbetalingType::fromFeilutbetalingValg),
-            ) { "Feilutbetaling mangler i brevutfall" }
-
+        val feilutbetaling = fellesData.feilutbetalingFraBrevutfall()
         val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, fellesData.beregningsperioder)
         val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
         val beregning =
-            OmstillingsstoenadBeregning(
-                virkningsdato = fellesData.avkortingsinfo.virkningsdato,
-                beregningsperioder = fellesData.beregningsperioder,
-                sisteBeregningsperiode = sisteBeregningsperiode,
-                sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-                trygdetid =
-                    fellesData.trygdetid.single().fromDto(
-                        beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                        beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                        navnAvdoed = null,
-                        landKodeverk = fellesData.alleLand,
-                    ),
-                oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                opphoerNesteAar =
-                    beregningsperioderOpphoer.forventetOpphoerDato?.year ==
-                        (behandling.virkningstidspunkt().dato.year + 1),
-                erYrkesskade = fellesData.trygdetid.single().erYrkesskade(),
+            omsBeregning(
+                behandling = behandling,
+                trygdetid = fellesData.trygdetid.single(),
+                avkortingsinfo = fellesData.avkortingsinfo,
+                landKodeverk = fellesData.alleLand,
             )
 
         return BrevRequest(
@@ -320,14 +299,7 @@ class VedtaksbrevService(
                                 fellesData.beregningsperioder,
                             )
                         },
-                    feilutbetaling =
-                        krevIkkeNull(
-                            fellesData.brevutfall.feilutbetaling
-                                ?.valg
-                                ?.let(::toFeilutbetalingType),
-                        ) {
-                            "Feilutbetaling mangler i brevutfall"
-                        },
+                    feilutbetaling = fellesData.feilutbetalingFraBrevutfall(),
                     harFlereUtbetalingsperioder = fellesData.beregningsperioder.size > 1,
                     harUtbetaling = fellesData.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                     inntekt = sisteBeregningsperiode.inntekt,
@@ -383,26 +355,15 @@ class VedtaksbrevService(
                 beregningsperioder = beregningsperioder,
             )
         val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
-        val virk = behandling.virkningstidspunkt!!.dato.atDay(1)
+        val virkningsdato = fellesData.virkningsdato
         val omsRettUtenTidsbegrensning = fellesData.omsRettUtenTidsbegrensning
 
         val beregning =
-            OmstillingsstoenadBeregning(
-                virkningsdato = virk,
-                beregningsperioder = beregningsperioder,
-                sisteBeregningsperiode = sisteBeregningsperiode,
-                sisteBeregningsperiodeNesteAar = null,
-                trygdetid =
-                    trygdetid.fromDto(
-                        beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                        beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                        navnAvdoed = null,
-                        landKodeverk = fellesData.alleLand,
-                    ),
-                oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                opphoerNesteAar =
-                    beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
-                erYrkesskade = trygdetid.erYrkesskade(),
+            omsBeregning(
+                behandling = behandling,
+                trygdetid = trygdetid,
+                avkortingsinfo = fellesData.avkortingsinfo,
+                landKodeverk = fellesData.alleLand,
             )
         return BrevRequest(
             sak = fellesData.sak,
@@ -420,16 +381,16 @@ class VedtaksbrevService(
                     beregning,
                     omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning,
                     tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
-                    inntektsaar = virk.year,
+                    inntektsaar = virkningsdato.year,
                     harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                     endringIUtbetaling = fellesData.avkortingsinfo.endringIUtbetalingVedVirk,
-                    virkningstidspunkt = virk,
+                    virkningstidspunkt = virkningsdato,
                     bosattUtland = behandling.erBosattUtland(),
                 ),
             brevRedigerbarInnholdData =
                 OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdAarligInntektsjustering(
                     inntektsbeloep = sisteBeregningsperiode.inntekt,
-                    inntektsaar = virk.year,
+                    inntektsaar = virkningsdato.year,
                 ),
             brevVedleggData =
                 listOf(

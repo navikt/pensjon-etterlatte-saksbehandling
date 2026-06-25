@@ -203,7 +203,7 @@ class VedtaksbrevService(
                 ),
             brevRedigerbarInnholdData =
                 OmstillingsstoenadInnvilgelseVedtakBrevData.VedtakInnhold(
-                    virkningsdato = fellesData.avkortingsinfo.virkningsdato,
+                    virkningsdato = fellesData.virkningsdato,
                     utbetalingsbeloep =
                         fellesData.avkortingsinfo.beregningsperioder
                             .firstOrNull()
@@ -241,16 +241,8 @@ class VedtaksbrevService(
     ): BrevRequest {
         val fellesData = hentFellesData(behandling, vedtak, brukerTokenInfo)
 
-        val feilutbetaling = fellesData.feilutbetalingFraBrevutfall()
         val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, fellesData.beregningsperioder)
         val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
-        val beregning =
-            omsBeregning(
-                behandling = behandling,
-                trygdetid = fellesData.trygdetid.single(),
-                avkortingsinfo = fellesData.avkortingsinfo,
-                landKodeverk = fellesData.alleLand,
-            )
 
         return BrevRequest(
             sak = fellesData.sak,
@@ -269,9 +261,15 @@ class VedtaksbrevService(
                             behandling.revurderingsaarsak == FRA_0UTBETALING_TIL_UTBETALING,
                     erOmgjoering = behandling.revurderingsaarsak == OMGJOERING_ETTER_KLAGE,
                     datoVedtakOmgjoering = fellesData.klage?.datoVedtakOmgjoering(),
-                    beregning = beregning,
+                    beregning =
+                        omsBeregning(
+                            behandling = behandling,
+                            trygdetid = fellesData.trygdetid.single(),
+                            avkortingsinfo = fellesData.avkortingsinfo,
+                            landKodeverk = fellesData.alleLand,
+                        ),
                     omsRettUtenTidsbegrensning = fellesData.omsRettUtenTidsbegrensning,
-                    feilutbetaling = feilutbetaling,
+                    feilutbetaling = fellesData.feilutbetalingFraBrevutfall(),
                     bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
                     erInnvilgelsesaar = fellesData.avkortingsinfo.erInnvilgelsesaar,
                     tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
@@ -280,7 +278,7 @@ class VedtaksbrevService(
                 VedtakInnhold(
                     beregning =
                         OmstillingsstoenadBeregningRedigerbartUtfall(
-                            virkningsdato = fellesData.avkortingsinfo.virkningsdato,
+                            virkningsdato = fellesData.virkningsdato,
                             beregningsperioder = fellesData.beregningsperioder,
                             sisteBeregningsperiode = sisteBeregningsperiode,
                             sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
@@ -319,7 +317,13 @@ class VedtaksbrevService(
                     BrevVedleggRedigerbarNy(
                         data =
                             OmstillingsstoenadBeregningRedigerbartVedleggData(
-                                omstillingsstoenadBeregning = beregning,
+                                omstillingsstoenadBeregning =
+                                    omsBeregning(
+                                        behandling = behandling,
+                                        trygdetid = fellesData.trygdetid.single(),
+                                        avkortingsinfo = fellesData.avkortingsinfo,
+                                        landKodeverk = fellesData.alleLand,
+                                    ),
                                 erInnvilgelsesAar = fellesData.avkortingsinfo.erInnvilgelsesaar,
                             ),
                         vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
@@ -346,22 +350,13 @@ class VedtaksbrevService(
     ): BrevRequest {
         val fellesData = hentFellesData(behandling, vedtak, brukerTokenInfo)
 
-        val trygdetid = krevIkkeNull(fellesData.trygdetid) { "Mangler trygdetid" }.single()
-        val beregningsperioder =
-            fellesData.avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
-        val beregningsperioderOpphoer =
-            utledBeregningsperioderOpphoer(
-                behandling = behandling,
-                beregningsperioder = beregningsperioder,
-            )
+        val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, fellesData.beregningsperioder)
         val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
-        val virkningsdato = fellesData.virkningsdato
-        val omsRettUtenTidsbegrensning = fellesData.omsRettUtenTidsbegrensning
 
         val beregning =
             omsBeregning(
                 behandling = behandling,
-                trygdetid = trygdetid,
+                trygdetid = fellesData.trygdetid.single(),
                 avkortingsinfo = fellesData.avkortingsinfo,
                 landKodeverk = fellesData.alleLand,
             )
@@ -379,18 +374,18 @@ class VedtaksbrevService(
                 OmstillingsstoenadRevurderingVedtakBrevData.VedtakAarligInntektsjustering(
                     beregning =
                     beregning,
-                    omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning,
+                    omsRettUtenTidsbegrensning = fellesData.omsRettUtenTidsbegrensning,
                     tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
-                    inntektsaar = virkningsdato.year,
-                    harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    inntektsaar = fellesData.virkningsdato.year,
+                    harUtbetaling = fellesData.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                     endringIUtbetaling = fellesData.avkortingsinfo.endringIUtbetalingVedVirk,
-                    virkningstidspunkt = virkningsdato,
+                    virkningstidspunkt = fellesData.virkningsdato,
                     bosattUtland = behandling.erBosattUtland(),
                 ),
             brevRedigerbarInnholdData =
                 OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdAarligInntektsjustering(
                     inntektsbeloep = sisteBeregningsperiode.inntekt,
-                    inntektsaar = virkningsdato.year,
+                    inntektsaar = fellesData.virkningsdato.year,
                 ),
             brevVedleggData =
                 listOf(
@@ -556,12 +551,4 @@ private fun OmstillingsstoenadVedtaksbrevGrunnlag.harUtbetaling(): Boolean =
     avkortingsinfo.beregningsperioder.any {
         it.utbetaltBeloep.value >
             0
-    }
-
-private fun toFeilutbetalingType(feilutbetalingValg: FeilutbetalingValg) =
-    when (feilutbetalingValg) {
-        FeilutbetalingValg.NEI -> FeilutbetalingType.INGEN_FEILUTBETALING
-        FeilutbetalingValg.JA_INGEN_TK -> FeilutbetalingType.FEILUTBETALING_4RG_UTEN_VARSEL
-        FeilutbetalingValg.JA_INGEN_VARSEL_MOTREGNES -> FeilutbetalingType.FEILUTBETALING_UTEN_VARSEL
-        FeilutbetalingValg.JA_VARSEL -> FeilutbetalingType.FEILUTBETALING_MED_VARSEL
     }

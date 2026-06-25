@@ -22,7 +22,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import java.time.LocalDate
 
-internal data class OmsVedtaksbrevGrunnlag(
+internal data class OmstillingsstoenadVedtaksbrevGrunnlag(
     val virkningsdato: LocalDate,
     val avkortingsinfo: Avkortingsinfo,
     val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,

@@ -453,7 +453,7 @@ class VedtaksbrevService(
         behandling: DetaljertBehandling,
         vedtak: VedtakDto,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OmsVedtaksbrevGrunnlag =
+    ): OmstillingsstoenadVedtaksbrevGrunnlag =
         coroutineScope {
             val behandlingId = behandling.id
             val virkningsdato = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).virkningstidspunkt.atDay(1)
@@ -492,7 +492,7 @@ class VedtaksbrevService(
 
             val brevutfall = behandlingInfoService.hentBrevutfall(behandlingId) ?: throw ManglerBrevutfall(behandlingId)
 
-            OmsVedtaksbrevGrunnlag(
+            OmstillingsstoenadVedtaksbrevGrunnlag(
                 virkningsdato = virkningsdato,
                 avkortingsinfo = avkortingsinfo,
                 beregningsperioder = beregningsperioder,
@@ -552,7 +552,11 @@ fun innvilgetMindreEnnFireMndEtterDoedsfall(
     doedsdatoEllerOpphoertPleieforhold: LocalDate,
 ): Boolean = innvilgelsesDato.isBefore(doedsdatoEllerOpphoertPleieforhold.plusMonths(4))
 
-private fun OmsVedtaksbrevGrunnlag.harUtbetaling(): Boolean = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 }
+private fun OmstillingsstoenadVedtaksbrevGrunnlag.harUtbetaling(): Boolean =
+    avkortingsinfo.beregningsperioder.any {
+        it.utbetaltBeloep.value >
+            0
+    }
 
 private fun toFeilutbetalingType(feilutbetalingValg: FeilutbetalingValg) =
     when (feilutbetalingValg) {

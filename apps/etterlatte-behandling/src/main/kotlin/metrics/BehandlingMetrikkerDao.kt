@@ -12,6 +12,27 @@ import javax.sql.DataSource
 class BehandlingMetrikkerDao(
     private val dataSource: DataSource,
 ) {
+    fun hentAttestertEldreEnnTimer(antallTimer: Long): List<AttestertHengendeAntall> =
+        dataSource.connection.use {
+            val statement =
+                it.prepareStatement(
+                    """
+                    SELECT count(*) antall, s.saktype
+                    FROM behandling b
+                    JOIN sak s ON b.sak_id = s.id
+                    WHERE b.status = 'ATTESTERT'
+                      AND b.sist_endret < NOW() - INTERVAL '$antallTimer hours'
+                    GROUP BY s.saktype
+                    """.trimIndent(),
+                )
+            statement.executeQuery().toList {
+                AttestertHengendeAntall(
+                    antall = getInt("antall"),
+                    saktype = SakType.valueOf(getString("saktype")),
+                )
+            }
+        }
+
     fun hent(): List<BehandlingAntall> {
         dataSource.connection.use {
             val statement =
@@ -54,4 +75,9 @@ data class BehandlingAntall(
     val status: BehandlingStatus,
     val kilde: Vedtaksloesning,
     val automatiskMigrering: String,
+)
+
+data class AttestertHengendeAntall(
+    val antall: Int,
+    val saktype: SakType,
 )

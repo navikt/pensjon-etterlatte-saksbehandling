@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.klage.AvvistKlageBrevInnholdDataNy
 import no.nav.etterlatte.brev.model.klage.AvvistKlageBrevRedigerbarInnholdData
 import no.nav.etterlatte.brev.model.oms.EtteroppgjoerBrevData
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartVedleggData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevInnholdDataNy
@@ -89,6 +90,14 @@ data class BrevRequest(
     JsonSubTypes.Type(value = OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak::class, name = "OMSTILLINGSSTOENAD_INNVILGELSE"),
     JsonSubTypes.Type(value = OmstillingsstoenadRevurderingVedtakBrevData.Vedtak::class, name = "OMSTILLINGSSTOENAD_REVURDERING"),
     JsonSubTypes.Type(value = AvvistKlageBrevInnholdDataNy::class, name = "AVVIST_KLAGE"),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakAarligInntektsjustering::class,
+        name = "OMS_AARLIG_INNTEKTSJUSTERING",
+    ),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakOpphoer::class,
+        name = "OMSTILLINGSSTOENAD_OPPHOER",
+    ),
 )
 abstract class BrevFastInnholdData : BrevData {
     abstract val brevKode: Brevkoder
@@ -114,9 +123,17 @@ abstract class BrevFastInnholdData : BrevData {
         name = "OMSTILLINGSSTOENAD_REVURDERING_UTFALL",
     ),
     JsonSubTypes.Type(value = AvvistKlageBrevRedigerbarInnholdData::class, name = "AVVIST_KLAGE_UTFALL"),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdAarligInntektsjustering::class,
+        name = "OMS_AARLIG_INNTEKTSJUSTERING_UTFALL",
+    ),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdOpphoer::class,
+        name = "OMSTILLINGSSTOENAD_OPPHOER",
+    ),
 )
 abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
-    abstract val brevKode: Brevkoder
+    abstract val brevKode: Brevkoder // TODO Ikke i bruk?
     abstract val type: String
     override val data: Any? = null
 }
@@ -126,6 +143,10 @@ abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     JsonSubTypes.Type(
         value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,
         name = "OMS_EO_BEREGNINGVEDLEGG_INNHOLD",
+    ),
+    JsonSubTypes.Type(
+        value = OmstillingsstoenadBeregningRedigerbartVedleggData::class,
+        name = "OMS_BEREGNINGVEDLEGG_UTFALL",
     ),
 )
 abstract class BrevVedleggInnholdData : BrevDataRedigerbar {

@@ -156,7 +156,7 @@ spec:
     - name: OPPGAVE_URL
       value: https://oppgave.prod-fss-pub.nais.io
     - name: PEN_URL
-      value: https://pensjon-pen.prod-fss-pub.nais.io/api
+      value: https://pensjon-pen.prod-fss-pub.nais.io
     - name: PEN_CLIENT_ID
       value: 53eaf67f-d7b2-46e9-8ffe-3da7cf0ac955
     - name: KRR_ENDPOINT_URL

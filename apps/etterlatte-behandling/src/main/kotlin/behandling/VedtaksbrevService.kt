@@ -10,24 +10,23 @@ import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
+import no.nav.etterlatte.brev.BrevVedleggKey
+import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.ManglerBrevutfall
+import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.mapAvdoede
-import no.nav.etterlatte.brev.behandling.mapInnsender
-import no.nav.etterlatte.brev.behandling.mapSoeker
-import no.nav.etterlatte.brev.behandling.mapSpraak
-import no.nav.etterlatte.brev.hentVergeForSak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.FeilutbetalingType
-import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.erYrkesskade
-import no.nav.etterlatte.brev.model.fromDto
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartUtfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartVedleggData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnhold
 import no.nav.etterlatte.brev.model.oms.omsBeregning
 import no.nav.etterlatte.brev.model.oms.toAvkortetBeregningsperiode
 import no.nav.etterlatte.brev.model.oms.utledBeregningsperioderOpphoer
@@ -36,8 +35,12 @@ import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.etterlatte.libs.common.behandling.BehandlingType.REVURDERING
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.AARLIG_INNTEKTSJUSTERING
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.INNTEKTSENDRING
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.NY_SOEKNAD
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.OMGJOERING_ETTER_KLAGE
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -140,6 +143,10 @@ class VedtaksbrevService(
                 (behandling.behandlingType == REVURDERING && behandling.revurderingsaarsak == NY_SOEKNAD)
             ) {
                 utledBrevRequestInnvilgelse(brukerTokenInfo, behandling, vedtak, skalLagres)
+            } else if (vedtak.type == VedtakType.OPPHOER) {
+                utledBrevRequestOpphoer(brukerTokenInfo, behandling, vedtak, skalLagres)
+            } else if (behandling.revurderingsaarsak == AARLIG_INNTEKTSJUSTERING) {
+                utledBrevRequestAarligInntektsjustering(brukerTokenInfo, behandling, vedtak, skalLagres)
             } else {
                 utledBrevRequestRevurdering(brukerTokenInfo, behandling, vedtak, skalLagres)
             }
@@ -151,125 +158,79 @@ class VedtaksbrevService(
         vedtak: VedtakDto,
         skalLagres: Boolean = false,
     ): BrevRequest {
-        val behandlingId = behandling.id
-        return coroutineScope {
-            val alleLand = async { kodeverkService.hentAlleLand(brukerTokenInfo) }
+        val fellesData = hentFellesData(behandling, vedtak, brukerTokenInfo)
+        val erTidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true
+        val doedsdatoEllerOpphoertPleieforhold =
+            if (erTidligereFamiliepleier) {
+                behandling.tidligereFamiliepleier!!.opphoertPleieforhold!!
+            } else {
+                fellesData.avdoede.single().doedsdato
+            }
 
-            val sak = krevIkkeNull(sakService.finnSak(behandling.sak)) { "Sak må finnes" }
-
-            val avkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
-
-            val vilkaarsvurdering =
-                krevIkkeNull(vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)) { "Må ha vilkårsvurdering" }
-
-            val grunnlag =
-                grunnlagService.hentOpplysningsgrunnlag(behandling.id)
-                    ?: throw InternfeilException("Fant ikke grunnlag for behandlingId=${behandling.id}")
-
-            val virkningsdato = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).virkningstidspunkt.atDay(1)
-
-            val avkortingsinfo =
-                Avkortingsinfo(
-                    virkningsdato = virkningsdato,
-                    beregningsperioder = avkorting.perioder.map { it.toAvkortetBeregningsperiode() },
-                    endringIUtbetalingVedVirk = avkorting.endringIUtbetalingVedVirk,
-                    erInnvilgelsesaar = avkorting.erInnvilgelsesaar,
-                )
-
-            val avkortetBeregningsperioder = avkortingsinfo.beregningsperioder
-            val beregningsperioder = avkortetBeregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
-
-            val etterbetaling = behandlingInfoService.hentEtterbetaling(behandlingId)?.toEtterbetalingDTO()
-            val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
-            krev(trygdetid.isNotEmpty()) { "Klarte ikke hente trygdetid for å generere vedtaksbrev" }
-
-            val erTidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true
-
-            val omsRettUtenTidsbegrensning =
-                vilkaarsvurdering.vilkaar.single {
-                    it.hovedvilkaar.type in
-                        listOf(
-                            VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
-                        )
-                }
-
-            val avdoede = grunnlag.mapAvdoede()
-
-            val doedsdatoEllerOpphoertPleieforhold =
-                if (erTidligereFamiliepleier) {
-                    behandling.tidligereFamiliepleier!!.opphoertPleieforhold!!
-                } else {
-                    avdoede.single().doedsdato
-                }
-            val klage = hentKlageForBehandling(behandling)
-
-            BrevRequest(
-                sak = sak,
-                innsender = grunnlag.mapInnsender(),
-                soeker = grunnlag.mapSoeker(null),
-                avdoede = grunnlag.mapAvdoede(),
-                verge = hentVergeForSak(sak.sakType, null, grunnlag),
-                spraak = grunnlag.mapSpraak(),
-                saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
-                attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
-                skalLagre = skalLagres,
-                brevFastInnholdData =
-                    OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak(
-                        beregning =
-                            omsBeregning(
-                                behandling = behandling,
-                                trygdetid = trygdetid.single(),
-                                avkortingsinfo = avkortingsinfo,
-                                landKodeverk = alleLand.await(),
+        return BrevRequest(
+            sak = fellesData.sak,
+            innsender = fellesData.innsender(),
+            soeker = fellesData.soeker(),
+            avdoede = fellesData.avdoede,
+            verge = fellesData.verge(),
+            spraak = fellesData.spraak(),
+            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
+            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            skalLagre = skalLagres,
+            brevFastInnholdData =
+                OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak(
+                    beregning =
+                        omsBeregning(
+                            behandling = behandling,
+                            trygdetid = fellesData.trygdetid.single(),
+                            avkortingsinfo = fellesData.avkortingsinfo,
+                            landKodeverk = fellesData.alleLand,
+                        ),
+                    innvilgetMindreEnnFireMndEtterDoedsfall =
+                        innvilgetMindreEnnFireMndEtterDoedsfall(
+                            doedsdatoEllerOpphoertPleieforhold = doedsdatoEllerOpphoertPleieforhold,
+                        ),
+                    omsRettUtenTidsbegrensning = fellesData.omsRettUtenTidsbegrensning,
+                    harUtbetaling = fellesData.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                    etterbetaling =
+                        fellesData.etterbetaling?.let { dto ->
+                            Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, fellesData.beregningsperioder)
+                        },
+                    erSluttbehandling = behandling.erSluttbehandling,
+                    tidligereFamiliepleier = erTidligereFamiliepleier,
+                    datoVedtakOmgjoering = fellesData.klage?.datoVedtakOmgjoering(),
+                ),
+            brevRedigerbarInnholdData =
+                OmstillingsstoenadInnvilgelseVedtakBrevData.VedtakInnhold(
+                    virkningsdato = fellesData.virkningsdato,
+                    utbetalingsbeloep =
+                        fellesData.avkortingsinfo.beregningsperioder
+                            .firstOrNull()
+                            ?.utbetaltBeloep
+                            ?: throw UgyldigForespoerselException(
+                                "MANGLER_BEREGNINGSPERIODER_AVKORTING",
+                                "Mangler beregningsperioder i avkorting",
                             ),
-                        innvilgetMindreEnnFireMndEtterDoedsfall =
-                            innvilgetMindreEnnFireMndEtterDoedsfall(
-                                doedsdatoEllerOpphoertPleieforhold = doedsdatoEllerOpphoertPleieforhold,
-                            ),
-                        omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
-                        harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                        bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
-                        etterbetaling =
-                            etterbetaling
-                                ?.let { dto ->
-                                    Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
-                                        dto,
-                                        beregningsperioder,
-                                    )
-                                },
-                        erSluttbehandling = behandling.erSluttbehandling,
-                        tidligereFamiliepleier = erTidligereFamiliepleier,
-                        datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
-                    ),
-                brevRedigerbarInnholdData =
-                    OmstillingsstoenadInnvilgelseVedtakBrevData.VedtakInnhold(
-                        virkningsdato = avkortingsinfo.virkningsdato,
-                        utbetalingsbeloep =
-                            avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
-                                ?: throw UgyldigForespoerselException(
-                                    "MANGLER_BEREGNINGSPERIODER_AVKORTING",
-                                    "Mangler beregningsperioder i avkorting",
-                                ),
-                        etterbetaling = etterbetaling != null,
-                        tidligereFamiliepleier = erTidligereFamiliepleier,
-                        datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
-                        avdoed = if (erTidligereFamiliepleier) null else avdoede.single(),
-                        erSluttbehandling = behandling.erSluttbehandling,
-                        harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                        beregning =
-                            omsBeregning(
-                                behandling = behandling,
-                                trygdetid = trygdetid.single(),
-                                avkortingsinfo = avkortingsinfo,
-                                landKodeverk = emptyList(),
-                            ),
-                    ),
-                brevVedleggData =
-                    listOf(
-                        OmstillingsstoenadInnvilgelseVedtakBrevData.beregningsvedleggInnhold(),
-                    ),
-            )
-        }
+                    etterbetaling = fellesData.etterbetaling != null,
+                    tidligereFamiliepleier = erTidligereFamiliepleier,
+                    datoVedtakOmgjoering = fellesData.klage?.datoVedtakOmgjoering(),
+                    avdoed = if (erTidligereFamiliepleier) null else fellesData.avdoede.single(),
+                    erSluttbehandling = behandling.erSluttbehandling,
+                    harUtbetaling = fellesData.harUtbetaling(),
+                    beregning =
+                        omsBeregning(
+                            behandling = behandling,
+                            trygdetid = fellesData.trygdetid.single(),
+                            avkortingsinfo = fellesData.avkortingsinfo,
+                            landKodeverk = emptyList(),
+                        ),
+                ),
+            brevVedleggData =
+                listOf(
+                    OmstillingsstoenadInnvilgelseVedtakBrevData.beregningsvedleggInnhold(),
+                ),
+        )
     }
 
     private suspend fun utledBrevRequestRevurdering(
@@ -278,9 +239,223 @@ class VedtaksbrevService(
         vedtak: VedtakDto,
         skalLagres: Boolean = false,
     ): BrevRequest {
-        val behandlingId = behandling.id
-        return coroutineScope {
+        val fellesData = hentFellesData(behandling, vedtak, brukerTokenInfo)
+
+        val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, fellesData.beregningsperioder)
+        val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
+
+        return BrevRequest(
+            sak = fellesData.sak,
+            innsender = fellesData.innsender(),
+            soeker = fellesData.soeker(),
+            avdoede = fellesData.avdoede,
+            verge = fellesData.verge(),
+            spraak = fellesData.spraak(),
+            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
+            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            skalLagre = skalLagres,
+            brevFastInnholdData =
+                OmstillingsstoenadRevurderingVedtakBrevData.Vedtak(
+                    erEndret =
+                        fellesData.avkortingsinfo.endringIUtbetalingVedVirk ||
+                            behandling.revurderingsaarsak == FRA_0UTBETALING_TIL_UTBETALING,
+                    erOmgjoering = behandling.revurderingsaarsak == OMGJOERING_ETTER_KLAGE,
+                    datoVedtakOmgjoering = fellesData.klage?.datoVedtakOmgjoering(),
+                    beregning =
+                        omsBeregning(
+                            behandling = behandling,
+                            trygdetid = fellesData.trygdetid.single(),
+                            avkortingsinfo = fellesData.avkortingsinfo,
+                            landKodeverk = fellesData.alleLand,
+                        ),
+                    omsRettUtenTidsbegrensning = fellesData.omsRettUtenTidsbegrensning,
+                    feilutbetaling = fellesData.feilutbetalingFraBrevutfall(),
+                    bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                    erInnvilgelsesaar = fellesData.avkortingsinfo.erInnvilgelsesaar,
+                    tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
+                ),
+            brevRedigerbarInnholdData =
+                VedtakInnhold(
+                    beregning =
+                        OmstillingsstoenadBeregningRedigerbartUtfall(
+                            virkningsdato = fellesData.virkningsdato,
+                            beregningsperioder = fellesData.beregningsperioder,
+                            sisteBeregningsperiode = sisteBeregningsperiode,
+                            sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+                            oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                            opphoerNesteAar =
+                                beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        ),
+                    erEndret =
+                        fellesData.avkortingsinfo.endringIUtbetalingVedVirk ||
+                            behandling.revurderingsaarsak == FRA_0UTBETALING_TIL_UTBETALING,
+                    erEtterbetaling = fellesData.etterbetaling != null,
+                    etterbetaling =
+                        fellesData.etterbetaling?.let {
+                            Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
+                                it,
+                                fellesData.beregningsperioder,
+                            )
+                        },
+                    feilutbetaling = fellesData.feilutbetalingFraBrevutfall(),
+                    harFlereUtbetalingsperioder = fellesData.beregningsperioder.size > 1,
+                    harUtbetaling = fellesData.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    inntekt = sisteBeregningsperiode.inntekt,
+                    inntektsAar = sisteBeregningsperiode.datoFOM.year,
+                    mottattInntektendringAutomatisk =
+                        if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
+                            behandling.revurderingsaarsak == INNTEKTSENDRING
+                        ) {
+                            behandling.mottattDato?.toLocalDate()
+                                ?: throw InternfeilException("Automatisk inntektsendring må ha mottatt dato")
+                        } else {
+                            null
+                        },
+                ),
+            brevVedleggData =
+                listOfNotNull(
+                    BrevVedleggRedigerbarNy(
+                        data =
+                            OmstillingsstoenadBeregningRedigerbartVedleggData(
+                                omstillingsstoenadBeregning =
+                                    omsBeregning(
+                                        behandling = behandling,
+                                        trygdetid = fellesData.trygdetid.single(),
+                                        avkortingsinfo = fellesData.avkortingsinfo,
+                                        landKodeverk = fellesData.alleLand,
+                                    ),
+                                erInnvilgelsesAar = fellesData.avkortingsinfo.erInnvilgelsesaar,
+                            ),
+                        vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                        vedleggId = BrevVedleggKey.OMS_BEREGNING,
+                    ),
+                    if (harFeilutbetalingMedVarsel(behandling.id)) {
+                        BrevVedleggRedigerbarNy(
+                            data = null,
+                            vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                            vedleggId = BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                        )
+                    } else {
+                        null
+                    },
+                ),
+        )
+    }
+
+    private suspend fun utledBrevRequestAarligInntektsjustering(
+        brukerTokenInfo: BrukerTokenInfo,
+        behandling: DetaljertBehandling,
+        vedtak: VedtakDto,
+        skalLagres: Boolean = false,
+    ): BrevRequest {
+        val fellesData = hentFellesData(behandling, vedtak, brukerTokenInfo)
+
+        val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, fellesData.beregningsperioder)
+        val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
+
+        val beregning =
+            omsBeregning(
+                behandling = behandling,
+                trygdetid = fellesData.trygdetid.single(),
+                avkortingsinfo = fellesData.avkortingsinfo,
+                landKodeverk = fellesData.alleLand,
+            )
+        return BrevRequest(
+            sak = fellesData.sak,
+            innsender = fellesData.innsender(),
+            soeker = fellesData.soeker(),
+            avdoede = fellesData.avdoede,
+            verge = fellesData.verge(),
+            spraak = fellesData.spraak(),
+            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
+            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            skalLagre = skalLagres,
+            brevFastInnholdData =
+                OmstillingsstoenadRevurderingVedtakBrevData.VedtakAarligInntektsjustering(
+                    beregning =
+                    beregning,
+                    omsRettUtenTidsbegrensning = fellesData.omsRettUtenTidsbegrensning,
+                    tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
+                    inntektsaar = fellesData.virkningsdato.year,
+                    harUtbetaling = fellesData.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                    endringIUtbetaling = fellesData.avkortingsinfo.endringIUtbetalingVedVirk,
+                    virkningstidspunkt = fellesData.virkningsdato,
+                    bosattUtland = behandling.erBosattUtland(),
+                ),
+            brevRedigerbarInnholdData =
+                OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdAarligInntektsjustering(
+                    inntektsbeloep = sisteBeregningsperiode.inntekt,
+                    inntektsaar = fellesData.virkningsdato.year,
+                ),
+            brevVedleggData =
+                listOf(
+                    BrevVedleggRedigerbarNy(
+                        data =
+                            OmstillingsstoenadBeregningRedigerbartVedleggData(
+                                omstillingsstoenadBeregning = beregning,
+                                erInnvilgelsesAar = fellesData.avkortingsinfo.erInnvilgelsesaar,
+                            ),
+                        vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                        vedleggId = BrevVedleggKey.OMS_BEREGNING,
+                    ),
+                ),
+        )
+    }
+
+    private suspend fun utledBrevRequestOpphoer(
+        brukerTokenInfo: BrukerTokenInfo,
+        behandling: DetaljertBehandling,
+        vedtak: VedtakDto,
+        skalLagres: Boolean = false,
+    ): BrevRequest {
+        val fellesData = hentFellesData(behandling, vedtak, brukerTokenInfo)
+        return BrevRequest(
+            sak = fellesData.sak,
+            innsender = fellesData.innsender(),
+            soeker = fellesData.soeker(),
+            avdoede = fellesData.avdoede,
+            verge = fellesData.verge(),
+            spraak = fellesData.spraak(),
+            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
+            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            skalLagre = skalLagres,
+            brevFastInnholdData =
+                OmstillingsstoenadRevurderingVedtakBrevData.VedtakOpphoer(
+                    bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                    virkningsdato = fellesData.virkningsdato,
+                    feilutbetaling = fellesData.feilutbetalingFraBrevutfall(),
+                ),
+            brevRedigerbarInnholdData =
+                OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnholdOpphoer(
+                    feilutbetaling = fellesData.feilutbetalingFraBrevutfall(),
+                ),
+            brevVedleggData =
+                if (harFeilutbetalingMedVarsel(behandling.id)) {
+                    listOf(
+                        BrevVedleggRedigerbarNy(
+                            data = null,
+                            vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                            vedleggId = BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                        ),
+                    )
+                } else {
+                    emptyList()
+                },
+        )
+    }
+
+    private suspend fun hentFellesData(
+        behandling: DetaljertBehandling,
+        vedtak: VedtakDto,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OmstillingsstoenadVedtaksbrevGrunnlag =
+        coroutineScope {
+            val behandlingId = behandling.id
             val virkningsdato = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).virkningstidspunkt.atDay(1)
+
+            val alleLand = async { kodeverkService.hentAlleLand(brukerTokenInfo) }
+            val trygdetid = async { trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo) }
+
             val avkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
             val avkortingsinfo =
                 Avkortingsinfo(
@@ -289,131 +464,44 @@ class VedtaksbrevService(
                     endringIUtbetalingVedVirk = avkorting.endringIUtbetalingVedVirk,
                     erInnvilgelsesaar = avkorting.erInnvilgelsesaar,
                 )
-
-            val alleLand = async { kodeverkService.hentAlleLand(brukerTokenInfo) }
-            val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
-            krev(trygdetid.isNotEmpty()) { "Klarte ikke hente trygdetid for å generere vedtaksbrev" }
-
-            val brevutfall = async { behandlingInfoService.hentBrevutfall(behandlingId) }
-            val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId) }
-
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
-            val feilutbetaling =
-                krevIkkeNull(
-                    (
-                        brevutfall.await()
-                            ?: throw ManglerBrevutfall(behandlingId)
-                    ).feilutbetaling?.valg?.let(FeilutbetalingType::fromFeilutbetalingValg),
-                ) {
-                    "Feilutbetaling mangler i brevutfall"
-                }
-            val sak = krevIkkeNull(sakService.finnSak(behandling.sak)) { "Sak må finnes" }
-            val klage = hentKlageForBehandling(behandling)
 
-            val beregningsperioderOpphoer =
-                utledBeregningsperioderOpphoer(
-                    behandling,
-                    beregningsperioder,
-                )
-            val etterbetaling = behandlingInfoService.hentEtterbetaling(behandlingId)?.toEtterbetalingDTO()
-            val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
-            val omsRettUtenTidsbegrensning =
-                krevIkkeNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" }.vilkaar.single {
-                    it.hovedvilkaar.type in
-                        listOf(
-                            VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
-                        )
-                }
+            val sak = krevIkkeNull(sakService.finnSak(behandling.sak)) { "Sak må finnes" }
             val grunnlag =
                 grunnlagService.hentOpplysningsgrunnlag(behandling.id)
                     ?: throw InternfeilException("Fant ikke grunnlag for behandlingId=${behandling.id}")
             val avdoede = grunnlag.mapAvdoede()
+            val klage = hentKlageForBehandling(behandling)
+            val etterbetaling = behandlingInfoService.hentEtterbetaling(behandlingId)?.toEtterbetalingDTO()
 
-            BrevRequest(
+            val trygdetidAwait = trygdetid.await()
+            krev(trygdetidAwait.isNotEmpty()) { "Klarte ikke hente trygdetid for å generere vedtaksbrev" }
+
+            val vilkaarsvurdering =
+                krevIkkeNull(vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)) { "Mangler vilkårsvurdering" }
+            val omsRettUtenTidsbegrensning =
+                vilkaarsvurdering.vilkaar
+                    .single { it.hovedvilkaar.type in listOf(VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING) }
+                    .let { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
+
+            val brevutfall = behandlingInfoService.hentBrevutfall(behandlingId) ?: throw ManglerBrevutfall(behandlingId)
+
+            OmstillingsstoenadVedtaksbrevGrunnlag(
+                virkningsdato = virkningsdato,
+                avkortingsinfo = avkortingsinfo,
+                beregningsperioder = beregningsperioder,
+                alleLand = alleLand.await(),
+                trygdetid = trygdetidAwait,
                 sak = sak,
-                innsender = grunnlag.mapInnsender(),
-                soeker = grunnlag.mapSoeker(null),
-                avdoede = grunnlag.mapAvdoede(),
-                verge = hentVergeForSak(sak.sakType, null, grunnlag),
-                spraak = grunnlag.mapSpraak(),
-                saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
-                attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
-                skalLagre = skalLagres,
-                brevFastInnholdData =
-                    OmstillingsstoenadRevurderingVedtakBrevData.Vedtak(
-                        erEndret =
-                            avkortingsinfo.endringIUtbetalingVedVirk ||
-                                behandling.revurderingsaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
-                        erOmgjoering = behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                        datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
-                        beregning =
-                            OmstillingsstoenadBeregning(
-                                virkningsdato = avkortingsinfo.virkningsdato,
-                                beregningsperioder = beregningsperioder,
-                                sisteBeregningsperiode = sisteBeregningsperiode,
-                                sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-                                trygdetid =
-                                    trygdetid.single().fromDto(
-                                        beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                                        beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                        navnAvdoed = null,
-                                        landKodeverk = alleLand.await(),
-                                    ),
-                                oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                                opphoerNesteAar =
-                                    beregningsperioderOpphoer.forventetOpphoerDato?.year ==
-                                        (behandling.virkningstidspunkt().dato.year + 1),
-                                erYrkesskade = trygdetid.single().erYrkesskade(),
-                            ),
-                        omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
-                        feilutbetaling = feilutbetaling,
-                        bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
-                        erInnvilgelsesaar = avkortingsinfo.erInnvilgelsesaar,
-                        tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
-                    ),
-                brevRedigerbarInnholdData =
-                    OmstillingsstoenadRevurderingVedtakBrevData.VedtakInnhold(
-                        virkningsdato = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).virkningstidspunkt.atDay(1),
-                        utbetalingsbeloep =
-                            avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
-                                ?: throw UgyldigForespoerselException(
-                                    "MANGLER_BEREGNINGSPERIODER_AVKORTING",
-                                    "Mangler beregningsperioder i avkorting",
-                                ),
-                        etterbetaling = etterbetaling != null,
-                        avdoed = if (behandling.tidligereFamiliepleier?.svar ?: false) null else avdoede.single(),
-                        harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                        beregning =
-                            OmstillingsstoenadBeregning(
-                                virkningsdato = avkortingsinfo.virkningsdato,
-                                beregningsperioder = beregningsperioder,
-                                sisteBeregningsperiode = sisteBeregningsperiode,
-                                sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
-                                trygdetid =
-                                    trygdetid.single().fromDto(
-                                        beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                                        beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                        navnAvdoed = null,
-                                        landKodeverk = alleLand.await(),
-                                    ),
-                                oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
-                                opphoerNesteAar =
-                                    beregningsperioderOpphoer.forventetOpphoerDato?.year ==
-                                        (behandling.virkningstidspunkt().dato.year + 1),
-                                erYrkesskade = trygdetid.single().erYrkesskade(),
-                            ),
-                        erSluttbehandling = behandling.erSluttbehandling,
-                        tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
-                        datoVedtakOmgjoering = klage?.datoVedtakOmgjoering(),
-                    ),
-                brevVedleggData =
-                    listOf(
-                        OmstillingsstoenadInnvilgelseVedtakBrevData.beregningsvedleggInnhold(),
-                    ),
+                grunnlag = grunnlag,
+                avdoede = avdoede,
+                omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning,
+                klage = klage,
+                etterbetaling = etterbetaling,
+                brevutfall = brevutfall,
             )
         }
-    }
 
     fun hentKlageForBehandling(behandling: DetaljertBehandling): Klage? {
         validerRevurderingOmgjoringHarRelatertBehandlingId(behandling)
@@ -422,6 +510,15 @@ class VedtaksbrevService(
             return klageService.hentKlage(relatertBehandlingId) // returnerer null hvis vi ikke finner klage
         }
         return null
+    }
+
+    private fun harFeilutbetalingMedVarsel(behandlingId: UUID): Boolean {
+        val brevutfall = behandlingInfoService.hentBrevutfall(behandlingId)
+        val brevutfallHentet =
+            krevIkkeNull(brevutfall) {
+                "Fant ingen brevutfall"
+            }
+        return brevutfallHentet.feilutbetaling?.valg == FeilutbetalingValg.JA_VARSEL
     }
 }
 
@@ -449,3 +546,9 @@ fun innvilgetMindreEnnFireMndEtterDoedsfall(
     innvilgelsesDato: LocalDate = LocalDate.now(),
     doedsdatoEllerOpphoertPleieforhold: LocalDate,
 ): Boolean = innvilgelsesDato.isBefore(doedsdatoEllerOpphoertPleieforhold.plusMonths(4))
+
+private fun OmstillingsstoenadVedtaksbrevGrunnlag.harUtbetaling(): Boolean =
+    avkortingsinfo.beregningsperioder.any {
+        it.utbetaltBeloep.value >
+            0
+    }

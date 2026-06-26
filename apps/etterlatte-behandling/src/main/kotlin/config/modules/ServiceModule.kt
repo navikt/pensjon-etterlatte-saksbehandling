@@ -480,19 +480,27 @@ class ServiceModule(
     private val brukInternTrygdetid: Boolean by lazy { env[BRUK_INTERN_TRYGDETID] == "true" }
     private val brukEgenDatabaseForTrygdetid: Boolean by lazy { env[BRUK_EGEN_DATABASE_FOR_TRYGDETID] == "true" }
 
-    val internTrygdetidAktivert: Boolean by lazy { brukInternTrygdetid && brukEgenDatabaseForTrygdetid }
+    val internTrygdetidAktivert: Boolean by lazy { brukInternTrygdetid }
 
     val avtaleService: AvtaleService by lazy {
-        AvtaleService(
-            avtaleRepository = daoModule.avtaleRepository,
-            brukInternTrygdetid = brukInternTrygdetid,
-            brukEgenDatabaseForTrygdetid = brukEgenDatabaseForTrygdetid,
-        )
+        val avtaleRepository =
+            if (brukEgenDatabaseForTrygdetid) {
+                daoModule.avtaleRepository
+            } else {
+                klientModule.avtaleRepositoryKlient
+            }
+        AvtaleService(avtaleRepository = avtaleRepository)
     }
 
     val trygdetidService: TrygdetidService by lazy {
+        val trygdetidRepository =
+            if (brukEgenDatabaseForTrygdetid) {
+                daoModule.trygdetidRepository
+            } else {
+                klientModule.trygdetidRepositoryKlient
+            }
         TrygdetidServiceImpl(
-            trygdetidRepository = daoModule.trygdetidRepository,
+            trygdetidRepository = trygdetidRepository,
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
             beregnTrygdetidService = TrygdetidBeregningService,
@@ -500,8 +508,6 @@ class ServiceModule(
             avtaleService = avtaleService,
             behandlingsStatusService = behandlingsStatusService,
             vedtaksvurderingKlient = VedtaksvurderingKlientAdapter(vedtaksvurderingService),
-            brukInternTrygdetid = brukInternTrygdetid,
-            brukEgenDatabaseForTrygdetid = brukEgenDatabaseForTrygdetid,
         )
     }
 }

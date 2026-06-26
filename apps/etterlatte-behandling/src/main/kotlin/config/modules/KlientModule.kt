@@ -48,6 +48,8 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
+import no.nav.etterlatte.trygdetid.TrygdetidRepositoryKlient
+import no.nav.etterlatte.trygdetid.avtale.AvtaleRepositoryKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient as TrygdetidPesysKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlientImpl as TrygdetidPesysKlientImpl
 
@@ -111,6 +113,14 @@ class KlientModule(
 
     val trygdetidKlient: TrygdetidKlient by lazy {
         trygdetidKlientOverride ?: TrygdetidKlientImpl(config = config, httpClient = standardHttpClient)
+    }
+
+    val trygdetidRepositoryKlient: TrygdetidRepositoryKlient by lazy {
+        TrygdetidRepositoryKlient(config = config, httpClient = standardHttpClient)
+    }
+
+    val avtaleRepositoryKlient: AvtaleRepositoryKlient by lazy {
+        AvtaleRepositoryKlient(config = config, httpClient = standardHttpClient)
     }
 
     val gosysOppgaveKlient: GosysOppgaveKlient by lazy {

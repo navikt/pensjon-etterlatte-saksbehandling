@@ -92,8 +92,6 @@ internal class TrygdetidServiceIntegrationTest(
                 avtaleService,
                 behandlingsStatusService,
                 vedtaksvurderingKlient,
-                brukInternTrygdetid = true,
-                brukEgenDatabaseForTrygdetid = true,
             )
     }
 

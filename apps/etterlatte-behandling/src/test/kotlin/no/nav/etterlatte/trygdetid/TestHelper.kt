@@ -75,6 +75,7 @@ fun trygdetid(
     yrkesskade: Boolean = false,
     overstyrtNorskPoengaar: Int? = null,
     opplysningerDifferanse: OpplysningerDifferanse = OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt()),
+    begrunnelse: String? = null,
 ) = Trygdetid(
     id = randomUUID(),
     sakId = sakId,
@@ -86,6 +87,7 @@ fun trygdetid(
     yrkesskade = yrkesskade,
     opplysningerDifferanse = opplysningerDifferanse,
     overstyrtNorskPoengaar = overstyrtNorskPoengaar,
+    begrunnelse = begrunnelse,
 )
 
 fun standardOpplysningsgrunnlag(): List<Opplysningsgrunnlag> {

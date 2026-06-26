@@ -1065,6 +1065,10 @@ class TrygdetidServiceImpl(
                 throw TrygdetidManglerBeregning()
             }
 
+            if (trygdetider.any { it.begrunnelse == null }) {
+                throw TrygdetidManglerBegrunnelse()
+            }
+
             // Dersom forrige steg (vilkårsvurdering) har blitt endret vil statusen være VILKAARSVURDERT. Når man
             // trykker videre fra vilkårsvurdering skal denne validere tilstand og sette status TRYGDETID_OPPDATERT.
             if (behandling.status == BehandlingStatus.VILKAARSVURDERT) {
@@ -1331,6 +1335,12 @@ class TrygdetidManglerBeregning :
     UgyldigForespoerselException(
         code = "TRYGDETID_MANGLER_BEREGNING",
         detail = "Oppgitt trygdetid er ikke gyldig fordi det mangler en beregning",
+    )
+
+class TrygdetidManglerBegrunnelse :
+    UgyldigForespoerselException(
+        code = "TRYGDETID_MANGLER_BEGRUNNELSE",
+        detail = "Oppgitt trygdetid må ha begrunnelse satt for å kunne gå videre",
     )
 
 class IngenFoedselsdatoForAvdoedFunnet(

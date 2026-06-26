@@ -34,7 +34,7 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
                         innhold =
                             innhold()
                                 .single { it.key == BrevVedleggKey.OMS_BEREGNING }
-                                .payload!!
+                                .payload
                                 .elements,
                     ),
             )

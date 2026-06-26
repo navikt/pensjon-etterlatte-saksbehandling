@@ -700,7 +700,7 @@ internal class VedtaksbrevServiceTest {
                 }
 
             nyttInnhold shouldBe
-                BrevService.BrevPayload(
+                BrevPayload(
                     opphoerPayload,
                     listOf(
                         vedleggPayload(opprettVedleggPayload()),

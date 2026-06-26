@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.ktor.initialisering.runEngine
 import no.nav.etterlatte.trygdetid.avtale.avtale
 import no.nav.etterlatte.trygdetid.config.ApplicationContext
 import no.nav.etterlatte.trygdetid.trygdetid
+import no.nav.etterlatte.trygdetid.trygdetidCrudRoute
 
 fun main() {
     ApplicationContext().let { Server(it).runServer() }
@@ -27,6 +28,7 @@ class Server(
             ) {
                 trygdetid(trygdetidService, behandlingKlient)
                 avtale(avtaleService, behandlingKlient)
+                trygdetidCrudRoute(trygdetidRepository, avtaleRepository)
             }
         }
 

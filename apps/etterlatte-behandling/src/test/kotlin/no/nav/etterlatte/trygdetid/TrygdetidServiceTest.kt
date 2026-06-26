@@ -95,8 +95,6 @@ internal class TrygdetidServiceTest {
             avtaleService,
             behandlingsStatusService,
             vedtaksvurderingKlient,
-            brukInternTrygdetid = true,
-            brukEgenDatabaseForTrygdetid = true,
         )
 
     private fun trygdeavtale(behandlingId: UUID) =

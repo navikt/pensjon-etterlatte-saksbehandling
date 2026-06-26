@@ -136,8 +136,10 @@ fun <T> inTransaction(block: () -> T): T =
     }
 
 fun <T> inTransactionIfNeeded(block: () -> T): T {
-    val kontekst = Kontekst.get()
-    return if (kontekst != null && !kontekst.databasecontxt.harIntransaction()) {
+    val kontekst =
+        Kontekst.get()
+            ?: throw IllegalStateException("Kontekst er ikke satt – inTransactionIfNeeded kan ikke brukes utenfor en request-kontekst")
+    return if (!kontekst.databasecontxt.harIntransaction()) {
         kontekst.databasecontxt.inTransaction(block)
     } else {
         block()

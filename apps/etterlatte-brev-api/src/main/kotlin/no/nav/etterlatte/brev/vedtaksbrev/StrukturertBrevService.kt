@@ -264,9 +264,7 @@ class StrukturertBrevService(
         }
 
         val innholdVedlegg = hentInnholdForVedlegg(brevRequest.brevVedleggData, avsender, soekerOgEventuellVerge, spraakIBrev, sak)
-        if (innholdVedlegg.isNotEmpty()) {
-            db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
-        }
+        db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
 
         if (brev.brevkoder != brevInnholdData.brevKode) {
             db.oppdaterBrevkoder(brevId, brevInnholdData.brevKode)

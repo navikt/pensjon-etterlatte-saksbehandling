@@ -87,7 +87,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       advarselTilbakestillBrevEnabled &&
       behandling.sakType === SakType.OMSTILLINGSSTOENAD &&
       vedtaksbrev.brevtype === Brevtype.VEDTAK &&
-      new Date(vedtaksbrev.opprettet).getTime() < new Date(2026, 6, 30, 0, 0, 0).getTime()
+      new Date(vedtaksbrev.opprettet).getTime() < new Date(2026, 6, 1, 0, 0, 0).getTime()
     )
   }
 
@@ -208,7 +208,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             {visAdvarselMaaTilbakestilles && (
               <InfoCard data-color="warning">
                 <InfoCard.Header>
-                  <InfoCard.Title>Vurder å tilbakestille brevet!</InfoCard.Title>
+                  <InfoCard.Title>Brevet må tilbakestilles</InfoCard.Title>
                 </InfoCard.Header>
                 <InfoCard.Content>
                   <BodyShort spacing>

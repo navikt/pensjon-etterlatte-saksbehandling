@@ -60,7 +60,8 @@ class ApplicationContext {
             httpClient = httpClient(),
         )
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
-    val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    val trygdetidKlient =
+        TrygdetidKlient(config, httpClient(), config.getString("behandling.trygdetid.enabled") == "true")
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
 
     val sanksjonService =

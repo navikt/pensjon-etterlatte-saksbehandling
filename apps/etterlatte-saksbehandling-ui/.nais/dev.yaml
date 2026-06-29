@@ -94,7 +94,7 @@ spec:
     - name: TRYGDETID_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
     - name: BRUK_INTERN_TRYGDETID
-      value: "false"
+      value: "true"
     - name: PDLTJENESTER_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: UTBETALING_API_SCOPE

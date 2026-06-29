@@ -108,7 +108,8 @@ internal class ApplicationContext {
     val pdltjenesterKlient = PdlTjenesterKlient(config, httpClient())
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val oppgaveKlient = OppgaveKlient(config, httpClient())
-    val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    val trygdetidKlient =
+        TrygdetidKlient(config, httpClient(), config.getString("behandling.trygdetid.enabled") == "true")
     val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlient(config, httpClient())
 
     val behandlingService = BehandlingService(behandlingKlient)

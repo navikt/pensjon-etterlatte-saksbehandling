@@ -116,6 +116,9 @@ spec:
       value: http://etterlatte-pdltjenester
     - name: ETTERLATTE_PDLTJENESTER_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-pdltjenester
+    - name: ETTERLATTE_BEHANDLING_TRYGDETID_ENABLED
+      value: "true"
+
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

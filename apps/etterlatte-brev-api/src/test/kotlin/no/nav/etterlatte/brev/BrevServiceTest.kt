@@ -10,7 +10,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService

@@ -5,8 +5,8 @@ import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.BrevDataFerdigstillingNy
 import no.nav.etterlatte.brev.BrevDataRedigerbarNy
 import no.nav.etterlatte.brev.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
-import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
@@ -225,7 +225,7 @@ class StrukturertBrevService(
         brevId: Long,
         bruker: BrukerTokenInfo,
         brevRequest: BrevRequest,
-    ): BrevService.BrevPayload {
+    ): BrevPayload {
         val brev = db.hentBrev(brevId)
         if (!brev.kanEndres()) {
             throw UgyldigForespoerselException(
@@ -264,16 +264,14 @@ class StrukturertBrevService(
         }
 
         val innholdVedlegg = hentInnholdForVedlegg(brevRequest.brevVedleggData, avsender, soekerOgEventuellVerge, spraakIBrev, sak)
-        if (innholdVedlegg.isNotEmpty()) {
-            db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
-        }
+        db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
 
         if (brev.brevkoder != brevInnholdData.brevKode) {
             db.oppdaterBrevkoder(brevId, brevInnholdData.brevKode)
             db.oppdaterTittel(brevId, brevinnhold.tittel, bruker)
         }
 
-        return BrevService.BrevPayload(
+        return BrevPayload(
             brevinnhold.payload ?: db.hentBrevPayload(brevId),
             innholdVedlegg,
         )

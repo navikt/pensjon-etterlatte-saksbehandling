@@ -51,7 +51,7 @@ object EtteroppgjoerBrevData {
                     innhold()
                         .single {
                             it.key == BrevVedleggKey.OMS_EO_BEREGNINGSVEDLEGG
-                        }.payload!!
+                        }.payload
                         .elements,
             )
 

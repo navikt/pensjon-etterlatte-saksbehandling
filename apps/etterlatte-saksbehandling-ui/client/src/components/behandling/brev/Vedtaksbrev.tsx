@@ -87,7 +87,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       advarselTilbakestillBrevEnabled &&
       behandling.sakType === SakType.OMSTILLINGSSTOENAD &&
       vedtaksbrev.brevtype === Brevtype.VEDTAK &&
-      new Date(vedtaksbrev.opprettet).getTime() < new Date(2026, 6, 26, 12, 10, 0).getTime()
+      new Date(vedtaksbrev.opprettet).getTime() < new Date(2026, 6, 30, 0, 0, 0).getTime()
     )
   }
 
@@ -207,9 +207,16 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
             {visAdvarselMaaTilbakestilles && (
               <Alert variant="warning">
-                Redigerbar tekst er endret i mal for beregningsvedlegget. Du må ta vare på din egen tekst om du har det,
-                tilbakestille brevet og legge inn igjen teksten der den passer inn. Hvis du allerede har gjort det for
-                dette brevet kan du ignorere denne boksen.
+                Avsnittet «Inntekten din» i beregningsvedlegget er nå fullt ut redigerbart. For å ta i bruk endringen må
+                brevet først tilbakestilles.
+                <br />
+                Tekst som tidligere var fast, skal kun endres dersom det er behov for å legge inn informasjon om flere
+                perioder. Du kan også legge til tekst tilpasset brukerens situasjon under dette avsnittet.
+                <br />
+                Hvis du allerede har lagt inn tekst, må du kopiere denne før du tilbakestiller brevet. Deretter legger
+                du inn teksten på nytt.
+                <br />
+                Har du allerede tilbakestilt brevet etter endringen i Gjenny, kan du se bort fra denne meldingen.
               </Alert>
             )}
 

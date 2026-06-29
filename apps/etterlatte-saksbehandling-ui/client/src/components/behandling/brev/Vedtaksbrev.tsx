@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Box, Heading, HStack, InfoCard, Label, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, HStack, InfoCard, Label, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -211,19 +211,21 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                   <InfoCard.Title>Vurder å tilbakestille brevet!</InfoCard.Title>
                 </InfoCard.Header>
                 <InfoCard.Content>
-                  Avsnittet «Inntekten din» i beregningsvedlegget er nå fullt ut redigerbart. For å ta i bruk endringen
-                  må brevet først tilbakestilles.
-                </InfoCard.Content>
-                <InfoCard.Content>
-                  Tekst som tidligere var fast, skal kun endres dersom det er behov for å legge inn informasjon om flere
-                  perioder. Du kan også legge til tekst tilpasset brukerens situasjon under dette avsnittet.
-                </InfoCard.Content>
-                <InfoCard.Content>
-                  Hvis du allerede har lagt inn tekst, må du kopiere denne før du tilbakestiller brevet. Deretter legger
-                  du inn teksten på nytt.
-                </InfoCard.Content>
-                <InfoCard.Content>
-                  Har du allerede tilbakestilt brevet etter endringen i Gjenny, kan du se bort fra denne meldingen.
+                  <BodyShort spacing>
+                    Avsnittet «Inntekten din» i beregningsvedlegget er nå fullt ut redigerbart. For å ta i bruk
+                    endringen må brevet først tilbakestilles.
+                  </BodyShort>
+                  <BodyShort spacing>
+                    Tekst som tidligere var fast, skal kun endres dersom det er behov for å legge inn informasjon om
+                    flere perioder. Du kan også legge til tekst tilpasset brukerens situasjon under dette avsnittet.
+                  </BodyShort>
+                  <BodyShort spacing>
+                    Hvis du allerede har lagt inn tekst, må du kopiere denne før du tilbakestiller brevet. Deretter
+                    legger du inn teksten på nytt.
+                  </BodyShort>
+                  <BodyShort spacing>
+                    Har du allerede tilbakestilt brevet etter endringen i Gjenny, kan du se bort fra denne meldingen.
+                  </BodyShort>
                 </InfoCard.Content>
               </InfoCard>
             )}

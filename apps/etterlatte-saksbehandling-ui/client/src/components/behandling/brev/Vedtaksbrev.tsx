@@ -208,7 +208,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             {visAdvarselMaaTilbakestilles && (
               <InfoCard data-color="warning">
                 <InfoCard.Header>
-                  <InfoCard.Title>Brevet må tilbakestilles</InfoCard.Title>
+                  <InfoCard.Title>Vurder å tilbakestille brevet!</InfoCard.Title>
                 </InfoCard.Header>
                 <InfoCard.Content>
                   <BodyShort spacing>

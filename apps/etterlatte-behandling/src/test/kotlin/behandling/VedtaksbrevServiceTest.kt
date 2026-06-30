@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartVedleggData
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseVedtakBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingVedtakBrevData
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlag.GrunnlagService
@@ -60,6 +61,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class VedtaksbrevServiceTest {
+    private val stubbedYtelseEtterAvkorting: Int = 4325
+
     private val klageService = mockk<KlageService>()
     private val brukerTokenInfo = simpleSaksbehandler("Z123456")
 
@@ -155,6 +158,84 @@ internal class VedtaksbrevServiceTest {
         val resultat = service.hentKlageForBehandling(behandling)
 
         resultat shouldBe klage
+    }
+
+    @Test
+    fun `oppretter vedtaksbrev for innvilgelse`() {
+        val sakType = SakType.OMSTILLINGSSTOENAD
+        val sakId = SakId(1336)
+        val sak = Sak("fnr", sakType, sakId, Enheter.defaultEnhet.enhetNr, null, null)
+        val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(dato = YearMonth.of(2024, Month.MARCH))
+        val revurdering =
+            lagDetaljertBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak.id,
+                virkningstidspunkt = virkningstidspunkt,
+            )
+        val vedtak =
+            vedtak(
+                id = SecureRandom().nextLong(),
+                virkningstidspunkt = virkningstidspunkt.dato,
+                sakId = sakId,
+                sakType = sakType,
+                behandlingId = revurdering.id,
+                type = VedtakType.INNVILGELSE,
+            )
+        every { sakService.finnSak(sakId) } returns sak
+
+        every { behandlingServiceMock.hentDetaljertBehandling(revurdering.id, brukerTokenInfo) } returns revurdering
+        coEvery { vedtakInternalService.hentVedtak(revurdering.id, brukerTokenInfo) } returns vedtak.toDto()
+        coEvery {
+            vilkaarsvurderingService.hentVilkaarsvurdering(revurdering.id)
+        } returns
+            vilkaarsvurdering(
+                behandlingId = revurdering.id,
+                virkningstidspunkt = virkningstidspunkt.dato,
+                utfall = VilkaarsvurderingUtfall.OPPFYLT,
+                omsRettUtenTidsbegrensning = Utfall.OPPFYLT,
+            )
+        coEvery {
+            beregningKlient.hentBeregningOgAvkorting(revurdering.id, brukerTokenInfo)
+        } returns
+            beregningOgAvkortingDto(
+                behandling = revurdering,
+                metode = BeregningsMetode.NASJONAL,
+            )
+        coEvery {
+            trygdetidKlient.hentTrygdetid(revurdering.id, brukerTokenInfo)
+        } returns listOf(mockk(relaxed = true))
+
+        runBlocking {
+            service.opprettVedtaksbrev(revurdering.id, bruker = brukerTokenInfo)
+        }
+
+        val brevSlot = slot<BrevRequest>()
+        coVerify {
+            brevKlient.opprettStrukturertBrev(
+                revurdering.id,
+                capture(brevSlot),
+                eq(brukerTokenInfo),
+            )
+        }
+
+        with(brevSlot.captured) {
+            this.sak.id shouldBe sakId
+            (this.brevFastInnholdData as OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak).let {
+                it.omsRettUtenTidsbegrensning shouldBe true
+                it.bosattUtland shouldBe false
+                it.beregning.trygdetid.beregningsMetodeAnvendt shouldBe BeregningsMetode.NASJONAL
+                it.beregning.beregningsperioder shouldHaveSize 1
+            }
+            (this.brevRedigerbarInnholdData as OmstillingsstoenadInnvilgelseVedtakBrevData.VedtakInnhold).let {
+                it.beregning.beregningsperioder shouldHaveSize 1
+                it.utbetalingsbeloep.value shouldBe stubbedYtelseEtterAvkorting
+            }
+            (this.brevVedleggData.single().data as OmstillingsstoenadBeregningRedigerbartVedleggData).let {
+                it.omstillingsstoenadBeregning.beregningsperioder shouldHaveSize 1
+                it.omstillingsstoenadBeregning.trygdetid.beregningsMetodeAnvendt shouldBe BeregningsMetode.NASJONAL
+                it.omstillingsstoenadBeregning.virkningsdato shouldBe virkningstidspunkt.dato.atDay(1)
+            }
+        }
     }
 
     @Test
@@ -370,6 +451,7 @@ internal class VedtaksbrevServiceTest {
                     mockk(relaxed = true) {
                         every { beregningsMetode } returns metode
                         every { periode } returns Periode(fom = behandling.virkningstidspunkt!!.dato, tom = null)
+                        every { ytelseEtterAvkorting } returns stubbedYtelseEtterAvkorting
                     },
                 ),
             erInnvilgelsesaar = true,

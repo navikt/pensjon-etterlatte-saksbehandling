@@ -2,9 +2,11 @@ package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
@@ -277,10 +279,14 @@ class TrygdetidServiceImpl(
 
                 BehandlingType.REVURDERING -> {
                     val sisteIverksatteBehandling =
-                        vedtaksvurderingKlient
-                            .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
-                            .sortedByDescending { it.datoAttestert }
-                            .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke trygdetid
+                        inTransaction {
+                            runBlocking {
+                                vedtaksvurderingKlient
+                                    .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                                    .sortedByDescending { it.datoAttestert }
+                                    .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke trygdetid
+                            }
+                        }
                     val forrigeTrygdetider =
                         hentTrygdetiderIBehandling(sisteIverksatteBehandling.behandlingId, brukerTokenInfo)
                     if (forrigeTrygdetider.isEmpty()) {

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.beregning.regler.avkorting
 
 import io.kotest.assertions.asClue
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -58,6 +60,64 @@ class BeregnAvkortingNyeReglerTest {
     @AfterEach
     fun `unmock grunnbeloep`() {
         unmockkObject(GrunnbeloepRepository)
+    }
+
+    @Test
+    fun `Foerstegangsbehandling med aapen STANS fra november beregner avkorting med kun 2024-inntekt`() {
+        val avkorting =
+            Avkorting()
+                .beregnAvkortingMedNyeGrunnlag(
+                    nyttGrunnlag =
+                        listOf(
+                            avkortinggrunnlagLagreDto(
+                                aarsinntekt = 300_000,
+                                fratrekkInnAar = 0,
+                                fom = YearMonth.of(2024, Month.FEBRUARY),
+                            ),
+                        ),
+                    bruker = bruker,
+                    beregning =
+                        beregning(
+                            beregninger =
+                                listOf(
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2024, Month.FEBRUARY),
+                                        datoTOM = YearMonth.of(2024, Month.OCTOBER),
+                                        utbetaltBeloep = 15_000,
+                                    ),
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2024, Month.NOVEMBER),
+                                        datoTOM = YearMonth.of(2025, Month.APRIL),
+                                        utbetaltBeloep = 0, // STANS
+                                    ),
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2025, Month.MAY),
+                                        datoTOM = YearMonth.of(2026, Month.APRIL),
+                                        utbetaltBeloep = 0, // STANS
+                                    ),
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2026, Month.MAY),
+                                        datoTOM = null,
+                                        utbetaltBeloep = 0, // STANS
+                                    ),
+                                ),
+                        ),
+                    sanksjoner =
+                        listOf(
+                            sanksjon(
+                                fom = YearMonth.of(2024, Month.NOVEMBER),
+                                tom = null,
+                                type = SanksjonType.STANS,
+                            ),
+                        ),
+                    opphoerFom = null,
+                    brukNyeReglerAvkorting = true,
+                )
+        avkorting.aarsoppgjoer shouldHaveSize 1
+        avkorting.aarsoppgjoer.single().aar shouldBe 2024
+        val avkortetYtelse = avkorting.aarsoppgjoer.single().avkortetYtelse
+        avkortetYtelse.shouldNotBeEmpty()
+        avkortetYtelse.last().periode.tom shouldBe null
     }
 
     @Test

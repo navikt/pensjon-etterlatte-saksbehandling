@@ -9,11 +9,11 @@ export function summerPerioder(perioder: SimulertBeregningsperiode[]) {
 }
 
 export function summerEtterbetaling(perioder: SimulertBeregningsperiode[]) {
-  const skatt = perioder
-    .filter((periode) => periode.klasseType === 'SKAT')
+  const brutto = perioder
+    .filter((periode) => periode.klasseType === 'YTEL')
     .reduce((sum, periode) => sum + periode.beloep, 0)
   const netto = summerPerioder(perioder)
-  const brutto = netto - skatt
+  const skatt = netto - brutto
   return { brutto, skatt, netto }
 }
 

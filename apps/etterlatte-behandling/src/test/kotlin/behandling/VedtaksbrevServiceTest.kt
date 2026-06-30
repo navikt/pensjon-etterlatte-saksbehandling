@@ -35,6 +35,7 @@ internal class VedtaksbrevServiceTest {
             sakService = mockk(relaxed = true),
             klageService = klageService,
             kodeverkService = mockk(relaxed = true),
+            oppgaveService = mockk(relaxed = true),
         )
 
     @Test

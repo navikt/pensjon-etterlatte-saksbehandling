@@ -129,7 +129,7 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
             inTransaction {
                 with(vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)!!) {
-                    type shouldBe VedtakType.INNVILGELSE
+                    type shouldBe VedtakType.AVSLAG
                     vedtakFattet shouldBe null
                     sakId shouldBe behandling.sak.id
                     id shouldBe opprettetVedtak.id
@@ -161,7 +161,7 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
         }
         inTransaction {
             with(vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)!!) {
-                type shouldBe VedtakType.INNVILGELSE
+                type shouldBe VedtakType.AVSLAG
                 vedtakFattet?.ansvarligSaksbehandler shouldBe saksbehandlerIdent
                 sakId shouldBe behandling.sak.id
                 val vedtakInnhold = innhold as VedtakInnhold.Behandling
@@ -202,7 +202,7 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             val vedtak = vedtaksvurderingService.hentVedtakMedBehandlingId(behandling.id)
             with(vedtak!!) {
-                type shouldBe VedtakType.INNVILGELSE
+                type shouldBe VedtakType.AVSLAG
                 vedtakFattet?.ansvarligSaksbehandler shouldBe saksbehandlerIdent
                 attestasjon?.attestant shouldBe attestantIdent
                 sakId shouldBe behandling.sak.id
@@ -257,7 +257,7 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
             settVirkningstidspunkt(behandling)
             lagreOkGyldighetsproeving(behandling)
             lagreOkKommerBarnetTilGode(behandling)
-            lagreOkVilkaarsvurdering(behandling)
+            lagreIkkeOppfyltVilkaarsvurdering(behandling)
         }
         coEvery { applicationContext.beregningKlient.hentBeregning(any(), any()) } returns beregningDto(behandling)
         return behandling
@@ -351,12 +351,12 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
             brukerTokenInfo = brukerTokenInfo,
         )
 
-    fun lagreOkVilkaarsvurdering(behandling: Behandling) {
+    fun lagreIkkeOppfyltVilkaarsvurdering(behandling: Behandling) {
         applicationContext.vilkaarsvurderingService.opprettVilkaarsvurdering(behandling.id, brukerTokenInfo)
         applicationContext.vilkaarsvurderingService.oppdaterTotalVurdering(
             behandling.id,
             brukerTokenInfo,
-            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), ""),
+            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.IKKE_OPPFYLT, "", LocalDateTime.now(), ""),
         )
     }
 }

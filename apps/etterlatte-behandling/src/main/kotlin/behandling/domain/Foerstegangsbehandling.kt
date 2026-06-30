@@ -140,7 +140,25 @@ data class Foerstegangsbehandling(
 
         return hvisTilstandEr(
             listOf(
-                // TODO EY-2927
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.RETURNERT,
+            ),
+            BehandlingStatus.FATTET_VEDTAK,
+        ) {
+            endreTilStatus(it)
+        }
+    }
+
+    override fun tilFattetVedtakIkkeOppfyltVilkaar(): Behandling {
+        if (!erFyltUt()) {
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha vurdert gyldig framsatt, " +
+                    "virkningstidspunkt og kommer bruker til gode for å settes til fattet vedtak",
+            )
+        }
+        return hvisTilstandEr(
+            listOf(
                 BehandlingStatus.VILKAARSVURDERT,
                 BehandlingStatus.TRYGDETID_OPPDATERT,
                 BehandlingStatus.BEREGNET,

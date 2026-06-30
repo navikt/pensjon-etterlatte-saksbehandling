@@ -48,11 +48,12 @@ class AppBuilder {
                 "http://etterlatte-behandling",
                 config.getString("behandling.client.id"),
             )
+        val brukBehandlingForTrygdetid = config.getString("behandling.trygdetid.enabled") == "true"
         val trygdetidService =
             TrygdetidService(
                 settOppHttpClient("trygdetid"),
-                "http://etterlatte-trygdetid",
-                config.getString("trygdetid.client.id"),
+                if (brukBehandlingForTrygdetid) "http://etterlatte-behandling" else "http://etterlatte-trygdetid",
+                if (brukBehandlingForTrygdetid) config.getString("behandling.client.id") else config.getString("trygdetid.client.id"),
             )
         val httpClientBeregning = settOppHttpClient("beregning")
         val avkortingService =

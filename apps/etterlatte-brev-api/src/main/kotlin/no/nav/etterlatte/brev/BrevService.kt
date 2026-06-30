@@ -81,7 +81,12 @@ class BrevService(
                     )
                 },
                 brevKodeMapping = { req.brevKode },
-                brevDataMapping = { ManueltBrevMedTittelData(innhold = it.innholdMedVedlegg.innhold(), data = ManueltBrevMedTittelDataData(tittel = it.tittel)) },
+                brevDataMapping = {
+                    ManueltBrevMedTittelData(
+                        innhold = it.innholdMedVedlegg.innhold(),
+                        data = ManueltBrevMedTittelDataData(tittel = it.tittel),
+                    )
+                },
             )
 
             logger.info("Journalfører brev med id: $brevId")
@@ -125,7 +130,12 @@ class BrevService(
                         )
                     },
                     brevKodeMapping = { hentBrev.brevkoder!! },
-                    brevDataMapping = { ManueltBrevMedTittelData(innhold = it.innholdMedVedlegg.innhold(), data = ManueltBrevMedTittelDataData(tittel = it.tittel)) },
+                    brevDataMapping = {
+                        ManueltBrevMedTittelData(
+                            innhold = it.innholdMedVedlegg.innhold(),
+                            data = ManueltBrevMedTittelDataData(tittel = it.tittel),
+                        )
+                    },
                 )
             }
 
@@ -212,19 +222,14 @@ class BrevService(
                 brevDataMapping = { parametre.brevDataMapping() },
                 brevKodeMapping = { parametre.brevkode },
             )
-        if (innhold.hoveddel != null) {
-            db.oppdaterPayload(brevId, innhold.hoveddel, bruker)
+        innhold.hoveddel?.let {
+            db.oppdaterPayload(brevId, it, bruker)
         }
-        if (innhold.vedlegg != null) {
-            db.oppdaterPayloadVedlegg(brevId, innhold.vedlegg, bruker)
+        innhold.vedlegg?.let {
+            db.oppdaterPayloadVedlegg(brevId, it, bruker)
         }
         return db.hentBrev(brevId)
     }
-
-    data class BrevPayload(
-        val hoveddel: Slate?,
-        val vedlegg: List<BrevInnholdVedlegg>?,
-    )
 
     fun hentBrevPayload(id: BrevID): BrevPayload {
         val hoveddel =
@@ -412,7 +417,9 @@ class BrevService(
             bruker,
             avsenderRequest = { b, vedtak, enhet -> opprettAvsenderRequest(b, vedtak, enhet) },
             brevKodeMapping = { Brevkoder.TOMT_INFORMASJONSBREV },
-            brevDataMapping = { ManueltBrevMedTittelData(innhold = it.innholdMedVedlegg.innhold(), data = ManueltBrevMedTittelDataData(tittel = it.tittel)) },
+            brevDataMapping = {
+                ManueltBrevMedTittelData(innhold = it.innholdMedVedlegg.innhold(), data = ManueltBrevMedTittelDataData(tittel = it.tittel))
+            },
         )
 
     // EY-4963

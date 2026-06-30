@@ -17,6 +17,7 @@ import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -40,7 +41,6 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
-import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.slf4j.LoggerFactory
@@ -211,16 +211,21 @@ class SakServiceImpl(
     private fun finnSakForPerson(
         ident: String,
         sakType: SakType,
-    ) = finnSakerForPerson(ident, sakType).let {
-        if (it.isEmpty()) {
+    ) = finnSakerForPerson(ident, sakType).let { saker ->
+        if (saker.isEmpty()) {
             null
-        } else if (it.size == 1) {
-            it.single()
+        } else if (saker.size == 1) {
+            saker.single()
         } else {
-            sikkerLogg.error("Fant ${it.size} saker av type $sakType på person: ${it.joinToString()}}")
-
+            sikkerLogg.error("Fant ${saker.size} saker av type $sakType på person: ${saker.joinToString()}}")
+            val sakIder = saker.map { it.id }
+            if (sakIder.containsAll(listOf(SakId(19062), SakId(19251)))) {
+                // Feilaktig dobbel sak på samme person. Det er sak 19062 som er riktig. Vi følger opp hvordan vi
+                // løser dette riktig, men har denne på plass nå for å komme videre i lesing av journal-hendelser
+                return@let saker.single { it.id == SakId(19062) }
+            }
             throw InternfeilException(
-                "Personen har ${it.size} saker av type $sakType. " +
+                "Personen har ${saker.size} saker av type $sakType. " +
                     "Dette må meldes i Porten for manuell kontroll og opprydding.",
             )
         }
@@ -359,9 +364,7 @@ class SakServiceImpl(
             .map { SakId(it.toLong()) }
     }
 
-    override fun hentSakerMedSkjerming(sakType: SakType): List<SakId> {
-        return lesDao.finnSakerMedSkjerming(sakType).map { it.id }
-    }
+    override fun hentSakerMedSkjerming(sakType: SakType): List<SakId> = lesDao.finnSakerMedSkjerming(sakType).map { it.id }
 
     private suspend fun hentSpraak(fnr: String): Spraak {
         val kontaktInfo = krrKlient.hentDigitalKontaktinformasjon(fnr)
@@ -460,7 +463,9 @@ class SakServiceImpl(
                 }
             }
 
-            AdressebeskyttelseGradering.FORTROLIG, AdressebeskyttelseGradering.UGRADERT, null -> return
+            AdressebeskyttelseGradering.FORTROLIG, AdressebeskyttelseGradering.UGRADERT, null -> {
+                return
+            }
         }
     }
 

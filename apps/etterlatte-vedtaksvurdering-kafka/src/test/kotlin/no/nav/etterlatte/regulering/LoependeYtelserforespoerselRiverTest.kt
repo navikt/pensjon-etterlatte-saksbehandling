@@ -139,6 +139,30 @@ internal class LoependeYtelserforespoerselRiverTest {
     }
 
     @Test
+    fun `sender avbryt-melding naar ytelse er loepende men har aktiv sanksjon`() {
+        val melding = genererReguleringMelding(foersteMai2023)
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
+            LoependeYtelseDTO(
+                erLoepende = true,
+                underSamordning = false,
+                dato = foersteMai2023,
+                harAktivSanksjon = true,
+            )
+        val inspector = TestRapid().apply { LoependeYtelserforespoerselRiver(this, vedtakServiceMock) }
+
+        inspector.sendTestMessage(melding.toJson())
+        Assertions.assertEquals(1, inspector.inspektør.size)
+        Assertions.assertEquals(
+            inspector.inspektør
+                .message(0)
+                .get(EVENT_NAME_KEY)
+                .asText(),
+            ReguleringHendelseType.YTELSE_IKKE_LOEPENDE.lagEventnameForType(),
+        )
+    }
+
+    @Test
     fun `avbryter hvis sak er under samordning`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)

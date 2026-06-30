@@ -354,37 +354,6 @@ class EtteroppgjoerForbehandlingService(
         )
     }
 
-    fun opprettEtteroppgjoerForbehandlingIBulk(
-        inntektsaar: Int,
-        antall: Int,
-        etteroppgjoerFilter: EtteroppgjoerFilter,
-        spesifikkeSaker: List<SakId>,
-        ekskluderteSaker: List<SakId>,
-        spesifikkeEnheter: List<String>,
-    ) {
-        val relevanteSaker: List<SakId> =
-            etteroppgjoerService.hentEtteroppgjoerSakerIBulk(
-                inntektsaar = inntektsaar,
-                antall = antall,
-                etteroppgjoerFilter = etteroppgjoerFilter,
-                status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                spesifikkeSaker = spesifikkeSaker,
-                ekskluderteSaker = ekskluderteSaker,
-                spesifikkeEnheter = spesifikkeEnheter,
-            )
-
-        relevanteSaker.map { sakId ->
-            try {
-                etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
-                    sakId = sakId,
-                    inntektsAar = inntektsaar,
-                )
-            } catch (e: Exception) {
-                logger.error("Kunne ikke opprette etteroppgjør forbehandling for sak med id: $sakId", e)
-            }
-        }
-    }
-
     fun lagreOgBeregnFaktiskInntekt(
         forbehandlingId: UUID,
         request: BeregnFaktiskInntektRequest,
@@ -402,6 +371,13 @@ class EtteroppgjoerForbehandlingService(
                 .periode.tom
                 ?.plusMonths(1)
 
+        // Ved omgjøring skal utbetalt stønad sammenlignes mot ytelsen slik den sto før det opprinnelige
+        // etteroppgjøret. Vi peker derfor på siste iverksatte behandling som den opprinnelige forbehandlingen brukte
+        val sammenlignTilOgMedBehandlingId =
+            forbehandling.kopiertFra
+                ?.takeIf { forbehandling.klageOmgjoering != null }
+                ?.let { hentForbehandling(it).sisteIverksatteBehandlingId }
+
         val beregningRequest =
             EtteroppgjoerBeregnFaktiskInntektRequest(
                 sakId = forbehandling.sak.id,
@@ -418,6 +394,7 @@ class EtteroppgjoerForbehandlingService(
                         forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.NEI,
                 innvilgetPeriodeIEtteroppgjoersAar = forbehandling.innvilgetPeriode,
                 opphoerFom = opphoerFom,
+                sammenlignTilOgMedBehandlingId = sammenlignTilOgMedBehandlingId,
             )
 
         val beregnetEtteroppgjoerResultat =

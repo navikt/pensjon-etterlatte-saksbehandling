@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.AutomatiskVedtakBehandlingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingService
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.KlageAvvistBrevService
 import no.nav.etterlatte.brev.TilbakekrevingBrevService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
@@ -33,6 +34,18 @@ class HighLevelServiceModule(
 
     private val klageBrevService by lazy {
         KlageBrevService(klientModule.brevApiKlient)
+    }
+
+    private val klageAvvistBrevService by lazy {
+        KlageAvvistBrevService(
+            sakService = serviceModule.sakService,
+            brevKlient = klientModule.brevKlient,
+            brevApiKlient = klientModule.brevApiKlient,
+            grunnlagService = serviceModule.grunnlagService,
+            klageDao = daoModule.klageDao,
+            vedtakInternalService = serviceModule.vedtakInternalService,
+            oppgaveService = serviceModule.oppgaveService,
+        )
     }
 
     val migreringService by lazy {
@@ -59,6 +72,7 @@ class HighLevelServiceModule(
             vedtakInternalService = serviceModule.vedtakInternalService,
             featureToggleService = featureToggleService,
             klageBrevService = klageBrevService,
+            klageAvvistBrevService = klageAvvistBrevService,
         )
     }
 
@@ -82,7 +96,7 @@ class HighLevelServiceModule(
             behandlingStatusService = serviceModule.behandlingsStatusService,
             behandlingService = serviceModule.behandlingService,
             samordningsKlient = klientModule.samordningKlient,
-            trygdetidKlient = klientModule.trygdetidKlient,
+            trygdetidKlient = serviceModule.trygdetidKlient,
             etteroppgjorRevurderingService = etteroppgjoerRevurderingService,
             sakLesDao = daoModule.sakLesDao,
         )
@@ -130,11 +144,12 @@ class HighLevelServiceModule(
             behandlingService = serviceModule.behandlingService,
             beregningKlient = klientModule.beregningKlient,
             behandlingInfoService = behandlingInfoService,
-            trygdetidKlient = klientModule.trygdetidKlient,
+            trygdetidKlient = serviceModule.trygdetidKlient,
             vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
             sakService = serviceModule.sakService,
             klageService = klageService,
             kodeverkService = serviceModule.kodeverkService,
+            oppgaveService = serviceModule.oppgaveService,
         )
     }
 
@@ -145,9 +160,11 @@ class HighLevelServiceModule(
             brevApiKlient = klientModule.brevApiKlient,
             vedtakInternalService = serviceModule.vedtakInternalService,
             tilbakekrevingBrevService = tilbakekrevingBrevService,
+            klageAvvistBrevService = klageAvvistBrevService,
             etteroppgjoerForbehandlingBrevService = etteroppgjoerForbehandlingBrevService,
             etteroppgjoerRevurderingBrevService = etteroppgjoerRevurderingBrevService,
             vedtaksbrevService = vedtaksbrevService,
+            featureToggleService = featureToggleService,
         )
     }
 
@@ -201,7 +218,7 @@ class HighLevelServiceModule(
             grunnlagService = serviceModule.grunnlagService,
             revurderingService = serviceModule.revurderingService,
             vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
-            trygdetidKlient = klientModule.trygdetidKlient,
+            trygdetidKlient = serviceModule.trygdetidKlient,
             beregningKlient = klientModule.beregningKlient,
             etteroppgjoerDataService = serviceModule.etteroppgjoerDataService,
         )

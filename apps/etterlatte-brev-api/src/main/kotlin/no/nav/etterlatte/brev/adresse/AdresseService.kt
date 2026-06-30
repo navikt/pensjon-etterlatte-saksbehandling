@@ -87,7 +87,7 @@ class AdresseService(
                         tomVergeMottaker(type = vergeMottakerType)
                     }
 
-                    else ->
+                    else -> {
                         if (
                             Folkeregisteridentifikator.isValid(innsender?.fnr?.value) &&
                             innsender!!.fnr.value != soeker.fnr.value
@@ -96,6 +96,7 @@ class AdresseService(
                         } else {
                             null
                         }
+                    }
                 }
 
             listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse)
@@ -122,12 +123,6 @@ class AdresseService(
 
             mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn.await())
         }
-
-    @Deprecated(message = "Midlertidig løsning for å støtte gammel flyt. Burde hente navn fra Grunnlag eller PDL")
-    suspend fun hentNavn(
-        sakType: SakType,
-        ident: String,
-    ): String = hentMottakerAdresse(sakType, ident, MottakerType.KOPI).navn
 
     private suspend fun hentMottakerAdresse(
         sakType: SakType,

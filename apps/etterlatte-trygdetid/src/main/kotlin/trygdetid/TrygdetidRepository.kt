@@ -93,7 +93,13 @@ class TrygdetidRepository(
                 trygdetid.trygdetidGrunnlag.forEach { opprettTrygdetidGrunnlag(trygdetid.id, it, tx) }
 
                 if (trygdetid.beregnetTrygdetid != null) {
-                    oppdaterBeregnetTrygdetid(trygdetid.behandlingId, trygdetid.id, trygdetid.beregnetTrygdetid, tx)
+                    oppdaterBeregnetTrygdetid(
+                        behandlingId = trygdetid.behandlingId,
+                        trygdetidId = trygdetid.id,
+                        beregnetTrygdetid = trygdetid.beregnetTrygdetid,
+                        trydgetidBegrunnelse = trygdetid.begrunnelse,
+                        tx = tx,
+                    )
                 }
             }.let { hentTrygdetidMedIdNotNull(behandlingId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
 
@@ -156,13 +162,14 @@ class TrygdetidRepository(
 
                 if (oppdatertTrygdetid.beregnetTrygdetid != null) {
                     oppdaterBeregnetTrygdetid(
-                        oppdatertTrygdetid.behandlingId,
-                        oppdatertTrygdetid.id,
-                        oppdatertTrygdetid.beregnetTrygdetid,
-                        tx,
+                        behandlingId = oppdatertTrygdetid.behandlingId,
+                        trygdetidId = oppdatertTrygdetid.id,
+                        beregnetTrygdetid = oppdatertTrygdetid.beregnetTrygdetid,
+                        trydgetidBegrunnelse = oppdatertTrygdetid.begrunnelse,
+                        tx = tx,
                     )
                 } else {
-                    nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
+                    nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id, tx)
                 }
             }.let { hentTrygdetidMedIdNotNull(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id) }
 
@@ -459,6 +466,7 @@ class TrygdetidRepository(
         behandlingId: UUID,
         trygdetidId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetid,
+        trydgetidBegrunnelse: String?,
         tx: TransactionalSession,
     ) {
         val beregnetVerdi = beregnetTrygdetid.resultat
@@ -491,7 +499,8 @@ class TrygdetidRepository(
                   trygdetid_regelresultat = :trygdetidRegelresultat,
                   beregnet_trygdetid_overstyrt = :overstyrt,
                   yrkesskade = :yrkesskade,
-                  overstyrt_begrunnelse = :overstyrtBegrunnelse
+                  overstyrt_begrunnelse = :overstyrtBegrunnelse,
+                  begrunnelse = :begrunnelse
                 WHERE behandling_id = :behandlingId AND id = :trygdetidId
                 """.trimIndent(),
             paramMap =
@@ -526,6 +535,7 @@ class TrygdetidRepository(
                     "overstyrt" to beregnetTrygdetid.resultat.overstyrt,
                     "yrkesskade" to beregnetVerdi.yrkesskade,
                     "overstyrtBegrunnelse" to beregnetVerdi.overstyrtBegrunnelse,
+                    "begrunnelse" to trydgetidBegrunnelse,
                 ),
         ).let { query ->
             tx.update(query)
@@ -534,6 +544,7 @@ class TrygdetidRepository(
 
     private fun nullstillBeregnetTrygdetid(
         behandlingId: UUID,
+        trygdetidId: UUID,
         tx: TransactionalSession,
     ) = queryOf(
         statement =
@@ -561,9 +572,9 @@ class TrygdetidRepository(
                 beregnet_trygdetid_overstyrt = false,
                 yrkesskade = false,
                 overstyrt_begrunnelse = null
-            WHERE behandling_id = :behandlingId
+            WHERE behandling_id = :behandlingId AND id = :trygdetidId
             """.trimIndent(),
-        paramMap = mapOf("behandlingId" to behandlingId),
+        paramMap = mapOf("behandlingId" to behandlingId, "trygdetidId" to trygdetidId),
     ).let { query -> tx.update(query) }
 
     private fun hentTrygdetidGrunnlag(trygdetidId: UUID): List<TrygdetidGrunnlag> =

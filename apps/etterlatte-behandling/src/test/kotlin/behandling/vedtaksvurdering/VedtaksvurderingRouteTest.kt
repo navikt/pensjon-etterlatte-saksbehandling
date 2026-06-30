@@ -349,15 +349,15 @@ internal class VedtaksvurderingRouteTest(
     @Test
     fun `skal sjekke om sak har loepende vedtak`() {
         val sakId = sakId1
-        val loependeYtelse = LoependeYtelse(erLoepende = true, underSamordning = false, LocalDate.now(), UUID.randomUUID())
+        val loependeYtelseDto = LoependeYtelseDTO(erLoepende = true, underSamordning = false, LocalDate.now(), UUID.randomUUID())
 
-        every { vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(any(), any()) } returns loependeYtelse
+        coEvery { vedtaksvurderingService.sjekkOmVedtakErLoepende(any(), any(), any()) } returns loependeYtelseDto
 
         withTestApplication(context) { client ->
 
             val hentetLoependeYtelse =
                 client
-                    .get("/api/vedtak/loepende/${sakId.sakId}?dato=${loependeYtelse.dato}") {
+                    .get("/api/vedtak/loepende/${sakId.sakId}?dato=${loependeYtelseDto.dato}") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                     }.let {
@@ -365,11 +365,12 @@ internal class VedtaksvurderingRouteTest(
                         deserialize<LoependeYtelseDTO>(it.bodyAsText())
                     }
 
-            hentetLoependeYtelse.erLoepende shouldBe loependeYtelse.erLoepende
-            hentetLoependeYtelse.dato shouldBe loependeYtelse.dato
+            hentetLoependeYtelse.erLoepende shouldBe loependeYtelseDto.erLoepende
+            hentetLoependeYtelse.dato shouldBe loependeYtelseDto.dato
+            hentetLoependeYtelse.harAktivSanksjon shouldBe false
 
             coVerify(exactly = 1) {
-                vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(any(), any())
+                vedtaksvurderingService.sjekkOmVedtakErLoepende(any(), any(), any())
             }
         }
     }

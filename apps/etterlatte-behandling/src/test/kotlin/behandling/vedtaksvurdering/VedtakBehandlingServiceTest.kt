@@ -1074,7 +1074,7 @@ internal class VedtakBehandlingServiceTest(
                 )
                 service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
                 service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
-                service.iverksattVedtak(behandlingId)
+                service.iverksettVedtak(behandlingId)
             }
 
         iverksattVedtak shouldNotBe null
@@ -1092,7 +1092,7 @@ internal class VedtakBehandlingServiceTest(
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
 
             assertThrows<InternfeilException> {
-                service.iverksattVedtak(behandlingId)
+                service.iverksettVedtak(behandlingId)
             }
         }
     }
@@ -1127,11 +1127,11 @@ internal class VedtakBehandlingServiceTest(
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId = behandlingId, brukerTokenInfo = saksbehandler)
             service.attesterVedtak(behandlingId = behandlingId, kommentar = KOMMENTAR, brukerTokenInfo = attestant)
-            service.iverksattVedtak(behandlingId)
+            service.iverksettVedtak(behandlingId)
 
             val vedtak =
                 assertDoesNotThrow {
-                    service.iverksattVedtak(behandlingId)
+                    service.iverksettVedtak(behandlingId)
                 }
 
             (vedtak as? KanskjeAlleredeUtfoertOppdatering.AlleredeUtfoert).shouldNotBeNull()

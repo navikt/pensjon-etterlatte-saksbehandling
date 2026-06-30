@@ -23,7 +23,6 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -70,25 +69,6 @@ class EtteroppgjoerService(
     ): Etteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) ?: throw FantIkkeEtteroppgjoer(sakId, inntektsaar)
 
     fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
-
-    fun hentEtteroppgjoerSakerIBulk(
-        inntektsaar: Int,
-        antall: Int,
-        etteroppgjoerFilter: EtteroppgjoerFilter,
-        status: EtteroppgjoerStatus,
-        spesifikkeSaker: List<SakId> = emptyList(),
-        ekskluderteSaker: List<SakId> = emptyList(),
-        spesifikkeEnheter: List<String> = emptyList(),
-    ): List<SakId> =
-        dao.hentEtteroppgjoerSakerIBulk(
-            inntektsaar = inntektsaar,
-            antall = antall,
-            etteroppgjoerFilter = etteroppgjoerFilter,
-            status = status,
-            spesifikkeSaker = spesifikkeSaker,
-            ekskluderteSaker = ekskluderteSaker,
-            spesifikkeEnheter = spesifikkeEnheter,
-        )
 
     fun oppdaterEtteroppgjoerStatus(
         sakId: SakId,
@@ -158,6 +138,9 @@ class EtteroppgjoerService(
             MOTTATT_SKATTEOPPGJOER,
             VENTER_PAA_SKATTEOPPGJOER,
             -> {
+                logger.info(
+                    "Mottok skatteoppgjørhendelse for sakId=${sak.id}: oppdater status og opprett oppgave da status er: ${etteroppgjoer.status} OPPRETT-OPPGAVE",
+                )
                 oppdaterEtteroppgjoerStatus(
                     sak.id,
                     etteroppgjoer.inntektsaar,
@@ -447,6 +430,7 @@ class EtteroppgjoerService(
 
         sikkerLogg.info(
             "Skatteoppgjørhendelse for ferdigstilt etteroppgjør - sakId=${sak.id}, inntektsaar=${etteroppgjoer.inntektsaar}. " +
+                "(har relevant endring: $harEndring)" +
                 "Lagret PGI næring=${lagretPgi?.naeringsinntekt}, ny=${nyPgi.naeringsinntekt}. " +
                 "Lagret A-inntekt AFP=${lagretAInntekt?.afp}, ny=${nyAInntekt.afp}. " +
                 "Lagret A-inntekt lønn=${lagretAInntekt?.loenn}, ny=${nyAInntekt.loenn}. " +
@@ -507,7 +491,14 @@ class EtteroppgjoerService(
         inntektsaar: Int,
     ): Boolean {
         val beregningsGrunnlag =
-            beregningKlient.hentBeregningsgrunnlag(behandlingId, HardkodaSystembruker.etteroppgjoer)
+            try {
+                beregningKlient.hentBeregningsgrunnlag(behandlingId, HardkodaSystembruker.etteroppgjoer)
+            } catch (e: Exception) {
+                logger.warn(
+                    "Behandling ($behandlingId) har ikke beregningsgrunnlag. Kan returnere false da harInstitusjonsopphold på Etteroppgjør ikke lenger er i bruk.", e
+                )
+                return false
+            }
         return beregningsGrunnlag.institusjonsopphold.any {
             it.fom.year <= inntektsaar && (it.tom?.year ?: inntektsaar) >= inntektsaar
         }

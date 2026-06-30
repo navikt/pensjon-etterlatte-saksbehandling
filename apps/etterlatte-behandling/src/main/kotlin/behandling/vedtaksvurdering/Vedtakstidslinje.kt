@@ -12,6 +12,8 @@ import java.time.YearMonth
 class Vedtakstidslinje(
     vedtak: List<Vedtak>,
 ) {
+    private val sakType = vedtak.firstOrNull()?.sakType
+
     private val attesterteBehandlingVedtak =
         vedtak
             .filter { it.innhold is VedtakInnhold.Behandling }
@@ -25,7 +27,7 @@ class Vedtakstidslinje(
         val erUnderSamordning =
             attesterteBehandlingVedtak.any { listOf(VedtakStatus.TIL_SAMORDNING, VedtakStatus.SAMORDNET).contains(it.status) }
 
-        if (iverksatteBehandlingVedtak.isEmpty()) return LoependeYtelse(false, erUnderSamordning, dato)
+        if (iverksatteBehandlingVedtak.isEmpty()) return LoependeYtelse(false, erUnderSamordning, dato, sakType)
 
         val senesteVedtakPaaDato = hentSenesteVedtakSomKanLoepePaaDato(dato)
         val erLoepende = senesteVedtakPaaDato?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
@@ -33,6 +35,7 @@ class Vedtakstidslinje(
             erLoepende = erLoepende,
             underSamordning = erUnderSamordning,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato,
+            sakType = sakType,
             behandlingId = if (erLoepende) senesteVedtakPaaDato!!.behandlingId else null,
             sisteLoependeBehandlingId =
                 if (erLoepende) {

@@ -4,10 +4,10 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.tidshendelser.JobbKategori
 import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
-import no.nav.etterlatte.tidshendelser.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.omregning.ReguleringService
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
@@ -48,7 +48,6 @@ class JobbPoller(
     private val inntektsjusteringService: AarligInntektsjusteringService,
     private val oppfoelgingBpFylt18Service: OppfoelgingBpFylt18Service,
     private val oppdaterSkjermingBpService: OppdaterSkjermingBpService,
-    private val etteroppgjoerService: EtteroppgjoerService,
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
 
@@ -63,12 +62,20 @@ class JobbPoller(
                 val saker =
                     when (it.type.kategori) {
                         JobbKategori.ALDERSOVERGANG -> aldersovergangerService.execute(it)
+
                         JobbKategori.OMS_DOEDSDATO -> omstillingsstoenadService.execute(it)
+
                         JobbKategori.REGULERING -> reguleringService.execute(it)
+
                         JobbKategori.AARLIG_INNTEKTSJUSTERING -> inntektsjusteringService.execute(it)
+
                         JobbKategori.OPPFOELGING_BP_FYLT_18 -> oppfoelgingBpFylt18Service.execute(it)
+
                         JobbKategori.OPPDATERING_SKJERMING_BP -> oppdaterSkjermingBpService.execute(it)
-                        JobbKategori.OPPRETT_ETTEROPPGJOER_FORBEHANDLING -> etteroppgjoerService.execute(it)
+
+                        JobbKategori.OPPRETT_ETTEROPPGJOER_FORBEHANDLING -> throw InternfeilException(
+                            "Vi skal ikke bruke tidshendelser for å sette i gang forbehandlinger for etteroppgjør",
+                        )
                     }
 
                 if (saker.isEmpty()) {

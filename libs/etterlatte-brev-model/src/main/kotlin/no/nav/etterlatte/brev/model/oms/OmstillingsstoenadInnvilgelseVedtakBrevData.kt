@@ -7,8 +7,9 @@ import no.nav.etterlatte.brev.BrevVedleggKey
 import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Vedlegg
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -17,7 +18,7 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
         val beregning: OmstillingsstoenadBeregning,
         val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
         val omsRettUtenTidsbegrensning: Boolean,
-        val etterbetaling: no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling?,
+        val etterbetaling: OmstillingsstoenadEtterbetaling?,
         val harUtbetaling: Boolean,
         val bosattUtland: Boolean,
         val erSluttbehandling: Boolean,
@@ -33,7 +34,7 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
                         innhold =
                             innhold()
                                 .single { it.key == BrevVedleggKey.OMS_BEREGNING }
-                                .payload!!
+                                .payload
                                 .elements,
                     ),
             )
@@ -45,7 +46,7 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
         val virkningsdato: LocalDate,
         val utbetalingsbeloep: Kroner,
         val etterbetaling: Boolean,
-        val avdoed: no.nav.etterlatte.brev.behandling.Avdoed?,
+        val avdoed: Avdoed?,
         val harUtbetaling: Boolean,
         val beregning: OmstillingsstoenadBeregning,
         val erSluttbehandling: Boolean = false,
@@ -56,17 +57,4 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
 
         override val brevKode: Brevkoder = Brevkoder.OMS_INNVILGELSE
     }
-
-    fun beregningsvedleggInnhold(): BrevVedleggRedigerbarNy =
-        BrevVedleggRedigerbarNy(
-            data = null,
-            vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-            vedleggId = BrevVedleggKey.OMS_BEREGNING,
-        )
-
-    data class Avdoed(
-        val fnr: Foedselsnummer,
-        val navn: String,
-        val doedsdato: LocalDate,
-    )
 }

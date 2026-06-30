@@ -93,7 +93,7 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
-    ): BrevService.BrevPayload {
+    ): BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
         val opprinneligBrevkoder = db.hentBrevkoder(brevId)
 
@@ -120,7 +120,7 @@ class Brevoppretter(
                 db.oppdaterTittel(brevId, innhold.tittel, bruker)
             }
 
-            return BrevService.BrevPayload(
+            return BrevPayload(
                 innhold.payload ?: db.hentBrevPayload(brevId),
                 innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId),
             )

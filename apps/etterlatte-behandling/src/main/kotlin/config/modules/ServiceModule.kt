@@ -1,5 +1,7 @@
 package no.nav.etterlatte.config.modules
 
+import no.nav.etterlatte.EnvKey.BRUK_EGEN_DATABASE_FOR_TRYGDETID
+import no.nav.etterlatte.EnvKey.BRUK_INTERN_TRYGDETID
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BrukerService
@@ -16,6 +18,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveSe
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlientIntern
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.klienter.VedtakInternalServiceImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
@@ -53,6 +56,11 @@ import no.nav.etterlatte.sak.TilgangServiceSjekkerImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
+import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
+import no.nav.etterlatte.trygdetid.avtale.AvtaleService
+import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlientAdapter
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 
 class ServiceModule(
@@ -389,11 +397,15 @@ class ServiceModule(
             etteroppgjoerService = etteroppgjoerService,
             forbehandlingService = etteroppgjoerForbehandlingService,
             grunnlagService = grunnlagService,
+            vilkaarsvurderingDao = daoModule.vilkaarsvurderingDao,
         )
     }
 
     val vedtaksvurderingService by lazy {
-        VedtaksvurderingService(daoModule.vedtaksvurderingRepository)
+        VedtaksvurderingService(
+            repository = daoModule.vedtaksvurderingRepository,
+            beregningKlient = klientModule.beregningKlient,
+        )
     }
 
     val vedtaksvurderingRapidService by lazy {
@@ -428,7 +440,11 @@ class ServiceModule(
     }
 
     val trygdetidKlient by lazy {
-        klientModule.trygdetidKlient
+        if (brukInternTrygdetid) {
+            TrygdetidKlientIntern(trygdetidService)
+        } else {
+            klientModule.trygdetidKlient
+        }
     }
 
     val beregningKlient by lazy {
@@ -463,6 +479,40 @@ class ServiceModule(
             outboxRepository = daoModule.outboxRepository,
             vedtaksvurderingService = vedtaksvurderingService,
             vedtakshendelseEksternProdusent = kafkaModule.vedtakshendelserEksternProdusent,
+        )
+    }
+
+    private val brukInternTrygdetid: Boolean by lazy { env[BRUK_INTERN_TRYGDETID] == "true" }
+    private val brukEgenDatabaseForTrygdetid: Boolean by lazy { env[BRUK_EGEN_DATABASE_FOR_TRYGDETID] == "true" }
+
+    val internTrygdetidAktivert: Boolean by lazy { brukInternTrygdetid }
+
+    val avtaleService: AvtaleService by lazy {
+        val avtaleRepository =
+            if (brukEgenDatabaseForTrygdetid) {
+                daoModule.avtaleRepository
+            } else {
+                klientModule.avtaleRepositoryKlient
+            }
+        AvtaleService(avtaleRepository = avtaleRepository)
+    }
+
+    val trygdetidService: TrygdetidService by lazy {
+        val trygdetidRepository =
+            if (brukEgenDatabaseForTrygdetid) {
+                daoModule.trygdetidRepository
+            } else {
+                klientModule.trygdetidRepositoryKlient
+            }
+        TrygdetidServiceImpl(
+            trygdetidRepository = trygdetidRepository,
+            behandlingService = behandlingService,
+            grunnlagService = grunnlagService,
+            beregnTrygdetidService = TrygdetidBeregningService,
+            pesysKlient = klientModule.trygdetidPesysKlient,
+            avtaleService = avtaleService,
+            behandlingsStatusService = behandlingsStatusService,
+            vedtaksvurderingKlient = VedtaksvurderingKlientAdapter(vedtaksvurderingService),
         )
     }
 }

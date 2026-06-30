@@ -108,7 +108,8 @@ internal class ApplicationContext {
     val pdltjenesterKlient = PdlTjenesterKlient(config, httpClient())
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val oppgaveKlient = OppgaveKlient(config, httpClient())
-    val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    val trygdetidKlient =
+        TrygdetidKlient(config, httpClient(), config.getString("behandling.trygdetid.enabled") == "true")
     val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlient(config, httpClient())
 
     val behandlingService = BehandlingService(behandlingKlient)
@@ -119,7 +120,7 @@ internal class ApplicationContext {
     val norg2Klient = Norg2Klient(env.requireEnvValue(NORG2_URL), httpClient())
     val adresseService = AdresseService(norg2Klient, saksbehandlerKlient, regoppslagKlient, pdltjenesterKlient)
 
-    val grunnlagService = GrunnlagService(behandlingKlient, adresseService)
+    val grunnlagService = GrunnlagService(behandlingKlient)
     val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
     val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
 

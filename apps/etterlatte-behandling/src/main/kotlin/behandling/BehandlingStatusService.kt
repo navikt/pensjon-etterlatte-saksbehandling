@@ -4,7 +4,6 @@ import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
@@ -28,12 +27,14 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import org.slf4j.LoggerFactory
 import java.time.Year
 import java.util.UUID
@@ -123,6 +124,7 @@ class BehandlingStatusServiceImpl(
     private val etteroppgjoerService: EtteroppgjoerService,
     private val forbehandlingService: EtteroppgjoerForbehandlingService,
     private val grunnlagService: GrunnlagService,
+    private val vilkaarsvurderingDao: VilkaarsvurderingDao,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
 
@@ -178,12 +180,7 @@ class BehandlingStatusServiceImpl(
 
     override fun sjekkOmKanFatteVedtak(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
-
-        if (behandling is ManuellRevurdering) {
-            behandling.tilFattetVedtakUtvidet()
-        } else {
-            behandling.tilFattetVedtak()
-        }
+        behandlingTilFattetVedtak(behandling)
     }
 
     override fun settFattetVedtak(
@@ -191,11 +188,7 @@ class BehandlingStatusServiceImpl(
         vedtak: VedtakEndringDTO,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        if (behandling is ManuellRevurdering) {
-            lagreNyBehandlingStatus(behandling.tilFattetVedtakUtvidet())
-        } else {
-            lagreNyBehandlingStatus(behandling.tilFattetVedtak())
-        }
+        lagreNyBehandlingStatus(behandlingTilFattetVedtak(behandling))
 
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.FATTET)
 
@@ -244,6 +237,17 @@ class BehandlingStatusServiceImpl(
             type = OppgaveType.fra(behandling.type),
             merknad = merknad,
         )
+    }
+
+    private fun behandlingTilFattetVedtak(behandling: Behandling): Behandling {
+        val vilkaarsvurderingIkkeOppfylt =
+            vilkaarsvurderingDao.hent(behandling.id)?.resultat?.utfall == VilkaarsvurderingUtfall.IKKE_OPPFYLT
+        return if (vilkaarsvurderingIkkeOppfylt) {
+            // I tilfeller der vi har en ikke oppfylt vilkårsvurdering krever vi ikke beregning før fatting av vedtak
+            behandling.tilFattetVedtakIkkeOppfyltVilkaar()
+        } else {
+            behandling.tilFattetVedtak()
+        }
     }
 
     override fun sjekkOmKanAttestere(behandlingId: UUID) {

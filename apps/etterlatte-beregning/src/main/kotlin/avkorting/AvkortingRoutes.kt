@@ -205,6 +205,7 @@ fun Route.avkorting(
                             sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
                             etteroppgjoersAar = request.aar,
                             harDoedsfall = request.harDoedsfall,
+                            sammenlignTilOgMedBehandlingId = request.sammenlignTilOgMedBehandlingId,
                         )
                     call.respond(resultat.toDto())
                 }

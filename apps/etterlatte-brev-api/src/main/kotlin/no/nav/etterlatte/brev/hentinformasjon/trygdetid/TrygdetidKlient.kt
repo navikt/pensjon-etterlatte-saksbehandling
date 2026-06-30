@@ -17,13 +17,16 @@ import java.util.UUID
 class TrygdetidKlient(
     config: Config,
     httpClient: HttpClient,
+    brukBehandlingForTrygdetid: Boolean,
 ) {
     private val logger = LoggerFactory.getLogger(TrygdetidKlient::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("trygdetid.client.id")
-    private val resourceUrl = config.getString("trygdetid.resource.url")
+    private val clientId =
+        if (brukBehandlingForTrygdetid) config.getString("behandling.client.id") else config.getString("trygdetid.client.id")
+    private val resourceUrl =
+        if (brukBehandlingForTrygdetid) config.getString("behandling.resource.url") else config.getString("trygdetid.resource.url")
 
     internal suspend fun hentTrygdetid(
         behandlingId: UUID,

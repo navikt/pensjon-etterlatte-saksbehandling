@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.db
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.ints.shouldBeExactly
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
@@ -456,7 +455,7 @@ internal class BrevRepositoryIntegrationTest(
                             BrevInnholdVedlegg(
                                 tittel = "tittel",
                                 key = BrevVedleggKey.OMS_BEREGNING,
-                                payload = null,
+                                payload = Slate(),
                             ),
                         ),
                 )
@@ -493,11 +492,11 @@ internal class BrevRepositoryIntegrationTest(
             val vedleggPayload = db.hentBrevPayloadVedlegg(opprettetBrev.id)!!
             vedleggPayload
                 .first()
-                .payload!!
+                .payload
                 .elements.size shouldBeExactly 1
             vedleggPayload
                 .first()
-                .payload!!
+                .payload
                 .elements[0]
                 .type shouldBe Slate.ElementType.HEADING_TWO
         }

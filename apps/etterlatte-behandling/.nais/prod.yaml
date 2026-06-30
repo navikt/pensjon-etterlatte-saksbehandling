@@ -238,3 +238,4 @@ spec:
         - application: etterlatte-brev-kafka
         - application: etterlatte-utbetaling
         - application: etterlatte-api
+        - application: etterlatte-trygdetid-kafka

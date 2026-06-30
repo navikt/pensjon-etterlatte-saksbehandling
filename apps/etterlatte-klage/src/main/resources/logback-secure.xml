@@ -2,6 +2,7 @@
 <included>
     <appender name="secureAppender" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>team-logs.nais-system:5170</destination>
+        <keepAliveDuration>5 minutes</keepAliveDuration>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>
                 {"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}

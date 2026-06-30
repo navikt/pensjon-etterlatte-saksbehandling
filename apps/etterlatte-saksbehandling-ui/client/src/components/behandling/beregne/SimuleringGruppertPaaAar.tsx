@@ -2,7 +2,30 @@ import { Accordion, Box, Heading, Table, VStack } from '@navikt/ds-react'
 import { getYear } from 'date-fns'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { NOK } from '~utils/formatering/formatering'
-import { summerPerioder, UtbetalingTable } from './UtbetalingTable'
+import { summerEtterbetaling, summerPerioder, UtbetalingTable } from './UtbetalingTable'
+
+const EtterbetalingRader = ({
+  etterbetaling,
+  suffix = '',
+}: {
+  etterbetaling: ReturnType<typeof summerEtterbetaling>
+  suffix?: string
+}) => (
+  <>
+    <Table.Row>
+      <Table.DataCell>Brutto etterbetaling{suffix}</Table.DataCell>
+      <Table.DataCell align="right">{NOK(etterbetaling.brutto)}</Table.DataCell>
+    </Table.Row>
+    <Table.Row>
+      <Table.DataCell>Skatt</Table.DataCell>
+      <Table.DataCell align="right">{NOK(etterbetaling.skatt)}</Table.DataCell>
+    </Table.Row>
+    <Table.Row>
+      <Table.DataCell>Netto etterbetaling{suffix}</Table.DataCell>
+      <Table.DataCell align="right">{NOK(etterbetaling.netto)}</Table.DataCell>
+    </Table.Row>
+  </>
+)
 
 export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) => {
   const aarMedPerioder = grupperPerioderPerAar(data)
@@ -25,10 +48,7 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                <Table.Row>
-                  <Table.DataCell>Etterbetaling</Table.DataCell>
-                  <Table.DataCell align="right">{NOK(summerPerioder(aar.etterbetaling))}</Table.DataCell>
-                </Table.Row>
+                <EtterbetalingRader etterbetaling={summerEtterbetaling(aar.etterbetaling)} />
                 <Table.Row>
                   <Table.DataCell>Tilbakekreving</Table.DataCell>
                   <Table.DataCell align="right">{NOK(summerPerioder(aar.tilbakekreving))}</Table.DataCell>
@@ -51,6 +71,28 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
           </Box>
         </Box>
       ))}
+      {aarMedPerioder.length > 1 && (
+        <Box maxWidth="70rem" background="neutral-soft" padding="space-20">
+          <Heading level="3" size="small">
+            Etterbetaling for hele perioden
+          </Heading>
+          <Box width="25rem" marginBlock="space-20">
+            <Table>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell scope="col">Type</Table.HeaderCell>
+                  <Table.HeaderCell scope="col" align="right">
+                    Sum
+                  </Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                <EtterbetalingRader etterbetaling={summerEtterbetaling(data.etterbetaling)} suffix=" for perioden" />
+              </Table.Body>
+            </Table>
+          </Box>
+        </Box>
+      )}
     </>
   )
 }

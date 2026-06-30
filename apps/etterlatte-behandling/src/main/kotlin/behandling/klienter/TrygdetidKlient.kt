@@ -12,6 +12,8 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.trygdetid.toDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -91,5 +93,22 @@ class TrygdetidKlientImpl(
                 detail = "Henting av trygdetid feilet",
             )
         }
+    }
+}
+
+class TrygdetidKlientIntern(
+    private val trygdetidService: TrygdetidService,
+) : TrygdetidKlient {
+    override suspend fun hentTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<TrygdetidDto> = trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).map { it.toDto() }
+
+    override suspend fun kopierTrygdetidFraForrigeBehandling(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        trygdetidService.kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo)
     }
 }

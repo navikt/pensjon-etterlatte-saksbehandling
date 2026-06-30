@@ -96,7 +96,7 @@ class HighLevelServiceModule(
             behandlingStatusService = serviceModule.behandlingsStatusService,
             behandlingService = serviceModule.behandlingService,
             samordningsKlient = klientModule.samordningKlient,
-            trygdetidKlient = klientModule.trygdetidKlient,
+            trygdetidKlient = serviceModule.trygdetidKlient,
             etteroppgjorRevurderingService = etteroppgjoerRevurderingService,
             sakLesDao = daoModule.sakLesDao,
         )
@@ -144,7 +144,7 @@ class HighLevelServiceModule(
             behandlingService = serviceModule.behandlingService,
             beregningKlient = klientModule.beregningKlient,
             behandlingInfoService = behandlingInfoService,
-            trygdetidKlient = klientModule.trygdetidKlient,
+            trygdetidKlient = serviceModule.trygdetidKlient,
             vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
             sakService = serviceModule.sakService,
             klageService = klageService,
@@ -217,7 +217,7 @@ class HighLevelServiceModule(
             grunnlagService = serviceModule.grunnlagService,
             revurderingService = serviceModule.revurderingService,
             vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
-            trygdetidKlient = klientModule.trygdetidKlient,
+            trygdetidKlient = serviceModule.trygdetidKlient,
             beregningKlient = klientModule.beregningKlient,
             etteroppgjoerDataService = serviceModule.etteroppgjoerDataService,
         )

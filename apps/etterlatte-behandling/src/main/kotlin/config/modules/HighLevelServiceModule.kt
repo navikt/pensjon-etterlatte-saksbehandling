@@ -149,6 +149,7 @@ class HighLevelServiceModule(
             sakService = serviceModule.sakService,
             klageService = klageService,
             kodeverkService = serviceModule.kodeverkService,
+            oppgaveService = serviceModule.oppgaveService,
         )
     }
 

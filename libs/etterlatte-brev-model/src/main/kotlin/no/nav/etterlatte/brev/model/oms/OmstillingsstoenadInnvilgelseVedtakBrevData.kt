@@ -57,11 +57,4 @@ object OmstillingsstoenadInnvilgelseVedtakBrevData {
 
         override val brevKode: Brevkoder = Brevkoder.OMS_INNVILGELSE
     }
-
-    fun beregningsvedleggInnhold(): BrevVedleggRedigerbarNy =
-        BrevVedleggRedigerbarNy(
-            data = null,
-            vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-            vedleggId = BrevVedleggKey.OMS_BEREGNING,
-        )
 }

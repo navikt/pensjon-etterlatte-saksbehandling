@@ -35,6 +35,8 @@ internal data class OmstillingsstoenadVedtaksbrevGrunnlag(
     val klage: Klage?,
     val etterbetaling: EtterbetalingDTO?,
     val brevutfall: BrevutfallDto,
+    val saksbehandlerIdent: String,
+    val attestantIdent: String?,
 ) {
     fun innsender(): Innsender? = grunnlag.mapInnsender()
 

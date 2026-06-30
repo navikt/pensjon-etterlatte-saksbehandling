@@ -158,7 +158,7 @@ abstract class BrevVedleggInnholdData : BrevDataRedigerbar {
 data class BrevInnholdVedlegg(
     val tittel: String,
     val key: BrevVedleggKey,
-    val payload: Slate? = null,
+    val payload: Slate,
 )
 
 enum class BrevVedleggKey {
@@ -168,3 +168,8 @@ enum class BrevVedleggKey {
     BP_FORHAANDSVARSEL_FEILUTBETALING,
     OMS_EO_BEREGNINGSVEDLEGG,
 }
+
+data class BrevPayload(
+    val hoveddel: Slate?,
+    val vedlegg: List<BrevInnholdVedlegg>?,
+)

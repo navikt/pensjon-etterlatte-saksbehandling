@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveSe
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.klienter.TrygdetidKlientIntern
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.klienter.VedtakInternalServiceImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
@@ -439,7 +440,11 @@ class ServiceModule(
     }
 
     val trygdetidKlient by lazy {
-        klientModule.trygdetidKlient
+        if (brukInternTrygdetid) {
+            TrygdetidKlientIntern(trygdetidService)
+        } else {
+            klientModule.trygdetidKlient
+        }
     }
 
     val beregningKlient by lazy {

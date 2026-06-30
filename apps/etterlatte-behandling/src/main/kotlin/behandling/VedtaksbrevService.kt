@@ -17,10 +17,10 @@ import no.nav.etterlatte.brev.ManglerBrevutfall
 import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.mapAvdoede
+import no.nav.etterlatte.brev.hentSaksbehandlerOgAttestantForVedtak
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Etterbetaling
-import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadBeregningRedigerbartVedleggData
@@ -49,6 +49,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -56,6 +57,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.LocalDate
@@ -73,6 +75,7 @@ class VedtaksbrevService(
     private val sakService: SakService,
     private val klageService: KlageService,
     private val kodeverkService: KodeverkService,
+    private val oppgaveService: OppgaveService,
 ) {
     suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
@@ -174,8 +177,8 @@ class VedtaksbrevService(
             avdoede = fellesData.avdoede,
             verge = fellesData.verge(),
             spraak = fellesData.spraak(),
-            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
-            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            saksbehandlerIdent = fellesData.saksbehandlerIdent,
+            attestantIdent = fellesData.attestantIdent,
             skalLagre = skalLagres,
             brevFastInnholdData =
                 OmstillingsstoenadInnvilgelseVedtakBrevData.Vedtak(
@@ -228,7 +231,21 @@ class VedtaksbrevService(
                 ),
             brevVedleggData =
                 listOf(
-                    OmstillingsstoenadInnvilgelseVedtakBrevData.beregningsvedleggInnhold(),
+                    BrevVedleggRedigerbarNy(
+                        data =
+                            OmstillingsstoenadBeregningRedigerbartVedleggData(
+                                omstillingsstoenadBeregning =
+                                    omsBeregning(
+                                        behandling = behandling,
+                                        trygdetid = fellesData.trygdetid.single(),
+                                        avkortingsinfo = fellesData.avkortingsinfo,
+                                        landKodeverk = fellesData.alleLand,
+                                    ),
+                                erInnvilgelsesAar = fellesData.avkortingsinfo.erInnvilgelsesaar,
+                            ),
+                        vedlegg = Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                        vedleggId = BrevVedleggKey.OMS_BEREGNING,
+                    ),
                 ),
         )
     }
@@ -251,8 +268,8 @@ class VedtaksbrevService(
             avdoede = fellesData.avdoede,
             verge = fellesData.verge(),
             spraak = fellesData.spraak(),
-            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
-            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            saksbehandlerIdent = fellesData.saksbehandlerIdent,
+            attestantIdent = fellesData.attestantIdent,
             skalLagre = skalLagres,
             brevFastInnholdData =
                 OmstillingsstoenadRevurderingVedtakBrevData.Vedtak(
@@ -367,8 +384,8 @@ class VedtaksbrevService(
             avdoede = fellesData.avdoede,
             verge = fellesData.verge(),
             spraak = fellesData.spraak(),
-            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
-            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            saksbehandlerIdent = fellesData.saksbehandlerIdent,
+            attestantIdent = fellesData.attestantIdent,
             skalLagre = skalLagres,
             brevFastInnholdData =
                 OmstillingsstoenadRevurderingVedtakBrevData.VedtakAarligInntektsjustering(
@@ -416,8 +433,8 @@ class VedtaksbrevService(
             avdoede = fellesData.avdoede,
             verge = fellesData.verge(),
             spraak = fellesData.spraak(),
-            saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident(),
-            attestantIdent = vedtak.attestasjon?.attestant ?: brukerTokenInfo.ident(),
+            saksbehandlerIdent = fellesData.saksbehandlerIdent,
+            attestantIdent = fellesData.attestantIdent,
             skalLagre = skalLagres,
             brevFastInnholdData =
                 OmstillingsstoenadRevurderingVedtakBrevData.VedtakOpphoer(
@@ -487,6 +504,17 @@ class VedtaksbrevService(
 
             val brevutfall = behandlingInfoService.hentBrevutfall(behandlingId) ?: throw ManglerBrevutfall(behandlingId)
 
+            val oppgave =
+                oppgaveService
+                    .hentOppgaverForReferanse(behandlingId.toString())
+                    .singleOrNull { it.status in listOf(Status.UNDER_BEHANDLING, Status.UNDERKJENT, Status.ATTESTERING) }
+            val (saksbehandlerIdent, attestantIdent) =
+                hentSaksbehandlerOgAttestantForVedtak(
+                    vedtakDto = vedtak,
+                    oppgaveForBehandling = oppgave,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+
             OmstillingsstoenadVedtaksbrevGrunnlag(
                 virkningsdato = virkningsdato,
                 avkortingsinfo = avkortingsinfo,
@@ -500,6 +528,8 @@ class VedtaksbrevService(
                 klage = klage,
                 etterbetaling = etterbetaling,
                 brevutfall = brevutfall,
+                saksbehandlerIdent = saksbehandlerIdent,
+                attestantIdent = attestantIdent,
             )
         }
 

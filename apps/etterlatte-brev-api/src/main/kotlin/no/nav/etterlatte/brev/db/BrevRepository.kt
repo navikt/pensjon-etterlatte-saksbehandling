@@ -81,8 +81,8 @@ class BrevRepository(
             it.run(
                 queryOf(
                     "SELECT brev_id, bytes, opprettet FROM pdf WHERE brev_id = ?",
-                    id
-                ).map(tilPdfMedData).asSingle
+                    id,
+                ).map(tilPdfMedData).asSingle,
             )
         }
 
@@ -96,8 +96,7 @@ class BrevRepository(
             it.run(queryOf("SELECT payload_vedlegg FROM innhold WHERE brev_id = ?", id).map(tilPayloadVedlegg).asSingle)
         }
 
-    fun hentBrevkoder(id: BrevID) =
-        ds.hent(HENT_BREVKODER_QUERY, id) { it.stringOrNull("brevkoder")?.let { Brevkoder.valueOf(it) } }
+    fun hentBrevkoder(id: BrevID) = ds.hent(HENT_BREVKODER_QUERY, id) { it.stringOrNull("brevkoder")?.let { Brevkoder.valueOf(it) } }
 
     fun hentBrevForBehandling(
         behandlingId: UUID,
@@ -158,13 +157,13 @@ class BrevRepository(
                     ),
                 ).asUpdate,
             ).also {
-                krev(it == 1) { "Brev fikk ikke oppdatert vedlegg id: $id" }
+                krev(it == 1) { "Brev med id $id fikk ikke oppdatert vedlegg" }
             }
 
         tx
             .lagreHendelse(id, Status.OPPDATERT, payload.toJson(), bruker)
             .also {
-                krev(it == 1) { "Brev fikk ikke oppdatert hendelse for vedlegg id: $id" }
+                krev(it == 1) { "Brev med id $id fikk ikke oppdatert hendelse for vedlegg" }
             }
     }
 
@@ -530,19 +529,21 @@ class BrevRepository(
                 it.run(
                     queryOf(
                         """
-                    DELETE FROM hendelse WHERE brev_id = :brevId AND status_id = :statusId
-                """.trimIndent(), mapOf(
+                        DELETE FROM hendelse WHERE brev_id = :brevId AND status_id = :statusId
+                        """.trimIndent(),
+                        mapOf(
                             "brevId" to id,
                             "statusId" to Status.FERDIGSTILT.name,
-                        )
-                    ).asUpdate
+                        ),
+                    ).asUpdate,
                 )
                 it.run(
                     queryOf(
                         """
-                    DELETE FROM pdf WHERE brev_id = :brevId
-                """.trimIndent(), mapOf("brevId" to id)
-                    ).asUpdate
+                        DELETE FROM pdf WHERE brev_id = :brevId
+                        """.trimIndent(),
+                        mapOf("brevId" to id),
+                    ).asUpdate,
                 )
             }
         }

@@ -15,6 +15,7 @@ export const enum FeatureToggle {
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
   oppgave_til_journalpost = 'oppgave-til-journalpost',
   etteroppgjoer_dev_opprett_forbehandling = 'etteroppgjoer-dev-opprett-forbehandling',
+  vis_tilbakestill_oms_brev_pga_malendring = 'vis-tilbakestill-oms-brev-pga-malendring',
   vis_tilbakestill_etteroppgjoer = 'vis-tilbakestill-etteroppgjoer',
   omgjoer_tilbakekreving = 'omgjoer-tilbakekreving',
   overstyr_netto_brutto_tilbakekreving = 'overstyr-netto-brutto-tilbakekreving',
@@ -87,6 +88,11 @@ const oppdater_inntekt_forbehandling: Toggle = {
   enabled: false,
 }
 
+const vis_tilbakestill_oms_brev_pga_malendring: Toggle = {
+  togglename: FeatureToggle.vis_tilbakestill_oms_brev_pga_malendring,
+  enabled: false,
+}
+
 const opprett_annen_sak: Toggle = {
   togglename: FeatureToggle.opprett_annen_sak,
   enabled: false,
@@ -107,6 +113,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.beregning_bruk_nye_beregningsregler]: beregning_bruk_nye_beregningsregler,
   [FeatureToggle.oppdater_inntekt_forbehandling]: oppdater_inntekt_forbehandling,
   [FeatureToggle.opprett_annen_sak]: opprett_annen_sak,
+  [FeatureToggle.vis_tilbakestill_oms_brev_pga_malendring]: vis_tilbakestill_oms_brev_pga_malendring,
 }
 
 export const Unleashcontext = createContext<{

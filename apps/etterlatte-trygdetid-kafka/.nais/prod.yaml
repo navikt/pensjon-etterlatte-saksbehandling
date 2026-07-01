@@ -48,7 +48,7 @@ spec:
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: ETTERLATTE_BEHANDLING_TRYGDETID_ENABLED
-      value: "false"
+      value: "true"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

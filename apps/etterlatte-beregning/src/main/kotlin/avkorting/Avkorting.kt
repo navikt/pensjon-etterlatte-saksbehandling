@@ -565,7 +565,6 @@ data class Avkorting(
                     }
 
                 inntektsavkorting.copy(
-                    grunnlag = inntekt,
                     avkortingsperioder = avkortinger,
                     avkortetYtelseForventetInntekt =
                         avkortetYtelseForventetInntekt.map {
@@ -575,7 +574,7 @@ data class Avkorting(
             }
 
         val avkortetYtelse =
-            if (reberegnetInntektsavkorting.size > 1) {
+            if (aarsoppgjoer.inntektsavkorting.size > 1) {
                 beregnAvkortetYtelseMedRestanse(
                     aarsoppgjoer,
                     ytelseFoerAvkorting,
@@ -585,7 +584,7 @@ data class Avkorting(
                     brukNyeReglerAvkorting,
                 )
             } else {
-                reberegnetInntektsavkorting.single().let {
+                reberegnetInntektsavkorting.first().let {
                     val tomSluttenAvAaret =
                         tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
 

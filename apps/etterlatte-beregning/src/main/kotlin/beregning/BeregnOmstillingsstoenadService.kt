@@ -312,7 +312,6 @@ class BeregnOmstillingsstoenadService(
                                         .finnGrunnlagForPeriode(
                                             periodisertResultat.periode.fraDato,
                                         ).verdi,
-                                grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid = trygdetid.trygdetid.toInteger(),
                                 beregningsMetode = trygdetid.beregningsMetode,
@@ -361,7 +360,6 @@ class BeregnOmstillingsstoenadService(
                         datoTOM = null,
                         utbetaltBeloep = 0,
                         soeskenFlokk = null,
-                        grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                         grunnbelop = grunnbeloep.grunnbeloep,
                         trygdetid = 0,
                     ),

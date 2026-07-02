@@ -1,8 +1,25 @@
 import { Accordion, Box, Heading, Table, VStack } from '@navikt/ds-react'
 import { getYear } from 'date-fns'
+import { CSSProperties, ReactNode } from 'react'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { NOK } from '~utils/formatering/formatering'
 import { summerEtterbetaling, summerFeilutbetaling, UtbetalingTable } from './UtbetalingTable'
+
+const utenBunnlinje: CSSProperties = { borderBottom: 'none' }
+
+const SumTabell = ({ children }: { children: ReactNode }) => (
+  <Table>
+    <Table.Header>
+      <Table.Row>
+        <Table.HeaderCell scope="col">Type</Table.HeaderCell>
+        <Table.HeaderCell scope="col" align="right">
+          Sum
+        </Table.HeaderCell>
+      </Table.Row>
+    </Table.Header>
+    <Table.Body>{children}</Table.Body>
+  </Table>
+)
 
 const EtterbetalingRader = ({
   etterbetaling,
@@ -21,8 +38,10 @@ const EtterbetalingRader = ({
       <Table.DataCell align="right">{NOK(etterbetaling.skatt)}</Table.DataCell>
     </Table.Row>
     <Table.Row>
-      <Table.DataCell>Netto etterbetaling{suffix}</Table.DataCell>
-      <Table.DataCell align="right">{NOK(etterbetaling.netto)}</Table.DataCell>
+      <Table.DataCell style={utenBunnlinje}>Netto etterbetaling{suffix}</Table.DataCell>
+      <Table.DataCell align="right" style={utenBunnlinje}>
+        {NOK(etterbetaling.netto)}
+      </Table.DataCell>
     </Table.Row>
   </>
 )
@@ -44,8 +63,10 @@ const FeilutbetalingRader = ({
       <Table.DataCell align="right">{NOK(feilutbetaling.skatt)}</Table.DataCell>
     </Table.Row>
     <Table.Row>
-      <Table.DataCell>Netto feilutbetaling{suffix}</Table.DataCell>
-      <Table.DataCell align="right">{NOK(feilutbetaling.netto)}</Table.DataCell>
+      <Table.DataCell style={utenBunnlinje}>Netto feilutbetaling{suffix}</Table.DataCell>
+      <Table.DataCell align="right" style={utenBunnlinje}>
+        {NOK(feilutbetaling.netto)}
+      </Table.DataCell>
     </Table.Row>
   </>
 )
@@ -61,22 +82,16 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
             Resultat av simulering i {aar.aarstall}
           </Heading>
           <Box width="25rem" marginBlock="space-20">
-            <Table>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell scope="col">Type</Table.HeaderCell>
-                  <Table.HeaderCell scope="col" align="right">
-                    Sum
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
+            <VStack gap="space-20">
+              <SumTabell>
                 <EtterbetalingRader etterbetaling={summerEtterbetaling(aar.etterbetaling)} />
-                {aar.tilbakekreving.length > 0 && (
+              </SumTabell>
+              {aar.tilbakekreving.length > 0 && (
+                <SumTabell>
                   <FeilutbetalingRader feilutbetaling={summerFeilutbetaling(aar.etterbetaling, aar.tilbakekreving)} />
-                )}
-              </Table.Body>
-            </Table>
+                </SumTabell>
+              )}
+            </VStack>
           </Box>
           <Box maxWidth="1000px">
             <Accordion size="small">
@@ -99,25 +114,19 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
             Etterbetaling for hele perioden
           </Heading>
           <Box width="25rem" marginBlock="space-20">
-            <Table>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell scope="col">Type</Table.HeaderCell>
-                  <Table.HeaderCell scope="col" align="right">
-                    Sum
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
+            <VStack gap="space-20">
+              <SumTabell>
                 <EtterbetalingRader etterbetaling={summerEtterbetaling(data.etterbetaling)} suffix=" for perioden" />
-                {data.tilbakekreving.length > 0 && (
+              </SumTabell>
+              {data.tilbakekreving.length > 0 && (
+                <SumTabell>
                   <FeilutbetalingRader
                     feilutbetaling={summerFeilutbetaling(data.etterbetaling, data.tilbakekreving)}
                     suffix=" for perioden"
                   />
-                )}
-              </Table.Body>
-            </Table>
+                </SumTabell>
+              )}
+            </VStack>
           </Box>
         </Box>
       )}

@@ -2,7 +2,7 @@ import { Accordion, Box, Heading, Table, VStack } from '@navikt/ds-react'
 import { getYear } from 'date-fns'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { NOK } from '~utils/formatering/formatering'
-import { summerEtterbetaling, summerPerioder, UtbetalingTable } from './UtbetalingTable'
+import { summerEtterbetaling, summerFeilutbetaling, UtbetalingTable } from './UtbetalingTable'
 
 const EtterbetalingRader = ({
   etterbetaling,
@@ -23,6 +23,29 @@ const EtterbetalingRader = ({
     <Table.Row>
       <Table.DataCell>Netto etterbetaling{suffix}</Table.DataCell>
       <Table.DataCell align="right">{NOK(etterbetaling.netto)}</Table.DataCell>
+    </Table.Row>
+  </>
+)
+
+const FeilutbetalingRader = ({
+  feilutbetaling,
+  suffix = '',
+}: {
+  feilutbetaling: ReturnType<typeof summerFeilutbetaling>
+  suffix?: string
+}) => (
+  <>
+    <Table.Row>
+      <Table.DataCell>Brutto feilutbetaling{suffix}</Table.DataCell>
+      <Table.DataCell align="right">{NOK(feilutbetaling.brutto)}</Table.DataCell>
+    </Table.Row>
+    <Table.Row>
+      <Table.DataCell>Skatt</Table.DataCell>
+      <Table.DataCell align="right">{NOK(feilutbetaling.skatt)}</Table.DataCell>
+    </Table.Row>
+    <Table.Row>
+      <Table.DataCell>Netto feilutbetaling{suffix}</Table.DataCell>
+      <Table.DataCell align="right">{NOK(feilutbetaling.netto)}</Table.DataCell>
     </Table.Row>
   </>
 )
@@ -49,10 +72,9 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
               </Table.Header>
               <Table.Body>
                 <EtterbetalingRader etterbetaling={summerEtterbetaling(aar.etterbetaling)} />
-                <Table.Row>
-                  <Table.DataCell>Tilbakekreving</Table.DataCell>
-                  <Table.DataCell align="right">{NOK(summerPerioder(aar.tilbakekreving))}</Table.DataCell>
-                </Table.Row>
+                {aar.tilbakekreving.length > 0 && (
+                  <FeilutbetalingRader feilutbetaling={summerFeilutbetaling(aar.etterbetaling, aar.tilbakekreving)} />
+                )}
               </Table.Body>
             </Table>
           </Box>
@@ -88,6 +110,12 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
               </Table.Header>
               <Table.Body>
                 <EtterbetalingRader etterbetaling={summerEtterbetaling(data.etterbetaling)} suffix=" for perioden" />
+                {data.tilbakekreving.length > 0 && (
+                  <FeilutbetalingRader
+                    feilutbetaling={summerFeilutbetaling(data.etterbetaling, data.tilbakekreving)}
+                    suffix=" for perioden"
+                  />
+                )}
               </Table.Body>
             </Table>
           </Box>

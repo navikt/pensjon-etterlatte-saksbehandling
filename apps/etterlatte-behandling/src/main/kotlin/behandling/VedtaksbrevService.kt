@@ -526,7 +526,6 @@ class VedtaksbrevService(
         coroutineScope {
             val trygdetidRequest = async { trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo) }
 
-            // TODO felles?
             val virkningsdato = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).virkningstidspunkt.atDay(1)
 
             val avkorting = beregningKlient.hentBeregningOgAvkorting(behandling.id, brukerTokenInfo)

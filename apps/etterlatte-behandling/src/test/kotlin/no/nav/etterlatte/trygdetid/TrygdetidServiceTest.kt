@@ -95,8 +95,6 @@ internal class TrygdetidServiceTest {
             avtaleService,
             behandlingsStatusService,
             vedtaksvurderingKlient,
-            brukInternTrygdetid = true,
-            brukEgenDatabaseForTrygdetid = true,
         )
 
     private fun trygdeavtale(behandlingId: UUID) =
@@ -1578,7 +1576,12 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal sjekke gyldighet og oppdatere status hvis behandlingstatus er VILKAARSVURDERT`() {
         val behandlingId = randomUUID()
-        val eksisterendeTrygdetid = trygdetid(behandlingId, beregnetTrygdetid = beregnetTrygdetid())
+        val eksisterendeTrygdetid =
+            trygdetid(
+                behandlingId = behandlingId,
+                beregnetTrygdetid = beregnetTrygdetid(),
+                begrunnelse = "Begrunnelse for trygdetid",
+            )
 
         every { behandlingService.hentDetaljertBehandling(any(), any()) } returns
             behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)

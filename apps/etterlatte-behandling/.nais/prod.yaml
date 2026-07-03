@@ -156,7 +156,7 @@ spec:
     - name: OPPGAVE_URL
       value: https://oppgave.prod-fss-pub.nais.io
     - name: PEN_URL
-      value: https://pensjon-pen.prod-fss-pub.nais.io/api
+      value: https://pensjon-pen.prod-fss-pub.nais.io
     - name: PEN_CLIENT_ID
       value: 53eaf67f-d7b2-46e9-8ffe-3da7cf0ac955
     - name: KRR_ENDPOINT_URL
@@ -182,7 +182,7 @@ spec:
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://prod-fss.pensjonsamhandling.sam/.default
     - name: BRUK_INTERN_TRYGDETID
-      value: "false"
+      value: "true"
     - name: BRUK_EGEN_DATABASE_FOR_TRYGDETID
       value: "false"
 
@@ -238,3 +238,4 @@ spec:
         - application: etterlatte-brev-kafka
         - application: etterlatte-utbetaling
         - application: etterlatte-api
+        - application: etterlatte-trygdetid-kafka

@@ -43,7 +43,7 @@ class PesysKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/sak/sammendrag/v2",
+                        url = "$resourceUrl/api/sak/sammendrag/v2",
                         additionalHeaders = mapOf("fnr" to fnr),
                     ),
                 brukerTokenInfo = bruker,

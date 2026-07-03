@@ -23,6 +23,7 @@ enum class EnvKey : EnvEnum {
     ETTERLATTE_MIGRERING_URL,
     BRUK_INTERN_TRYGDETID,
     BRUK_EGEN_DATABASE_FOR_TRYGDETID,
+    ETTERLATTE_BEHANDLING_TRYGDETID_ENABLED,
     ;
 
     override fun key() = name

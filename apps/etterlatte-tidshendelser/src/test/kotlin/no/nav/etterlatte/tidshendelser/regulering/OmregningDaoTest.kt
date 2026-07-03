@@ -17,6 +17,8 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.Month
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
@@ -26,7 +28,7 @@ class OmregningDaoTest(
 ) {
     @Test
     fun lagreOgHentOppReguleringskonfigurasjon() {
-        val dato = LocalDate.of(2024, Month.JUNE, 22)
+        val dato = YearMonth.of(2024, Month.JUNE)
         leggInnReguleringskonfigurasjon(dato, 10, listOf(sakId1, sakId2, sakId3), listOf(sakId2))
         leggInnReguleringskonfigurasjon(
             dato,
@@ -37,37 +39,37 @@ class OmregningDaoTest(
         val dao = OmregningDao(datasource = dataSource)
         val konfigurasjon: Omregningskonfigurasjon = dao.hentNyesteKonfigurasjon()
         assertEquals(20, konfigurasjon.antall)
-        assertEquals(dato, konfigurasjon.dato)
+        assertEquals(dato, konfigurasjon.datoVirkFom)
         containsInOrder(listOf(1, 2, 3, 4, 5), konfigurasjon.spesifikkeSaker)
         containsInOrder(listOf(1, 2, 4), konfigurasjon.ekskluderteSaker)
     }
 
     @Test
     fun taklerAtViIkkeHarSpesifisertSaker() {
-        val dato = LocalDate.of(2024, Month.JUNE, 22)
+        val dato = YearMonth.of(2024, Month.JUNE)
         leggInnReguleringskonfigurasjon(dato, 10, null, null)
         leggInnReguleringskonfigurasjon(dato, 20, null, null)
         val dao = OmregningDao(datasource = dataSource)
         val konfigurasjon: Omregningskonfigurasjon = dao.hentNyesteKonfigurasjon()
         assertEquals(20, konfigurasjon.antall)
-        assertEquals(dato, konfigurasjon.dato)
+        assertEquals(dato, konfigurasjon.datoVirkFom)
         containsInOrder(listOf(1, 2, 3, 4, 5), konfigurasjon.spesifikkeSaker)
         containsInOrder(listOf(1, 2, 4), konfigurasjon.ekskluderteSaker)
     }
 
     @Test
     fun ignorerInaktivKonfigurasjon() {
-        val dato = LocalDate.of(2024, Month.JUNE, 22)
+        val dato = YearMonth.of(2024, Month.JUNE)
         leggInnReguleringskonfigurasjon(dato, 10, emptyList(), emptyList())
         leggInnReguleringskonfigurasjon(dato, 20, emptyList(), emptyList(), false)
         val dao = OmregningDao(datasource = dataSource)
         val konfigurasjon: Omregningskonfigurasjon = dao.hentNyesteKonfigurasjon()
         assertEquals(10, konfigurasjon.antall)
-        assertEquals(dato, konfigurasjon.dato)
+        assertEquals(dato, konfigurasjon.datoVirkFom)
     }
 
     private fun leggInnReguleringskonfigurasjon(
-        dato: LocalDate,
+        dato: YearMonth,
         antall: Int,
         spesifikkeSaker: List<SakId>?,
         ekskluderteSaker: List<SakId>?,
@@ -77,7 +79,7 @@ class OmregningDaoTest(
         params = { tx ->
             mapOf(
                 Databasetabell.ANTALL to antall,
-                Databasetabell.DATO to dato,
+                Databasetabell.DATOVIRKFOM to dato.toString(),
                 Databasetabell.SPESIFIKKE_SAKER to spesifikkeSaker?.tilDatabasetabell(tx),
                 Databasetabell.EKSKLUDERTE_SAKER to ekskluderteSaker?.tilDatabasetabell(tx),
                 Databasetabell.AKTIV to aktiv,

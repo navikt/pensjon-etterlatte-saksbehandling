@@ -25,8 +25,6 @@ internal class AvtaleServiceTest {
     private val service =
         AvtaleService(
             avtaleRepository = repository,
-            brukInternTrygdetid = true,
-            brukEgenDatabaseForTrygdetid = true,
         )
 
     @BeforeEach

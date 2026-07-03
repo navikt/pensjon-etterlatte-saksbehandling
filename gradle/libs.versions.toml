@@ -30,7 +30,7 @@ kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "4.2.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.12.1" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "8.2.0" }
 
-klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.12.17" }
+klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "3.3.8" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.1.0" }
 

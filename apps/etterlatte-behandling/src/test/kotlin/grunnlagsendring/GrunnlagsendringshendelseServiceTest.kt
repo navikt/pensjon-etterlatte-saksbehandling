@@ -158,7 +158,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
-                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
             )
         } returns
             listOf(
@@ -179,7 +179,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
-                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
             )
         } returns
             listOf(
@@ -229,7 +229,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
-                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
             )
         } returns emptyList()
 
@@ -245,7 +245,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
-                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
             )
         } returns listOf(grlhendelse.copy(id = randomUUID(), samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse))
 
@@ -257,6 +257,121 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
 
         assertTrue(erDuplikat)
+    }
+
+    @Test
+    fun `Skal ignorere hendelse som allerede er vurdert som ikke relevant med samme samsvar`() {
+        val sakId = sakId1
+        val adresse =
+            Adresse(
+                type = AdresseType.VEGADRESSE,
+                aktiv = true,
+                kilde = "FREG",
+                postnr = "2040",
+                adresseLinje1 = "Furukollveien 189",
+            )
+        val samsvarBostedAdresse =
+            SamsvarMellomKildeOgGrunnlag.Adresse(
+                samsvar = false,
+                fraPdl = listOf(adresse),
+                fraGrunnlag = null,
+                aarsakIgnorert = null,
+            )
+        val grlhendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                gjelderPerson = KONTANT_FOT.value,
+                hendelseGjelderRolle = Saksrolle.SOEKER,
+                samsvarMellomKildeOgGrunnlag = null,
+            ).copy(
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                type = GrunnlagsendringsType.BOSTED,
+            )
+
+        // Saksbehandler har allerede vurdert en identisk hendelse som ikke relevant
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
+            )
+        } returns
+            listOf(
+                grlhendelse.copy(
+                    id = randomUUID(),
+                    status = GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT,
+                    samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse,
+                ),
+            )
+
+        val erDuplikat =
+            grunnlagsendringshendelseService.erDuplikatHendelse(
+                sakId,
+                grlhendelse,
+                samsvarBostedAdresse,
+            )
+
+        assertTrue(erDuplikat)
+    }
+
+    @Test
+    fun `Skal ikke ignorere hendelse vurdert som ikke relevant hvis samsvar er ulikt`() {
+        val sakId = sakId1
+        val adresse =
+            Adresse(
+                type = AdresseType.VEGADRESSE,
+                aktiv = true,
+                kilde = "FREG",
+                postnr = "2040",
+                adresseLinje1 = "Furukollveien 189",
+            )
+        val samsvarBostedAdresse =
+            SamsvarMellomKildeOgGrunnlag.Adresse(
+                samsvar = false,
+                fraPdl = listOf(adresse),
+                fraGrunnlag = null,
+                aarsakIgnorert = null,
+            )
+        val nyAdresse =
+            Adresse(
+                type = AdresseType.VEGADRESSE,
+                aktiv = true,
+                kilde = "FREG",
+                postnr = "1359",
+                adresseLinje1 = "Trøgstadbåsta 612",
+            )
+        val nyttSamsvarBostedAdresse = samsvarBostedAdresse.copy(fraPdl = listOf(nyAdresse))
+        val grlhendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                gjelderPerson = KONTANT_FOT.value,
+                hendelseGjelderRolle = Saksrolle.SOEKER,
+                samsvarMellomKildeOgGrunnlag = null,
+            ).copy(
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                type = GrunnlagsendringsType.BOSTED,
+            )
+
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
+            )
+        } returns
+            listOf(
+                grlhendelse.copy(
+                    id = randomUUID(),
+                    status = GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT,
+                    samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse,
+                ),
+            )
+
+        // Ny hendelse har annen adresse enn den som er vurdert — skal ikke ignoreres
+        val erIkkeDuplikat =
+            grunnlagsendringshendelseService.erDuplikatHendelse(
+                sakId,
+                grlhendelse,
+                nyttSamsvarBostedAdresse,
+            )
+
+        assertFalse(erIkkeDuplikat)
     }
 
     @Test
@@ -404,7 +519,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
-                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
             )
         } returns emptyList()
         every { behandlingService.hentBehandlingerForSak(sak.id) } returns emptyList()
@@ -461,7 +576,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
-                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
             )
         } returns emptyList()
         every { behandlingService.hentBehandlingerForSak(sak.id) } returns emptyList()
@@ -606,7 +721,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
-                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT),
             )
         } returns listOf(grlhendelse)
         grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(gjenlevendeFnr, GrunnlagsendringsType.BOSTED)

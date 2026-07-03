@@ -59,6 +59,8 @@ spec:
       value: dev-gcp.etterlatte.etterlatte-brev-api
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-trygdetid
+    - name: ETTERLATTE_BEHANDLING_TRYGDETID_ENABLED
+      value: "true"
   accessPolicy:
     outbound:
       rules:

@@ -1,0 +1,2 @@
+ALTER TABLE etteroppgjoer
+    DROP COLUMN har_institusjonsopphold;

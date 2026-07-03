@@ -1,35 +1,18 @@
 export interface AvbrytBehandlingRequest {
-  aarsakTilAvbrytelse: AarsakTilAvsluttingFoerstegangsbehandling | AarsakTilAvsluttingRevurdering
+  aarsakTilAvbrytelse: AarsakTilAvslutting //TODO
   kommentar: string
 }
 
-export enum AarsakTilAvsluttingFoerstegangsbehandling {
-  SOEKNADEN_ER_IKKE_AKTUELL = 'SOEKNADEN_ER_IKKE_AKTUELL',
-  FEILREGISTRERT = 'FEILREGISTRERT',
+export enum AarsakTilAvslutting {
+  SOEKNAD_TRUKKET = 'SOEKNAD_TRUKKET',
+  SAKEN_HENLEGGES_ELLER_SOEKNADEN_ER_IKKE_AKTUELL = 'SAKEN_HENLEGGES_ELLER_SOEKNADEN_ER_IKKE_AKTUELL',
+  AVSLUTTE_SAK_VENTER_SVAR_FRA_UTLAND = 'AVSLUTTE_SAK_VENTER_SVAR_FRA_UTLAND',
   ANNET = 'ANNET',
 }
 
-export enum AarsakTilAvsluttingRevurdering {
-  IKKE_LENGER_AKTUELL = 'IKKE_LENGER_AKTUELL',
-  FEILREGISTRERT = 'FEILREGISTRERT',
-  AVBRUTT_PAA_GRUNN_AV_FEIL = 'AVBRUTT_PAA_GRUNN_AV_FEIL',
-  ANNET = 'ANNET',
-  ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST = 'ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST',
-}
-
-export const teksterAarsakTilAvsluttingFoerstegangsbehandling: Record<
-  AarsakTilAvsluttingFoerstegangsbehandling,
-  string
-> = {
-  SOEKNADEN_ER_IKKE_AKTUELL: 'Søknaden er ikke aktuell',
-  FEILREGISTRERT: 'Søknaden er feilregistrert',
-  ANNET: 'Annet',
-}
-
-export const teksterAarsakTilAvsluttingRevurdering: Record<AarsakTilAvsluttingRevurdering, string> = {
-  IKKE_LENGER_AKTUELL: 'Revurderingen er ikke lengre aktuell',
-  FEILREGISTRERT: 'Revurderingen er feilregistrert',
-  AVBRUTT_PAA_GRUNN_AV_FEIL: 'Revurderingen er avbrutt på grunn av feil i Gjenny',
-  ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST: 'Endring i etteroppgjør er til ugunst',
+export const teksterAArsakTilAvslutting: Record<AarsakTilAvslutting, string> = {
+  SOEKNAD_TRUKKET: 'Søknad trukket',
+  SAKEN_HENLEGGES_ELLER_SOEKNADEN_ER_IKKE_AKTUELL: 'Saken henlegges / søknaden er ikke aktuell',
+  AVSLUTTE_SAK_VENTER_SVAR_FRA_UTLAND: 'Avslutt sak i påvente av opplysninger fra utlandet',
   ANNET: 'Annet',
 }

@@ -181,12 +181,12 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                 opprettKlage(sak)
             }
         inTransaction {
-            service.avbrytKlage(klage.id, AarsakTilAvbrytelse.FEILREGISTRERT, "Fordi jeg vil", saksbehandler)
+            service.avbrytKlage(klage.id, AarsakTilAvbrytelse.FEILREGISTRERT, "Fordi jeg vil", saksbehandler) // TODO .feilregistrert
 
             val hentetKlage = requireNotNull(service.hentKlage(klage.id))
             with(hentetKlage) {
                 status shouldBe KlageStatus.AVBRUTT
-                aarsakTilAvbrytelse shouldBe AarsakTilAvbrytelse.FEILREGISTRERT
+                aarsakTilAvbrytelse shouldBe AarsakTilAvbrytelse.FEILREGISTRERT // TODO .feilregistrert
             }
 
             val hendelserISak = hendelseDao.hentHendelserISak(klage.sak.id)
@@ -202,7 +202,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                 it.opprettet shouldNotBe null
                 it.sakId shouldBe klage.sak.id
                 it.valgtBegrunnelse shouldBe "FEILREGISTRERT"
-                it.valgtBegrunnelse shouldBe AarsakTilAvbrytelse.FEILREGISTRERT.name
+                it.valgtBegrunnelse shouldBe AarsakTilAvbrytelse.FEILREGISTRERT.name // TODO .feilregistrert
                 it.vedtakId shouldBe null
             }
         }
@@ -223,7 +223,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
             inTransaction {
                 service.avbrytKlage(
                     klage.id,
-                    AarsakTilAvbrytelse.FEILREGISTRERT,
+                    AarsakTilAvbrytelse.FEILREGISTRERT, // TODO .feilregistrert
                     "Fordi jeg vil",
                     saksbehandler,
                 )

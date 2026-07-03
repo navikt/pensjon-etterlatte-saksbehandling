@@ -796,6 +796,59 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
     }
 
+    @Test
+    fun `ny`() {
+        val oppgaveService = applicationContext.oppgaveService
+        val revurderingService = manuellRevurderingService(revurderingService())
+        val behandlingFactory = behandlingFactory()
+
+        // Forutsetninger - sak med iverksatt behandling
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        inTransaction {
+            iverksett(behandling)
+        }
+
+        // Opprett en revurderingsoppgave som gjelder en hendelse
+        val oppgaveHendelse =
+            inTransaction {
+                oppgaveService.opprettOppgave(
+                    referanse = "",
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.HENDELSE,
+                    type = OppgaveType.REVURDERING,
+                    merknad = "Aldersovergang v/20 år",
+                    frist = Tidspunkt.now(),
+                )
+            }
+
+        // Tildel oppgaven
+        inTransaction {
+            oppgaveService.tildelSaksbehandler(oppgaveHendelse.id, "Z123456")
+        }
+
+        // Opprett revurdering, triggende oppgave konverteres til aa gjelde behandlingen
+        val revurdering =
+            inTransaction {
+                revurderingService.opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = Revurderingaarsak.OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV,
+                    paaGrunnAvHendelseId = null,
+                    paaGrunnAvOppgaveId = null,
+                    begrunnelse = oppgaveHendelse.merknad,
+                    saksbehandler = simpleSaksbehandler(),
+                )
+            }
+
+        with(
+            inTransaction {
+                oppgaveService.hentOppgave(oppgaveHendelse.id)
+            },
+        ) {
+            status shouldBe Status.UNDER_BEHANDLING
+            referanse shouldBe revurdering.id.toString()
+        }
+    }
+
     private fun iverksett(
         behandling: Behandling,
         saksbehandlerId: String = "sbh",

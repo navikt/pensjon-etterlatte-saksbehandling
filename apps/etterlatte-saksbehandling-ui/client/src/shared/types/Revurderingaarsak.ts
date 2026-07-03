@@ -44,6 +44,7 @@ export enum Revurderingaarsak {
   UTSENDELSE_AV_SED = 'UTSENDELSE_AV_SED',
   AKTIVITETSPLIKT = 'AKTIVITETSPLIKT',
   AARLIG_INNTEKTSJUSTERING = 'AARLIG_INNTEKTSJUSTERING',
+  OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV = 'OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV',
 }
 
 // se også behandlingsslistemappere.ts
@@ -79,6 +80,7 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   FRA_0UTBETALING_TIL_UTBETALING: 'Fra 0-utbetaling til utbetaling etter regulering',
   AVKORTING_MOT_UFOERETRYGD: 'Avkorting mot uføretrygd',
   ETTEROPPGJOER: 'Etteroppgjør',
+  OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV: 'Omgjøring av etteroppgjør (eget initiativ)',
   OMGJOERING_ETTER_ANKE: 'Omgjøring etter anke',
   OMGJOERING_PAA_EGET_INITIATIV: 'Omgjøring på eget intitiativ',
   OMGJOERING_ETTER_KRAV_FRA_BRUKER: 'Omgjøring etter krav fra bruker',

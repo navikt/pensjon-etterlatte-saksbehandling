@@ -185,6 +185,47 @@ class EtteroppgjoerRevurderingService(
         )
     }
 
+    fun omgjoerEtteroppgjoerRevurderingEgetInitiativ(
+        sakId: SakId,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Revurdering {
+        val omgjoerForbehandlingId =
+            inTransaction {
+                val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+
+                if (etteroppgjoer.status != EtteroppgjoerStatus.FERDIGSTILT) {
+                    throw IkkeTillattException(
+                        "ETTEROPPGJOER_IKKE_IVERKSATT",
+                        "Etteroppgjøret for sakId=$sakId og inntektsår=$inntektsaar har status ${etteroppgjoer.status} " +
+                            "og kan ikke omgjøres. Kun iverksatte etteroppgjør kan omgjøres på eget initiativ.",
+                    )
+                }
+
+                val omgjoerForbehandlingId =
+                    krevIkkeNull(etteroppgjoer.sisteFerdigstilteForbehandling) {
+                        "Fant ingen ferdigstilt forbehandling for etteroppgjøret til sakId=$sakId og inntektsår=$inntektsaar"
+                    }
+
+                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                    sakId,
+                    inntektsaar,
+                    EtteroppgjoerStatus.OMGJOERING,
+                    EtteroppgjoerHendelser.OMGJOERING,
+                )
+
+                omgjoerForbehandlingId
+            }
+
+        return opprettEtteroppgjoerRevurdering(
+            sakId = sakId,
+            inntektsaar = inntektsaar,
+            opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
+            omgjoerForbehandlingId = omgjoerForbehandlingId,
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
     fun omgjoerEtteroppgjoerRevurderingEtterKlage(
         behandlingId: UUID,
         klageId: UUID,

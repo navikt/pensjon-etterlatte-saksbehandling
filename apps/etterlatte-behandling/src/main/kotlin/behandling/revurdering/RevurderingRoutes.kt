@@ -129,6 +129,23 @@ internal fun Route.revurderingRoutes(
                 }
             }
 
+            post("omgjoering-etteroppgjoer") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<OpprettOmgjoeringEtteroppgjoerRequest> {
+                        logger.info(
+                            "Oppretter omgjøring av etteroppgjør på eget initiativ på sakId=$sakId for året ${it.inntektsaar}",
+                        )
+                        val revurdering =
+                            etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurderingEgetInitiativ(
+                                sakId = sakId,
+                                inntektsaar = it.inntektsaar,
+                                brukerTokenInfo = saksbehandler,
+                            )
+                        call.respond(revurdering.id)
+                    }
+                }
+            }
+
             get("/{revurderingsaarsak}") {
                 val revurderingsaarsak =
                     call.parameters["revurderingsaarsak"]?.let { Revurderingaarsak.valueOf(it) }
@@ -174,6 +191,10 @@ private fun hentRevurderingaarsaker(sakType: SakType) =
 
 data class OpprettOmgjoeringKlageRequest(
     val oppgaveIdOmgjoering: UUID,
+)
+
+data class OpprettOmgjoeringEtteroppgjoerRequest(
+    val inntektsaar: Int,
 )
 
 data class OpprettRevurderingRequest(

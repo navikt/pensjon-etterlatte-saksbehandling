@@ -77,3 +77,7 @@
 **2026-06-22 — Transaksjonskontext ved intern migrering**
 - Observation: Brute-force lesing av kode for å finne logikkforskjeller – uten å trace infrastruktur-forutsetningene – kostet mange omganger. Feilen lå ikke i forretningslogikken, men i at `ConnectionAutoclosing.hentConnection` krever en åpen transaksjon når `Kontekst` er satt, og den nye route-laget manglet `inTransaction`.
 - Action: Ved migrering av logikk fra en app til en annen – sjekk infrastruktur-kontrakten (transaksjonsoppsett, Kontekst, DB-tilkoblingsmønster) like grundig som forretningslogikken. Finn tidlig "hvem setter opp DB-konteksten i den nye appen?"
+
+**2026-07-03 — Testkjøring / miljøfeil**
+- Observation: Jeg itererte to ganger på egen testkode (TestHelper-NPE, mockkStatic) før jeg oppdaget at feilen var Java 25 vs. Byte Buddy – en eksisterende test feilet 22/22 på samme måte, og en Java 21-JDK fantes lokalt.
+- Action: Når en test feiler med infrastruktur-/toolchain-feil (Byte Buddy, class-init, instrumentering), kjør først en eksisterende test for å isolere miljø vs. egen kode, og sjekk tilgjengelige JDK-er før du endrer testkoden.

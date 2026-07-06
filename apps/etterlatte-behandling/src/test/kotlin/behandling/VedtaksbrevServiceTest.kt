@@ -2,8 +2,10 @@ package no.nav.etterlatte.behandling
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -48,6 +50,7 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.security.SecureRandom
@@ -94,6 +97,12 @@ internal class VedtaksbrevServiceTest {
         coEvery {
             brevKlient.opprettStrukturertBrev(any(), any(), any())
         } returns mockk()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        confirmVerified(brevKlient)
+        clearAllMocks()
     }
 
     @Test

@@ -79,7 +79,7 @@ class BeregnOverstyrBeregningService(
             )
 
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING ->
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 beregnOverstyr(
                     behandlingId = behandling.id,
                     beregningsType = beregningsType,
@@ -89,6 +89,7 @@ class BeregnOverstyrBeregningService(
                     overstyrBeregning = overstyrBeregning,
                     opphoerFraOgMed = behandling.opphoerFraOgMed,
                 )
+            }
 
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall =
@@ -96,7 +97,7 @@ class BeregnOverstyrBeregningService(
                         ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {
-                    VilkaarsvurderingUtfall.OPPFYLT ->
+                    VilkaarsvurderingUtfall.OPPFYLT -> {
                         beregnOverstyr(
                             behandlingId = behandling.id,
                             beregningsType = beregningsType,
@@ -106,6 +107,7 @@ class BeregnOverstyrBeregningService(
                             overstyrBeregning = overstyrBeregning,
                             opphoerFraOgMed = behandling.opphoerFraOgMed,
                         )
+                    }
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
                         beregnOverstyr(
@@ -190,7 +192,7 @@ class BeregnOverstyrBeregningService(
         val beregnetDato = Tidspunkt.now()
 
         return when (resultat) {
-            is RegelkjoeringResultat.Suksess ->
+            is RegelkjoeringResultat.Suksess -> {
                 Beregning(
                     beregningId = UUID.randomUUID(),
                     behandlingId = behandlingId,
@@ -237,7 +239,6 @@ class BeregnOverstyrBeregningService(
                                         .toInt(),
                                 harForeldreloessats = periodisertResultat.resultat.verdi.foreldreloessats,
                                 institusjonsopphold = null,
-                                grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid = trygdetid,
                                 trygdetidForIdent = periodisertResultat.resultat.verdi.trygdetidForIdent,
@@ -268,10 +269,13 @@ class BeregnOverstyrBeregningService(
                         },
                     overstyrBeregning = overstyrBeregning,
                 )
+            }
 
-            is RegelkjoeringResultat.UgyldigPeriode -> throw RuntimeException(
-                "Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}",
-            )
+            is RegelkjoeringResultat.UgyldigPeriode -> {
+                throw RuntimeException(
+                    "Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}",
+                )
+            }
         }
     }
 }

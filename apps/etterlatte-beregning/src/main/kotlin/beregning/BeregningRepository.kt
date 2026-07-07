@@ -133,7 +133,6 @@ class BeregningRepository(
             "utbetaltBeloep" to beregningsperiode.utbetaltBeloep,
             "institusjonsopphold" to beregningsperiode.institusjonsopphold?.toJson(),
             "soeskenFlokk" to beregningsperiode.soeskenFlokk?.toJson(),
-            "grunnbeloepMnd" to beregningsperiode.grunnbelopMnd,
             "grunnbeloep" to beregningsperiode.grunnbelop,
             "sakId" to beregning.grunnlagMetadata.sakId.sakId,
             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon,
@@ -183,7 +182,6 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
                 stringOrNull(BeregningsperiodeDatabaseColumns.Institusjonsopphold.navn)?.let {
                     objectMapper.readValue(it)
                 },
-            grunnbelopMnd = int(BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn),
             grunnbelop = int(BeregningsperiodeDatabaseColumns.Grunnbeloep.navn),
             grunnlagMetadata =
                 Metadata(
@@ -261,7 +259,6 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                         utbetaltBeloep = it.utbetaltBeloep,
                         soeskenFlokk = it.soeskenFlokk,
                         institusjonsopphold = it.institusjonsopphold,
-                        grunnbelopMnd = it.grunnbelopMnd,
                         grunnbelop = it.grunnbelop,
                         trygdetid = it.trygdetid,
                         trygdetidForIdent = it.trygdetidForIdent,
@@ -294,7 +291,6 @@ private enum class BeregningsperiodeDatabaseColumns(
     DatoTOM("datoTOM"),
     UtbetaltBeloep("utbetaltBeloep"),
     SoeskenFlokk("soeskenFlokk"),
-    GrunnbeloepMnd("grunnbeloepMnd"),
     Grunnbeloep("grunnbeloep"),
     SakId("sakId"),
     GrunnlagVersjon("grunnlagVersjon"),
@@ -333,7 +329,6 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.DatoTOM.navn}, 
             ${BeregningsperiodeDatabaseColumns.UtbetaltBeloep.navn}, 
             ${BeregningsperiodeDatabaseColumns.SoeskenFlokk.navn}, 
-            ${BeregningsperiodeDatabaseColumns.GrunnbeloepMnd.navn}, 
             ${BeregningsperiodeDatabaseColumns.Grunnbeloep.navn}, 
             ${BeregningsperiodeDatabaseColumns.SakId.navn}, 
             ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}, 
@@ -354,7 +349,7 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.HarForeldreloessats.navn}
             )
         VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :type::TEXT, :beregnetDato::TIMESTAMP, 
-            :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
+            :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, 
             :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :trygdetidForIdent::TEXT,
             :beregningsMetode::TEXT, :samletNorskTrygdetid::BIGINT, :samletTeoretiskTrygdetid::BIGINT,
             :prorataBroekTeller::BIGINT, :prorataBroekNevner::BIGINT, :avdoedeForeldre::JSONB, :regelResultat::JSONB, 
@@ -410,7 +405,6 @@ private data class BeregningsperiodeDAO(
     val utbetaltBeloep: Int,
     val soeskenFlokk: List<String>?,
     val institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
-    val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val grunnlagMetadata: Metadata,
     val trygdetid: Int,

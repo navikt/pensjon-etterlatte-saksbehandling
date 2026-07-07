@@ -29,6 +29,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -106,7 +107,7 @@ class StrukturertBrevService(
                             soeker,
                             avdoede,
                             verge,
-                            gjenlevende,
+                            gjenlevende = if (sak.sakType == SakType.BARNEPENSJON) gjenlevende else emptyList(),
                         ),
                         bruker,
                     ),

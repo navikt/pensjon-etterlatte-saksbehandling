@@ -100,12 +100,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 sakId = sakId1,
                 inntektsaar = 2024,
                 status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                harSanksjon = false,
                 harOpphoer = false,
-                harAdressebeskyttelseEllerSkjermet = false,
-                harAktivitetskrav = false,
-                harBosattUtland = false,
-                harOverstyrtBeregning = false,
                 sisteFerdigstilteForbehandling = UUID.randomUUID(),
             )
 

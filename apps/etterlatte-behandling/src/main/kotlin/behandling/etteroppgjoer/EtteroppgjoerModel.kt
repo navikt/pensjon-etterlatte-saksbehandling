@@ -8,13 +8,7 @@ data class Etteroppgjoer(
     val sakId: SakId,
     val inntektsaar: Int,
     val status: EtteroppgjoerStatus,
-    val harSanksjon: Boolean = false,
     val harOpphoer: Boolean = false,
-    val harAdressebeskyttelseEllerSkjermet: Boolean = false,
-    val harAktivitetskrav: Boolean = false,
-    val harBosattUtland: Boolean = false,
-    val harUtlandstilsnitt: Boolean = false,
-    val harOverstyrtBeregning: Boolean = false,
     val sisteFerdigstilteForbehandling: UUID? = null,
 ) {
     fun venterPaaSkatteoppgjoer() = status == EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER

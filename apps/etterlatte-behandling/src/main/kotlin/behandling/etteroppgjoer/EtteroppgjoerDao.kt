@@ -1,9 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
-import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -173,17 +171,11 @@ class EtteroppgjoerDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer(
-                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_sanksjon, har_bosatt_utland, har_utlandstilsnitt, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, har_overstyrt_beregning, endret, siste_ferdigstilte_forbehandling
+                            sak_id, inntektsaar, opprettet, status, har_opphoer, endret, siste_ferdigstilte_forbehandling
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
-                            har_bosatt_utland = excluded.har_bosatt_utland,
-                            har_utlandstilsnitt = excluded.har_utlandstilsnitt,
-                            har_sanksjon = excluded.har_sanksjon,
                             har_opphoer = excluded.har_opphoer,
-                            har_adressebeskyttelse_eller_skjermet = excluded.har_adressebeskyttelse_eller_skjermet,
-                            har_aktivitetskrav = excluded.har_aktivitetskrav,
-                            har_overstyrt_beregning = excluded.har_overstyrt_beregning,
                             status = excluded.status,
                             endret = excluded.endret,
                             siste_ferdigstilte_forbehandling  = excluded.siste_ferdigstilte_forbehandling
@@ -196,14 +188,8 @@ class EtteroppgjoerDao(
                     statement.setTidspunkt(3, Tidspunkt(java.time.Instant.now()))
                     statement.setString(4, status.name)
                     statement.setBoolean(5, harOpphoer)
-                    statement.setBoolean(6, harSanksjon)
-                    statement.setBoolean(7, harBosattUtland)
-                    statement.setBoolean(8, harUtlandstilsnitt)
-                    statement.setBoolean(9, harAdressebeskyttelseEllerSkjermet)
-                    statement.setBoolean(10, harAktivitetskrav)
-                    statement.setBoolean(11, harOverstyrtBeregning)
-                    statement.setTidspunkt(12, Tidspunkt.now())
-                    statement.setObject(13, sisteFerdigstilteForbehandling)
+                    statement.setTidspunkt(6, Tidspunkt.now())
+                    statement.setObject(7, sisteFerdigstilteForbehandling)
 
                     statement.executeUpdate().also {
                         krev(it == 1) {
@@ -220,12 +206,6 @@ class EtteroppgjoerDao(
             inntektsaar = getInt("inntektsaar"),
             status = EtteroppgjoerStatus.valueOf(getString("status")),
             harOpphoer = getBoolean("har_opphoer"),
-            harSanksjon = getBoolean("har_sanksjon"),
-            harBosattUtland = getBoolean("har_bosatt_utland"),
-            harUtlandstilsnitt = getBoolean("har_utlandstilsnitt"),
-            harAdressebeskyttelseEllerSkjermet = getBoolean("har_adressebeskyttelse_eller_skjermet"),
-            harAktivitetskrav = getBoolean("har_aktivitetskrav"),
-            harOverstyrtBeregning = getBoolean("har_overstyrt_beregning"),
             sisteFerdigstilteForbehandling = getObject("siste_ferdigstilte_forbehandling")?.let { it as UUID },
         )
 }

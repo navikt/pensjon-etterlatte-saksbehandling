@@ -181,7 +181,6 @@ class ServiceModule(
             forbehandlingDao = daoModule.etteroppgjoerForbehandlingDao,
             vedtakInternalService = vedtakInternalService,
             behandlingService = behandlingService,
-            beregningKlient = klientModule.beregningKlient,
             sigrunKlient = klientModule.sigrunKlient,
             inntektskomponentService = inntektskomponentService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,

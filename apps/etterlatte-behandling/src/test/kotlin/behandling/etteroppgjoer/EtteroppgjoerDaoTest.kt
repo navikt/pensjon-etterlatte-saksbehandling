@@ -16,19 +16,12 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
-import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -189,9 +182,7 @@ class EtteroppgjoerDaoTest(
             sakId shouldBe sakId
             inntektsaar shouldBe inntektsaar
             status shouldBe EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER
-            harSanksjon shouldBe false
             harOpphoer shouldBe false
-            harBosattUtland shouldBe false
         }
 
         etteroppgjoerDao.lagreEtteroppgjoer(
@@ -199,12 +190,6 @@ class EtteroppgjoerDaoTest(
                 sak.id,
                 2024,
                 EtteroppgjoerStatus.UNDER_FORBEHANDLING,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
                 true,
                 uuid,
             ),
@@ -215,13 +200,7 @@ class EtteroppgjoerDaoTest(
             sakId shouldBe sakId
             inntektsaar shouldBe inntektsaar
             status shouldBe EtteroppgjoerStatus.UNDER_FORBEHANDLING
-            harSanksjon shouldBe true
             harOpphoer shouldBe true
-            harBosattUtland shouldBe true
-            harUtlandstilsnitt shouldBe true
-            harAdressebeskyttelseEllerSkjermet shouldBe true
-            harAktivitetskrav shouldBe true
-            harOverstyrtBeregning shouldBe true
         }
     }
 

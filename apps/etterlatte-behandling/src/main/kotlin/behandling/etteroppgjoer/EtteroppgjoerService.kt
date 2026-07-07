@@ -19,10 +19,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveSe
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektBeregning
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -37,7 +34,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.sikkerLogg
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -54,7 +50,6 @@ class EtteroppgjoerService(
     val vedtakInternalService: VedtakInternalService,
     val forbehandlingDao: EtteroppgjoerForbehandlingDao,
     val behandlingService: BehandlingService,
-    val beregningKlient: BeregningKlient,
     val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     val sigrunKlient: SigrunKlient,
     val inntektskomponentService: InntektskomponentService,
@@ -370,29 +365,10 @@ class EtteroppgjoerService(
                 sakId = sakId,
                 inntektsaar = inntektsaar,
                 status = etteroppgjoerStatus,
-                harSanksjon = utledSanksjoner(sisteIverksatteBehandling.id, inntektsaar),
                 harOpphoer = harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed !== null,
-                harBosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
-                harUtlandstilsnitt = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.UTLANDSTILSNITT,
-                harAdressebeskyttelseEllerSkjermet =
-                    sisteIverksatteBehandling.sak.adressebeskyttelse?.harAdressebeskyttelse() == true ||
-                        sisteIverksatteBehandling.sak.erSkjermet == true,
-                harAktivitetskrav =
-                    utledAktivitetskrav(
-                        behandlingId = sisteIverksatteBehandling.id,
-                        sakType = sisteIverksatteBehandling.sak.sakType,
-                        inntektsaar = inntektsaar,
-                    ),
-                harOverstyrtBeregning = utledOverstyrtBeregning(sisteIverksatteBehandling.id),
                 sisteFerdigstilteForbehandling = sisteFerdigstilteForbehandling,
             )
         return etteroppgjoer
-    }
-
-    private suspend fun utledOverstyrtBeregning(behandlingId: UUID): Boolean {
-        val overstyrtBeregningsgrunnlag =
-            beregningKlient.hentOverstyrtBeregning(behandlingId, HardkodaSystembruker.etteroppgjoer)
-        return overstyrtBeregningsgrunnlag != null
     }
 
     private fun haandterSkatteoppgjoerForFerdigstiltEtteroppgjoer(
@@ -458,30 +434,5 @@ class EtteroppgjoerService(
                     "etteroppgjør for ${etteroppgjoer.inntektsaar}. Resultat av etteroppgjør var $resultatType.",
             )
         }
-    }
-
-    private fun utledAktivitetskrav(
-        behandlingId: UUID,
-        sakType: SakType,
-        inntektsaar: Int,
-    ): Boolean {
-        val aktivitetsKravDato = LocalDate.of(inntektsaar, 7, 1)
-        val sisteDoedsdato = behandlingService.hentFoersteDoedsdato(behandlingId, sakType) ?: return false
-        return sisteDoedsdato.isBefore(aktivitetsKravDato)
-    }
-
-    private suspend fun utledSanksjoner(
-        behandlingId: UUID,
-        inntektsaar: Int,
-    ): Boolean {
-        val sanksjoner =
-            beregningKlient.hentSanksjoner(
-                behandlingId,
-                HardkodaSystembruker.etteroppgjoer,
-            )
-
-        return sanksjoner?.any { sanksjon ->
-            sanksjon.fom.year <= inntektsaar && (sanksjon.tom?.year ?: inntektsaar) >= inntektsaar
-        } == true
     }
 }

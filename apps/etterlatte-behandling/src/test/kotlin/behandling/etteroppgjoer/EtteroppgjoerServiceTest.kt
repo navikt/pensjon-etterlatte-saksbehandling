@@ -20,7 +20,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.Summert
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
@@ -64,7 +63,6 @@ class EtteroppgjoerServiceTest {
         val forbehandlingDao: EtteroppgjoerForbehandlingDao = mockk()
         val sigrunKlient: SigrunKlient = mockk()
         val inntektskomponentService: InntektskomponentService = mockk()
-        val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakInternalService: VedtakInternalService = mockk()
         val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = mockk()
@@ -76,7 +74,6 @@ class EtteroppgjoerServiceTest {
                 forbehandlingDao = forbehandlingDao,
                 vedtakInternalService = vedtakInternalService,
                 behandlingService = behandlingService,
-                beregningKlient = beregningKlient,
                 sigrunKlient = sigrunKlient,
                 inntektskomponentService = inntektskomponentService,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
@@ -96,14 +93,6 @@ class EtteroppgjoerServiceTest {
             coEvery { dao.lagreEtteroppgjoer(any()) } returns 1
             every { dao.oppdaterEtteroppgjoerStatus(any(), any(), any()) } returns Unit
             every { dao.oppdaterFerdigstiltForbehandlingId(any(), any(), any()) } returns Unit
-
-            coEvery { beregningKlient.hentSanksjoner(any(), any()) } returns emptyList()
-            coEvery { beregningKlient.hentBeregningsgrunnlag(any(), any()) } returns
-                mockk {
-                    every { institusjonsopphold } returns emptyList()
-                }
-            coEvery { beregningKlient.hentOverstyrtBeregning(any(), any()) } returns mockk()
-            every { behandlingService.hentFoersteDoedsdato(any(), any()) } returns null
             coEvery { vedtakInternalService.hentIverksatteVedtak(any(), any()) } returns
                 listOf(
                     VedtakSammendragDto(
@@ -390,7 +379,6 @@ class EtteroppgjoerServiceTest {
                 sakId = sakId,
                 inntektsaar = 2024,
                 status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                harUtlandstilsnitt = false,
             )
 
         coEvery { ctx.behandlingService.hentBehandling(ctx.sisteIverksatteBehandlingId) } returns
@@ -411,7 +399,6 @@ class EtteroppgjoerServiceTest {
             this.sakId shouldBe ctx.sakId
             this.inntektsaar shouldBe 2024
             this.status shouldBe EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER
-            this.harUtlandstilsnitt shouldBe true
         }
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
     }

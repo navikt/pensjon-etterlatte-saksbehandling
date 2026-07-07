@@ -73,9 +73,9 @@ class SkatteoppgjoerHendelserServiceTest {
         coEvery { etteroppgjoerService.finnInnvilgedeAarForSak(any(), any()) } returns listOf(2024)
 
         coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(2L), 2024) } returns
-            Etteroppgjoer(SakId(2L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
+            Etteroppgjoer(SakId(2L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
         coEvery { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(SakId(3L), 2024) } returns
-            Etteroppgjoer(SakId(3L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER, false, false, false, false)
+            Etteroppgjoer(SakId(3L), 2024, EtteroppgjoerStatus.VENTER_PAA_SKATTEOPPGJOER)
 
         coEvery { dao.lagreKjoering(any()) } returns 1
         coEvery { etteroppgjoerService.haandterSkatteoppgjoerMottatt(any(), any()) } just runs

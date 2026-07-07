@@ -31,19 +31,35 @@ class TidshendelseService(
         )
 
         return when (hendelse.jobbtype) {
-            JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> opprettAktivitetspliktOppgave(hendelse)
-            JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> opprettRevurderingForAktivitetsplikt(hendelse)
-            JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
-            JobbType.OP_BP_FYLT_18 -> opprettOppgaveForBpFylt18Aar(hendelse)
+            JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> {
+                opprettAktivitetspliktOppgave(hendelse)
+            }
 
-            JobbType.AO_BP20, JobbType.AO_BP21, JobbType.AO_OMS67, JobbType.OMS_DOED_3AAR, JobbType.OMS_DOED_5AAR ->
+            JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> {
+                opprettRevurderingForAktivitetsplikt(hendelse)
+            }
+
+            JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> {
+                opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
+            }
+
+            JobbType.OP_BP_FYLT_18 -> {
+                opprettOppgaveForBpFylt18Aar(hendelse)
+            }
+
+            JobbType.AO_BP20, JobbType.AO_BP21, JobbType.AO_OMS67, JobbType.OMS_DOED_3AAR, JobbType.OMS_DOED_5AAR -> {
                 opprettAutomatiskRevurdering(
                     hendelse,
                 )
+            }
 
-            JobbType.OPPDATER_SKJERMING_BP -> oppdaterSkjerming(hendelse)
+            JobbType.OPPDATER_SKJERMING_BP -> {
+                oppdaterSkjerming(hendelse)
+            }
 
-            else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
+            else -> {
+                throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
+            }
         }
     }
 
@@ -142,7 +158,9 @@ class TidshendelseService(
                 TidshendelseResult.OpprettetOppgave(response.oppgaveId!!)
             }
 
-            else -> TidshendelseResult.Skipped
+            else -> {
+                TidshendelseResult.Skipped
+            }
         }
     }
 
@@ -211,17 +229,26 @@ class TidshendelseService(
     private fun oppgaveTypeFor(type: JobbType): OppgaveType =
         when (type) {
             JobbType.AO_BP20 -> REVURDERING
+
             JobbType.AO_BP21 -> REVURDERING
+
             JobbType.AO_OMS67 -> REVURDERING
+
             JobbType.OMS_DOED_3AAR -> REVURDERING
+
             JobbType.OMS_DOED_5AAR -> REVURDERING
+
             JobbType.OMS_DOED_4MND -> AKTIVITETSPLIKT
+
             JobbType.OMS_DOED_10MND -> AKTIVITETSPLIKT_12MND
+
             JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> AKTIVITETSPLIKT_REVURDERING
+
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
+
             JobbType.OP_BP_FYLT_18 -> OppgaveType.OPPFOELGING
+
             JobbType.REGULERING,
-            JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
             JobbType.OPPDATER_SKJERMING_BP,
             JobbType.OPPRETT_ETTEROPPGJOER_FORBEHANDLING,

@@ -72,7 +72,7 @@ class StrukturertBrevService(
             return brev
         }
 
-        val (spraak, sak, innsender, soeker, avdoede, verge, saksbehandlerIdent, attestantIdent) = brevRequest
+        val (spraak, sak, innsender, soeker, avdoede, verge, gjenlevende, saksbehandlerIdent, attestantIdent) = brevRequest
         val brevKode = brevRequest.brevFastInnholdData.brevKode
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)
         val soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, verge)
@@ -106,7 +106,7 @@ class StrukturertBrevService(
                             soeker,
                             avdoede,
                             verge,
-                            emptyList(), // TODO her burde det slenges på hvis BP i requesten..
+                            gjenlevende,
                         ),
                         bruker,
                     ),
@@ -234,7 +234,7 @@ class StrukturertBrevService(
             )
         }
 
-        val (spraak, sak, _, soeker, _, verge, saksbehandlerIdent, attestantIdent, _, brevInnholdData) = brevRequest
+        val (spraak, sak, _, soeker, _, verge, _, saksbehandlerIdent, attestantIdent, _, brevInnholdData) = brevRequest
 
         val brevKode = brevInnholdData.brevKode
         val avsender = utledAvsender(bruker, saksbehandlerIdent, attestantIdent, sak.enhet)

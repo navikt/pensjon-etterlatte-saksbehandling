@@ -97,9 +97,6 @@ class AdresseService(
                 mottakereIPrioritertRekkefoelge.firstOrNull()
                     ?: throw InternfeilException("Dette skal ikke skje, men vi har ingen gyldige mottakere")
             val kopimottakere = mottakereIPrioritertRekkefoelge.drop(1)
-            logger.info(
-                "vergemottaker: $vergeMottaker, gjenlevendemottaker: $gjenlevendeMottaker, innsendermottaker: $innsenderMottaker, soekermottaker: $soekerMottaker",
-            )
             listOf(hovedmottaker.copy(type = MottakerType.HOVED)) + kopimottakere.map { it.copy(type = MottakerType.KOPI) }
         }
 

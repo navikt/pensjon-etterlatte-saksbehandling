@@ -6,7 +6,7 @@ import { hentBeregning } from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { Alert, Box, Button, HStack } from '@navikt/ds-react'
+import { Alert, Box, Button, HStack, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingStatus, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -81,9 +81,11 @@ export const BeregneBP = (props: { behandling: IBehandlingReducer }) => {
   return (
     <>
       {erOpphoer ? (
-        <Box paddingInline="space-72" paddingBlock="space-16">
-          <SimulerUtbetaling behandling={behandling} />
-          <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+        <Box paddingInline="space-64" paddingBlock="space-32 space-0">
+          <VStack gap="space-48">
+            <SimulerUtbetaling behandling={behandling} />
+            <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+          </VStack>
         </Box>
       ) : (
         <>
@@ -94,17 +96,17 @@ export const BeregneBP = (props: { behandling: IBehandlingReducer }) => {
               <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
             ),
             (beregning) => (
-              <Box paddingInline="space-72" paddingBlock="space-16">
-                <>
+              <Box paddingInline="space-64" paddingBlock="space-32 space-0">
+                <VStack gap="space-48">
                   <BarnepensjonSammendrag beregning={beregning} />
                   <SimulerUtbetaling behandling={behandling} />
                   <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
-                </>
-                {manglerBrevutfall && (
-                  <Alert style={{ maxWidth: '16em' }} variant="error">
-                    Du må fylle ut utfall i brev
-                  </Alert>
-                )}
+                  {manglerBrevutfall && (
+                    <Alert style={{ maxWidth: '16em' }} variant="error">
+                      Du må fylle ut utfall i brev
+                    </Alert>
+                  )}
+                </VStack>
               </Box>
             )
           )}

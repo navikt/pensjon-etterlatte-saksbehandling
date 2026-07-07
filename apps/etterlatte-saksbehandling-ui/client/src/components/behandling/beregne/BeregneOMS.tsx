@@ -6,7 +6,7 @@ import { hentBeregning } from '~shared/api/beregning'
 import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { Alert, Box, Button, HStack } from '@navikt/ds-react'
+import { Alert, Box, Button, HStack, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -88,9 +88,11 @@ export const BeregneOMS = () => {
   return (
     <>
       {erOpphoer ? (
-        <Box paddingInline="space-72" paddingBlock="space-16">
-          <SimulerUtbetaling behandling={behandling} />
-          <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+        <Box paddingInline="space-64" paddingBlock="space-32 space-0">
+          <VStack gap="space-48">
+            <SimulerUtbetaling behandling={behandling} />
+            <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+          </VStack>
         </Box>
       ) : (
         <>
@@ -101,20 +103,20 @@ export const BeregneOMS = () => {
               <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
             ),
             (beregning) => (
-              <Box paddingInline="space-72" paddingBlock="space-16">
-                <>
+              <Box paddingInline="space-64" paddingBlock="space-32 space-0">
+                <VStack gap="space-48">
                   <OmstillingsstoenadSammendrag beregning={beregning} />
                   <Avkorting />
-                </>
-                {erAvkortet && <SimulerUtbetaling behandling={behandling} />}
-                {erAvkortet && (
-                  <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
-                )}
-                {manglerBrevutfall && (
-                  <Alert style={{ maxWidth: '16em' }} variant="error">
-                    Du må fylle ut utfall i brev
-                  </Alert>
-                )}
+                  {erAvkortet && <SimulerUtbetaling behandling={behandling} />}
+                  {erAvkortet && (
+                    <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+                  )}
+                  {manglerBrevutfall && (
+                    <Alert style={{ maxWidth: '16em' }} variant="error">
+                      Du må fylle ut utfall i brev
+                    </Alert>
+                  )}
+                </VStack>
               </Box>
             )
           )}

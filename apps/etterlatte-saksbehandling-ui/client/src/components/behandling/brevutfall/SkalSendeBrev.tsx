@@ -1,8 +1,7 @@
-import { Alert, BodyShort, Button, Heading, HStack, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, HStack, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { IBehandlingReducer, oppdaterSendeBrev } from '~store/reducers/BehandlingReducer'
-import styled from 'styled-components'
 import { Controller, useForm } from 'react-hook-form'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -41,59 +40,49 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer; behandlin
   }
 
   return (
-    <SkalSendeBrevContent>
-      <Heading size="small" level="2">
-        Skal sende vedtaksbrev
-      </Heading>
-      {redigere ? (
-        <form onSubmit={handleSubmit(lagreSkalSendeBrev)}>
-          <Controller
-            control={control}
-            name="sendBrev"
-            render={({ field }) => (
-              <RadioGroup legend="" {...field}>
-                <Radio value={true}>Ja</Radio>
-                <Radio value={false}>Nei</Radio>
-              </RadioGroup>
-            )}
-          />
-          {isFailure(skalSendeBrevStatus) && <Alert variant="error">{skalSendeBrevStatus.error.detail}</Alert>}
-          <HStack gap="space-16">
-            <Button type="submit" loading={isPending(skalSendeBrevStatus)} variant="primary" size="small">
-              Lagre
-            </Button>
-            <Button variant="secondary" size="small" onClick={() => setRedigere(false)}>
-              Avbryt
-            </Button>
-          </HStack>
-        </form>
-      ) : (
-        <>
-          <InnholdWrapper>
-            <BodyShort>{behandling.sendeBrev ? 'Ja' : 'Nei'}</BodyShort>
-          </InnholdWrapper>
-          {behandlingRedigerbart && (
-            <Button
-              variant="secondary"
-              icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
-              size="small"
-              onClick={() => setRedigere(true)}
-            >
-              Rediger
-            </Button>
-          )}
-        </>
+    <VStack gap="space-16">
+      <div>
+        <Heading size="small" level="2" spacing>
+          Skal sende vedtaksbrev
+        </Heading>
+        {redigere ? (
+          <form onSubmit={handleSubmit(lagreSkalSendeBrev)}>
+            <Controller
+              control={control}
+              name="sendBrev"
+              render={({ field }) => (
+                <RadioGroup legend="" {...field}>
+                  <Radio value={true}>Ja</Radio>
+                  <Radio value={false}>Nei</Radio>
+                </RadioGroup>
+              )}
+            />
+            {isFailure(skalSendeBrevStatus) && <Alert variant="error">{skalSendeBrevStatus.error.detail}</Alert>}
+            <HStack gap="space-16" marginBlock="space-16 space-0">
+              <Button type="submit" loading={isPending(skalSendeBrevStatus)} variant="primary" size="small">
+                Lagre
+              </Button>
+              <Button variant="secondary" size="small" onClick={() => setRedigere(false)}>
+                Avbryt
+              </Button>
+            </HStack>
+          </form>
+        ) : (
+          <BodyShort>{behandling.sendeBrev ? 'Ja' : 'Nei'}</BodyShort>
+        )}
+      </div>
+      {!redigere && behandlingRedigerbart && (
+        <HStack>
+          <Button
+            variant="secondary"
+            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+            size="small"
+            onClick={() => setRedigere(true)}
+          >
+            Rediger
+          </Button>
+        </HStack>
       )}
-    </SkalSendeBrevContent>
+    </VStack>
   )
 }
-
-const SkalSendeBrevContent = styled.div`
-  margin-top: 4em;
-  margin-bottom: 2em;
-  max-width: 500px;
-`
-const InnholdWrapper = styled.div`
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-`

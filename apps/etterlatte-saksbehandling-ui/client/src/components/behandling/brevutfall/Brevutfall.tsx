@@ -1,5 +1,4 @@
-import styled from 'styled-components'
-import { Alert, BodyLong, Heading } from '@navikt/ds-react'
+import { Alert, BodyLong, Heading, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevutfallOgEtterbetalingApi } from '~shared/api/behandling'
@@ -110,58 +109,51 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
   const erIkkeFoerstegangsbehandling = behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   return behandling.sendeBrev ? (
-    <BrevutfallContent id="brevutfall">
+    <VStack gap="space-48" maxWidth="500px" id="brevutfall">
       {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />}
-      <Heading level="2" size="small" spacing>
-        Valg av utfall i brev
-      </Heading>
-      <BodyLong spacing>
-        Velg hvilke utfall som gjelder i saken for å få riktig informasjon i brevet. Valgene du gjør under har bare
-        betydning for hvilken tekst som kommer i brevet.
-      </BodyLong>
+      <div>
+        <Heading level="2" size="small" spacing>
+          Valg av utfall i brev
+        </Heading>
+        <BodyLong spacing>
+          Velg hvilke utfall som gjelder i saken for å få riktig informasjon i brevet. Valgene du gjør under har bare
+          betydning for hvilken tekst som kommer i brevet.
+        </BodyLong>
 
-      <MapApiResult
-        result={hentBrevutfallOgEtterbetalingResult}
-        mapInitialOrPending={<Spinner label="Henter brevutfall .." />}
-        mapError={(apiError) => <Alert variant="error">{apiError.detail}</Alert>}
-        mapSuccess={() =>
-          visSkjema ? (
-            <BrevutfallSkjema
-              behandlingErOpphoer={behandlingErOpphoer}
-              resetBrevutfallvalidering={props.resetBrevutfallvalidering}
-              behandling={behandling}
-              brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
-              setBrevutfallOgEtterbetaling={setBrevutfallOgEtterbetaling}
-              setVisSkjema={setVisSkjema}
-              onAvbryt={hentBrevutfall}
-            />
-          ) : (
-            <BrevutfallVisning
-              behandlingErOpphoer={behandlingErOpphoer}
-              redigerbar={redigerbar}
-              brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
-              sakType={behandling.sakType}
-              setVisSkjema={setVisSkjema}
-            />
-          )
-        }
-      />
-    </BrevutfallContent>
+        <MapApiResult
+          result={hentBrevutfallOgEtterbetalingResult}
+          mapInitialOrPending={<Spinner label="Henter brevutfall .." />}
+          mapError={(apiError) => <Alert variant="error">{apiError.detail}</Alert>}
+          mapSuccess={() =>
+            visSkjema ? (
+              <BrevutfallSkjema
+                behandlingErOpphoer={behandlingErOpphoer}
+                resetBrevutfallvalidering={props.resetBrevutfallvalidering}
+                behandling={behandling}
+                brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
+                setBrevutfallOgEtterbetaling={setBrevutfallOgEtterbetaling}
+                setVisSkjema={setVisSkjema}
+                onAvbryt={hentBrevutfall}
+              />
+            ) : (
+              <BrevutfallVisning
+                behandlingErOpphoer={behandlingErOpphoer}
+                redigerbar={redigerbar}
+                brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
+                sakType={behandling.sakType}
+                setVisSkjema={setVisSkjema}
+              />
+            )
+          }
+        />
+      </div>
+    </VStack>
   ) : (
-    <>
+    <VStack gap="space-48" maxWidth="500px">
       {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />}
-      <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
-    </>
+      <Alert variant="info" style={{ maxWidth: 'fit-content' }}>
+        Det sendes ikke vedtaksbrev for denne behandlingen.
+      </Alert>
+    </VStack>
   )
 }
-
-const BrevutfallContent = styled.div`
-  margin-top: 4rem;
-  margin-bottom: 4rem;
-  max-width: 500px;
-`
-const InfoAlert = styled(Alert)`
-  margin-top: 2rem;
-  margin-bottom: 4rem;
-  max-width: fit-content;
-`

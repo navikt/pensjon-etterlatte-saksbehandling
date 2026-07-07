@@ -1,4 +1,4 @@
-import { Box, Heading, Label, Table } from '@navikt/ds-react'
+import { BodyShort, Box, Heading, Label, Table } from '@navikt/ds-react'
 import { compareDesc } from 'date-fns'
 import { SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato'
@@ -77,10 +77,10 @@ export const UtbetalingTable = ({ tittel, perioder }: { tittel: string; perioder
   } else {
     return (
       <Box maxWidth="70rem">
-        <Heading level="3" size="xsmall">
+        <Heading level="3" size="xsmall" spacing>
           {tittel}
         </Heading>
-        <p>Ingen perioder</p>
+        <BodyShort textColor="subtle">Ingen perioder</BodyShort>
       </Box>
     )
   }

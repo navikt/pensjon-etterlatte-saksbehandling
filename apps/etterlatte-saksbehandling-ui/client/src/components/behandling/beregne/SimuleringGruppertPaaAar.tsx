@@ -1,4 +1,4 @@
-import { Accordion, Box, Heading, Table, VStack } from '@navikt/ds-react'
+import { Box, Heading, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { getYear } from 'date-fns'
 import { CSSProperties, ReactNode } from 'react'
 import { SimulertBeregning, SimulertBeregningsperiode } from '~shared/types/Utbetaling'
@@ -93,19 +93,12 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
               )}
             </VStack>
           </Box>
-          <Box maxWidth="1000px">
-            <Accordion size="small">
-              <Accordion.Item>
-                <Accordion.Header>Se detaljer om simulering i {aar.aarstall}</Accordion.Header>
-                <Accordion.Content>
-                  <VStack gap="space-20">
-                    <UtbetalingTable tittel={`Etterbetaling ${aar.aarstall}`} perioder={aar.etterbetaling} />
-                    <UtbetalingTable tittel={`Tilbakekreving ${aar.aarstall}`} perioder={aar.tilbakekreving} />
-                  </VStack>
-                </Accordion.Content>
-              </Accordion.Item>
-            </Accordion>
-          </Box>
+          <ReadMore header={`Se detaljer om simulering i ${aar.aarstall}`} size="small">
+            <VStack gap="space-20">
+              <UtbetalingTable tittel={`Etterbetaling ${aar.aarstall}`} perioder={aar.etterbetaling} />
+              <UtbetalingTable tittel={`Tilbakekreving ${aar.aarstall}`} perioder={aar.tilbakekreving} />
+            </VStack>
+          </ReadMore>
         </Box>
       ))}
       {aarMedPerioder.length > 1 && (

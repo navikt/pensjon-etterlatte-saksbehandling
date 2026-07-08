@@ -371,7 +371,6 @@ class EtteroppgjoerService(
                 inntektsaar = inntektsaar,
                 status = etteroppgjoerStatus,
                 harSanksjon = utledSanksjoner(sisteIverksatteBehandling.id, inntektsaar),
-                harInstitusjonsopphold = utledInstitusjonsopphold(sisteIverksatteBehandling.id, inntektsaar),
                 harOpphoer = harVedtakAvTypeOpphoer || sisteIverksatteBehandling.opphoerFraOgMed !== null,
                 harBosattUtland = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
                 harUtlandstilsnitt = sisteIverksatteBehandling.utlandstilknytning?.type == UtlandstilknytningType.UTLANDSTILSNITT,
@@ -484,23 +483,5 @@ class EtteroppgjoerService(
         return sanksjoner?.any { sanksjon ->
             sanksjon.fom.year <= inntektsaar && (sanksjon.tom?.year ?: inntektsaar) >= inntektsaar
         } == true
-    }
-
-    private suspend fun utledInstitusjonsopphold(
-        behandlingId: UUID,
-        inntektsaar: Int,
-    ): Boolean {
-        val beregningsGrunnlag =
-            try {
-                beregningKlient.hentBeregningsgrunnlag(behandlingId, HardkodaSystembruker.etteroppgjoer)
-            } catch (e: Exception) {
-                logger.warn(
-                    "Behandling ($behandlingId) har ikke beregningsgrunnlag. Kan returnere false da harInstitusjonsopphold på Etteroppgjør ikke lenger er i bruk.", e
-                )
-                return false
-            }
-        return beregningsGrunnlag.institusjonsopphold.any {
-            it.fom.year <= inntektsaar && (it.tom?.year ?: inntektsaar) >= inntektsaar
-        }
     }
 }

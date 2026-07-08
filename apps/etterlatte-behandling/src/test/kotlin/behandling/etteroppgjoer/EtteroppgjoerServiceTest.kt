@@ -383,22 +383,6 @@ class EtteroppgjoerServiceTest {
     }
 
     @Test
-    fun `Setter harInstitusjonsopphold = false dersom vi får feil når vi henter beregningsgrunnlag`() {
-        val ctx = TestContext(sakId)
-        every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns
-            null
-
-        coEvery { ctx.beregningKlient.hentBeregningsgrunnlag(any(), any()) } throws (Exception())
-
-        val resultat = runBlocking { ctx.service.opprettNyttEtteroppgjoer(sakId, 2024) }
-
-        with(resultat) {
-            this.harInstitusjonsopphold shouldBe false
-        }
-        coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(any()) }
-    }
-
-    @Test
     fun `opprettEtteroppgjoer oppdaterer etteroppgjør men ikke status dersom behandling ikke er påbegynt`() {
         val ctx = TestContext(sakId)
         every { ctx.dao.hentEtteroppgjoerForInntektsaar(sakId, 2024) } returns

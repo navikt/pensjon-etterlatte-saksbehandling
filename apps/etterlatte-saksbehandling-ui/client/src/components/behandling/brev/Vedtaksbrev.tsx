@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Box, Heading, HStack, Label, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, HStack, InfoCard, Label, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -13,7 +13,7 @@ import {
 import { IBehandlingStatus, IDetaljertBehandling, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
-import { BrevProsessType, IBrev } from '~shared/types/Brev'
+import { BrevProsessType, Brevtype, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
@@ -36,6 +36,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { formaterDato } from '~utils/formatering/dato'
+import { SakType } from '~shared/types/sak'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -52,6 +54,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev>()
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
   const [visAdvarselIngenAvdoede, setVisAdvarselIngenAvdoede] = useState(false)
+  const [visAdvarselMaaTilbakestilles, setVisAdvarselMaaTilbakestilles] = useState(false)
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentBrevTilBehandling)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettBrevTilBehandling)
@@ -66,6 +69,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = useBehandling()
   const personopplysninger = usePersonopplysninger()
   const [tilbakestilt, setTilbakestilt] = useState(false)
+  const advarselTilbakestillBrevEnabled = useFeaturetoggle(FeatureToggle.vis_tilbakestill_oms_brev_pga_malendring)
 
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
     if (!redigerbar) {
@@ -73,6 +77,18 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     }
     const hendelse = sisteBehandlingHendelse(hendelser)
     return new Date(hendelse.opprettet).getTime() > new Date(vedtaksbrev.statusEndret).getTime()
+  }
+
+  const omsBrevOpprettetFoerRedigerbarTekstEndring = (vedtaksbrev: IBrev, behandling: IDetaljertBehandling) => {
+    if (!redigerbar) {
+      return false
+    }
+    return (
+      advarselTilbakestillBrevEnabled &&
+      behandling.sakType === SakType.OMSTILLINGSSTOENAD &&
+      vedtaksbrev.brevtype === Brevtype.VEDTAK &&
+      new Date(vedtaksbrev.opprettet).getTime() < new Date(2026, 6, 1, 0, 0, 0).getTime()
+    )
   }
 
   const lukkAdvarselBehandlingEndret = () => {
@@ -88,6 +104,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           dispatch(oppdaterDetaljertBehandling(behandling))
           setVisAdvarselBehandlingEndret(behandlingRedigertEtterOpprettetBrev(vedtaksbrev, behandling.hendelser))
           setVisAdvarselIngenAvdoede(redigerbar && personopplysninger?.avdoede.length === 0)
+          setVisAdvarselMaaTilbakestilles(omsBrevOpprettetFoerRedigerbarTekstEndring(vedtaksbrev, behandling))
         },
         () => dispatch(resetBehandling())
       )
@@ -186,6 +203,31 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles
                 for å få oppdaterte verdier fra behandlingen.
               </Alert>
+            )}
+
+            {visAdvarselMaaTilbakestilles && (
+              <InfoCard data-color="warning">
+                <InfoCard.Header>
+                  <InfoCard.Title>Vurder å tilbakestille brevet!</InfoCard.Title>
+                </InfoCard.Header>
+                <InfoCard.Content>
+                  <BodyShort spacing>
+                    Avsnittet «Inntekten din» i beregningsvedlegget er nå fullt ut redigerbart. For å ta i bruk
+                    endringen må brevet først tilbakestilles.
+                  </BodyShort>
+                  <BodyShort spacing>
+                    Tekst som tidligere var fast, skal kun endres dersom det er behov for å legge inn informasjon om
+                    flere perioder. Du kan også legge til tekst tilpasset brukerens situasjon under dette avsnittet.
+                  </BodyShort>
+                  <BodyShort spacing>
+                    Hvis du allerede har lagt inn tekst, må du kopiere denne før du tilbakestiller brevet. Deretter
+                    legger du inn teksten på nytt.
+                  </BodyShort>
+                  <BodyShort spacing>
+                    Har du allerede tilbakestilt brevet etter endringen i Gjenny, kan du se bort fra denne meldingen.
+                  </BodyShort>
+                </InfoCard.Content>
+              </InfoCard>
             )}
 
             {visAdvarselIngenAvdoede && (

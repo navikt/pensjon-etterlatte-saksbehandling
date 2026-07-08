@@ -9,7 +9,6 @@ data class Etteroppgjoer(
     val inntektsaar: Int,
     val status: EtteroppgjoerStatus,
     val harSanksjon: Boolean = false,
-    val harInstitusjonsopphold: Boolean = false,
     val harOpphoer: Boolean = false,
     val harAdressebeskyttelseEllerSkjermet: Boolean = false,
     val harAktivitetskrav: Boolean = false,

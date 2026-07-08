@@ -61,6 +61,15 @@
 **2026-06-12 — Implementasjon vs. test-kontrakten**
 - Observation: Ny implementasjon konsoliderte to `hentGrunnlag`-kall til ett, men testene forventet `exactly = 2`. Dette var en korrekt forbedring, men det krevde oppdatering av testpåstander som ikke var åpenbare i forkant.
 - Action: Ved refaktorering fra HTTP-klient til intern service: tell forventede kall i den NYE impl., ikke den gamle. Den nye kan optimalisere (f.eks. cache grunnlag lokalt i scope) — sjekk om `exactly = N` i testene reflekterer ny eller gammel oppførsel.
+
+**2026-06-15 — Feilsøking / valideringslogikk**
+- Observation: Jeg gikk mange runder med å spore hele avkortingsflyten manuelt uten å zoome inn på den konkrete feilmeldingen brukeren ville fått. Det hadde spart mange iterasjoner å se etter `throw`-statements i valideringslogikken med en gang.
+- Action: Ved feilsøking av valideringsfeil: finn alle `throw`-statements i den relevante koden først, og sjekk hvilke betingelser som trigger dem for scenariet brukeren beskriver — ikke spor hele flyten line-by-line fra topp til bunn.
+
+**2026-06-15 — Feilsøking / loopstopp**
+- Observation: Jeg fortsatte å lese kode i loop uten å gjenskape feilen — og kjente igjen at jeg ikke klarte å finne rotårsaken, men fortsatte likevel i stedet for å stoppe og spørre.
+- Action: Hvis samme problem er undersøkt 3+ ganger uten at feilen er gjenskapt eller rootcause funnet: bryt ut, oppsummer hva som er utelukket, og spør brukeren om mer kontekst (eksakt feilmelding, steg for å reprodusere, logg-output).
+
 **2026-06-17 — REST-databaselag med toggle**
 - Observation: Toggle-logikk for kilde-valg hørte hjemme på wiring-nivå (ServiceModule), ikke spredt som sjekker i service-metodene. Når servicen alltid "oppfører seg", og korrekt implementasjon er injisert via interface, trengs ingen toggle-sjekk i logikken.
 - Action: Flytt toggle-logikk til komposeringsnivå (ApplicationContext/ServiceModule). Serviceklasser skal aldri sjekke toggles for å velge datakilde – det er DI sin jobb.
@@ -68,3 +77,7 @@
 **2026-06-22 — Transaksjonskontext ved intern migrering**
 - Observation: Brute-force lesing av kode for å finne logikkforskjeller – uten å trace infrastruktur-forutsetningene – kostet mange omganger. Feilen lå ikke i forretningslogikken, men i at `ConnectionAutoclosing.hentConnection` krever en åpen transaksjon når `Kontekst` er satt, og den nye route-laget manglet `inTransaction`.
 - Action: Ved migrering av logikk fra en app til en annen – sjekk infrastruktur-kontrakten (transaksjonsoppsett, Kontekst, DB-tilkoblingsmønster) like grundig som forretningslogikken. Finn tidlig "hvem setter opp DB-konteksten i den nye appen?"
+
+**2026-07-03 — Flyway-migrasjonsnummerering**
+- Observation: Jeg valgte neste Flyway-versjonsnummer ved kun å se på `src/main/resources/db/migration/`, og overså at appen også har `db/prod/`, `db/dev/` og `db/gcp/` med egne nummererte filer i samme sekvens. Det ga et versjonskollisjon (`V348` fantes allerede i `prod/`).
+- Action: Før du navngir en ny Flyway-migrasjon: finn høyeste versjonsnummer på tvers av ALLE undermapper under `src/main/resources/db/` for den aktuelle appen (ikke bare `migration/`), og velg neste ledige nummer basert på det.

@@ -49,58 +49,75 @@ class BehandlingKlient(
             val body =
                 try {
                     when (klageHendelse.type) {
-                        BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET ->
+                        BehandlingEventType.GJENOPPTAKSBEHANDLING_AVSLUTTET -> {
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
                                 krevIkkeNull(klageHendelse.detaljer.klagebehandlingAvsluttet) {
                                     "Detaljer på klage mangler"
                                 }.utfall.tilResultat(),
                             )
+                        }
+
+                        BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET -> {
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                krevIkkeNull(klageHendelse.detaljer.klagebehandlingAvsluttet) {
+                                    "Detaljer på klage mangler"
+                                }.utfall.tilResultat(),
+                            )
+                        }
 
                         // TODO: Se på hvordan vi håndterer anke -- det burde nok sette et eget flagg
                         //  og ikke overstyre første status
-                        BehandlingEventType.ANKEBEHANDLING_OPPRETTET ->
+                        BehandlingEventType.ANKEBEHANDLING_OPPRETTET -> {
                             Kabalrespons(
                                 KabalStatus.OPPRETTET,
                                 BehandlingResultat.IKKE_SATT,
                             )
+                        }
 
-                        BehandlingEventType.ANKEBEHANDLING_AVSLUTTET ->
+                        BehandlingEventType.ANKEBEHANDLING_AVSLUTTET -> {
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
                                 krevIkkeNull(klageHendelse.detaljer.ankebehandlingAvsluttet) {
                                     "Detailjer på avsluttet anke mangler"
                                 }.utfall.tilResultat(),
                             )
+                        }
 
-                        BehandlingEventType.ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET ->
+                        BehandlingEventType.ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET -> {
                             Kabalrespons(
                                 KabalStatus.OPPRETTET,
                                 krevIkkeNull(klageHendelse.detaljer.ankeITrygderettenbehandlingOpprettet) {
                                     "Detaljer på anke i trygderetten mangler"
                                 }.utfall?.tilResultat() ?: BehandlingResultat.IKKE_SATT,
                             )
+                        }
 
-                        BehandlingEventType.BEHANDLING_FEILREGISTRERT ->
+                        BehandlingEventType.BEHANDLING_FEILREGISTRERT -> {
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
                                 BehandlingResultat.HENLAGT,
                             )
+                        }
 
-                        BehandlingEventType.BEHANDLING_ETTER_TRYGDERETTEN_OPPHEVET_AVSLUTTET ->
+                        BehandlingEventType.BEHANDLING_ETTER_TRYGDERETTEN_OPPHEVET_AVSLUTTET -> {
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
                                 krevIkkeNull(klageHendelse.detaljer.klagebehandlingAvsluttet) {
                                     "Detaljer på avsluttet klagebehandling mangler"
                                 }.utfall.tilResultat(),
                             )
-                        BehandlingEventType.OMGJOERINGSKRAVBEHANDLING_AVSLUTTET ->
+                        }
+
+                        BehandlingEventType.OMGJOERINGSKRAVBEHANDLING_AVSLUTTET -> {
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
                                 krevIkkeNull(klageHendelse.detaljer.klagebehandlingAvsluttet) {
                                     "Detaljer på avsluttet klagebehandling mangler"
                                 }.utfall.tilResultat(),
                             )
+                        }
                     }
                 } catch (e: Exception) {
                     logger.error("Kunne ikke mappe ut kabalresponsen riktig. Hendelsen er logget til sikkerlogg")

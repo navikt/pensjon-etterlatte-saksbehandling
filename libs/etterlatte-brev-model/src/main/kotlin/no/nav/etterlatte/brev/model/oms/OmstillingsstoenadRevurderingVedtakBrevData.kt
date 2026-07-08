@@ -48,14 +48,14 @@ object OmstillingsstoenadRevurderingVedtakBrevData {
                         innhold =
                             innhold()
                                 .singleOrNull { it.key == BrevVedleggKey.OMS_BEREGNING }
-                                ?.let { it.payload!!.elements }
+                                ?.let { it.payload.elements }
                                 ?: emptyList(),
                     ),
                 innholdForhaandsvarsel =
                     innhold()
                         .takeIf { feilutbetaling == FeilutbetalingType.FEILUTBETALING_MED_VARSEL }
                         ?.single { it.key == BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING }
-                        ?.let { it.payload!!.elements }
+                        ?.let { it.payload.elements }
                         ?: emptyList(),
             )
 
@@ -100,7 +100,7 @@ object OmstillingsstoenadRevurderingVedtakBrevData {
                             innhold()
                                 .single {
                                     it.key == BrevVedleggKey.OMS_BEREGNING
-                                }.payload!!
+                                }.payload
                                 .elements,
                     ),
             )
@@ -129,7 +129,7 @@ object OmstillingsstoenadRevurderingVedtakBrevData {
                     innhold()
                         .takeIf { feilutbetaling == FeilutbetalingType.FEILUTBETALING_MED_VARSEL }
                         ?.single { it.key == BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING }
-                        ?.let { it.payload!!.elements }
+                        ?.let { it.payload.elements }
                         ?: emptyList(),
             )
     }

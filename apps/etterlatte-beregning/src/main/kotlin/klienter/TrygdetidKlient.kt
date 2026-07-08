@@ -23,13 +23,16 @@ class TrygdetidKlientException(
 class TrygdetidKlient(
     config: Config,
     httpClient: HttpClient,
+    brukBehandlingForTrygdetid: Boolean,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("trygdetid.client.id")
-    private val resourceUrl = config.getString("trygdetid.resource.url")
+    private val clientId =
+        if (brukBehandlingForTrygdetid) config.getString("behandling.client.id") else config.getString("trygdetid.client.id")
+    private val resourceUrl =
+        if (brukBehandlingForTrygdetid) config.getString("behandling.resource.url") else config.getString("trygdetid.resource.url")
 
     suspend fun hentTrygdetid(
         behandlingId: UUID,
@@ -53,7 +56,10 @@ class TrygdetidKlient(
                 )
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw TrygdetidKlientException(
                         "Klarte ikke hente trygdetid for behandling med behandlingId=$behandlingId",

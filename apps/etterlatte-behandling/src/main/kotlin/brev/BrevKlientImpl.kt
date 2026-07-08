@@ -261,16 +261,3 @@ class BrevKlientImpl(
                 failure = { errorResponse -> throw errorResponse },
             )
 }
-
-// TODO Finnes nå i etterlatte-behandling og brev-api - bør ligge i en lib men er ikke helt landet hvilket lib
-// som bør brukes mellom behandling og brev
-data class BrevPayload(
-    val hoveddel: Slate?,
-    val vedlegg: List<BrevInnholdVedlegg>?,
-)
-
-data class BrevInnholdVedlegg(
-    val tittel: String,
-    val key: BrevVedleggKey,
-    val payload: Slate? = null,
-)

@@ -29,7 +29,7 @@ spec:
             envVarPrefix: DB
         flags:
           - name: cloudsql.enable_pgaudit
-            value: "true"
+            value: "false"
           - name: pgaudit.log
             value: 'write,ddl,role'
           - name: pgaudit.log_parameter
@@ -238,3 +238,4 @@ spec:
         - application: etterlatte-brev-kafka
         - application: etterlatte-utbetaling
         - application: etterlatte-api
+        - application: etterlatte-trygdetid-kafka

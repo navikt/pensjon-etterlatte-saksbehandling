@@ -24,10 +24,7 @@ import java.time.LocalDate
 
 internal data class OmstillingsstoenadVedtaksbrevGrunnlag(
     val virkningsdato: LocalDate,
-    val avkortingsinfo: Avkortingsinfo,
-    val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
     val alleLand: List<LandDto>,
-    val trygdetid: List<TrygdetidDto>,
     val sak: Sak,
     val grunnlag: Grunnlag,
     val avdoede: List<Avdoed>,
@@ -35,6 +32,8 @@ internal data class OmstillingsstoenadVedtaksbrevGrunnlag(
     val klage: Klage?,
     val etterbetaling: EtterbetalingDTO?,
     val brevutfall: BrevutfallDto,
+    val saksbehandlerIdent: String,
+    val attestantIdent: String?,
 ) {
     fun innsender(): Innsender? = grunnlag.mapInnsender()
 
@@ -51,3 +50,9 @@ internal data class OmstillingsstoenadVedtaksbrevGrunnlag(
                 ?.let(FeilutbetalingType::fromFeilutbetalingValg),
         ) { "Feilutbetaling mangler i brevutfall" }
 }
+
+internal data class OmstillingsstoenadVedtaksbrevGrunnlagForLoependeYtelse(
+    val avkortingsinfo: Avkortingsinfo,
+    val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
+    val trygdetid: TrygdetidDto,
+)

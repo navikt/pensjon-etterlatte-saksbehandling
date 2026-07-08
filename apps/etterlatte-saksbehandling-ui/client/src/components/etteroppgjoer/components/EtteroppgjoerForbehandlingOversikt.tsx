@@ -32,6 +32,7 @@ import AvbrytBehandling from '~components/behandling/handlinger/AvbrytBehandling
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import Spinner from '~shared/Spinner'
 import { SammendragAvSkjemaFeil } from '~shared/sammendragAvSkjemaFeil/SammendragAvSkjemaFeil'
+import InfoOppgaveOmgjoering from '~components/etteroppgjoer/components/InfoOppgaveOmgjoering'
 
 export enum EtteroppgjoerKontekstType {
   FORBEHANDLING = 'FORBEHANDLING',
@@ -199,6 +200,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         <VStack gap="space-16">
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
+          {forbehandling.klageOmgjoering && <InfoOppgaveOmgjoering />}
         </VStack>
       )}
       <Box maxWidth="42.5rem">

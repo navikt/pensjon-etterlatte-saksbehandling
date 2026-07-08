@@ -77,3 +77,7 @@
 **2026-06-22 — Transaksjonskontext ved intern migrering**
 - Observation: Brute-force lesing av kode for å finne logikkforskjeller – uten å trace infrastruktur-forutsetningene – kostet mange omganger. Feilen lå ikke i forretningslogikken, men i at `ConnectionAutoclosing.hentConnection` krever en åpen transaksjon når `Kontekst` er satt, og den nye route-laget manglet `inTransaction`.
 - Action: Ved migrering av logikk fra en app til en annen – sjekk infrastruktur-kontrakten (transaksjonsoppsett, Kontekst, DB-tilkoblingsmønster) like grundig som forretningslogikken. Finn tidlig "hvem setter opp DB-konteksten i den nye appen?"
+
+**2026-07-03 — Flyway-migrasjonsnummerering**
+- Observation: Jeg valgte neste Flyway-versjonsnummer ved kun å se på `src/main/resources/db/migration/`, og overså at appen også har `db/prod/`, `db/dev/` og `db/gcp/` med egne nummererte filer i samme sekvens. Det ga et versjonskollisjon (`V348` fantes allerede i `prod/`).
+- Action: Før du navngir en ny Flyway-migrasjon: finn høyeste versjonsnummer på tvers av ALLE undermapper under `src/main/resources/db/` for den aktuelle appen (ikke bare `migration/`), og velg neste ledige nummer basert på det.

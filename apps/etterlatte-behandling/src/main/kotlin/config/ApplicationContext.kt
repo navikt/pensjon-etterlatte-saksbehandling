@@ -222,6 +222,7 @@ internal class ApplicationContext(
     val oppdaterSkatteoppgjoerIkkeMottattJob get() = jobModule.oppdaterSkatteoppgjoerIkkeMottattJob
     val etteroppgjoerSvarfristUtloeptJob get() = jobModule.etteroppgjoerSvarfristUtloeptJob
     val sjekkAdressebeskyttelseJob get() = jobModule.sjekkAdressebeskyttelseJob
+    val hengendeBehandlingJob get() = jobModule.hengendeBehandlingJob
     val lesSkatteoppgjoerHendelserJob get() = jobModule.lesSkatteoppgjoerHendelserJob
     val outboxJob get() = jobModule.outboxJob
 

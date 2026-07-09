@@ -184,7 +184,7 @@ spec:
     - name: BRUK_INTERN_TRYGDETID
       value: "true"
     - name: BRUK_EGEN_DATABASE_FOR_TRYGDETID
-      value: "false"
+      value: "true"
 
   envFrom:
     - secret: my-application-unleash-api-token

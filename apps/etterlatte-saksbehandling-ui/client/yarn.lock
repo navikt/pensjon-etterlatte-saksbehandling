@@ -281,32 +281,32 @@
   dependencies:
     "@tybys/wasm-util" "^0.10.3"
 
-"@navikt/aksel-icons@^8.10.2", "@navikt/aksel-icons@^8.11.1":
-  version "8.11.1"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-8.11.1.tgz#3e09f9941a2cb819aaa2fe83771ab061b0a13456"
-  integrity sha512-hXvm/5T8s7fcSlZpg2RWrs870PkH2SeCSQBMmDgI4rm+t5gsw+nDa4qOSCrQQJLiNjMx3jbCO10rL4po9QtfdQ==
+"@navikt/aksel-icons@^8.14.0":
+  version "8.14.0"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-8.14.0.tgz#1932d98875d11b80f9c2e443f8db04855cd8ac27"
+  integrity sha512-jFBjGMgA2WuAxB4nBzDcF8vf5pkT+OZiCsCZH5D84G/Fk8Os6iUuj1Is0XpMqObNTjI11s+PtQt9Lp/85qB5vw==
 
-"@navikt/ds-css@~8.11.1":
-  version "8.11.1"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-8.11.1.tgz#d2edadc20c615f882b95093aea06cdb5960fadd8"
-  integrity sha512-fOJ3j4oMkPjS2r1DUIpIDBklUM+XU42fN4b0GcqtAUanB9hJoAIw7Pr2pvR+dF8RCGsPTabX9uGW5mIRm6fPVw==
+"@navikt/ds-css@~8.14.0":
+  version "8.14.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-8.14.0.tgz#fb120945cda0247ea4c56535066d21c5c818bfdb"
+  integrity sha512-KQDrW8P798nN3R6NoUHKpSbGxfQBK3Dpr63C8WAV0uiWl3CdNTirNfFQUtYI5Lccss4CEMhciDJjv28ZomrefQ==
 
-"@navikt/ds-react@~8.11.1":
-  version "8.11.1"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-8.11.1.tgz#ca7cc25e52c58a890ff5a721238a991b8a4a071e"
-  integrity sha512-KnJmlKuGxN1+EQ85WxbQBphlYfeG27D061N804otrSnBTAzMM3TVtXI9NAr3IYf++lgPr5c4UPge0nOSuG3zvA==
+"@navikt/ds-react@~8.14.0":
+  version "8.14.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-8.14.0.tgz#ba6fdf912f3dc28b111a9a97290bd44ed16849c2"
+  integrity sha512-5aBBf2lhOqb5AV6S7udx7O6vB6PlhDx5vBj37zC12a90HrCIhK8Bu36e2R/1TyM9J93blwEzcOTNVaxU3zUbEA==
   dependencies:
     "@floating-ui/react" "0.27.19"
     "@floating-ui/react-dom" "^2.1.8"
-    "@navikt/aksel-icons" "^8.11.1"
-    "@navikt/ds-tokens" "^8.11.1"
+    "@navikt/aksel-icons" "^8.14.0"
+    "@navikt/ds-tokens" "^8.14.0"
     date-fns "^4.0.0"
     react-day-picker "9.14.0"
 
-"@navikt/ds-tokens@^8.11.1", "@navikt/ds-tokens@~8.11.1":
-  version "8.11.1"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-8.11.1.tgz#15883c8c993965a47c8e12dcf588687095a70a4e"
-  integrity sha512-jsPer8drVa+TxqdfHHanZVrsUNjowx+3ZcXQ7/+Nb3q81FTnrXmpvV2VeN7TTzSToWdX5/6oGH9LzrSyiN5UGw==
+"@navikt/ds-tokens@^8.14.0", "@navikt/ds-tokens@~8.14.0":
+  version "8.14.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-8.14.0.tgz#0ffa6e54267bba9400b9f4cb306961244e2b6694"
+  integrity sha512-OsGQ2wVfQSD5SPIBu4/4eRoOFohTGgtf2jGy5sn7l493d/ZdWCCndaL4Ww01FWDNLH6FG1ZUSCc85MhLdGOX1w==
 
 "@npmcli/agent@^4.0.0":
   version "4.0.2"

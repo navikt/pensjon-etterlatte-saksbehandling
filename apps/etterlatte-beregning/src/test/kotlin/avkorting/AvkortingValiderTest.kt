@@ -75,6 +75,7 @@ class AvkortingValiderTest {
             listOf(inntektMedFratrekk),
             emptyList(),
             true,
+            null,
             naa = YearMonth.of(2024, 12),
         )
     }
@@ -109,6 +110,7 @@ class AvkortingValiderTest {
                 listOf(inntektMedFratrekk),
                 emptyList(),
                 true,
+                null,
                 naa = fom,
             )
         }
@@ -155,6 +157,7 @@ class AvkortingValiderTest {
             listOf(inntektMedFratrekk),
             emptyList(),
             true,
+            null,
             naa = fom,
         )
     }
@@ -198,6 +201,7 @@ class AvkortingValiderTest {
                 listOf(inntektMedFratrekk),
                 emptyList(),
                 true,
+                null,
                 naa = fom,
             )
         }
@@ -246,6 +250,7 @@ class AvkortingValiderTest {
             listOf(inntektMedFratrekk),
             emptyList(),
             true,
+            null,
             naa = YearMonth.of(2024, 6),
         )
     }
@@ -269,6 +274,7 @@ class AvkortingValiderTest {
                 listOf(utenFratrekk),
                 emptyList(),
                 true,
+                null,
                 naa = YearMonth.of(2024, 3),
             )
 
@@ -286,6 +292,7 @@ class AvkortingValiderTest {
                     listOf(inntektMedFratrekk),
                     emptyList(),
                     true,
+                    null,
                     naa = YearMonth.of(2024, 3),
                 )
             }
@@ -305,6 +312,7 @@ class AvkortingValiderTest {
                     listOf(inntektMedFratrekkUtland),
                     emptyList(),
                     true,
+                    null,
                     naa = YearMonth.of(2024, 3),
                 )
             }
@@ -337,6 +345,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(utenFratrekk),
                 emptyList(),
                 true,
+                null,
             )
 
             assertThrows<HarFratrekkInnAarForFulltAar> {
@@ -353,6 +362,7 @@ class AvkortingValiderTest {
                     listOf(inntektMedFratrekk),
                     emptyList(),
                     true,
+                    null,
                 )
             }
 
@@ -370,6 +380,7 @@ class AvkortingValiderTest {
                     listOf(inntektMedFratrekkUtland),
                     emptyList(),
                     true,
+                    null,
                 )
             }
         }
@@ -407,6 +418,7 @@ class AvkortingValiderTest {
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
             sanksjoner = emptyList(),
             krevInntektForNesteAar = true,
+            eksisterendeOpphoerFom = null,
             naa = YearMonth.of(2024, 5),
         )
     }
@@ -444,6 +456,7 @@ class AvkortingValiderTest {
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
             sanksjoner = emptyList(),
             krevInntektForNesteAar = true,
+            eksisterendeOpphoerFom = null,
         )
     }
 
@@ -547,6 +560,7 @@ class AvkortingValiderTest {
                         nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.MARCH))),
                         sanksjoner = emptyList(),
                         krevInntektForNesteAar = false,
+                        eksisterendeOpphoerFom = null,
                         naa = virk,
                     )
                 }
@@ -569,6 +583,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.JANUARY))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
         }
@@ -589,6 +604,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.FEBRUARY))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
         }
@@ -612,6 +628,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.MARCH))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = YearMonth.of(2025, Month.JANUARY),
             )
         }
@@ -632,6 +649,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.APRIL))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
         }
@@ -675,6 +693,7 @@ class AvkortingValiderTest {
                     nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2024, Month.MARCH))),
                     sanksjoner = emptyList(),
                     krevInntektForNesteAar = false,
+                    eksisterendeOpphoerFom = null,
                     naa = virk,
                 )
             }
@@ -696,6 +715,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2024, Month.JANUARY))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
         }
@@ -716,6 +736,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2024, Month.JUNE))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
         }

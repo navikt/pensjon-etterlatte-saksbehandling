@@ -232,6 +232,16 @@ class AvkortingService(
 
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
 
+        val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(behandling.sak, brukerTokenInfo)
+
+        // hent siste periode, hvis den har en slutt (har en tom satt), legg til 1 måned for å få den neste perioden (som da er opphørt)
+        val eksisterendeOpphoerFom =
+            innvilgedePerioder
+                .maxByOrNull { it.periode.fom }
+                ?.periode
+                ?.tom
+                ?.plusMonths(1)
+
         validerInntekter(
             behandling,
             beregning,
@@ -239,6 +249,7 @@ class AvkortingService(
             nyeGrunnlag,
             sanksjoner,
             skalKreveInntektNesteAar,
+            eksisterendeOpphoerFom,
         )
         val aldersovergangMaaned =
             when (behandling.opphoerFraOgMed) {

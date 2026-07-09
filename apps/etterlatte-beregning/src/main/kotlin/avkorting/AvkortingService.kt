@@ -435,9 +435,18 @@ class AvkortingService(
         if (behandling.status == BehandlingStatus.IVERKSATT) {
             return forrigeAvkorting
         }
-        sjekkAtNyttAarMedInntektStarterIJanuar(forrigeAvkorting, virkningstidspunkt)
-
         val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(behandling.sak, brukerTokenInfo)
+
+        // hent siste periode, hvis den har en slutt (har en tom satt), legg til 1 måned for å få den neste perioden (som da er opphørt)
+        val eksisterendeOpphoerFom =
+            innvilgedePerioder
+                .maxByOrNull { it.periode.fom }
+                ?.periode
+                ?.tom
+                ?.plusMonths(1)
+
+        sjekkAtNyttAarMedInntektStarterVedStart(forrigeAvkorting, virkningstidspunkt, eksisterendeOpphoerFom)
+
         return avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
             forrigeAvkorting,
             alleVedtak,
@@ -475,9 +484,14 @@ class AvkortingService(
         }
     }
 
-    private fun sjekkAtNyttAarMedInntektStarterIJanuar(
+    /**
+     * start = januar i normale tilfeller
+     * hvis saken er opphørt og skal startes på nytt kan virk være senere i året
+     */
+    private fun sjekkAtNyttAarMedInntektStarterVedStart(
         avkorting: Avkorting,
         virkningstidspunkt: YearMonth,
+        eksisterendeOpphoerFom: YearMonth?,
     ) {
         val sisteAarsoppgjoer = avkorting.aarsoppgjoer.maxByOrNull { it.aar }
         val virkErINyttAar =
@@ -486,7 +500,14 @@ class AvkortingService(
                 ?.let { sisteAar -> sisteAar < virkningstidspunkt.year } ?: false
 
         if (virkErINyttAar) {
-            if (virkningstidspunkt != YearMonth.of(virkningstidspunkt.year, 1)) {
+            if (!(
+                    virkningstidspunkt ==
+                        YearMonth.of(
+                            virkningstidspunkt.year,
+                            1,
+                        ) || (eksisterendeOpphoerFom != null && virkningstidspunkt > eksisterendeOpphoerFom)
+                )
+            ) {
                 throw NyeAarMedInntektMaaStarteIJanuar()
             }
         }

@@ -850,6 +850,7 @@ internal class AvkortingServiceTest {
         coVerify {
             avkortingRepository.hentAvkorting(forrigeBehandlingId)
             vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+            vedtaksvurderingKlient.hentInnvilgedePerioder(behandling.sak, bruker)
         }
     }
 

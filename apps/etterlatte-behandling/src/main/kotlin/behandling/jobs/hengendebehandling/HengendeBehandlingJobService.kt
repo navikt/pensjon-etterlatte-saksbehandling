@@ -23,16 +23,14 @@ class HengendeBehandlingJobService(
     private fun run() {
         val sistEndretFoer = Tidspunkt.now().minus(grenseForHengende.toDays(), ChronoUnit.DAYS)
 
-        listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING).forEach { status ->
+        listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.SAMORDNET).forEach { status ->
             val hengendeBehandlinger =
                 inTransaction { dao.hentBehandlingerHengendeIStatus(status, sistEndretFoer) }
 
             if (hengendeBehandlinger.isNotEmpty()) {
                 logger.error(
                     "Fant ${hengendeBehandlinger.size} behandling(er) som har stått fast i status $status i mer enn " +
-                        "$grenseForHengende uten endring, dette kan tyde på at " +
-                        "${if (status == BehandlingStatus.TIL_SAMORDNING) "samordningen" else "iverksettingen"} " +
-                        "har stanset opp: " +
+                        "$grenseForHengende dager uten endring, dette kan tyde på at iverksettingen har stanset opp: " +
                         hengendeBehandlinger.joinToString(", ") {
                             "behandlingId=${it.behandlingId} sakId=${it.sakId.sakId} sistEndret=${it.sistEndret}"
                         },

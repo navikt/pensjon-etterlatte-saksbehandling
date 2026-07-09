@@ -39,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Month
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
@@ -851,6 +852,55 @@ internal class AvkortingServiceTest {
             avkortingRepository.hentAvkorting(forrigeBehandlingId)
             vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
             vedtaksvurderingKlient.hentInnvilgedePerioder(behandling.sak, bruker)
+        }
+    }
+
+    @Test
+    fun `opphørt sak som starter opp igjen midt i et nytt år kaster ikke feil`() {
+        val behandling = behandling()
+        val forrigeBehandlingId = UUID.randomUUID()
+        val forrigeAvkorting = Avkorting(listOf(aarsoppgjoer(2025)))
+        val reparertAvkorting = mockk<Avkorting>()
+
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+            listOf(
+                vedtakSammendragDto(forrigeBehandlingId)
+                    .copy(virkningstidspunkt = YearMonth.of(2025, Month.JANUARY)),
+            )
+        every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
+        // Saken var opphørt etter november 2025 (tom = november) → eksisterendeOpphoerFom = desember 2025
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(
+                    Periode(YearMonth.of(2025, Month.JANUARY), YearMonth.of(2025, Month.NOVEMBER)),
+                    listOf(mockk()),
+                ),
+            )
+        every {
+            avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(any(), any(), any())
+        } returns reparertAvkorting
+
+        // virk = mars 2026 > desember 2025 (opphoerFom) → skal ikke kaste NyeAarMedInntektMaaStarteIJanuar
+        val result =
+            runBlocking {
+                service.hentAvkortingForrigeBehandling(
+                    behandling = behandling,
+                    brukerTokenInfo = bruker,
+                    virkningstidspunkt = YearMonth.of(2026, Month.MARCH),
+                )
+            }
+
+        result shouldBeSameInstanceAs reparertAvkorting
+
+        coVerify {
+            avkortingRepository.hentAvkorting(forrigeBehandlingId)
+            vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+            vedtaksvurderingKlient.hentInnvilgedePerioder(behandling.sak, bruker)
+            avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
+                forrigeAvkorting,
+                any(),
+                any(),
+            )
         }
     }
 

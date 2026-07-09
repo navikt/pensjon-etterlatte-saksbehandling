@@ -10,7 +10,7 @@
     "@typescript-eslint/parser": "~8.62.0",
     "eslint": "^10.5.0",
     "husky": "~9.1.7",
-    "license-checker-rseidelsohn": "^4.4.2",
+    "license-checker-rseidelsohn": "^5.0.1",
     "lint-staged": "~17.0.8",
     "prettier": "^3.8.4"
   },

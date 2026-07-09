@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.jobs.hengendebehandling.HengendeBehandlingDao
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJobDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -108,6 +109,8 @@ class DaoModule(
     val opplysningDao by lazy { OpplysningDao(dataSource) }
 
     val sjekkAdressebeskyttelseJobDao by lazy { SjekkAdressebeskyttelseJobDao(autoClosingDatabase) }
+
+    val hengendeBehandlingDao by lazy { HengendeBehandlingDao(autoClosingDatabase) }
 
     val outboxRepository by lazy { OutboxRepository(dataSource) }
 

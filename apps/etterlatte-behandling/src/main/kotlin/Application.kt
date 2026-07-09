@@ -113,6 +113,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.etteroppgjoerSvarfristUtloeptJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
         context.sjekkAdressebeskyttelseJob,
+        context.hengendeBehandlingJob,
         context.uttrekkLoependeYtelseEtter67Job,
         context.lesSkatteoppgjoerHendelserJob,
         context.oppdaterSkatteoppgjoerIkkeMottattJob,

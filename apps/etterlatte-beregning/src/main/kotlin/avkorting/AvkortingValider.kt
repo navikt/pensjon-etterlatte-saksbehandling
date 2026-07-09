@@ -63,6 +63,7 @@ object AvkortingValider {
         nyeGrunnlag: List<AvkortingGrunnlagLagreDto>,
         sanksjoner: List<Sanksjon>,
         krevInntektForNesteAar: Boolean,
+        eksisterendeOpphoerFom: YearMonth?,
         naa: YearMonth = YearMonth.now(),
     ) {
         val inntekterViHar =
@@ -87,8 +88,11 @@ object AvkortingValider {
                 "Behandling mangler virkningstidspunkt, kan ikke legge inn nye inntekter. " +
                     "Sak: ${behandling.sak.sakId}, id:${behandling.id}"
             }
-        val virkFoerstegangsbehandling =
-            virk.takeIf { behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING }
+        val virkOppstart =
+            virk.takeIf {
+                behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING ||
+                    (eksisterendeOpphoerFom != null && eksisterendeOpphoerFom < virk)
+            }
 
         val tidligsteAarMedEksisterendeInntekt = eksisterendeAvkorting.aarsoppgjoer.minOfOrNull { it.aar }
 
@@ -104,14 +108,14 @@ object AvkortingValider {
 
         val alleNyeAarFramITidHarInntektFraStart =
             nyeAarFramITid.all { aar ->
-                // Start på et år er enten 1. januar eller virk i førstegangsbehandlinger
+                // Start på et år er enten 1. januar eller virk i førstegangsbehandlinger eller virk etter opphør
                 nyeGrunnlag.find {
                     it.fom ==
                         YearMonth.of(
                             aar,
                             Month.JANUARY,
                         ) ||
-                        it.fom == virkFoerstegangsbehandling
+                        it.fom == virkOppstart
                 } != null
             }
         if (!alleNyeAarFramITidHarInntektFraStart) {

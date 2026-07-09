@@ -410,7 +410,6 @@ fun beregning(trygdetid: Int = 40) =
                 Beregningsperiode(
                     datoFOM = now(),
                     utbetaltBeloep = 13345,
-                    grunnbelopMnd = 9885,
                     grunnbelop = 118620,
                     trygdetid = trygdetid,
                 ),

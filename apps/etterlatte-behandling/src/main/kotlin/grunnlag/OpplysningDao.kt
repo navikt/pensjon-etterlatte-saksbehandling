@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.database.firstOrNull
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -70,8 +69,8 @@ class OpplysningDao(
                 .prepareStatement(
                     """
                     SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
-                    FROM grunnlagshendelse hendelse 
-                    WHERE hendelse.sak_id = ?
+                    FROM siste_grunnlagshendelse
+                    WHERE sak_id = ?
                     """.trimIndent(),
                 ).apply {
                     setSakId(1, sakId)
@@ -84,11 +83,9 @@ class OpplysningDao(
             it
                 .prepareStatement(
                     """
-                    SELECT bv.sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelse.hendelsenummer, fnr, fom, tom
-                    FROM grunnlagshendelse hendelse 
-                    LEFT JOIN behandling_versjon bv 
-                        ON bv.sak_id = hendelse.sak_id AND bv.hendelsenummer >= hendelse.hendelsenummer 
-                    WHERE bv.behandling_id = ?
+                    SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
+                    FROM siste_grunnlagshendelse_per_behandling
+                    WHERE behandling_id = ?
                     """.trimIndent(),
                 ).apply {
                     setObject(1, behandlingId)
@@ -104,12 +101,10 @@ class OpplysningDao(
             it
                 .prepareStatement(
                     """
-                    SELECT bv.sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelse.hendelsenummer, fnr, fom, tom
-                    FROM grunnlagshendelse hendelse 
-                    LEFT JOIN behandling_versjon bv 
-                        ON bv.sak_id = hendelse.sak_id AND bv.hendelsenummer >= hendelse.hendelsenummer 
-                    WHERE bv.behandling_id = ?
-                        AND hendelse.opplysning_type = ANY(?)
+                    SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
+                    FROM siste_grunnlagshendelse_per_behandling
+                    WHERE behandling_id = ?
+                        AND opplysning_type = ANY(?)
                     """.trimIndent(),
                 ).apply {
                     setObject(1, behandlingId)
@@ -125,14 +120,8 @@ class OpplysningDao(
                 .prepareStatement(
                     """
                     SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
-                    FROM grunnlagshendelse hendelse 
-                    WHERE hendelse.sak_id = ? 
-                    AND NOT EXISTS(
-                        SELECT 1 FROM grunnlagshendelse annen 
-                        WHERE annen.sak_id = hendelse.sak_id 
-                        AND hendelse.opplysning_type = annen.opplysning_type 
-                        AND annen.hendelsenummer > hendelse.hendelsenummer
-                    )
+                    FROM siste_grunnlagshendelse
+                    WHERE sak_id = ?
                     """.trimIndent(),
                 ).apply {
                     setSakId(1, sakId)
@@ -149,15 +138,9 @@ class OpplysningDao(
                 .prepareStatement(
                     """
                     SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
-                    FROM grunnlagshendelse hendelse 
-                    WHERE hendelse.sak_id = ? 
-                    AND hendelse.opplysning_type = ? 
-                    AND NOT EXISTS(
-                        SELECT 1 FROM grunnlagshendelse annen 
-                        WHERE annen.sak_id = hendelse.sak_id 
-                        AND hendelse.opplysning_type = annen.opplysning_type 
-                        AND annen.hendelsenummer > hendelse.hendelsenummer
-                    )
+                    FROM siste_grunnlagshendelse
+                    WHERE sak_id = ?
+                        AND opplysning_type = ?
                     """.trimIndent(),
                 ).apply {
                     setSakId(1, sakId)
@@ -174,20 +157,16 @@ class OpplysningDao(
             it
                 .prepareStatement(
                     """
-                    SELECT hendelse.sak_id, behandling_id, opplysning_id, kilde, opplysning_type, 
-                            opplysning, hendelse.hendelsenummer, fnr, fom, tom
-                    FROM grunnlagshendelse hendelse 
-                    LEFT JOIN behandling_versjon versjon 
-                        ON versjon.sak_id = hendelse.sak_id AND versjon.hendelsenummer >= hendelse.hendelsenummer
-                    WHERE versjon.behandling_id = ?
-                    AND hendelse.opplysning_type = ?
-                    ORDER BY hendelse.hendelsenummer DESC
+                    SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
+                    FROM siste_grunnlagshendelse_per_behandling
+                    WHERE behandling_id = ?
+                        AND opplysning_type = ?
                     """.trimIndent(),
                 ).apply {
                     setObject(1, behandlingId)
                     setString(2, opplysningType.name)
                 }.executeQuery()
-                .firstOrNull { asGrunnlagshendelse() }
+                .singleOrNull { asGrunnlagshendelse() }
         }
 
     fun leggOpplysningTilGrunnlag(

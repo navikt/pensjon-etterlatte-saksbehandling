@@ -113,10 +113,6 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
-    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-trygdetid
-    - name: ETTERLATTE_TRYGDETID_URL
-      value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TILBAKEKREVING_URL
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
@@ -181,10 +177,6 @@ spec:
       value: https://sam.prod-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://prod-fss.pensjonsamhandling.sam/.default
-    - name: BRUK_INTERN_TRYGDETID
-      value: "true"
-    - name: BRUK_EGEN_DATABASE_FOR_TRYGDETID
-      value: "true"
 
   envFrom:
     - secret: my-application-unleash-api-token
@@ -201,7 +193,6 @@ spec:
           namespace: team-rocket
           cluster: prod-gcp
         - application: etterlatte-beregning
-        - application: etterlatte-trygdetid
         - application: etterlatte-tilbakekreving
         - application: etterlatte-klage
         - application: logging

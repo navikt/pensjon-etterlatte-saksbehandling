@@ -56,6 +56,7 @@ fun Grunnlag.mapSoeker(aldersgruppe: Aldersgruppe?): Soeker =
             under18 = !erOver18(aldersgruppe),
             foreldreloes = sak.hentErForeldreloes()?.verdi ?: false,
             ufoere = sak.hentErUfoere()?.verdi ?: false,
+            ansvarligeForeldre = hentFamilierelasjon()?.verdi?.ansvarligeForeldre?.map { it.value } ?: emptyList(),
         )
     }
 

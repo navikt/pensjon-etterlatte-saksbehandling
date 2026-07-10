@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.klage.KlageDao
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
+import no.nav.etterlatte.brev.behandling.hentGjenlevende
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -122,6 +123,7 @@ class KlageAvvistBrevService(
                 soeker = soeker,
                 avdoede = grunnlag.mapAvdoede(),
                 verge = verge,
+                gjenlevende = grunnlag.hentGjenlevende(),
                 spraak = grunnlag.mapSpraak(),
                 saksbehandlerIdent = saksbehandlerIdent,
                 attestantIdent = attestantIdent,

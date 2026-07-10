@@ -1,7 +1,5 @@
 package no.nav.etterlatte.config.modules
 
-import no.nav.etterlatte.EnvKey.BRUK_EGEN_DATABASE_FOR_TRYGDETID
-import no.nav.etterlatte.EnvKey.BRUK_INTERN_TRYGDETID
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BrukerService
@@ -440,11 +438,7 @@ class ServiceModule(
     }
 
     val trygdetidKlient by lazy {
-        if (brukInternTrygdetid) {
-            TrygdetidKlientIntern(trygdetidService)
-        } else {
-            klientModule.trygdetidKlient
-        }
+        TrygdetidKlientIntern(trygdetidService)
     }
 
     val beregningKlient by lazy {
@@ -482,30 +476,13 @@ class ServiceModule(
         )
     }
 
-    private val brukInternTrygdetid: Boolean by lazy { env[BRUK_INTERN_TRYGDETID] == "true" }
-    private val brukEgenDatabaseForTrygdetid: Boolean by lazy { env[BRUK_EGEN_DATABASE_FOR_TRYGDETID] == "true" }
-
-    val internTrygdetidAktivert: Boolean by lazy { brukInternTrygdetid }
-
     val avtaleService: AvtaleService by lazy {
-        val avtaleRepository =
-            if (brukEgenDatabaseForTrygdetid) {
-                daoModule.avtaleRepository
-            } else {
-                klientModule.avtaleRepositoryKlient
-            }
-        AvtaleService(avtaleRepository = avtaleRepository)
+        AvtaleService(avtaleRepository = daoModule.avtaleRepository)
     }
 
     val trygdetidService: TrygdetidService by lazy {
-        val trygdetidRepository =
-            if (brukEgenDatabaseForTrygdetid) {
-                daoModule.trygdetidRepository
-            } else {
-                klientModule.trygdetidRepositoryKlient
-            }
         TrygdetidServiceImpl(
-            trygdetidRepository = trygdetidRepository,
+            trygdetidRepository = daoModule.trygdetidRepository,
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
             beregnTrygdetidService = TrygdetidBeregningService,

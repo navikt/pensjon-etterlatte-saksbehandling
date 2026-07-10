@@ -109,6 +109,7 @@ class StrukturertBrevService(
                             verge,
                             gjenlevende = if (sak.sakType == SakType.BARNEPENSJON) gjenlevende else emptyList(),
                         ),
+                        sak.id,
                         bruker,
                     ),
                 opprettet = Tidspunkt.now(),

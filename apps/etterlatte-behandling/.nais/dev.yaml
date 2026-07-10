@@ -97,10 +97,6 @@ spec:
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
-    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-trygdetid
-    - name: ETTERLATTE_TRYGDETID_URL
-      value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TILBAKEKREVING_URL
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
@@ -167,10 +163,6 @@ spec:
       value: https://sam-q2.dev-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://dev-fss.pensjonsamhandling.sam-q2/.default
-    - name: BRUK_INTERN_TRYGDETID
-      value: "true"
-    - name: BRUK_EGEN_DATABASE_FOR_TRYGDETID
-      value: "true"
 
   envFrom:
     - secret: my-application-unleash-api-token
@@ -181,7 +173,6 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-pdltjenester
         - application: etterlatte-beregning
-        - application: etterlatte-trygdetid
         - application: etterlatte-tilbakekreving
         - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom

@@ -25,8 +25,6 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
-import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
-import no.nav.etterlatte.behandling.klienter.TrygdetidKlientImpl
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.brev.BrevKlient
@@ -48,8 +46,6 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
-import no.nav.etterlatte.trygdetid.TrygdetidRepositoryKlient
-import no.nav.etterlatte.trygdetid.avtale.AvtaleRepositoryKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient as TrygdetidPesysKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlientImpl as TrygdetidPesysKlientImpl
 
@@ -62,7 +58,7 @@ class KlientModule(
     norg2KlientOverride: Norg2Klient? = null,
     leaderElectionHttpClientOverride: HttpClient? = null,
     beregningKlientOverride: BeregningKlient? = null,
-    trygdetidKlientOverride: TrygdetidKlient? = null,
+    trygdetidPesysKlientOverride: TrygdetidPesysKlient? = null,
     gosysOppgaveKlientOverride: GosysOppgaveKlient? = null,
     brevApiKlientOverride: BrevApiKlient? = null,
     brevKlientOverride: BrevKlient? = null,
@@ -109,18 +105,6 @@ class KlientModule(
 
     val beregningKlient: BeregningKlient by lazy {
         beregningKlientOverride ?: BeregningKlientImpl(config = config, httpClient = standardHttpClient)
-    }
-
-    val trygdetidKlient: TrygdetidKlient by lazy {
-        trygdetidKlientOverride ?: TrygdetidKlientImpl(config = config, httpClient = standardHttpClient)
-    }
-
-    val trygdetidRepositoryKlient: TrygdetidRepositoryKlient by lazy {
-        TrygdetidRepositoryKlient(config = config, httpClient = standardHttpClient)
-    }
-
-    val avtaleRepositoryKlient: AvtaleRepositoryKlient by lazy {
-        AvtaleRepositoryKlient(config = config, httpClient = standardHttpClient)
     }
 
     val gosysOppgaveKlient: GosysOppgaveKlient by lazy {
@@ -203,7 +187,7 @@ class KlientModule(
     }
 
     val trygdetidPesysKlient: TrygdetidPesysKlient by lazy {
-        TrygdetidPesysKlientImpl(config = config, httpClient = standardHttpClient)
+        trygdetidPesysKlientOverride ?: TrygdetidPesysKlientImpl(config = config, httpClient = standardHttpClient)
     }
 
     val leaderElectionHttpClient: HttpClient by lazy {

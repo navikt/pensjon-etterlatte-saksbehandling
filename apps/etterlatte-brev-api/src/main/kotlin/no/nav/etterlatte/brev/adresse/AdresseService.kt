@@ -13,14 +13,15 @@ import no.nav.etterlatte.brev.model.mottakerFraAdresse
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.hentAlder
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.sikkerLogg
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -36,6 +37,7 @@ class AdresseService(
     suspend fun hentMottakere(
         sakType: SakType,
         personerISak: PersonerISak,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Mottaker> =
         with(personerISak) {
@@ -95,7 +97,18 @@ class AdresseService(
 
             val hovedmottaker =
                 mottakereIPrioritertRekkefoelge.firstOrNull()
-                    ?: throw InternfeilException("Dette skal ikke skje, men vi har ingen gyldige mottakere")
+                    ?: ukjentMottaker().let { ukjentMottaker ->
+                        logger.warn(
+                            "Kunne ikke utlede mottakere for brev i sak $sakId. Dette betyr at vi gir en tom " +
+                                "mottaker til saksbehandler og de må manuelt fylle ut mottakerinformasjon. " +
+                                "Se sikkerlogg for hvilke personer vi har sett på i utledning av mottaker.",
+                        )
+                        sikkerLogg.warn(
+                            "Kunne ikke finne en gyldig mottaker i sak $sakId. Personer vi tok inn i saken:" +
+                                "$personerISak, soekerErMyndig=$soekerErMyndig, soekerFoedselsdato=$soekerFoedselsdato",
+                        )
+                        return@let ukjentMottaker
+                    }
             val kopimottakere = mottakereIPrioritertRekkefoelge.drop(1)
             listOf(hovedmottaker.copy(type = MottakerType.HOVED)) + kopimottakere.map { it.copy(type = MottakerType.KOPI) }
         }
@@ -128,7 +141,15 @@ class AdresseService(
     ): Mottaker {
         val regoppslag = regoppslagKlient.hentMottakerAdresse(sakType, ident)
         val fnr = Folkeregisteridentifikator.of(ident)
-        return if (regoppslag == null) tomMottaker(fnr, MottakerType.HOVED) else mottakerFraAdresse(fnr, regoppslag, MottakerType.HOVED)
+        return if (regoppslag == null) {
+            tomMottaker(fnr, MottakerType.HOVED)
+        } else {
+            mottakerFraAdresse(
+                fnr,
+                regoppslag,
+                MottakerType.HOVED,
+            )
+        }
     }
 
     private suspend fun hentSaksbehandlerNavn(
@@ -162,6 +183,13 @@ class AdresseService(
             navn = VERGENAVN_FOR_MOTTAKER,
             foedselsnummer = fnr,
             orgnummer = null,
+            adresse = Adresse(adresseType = "", landkode = "", land = ""),
+        )
+
+    private fun ukjentMottaker(): Mottaker =
+        Mottaker(
+            id = UUID.randomUUID(),
+            navn = "UKJENT MOTTAKER",
             adresse = Adresse(adresseType = "", landkode = "", land = ""),
         )
 }

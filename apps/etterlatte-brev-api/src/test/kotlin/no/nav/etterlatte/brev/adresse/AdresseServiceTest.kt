@@ -1,8 +1,6 @@
 package no.nav.etterlatte.brev.adresse
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
-import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -23,6 +21,7 @@ import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
@@ -47,6 +46,7 @@ internal class AdresseServiceTest {
         private val ANSVARLIG_ENHET = Enheter.defaultEnhet.enhetNr
         private const val SAKSBEHANDLER = "Z123456"
         private const val ATTESTANT = "Z00002"
+        private val SAK_ID = SakId(1L)
     }
 
     @BeforeEach
@@ -126,7 +126,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
         mottakere.size shouldBe 1
         mottakere.count { it.type == MottakerType.HOVED && it.foedselsnummer?.value == SOEKER_FOEDSELSNUMMER.value } shouldBe 1
@@ -165,7 +165,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
         mottakere.size shouldBe 2
         mottakere.count { it.type == MottakerType.HOVED && it.foedselsnummer?.value == GJENLEVENDE_FOEDSELSNUMMER.value } shouldBe 1
@@ -202,7 +202,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
         mottakere.size shouldBe 1
         mottakere.count { it.type == MottakerType.HOVED && it.foedselsnummer?.value == GJENLEVENDE_FOEDSELSNUMMER.value } shouldBe 1
@@ -228,7 +228,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 1
@@ -258,7 +258,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 1
@@ -288,7 +288,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 2
@@ -325,7 +325,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 2
@@ -361,7 +361,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 2
@@ -398,7 +398,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 3
@@ -422,6 +422,32 @@ internal class AdresseServiceTest {
         }
     }
 
+    @Test
+    fun `Gir en tom mottaker hvis vi ikke finner noe i grunnlaget i barnepensjon`() {
+        val personerISak =
+            PersonerISak(
+                innsender = null,
+                soeker = Soeker("LITEN", null, "FLASKE", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                avdoede = emptyList(),
+                verge = null,
+            )
+
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.now().minusYears(2)
+        val sakId = SakId(1L)
+
+        val mottakere =
+            runBlocking {
+                adresseService.hentMottakere(SakType.BARNEPENSJON, personerISak, sakId, simpleSaksbehandler())
+            }
+
+        mottakere.size shouldBe 1
+        val ukjentMottaker = mottakere.single()
+        ukjentMottaker.type shouldBe MottakerType.HOVED
+        ukjentMottaker.foedselsnummer shouldBe null
+        ukjentMottaker.orgnummer shouldBe null
+    }
+
     @ParameterizedTest
     @EnumSource(SakType::class)
     fun `Setter søker til null hvis under 15 år`(sakType: SakType) {
@@ -438,7 +464,7 @@ internal class AdresseServiceTest {
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+                adresseService.hentMottakere(sakType, personerISak, SAK_ID, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 2

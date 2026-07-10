@@ -161,6 +161,8 @@ class OpplysningDao(
                     FROM siste_grunnlagshendelse_per_behandling
                     WHERE behandling_id = ?
                         AND opplysning_type = ?
+                    ORDER BY hendelsenummer DESC
+                    LIMIT 1    
                     """.trimIndent(),
                 ).apply {
                     setObject(1, behandlingId)

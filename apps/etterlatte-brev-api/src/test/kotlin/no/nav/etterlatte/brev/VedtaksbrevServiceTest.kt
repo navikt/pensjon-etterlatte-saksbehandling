@@ -248,7 +248,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any(), any()) } returns opprettAvsender()
-            coEvery { adresseService.hentMottakere(any(), any(), any()) } returns listOf(mottaker)
+            coEvery { adresseService.hentMottakere(any(), any(), any(), any()) } returns listOf(mottaker)
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns Slate(emptyList())
             coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
             coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns null
@@ -306,7 +306,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, null, any())
-                adresseService.hentMottakere(sakType, behandling.personerISak, any())
+                adresseService.hentMottakere(sakType, behandling.personerISak, sakId, any())
                 adresseService.hentAvsender(any(), any())
             }
 
@@ -346,7 +346,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns opprettSlate()
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentMottakere(sakType, any(), any()) } returns listOf(mottaker)
+            coEvery { adresseService.hentMottakere(sakType, any(), any(), any()) } returns listOf(mottaker)
             coEvery { adresseService.hentAvsender(any(), any()) } returns opprettAvsender()
             coEvery { beregningService.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
             coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns null
@@ -372,7 +372,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, null, any())
-                adresseService.hentMottakere(sakType, behandling.personerISak, any())
+                adresseService.hentMottakere(sakType, behandling.personerISak, sakId, any())
                 adresseService.hentAvsender(any(), any())
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(any())
             }
@@ -432,7 +432,7 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentMottakere(any(), any(), any()) } returns listOf(mottaker)
+            coEvery { adresseService.hentMottakere(any(), any(), sakId, any()) } returns listOf(mottaker)
 
             coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns false
 

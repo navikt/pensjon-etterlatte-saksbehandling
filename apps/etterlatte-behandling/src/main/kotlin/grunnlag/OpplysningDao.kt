@@ -141,6 +141,8 @@ class OpplysningDao(
                     FROM siste_grunnlagshendelse
                     WHERE sak_id = ?
                         AND opplysning_type = ?
+                    ORDER BY hendelsenummer DESC
+                    LIMIT 1
                     """.trimIndent(),
                 ).apply {
                     setSakId(1, sakId)

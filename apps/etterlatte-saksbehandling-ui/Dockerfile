@@ -1,5 +1,6 @@
 FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24-dev as base
 
+USER root
 WORKDIR /app
 COPY ./client/dist ./client
 COPY ./server/build ./server

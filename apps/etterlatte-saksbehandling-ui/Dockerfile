@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim as base
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24-dev as base
 
 WORKDIR /app
 COPY ./client/dist ./client
@@ -10,7 +10,7 @@ ENV NODE_ENV="production"
 RUN cd ./server && yarn install --frozen-lockfile
 
 
-FROM gcr.io/distroless/nodejs24-debian13 as prod
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24-slim as prod
 COPY --from=base /app /app
 
 USER nonroot

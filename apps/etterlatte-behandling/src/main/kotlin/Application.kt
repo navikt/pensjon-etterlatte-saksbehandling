@@ -62,6 +62,8 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
+import no.nav.etterlatte.prosessering.installProsessering
+import no.nav.etterlatte.prosessering.prosesseringSkyggeRoutes
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
@@ -92,7 +94,10 @@ private class Server(
             httpPort = context.httpPort,
             applicationConfig = context.config,
             cronJobs = timerJobs(context),
-            routes = { selfTestRoute(context.selfTestService) },
+            routes = {
+                selfTestRoute(context.selfTestService)
+                installProsessering(context.dataSource)
+            },
         ) {
             settOppApplikasjonen(context)
         }
@@ -285,6 +290,8 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     etteroppgjoerSystembrukerVedtakRoute(applicationContext.vedtakEtteroppgjoerService)
     samordningSystembrukerVedtakRoute(applicationContext.vedtakSamordningService)
     tilbakekrevingvedtakRoute(applicationContext.vedtakTilbakekrevingService)
+
+    prosesseringSkyggeRoutes(applicationContext.featureToggleService)
 }
 
 private fun Route.settOppTilganger(

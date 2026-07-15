@@ -119,9 +119,8 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
 - **Skjema-støtte:** `PostgresTaskRepository(skjema = "prosessering")` — SQL-en er
   skjema-kvalifisert, default `prosessering`. Bibliotekets `schema.sql` (test) oppretter
   skjemaet. Klart for behandling-DB (se «Besluttet: hvor task-tabellen bor»).
-- **Gjenstår:** Flyway-migrasjon i behandling som oppretter `prosessering`-skjemaet +
-  tabellene (avventer eksplisitt go — treffer prod-DB); flere ports ved behov
-  (`Klokke`, `Metrics`).
+- **Gjenstår:** flere ports ved behov (`Klokke`, `Metrics`). *(Flyway-migrasjonen er nå lagt
+  inn som `V352` i behandling — se Fase 4a.)*
 - ✅ Konkurransebeviset beholdt (1000 tasks, 4 engines, 0 dobbeltkjøring) — nå via
   typed steg + produsent.
 
@@ -153,8 +152,33 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
   en ugyldig søknad.
 
 ### Fase 4 — Skyggekjøring ende-til-ende i Gjenny
-- Opprett task fra søknad-eventet (parallelt med `NySoeknadRiver`).
-- Kjør i dev; observer at søknader blir tasks som fullfører.
+**4a — host-kobling (ugatet mot prod, kjørt/verifisert på Testcontainers) ✅ GJORT**
+- **Task-typen flyttet inn i `etterlatte-behandling`** (`prosessering/SoeknadMottakSkygge.kt`):
+  `SoeknadMottakPayload` bruker vertens ekte `SakType` og `objectMapper`; steget validerer
+  (`Folkeregisteridentifikator.isValid` + soeknadId) og *logger* «ville opprettet behandling …»
+  — ingen sideeffekter. Fase 3-koden i ktor-lib-testkilden er fjernet (ekte «flytt»).
+- **Motoren wiret via `install(Prosessering)`** på `Route.application`, men **kun i
+  produksjons-oppsettet** (`installProsessering` kalles fra `initEmbeddedServer(routes = …)`),
+  *ikke* fra den delte `module`-testinngangen — så motoren/reaperen ikke starter i den store
+  mengden behandling-tester. Motoren poller `prosessering.task` og er inaktiv uten tasker.
+- **Internt systembruker-endepunkt** `POST /api/prosessering/skygge/soeknad`
+  (`prosesseringSkyggeRoutes`, inne i `authenticate`) legger en skygge-task i kø via
+  `opprettFrittstående`. Gated bak `ProsesseringToggles.SKYGGE_SOEKNADMOTTAK`
+  (`"prosessering-soeknad-skygge"`, default av).
+- **`SoeknadSkyggeRiver`** i `etterlatte-behandling-kafka`, parallelt med `NySoeknadRiver`
+  (samme `soeknad_innsendt`-event, **ingen** `precondition`/`publish` som konsumerer eventet).
+  Kaller endepunktet via `BehandlingClient.opprettSoeknadSkyggeTask`. Også gated bak samme
+  toggle-nøkkel (i egen enum i kafka-appen), så ingen HTTP-kall når mørkt.
+- **Flyway `V352__prosessering_skjema.sql`** i behandling oppretter `prosessering`-skjemaet +
+  `task`-tabellen + plukk-indeksen (ikke `execution_log` — den er test-only). Kjører i dev nå;
+  prod-tilpasning ved behov senere.
+- **Integrasjonstest** (`SoeknadMottakSkyggeIntegrationTest`, Testcontainers via behandlingens
+  `GenerellDatabaseExtension`): gyldig søknad → task → FULLFØRT (mottaket observert), og
+  ugyldig fnr → retry → STOPPET (`Stoppaarsak.FEIL`) uten at mottaket noensinne observeres. Grønn.
+
+**4b — kjør i dev (gjenstår, krever menneske-i-loop):**
+- Deploy behandling (med V352) + behandling-kafka til dev.
+- Flipp `prosessering-soeknad-skygge` på i dev; observer at søknader blir tasks som fullfører.
 - Fremtving feil → STOPPET → prøv igjen (via kall/logg siden UI er utenfor scope).
 
 ### Fase 5 — Kutt ut til eget repo
@@ -189,18 +213,19 @@ behandling-REST (Ktor) via `install(Prosessering)`.
   rent kutt-ut ved Fase 5. Outbox holder — samme connection skriver på tvers av skjema i
   samme database. `PostgresTaskRepository(skjema = "prosessering")` er default; SQL-en er
   skjema-kvalifisert.
-- **Skygge produseres løsrevet/ad hoc først** (`opprettFrittstående`), *ikke* koblet på
-  søknad-eventet ennå. Poenget er å bevise motor + observerbarhet; event-koblingen er
-  Fase 4 og bør bygges som det *ekte* outbox-tilfellet (task i samme tx som behandling),
-  ikke som en midlertidig skygge-kobling.
+- **Skygge koblet på søknad-eventet (Fase 4a)** via `SoeknadSkyggeRiver` (parallell river) →
+  behandling-REST → `opprettFrittstående`. Bevisst *skygge*-kobling, ikke ekte outbox: målet er
+  å bevise motor + observerbarhet. Den ekte outbox-koblingen (task i samme tx som behandlings-
+  skrivet) hører hjemme i skygge→ekte-overgangen, ikke her — den ville vært mer invasiv på
+  hot-pathen, og outbox-garantien er allerede bevist i `OutboxTest`.
 - **Nyanse:** søknad-eventet konsumeres i `etterlatte-behandling-kafka` (egen app), mens
   produsent + motor hører hjemme i behandling-REST (regel: ingen app skriver i en annen
   apps DB). Event-drevet task-opprettelse må derfor gå *via* behandling-REST når den tid
   kommer.
 
-**Gjenstår (eksplisitt menneske-i-loop før prod):** Flyway-migrasjon som oppretter
-`prosessering`-skjemaet + tabellene i behandling-DB. Ikke lagt inn ennå — den treffer en
-kritisk produksjonsdatabase og bør godkjennes bevisst.
+**Lagt inn (Fase 4a):** Flyway `V352__prosessering_skjema.sql` oppretter `prosessering`-skjemaet
++ `task`-tabellen i behandling-DB. Kjører i dev nå; prod-tilpasning tas ved behov senere
+(besluttet at dev holder for PoC-en).
 
 ---
 

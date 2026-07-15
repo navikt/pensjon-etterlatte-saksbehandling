@@ -10,6 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brukerdialog.soeknad.SoeknadSkyggeRequest
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
@@ -109,4 +110,13 @@ class BehandlingClient(
                     contentType(ContentType.Application.Json)
                 }.body()
         }
+
+    fun opprettSoeknadSkyggeTask(request: SoeknadSkyggeRequest) {
+        runBlocking {
+            sakOgBehandlingApp.post("$url/api/prosessering/skygge/soeknad") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+        }
+    }
 }

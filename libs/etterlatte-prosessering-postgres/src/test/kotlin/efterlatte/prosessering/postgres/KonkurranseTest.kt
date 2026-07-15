@@ -1,7 +1,10 @@
 package efterlatte.prosessering.postgres
 
 import efterlatte.prosessering.ProcessingEngine
+import efterlatte.prosessering.StandardTaskProdusent
 import efterlatte.prosessering.Status
+import efterlatte.prosessering.strengType
+import efterlatte.prosessering.taskSteg
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -20,6 +23,7 @@ class KonkurranseTest {
     private val container: PostgreSQLContainer<*> = TestStotte.startPostgres()
     private val dataSource: DataSource = TestStotte.datasource(container, poolStorrelse = 40)
     private val repo = PostgresTaskRepository(dataSource)
+    private val produsent = StandardTaskProdusent(repo)
 
     init {
         TestStotte.anvendSkjema(dataSource)
@@ -36,9 +40,10 @@ class KonkurranseTest {
         runBlocking {
             val antallTasks = 1000
             val antallEngines = 4
+            val sendVedtaksbrev = strengType("SendVedtaksbrev")
 
             repeat(antallTasks) { i ->
-                repo.insert(type = "SendVedtaksbrev", payload = """{"nr":$i}""")
+                produsent.opprettFrittstående(type = sendVedtaksbrev, payload = """{"nr":$i}""")
             }
 
             // Tråd-sikker fasit: hver task-id skal kun forekomme én gang.
@@ -47,17 +52,20 @@ class KonkurranseTest {
 
             val engines =
                 (1..antallEngines).map { nr ->
+                    val steg =
+                        taskSteg(sendVedtaksbrev) { kontekst ->
+                            // DB-en håndhever også via UNIQUE-constraint: en dobbel-kjøring kaster her.
+                            TestStotte.loggEksekvering(dataSource = dataSource, taskId = kontekst.task.id, node = "pod-$nr")
+                            eksekveringerPerTask.computeIfAbsent(kontekst.task.id) { AtomicInteger(0) }.incrementAndGet()
+                            totaltAntall.incrementAndGet()
+                        }
                     ProcessingEngine(
                         repo = repo,
+                        produsent = produsent,
+                        steg = listOf(steg),
                         node = "pod-$nr",
                         batchStorrelse = 20,
                         maxSamtidighet = 8,
-                        handler = { task ->
-                            // DB-en håndhever også via UNIQUE-constraint: en dobbel-kjøring kaster her.
-                            TestStotte.loggEksekvering(dataSource = dataSource, taskId = task.id, node = "pod-$nr")
-                            eksekveringerPerTask.computeIfAbsent(task.id) { AtomicInteger(0) }.incrementAndGet()
-                            totaltAntall.incrementAndGet()
-                        },
                     )
                 }
 

@@ -39,7 +39,7 @@ class ReaperTest {
     @Test
     fun `hengende KJOERER-task eldre enn timeout settes tilbake til KLAR`() =
         runBlocking {
-            val taskId = repo.insert(type = "Hengende", payload = "{}")
+            val taskId = repo.insertFrittstaaende(type = "Hengende", payload = "{}", triggerTid = Instant.now())
             repo.claimBatch(limit = 10)
             assertEquals(Status.KJØRER, repo.finn(taskId)!!.status, "Skal være plukket til KJØRER")
 
@@ -61,7 +61,7 @@ class ReaperTest {
     @Test
     fun `nettopp plukket task innenfor timeout roeres ikke`() =
         runBlocking {
-            val taskId = repo.insert(type = "FerskKjoerer", payload = "{}")
+            val taskId = repo.insertFrittstaaende(type = "FerskKjoerer", payload = "{}", triggerTid = Instant.now())
             repo.claimBatch(limit = 10)
             assertEquals(Status.KJØRER, repo.finn(taskId)!!.status, "Skal være plukket til KJØRER")
 

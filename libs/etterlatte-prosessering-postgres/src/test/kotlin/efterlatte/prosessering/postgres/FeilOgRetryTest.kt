@@ -1,8 +1,11 @@
 package efterlatte.prosessering.postgres
 
 import efterlatte.prosessering.ProcessingEngine
+import efterlatte.prosessering.StandardTaskProdusent
 import efterlatte.prosessering.Status
 import efterlatte.prosessering.Stoppaarsak
+import efterlatte.prosessering.strengType
+import efterlatte.prosessering.taskSteg
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -22,6 +25,7 @@ class FeilOgRetryTest {
     private val container: PostgreSQLContainer<*> = TestStotte.startPostgres()
     private val dataSource: DataSource = TestStotte.datasource(container, poolStorrelse = 10)
     private val repo = PostgresTaskRepository(dataSource)
+    private val produsent = StandardTaskProdusent(repo)
 
     init {
         TestStotte.anvendSkjema(dataSource)
@@ -37,21 +41,26 @@ class FeilOgRetryTest {
     fun `task som alltid feiler havner i STOPPET etter maxAntallFeil og retries underveis`() =
         runBlocking {
             val maxAntallFeil = 3
-            val taskId = repo.insert(type = "AlltidFeil", payload = "{}")
+            val alltidFeil = strengType("AlltidFeil")
             val antallForsok = AtomicInteger(0)
+            val taskId = produsent.opprettFrittstående(type = alltidFeil, payload = "{}").verdi
 
             val engine =
                 ProcessingEngine(
                     repo = repo,
+                    produsent = produsent,
+                    steg =
+                        listOf(
+                            taskSteg(alltidFeil) {
+                                antallForsok.incrementAndGet()
+                                throw IllegalStateException("simulert feil")
+                            },
+                        ),
                     node = "pod-feil",
                     batchStorrelse = 5,
                     maxSamtidighet = 2,
                     maxAntallFeil = maxAntallFeil,
                     backoff = { 50.milliseconds },
-                    handler = {
-                        antallForsok.incrementAndGet()
-                        throw IllegalStateException("simulert feil")
-                    },
                 )
 
             engine.start()
@@ -82,23 +91,28 @@ class FeilOgRetryTest {
     @Test
     fun `task som feiler en gang og deretter lykkes ender FULLFØRT via KLAR`() =
         runBlocking {
-            val taskId = repo.insert(type = "FeilEnGang", payload = "{}")
+            val feilEnGang = strengType("FeilEnGang")
             val forsokPerTask = ConcurrentHashMap<Long, AtomicInteger>()
             val observerteStatuser = mutableListOf<Status>()
+            val taskId = produsent.opprettFrittstående(type = feilEnGang, payload = "{}").verdi
 
             val engine =
                 ProcessingEngine(
                     repo = repo,
+                    produsent = produsent,
+                    steg =
+                        listOf(
+                            taskSteg(feilEnGang) { kontekst ->
+                                val forsok = forsokPerTask.computeIfAbsent(kontekst.task.id) { AtomicInteger(0) }.incrementAndGet()
+                                if (forsok == 1) throw IllegalStateException("feiler første gang")
+                                // andre gang: lykkes
+                            },
+                        ),
                     node = "pod-retry",
                     batchStorrelse = 5,
                     maxSamtidighet = 2,
                     maxAntallFeil = 3,
                     backoff = { 50.milliseconds },
-                    handler = { task ->
-                        val forsok = forsokPerTask.computeIfAbsent(task.id) { AtomicInteger(0) }.incrementAndGet()
-                        if (forsok == 1) throw IllegalStateException("feiler første gang")
-                        // andre gang: lykkes
-                    },
                 )
 
             engine.start()

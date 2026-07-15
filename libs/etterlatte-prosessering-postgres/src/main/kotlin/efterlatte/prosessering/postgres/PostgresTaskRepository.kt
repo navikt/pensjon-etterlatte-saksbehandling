@@ -4,6 +4,8 @@ import efterlatte.prosessering.Status
 import efterlatte.prosessering.Stoppaarsak
 import efterlatte.prosessering.Task
 import efterlatte.prosessering.TaskRepository
+import efterlatte.prosessering.Transaksjon
+import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
@@ -32,14 +34,31 @@ class PostgresTaskRepository(
             }
         }
 
-    override fun markFullført(id: Long) =
+    override fun <T> iEgenTransaksjon(block: (Transaksjon) -> T): T =
         dataSource.connection.use { connection ->
-            connection.prepareStatement(MARK_FULLFØRT_SQL).use { statement ->
-                statement.setLong(1, id)
-                statement.executeUpdate()
-                Unit
+            val forrigeAutoCommit = connection.autoCommit
+            connection.autoCommit = false
+            try {
+                val resultat = block(JdbcTransaksjon(connection))
+                connection.commit()
+                resultat
+            } catch (e: Throwable) {
+                connection.rollback()
+                throw e
+            } finally {
+                connection.autoCommit = forrigeAutoCommit
             }
         }
+
+    override fun markerFullført(
+        transaksjon: Transaksjon,
+        id: Long,
+    ) {
+        transaksjon.connection().prepareStatement(MARK_FULLFØRT_SQL).use { statement ->
+            statement.setLong(1, id)
+            statement.executeUpdate()
+        }
+    }
 
     override fun markFeilet(
         id: Long,
@@ -87,23 +106,38 @@ class PostgresTaskRepository(
         }
 
     override fun insert(
+        transaksjon: Transaksjon,
         type: String,
         payload: String?,
         triggerTid: Instant,
-        status: Status,
+    ): Long = insertMed(transaksjon.connection(), type, payload, triggerTid)
+
+    override fun insertFrittstaaende(
+        type: String,
+        payload: String?,
+        triggerTid: Instant,
+    ): Long = iEgenTransaksjon { transaksjon -> insert(transaksjon, type, payload, triggerTid) }
+
+    private fun insertMed(
+        connection: Connection,
+        type: String,
+        payload: String?,
+        triggerTid: Instant,
     ): Long =
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(INSERT_SQL).use { statement ->
-                statement.setString(1, type)
-                statement.setString(2, status.name)
-                statement.setString(3, payload)
-                statement.setTimestamp(4, Timestamp.from(triggerTid))
-                statement.executeQuery().use { resultSet ->
-                    resultSet.next()
-                    resultSet.getLong("id")
-                }
+        connection.prepareStatement(INSERT_SQL).use { statement ->
+            statement.setString(1, type)
+            statement.setString(2, Status.KLAR.name)
+            statement.setString(3, payload)
+            statement.setTimestamp(4, Timestamp.from(triggerTid))
+            statement.executeQuery().use { resultSet ->
+                resultSet.next()
+                resultSet.getLong("id")
             }
         }
+
+    private fun Transaksjon.connection(): Connection =
+        (this as? JdbcTransaksjon)?.connection
+            ?: error("Forventet JdbcTransaksjon, fikk ${this::class.simpleName}")
 
     private fun ResultSet.tilTask(): Task =
         Task(

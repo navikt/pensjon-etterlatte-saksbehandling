@@ -100,15 +100,26 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
   (STOPPET + KLAR-retry) på Testcontainers.
 
 ### Fase 1 — Fullfør motoren
-- Typed `TaskStep<P>` / `TaskType<P>` + payload-(de)serialisering + produsent-API
-  (`opprett` / `opprettFrittstående`, se [04-outbox-api.md](04-outbox-api.md)).
+- ✅ **Typed `TaskStep<P>` / `TaskType<P>` + payload-serialisering.** `TaskType<P>`
+  bærer `serialiser`/`deserialiser` som funksjoner → `core` binder seg ikke til
+  Jackson/kotlinx og forblir framework-agnostisk. `strengType(navn)` for rå-streng-payload.
+  `TaskStep<P>` er **blokkerende** (ikke `suspend`) — kjøres i én tx på én tråd.
+- ✅ **Produsent-API `opprett` / `opprettFrittstående`** (se [04-outbox-api.md](04-outbox-api.md)).
+  `Transaksjon`-markørinterface + `TaskId` i `core`; `JdbcTransaksjon(connection)` i
+  `postgres`. `StandardTaskProdusent` serialiserer og delegerer til repoet. `opprett`
+  skriver på kallerens tx; `opprettFrittstående` åpner sin egen. Outbox-garantien
+  bevist i `OutboxTest` (rollback tar tasken med seg; commit beholder den).
+- ✅ **Transaksjon-per-steg** (beslutning 2): `TaskRepository.iEgenTransaksjon { tx -> … }`
+  pakker hver stegkjøring; `markerFullført(tx, id)` committer atomisk med stegets skriv.
+  `TaskKontekst.opprettNesteTask(...)` legger neste task på samme tx (atomiske kjeder).
+  Feil → rollback + feil-bokføring i egen tx (KLAR m/backoff eller STOPPET).
 - ✅ **Reaper**: `KJØRER` eldre enn `plukket_tid`-timeout → `KLAR` (dekker pod som dør
-  midt i et steg). Ligger i `core` (`Reaper`, coroutine-løkke) med port-metoden
-  `TaskRepository.gjenopprettHengende(plukketFoer)` og JDBC-impl i `postgres`. Reaperen
-  teller *ikke* dette som et retry (`antall_feil` røres ikke) — en død pod er ikke en
-  stegfeil. Testet på Testcontainers (hengende → KLAR; fersk KJØRER → urørt).
-- Flyway i stedet for rå `schema.sql`; flere ports ved behov (`Klokke`, `Metrics`).
-- Behold konkurransebeviset.
+  midt i et steg). `Reaper` i `core` + `TaskRepository.gjenopprettHengende(plukketFoer)`.
+  Teller *ikke* som retry (`antall_feil` røres ikke). Testet på Testcontainers.
+- **Gjenstår:** Flyway i stedet for rå `schema.sql`; flere ports ved behov
+  (`Klokke`, `Metrics`).
+- ✅ Konkurransebeviset beholdt (1000 tasks, 4 engines, 0 dobbeltkjøring) — nå via
+  typed steg + produsent.
 
 ### Fase 2 — `ktor`-plugin (minimal)
 - `install(Prosessering)` som starter/stopper engine på `ApplicationStarted` /

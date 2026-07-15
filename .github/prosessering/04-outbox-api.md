@@ -166,11 +166,21 @@ trege eksterne kall før DB-skrivene sine der det er mulig.
 - Ingen kodevei åpner noen gang en skjult transaction på vegne av `opprett`. Å velge
   bort outbox skrives `opprettFrittstående`.
 
+## Avklart (implementert i PoC-en, 2026-07)
+
+- **`TaskType<P>` / `TaskStep<P>`**: `TaskType<P>` bærer `navn` + `serialiser`/`deserialiser`
+  som funksjoner (payload-serialisering uten framework-binding i `core`). `TaskStep<P>` er
+  **blokkerende**, ikke `suspend` — kjøres i én tx på én tråd. `strengType(navn)` for
+  rå-streng-payload. Per-step config (maxAntallFeil/backoff/manuell) er ennå engine-globalt;
+  per-type-config gjenstår.
+- **`TaskKontekst<P>`-flate**: `task`, `payload` (deserialisert), `transaksjon`, og
+  `opprettNesteTask(type, payload, triggerTid)` som legger neste task på samme tx.
+- **`TaskRepository`-port**: `claimBatch`, `iEgenTransaksjon { tx -> … }`,
+  `markerFullført(tx, id)`, `markFeilet(...)` (egen tx), `gjenopprettHengende(plukketFoer)`,
+  `insert(tx, …)` / `insertFrittstaaende(…)`.
+
 ## Åpne tråder (neste økter)
 
-- `TaskStep<P>` / `TaskType<P>`-design: payload-(de)serialisering, per-step config
-  (maxAntallFeil, backoff, settTilManuellOppfølging), step registry.
-- `TaskKontekst`-flate: nøyaktig hva et step kan nå (opprettNesteTask, metadata,
-  logger, …).
-- `TaskRepository`-portsignaturer formet av denne beslutningen (claim / iEgenTransaksjon /
-  markerFullført / feil-bokføring).
+- Per-type-config (maxAntallFeil, backoff, settTilManuellOppfølging) og et eksplisitt
+  step-register utover engine-konstruktørens `steg`-liste.
+- Flyway-migrering i stedet for rå `schema.sql`; `Klokke`/`Metrics`-ports.

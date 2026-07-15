@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.logging.slf4japi)
 
     testImplementation(project(":libs:etterlatte-prosessering-postgres"))
+    testImplementation(libs.bundles.jackson)
     testImplementation(libs.database.hikaricp)
     testImplementation(libs.database.postgresql)
     testImplementation(libs.ktor.servertests)

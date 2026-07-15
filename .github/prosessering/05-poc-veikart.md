@@ -138,9 +138,19 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
   `opprettFrittstående`-task og kjører den til `FULLFØRT`. Grønn.
 - **Reaperen kan slås av** (`reaperPaa = false`) for test/kontekster uten behov.
 
-### Fase 3 — `SoeknadMottakSkygge`-task-type
-- Payload: `soeknadId`, `sakType` (BP/OMS), `fnrSoeker`.
-- Steg: valider fnr + skjema, logg «ville opprettet behandling …». Ingen sideeffekter.
+### Fase 3 — `SoeknadMottakSkygge`-task-type ✅ GJORT
+- **Typed payload** `SoeknadMottakPayload(soeknadId, sakType, fnrSoeker)` med `SakType`
+  (BP/OMS). Task-typen bærer sin egen Jackson-(de)serialisering → `core` forblir
+  framework-agnostisk; verten velger serialiseringsteknologi.
+- **Steg** validerer fnr (11 siffer) + skjema (soeknadId ikke tom) og *logger* «ville
+  opprettet behandling …» — **ingen sideeffekter**, ingen kall til `etterlatte-behandling`.
+  Validering som feiler kaster → motoren gir KLAR-retry og til slutt STOPPET (FEIL).
+- **Plassert i ktor-modulens testkilde** (`…ktor.skygge`) med vilje: dette er *vertens*
+  domene, ikke gjenbrukbar prosessering-infra, så det skal ikke ligge i biblioteks-main.
+  Ved Fase 4 flyttes tilsvarende task-type inn i `etterlatte-behandling` (host-en).
+- **Bevist på Testcontainers:** gyldig søknad → task → FULLFØRT (mottaket observert), og
+  ugyldig fnr → retry → STOPPET (Stoppaarsak.FEIL), uten at steget noensinne observerer
+  en ugyldig søknad.
 
 ### Fase 4 — Skyggekjøring ende-til-ende i Gjenny
 - Opprett task fra søknad-eventet (parallelt med `NySoeknadRiver`).

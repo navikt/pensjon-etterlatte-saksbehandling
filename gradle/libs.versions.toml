@@ -16,6 +16,8 @@ tbdlibs-version = "2026.02.19-20.58-521cdd3c" # OBS! rapidsandrivers bruker denn
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.4" }
 
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2" }
+
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "7.0.2" }
 database-flywaydb = { module = "org.flywaydb:flyway-core", version = "12.6.2" }
 database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "12.6.2" }

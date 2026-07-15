@@ -48,4 +48,6 @@ include(
     "libs:etterlatte-tidshendelser-model",
     "libs:etterlatte-omregning-model",
     "libs:etterlatte-inntektsjustering-model",
+    "libs:etterlatte-prosessering-core",
+    "libs:etterlatte-prosessering-postgres",
 )

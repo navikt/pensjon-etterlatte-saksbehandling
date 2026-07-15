@@ -23,6 +23,13 @@ interface TaskRepository {
         nesteTriggerTid: Instant,
     )
 
+    /**
+     * Tar tilbake tasker som står i [Status.KJØRER] med [Task.plukketTid] eldre
+     * enn [plukketFoer], og setter dem tilbake til [Status.KLAR]. Dekker poden
+     * som døde midt i et steg. Returnerer antall gjenopprettede tasker.
+     */
+    fun gjenopprettHengende(plukketFoer: Instant): Int
+
     fun finn(id: Long): Task?
 
     fun antallMedStatus(status: Status): Int

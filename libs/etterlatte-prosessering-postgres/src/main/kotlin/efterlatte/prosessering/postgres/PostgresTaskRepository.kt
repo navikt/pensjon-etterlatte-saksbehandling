@@ -57,6 +57,14 @@ class PostgresTaskRepository(
         }
     }
 
+    override fun gjenopprettHengende(plukketFoer: Instant): Int =
+        dataSource.connection.use { connection ->
+            connection.prepareStatement(GJENOPPRETT_HENGENDE_SQL).use { statement ->
+                statement.setTimestamp(1, Timestamp.from(plukketFoer))
+                statement.executeUpdate()
+            }
+        }
+
     override fun finn(id: Long): Task? =
         dataSource.connection.use { connection ->
             connection.prepareStatement("SELECT * FROM task WHERE id = ?").use { statement ->
@@ -126,6 +134,13 @@ class PostgresTaskRepository(
 
         private val MARK_FULLFØRT_SQL =
             "UPDATE task SET status = 'FULLFØRT', versjon = versjon + 1 WHERE id = ?"
+
+        private val GJENOPPRETT_HENGENDE_SQL =
+            """
+            UPDATE task
+               SET status = 'KLAR', plukket_tid = NULL, versjon = versjon + 1
+             WHERE status = 'KJØRER' AND plukket_tid < ?
+            """.trimIndent()
 
         private val MARK_FEILET_SQL =
             """

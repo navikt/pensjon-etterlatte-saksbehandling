@@ -102,7 +102,11 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
 ### Fase 1 — Fullfør motoren
 - Typed `TaskStep<P>` / `TaskType<P>` + payload-(de)serialisering + produsent-API
   (`opprett` / `opprettFrittstående`, se [04-outbox-api.md](04-outbox-api.md)).
-- Reaper: reset `KJØRER` eldre enn timeout → `KLAR` (dekker pod som dør midt i et steg).
+- ✅ **Reaper**: `KJØRER` eldre enn `plukket_tid`-timeout → `KLAR` (dekker pod som dør
+  midt i et steg). Ligger i `core` (`Reaper`, coroutine-løkke) med port-metoden
+  `TaskRepository.gjenopprettHengende(plukketFoer)` og JDBC-impl i `postgres`. Reaperen
+  teller *ikke* dette som et retry (`antall_feil` røres ikke) — en død pod er ikke en
+  stegfeil. Testet på Testcontainers (hengende → KLAR; fersk KJØRER → urørt).
 - Flyway i stedet for rå `schema.sql`; flere ports ved behov (`Klokke`, `Metrics`).
 - Behold konkurransebeviset.
 

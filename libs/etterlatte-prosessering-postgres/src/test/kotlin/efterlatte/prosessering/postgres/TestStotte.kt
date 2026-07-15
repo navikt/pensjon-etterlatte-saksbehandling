@@ -39,7 +39,7 @@ object TestStotte {
         taskId: Long,
         node: String,
     ) = dataSource.connection.use { connection ->
-        connection.prepareStatement("INSERT INTO execution_log (task_id, node) VALUES (?, ?)").use { statement ->
+        connection.prepareStatement("INSERT INTO prosessering.execution_log (task_id, node) VALUES (?, ?)").use { statement ->
             statement.setLong(1, taskId)
             statement.setString(2, node)
             statement.executeUpdate()
@@ -48,7 +48,7 @@ object TestStotte {
 
     fun antallEksekveringer(dataSource: DataSource): Int =
         dataSource.connection.use { connection ->
-            connection.prepareStatement("SELECT count(*) FROM execution_log").use { statement ->
+            connection.prepareStatement("SELECT count(*) FROM prosessering.execution_log").use { statement ->
                 statement.executeQuery().use { resultSet ->
                     resultSet.next()
                     resultSet.getInt(1)

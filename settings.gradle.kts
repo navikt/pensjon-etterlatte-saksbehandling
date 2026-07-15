@@ -50,4 +50,5 @@ include(
     "libs:etterlatte-inntektsjustering-model",
     "libs:etterlatte-prosessering-core",
     "libs:etterlatte-prosessering-postgres",
+    "libs:etterlatte-prosessering-ktor",
 )

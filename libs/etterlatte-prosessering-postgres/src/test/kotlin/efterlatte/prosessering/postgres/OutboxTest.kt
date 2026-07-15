@@ -31,7 +31,7 @@ class OutboxTest {
     @BeforeEach
     fun tomTabell() {
         dataSource.connection.use { connection ->
-            connection.createStatement().use { it.execute("TRUNCATE TABLE task") }
+            connection.createStatement().use { it.execute("TRUNCATE TABLE prosessering.task") }
         }
     }
 

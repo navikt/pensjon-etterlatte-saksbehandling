@@ -75,7 +75,7 @@ Fra målbildets 7 moduler ([02-arkitektur.md](02-arkitektur.md)) skjærer vi til
 |---|:---:|---|
 | `core` | ✅ | Domene (5-status), state machine, coroutine-engine, ports, `TaskStep<P>` / `TaskType<P>`, produsent |
 | `postgres` | ✅ | JDBC-repo, Flyway, `SKIP LOCKED`, reaper |
-| `ktor` | ✅ (minimal) | `install(Prosessering)` — lifecycle + produsent-wiring. **Ingen REST-ruter ennå** |
+| `ktor` | ✅ (minimal) | `install(Prosessering)` — lifecycle + produsent-wiring **implementert**. Ingen REST-ruter ennå |
 | `api` (REST/OpenAPI) | ❌ | Senere (trengs først med UI) |
 | `tck` | ❌ | Senere |
 | `spring-boot-starter` | ❌ | Senere (ef-sak) |
@@ -116,15 +116,27 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
 - ✅ **Reaper**: `KJØRER` eldre enn `plukket_tid`-timeout → `KLAR` (dekker pod som dør
   midt i et steg). `Reaper` i `core` + `TaskRepository.gjenopprettHengende(plukketFoer)`.
   Teller *ikke* som retry (`antall_feil` røres ikke). Testet på Testcontainers.
-- **Gjenstår:** Flyway i stedet for rå `schema.sql`; flere ports ved behov
+- **Skjema-støtte:** `PostgresTaskRepository(skjema = "prosessering")` — SQL-en er
+  skjema-kvalifisert, default `prosessering`. Bibliotekets `schema.sql` (test) oppretter
+  skjemaet. Klart for behandling-DB (se «Besluttet: hvor task-tabellen bor»).
+- **Gjenstår:** Flyway-migrasjon i behandling som oppretter `prosessering`-skjemaet +
+  tabellene (avventer eksplisitt go — treffer prod-DB); flere ports ved behov
   (`Klokke`, `Metrics`).
 - ✅ Konkurransebeviset beholdt (1000 tasks, 4 engines, 0 dobbeltkjøring) — nå via
   typed steg + produsent.
 
-### Fase 2 — `ktor`-plugin (minimal)
-- `install(Prosessering)` som starter/stopper engine på `ApplicationStarted` /
-  `ApplicationStopped`, og eksponerer `TaskProdusent`.
-- Wires mot en Postgres i en Gjenny-Ktor-app.
+### Fase 2 — `ktor`-plugin (minimal) ✅ GJORT
+- **`libs/etterlatte-prosessering-ktor`**: `install(Prosessering)` bygget som en
+  `createApplicationPlugin`. Konfig (`ProsesseringConfig`) tar vertens `repository`
+  (adapter mot dens DB), `steg` og `node`; motor/reaper beholder egne standarder.
+- **Livssyklus wiret:** `ApplicationStarted` → `engine.start()` (+ reaper), og
+  `ApplicationStopPreparing` → `engine.stop()`/`reaper.stop()` i `runBlocking`
+  (graceful shutdown). Ingen REST-ruter, som planlagt.
+- **Produsent eksponert** via `Application.taskProdusent` (attribute-nøkkel), så
+  ruter/handlere kan legge arbeid i kø etter `install`.
+- Ende-til-ende-test på Testcontainers: appen starter → motoren plukker en KLAR
+  `opprettFrittstående`-task og kjører den til `FULLFØRT`. Grønn.
+- **Reaperen kan slås av** (`reaperPaa = false`) for test/kontekster uten behov.
 
 ### Fase 3 — `SoeknadMottakSkygge`-task-type
 - Payload: `soeknadId`, `sakType` (BP/OMS), `fnrSoeker`.
@@ -154,9 +166,36 @@ håndhevet av modulskillet, slik at uttrekket senere blir et rent kopier-ut.
 
 ---
 
+## Besluttet: hvor task-tabellen bor
+
+**Task-tabellen bor i `etterlatte-behandling` sin database, i et eget Postgres-skjema
+`prosessering`.** Hard føring fra outbox-beslutningen: tasken må skrives i samme
+DB/transaksjon som behandlings-skrivet (ellers dual-write), og behandlingen opprettes
+i behandling-REST. Sentraliseringen mot behandling peker samme vei. Motoren embeddes i
+behandling-REST (Ktor) via `install(Prosessering)`.
+
+- **Eget skjema `prosessering`** (ikke behandlings hovedskjema): logisk isolasjon fra de
+  ~237 behandlings-migrasjonene, ingen navnekollisjon på generiske navn (`task`), og et
+  rent kutt-ut ved Fase 5. Outbox holder — samme connection skriver på tvers av skjema i
+  samme database. `PostgresTaskRepository(skjema = "prosessering")` er default; SQL-en er
+  skjema-kvalifisert.
+- **Skygge produseres løsrevet/ad hoc først** (`opprettFrittstående`), *ikke* koblet på
+  søknad-eventet ennå. Poenget er å bevise motor + observerbarhet; event-koblingen er
+  Fase 4 og bør bygges som det *ekte* outbox-tilfellet (task i samme tx som behandling),
+  ikke som en midlertidig skygge-kobling.
+- **Nyanse:** søknad-eventet konsumeres i `etterlatte-behandling-kafka` (egen app), mens
+  produsent + motor hører hjemme i behandling-REST (regel: ingen app skriver i en annen
+  apps DB). Event-drevet task-opprettelse må derfor gå *via* behandling-REST når den tid
+  kommer.
+
+**Gjenstår (eksplisitt menneske-i-loop før prod):** Flyway-migrasjon som oppretter
+`prosessering`-skjemaet + tabellene i behandling-DB. Ikke lagt inn ennå — den treffer en
+kritisk produksjonsdatabase og bør godkjennes bevisst.
+
+---
+
 ## Åpne tråder å sparre om videre
 
-- Hvor skal task-tabellene bo i Gjenny? (Egen app-DB, f.eks. `etterlatte-behandling`,
-  eller et dedikert lite skjema.) For skygge holder `opprettFrittstående`.
-- Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt.
+- Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
+  (Fase 4 — via behandling-REST).
 - Når går vi fra skygge til ekte outbox (task i samme tx som behandling)?

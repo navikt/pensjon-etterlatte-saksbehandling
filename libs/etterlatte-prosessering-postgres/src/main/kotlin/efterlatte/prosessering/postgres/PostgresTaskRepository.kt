@@ -15,16 +15,24 @@ import javax.sql.DataSource
  * Postgres-implementasjon av [TaskRepository]. Ren JDBC (ingen Spring Data),
  * slik at samme SQL kan tjene alle adaptere.
  *
+ * Tabellene bor i et eget [skjema] (default `prosessering`) i vertens database.
+ * Eget skjema holder bibliotekets tabeller logisk adskilt fra vertens domene-
+ * skjema — outbox-garantien er upåvirket, siden `opprett` fortsatt skriver på
+ * samme connection/transaksjon som forretnings-skrivet (samme database).
+ *
  * Plukk-strategien låner db-schedulers `SELECT … FOR UPDATE SKIP LOCKED`-teknikk
  * uten avhengigheten: én atomisk CTE-update flipper klare rader til KJØRER og
  * committer, som er det som gjør at andre pods hopper over dem.
  */
 class PostgresTaskRepository(
     private val dataSource: DataSource,
+    skjema: String = "prosessering",
 ) : TaskRepository {
+    private val tabell = "$skjema.task"
+
     override fun claimBatch(limit: Int): List<Task> =
         dataSource.connection.use { connection ->
-            connection.prepareStatement(CLAIM_BATCH_SQL).use { statement ->
+            connection.prepareStatement(claimBatchSql).use { statement ->
                 statement.setInt(1, limit)
                 statement.executeQuery().use { resultSet ->
                     buildList {
@@ -54,7 +62,7 @@ class PostgresTaskRepository(
         transaksjon: Transaksjon,
         id: Long,
     ) {
-        transaksjon.connection().prepareStatement(MARK_FULLFØRT_SQL).use { statement ->
+        transaksjon.connection().prepareStatement(markFullførtSql).use { statement ->
             statement.setLong(1, id)
             statement.executeUpdate()
         }
@@ -66,7 +74,7 @@ class PostgresTaskRepository(
         stoppaarsak: Stoppaarsak?,
         nesteTriggerTid: Instant,
     ) = dataSource.connection.use { connection ->
-        connection.prepareStatement(MARK_FEILET_SQL).use { statement ->
+        connection.prepareStatement(markFeiletSql).use { statement ->
             statement.setString(1, nyStatus.name)
             statement.setString(2, stoppaarsak?.name)
             statement.setTimestamp(3, Timestamp.from(nesteTriggerTid))
@@ -78,7 +86,7 @@ class PostgresTaskRepository(
 
     override fun gjenopprettHengende(plukketFoer: Instant): Int =
         dataSource.connection.use { connection ->
-            connection.prepareStatement(GJENOPPRETT_HENGENDE_SQL).use { statement ->
+            connection.prepareStatement(gjenopprettHengendeSql).use { statement ->
                 statement.setTimestamp(1, Timestamp.from(plukketFoer))
                 statement.executeUpdate()
             }
@@ -86,7 +94,7 @@ class PostgresTaskRepository(
 
     override fun finn(id: Long): Task? =
         dataSource.connection.use { connection ->
-            connection.prepareStatement("SELECT * FROM task WHERE id = ?").use { statement ->
+            connection.prepareStatement("SELECT * FROM $tabell WHERE id = ?").use { statement ->
                 statement.setLong(1, id)
                 statement.executeQuery().use { resultSet ->
                     if (resultSet.next()) resultSet.tilTask() else null
@@ -96,7 +104,7 @@ class PostgresTaskRepository(
 
     override fun antallMedStatus(status: Status): Int =
         dataSource.connection.use { connection ->
-            connection.prepareStatement("SELECT count(*) FROM task WHERE status = ?").use { statement ->
+            connection.prepareStatement("SELECT count(*) FROM $tabell WHERE status = ?").use { statement ->
                 statement.setString(1, status.name)
                 statement.executeQuery().use { resultSet ->
                     resultSet.next()
@@ -124,7 +132,7 @@ class PostgresTaskRepository(
         payload: String?,
         triggerTid: Instant,
     ): Long =
-        connection.prepareStatement(INSERT_SQL).use { statement ->
+        connection.prepareStatement(insertSql).use { statement ->
             statement.setString(1, type)
             statement.setString(2, Status.KLAR.name)
             statement.setString(3, payload)
@@ -153,41 +161,39 @@ class PostgresTaskRepository(
             versjon = getLong("versjon"),
         )
 
-    companion object {
-        private val CLAIM_BATCH_SQL =
-            """
-            WITH klar AS (
-                SELECT id FROM task
-                 WHERE status = 'KLAR' AND trigger_tid <= now()
-                 ORDER BY trigger_tid LIMIT ?
-                 FOR UPDATE SKIP LOCKED
-            )
-            UPDATE task SET status = 'KJØRER', plukket_tid = now(), versjon = versjon + 1
-             WHERE id IN (SELECT id FROM klar) RETURNING *;
-            """.trimIndent()
+    private val claimBatchSql =
+        """
+        WITH klar AS (
+            SELECT id FROM $tabell
+             WHERE status = 'KLAR' AND trigger_tid <= now()
+             ORDER BY trigger_tid LIMIT ?
+             FOR UPDATE SKIP LOCKED
+        )
+        UPDATE $tabell SET status = 'KJØRER', plukket_tid = now(), versjon = versjon + 1
+         WHERE id IN (SELECT id FROM klar) RETURNING *;
+        """.trimIndent()
 
-        private val MARK_FULLFØRT_SQL =
-            "UPDATE task SET status = 'FULLFØRT', versjon = versjon + 1 WHERE id = ?"
+    private val markFullførtSql =
+        "UPDATE $tabell SET status = 'FULLFØRT', versjon = versjon + 1 WHERE id = ?"
 
-        private val GJENOPPRETT_HENGENDE_SQL =
-            """
-            UPDATE task
-               SET status = 'KLAR', plukket_tid = NULL, versjon = versjon + 1
-             WHERE status = 'KJØRER' AND plukket_tid < ?
-            """.trimIndent()
+    private val gjenopprettHengendeSql =
+        """
+        UPDATE $tabell
+           SET status = 'KLAR', plukket_tid = NULL, versjon = versjon + 1
+         WHERE status = 'KJØRER' AND plukket_tid < ?
+        """.trimIndent()
 
-        private val MARK_FEILET_SQL =
-            """
-            UPDATE task
-               SET status = ?, stoppaarsak = ?, antall_feil = antall_feil + 1,
-                   trigger_tid = ?, versjon = versjon + 1
-             WHERE id = ?
-            """.trimIndent()
+    private val markFeiletSql =
+        """
+        UPDATE $tabell
+           SET status = ?, stoppaarsak = ?, antall_feil = antall_feil + 1,
+               trigger_tid = ?, versjon = versjon + 1
+         WHERE id = ?
+        """.trimIndent()
 
-        private val INSERT_SQL =
-            """
-            INSERT INTO task (type, status, payload, trigger_tid)
-            VALUES (?, ?, ?, ?) RETURNING id
-            """.trimIndent()
-    }
+    private val insertSql =
+        """
+        INSERT INTO $tabell (type, status, payload, trigger_tid)
+        VALUES (?, ?, ?, ?) RETURNING id
+        """.trimIndent()
 }

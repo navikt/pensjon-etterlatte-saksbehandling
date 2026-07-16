@@ -178,7 +178,11 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
 
 **4b — kjør i dev (gjenstår, krever menneske-i-loop):**
 - Deploy behandling (med V352) + behandling-kafka til dev.
-- Flipp `prosessering-soeknad-skygge` på i dev; observer at søknader blir tasks som fullfører.
+- **Opprett feature-flagget `prosessering-soeknad-skygge` i team-Unleash (Unleash-web-UI-et,
+  ikke nais-yaml) og aktiver det for dev.** Ett flagg styrer begge appene siden de deler
+  nøkkelen. Til flagget finnes returnerer SDK-en default `false` → skyggekjøringen er mørk
+  (trygt av seg selv).
+- Flipp flagget på i dev; observer at søknader blir tasks som fullfører.
 - Fremtving feil → STOPPET → prøv igjen (via kall/logg siden UI er utenfor scope).
 
 ### Fase 5 — Kutt ut til eget repo
@@ -226,6 +230,15 @@ behandling-REST (Ktor) via `install(Prosessering)`.
 **Lagt inn (Fase 4a):** Flyway `V352__prosessering_skjema.sql` oppretter `prosessering`-skjemaet
 + `task`-tabellen i behandling-DB. Kjører i dev nå; prod-tilpasning tas ved behov senere
 (besluttet at dev holder for PoC-en).
+
+**Grants-lærdom (V353):** V352 opprettet skjemaet uten grants. På `POSTGRES_14` lener
+`public`-skjemaet seg på PostgreSQLs default PUBLIC-privilegier, men et *nytt* skjema arver
+ikke det — kun eieren (Flyway/app-brukeren) får tilgang. Motoren kjører derfor fint, men
+lesende roller (personlige IAM-brukere) får «permission denied for schema prosessering».
+`V353__prosessering_skjema_grants.sql` replikerer public-mønsteret (`GRANT USAGE` + `SELECT`
+til `PUBLIC` + `ALTER DEFAULT PRIVILEGES`). NB: `task.payload` inneholder `fnrSoeker` — greit
+i dev/PoC og konsistent med at hele public-skjemaet allerede eksponeres til PUBLIC på PG14,
+men strammes inn ved en evt. prod-tilpasning.
 
 ---
 

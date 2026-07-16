@@ -60,8 +60,11 @@ internal class SoeknadSkyggeRiver(
         context: MessageContext,
     ) {
         if (!featureToggleService.isEnabled(ProsesseringSkyggeToggle.SKYGGE_SOEKNADMOTTAK, false)) {
+            logger.info("Skyggekjøring: mottok soeknad_innsendt-event, men toggle er av — hopper over")
             return
         }
+
+        logger.info("Skyggekjøring: mottok soeknad_innsendt-event og toggle er på — legger søknad i prosessering-kø")
 
         val soeknadId = packet[SoeknadInnsendt.lagretSoeknadIdKey].longValue().toString()
         val soeknad = objectMapper.treeToValue<InnsendtSoeknad>(packet[SoeknadInnsendt.skjemaInfoKey])

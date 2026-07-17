@@ -269,6 +269,29 @@ holder oss i vår egen 5-status-modell.
 Vi blir værende i Gjenny og jobber videre med skyggekjøringen før Fase 5-uttrekket.
 Det er flere ting å diskutere/undersøke her.
 
+- **Rekjøring bevist ende-til-ende (2026-07-17). ✅ GJORT.**
+  For å demonstrere den ene styrken rapids-and-rivers ikke gir alene — et **stoppet arbeid
+  som kan plukkes opp igjen og fullføres** — la vi til en **feilbar demo-task** i host-en
+  (`etterlatte-behandling/prosessering/FeilbarDemoTask.kt`). Den modellerer en **forbigående**
+  feil: en simulert nedstrøms-avhengighet er «nede» frem til `simulertOppeFra`, så steget
+  kaster (→ retry → STOPPET) og fullfører først når avhengigheten er «oppe».
+  - **Task-type** `FeilbarDemo` med payload `FeilbarDemoPayload(demoId, simulertOppeFra)`.
+    Ingen sideeffekter — steget bare kaster (nede) eller logger (oppe). Registrert i motoren
+    via `installProsessering` (ved siden av skygge-steget).
+  - **Produsent-endepunkt** `POST /api/prosessering/demo/feilbar` (`prosesseringDemoRoutes`)
+    legger en demo-task i kø med `simulertOppeFra = now + vinduSekunder` (default 20 s).
+    Saksbehandler-auth, gated bak `ProsesseringToggles.PROSESSERING_ADMIN` — samme operatør-flate
+    som innsyns-/rekjør-API-et, og når via samme dev-only BFF-proxy `/api/prosessering`.
+  - **GUI:** en «Opprett demo-task»-knapp i `ProsesseringTasks.tsx` gjør hele loopen klikkbar:
+    opprett → se den gå STOPPET → vent til vinduet har gått → «Rekjør» → se den gå FULLFØRT.
+  - **Bevist på Testcontainers** (`FeilbarDemoRekjorIntegrationTest`): task feiler → STOPPET
+    (`Stoppaarsak.FEIL`), `ProsesseringAdminDao.rekjor` → KLAR, motoren plukker den → FULLFØRT.
+    Steget observerer aldri en fullføring mens avhengigheten er «nede». Grønn.
+  - **Merk:** dette er en *demo* av mekanikken (rekjør av STOPPET → FULLFØRT), ikke ekte arbeid.
+    Skygge-tasken (`SoeknadMottakSkygge`) er fortsatt deterministisk — en rekjør av dens STOPPET
+    ville feile likt igjen, siden validering er ren funksjon av payload. Demo-tasken finnes nettopp
+    fordi rekjøring bare gir mening når feilen er forbigående.
+
 - **Duplikate tasker? — undersøkt (2026-07-17). ✅ Avklart, tiltak gjenstår.**
   Dump av `prosessering.task` (33 rader) viste: alle `SoeknadMottakSkygge`, alle `FULLFØRT`,
   `antall_feil=0`, men kun **3 unike `soeknadId`** — `11764` (29 tasker, jevnt ~hvert 50. min),

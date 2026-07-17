@@ -32,3 +32,13 @@ export const hentProsesseringTasks = (args: {
 
 export const rekjorProsesseringTask = (id: number): Promise<ApiResponse<void>> =>
   apiClient.put<void>(`/prosessering/task/${id}/rekjor`, {})
+
+export interface FeilbarDemoResponse {
+  taskId: number
+  simulertOppeFra: string
+}
+
+export const opprettFeilbarDemoTask = (args: { vinduSekunder?: number }): Promise<ApiResponse<FeilbarDemoResponse>> =>
+  apiClient.post<FeilbarDemoResponse>('/prosessering/demo/feilbar', {
+    vinduSekunder: args.vinduSekunder ?? 20,
+  })

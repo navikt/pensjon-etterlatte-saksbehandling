@@ -65,6 +65,7 @@ import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
 import no.nav.etterlatte.prosessering.ProsesseringAdminDao
 import no.nav.etterlatte.prosessering.installProsessering
 import no.nav.etterlatte.prosessering.prosesseringAdminRoutes
+import no.nav.etterlatte.prosessering.prosesseringDemoRoutes
 import no.nav.etterlatte.prosessering.prosesseringSkyggeRoutes
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
@@ -294,6 +295,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     tilbakekrevingvedtakRoute(applicationContext.vedtakTilbakekrevingService)
 
     prosesseringSkyggeRoutes(applicationContext.featureToggleService)
+    prosesseringDemoRoutes(applicationContext.featureToggleService)
     prosesseringAdminRoutes(
         dao = ProsesseringAdminDao(applicationContext.dataSource),
         featureToggleService = applicationContext.featureToggleService,

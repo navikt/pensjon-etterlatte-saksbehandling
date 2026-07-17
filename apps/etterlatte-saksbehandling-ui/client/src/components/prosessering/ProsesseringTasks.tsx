@@ -21,6 +21,7 @@ import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import {
   hentProsesseringTasks,
   kanRekjores,
+  opprettFeilbarDemoTask,
   PROSESSERING_STATUSER,
   ProsesseringStatus,
   ProsesseringTask,
@@ -47,6 +48,7 @@ export const ProsesseringTasks = () => {
 
   const [tasksResult, hentTasks] = useApiCall(hentProsesseringTasks)
   const [rekjorResult, rekjor] = useApiCall(rekjorProsesseringTask)
+  const [demoResult, opprettDemo] = useApiCall(opprettFeilbarDemoTask)
 
   const oppdater = () => hentTasks({ status: statusFilter || undefined })
 
@@ -55,6 +57,8 @@ export const ProsesseringTasks = () => {
   }, [statusFilter])
 
   const rekjorTask = (task: ProsesseringTask) => rekjor(task.id, () => oppdater())
+
+  const opprettDemoTask = () => opprettDemo({}, () => oppdater())
 
   return (
     <Box padding="space-32" maxWidth="80rem">
@@ -83,7 +87,25 @@ export const ProsesseringTasks = () => {
           <Button variant="secondary" onClick={oppdater} loading={isPending(tasksResult)}>
             Oppdater
           </Button>
+          <Button variant="primary" onClick={opprettDemoTask} loading={isPending(demoResult)}>
+            Opprett demo-task (feiler, funker ved rekjør)
+          </Button>
         </HStack>
+
+        <BodyShort textColor="subtle">
+          Demo-tasken simulerer en nedstrøms-avhengighet som er «nede» i ~20 sekunder: den feiler og havner i STOPPET.
+          Vent til vinduet har gått og trykk «Rekjør» — da fullfører den.
+        </BodyShort>
+
+        {mapResult(demoResult, {
+          error: (error) => <ApiErrorAlert>Kunne ikke opprette demo-task: {error.detail}</ApiErrorAlert>,
+          success: (demo) => (
+            <Alert variant="success">
+              Opprettet demo-task {demo.taskId}. Simulert avhengighet er «oppe» fra{' '}
+              {formaterDatoMedKlokkeslett(demo.simulertOppeFra)}.
+            </Alert>
+          ),
+        })}
 
         {mapResult(rekjorResult, {
           error: (error) => <ApiErrorAlert>Kunne ikke rekjøre task: {error.detail}</ApiErrorAlert>,

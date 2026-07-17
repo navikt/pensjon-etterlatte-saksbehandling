@@ -14,8 +14,11 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import org.slf4j.LoggerFactory
+import java.time.Instant
+import java.util.UUID
 import javax.sql.DataSource
 
 private val logger = LoggerFactory.getLogger("ProsesseringModule")
@@ -51,7 +54,7 @@ fun Route.installProsessering(
 ) {
     application.install(Prosessering) {
         repository = PostgresTaskRepository(dataSource)
-        steg = listOf(soeknadMottakSkyggeSteg())
+        steg = listOf(soeknadMottakSkyggeSteg(), feilbarDemoSteg())
         this.node = node
     }
 }
@@ -85,6 +88,54 @@ fun Route.prosesseringSkyggeRoutes(featureToggleService: FeatureToggleService) {
                     )
                 logger.info("La skyggekjørings-task ${taskId.verdi} i kø for søknad ${request.soeknadId}")
                 call.respond(HttpStatusCode.Accepted)
+            }
+        }
+    }
+}
+
+/** Request for å opprette en [feilbarDemoType]-task. [vinduSekunder] styrer hvor lenge den simulerte
+ * avhengigheten er «nede» — task-en feiler til dette vinduet har gått, og fullfører ved rekjøring etterpå. */
+data class FeilbarDemoRequest(
+    val vinduSekunder: Long = 20,
+)
+
+data class FeilbarDemoResponse(
+    val taskId: Long,
+    val simulertOppeFra: Instant,
+)
+
+/**
+ * Operatør-/demo-endepunkt (PoC Fase 4d) som legger en [feilbarDemoType]-task i kø. Task-en feiler
+ * mens den simulerte avhengigheten er «nede» (frem til `now + vinduSekunder`), går til STOPPET når
+ * retriene er brukt opp, og fullfører når en operatør **rekjører** den etter at vinduet har gått.
+ * Formålet er å demonstrere rekjøring-styrken i konseptet fra ende til annen.
+ *
+ * Saksbehandler-auth og gated bak [ProsesseringToggles.PROSESSERING_ADMIN] — samme operatør-flate
+ * som innsyns- og rekjør-API-et ([prosesseringAdminRoutes]).
+ */
+fun Route.prosesseringDemoRoutes(featureToggleService: FeatureToggleService) {
+    route("/api/prosessering/demo/feilbar") {
+        post {
+            kunSaksbehandler {
+                if (!featureToggleService.isEnabled(ProsesseringToggles.PROSESSERING_ADMIN, false)) {
+                    call.respond(HttpStatusCode.NotFound)
+                    return@kunSaksbehandler
+                }
+
+                val request = call.receive<FeilbarDemoRequest>()
+                val simulertOppeFra = Instant.now().plusSeconds(request.vinduSekunder)
+                val payload =
+                    FeilbarDemoPayload(
+                        demoId = UUID.randomUUID().toString(),
+                        simulertOppeFra = simulertOppeFra,
+                    )
+                val taskId =
+                    call.application.taskProdusent.opprettFrittstående(
+                        type = feilbarDemoType,
+                        payload = payload,
+                    )
+                logger.info("La feilbar demo-task ${taskId.verdi} i kø (nede til $simulertOppeFra)")
+                call.respond(HttpStatusCode.Accepted, FeilbarDemoResponse(taskId = taskId.verdi, simulertOppeFra = simulertOppeFra))
             }
         }
     }

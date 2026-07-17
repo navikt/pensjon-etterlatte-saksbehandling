@@ -23,6 +23,9 @@ function hentApiConfigFraEnv() {
   }
 }
 
+// Prosessering-admin (operatør-innsyn i task-køen) skal kun være tilgjengelig i dev/lokalt.
+export const erProduksjon = process.env.NAIS_CLUSTER_NAME === 'prod-gcp'
+
 export const FeatureToggleConfig = {
   host: process.env.UNLEASH_SERVER_API_URL || '',
   token: process.env.UNLEASH_SERVER_API_TOKEN || '',

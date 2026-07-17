@@ -185,17 +185,57 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
 - Flipp flagget på i dev; observer at søknader blir tasks som fullfører.
 - Fremtving feil → STOPPET → prøv igjen (via kall/logg siden UI er utenfor scope).
 
-### Fase 4c — operatør-GUI via `etterlatte-testdata` (IMPLEMENTERT — venter på deploy + flagg)
+### Fase 4c — operatør-GUI ✅ GJORT (valg A: `etterlatte-saksbehandling-ui`, kun dev)
+
+> **Blokker funnet ved deploy (2026-07-17):** `etterlatte-testdata` kjører i Azure-tenant
+> **`nav.no`** (fordi den integrerer mot Dolly/testnav der), mens `etterlatte-behandling` og
+> `etterlatte-saksbehandling-ui` kjører i **`trygdeetaten.no`**. En NAIS-app har nøyaktig én
+> Azure-app i én tenant, og **OBO/client-credentials krysser ikke tenant-grenser** →
+> `AADSTS500011: resource principal named api://dev-gcp.etterlatte.etterlatte-behandling was
+> not found in the tenant`. testdata kan derfor **aldri** skaffe et token behandling godtar.
+> Det forklarer også hvorfor dagens dolly-`BehandlingKlient` peker mot vedtaksvurdering *uten*
+> token. Spec-antakelsen «testdata kaller behandling-REST med OBO» holder altså ikke.
+>
+> **Status:** behandling-siden (admin-API) er ferdig og deployet. testdata-frontenden er
+> **parkert** (`ProsesseringFeature` er kommentert ut av `features`-lista i testdata
+> `Application.kt` for å unngå live 500 i dev; klient/feature/template beholdes på disk).
+>
+> **Beslutning (2026-07-17): valg A — GUI i `etterlatte-saksbehandling-ui`.** Samme tenant
+> (`trygdeetaten.no`), ekte operatør-flate, og BFF-en OBO-er allerede inn i behandling.
+> **Kun dev** (både BFF-proxy og route/lenke er gatet), siden dette er PoC-innsyn og
+> `payload` inneholder `fnrSoeker` (jf. V353 — bør maskeres ved evt. prod-tilpasning).
+>
+> **Gjennomført (valg A, 2026-07-17):**
+> - **BFF-proxy** `/api/prosessering` → behandling (behandling-scope) i
+>   `etterlatte-saksbehandling-ui/server`, **kun når `NAIS_CLUSTER_NAME !== 'prod-gcp'`**
+>   (ny `erProduksjon` i `config.ts`). I prod finnes ruten ikke → 404.
+> - **React-side** `ProsesseringTasks.tsx` (`client/src/components/prosessering/`) +
+>   `prosesseringApi.ts`: lister tasks mot vår rene 5-status, statusfilter, «Rekjør»-knapp
+>   for `STOPPET`/`AVBRUTT` (kaller `PUT …/rekjor`). Route `/prosessering` i `App.tsx` er
+>   gatet bak `miljoeErDev`, og en dev-only lenke ligger i `AppSwitcher` («Utvikling (kun dev)»).
+> - **NB:** admin-API-et er fortsatt gatet bak `ProsesseringToggles.PROSESSERING_ADMIN` i
+>   behandling, så innsynet er dobbelt av (toggle av + kun-dev-proxy).
+>
+> **Åpent veivalg (historikk — valg A valgt):**
+> - **A (anbefalt) — legg admin-siden i `etterlatte-saksbehandling-ui`.** Samme tenant, ekte
+>   operatør-flate, BFF-en OBO-er allerede inn i behandling. Krever React/TS + BFF-proxy, dvs.
+>   faktisk UI-design (som er bevisst utsatt).
+> - **B — behold testdata-GUI, men gå via en trygdeetaten-app** (f.eks. gjøre
+>   `etterlatte-testdata-behandler` til REST-bro). Awkward: den er en Kafka-river, og
+>   testdata→den er også kryss-tenant.
+> - **C — behold testdata-GUI kun lokalt/dev** der token-kravet kan omgås, ikke i sky.
 
 Målet: kunne se og styre tasks (liste, detaljer, rekjøre) fra et GUI **uten** å bygge
 et fullverdig operatør-UI ennå, og **uten** å conforme mot noe eksternt kontrakt-format.
 
 **Beslutning (2026-07-17): bruk `etterlatte-testdata` sitt eget GUI, ikke
 `familie-prosessering-frontend`.** Vi eier `etterlatte-testdata` fullt ut, den har allerede
-et enkelt Mustache-GUI, kaller behandling-REST med saksbehandler-token (OBO), og brukes
-allerede til å teste appene våre. Da slipper vi å bro vår **5-status-modell** mot familie-
-prosesserings gamle 8-status + `Ressurs`-konvolutt + avvikshåndtering/kommentar/logg. Vi
-eksponerer vår rene 5-status (`KLAR`/`KJØRER`/`FULLFØRT`/`STOPPET`/`AVBRUTT`) direkte.
+et enkelt Mustache-GUI, og brukes allerede til å teste appene våre. Da slipper vi å bro vår
+**5-status-modell** mot familie-prosesserings gamle 8-status + `Ressurs`-konvolutt +
+avvikshåndtering/kommentar/logg. Vi eksponerer vår rene 5-status
+(`KLAR`/`KJØRER`/`FULLFØRT`/`STOPPET`/`AVBRUTT`) direkte. **NB:** tenant-blokkeren over betyr
+at *selve GUIet* trolig må flyttes fra testdata (retning A/B/C) — men admin-API-et under er
+uansett riktig hjem og gjenbrukbart.
 
 **Gjennomført (2026-07-17):**
 1. **Lese-/rekjør-endepunkt i `etterlatte-behandling`** (`prosessering/ProsesseringAdminRoutes.kt`
@@ -208,33 +248,14 @@ eksponerer vår rene 5-status (`KLAR`/`KJØRER`/`FULLFØRT`/`STOPPET`/`AVBRUTT`)
    samme mønster som `PostgresTaskRepository`) gjør `list`/`finn`/`rekjor`. `rekjor` er en manuell
    operatør-handling: `STOPPET`/`AVBRUTT` → `KLAR`, nullstiller `antall_feil` (=0) og
    `stoppaarsak` så motoren får fulle retries igjen (motorens `maxAntallFeil = 3`), og setter
-   `trigger_tid = now()`. Wiret i behandlingens `Application.kt`.
-2. **`ProsesseringFeature` i `etterlatte-testdata`** (`features/prosessering/`): Mustache-side
-   (`templates/prosessering/tasks.hbs`) som lister tasks (id, type, status, antall_feil,
-   stoppårsak, trigger/opprettet-tid, payload) med statusfilter og en «Rekjør»-knapp (kun for
-   STOPPET/AVBRUTT). `ProsesseringKlient` kaller behandling-admin-API-et med **OBO**
-   (`azureAdClient.hentTokenFraAD(bruker, scope)`) — merk: dette er *ekte* OBO med bearer-header,
-   i motsetning til `BehandlingKlient` (dolly) som peker mot vedtaksvurdering uten token.
-   Registrert i `features`-lista, `kunEtterlatte = true`.
-3. **Config/nais:** prosessering-admin-API-et ligger i `etterlatte-behandling`-appen (ikke
-   vedtaksvurdering, som dagens `ETTERLATTE_BEHANDLING_URL` peker på), så det er lagt til egne
-   `behandling.app.url`/`behandling.app.scope` (env `ETTERLATTE_BEHANDLING_APP_URL` →
-   `http://etterlatte-behandling`, `ETTERLATTE_BEHANDLING_APP_SCOPE` →
-   `api://dev-gcp.etterlatte.etterlatte-behandling/.default`). `accessPolicy.outbound` hadde
-   allerede `etterlatte-behandling`.
-
-**Gjenstår (menneske-i-loop):**
-- Opprett feature-flagget `prosessering-admin` i team-Unleash og aktiver i dev (i tillegg til
-  `prosessering-soeknad-skygge` fra 4b). Til flagget finnes gir SDK-en default `false` → admin-
-  API-et svarer `404` og GUIet viser ingenting (trygt av seg selv).
-- Deploy `etterlatte-behandling` + `etterlatte-testdata` til dev.
-- Trigg skygge-tasks (via 4a/4b-flyten) og observer/rekjør fra testdata-GUIet.
-- **UI-utforming er bevisst enkel/PoC** — kan forbedres senere. `hentTask`-detaljendepunktet
-  finnes, men detaljside i GUIet er ikke tegnet ennå.
-
-**NB personvern:** `ProsesseringTaskDto.payload` inneholder `fnrSoeker` (jf. V353-notatet).
-Greit i dev/PoC, men payload vises i GUIet — strammes inn (maskering/utelatelse) ved en evt.
-prod-tilpasning.
+   `trigger_tid = now()`. Wiret i behandlingens `Application.kt`. **Deployet til dev.**
+2. **`ProsesseringFeature` i `etterlatte-testdata`** (`features/prosessering/`, PARKERT): Mustache-
+   side (`templates/prosessering/tasks.hbs`) som lister tasks med statusfilter og «Rekjør»-knapp,
+   `ProsesseringKlient` som skulle kalle behandling-admin-API-et med OBO. Blokkert av tenant-splitt
+   (se over); kommentert ut av `features`-lista, filene beholdt for gjenbruk.
+3. **Config/nais:** la til `behandling.app.url`/`behandling.app.scope` (env
+   `ETTERLATTE_BEHANDLING_APP_URL`/`ETTERLATTE_BEHANDLING_APP_SCOPE`) i testdata — beholdt som
+   parkert scaffolding, men fungerer ikke pga. tenant-splitt.
 
 **Parkert alternativ (utforsket, ikke i bruk):** En adapter som eksponerer familie-
 prosesserings `/api/task`-kontrakt (`Ressurs<T>`, 8-status, `taskStepType`, avvikshåndtering)
@@ -303,9 +324,13 @@ men strammes inn ved en evt. prod-tilpasning.
 
 ## Åpne tråder å sparre om videre
 
-- **Operatør-GUI (Fase 4c):** implementert via `etterlatte-testdata` sitt eget GUI (se
-  Fase 4c). Gjenstår: Unleash-flagget `prosessering-admin`, deploy og en evt. detaljside/
-  UI-forbedring. Familie-frontend-adapteren er parkert.
+- **Operatør-GUI (Fase 4c):** behandling-admin-API-et er ferdig og deployet.
+  **Valg A implementert:** GUI-et ligger nå i `etterlatte-saksbehandling-ui` (React-side +
+  dev-only BFF-proxy og lenke), som løser tenant-splitten (samme tenant, BFF-en OBO-er inn i
+  behandling). `etterlatte-testdata`-GUIet forblir parkert. Familie-frontend-adapteren er
+  fortsatt parkert.
+- **NB personvern:** `ProsesseringTaskDto.payload` inneholder `fnrSoeker` (jf. V353). Vises i
+  GUIet (kun dev) — bør maskeres/utelates ved en evt. prod-tilpasning.
 - Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
   (Fase 4 — via behandling-REST).
 - Når går vi fra skygge til ekte outbox (task i samme tx som behandling)?

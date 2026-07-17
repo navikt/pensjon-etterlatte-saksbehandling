@@ -2,6 +2,7 @@ import { Dropdown, InternalHeader } from '@navikt/ds-react'
 import { ExternalLinkIcon, MenuGridIcon } from '@navikt/aksel-icons'
 import React, { useContext } from 'react'
 import { ConfigContext } from '~clientConfig'
+import { miljoeErDev } from '~utils/miljoe'
 
 export const AppSwitcher = () => {
   const configContext = useContext(ConfigContext)
@@ -33,6 +34,14 @@ export const AppSwitcher = () => {
             Bisys <ExternalLinkIcon aria-hidden />
           </Dropdown.Menu.GroupedList.Item>
         </Dropdown.Menu.GroupedList>
+        {miljoeErDev && (
+          <Dropdown.Menu.GroupedList>
+            <Dropdown.Menu.GroupedList.Heading>Utvikling (kun dev)</Dropdown.Menu.GroupedList.Heading>
+            <Dropdown.Menu.GroupedList.Item as="a" href="/prosessering">
+              Prosessering – task-kø
+            </Dropdown.Menu.GroupedList.Item>
+          </Dropdown.Menu.GroupedList>
+        )}
       </Dropdown.Menu>
     </Dropdown>
   )

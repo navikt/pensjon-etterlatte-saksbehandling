@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express'
 import path from 'path'
-import { ApiConfig, appConf, ClientConfig } from './config/config'
+import { ApiConfig, appConf, ClientConfig, erProduksjon } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { logger } from './monitoring/logger'
 import { tokenMiddleware } from './middleware/getOboToken'
@@ -99,6 +99,11 @@ app.use('/api/pdltjenester', tokenMiddleware(ApiConfig.pdltjenester.scope), prox
 app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url))
 
 app.use('/api/vedtak', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
+
+// Prosessering-admin (operatør-innsyn i task-køen, PoC Fase 4c) er kun tilgjengelig i dev/lokalt.
+if (!erProduksjon) {
+  app.use('/api/prosessering', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
+}
 
 app.use('/api/trygdetid', tokenMiddleware(ApiConfig.trygdetid.scope), proxy(ApiConfig.trygdetid.url))
 

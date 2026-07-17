@@ -29,6 +29,8 @@ import { EtteroppgjoerForbehandling } from '~components/etteroppgjoer/forbehandl
 import { MeldtInnEndring } from '~components/meldtInnEndring/MeldtInnEndring'
 import { useLastUmami } from '~shared/umami/useLastUmami'
 import { SvarPaaEtteroppgjoer } from '~components/person/journalfoeringsoppgave/svarPaaEtteroppgjoer/SvarPaaEtteroppgjoer'
+import { ProsesseringTasks } from '~components/prosessering/ProsesseringTasks'
+import { miljoeErDev } from '~utils/miljoe'
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
@@ -76,6 +78,7 @@ function App() {
                     <Route path="/etteroppgjoer/:forbehandlingId/*" element={<EtteroppgjoerForbehandling />} />
                     <Route path="/svar-paa-etteroppgjoer/:oppgaveId/*" element={<SvarPaaEtteroppgjoer />} />
                     <Route path="/meldt-inn-endring/:oppgaveId/*" element={<MeldtInnEndring />} />
+                    {miljoeErDev && <Route path="/prosessering" element={<ProsesseringTasks />} />}
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </ErrorBoundary>

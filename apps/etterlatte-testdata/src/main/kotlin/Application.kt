@@ -67,8 +67,6 @@ import no.nav.etterlatte.testdata.features.dolly.VedtakService
 import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeature
 import no.nav.etterlatte.testdata.features.index.IndexFeature
 import no.nav.etterlatte.testdata.features.opprettFamilie.OpprettFamilie
-import no.nav.etterlatte.testdata.features.prosessering.ProsesseringFeature
-import no.nav.etterlatte.testdata.features.prosessering.ProsesseringKlient
 import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
 import no.nav.security.token.support.v3.tokenValidationSupport
 import org.slf4j.Logger
@@ -108,14 +106,18 @@ val dollyService =
         TestnavClient(config, httpClient),
     )
 val vedtakService = VedtakService(BehandlingKlient(config, httpClient))
-val prosesseringKlient = ProsesseringKlient(config, httpClient, azureAdClient)
 val features: List<TestDataFeature> =
     listOf(
         IndexFeature,
         EgendefinertMeldingFeature,
         OpprettSoeknadFeature,
         DollyFeature(dollyService, vedtakService),
-        ProsesseringFeature(prosesseringKlient),
+        // ProsesseringFeature er PARKERT: etterlatte-testdata kjører i Azure-tenant nav.no,
+        // mens etterlatte-behandling kjører i trygdeetaten.no. OBO/client-credentials krysser
+        // ikke tenant, så testdata kan ikke auth-e mot behandling sitt prosessering-admin-API
+        // (AADSTS500011). Se .github/prosessering/05-poc-veikart.md (Fase 4c). Klient/feature/
+        // template beholdes på disk for gjenbruk når operatør-GUI havner i riktig tenant.
+        // ProsesseringFeature(ProsesseringKlient(config, httpClient, azureAdClient)),
         OpprettOgBehandle(dollyService, Familieoppretter(dollyService)),
         OpprettFamilie(
             dollyService =

@@ -265,7 +265,18 @@ senere vil ha et ferdig fler-backend-GUI: da conformer vi mot familie-kontrakten
 mot frontendens `typer/task.ts`/`api/task.ts`), men for PoC-en er testdata-veien enklere og
 holder oss i vår egen 5-status-modell.
 
-### Fase 5 — Kutt ut til eget repo
+### Fase 4d — Videre arbeid i Gjenny FØR eget repo (neste økter)
+Vi blir værende i Gjenny og jobber videre med skyggekjøringen før Fase 5-uttrekket.
+Det er flere ting å diskutere/undersøke her.
+
+- **Neste økt: undersøk taskene som allerede har dukket opp — er de duplikate?**
+  Skygge-riveren (`SoeknadSkyggeRiver`) kjører parallelt med `NySoeknadRiver` på samme
+  `soeknad_innsendt`-event. Kartlegg om vi får duplikate skygge-tasker (samme søknad → flere
+  tasker), hvorfor (retries på river, replays, at-least-once på Kafka), og hva riktig
+  idempotens-nøkkel er (f.eks. `soeknadId`). Avklar om produsent-API-et bør ha
+  dedupe/unik-constraint før vi går fra skygge til ekte outbox.
+
+### Fase 5 — Kutt ut til eget repo (etter Fase 4d)
 - Når form/API sitter: opprett `efterlatte-prosessering`-repoet, publiser som
   Maven-artefakt (GitHub Packages, à la `pensjon-etterlatte-felles/common`), la Gjenny
   dra det inn via Gradle-avhengighet i stedet for `includeBuild`.
@@ -331,6 +342,10 @@ men strammes inn ved en evt. prod-tilpasning.
   fortsatt parkert.
 - **NB personvern:** `ProsesseringTaskDto.payload` inneholder `fnrSoeker` (jf. V353). Vises i
   GUIet (kun dev) — bør maskeres/utelates ved en evt. prod-tilpasning.
+- **Duplikate tasker? (Fase 4d — neste økt):** undersøk skygge-taskene som allerede har
+  dukket opp — er det duplikater fra parallell river / retries / Kafka-replay? Avklar
+  idempotens-nøkkel (`soeknadId`) og om produsenten trenger dedupe før skygge → ekte outbox.
+- **Bli i Gjenny litt til:** vi jobber videre med skyggekjøringen (Fase 4d) FØR Fase 5-uttrekket.
 - Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
   (Fase 4 — via behandling-REST).
 - Når går vi fra skygge til ekte outbox (task i samme tx som behandling)?

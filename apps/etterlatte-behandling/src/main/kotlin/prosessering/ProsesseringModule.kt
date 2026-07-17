@@ -24,6 +24,7 @@ enum class ProsesseringToggles(
     private val toggle: String,
 ) : FeatureToggle {
     SKYGGE_SOEKNADMOTTAK("prosessering-soeknad-skygge"),
+    PROSESSERING_ADMIN("prosessering-admin"),
     ;
 
     override fun key(): String = toggle

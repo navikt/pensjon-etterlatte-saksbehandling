@@ -66,6 +66,10 @@ spec:
       value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_BEHANDLING_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+    - name: ETTERLATTE_BEHANDLING_APP_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_APP_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:
     outbound:
       rules:

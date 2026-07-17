@@ -185,40 +185,56 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
 - Flipp flagget på i dev; observer at søknader blir tasks som fullfører.
 - Fremtving feil → STOPPET → prøv igjen (via kall/logg siden UI er utenfor scope).
 
-### Fase 4c — operatør-GUI via `etterlatte-testdata` (VALGT RETNING — neste økt)
+### Fase 4c — operatør-GUI via `etterlatte-testdata` (IMPLEMENTERT — venter på deploy + flagg)
 
 Målet: kunne se og styre tasks (liste, detaljer, rekjøre) fra et GUI **uten** å bygge
 et fullverdig operatør-UI ennå, og **uten** å conforme mot noe eksternt kontrakt-format.
 
 **Beslutning (2026-07-17): bruk `etterlatte-testdata` sitt eget GUI, ikke
 `familie-prosessering-frontend`.** Vi eier `etterlatte-testdata` fullt ut, den har allerede
-et enkelt Handlebars-GUI, kaller behandling-REST med saksbehandler-token (OBO), og brukes
+et enkelt Mustache-GUI, kaller behandling-REST med saksbehandler-token (OBO), og brukes
 allerede til å teste appene våre. Da slipper vi å bro vår **5-status-modell** mot familie-
-prosesserings gamle 8-status + `Ressurs`-konvolutt + avvikshåndtering/kommentar/logg. Vi kan
-eksponere vår rene 5-status (`KLAR`/`KJØRER`/`FULLFØRT`/`STOPPET`/`AVBRUTT`) direkte.
+prosesserings gamle 8-status + `Ressurs`-konvolutt + avvikshåndtering/kommentar/logg. Vi
+eksponerer vår rene 5-status (`KLAR`/`KJØRER`/`FULLFØRT`/`STOPPET`/`AVBRUTT`) direkte.
 
-**Hvorfor dette er lettere (funn 2026-07-17):**
-- `etterlatte-testdata` er en Ktor + Handlebars-app. Features implementerer `TestDataFeature`
-  (`beskrivelse`, `path`, `kunEtterlatte`, `routes`) — se `EgendefinertMeldingFeature`.
-- Den har allerede en `BehandlingKlient` som kaller behandling-REST via OBO-token
-  (`features/dolly/BehandlingKlient.kt`). Samme mønster kan hente/rekjøre tasks.
-- Ingen kontrakt å conforme til: GUIet er vårt, så list-/detalj-/rekjør-sidene tegnes rett
-  mot vår egen modell. Ingen 5→8-status-oversettelse, ingen `taskStepType`/`Ressurs`-former.
-
-**Skisse til gjennomføring (ikke startet):**
-1. **Lese-/rekjør-endepunkt i `etterlatte-behandling`** som returnerer vår 5-status direkte
-   (ren DTO, ingen familie-former): `GET /api/prosessering/task` (liste m/filter),
+**Gjennomført (2026-07-17):**
+1. **Lese-/rekjør-endepunkt i `etterlatte-behandling`** (`prosessering/ProsesseringAdminRoutes.kt`
+   + `ProsesseringAdminDao.kt`) som returnerer vår 5-status direkte (ren `ProsesseringTaskDto`,
+   ingen familie-former): `GET /api/prosessering/task` (filter `status`/`limit`),
    `GET /api/prosessering/task/{id}`, `PUT /api/prosessering/task/{id}/rekjor`. Saksbehandler-
-   auth (`kunSaksbehandler`), gated bak en toggle. En enkel read/admin-DAO mot
-   `prosessering.task` (list, finn, rekjor: STOPPET/AVBRUTT → KLAR).
-2. **`ProsesseringFeature` i `etterlatte-testdata`** (`TestDataFeature`): Handlebars-side som
-   lister tasks (status, type, antall_feil, trigger_tid, stoppårsak) og har en «rekjør»-knapp,
-   via en `ProsesseringKlient` (kopi av `BehandlingKlient`-mønsteret, OBO mot behandling).
-3. **Bruk eksisterende søknad-/egendefinert-melding-features** i testdata til å *trigge*
-   skygge-tasks (via `soeknad_innsendt`-flyten fra 4a/4b), og den nye siden til å *observere
-   og styre* dem. NB fra 4b: `etterlatte-testdata` publiserer i dag `trenger_behandling`, ikke
-   `soeknad_innsendt` — for å trigge `SoeknadSkyggeRiver` må vi enten poste `soeknad_innsendt`
-   (f.eks. via egendefinert-melding-featuren) eller sende ekte søknad via søknadsdialogen.
+   auth (`kunSaksbehandler`), gated bak ny toggle `ProsesseringToggles.PROSESSERING_ADMIN`
+   (`"prosessering-admin"`, default av) — skilt fra `SKYGGE_SOEKNADMOTTAK` så innsyn og
+   produksjon kan skrus av/på uavhengig. `ProsesseringAdminDao` (rå JDBC mot `prosessering.task`,
+   samme mønster som `PostgresTaskRepository`) gjør `list`/`finn`/`rekjor`. `rekjor` er en manuell
+   operatør-handling: `STOPPET`/`AVBRUTT` → `KLAR`, nullstiller `antall_feil` (=0) og
+   `stoppaarsak` så motoren får fulle retries igjen (motorens `maxAntallFeil = 3`), og setter
+   `trigger_tid = now()`. Wiret i behandlingens `Application.kt`.
+2. **`ProsesseringFeature` i `etterlatte-testdata`** (`features/prosessering/`): Mustache-side
+   (`templates/prosessering/tasks.hbs`) som lister tasks (id, type, status, antall_feil,
+   stoppårsak, trigger/opprettet-tid, payload) med statusfilter og en «Rekjør»-knapp (kun for
+   STOPPET/AVBRUTT). `ProsesseringKlient` kaller behandling-admin-API-et med **OBO**
+   (`azureAdClient.hentTokenFraAD(bruker, scope)`) — merk: dette er *ekte* OBO med bearer-header,
+   i motsetning til `BehandlingKlient` (dolly) som peker mot vedtaksvurdering uten token.
+   Registrert i `features`-lista, `kunEtterlatte = true`.
+3. **Config/nais:** prosessering-admin-API-et ligger i `etterlatte-behandling`-appen (ikke
+   vedtaksvurdering, som dagens `ETTERLATTE_BEHANDLING_URL` peker på), så det er lagt til egne
+   `behandling.app.url`/`behandling.app.scope` (env `ETTERLATTE_BEHANDLING_APP_URL` →
+   `http://etterlatte-behandling`, `ETTERLATTE_BEHANDLING_APP_SCOPE` →
+   `api://dev-gcp.etterlatte.etterlatte-behandling/.default`). `accessPolicy.outbound` hadde
+   allerede `etterlatte-behandling`.
+
+**Gjenstår (menneske-i-loop):**
+- Opprett feature-flagget `prosessering-admin` i team-Unleash og aktiver i dev (i tillegg til
+  `prosessering-soeknad-skygge` fra 4b). Til flagget finnes gir SDK-en default `false` → admin-
+  API-et svarer `404` og GUIet viser ingenting (trygt av seg selv).
+- Deploy `etterlatte-behandling` + `etterlatte-testdata` til dev.
+- Trigg skygge-tasks (via 4a/4b-flyten) og observer/rekjør fra testdata-GUIet.
+- **UI-utforming er bevisst enkel/PoC** — kan forbedres senere. `hentTask`-detaljendepunktet
+  finnes, men detaljside i GUIet er ikke tegnet ennå.
+
+**NB personvern:** `ProsesseringTaskDto.payload` inneholder `fnrSoeker` (jf. V353-notatet).
+Greit i dev/PoC, men payload vises i GUIet — strammes inn (maskering/utelatelse) ved en evt.
+prod-tilpasning.
 
 **Parkert alternativ (utforsket, ikke i bruk):** En adapter som eksponerer familie-
 prosesserings `/api/task`-kontrakt (`Ressurs<T>`, 8-status, `taskStepType`, avvikshåndtering)
@@ -287,9 +303,9 @@ men strammes inn ved en evt. prod-tilpasning.
 
 ## Åpne tråder å sparre om videre
 
-- **Operatør-GUI (Fase 4c):** valgt retning er `etterlatte-testdata` sitt eget GUI (se
-  Fase 4c). Gjenstår: lese-/rekjør-endepunkt i behandling + `ProsesseringFeature` i testdata.
-  Familie-frontend-adapteren er parkert.
+- **Operatør-GUI (Fase 4c):** implementert via `etterlatte-testdata` sitt eget GUI (se
+  Fase 4c). Gjenstår: Unleash-flagget `prosessering-admin`, deploy og en evt. detaljside/
+  UI-forbedring. Familie-frontend-adapteren er parkert.
 - Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
   (Fase 4 — via behandling-REST).
 - Når går vi fra skygge til ekte outbox (task i samme tx som behandling)?

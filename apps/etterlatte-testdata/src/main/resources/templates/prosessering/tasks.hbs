@@ -1,0 +1,80 @@
+{{> ../_fragments/header }}
+
+<div class="row">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Forsiden</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ beskrivelse }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12 col-lg-4">
+        <form action="/{{ path }}" method="get" class="d-flex align-items-end gap-2">
+            <div class="flex-grow-1">
+                <label for="status" class="form-label">Filtrer på status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">Alle</option>
+                    {{#statuser}}
+                        <option value="{{navn}}" {{#valgt}}selected{{/valgt}}>{{navn}}</option>
+                    {{/statuser}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Vis</button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        {{^harTasks}}
+            <div class="alert alert-info" role="alert">Ingen tasks å vise.</div>
+        {{/harTasks}}
+
+        {{#harTasks}}
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Feil</th>
+                            <th>Stoppårsak</th>
+                            <th>Trigger</th>
+                            <th>Opprettet</th>
+                            <th>Payload</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#tasks}}
+                            <tr>
+                                <td>{{id}}</td>
+                                <td>{{type}}</td>
+                                <td>{{status}}</td>
+                                <td>{{antallFeil}}</td>
+                                <td>{{stoppaarsak}}</td>
+                                <td>{{triggerTid}}</td>
+                                <td>{{opprettetTid}}</td>
+                                <td><code style="white-space: pre-wrap">{{payload}}</code></td>
+                                <td>
+                                    {{#kanRekjores}}
+                                        <form action="/{{path}}/{{id}}/rekjor" method="post">
+                                            <button type="submit" class="btn btn-sm btn-warning">Rekjør</button>
+                                        </form>
+                                    {{/kanRekjores}}
+                                </td>
+                            </tr>
+                        {{/tasks}}
+                    </tbody>
+                </table>
+            </div>
+        {{/harTasks}}
+    </div>
+</div>
+
+{{> ../_fragments/footer }}

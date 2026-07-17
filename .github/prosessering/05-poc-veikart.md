@@ -185,6 +185,49 @@ Testcontainers-harnesset). Koden bor nå som to biblioteksmoduler **inne i Gjenn
 - Flipp flagget på i dev; observer at søknader blir tasks som fullfører.
 - Fremtving feil → STOPPET → prøv igjen (via kall/logg siden UI er utenfor scope).
 
+### Fase 4c — operatør-GUI via `etterlatte-testdata` (VALGT RETNING — neste økt)
+
+Målet: kunne se og styre tasks (liste, detaljer, rekjøre) fra et GUI **uten** å bygge
+et fullverdig operatør-UI ennå, og **uten** å conforme mot noe eksternt kontrakt-format.
+
+**Beslutning (2026-07-17): bruk `etterlatte-testdata` sitt eget GUI, ikke
+`familie-prosessering-frontend`.** Vi eier `etterlatte-testdata` fullt ut, den har allerede
+et enkelt Handlebars-GUI, kaller behandling-REST med saksbehandler-token (OBO), og brukes
+allerede til å teste appene våre. Da slipper vi å bro vår **5-status-modell** mot familie-
+prosesserings gamle 8-status + `Ressurs`-konvolutt + avvikshåndtering/kommentar/logg. Vi kan
+eksponere vår rene 5-status (`KLAR`/`KJØRER`/`FULLFØRT`/`STOPPET`/`AVBRUTT`) direkte.
+
+**Hvorfor dette er lettere (funn 2026-07-17):**
+- `etterlatte-testdata` er en Ktor + Handlebars-app. Features implementerer `TestDataFeature`
+  (`beskrivelse`, `path`, `kunEtterlatte`, `routes`) — se `EgendefinertMeldingFeature`.
+- Den har allerede en `BehandlingKlient` som kaller behandling-REST via OBO-token
+  (`features/dolly/BehandlingKlient.kt`). Samme mønster kan hente/rekjøre tasks.
+- Ingen kontrakt å conforme til: GUIet er vårt, så list-/detalj-/rekjør-sidene tegnes rett
+  mot vår egen modell. Ingen 5→8-status-oversettelse, ingen `taskStepType`/`Ressurs`-former.
+
+**Skisse til gjennomføring (ikke startet):**
+1. **Lese-/rekjør-endepunkt i `etterlatte-behandling`** som returnerer vår 5-status direkte
+   (ren DTO, ingen familie-former): `GET /api/prosessering/task` (liste m/filter),
+   `GET /api/prosessering/task/{id}`, `PUT /api/prosessering/task/{id}/rekjor`. Saksbehandler-
+   auth (`kunSaksbehandler`), gated bak en toggle. En enkel read/admin-DAO mot
+   `prosessering.task` (list, finn, rekjor: STOPPET/AVBRUTT → KLAR).
+2. **`ProsesseringFeature` i `etterlatte-testdata`** (`TestDataFeature`): Handlebars-side som
+   lister tasks (status, type, antall_feil, trigger_tid, stoppårsak) og har en «rekjør»-knapp,
+   via en `ProsesseringKlient` (kopi av `BehandlingKlient`-mønsteret, OBO mot behandling).
+3. **Bruk eksisterende søknad-/egendefinert-melding-features** i testdata til å *trigge*
+   skygge-tasks (via `soeknad_innsendt`-flyten fra 4a/4b), og den nye siden til å *observere
+   og styre* dem. NB fra 4b: `etterlatte-testdata` publiserer i dag `trenger_behandling`, ikke
+   `soeknad_innsendt` — for å trigge `SoeknadSkyggeRiver` må vi enten poste `soeknad_innsendt`
+   (f.eks. via egendefinert-melding-featuren) eller sende ekte søknad via søknadsdialogen.
+
+**Parkert alternativ (utforsket, ikke i bruk):** En adapter som eksponerer familie-
+prosesserings `/api/task`-kontrakt (`Ressurs<T>`, 8-status, `taskStepType`, avvikshåndtering)
+slik at `familie-prosessering-frontend` kunne gjenbrukes uendret, ble prototypet i en egen
+økt og **lagret separat, men er ikke koblet inn på denne branchen**. Verdt å vite om vi
+senere vil ha et ferdig fler-backend-GUI: da conformer vi mot familie-kontrakten (verifisert
+mot frontendens `typer/task.ts`/`api/task.ts`), men for PoC-en er testdata-veien enklere og
+holder oss i vår egen 5-status-modell.
+
 ### Fase 5 — Kutt ut til eget repo
 - Når form/API sitter: opprett `efterlatte-prosessering`-repoet, publiser som
   Maven-artefakt (GitHub Packages, à la `pensjon-etterlatte-felles/common`), la Gjenny
@@ -244,6 +287,9 @@ men strammes inn ved en evt. prod-tilpasning.
 
 ## Åpne tråder å sparre om videre
 
+- **Operatør-GUI (Fase 4c):** valgt retning er `etterlatte-testdata` sitt eget GUI (se
+  Fase 4c). Gjenstår: lese-/rekjør-endepunkt i behandling + `ProsesseringFeature` i testdata.
+  Familie-frontend-adapteren er parkert.
 - Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
   (Fase 4 — via behandling-REST).
 - Når går vi fra skygge til ekte outbox (task i samme tx som behandling)?

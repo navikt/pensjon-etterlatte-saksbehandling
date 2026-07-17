@@ -269,12 +269,28 @@ holder oss i vår egen 5-status-modell.
 Vi blir værende i Gjenny og jobber videre med skyggekjøringen før Fase 5-uttrekket.
 Det er flere ting å diskutere/undersøke her.
 
-- **Neste økt: undersøk taskene som allerede har dukket opp — er de duplikate?**
-  Skygge-riveren (`SoeknadSkyggeRiver`) kjører parallelt med `NySoeknadRiver` på samme
-  `soeknad_innsendt`-event. Kartlegg om vi får duplikate skygge-tasker (samme søknad → flere
-  tasker), hvorfor (retries på river, replays, at-least-once på Kafka), og hva riktig
-  idempotens-nøkkel er (f.eks. `soeknadId`). Avklar om produsent-API-et bør ha
-  dedupe/unik-constraint før vi går fra skygge til ekte outbox.
+- **Duplikate tasker? — undersøkt (2026-07-17). ✅ Avklart, tiltak gjenstår.**
+  Dump av `prosessering.task` (33 rader) viste: alle `SoeknadMottakSkygge`, alle `FULLFØRT`,
+  `antall_feil=0`, men kun **3 unike `soeknadId`** — `11764` (29 tasker, jevnt ~hvert 50. min),
+  `11786` (2) og `11787` (2).
+  - **Ikke motor-duplikater.** Hver rad har egen `id`/`opprettet_tid`/`trigger_tid`; ingen task
+    kjørt to ganger (`execution_log.uq_execution_log_task` ville ellers slått ut), ingen
+    retry-loop (`antall_feil=0`). Motoren håndterte hver task nøyaktig én gang — det er sunt.
+  - **Produsent-duplikater.** `opprettFrittstående` (i `ProsesseringModule.kt`) gjør en ren
+    `insert` — ingen unik-constraint på `(type, payload)` i `schema.sql`, ingen dedupe-sjekk.
+    Skygge-riveren er dessuten bevisst mutasjonsfri (ingen `precondition`/`publish`), så
+    `soeknad_innsendt` for samme søknad blir aldri «brukt opp» og redeleveres på hver
+    rapid-syklus → ny task hver gang. Dette forklarer den jevne re-innkøingen av `11764`.
+  - **Konklusjon: forventet gitt dagens design** — skyggekjøringen beviser
+    reliable/retryable/observerbar håndtering. Men re-innkøingen bekrefter at **idempotens
+    ikke er løst**, og det må på plass før skygge → ekte outbox.
+  - **Anbefaling:** løs det **produsent-side** i skygge-ruten nå: sjekk om det allerede finnes
+    en uferdig (`KLAR`/`KJØRER`) task for samme `soeknadId` før `opprettFrittstående`, og hopp
+    over hvis så. Enkelt, holder biblioteket rent, og `soeknadId` er den naturlige
+    idempotens-nøkkelen for denne task-typen. **Ikke** legg en generell `(type, payload)`-
+    unik-constraint i biblioteket ennå — hva som utgjør «samme task» er verts-domene, ikke
+    infra, og en bibliotek-side unik-nøkkel er en større API-beslutning som i så fall må
+    besluttes og dokumenteres i `04-outbox-api.md` først.
 
 ### Fase 5 — Kutt ut til eget repo (etter Fase 4d)
 - Når form/API sitter: opprett `efterlatte-prosessering`-repoet, publiser som
@@ -342,9 +358,12 @@ men strammes inn ved en evt. prod-tilpasning.
   fortsatt parkert.
 - **NB personvern:** `ProsesseringTaskDto.payload` inneholder `fnrSoeker` (jf. V353). Vises i
   GUIet (kun dev) — bør maskeres/utelates ved en evt. prod-tilpasning.
-- **Duplikate tasker? (Fase 4d — neste økt):** undersøk skygge-taskene som allerede har
-  dukket opp — er det duplikater fra parallell river / retries / Kafka-replay? Avklar
-  idempotens-nøkkel (`soeknadId`) og om produsenten trenger dedupe før skygge → ekte outbox.
+- **Duplikate tasker? (Fase 4d) — ✅ undersøkt 2026-07-17.** Ikke motor-duplikater (hver task
+  kjørt én gang, feil=0), men produsent-duplikater: samme `soeknadId` køes på nytt fordi
+  `opprettFrittstående` ikke deduper og skygge-riveren ikke konsumerer eventet. Forventet for
+  skyggen. **Anbefalt tiltak:** dedupe produsent-side på `soeknadId` (sjekk uferdig task før
+  innkøing); *ikke* bibliotek-side unik-constraint uten en egen API-beslutning i
+  `04-outbox-api.md`. Detaljer i Fase 4d over.
 - **Bli i Gjenny litt til:** vi jobber videre med skyggekjøringen (Fase 4d) FØR Fase 5-uttrekket.
 - Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
   (Fase 4 — via behandling-REST).

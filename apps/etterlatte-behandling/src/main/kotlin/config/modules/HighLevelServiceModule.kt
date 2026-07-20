@@ -207,6 +207,8 @@ class HighLevelServiceModule(
             vilkaarsvurderingService = serviceModule.vilkaarsvurderingService,
             behandlingInfoService = behandlingInfoService,
             tilgangsService = serviceModule.oppdaterTilgangService,
+            prosesseringTaskProdusent = daoModule.prosesseringTaskProdusent,
+            featureToggleService = featureToggleService,
         )
     }
 

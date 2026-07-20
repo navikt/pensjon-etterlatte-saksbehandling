@@ -5,6 +5,7 @@ import efterlatte.prosessering.TaskProdusent
 import efterlatte.prosessering.TaskType
 import efterlatte.prosessering.postgres.JdbcTransaksjon
 import kotliquery.TransactionalSession
+import no.nav.etterlatte.databaseContext
 import java.time.Instant
 
 /**
@@ -29,6 +30,29 @@ fun <P : Any> TaskProdusent.opprettISammeTransaksjon(
 ): TaskId =
     opprett(
         transaksjon = JdbcTransaksjon(transaksjon.connection.underlying),
+        type = type,
+        payload = payload,
+        triggerTid = triggerTid,
+    )
+
+/**
+ * Outbox-kobling mot behandlingens tråd-lokale transaksjon (PoC Fase 4e, Steg 2). Skal kalles
+ * *inne i* en `inTransaction { … }`-blokk: behandling åpner da en `java.sql.Connection` med
+ * `autoCommit=false` og legger den i den tråd-lokale [no.nav.etterlatte.common.DatabaseContext],
+ * tilgjengelig via [databaseContext]. Vi henger task-en på nettopp den connectionen, så task-raden
+ * committer eller ruller tilbake atomisk sammen med behandlings-skrivet.
+ *
+ * Kaster `IllegalStateException` («No currently open transaction») hvis den kalles utenfor en
+ * `inTransaction`-blokk — en task uten et forretnings-skriv å henge på skal bruke
+ * `opprettFrittstående`, ikke denne.
+ */
+fun <P : Any> TaskProdusent.opprettPaaAktivBehandlingstransaksjon(
+    type: TaskType<P>,
+    payload: P,
+    triggerTid: Instant? = null,
+): TaskId =
+    opprett(
+        transaksjon = JdbcTransaksjon(databaseContext().activeTx()),
         type = type,
         payload = payload,
         triggerTid = triggerTid,

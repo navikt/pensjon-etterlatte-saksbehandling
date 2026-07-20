@@ -1,5 +1,8 @@
 package no.nav.etterlatte.config.modules
 
+import efterlatte.prosessering.StandardTaskProdusent
+import efterlatte.prosessering.TaskProdusent
+import efterlatte.prosessering.postgres.PostgresTaskRepository
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktBrevDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
@@ -113,6 +116,8 @@ class DaoModule(
     val hengendeBehandlingDao by lazy { HengendeBehandlingDao(autoClosingDatabase) }
 
     val outboxRepository by lazy { OutboxRepository(dataSource) }
+
+    val prosesseringTaskProdusent: TaskProdusent by lazy { StandardTaskProdusent(PostgresTaskRepository(dataSource)) }
 
     val trygdetidRepository by lazy { TrygdetidRepository(dataSource) }
     val avtaleRepository by lazy { AvtaleRepository(dataSource) }

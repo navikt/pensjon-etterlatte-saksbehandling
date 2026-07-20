@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import efterlatte.prosessering.TaskProdusent
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -10,6 +11,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.inTransaction
@@ -49,6 +51,10 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.prosessering.EkteBehandlingMottakPayload
+import no.nav.etterlatte.prosessering.ProsesseringToggles
+import no.nav.etterlatte.prosessering.ekteBehandlingMottakType
+import no.nav.etterlatte.prosessering.opprettPaaAktivBehandlingstransaksjon
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
@@ -69,6 +75,8 @@ class BehandlingFactory(
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val behandlingInfoService: BehandlingInfoService,
     private val tilgangsService: OppdaterTilgangService,
+    private val prosesseringTaskProdusent: TaskProdusent? = null,
+    private val featureToggleService: FeatureToggleService? = null,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -519,12 +527,43 @@ class BehandlingFactory(
 
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
+            koeEkteMottakOutbox(opprettBehandling.id, sak)
+
             behandlingDao.hentBehandling(opprettBehandling.id)
                 ?: throw InternfeilException(
                     "Behandlingen vi akkurat opprettet finnes ikke i databasen. Id burde være " +
                         "${opprettBehandling.id}, i sak ${opprettBehandling.sakId}",
                 )
         }
+    }
+
+    /**
+     * Ekte outbox-kobling (PoC Fase 4e, Steg 2a): legger en [ekteBehandlingMottakType]-task i kø på
+     * *samme* transaksjon som behandlings-skrivet over (vi står inne i `inTransaction`). Task-raden
+     * committer eller ruller tilbake atomisk sammen med behandlingen — outbox-garantien i praksis.
+     *
+     * Gatet bak [ProsesseringToggles.EKTE_OUTBOX] (default av) og hopper over hvis produsenten ikke er
+     * wiret (f.eks. i enhetstester). Nøkkelen er `behandlingId` — behandlingsopprettelse er allerede
+     * guardet (én åpen behandling per sak), så én behandling = én task uten egen dedupe.
+     */
+    private fun koeEkteMottakOutbox(
+        behandlingId: UUID,
+        sak: Sak,
+    ) {
+        val produsent = prosesseringTaskProdusent ?: return
+        if (featureToggleService?.isEnabled(ProsesseringToggles.EKTE_OUTBOX, false) != true) {
+            return
+        }
+        produsent.opprettPaaAktivBehandlingstransaksjon(
+            type = ekteBehandlingMottakType,
+            payload =
+                EkteBehandlingMottakPayload(
+                    behandlingId = behandlingId.toString(),
+                    sakId = sak.id.sakId,
+                    sakType = sak.sakType,
+                ),
+        )
+        logger.info("La ekte outbox-task i kø for behandling $behandlingId (sak ${sak.id.sakId})")
     }
 }
 

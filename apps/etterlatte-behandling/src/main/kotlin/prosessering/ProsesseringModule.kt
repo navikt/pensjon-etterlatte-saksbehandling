@@ -27,6 +27,7 @@ enum class ProsesseringToggles(
     private val toggle: String,
 ) : FeatureToggle {
     SKYGGE_SOEKNADMOTTAK("prosessering-soeknad-skygge"),
+    EKTE_OUTBOX("prosessering-ekte-outbox"),
     PROSESSERING_ADMIN("prosessering-admin"),
     ;
 
@@ -54,7 +55,7 @@ fun Route.installProsessering(
 ) {
     application.install(Prosessering) {
         repository = PostgresTaskRepository(dataSource)
-        steg = listOf(soeknadMottakSkyggeSteg(), feilbarDemoSteg())
+        steg = listOf(soeknadMottakSkyggeSteg(), feilbarDemoSteg(), ekteBehandlingMottakSteg())
         this.node = node
     }
 }

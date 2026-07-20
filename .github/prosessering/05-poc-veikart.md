@@ -358,22 +358,62 @@ samme garantien bevist mot behandlingens **faktiske** transaksjonsmekanikk — k
   `autoCommit=false` på den underliggende Hikari-connectionen ved `begin()`, så insert-en henger på
   transaksjonen — verifisert via probe (`autoCommit=false`, samme Hikari-proxy-connection).
 
-**Steg 2 — koble broen på det ekte behandlings-skrivet (GJENSTÅR, krever sparring):**
-Ting å avklare/undersøke (sparres om ved oppstart av økten):
-- **Hvor sitter forretnings-skrivet?** Sak/behandling opprettes i behandling-REST
-  (`NySoeknadRiver` → behandling). Outbox-tasken må henge på *den* transaksjonen, så koblingen
-  hører hjemme der behandlingen faktisk skrives — ikke i skygge-riveren (som er mutasjonsfri).
-  Broen fra Steg 1 er verktøyet: finn den kotliquery-transaksjonen behandlingen skrives i, og kall
-  `opprettISammeTransaksjon(tx, …)` der.
-- **Regel-kollisjon:** søknad-eventet konsumeres i `etterlatte-behandling-kafka`, men skriv +
-  produsent hører hjemme i behandling-REST (ingen app skriver i en annen apps DB). Event-drevet
-  task-opprettelse må gå *via* behandling-REST.
-- **Idempotens flyttes/gjenbrukes:** dedupe-nøkkelen (`soeknadId`, jf. Fase 4d) må gjelde også
-  når task-en opprettes i samme tx — enten via samme sjekk før innkøing, eller en
-  besluttet unik-nøkkel i biblioteket (i så fall dokumenteres i `04-outbox-api.md` først).
-- **Hva er «ekte»-steget?** Fortsatt ingen faktisk behandling opprettes i første omgang, eller
-  går vi hele veien? Avgrens scope ved oppstart — men API-formen (`opprett` på vertens tx) er
-  målet uansett, og er nå bevist mot behandlingens virkelige transaksjon.
+**Steg 2 — koble broen på det ekte behandlings-skrivet:**
+
+**Steg 2a — outbox-bro mot behandlingens tråd-lokale tx + effektfritt ekte-steg (2026-07-20). ✅ GJORT (uten selve hot-path-kallet).**
+Kartla at behandlingsopprettelsen skjer i `BehandlingFactory` inne i `inTransaction { opprettBehandling(…) }`
+(`opprettFoerstegangsbehandling` → `behandlingDao.opprettBehandling`), og at behandling bruker en
+**tråd-lokal `DatabaseContext`** der `activeTx()` gir en rå `java.sql.Connection` (`autoCommit=false`,
+commit ved blokk-slutt). Det er den ideelle outbox-sømmen — bedre enn kotliquery, siden vi allerede har
+en rå Connection å pakke i `JdbcTransaksjon`.
+- **Host-bro `TaskProdusent.opprettPaaAktivBehandlingstransaksjon(type, payload)`**
+  (`ProsesseringOutbox.kt`): henter `databaseContext().activeTx()`, wrapper i `JdbcTransaksjon`,
+  delegerer til `opprett`. Skal kalles inne i en `inTransaction`-blokk; kaster ellers
+  «No currently open transaction» (en task uten forretnings-skriv skal bruke `opprettFrittstående`).
+- **Ny, uavhengig toggle `ProsesseringToggles.EKTE_OUTBOX`** (`"prosessering-ekte-outbox"`, default av),
+  atskilt fra `SKYGGE_SOEKNADMOTTAK` — skygge og ekte kan kjøre side om side i dev.
+- **Effektfri ekte-task-type `ekteBehandlingMottakType`** (`EkteBehandlingMottak.kt`) med payload
+  `EkteBehandlingMottakPayload(behandlingId, sakId, sakType)`. Steget logger «behandling X opprettet —
+  ville varslet …» uten sideeffekter. Registrert i motoren via `installProsessering`.
+- **Idempotens flyttes til `behandlingId`:** behandlingsopprettelse er allerede guardet (én åpen
+  behandling per sak) og task-en henger på samme tx → én behandling = én task, uten den egne
+  dedupe-DAO-en skyggeflyten trenger (`SoeknadSkyggeDao`).
+- **Integrasjonstest** (`EkteOutboxBehandlingstransaksjonIntegrationTest`, Testcontainers): innenfor
+  behandlingens *virkelige* `inTransaction { }` skrives en simulert forretnings-rad + en task via broen.
+  Commit → begge finnes. Rollback (forretnings-skrivet kaster) → task-raden ruller tilbake med det. Grønn.
+
+**Steg 2a-rest — selve hot-path-kallet (2026-07-20). ✅ GJORT.**
+Kallet til `taskProdusent.opprettPaaAktivBehandlingstransaksjon(...)` er nå wiret inn i
+`opprettFoerstegangsbehandling` (rett etter `behandlingDao.opprettBehandling`), via privat
+`koeEkteMottakOutbox(behandlingId, sak)`. Additivt og fullstendig gatet:
+- **Konstruktør-utvidelse:** `BehandlingFactory` fikk to *defaultede* params
+  (`prosesseringTaskProdusent: TaskProdusent? = null`, `featureToggleService: FeatureToggleService? = null`),
+  så alle eksisterende testkonstruksjoner er urørt. Prod-wiringen kobles i `HighLevelServiceModule`
+  med `daoModule.prosesseringTaskProdusent` (= `StandardTaskProdusent(PostgresTaskRepository(dataSource))`).
+- **Gating-rekkefølge:** `koeEkteMottakOutbox` returnerer tidlig hvis produsenten ikke er wiret
+  (`?: return`) *før* toggle/`activeTx()` røres — så enhetstester med mock-Kontekst aldri kaller
+  `activeTx()`. Deretter `if EKTE_OUTBOX ikke på → return`. Default av ⇒ null sideeffekt i prod inntil
+  toggelen skrus på i dev.
+- **Wiring-test** (`BehandlingFactoryOutboxTest`): én opprettet førstegangsbehandling med mock-produsent
+  gir **nøyaktig én** `ekteBehandlingMottakType`-task når toggelen er på, og **null** når den er av.
+  Grønn. (At task-en committer/ruller tilbake atomisk er allerede bevist i
+  `EkteOutboxBehandlingstransaksjonIntegrationTest`; denne dekker kun gatingen/kallet.)
+
+**Verifiser lokalt:** skru på `prosessering-ekte-outbox` i Unleash (dev) og opprett en
+førstegangsbehandling — det legges én KLAR-task av type `ekte-behandling-mottak` i `prosessering.task`,
+i samme tx som behandlingen. Motoren plukker den og logger «behandling X opprettet — ville varslet …»
+(ingen sideeffekt ennå, jf. Steg 2b). Skru toggelen av ⇒ ingen task.
+
+**Steg 2b — ekte, idempotent sideeffekt (SENERE):** la ekte-steget gjøre en faktisk omgjørbar/idempotent
+sideeffekt i stedet for kun logg.
+
+Åpne spørsmål fra tidligere, nå avklart av Steg 2a-kartleggingen:
+- **Hvor sitter forretnings-skrivet?** `BehandlingFactory.opprettFoerstegangsbehandling`, inne i `inTransaction`.
+- **Regel-kollisjon:** løst — kallet bor i behandling-REST der behandlingen faktisk skrives, ikke i
+  skygge-riveren.
+- **Idempotens:** løst via `behandlingId` (se over).
+- **Hva er «ekte»-steget?** Steg 2a: effektfritt (logg). Steg 2b: ekte sideeffekt. API-formen (`opprett` på
+  vertens tx) er nå bevist mot både kotliquery- og den tråd-lokale behandlings-transaksjonen.
 
 ### Fase 5 — Kutt ut til eget repo (etter Fase 4d/4e)
 - Når form/API sitter: opprett `efterlatte-prosessering`-repoet, publiser som
@@ -450,6 +490,8 @@ men strammes inn ved en evt. prod-tilpasning.
 - Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
   (Fase 4 — via behandling-REST).
 - **NESTE MÅL — skygge → ekte outbox (Fase 4e):** task i samme tx som behandlings-skrivet.
-  **Steg 1 (produsent-API herdet mot behandlingens kotliquery-tx via `opprettISammeTransaksjon` +
-  `OutboxSammeTransaksjonIntegrationTest`) er gjort (2026-07-20).** Gjenstår Steg 2: koble broen på
-  det ekte behandlings-skrivet (krever sparring — se Fase 4e over).
+  **Steg 1 (produsent-API herdet mot kotliquery-tx) og Steg 2a (bro mot behandlingens tråd-lokale
+  `inTransaction` via `opprettPaaAktivBehandlingstransaksjon`, ny toggle `EKTE_OUTBOX`, effektfri
+  ekte-task-type + `EkteOutboxBehandlingstransaksjonIntegrationTest`) er gjort (2026-07-20).**
+  Gjenstår: selve hot-path-kallet i `BehandlingFactory.opprettFoerstegangsbehandling` (krever eksplisitt
+  klarsignal — redigerer produksjons-domenekode) og Steg 2b (ekte sideeffekt). Detaljer i Fase 4e over.

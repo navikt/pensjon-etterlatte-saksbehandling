@@ -327,8 +327,55 @@ Det er flere ting å diskutere/undersøke her.
     Biblioteket er urørt (ingen `(type, payload)`-constraint i `core`/`postgres`). Bevist på
     Testcontainers (`SoeknadSkyggeDaoTest`, 6 tester): KLAR/KJØRER/FULLFØRT/STOPPET → true;
     AVBRUTT/ukjent → false.
+  - **Verifisert i dev (2026-07-20). ✅** Med begge toggles på: ved neste 11764-redelivery
+    (50-min-kadensen, kl. 12:40) blokkerte dedupe-en innkøingen — logglinje
+    `Søknad 11764 er allerede håndtert (finnes task) — hopper over ny innkøing (idempotens)`,
+    og count stod stille på 116 (ingen ny task-rad). Samtidig ble en fersk søknad (11790)
+    håndtert nøyaktig én gang, og FeilbarDemo-rekjør fortsatt intakt. Én søknad = én task,
+    bevist ende-til-ende. (Gamle pre-deploy-duplikater ligger igjen som historikk; vokser ikke,
+    ryddes ikke retroaktivt — greit for PoC-en.)
 
-### Fase 5 — Kutt ut til eget repo (etter Fase 4d)
+### Fase 4e — skygge → ekte outbox (PÅGÅR)
+Dette er tråden som reelt **herder produsent-API-et** før Fase 5-uttrekket: gå fra en ren
+skygge (`opprettFrittstående`, ingen forretnings-skriv) til en **ekte outbox-kobling** der
+task-en skrives i *samme DB-transaksjon* som behandlings-skrivet. Det er her `opprett(transaksjon, …)`
+og `Transaksjon`-porten faktisk tas i bruk mot vertens virkelige tx, ikke bare i `OutboxTest`.
+
+**Steg 1 — produsent-API herdet mot vertens virkelige transaksjon (2026-07-20). ✅ GJORT.**
+Bibliotekets egen `OutboxTest` bevist outbox-garantien mot `repo.iEgenTransaksjon`. Nå er den
+samme garantien bevist mot behandlingens **faktiske** transaksjonsmekanikk — kotliquery
+`DataSource.transaction { … }`:
+- **Host-bro `TaskProdusent.opprettISammeTransaksjon(tx, type, payload)`**
+  (`etterlatte-behandling/prosessering/ProsesseringOutbox.kt`): pakker kotliquerys underliggende
+  `java.sql.Connection` (`tx.connection.underlying`) i bibliotekets `JdbcTransaksjon` og delegerer
+  til `opprett`. Produsenten skriver på den, men committer/lukker den aldri — kotliquery-transaksjonen
+  eier connectionen. Dette er *nøyaktig* koblingen den ekte outboxen vil bruke når en task skrives i
+  samme tx som behandlings-skrivet. Biblioteket er urørt (broen bor i host-en).
+- **Integrasjonstest** (`OutboxSammeTransaksjonIntegrationTest`, Testcontainers via behandlingens
+  `ProsesseringDatabaseExtension`): innenfor én `dataSource.transaction { }` skrives en simulert
+  forretnings-rad + en task via broen. **Commit** → begge finnes. **Rollback** (forretnings-skrivet
+  kaster) → task-raden ruller tilbake med det (ingen KLAR-task). Grønn. **Læring:** kotliquery setter
+  `autoCommit=false` på den underliggende Hikari-connectionen ved `begin()`, så insert-en henger på
+  transaksjonen — verifisert via probe (`autoCommit=false`, samme Hikari-proxy-connection).
+
+**Steg 2 — koble broen på det ekte behandlings-skrivet (GJENSTÅR, krever sparring):**
+Ting å avklare/undersøke (sparres om ved oppstart av økten):
+- **Hvor sitter forretnings-skrivet?** Sak/behandling opprettes i behandling-REST
+  (`NySoeknadRiver` → behandling). Outbox-tasken må henge på *den* transaksjonen, så koblingen
+  hører hjemme der behandlingen faktisk skrives — ikke i skygge-riveren (som er mutasjonsfri).
+  Broen fra Steg 1 er verktøyet: finn den kotliquery-transaksjonen behandlingen skrives i, og kall
+  `opprettISammeTransaksjon(tx, …)` der.
+- **Regel-kollisjon:** søknad-eventet konsumeres i `etterlatte-behandling-kafka`, men skriv +
+  produsent hører hjemme i behandling-REST (ingen app skriver i en annen apps DB). Event-drevet
+  task-opprettelse må gå *via* behandling-REST.
+- **Idempotens flyttes/gjenbrukes:** dedupe-nøkkelen (`soeknadId`, jf. Fase 4d) må gjelde også
+  når task-en opprettes i samme tx — enten via samme sjekk før innkøing, eller en
+  besluttet unik-nøkkel i biblioteket (i så fall dokumenteres i `04-outbox-api.md` først).
+- **Hva er «ekte»-steget?** Fortsatt ingen faktisk behandling opprettes i første omgang, eller
+  går vi hele veien? Avgrens scope ved oppstart — men API-formen (`opprett` på vertens tx) er
+  målet uansett, og er nå bevist mot behandlingens virkelige transaksjon.
+
+### Fase 5 — Kutt ut til eget repo (etter Fase 4d/4e)
 - Når form/API sitter: opprett `efterlatte-prosessering`-repoet, publiser som
   Maven-artefakt (GitHub Packages, à la `pensjon-etterlatte-felles/common`), la Gjenny
   dra det inn via Gradle-avhengighet i stedet for `includeBuild`.
@@ -399,7 +446,10 @@ men strammes inn ved en evt. prod-tilpasning.
   `opprettFrittstående` ikke deduper og skygge-riveren ikke konsumerer eventet. **Løst
   produsent-side** med `SoeknadSkyggeDao` som skygge-ruten sjekker før innkøing (finnes task
   for `soeknadId` i alt unntatt AVBRUTT → hopp over). Biblioteket urørt. Detaljer i Fase 4d over.
-- **Bli i Gjenny litt til:** vi jobber videre med skyggekjøringen (Fase 4d) FØR Fase 5-uttrekket.
+- **Bli i Gjenny litt til:** vi jobber videre med skyggekjøringen (Fase 4d/4e) FØR Fase 5-uttrekket.
 - Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
   (Fase 4 — via behandling-REST).
-- Når går vi fra skygge til ekte outbox (task i samme tx som behandling)?
+- **NESTE MÅL — skygge → ekte outbox (Fase 4e):** task i samme tx som behandlings-skrivet.
+  **Steg 1 (produsent-API herdet mot behandlingens kotliquery-tx via `opprettISammeTransaksjon` +
+  `OutboxSammeTransaksjonIntegrationTest`) er gjort (2026-07-20).** Gjenstår Steg 2: koble broen på
+  det ekte behandlings-skrivet (krever sparring — se Fase 4e over).

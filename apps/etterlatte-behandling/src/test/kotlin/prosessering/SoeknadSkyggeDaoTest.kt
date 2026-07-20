@@ -16,8 +16,9 @@ import javax.sql.DataSource
  * Idempotens-sjekken ([SoeknadSkyggeDao]) som skygge-ruten deduper på (PoC Fase 4d).
  * Kjøres mot behandlingens ekte `prosessering`-skjema på Testcontainers.
  *
- * En uferdig (KLAR/KJØRER) task for samme `soeknadId` skal blokkere ny innkøing;
- * FULLFØRT/STOPPET skal ikke det.
+ * En søknad skal gi nøyaktig én task: finnes det allerede en task for `soeknadId` i en
+ * hvilken som helst status unntatt AVBRUTT, blokkeres ny innkøing. Bare AVBRUTT (operatør
+ * har avfeid tasken) åpner for ny innkøing.
  */
 @ExtendWith(ProsesseringDatabaseExtension::class)
 class SoeknadSkyggeDaoTest {
@@ -35,7 +36,7 @@ class SoeknadSkyggeDaoTest {
         tøm(dataSource)
         val dao = SoeknadSkyggeDao(dataSource)
 
-        assertFalse(dao.finnesUferdigTaskForSoeknad("ukjent"))
+        assertFalse(dao.harAlleredeHaandtertSoeknad("ukjent"))
     }
 
     @Test
@@ -46,8 +47,8 @@ class SoeknadSkyggeDaoTest {
 
         opprettTask(repo, "12345")
 
-        assertTrue(dao.finnesUferdigTaskForSoeknad("12345"), "En KLAR task for søknaden er uferdig")
-        assertFalse(dao.finnesUferdigTaskForSoeknad("99999"), "Annen soeknadId skal ikke matche")
+        assertTrue(dao.harAlleredeHaandtertSoeknad("12345"), "En KLAR task for søknaden teller som håndtert")
+        assertFalse(dao.harAlleredeHaandtertSoeknad("99999"), "Annen soeknadId skal ikke matche")
     }
 
     @Test
@@ -60,11 +61,11 @@ class SoeknadSkyggeDaoTest {
         val plukket = repo.claimBatch(limit = 10)
         assertTrue(plukket.any { it.status == Status.KJØRER }, "claim skal sette task til KJØRER")
 
-        assertTrue(dao.finnesUferdigTaskForSoeknad("22222"), "En KJØRER task for søknaden er uferdig")
+        assertTrue(dao.harAlleredeHaandtertSoeknad("22222"), "En KJØRER task for søknaden teller som håndtert")
     }
 
     @Test
-    fun `FULLFOERT task for soeknaden gir false`(dataSource: DataSource) {
+    fun `FULLFOERT task for soeknaden gir true`(dataSource: DataSource) {
         tøm(dataSource)
         val repo = PostgresTaskRepository(dataSource)
         val dao = SoeknadSkyggeDao(dataSource)
@@ -72,11 +73,14 @@ class SoeknadSkyggeDaoTest {
         val id = opprettTask(repo, "33333")
         repo.iEgenTransaksjon { tx -> repo.markerFullført(transaksjon = tx, id = id) }
 
-        assertFalse(dao.finnesUferdigTaskForSoeknad("33333"), "En FULLFØRT task skal ikke blokkere ny innkøing")
+        assertTrue(
+            dao.harAlleredeHaandtertSoeknad("33333"),
+            "En FULLFØRT task skal blokkere ny innkøing — søknaden er ferdig håndtert",
+        )
     }
 
     @Test
-    fun `STOPPET task for soeknaden gir false`(dataSource: DataSource) {
+    fun `STOPPET task for soeknaden gir true`(dataSource: DataSource) {
         tøm(dataSource)
         val repo = PostgresTaskRepository(dataSource)
         val dao = SoeknadSkyggeDao(dataSource)
@@ -84,6 +88,34 @@ class SoeknadSkyggeDaoTest {
         val id = opprettTask(repo, "44444")
         repo.markFeilet(id = id, nyStatus = Status.STOPPET, stoppaarsak = Stoppaarsak.FEIL, nesteTriggerTid = Instant.now())
 
-        assertFalse(dao.finnesUferdigTaskForSoeknad("44444"), "En STOPPET task venter på operatør, ikke ny innkøing")
+        assertTrue(
+            dao.harAlleredeHaandtertSoeknad("44444"),
+            "En STOPPET task følges opp via rekjør, ikke ved ny innkøing",
+        )
+    }
+
+    @Test
+    fun `AVBRUTT task for soeknaden gir false`(dataSource: DataSource) {
+        tøm(dataSource)
+        val repo = PostgresTaskRepository(dataSource)
+        val dao = SoeknadSkyggeDao(dataSource)
+
+        val id = opprettTask(repo, "55555")
+        settStatusAvbrutt(dataSource, id)
+
+        assertFalse(
+            dao.harAlleredeHaandtertSoeknad("55555"),
+            "En AVBRUTT task er avfeid av operatør — søknaden kan køes på nytt",
+        )
+    }
+
+    private fun settStatusAvbrutt(
+        dataSource: DataSource,
+        id: Long,
+    ) = dataSource.connection.use { connection ->
+        connection.prepareStatement("UPDATE prosessering.task SET status = 'AVBRUTT' WHERE id = ?").use { statement ->
+            statement.setLong(1, id)
+            statement.executeUpdate()
+        }
     }
 }

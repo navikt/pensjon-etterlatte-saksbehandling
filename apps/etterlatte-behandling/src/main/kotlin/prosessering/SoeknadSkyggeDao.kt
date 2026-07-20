@@ -13,9 +13,13 @@ import javax.sql.DataSource
  * «samme task» er verts-domene, ikke gjenbrukbar infra. En generell
  * `(type, payload)`-unik-constraint i biblioteket er bevisst utsatt (jf. `04-outbox-api.md`).
  *
- * «Uferdig» = [Status.KLAR] eller [Status.KJØRER]. En [Status.STOPPET] task venter på en
- * operatør-beslutning (rekjør/avbryt) og skal ikke blokkere ny innkøing; en [Status.FULLFØRT]
- * er ferdig håndtert.
+ * «Allerede håndtert» = det finnes en task for `soeknadId` i en hvilken som helst status
+ * unntatt [Status.AVBRUTT]. Vi inkluderer bevisst [Status.FULLFØRT] og [Status.STOPPET],
+ * ikke bare uferdige (KLAR/KJØRER): søknad-eventet redeleveres jevnt over tid, så en task
+ * rekker å fullføre før neste redelivery — en ren uferdig-sjekk ville derfor sluppet gjennom
+ * en ny task per redelivery. For et *mottak* skal én søknad gi nøyaktig én task; en STOPPET
+ * task følges opp via rekjør (operatør), ikke ved ny innkøing. Bare [Status.AVBRUTT] (operatør
+ * har eksplisitt avfeid tasken) åpner for at søknaden kan køes på nytt.
  */
 class SoeknadSkyggeDao(
     private val dataSource: DataSource,
@@ -23,25 +27,24 @@ class SoeknadSkyggeDao(
 ) {
     private val tabell = "$skjema.task"
 
-    fun finnesUferdigTaskForSoeknad(soeknadId: String): Boolean =
+    fun harAlleredeHaandtertSoeknad(soeknadId: String): Boolean =
         dataSource.connection.use { connection ->
-            connection.prepareStatement(finnesUferdigSql).use { statement ->
+            connection.prepareStatement(harAlleredeHaandtertSql).use { statement ->
                 statement.setString(1, soeknadMottakSkyggeType.navn)
-                statement.setString(2, Status.KLAR.name)
-                statement.setString(3, Status.KJØRER.name)
-                statement.setString(4, soeknadId)
+                statement.setString(2, Status.AVBRUTT.name)
+                statement.setString(3, soeknadId)
                 statement.executeQuery().use { resultSet ->
                     resultSet.next() && resultSet.getBoolean(1)
                 }
             }
         }
 
-    private val finnesUferdigSql =
+    private val harAlleredeHaandtertSql =
         """
         SELECT EXISTS(
             SELECT 1 FROM $tabell
              WHERE type = ?
-               AND status IN (?, ?)
+               AND status <> ?
                AND payload::jsonb ->> 'soeknadId' = ?
         )
         """.trimIndent()

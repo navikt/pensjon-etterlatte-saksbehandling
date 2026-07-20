@@ -63,6 +63,7 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
 import no.nav.etterlatte.prosessering.ProsesseringAdminDao
+import no.nav.etterlatte.prosessering.SoeknadSkyggeDao
 import no.nav.etterlatte.prosessering.installProsessering
 import no.nav.etterlatte.prosessering.prosesseringAdminRoutes
 import no.nav.etterlatte.prosessering.prosesseringDemoRoutes
@@ -294,7 +295,10 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     samordningSystembrukerVedtakRoute(applicationContext.vedtakSamordningService)
     tilbakekrevingvedtakRoute(applicationContext.vedtakTilbakekrevingService)
 
-    prosesseringSkyggeRoutes(applicationContext.featureToggleService)
+    prosesseringSkyggeRoutes(
+        featureToggleService = applicationContext.featureToggleService,
+        skyggeDao = SoeknadSkyggeDao(applicationContext.dataSource),
+    )
     prosesseringDemoRoutes(applicationContext.featureToggleService)
     prosesseringAdminRoutes(
         dao = ProsesseringAdminDao(applicationContext.dataSource),

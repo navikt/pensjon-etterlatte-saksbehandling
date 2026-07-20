@@ -64,8 +64,15 @@ fun Route.installProsessering(
  * en river i behandling-kafka når en søknad kommer inn (parallelt med dagens flyt).
  * Bruker `opprettFrittstående` fordi skyggen ikke har noe forretnings-skriv å henge
  * outbox-garantien på. Gated bak [ProsesseringToggles.SKYGGE_SOEKNADMOTTAK].
+ *
+ * Idempotens (Fase 4d): riveren er mutasjonsfri, så samme søknad-event redeleveres på hver
+ * rapid-syklus. Vi deduper produsent-side på `soeknadId` via [SoeknadSkyggeDao] — finnes det
+ * allerede en uferdig (KLAR/KJØRER) task for søknaden, hopper vi over ny innkøing.
  */
-fun Route.prosesseringSkyggeRoutes(featureToggleService: FeatureToggleService) {
+fun Route.prosesseringSkyggeRoutes(
+    featureToggleService: FeatureToggleService,
+    skyggeDao: SoeknadSkyggeDao,
+) {
     route("/api/prosessering/skygge/soeknad") {
         post {
             kunSystembruker {
@@ -76,6 +83,16 @@ fun Route.prosesseringSkyggeRoutes(featureToggleService: FeatureToggleService) {
                 }
 
                 val request = call.receive<SoeknadSkyggeRequest>()
+
+                if (skyggeDao.finnesUferdigTaskForSoeknad(request.soeknadId)) {
+                    logger.info(
+                        "Uferdig skygge-task finnes allerede for søknad ${request.soeknadId} " +
+                            "— hopper over ny innkøing (idempotens)",
+                    )
+                    call.respond(HttpStatusCode.OK)
+                    return@kunSystembruker
+                }
+
                 val taskId =
                     call.application.taskProdusent.opprettFrittstående(
                         type = soeknadMottakSkyggeType,

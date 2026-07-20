@@ -292,7 +292,7 @@ Det er flere ting å diskutere/undersøke her.
     ville feile likt igjen, siden validering er ren funksjon av payload. Demo-tasken finnes nettopp
     fordi rekjøring bare gir mening når feilen er forbigående.
 
-- **Duplikate tasker? — undersøkt (2026-07-17). ✅ Avklart, tiltak gjenstår.**
+- **Duplikate tasker? — undersøkt (2026-07-17). ✅ Avklart. Idempotens løst (2026-07-20). ✅ GJORT.**
   Dump av `prosessering.task` (33 rader) viste: alle `SoeknadMottakSkygge`, alle `FULLFØRT`,
   `antall_feil=0`, men kun **3 unike `soeknadId`** — `11764` (29 tasker, jevnt ~hvert 50. min),
   `11786` (2) og `11787` (2).
@@ -314,6 +314,13 @@ Det er flere ting å diskutere/undersøke her.
     unik-constraint i biblioteket ennå — hva som utgjør «samme task» er verts-domene, ikke
     infra, og en bibliotek-side unik-nøkkel er en større API-beslutning som i så fall må
     besluttes og dokumenteres i `04-outbox-api.md` først.
+  - **Implementert (2026-07-20):** dedupe produsent-side i skygge-ruten. Ny host-side
+    `SoeknadSkyggeDao.finnesUferdigTaskForSoeknad(soeknadId)` (rå JDBC mot `prosessering.task`,
+    `payload::jsonb ->> 'soeknadId'`, uferdig = `KLAR`/`KJØRER`). `prosesseringSkyggeRoutes`
+    sjekker denne før `opprettFrittstående` og hopper over (HTTP 200) hvis en uferdig task
+    allerede finnes — `soeknadId` er idempotens-nøkkelen. Biblioteket er urørt (ingen
+    `(type, payload)`-constraint i `core`/`postgres`). Bevist på Testcontainers
+    (`SoeknadSkyggeDaoTest`, 5 tester): KLAR/KJØRER → true; FULLFØRT/STOPPET/ukjent → false.
 
 ### Fase 5 — Kutt ut til eget repo (etter Fase 4d)
 - Når form/API sitter: opprett `efterlatte-prosessering`-repoet, publiser som
@@ -381,12 +388,11 @@ men strammes inn ved en evt. prod-tilpasning.
   fortsatt parkert.
 - **NB personvern:** `ProsesseringTaskDto.payload` inneholder `fnrSoeker` (jf. V353). Vises i
   GUIet (kun dev) — bør maskeres/utelates ved en evt. prod-tilpasning.
-- **Duplikate tasker? (Fase 4d) — ✅ undersøkt 2026-07-17.** Ikke motor-duplikater (hver task
+- **Duplikate tasker? (Fase 4d) — ✅ løst 2026-07-20.** Ikke motor-duplikater (hver task
   kjørt én gang, feil=0), men produsent-duplikater: samme `soeknadId` køes på nytt fordi
-  `opprettFrittstående` ikke deduper og skygge-riveren ikke konsumerer eventet. Forventet for
-  skyggen. **Anbefalt tiltak:** dedupe produsent-side på `soeknadId` (sjekk uferdig task før
-  innkøing); *ikke* bibliotek-side unik-constraint uten en egen API-beslutning i
-  `04-outbox-api.md`. Detaljer i Fase 4d over.
+  `opprettFrittstående` ikke deduper og skygge-riveren ikke konsumerer eventet. **Løst
+  produsent-side** med `SoeknadSkyggeDao` som skygge-ruten sjekker før innkøing (uferdig
+  KLAR/KJØRER-task for `soeknadId` → hopp over). Biblioteket urørt. Detaljer i Fase 4d over.
 - **Bli i Gjenny litt til:** vi jobber videre med skyggekjøringen (Fase 4d) FØR Fase 5-uttrekket.
 - Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
   (Fase 4 — via behandling-REST).

@@ -431,6 +431,27 @@ min-aktige tallene gjelder kun reaperens hengende-timeout.)
 **Steg 2b — ekte, idempotent sideeffekt (SENERE):** la ekte-steget gjøre en faktisk omgjørbar/idempotent
 sideeffekt i stedet for kun logg.
 
+**Kandidat-vurdering (2026-07-20).** To former:
+- **A1 — selvstendig idempotent markør-/mottak-rad** (egen tabell i behandling, keyet på `behandlingId`,
+  `ON CONFLICT DO NOTHING`): trygt og helt innenfor behandling, men **make-work** — mekanismen (ekte
+  idempotent skriv gjennom stegets tx) er allerede bevist av `KjedeOgStegTransaksjonTest` og dev-kjøringen.
+  En tabell ingen leser tilfører lite.
+- **A2 — outbox-ifiser den ekte dual-writen** i behandlingsopprettelsen: `BehandlingRoutes` kaller
+  `behandlingOgOppgave.sendMeldingForHendelse()` (statistikk-publisering på Rapid) **etter** at
+  `inTransaction { }` har committet. Dør poden / er Kafka nede mellom commit og publisering → behandling
+  finnes, statistikk-event tapt, ingen retry. Dette er *det* dual-write-problemet outbox løser, og den
+  genuint verdifulle kandidaten.
+  - **BLOKKERT på konsument-idempotens (annet team).** Statistikk-konsumenten
+    (`AvbruttOpprettetBehandlinghendelseRiver` → `StatistikkService.registrerStatistikkForBehandlinghendelse`
+    → `SakRepository.lagreRad`) er **append-only** (ren `INSERT` i `sak`, ingen dedupe/`ON CONFLICT`).
+    Dagens dual-write er *høyst-én-gang* (kan tapes, aldri dupliseres). Outbox er *minst-én-gang* → ville
+    gitt **duplikate `sak`-rader**. A2 krever derfor dedupe på statistikk-siden (behandlingId+hendelse)
+    *før* den kan slås på — en endring i `etterlatte-statistikk`, ikke en solo-endring i behandling.
+
+**Konklusjon:** PoC-ens tekniske kjerne er reelt bevist (Steg 2a i dev + full bibliotek-kontrakt). Steg 2b
+i sin *verdifulle* form (A2) er et tverr-team-tiltak (statistikk-idempotens), og i sin *trygge* form (A1)
+make-work. Den umiddelbart farbare, høyverdi-veien videre er derfor **Fase 5-uttrekket**, ikke Steg 2b.
+
 **Uttrekks-beredskap (avklart 2026-07-20).** Steg 2b er *ikke* en forutsetning for Fase 5-uttrekket:
 den bor i `apps/etterlatte-behandling` (konsument-/host-steg) og blir værende i Gjenny, uten å røre
 bibliotekets grensesnitt. Det som derimot ble herdet *før* uttrekk — de to delene av den offentlige

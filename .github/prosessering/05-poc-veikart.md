@@ -404,8 +404,44 @@ førstegangsbehandling — det legges én KLAR-task av type `ekte-behandling-mot
 i samme tx som behandlingen. Motoren plukker den og logger «behandling X opprettet — ville varslet …»
 (ingen sideeffekt ennå, jf. Steg 2b). Skru toggelen av ⇒ ingen task.
 
+**✅ Verifisert i dev-gcp (2026-07-20).** Toggle `prosessering-ekte-outbox` på, sendte inn en ekte
+BP-søknad. Én task lagt i kø i behandlingens tx og kjørt til ende:
+```
+id=131 type=EkteBehandlingMottak status=FULLFØRT antall_feil=0
+payload={"behandlingId":"c85ddb6c-…","sakId":1010933,"sakType":"BARNEPENSJON"}
+opprettet_tid=11:50:25.672  plukket_tid=11:50:28.332   (plukk-latens ~2,6 s)
+```
+Logg (pod `etterlatte-behandling-5b59599cbb-92lzb`): «Behandling c85ddb6c-… opprettet (sak 1010933,
+type BARNEPENSJON) — ville varslet/registrert mottak (Steg 2a: ingen sideeffekter ennå)». Behandlingen
+i Gjenny så korrekt ut. Outbox-garantien bekreftet ende-til-ende mot produksjonslik infrastruktur.
+(Merk: motorens polleintervall er **50 ms**, ikke minutter — plukk skjer tilnærmet umiddelbart; de 50
+min-aktige tallene gjelder kun reaperens hengende-timeout.)
+
+**✅ Negativ test + feil/retry-demo verifisert i dev-gcp (2026-07-20).**
+- **Negativ:** ny BP-søknad med `prosessering-ekte-outbox` **av** → ingen `EkteBehandlingMottak`-task
+  (bekreftet i `/prosessering`-UI etter ~2 min). **Læring:** å skru toggelen *på i etterkant*
+  backfiller **ikke** — toggelen leses i det `opprettFoerstegangsbehandling` kjører, så en behandling
+  opprettet mens toggelen var av får aldri en task. Ny task krever ny behandling opprettet mens
+  toggelen er på (jf. task 131). Riktig og forventet gating.
+- **Feil/retry (hele statusmaskinen):** feilbar demo-task (`vinduSekunder=20`) feilet mens den simulerte
+  avhengigheten var «nede» → **STOPPET**; etter at vinduet var ute trykket operatøren **Rekjør** i UI-en
+  → **FULLFØRT** (task 132). Beviser reliable/retryable/observerbar task-håndtering som
+  rapids-and-rivers ikke gir alene.
+
 **Steg 2b — ekte, idempotent sideeffekt (SENERE):** la ekte-steget gjøre en faktisk omgjørbar/idempotent
 sideeffekt i stedet for kun logg.
+
+**Uttrekks-beredskap (avklart 2026-07-20).** Steg 2b er *ikke* en forutsetning for Fase 5-uttrekket:
+den bor i `apps/etterlatte-behandling` (konsument-/host-steg) og blir værende i Gjenny, uten å røre
+bibliotekets grensesnitt. Det som derimot ble herdet *før* uttrekk — de to delene av den offentlige
+kontrakten resten av PoC-en ikke kjørte ennå:
+- **`core` er import-rent:** scan viser kun `java.time`, `kotlin.time`, `kotlinx.coroutines`, `slf4j` og
+  egen pakke — ingen `java.sql`/Ktor/Spring/Gjenny/JDBC. Uttrekks-gaten (framework-agnostisk core) klarert.
+- **`TaskKontekst.opprettNesteTask` + ekte forretnings-skriv gjennom stegets `transaksjon`** er nå bevist
+  i `KjedeOgStegTransaksjonTest` (`-postgres`, Testcontainers): innenfor `repo.iEgenTransaksjon { }` skrives
+  en forretnings-rad + kjedes en neste task på *samme* stegtransaksjon. Commit ⇒ begge finnes; steg-feil ⇒
+  ingen av delene. Dette var API-flaten uttrekket eksponerer for konsumenter, men som verken test eller app
+  hadde kjørt før nå.
 
 Åpne spørsmål fra tidligere, nå avklart av Steg 2a-kartleggingen:
 - **Hvor sitter forretnings-skrivet?** `BehandlingFactory.opprettFoerstegangsbehandling`, inne i `inTransaction`.

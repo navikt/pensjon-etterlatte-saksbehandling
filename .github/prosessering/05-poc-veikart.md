@@ -477,6 +477,45 @@ kontrakten resten av PoC-en ikke kjørte ennå:
   Maven-artefakt (GitHub Packages, à la `pensjon-etterlatte-felles/common`), la Gjenny
   dra det inn via Gradle-avhengighet i stedet for `includeBuild`.
 
+**Uttrekks-avklaringer (2026-07-21).** Sparret rundt oppstarten av Fase 5. Beslutninger og
+hensyn før første flytting:
+
+- **Byggeverktøy er frikoblet fra uttrekket — åpent valg ved repo-oppsett.** Selve flyttingen
+  av de tre modulene er byggeverktøy-agnostisk; koden binder seg ikke til Gradle (`core` er ren
+  Kotlin, `postgres` er JDBC + Hikari, `ktor` legger til `ktor-server-core`). Hvilket byggeverktøy
+  det *nye* repoet bruker avgjøres når repoet settes opp, uavhengig av selve uttrekket.
+  **Maven er dermed mulig** (team Enslig Forsørgers preferanse) — en Maven-publisert GitHub
+  Packages-artefakt konsumeres av Gjenny (Gradle) uten problem, samme `GITHUB_TOKEN`
+  (`read:packages`)-mekanisme som for øvrige interne pakker. **Ikke en låst beslutning** og ikke
+  en del av uttrekksmekanikken; 02-arkitektur nevner «Gradle multi-module» som skisse, ikke føring.
+
+- **Skarpt skille — hva flyttes vs. hva blir igjen.** Kun biblioteksinfra flyttes:
+  - **Flytt:** `libs/etterlatte-prosessering-core`, `-postgres`, `-ktor`.
+  - **Blir igjen i Gjenny (vertens domene, urørt av uttrekket):** `SoeknadMottakSkygge`,
+    `FeilbarDemoTask`, `EkteBehandlingMottak`, `ProsesseringOutbox`-broen, admin-routes/DAO,
+    `SoeknadSkyggeDao`, `SoeknadSkyggeRiver`, Flyway `V352`/`V353`, `/prosessering`-UI-en.
+    Task-typer og outbox-koblingen er host-domene, ikke gjenbrukbar infra.
+
+- **Ved uttrekk må avklares/etableres:**
+  - **Egne dependency-versjoner** (mister Gjennys `libs.versions.toml`): kotlin, coroutines,
+    hikari, postgres-driver, ktor, jackson (kun test), testcontainers.
+  - **Publisering:** Actions-workflow for build + publish til GitHub Packages, og
+    versjoneringsstrategi (semver via git-tag).
+  - **CI trenger Docker** (Testcontainers) — `ubuntu-latest` har det.
+  - **Navn/koordinater:** repo/artefakt `efterlatte-prosessering` (besluttet); modulene heter
+    i dag `etterlatte-prosessering-*` i Gjenny mens 02-arkitektur bruker `prosessering-*`. Land
+    `groupId`/`artifactId` før flytting.
+  - **Privat vs. offentlig:** NAV-standard er offentlig repo (MIT). Privat er et bevisst valg —
+    bekreft intensjonen. *(Brukeren har oppgitt privat org-repo.)*
+  - **Adaptere:** låst beslutning i 02-arkitektur er *begge* adaptere (Spring + Ktor) + `tck`
+    fra dag én. PoC har bare `ktor`. Avgjør om `spring-boot-starter` + `tck` tas med i første
+    uttrekk eller utsettes.
+
+- **Uttrekks-beredskap: klar.** Fase 4e herdet de to siste uprøvde delene av den offentlige
+  kontrakten (`core` import-rent; `opprettNesteTask` + forretnings-skriv gjennom stegets tx
+  bevist i `KjedeOgStegTransaksjonTest`). Steg 2b er *ikke* en forutsetning — den bor i host-en
+  og rører ikke bibliotekets grensesnitt (se Fase 4e-konklusjonen).
+
 ---
 
 ## Hvor bygger vi (besluttet + gjort)
@@ -546,9 +585,8 @@ men strammes inn ved en evt. prod-tilpasning.
 - **Bli i Gjenny litt til:** vi jobber videre med skyggekjøringen (Fase 4d/4e) FØR Fase 5-uttrekket.
 - Nøyaktig hvordan koble task-opprettelse på søknad-eventet uten å forstyrre dagens flyt
   (Fase 4 — via behandling-REST).
-- **NESTE MÅL — skygge → ekte outbox (Fase 4e):** task i samme tx som behandlings-skrivet.
-  **Steg 1 (produsent-API herdet mot kotliquery-tx) og Steg 2a (bro mot behandlingens tråd-lokale
-  `inTransaction` via `opprettPaaAktivBehandlingstransaksjon`, ny toggle `EKTE_OUTBOX`, effektfri
-  ekte-task-type + `EkteOutboxBehandlingstransaksjonIntegrationTest`) er gjort (2026-07-20).**
-  Gjenstår: selve hot-path-kallet i `BehandlingFactory.opprettFoerstegangsbehandling` (krever eksplisitt
-  klarsignal — redigerer produksjons-domenekode) og Steg 2b (ekte sideeffekt). Detaljer i Fase 4e over.
+- **NESTE MÅL — Fase 5-uttrekk til `efterlatte-prosessering`-repo.** Fase 4e er i praksis ferdig
+  (Steg 1 + 2a + 2a-rest gjort og verifisert i dev-gcp); Steg 2b er utsatt og blokkerer ikke
+  uttrekket (bor i host-en). Byggeverktøy i det nye repoet er et frikoblet, åpent valg ved
+  repo-oppsett (Maven mulig, ikke låst) — se «Uttrekks-avklaringer» under Fase 5 for det skarpe
+  skillet flytt-vs-bli-igjen, publisering, versjoner, navn og adapter-scope.

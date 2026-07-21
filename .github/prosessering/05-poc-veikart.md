@@ -472,7 +472,38 @@ kontrakten resten av PoC-en ikke kjørte ennå:
 - **Hva er «ekte»-steget?** Steg 2a: effektfritt (logg). Steg 2b: ekte sideeffekt. API-formen (`opprett` på
   vertens tx) er nå bevist mot både kotliquery- og den tråd-lokale behandlings-transaksjonen.
 
-### Fase 5 — Kutt ut til eget repo (etter Fase 4d/4e)
+### Fase 5 — Kutt ut til eget repo (etter Fase 4d/4e) ✅ GJORT (2026-07-21)
+
+**Utført:** Modulene ble kuttet ut til det frittstående private repoet
+`navikt/efterlatte-prosessering`. Én ren commit på `main`.
+
+- **Flyttet og omdøpt:** `libs/etterlatte-prosessering-{core,postgres,ktor}` (Gjenny) →
+  `prosessering-{core,postgres,ktor}` (nytt repo). Kildekode byte-identisk; pakker
+  `efterlatte.prosessering.*` uendret.
+- **Byggeverktøy:** Gradle valgt (rent kopier-ut, laveste risiko). Egen versjonskatalog med
+  identiske aliaser → modul-byggefilene ble nesten uendret. Maven forblir mulig senere.
+- **Koordinater:** `no.nav.efterlatte:prosessering-{core,postgres,ktor}`, versjon fra git-tag
+  (semver). Kotlin 2.2.21, JVM 21, Gradle-wrapper 9.5.1.
+- **CI:** GitHub Actions-workflow bygger + tester på PR/push og publiserer til GitHub Packages
+  på `v*`-tag. *(Merk: workflow-filen krever et token med `workflow`-scope for å pushes.)*
+- **Verifisert:** `./gradlew build` grønt, tester passerer (ReaperTest er timing-flaky ved
+  container-oppstart — ikke en regresjon), `core` import-rent, publisering bevist via
+  `publishToMavenLocal`.
+- **Frontend fjernet:** `frontend/`, `docs-frontend/` og `contract/` (frontend/UI-sporet) ble
+  fjernet fra repoet og skrubbet fra git-historikken (amend + force-push på den ene commiten).
+- **Docs + agent flyttet med:** `.github/prosessering/` og
+  `.github/agents/efterlatte-prosessering-ekspert.md` bor nå i det nye repoet, så videre
+  arbeid kan skje i en Copilot-session der.
+
+**Blir igjen i Gjenny (host-domenet, urørt av uttrekket):** `SoeknadMottakSkygge`,
+`FeilbarDemoTask`, `EkteBehandlingMottak`, `ProsesseringOutbox`-broen, admin-routes/DAO,
+`SoeknadSkyggeDao`/`SoeknadSkyggeRiver`, Flyway `V352`/`V353`, `/prosessering`-UI-en.
+
+**Gjenstår etter uttrekket:**
+1. Tagg en versjon i det nye repoet og publiser artefakten.
+2. Bytt Gjenny fra `includeBuild`/lokale `libs`-moduler til Gradle-avhengighet mot den
+   publiserte artefakten, og fjern deretter `libs/etterlatte-prosessering-*` fra Gjenny.
+
 - Når form/API sitter: opprett `efterlatte-prosessering`-repoet, publiser som
   Maven-artefakt (GitHub Packages, à la `pensjon-etterlatte-felles/common`), la Gjenny
   dra det inn via Gradle-avhengighet i stedet for `includeBuild`.

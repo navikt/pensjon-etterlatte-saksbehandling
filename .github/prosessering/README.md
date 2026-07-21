@@ -9,6 +9,12 @@ jobbkø** for Kotlin, framework-agnostisk, som apper kan embedde som et bibliote
 
 ## Status (2026-07)
 
+> **Biblioteket er kuttet ut (Fase 5, 2026-07-21).** Koden bor nå i det frittstående repoet
+> **`navikt/efterlatte-prosessering`** (`prosessering-{core,postgres,ktor}`), sammen med disse
+> docs-ene og domeneekspert-agenten. Videre arbeid på selve biblioteket skjer der. Denne
+> kopien i Gjenny beholdes for host-domenet (skygge-task, outbox-bro, admin-routes) som blir
+> værende her til Gjenny bytter til den publiserte artefakten. Se «Fase 5» i veikartet.
+
 Vi har snevret inn fra den brede visjonen til en **fokusert PoC**: få **Gjenny**
 (`pensjon-etterlatte-saksbehandling`, Ktor) til å ta imot søknader på en
 prosesserings-måte — en **skyggekjøring** som beviser reliable/retryable/observerbar
@@ -18,8 +24,7 @@ Beslutninger for PoC-en:
 - **Kun Gjenny (Ktor)** nå. Spring-adapter, TCK og multi-backend-UI er utsatt.
 - **Frontend ignoreres** inntil videre.
 - **Tynt bibliotek** Gjenny drar inn. ef-sak kan følge senere.
-- **Prototypes inne i Gjenny først** (rask iterasjon), kuttes ut til eget repo når
-  formen sitter.
+- **Prototypet inne i Gjenny først** (rask iterasjon), nå kuttet ut til eget repo.
 
 Veien dit står i **[05-poc-veikart.md](05-poc-veikart.md)**.
 

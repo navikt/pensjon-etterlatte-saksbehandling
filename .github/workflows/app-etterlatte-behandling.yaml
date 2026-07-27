@@ -35,6 +35,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-behandling/**
       - "!apps/etterlatte-behandling/.nais/*"
       - libs/saksbehandling-common/**

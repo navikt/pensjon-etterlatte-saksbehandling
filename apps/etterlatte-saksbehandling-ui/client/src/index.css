@@ -35,11 +35,21 @@ li {
   padding: 0;
 }
 
+/* Gjenopprett padding for Aksel combobox-options som ellers nullstilles av regelen over (ul/li).*/
+.aksel-combobox__list-item,
+.aksel-combobox__list-item--loading,
+.aksel-combobox__list-item--no-options,
+.aksel-combobox__list-item--new-option,
+.aksel-combobox__list-item--max-selected {
+  padding: 12px;
+  margin: 2px 8px;
+}
+
 .breddepopover {
   min-width: 350px;
 }
 
 .padding-modal {
-    padding-top: 3rem !important;
-    padding-bottom: 1rem !important;
+  padding-top: 3rem !important;
+  padding-bottom: 1rem !important;
 }

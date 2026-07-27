@@ -206,7 +206,6 @@ internal class ApplicationContext(
 
     val trygdetidService get() = serviceModule.trygdetidService
     val avtaleService get() = serviceModule.avtaleService
-    val internTrygdetidAktivert get() = serviceModule.internTrygdetidAktivert
 
     val lesSkatteoppgjoerHendelserJobService get() = jobModule.lesSkatteoppgjoerHendelserJobService
     val aarligInntektsjusteringJobbService get() = jobModule.aarligInntektsjusteringJobbService
@@ -222,6 +221,7 @@ internal class ApplicationContext(
     val oppdaterSkatteoppgjoerIkkeMottattJob get() = jobModule.oppdaterSkatteoppgjoerIkkeMottattJob
     val etteroppgjoerSvarfristUtloeptJob get() = jobModule.etteroppgjoerSvarfristUtloeptJob
     val sjekkAdressebeskyttelseJob get() = jobModule.sjekkAdressebeskyttelseJob
+    val hengendeBehandlingJob get() = jobModule.hengendeBehandlingJob
     val lesSkatteoppgjoerHendelserJob get() = jobModule.lesSkatteoppgjoerHendelserJob
     val outboxJob get() = jobModule.outboxJob
 

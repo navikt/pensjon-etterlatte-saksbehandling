@@ -12,7 +12,6 @@ import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
 import no.nav.etterlatte.opplysningerfrasoknad.StartUthentingFraSoeknadRiver
 import no.nav.etterlatte.opplysningerfrasoknad.uthenter.Opplysningsuthenter
 import no.nav.etterlatte.pdl.PdlHendelserRiver
-import no.nav.etterlatte.regulering.FinnSakerTilReguleringRiver
 import no.nav.etterlatte.regulering.OmregningBrevDistribusjonRiver
 import no.nav.etterlatte.regulering.OmregningFeiletRiver
 import no.nav.etterlatte.regulering.OmregningsHendelserBehandlingRiver
@@ -44,7 +43,6 @@ private fun settOppRivers(
 
     PdlHendelserRiver(rapidsConnection, behandlingservice)
     OmregningsHendelserBehandlingRiver(rapidsConnection, behandlingservice)
-    FinnSakerTilReguleringRiver(rapidsConnection, behandlingservice)
     ReguleringsforespoerselRiver(rapidsConnection, behandlingservice, featureToggleService)
     OmregningFeiletRiver(rapidsConnection, behandlingservice)
     VedtakAttestertRiver(rapidsConnection, behandlingservice, featureToggleService)

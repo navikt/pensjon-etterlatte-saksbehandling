@@ -2,8 +2,6 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.FilterVerdi
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -175,11 +173,10 @@ class EtteroppgjoerDao(
                     prepareStatement(
                         """
                         INSERT INTO etteroppgjoer(
-                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_institusjonsopphold, har_sanksjon, har_bosatt_utland, har_utlandstilsnitt, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, har_overstyrt_beregning, endret, siste_ferdigstilte_forbehandling
+                            sak_id, inntektsaar, opprettet, status, har_opphoer, har_sanksjon, har_bosatt_utland, har_utlandstilsnitt, har_adressebeskyttelse_eller_skjermet, har_aktivitetskrav, har_overstyrt_beregning, endret, siste_ferdigstilte_forbehandling
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (sak_id, inntektsaar) DO UPDATE SET
-                            har_institusjonsopphold = excluded.har_institusjonsopphold,
                             har_bosatt_utland = excluded.har_bosatt_utland,
                             har_utlandstilsnitt = excluded.har_utlandstilsnitt,
                             har_sanksjon = excluded.har_sanksjon,
@@ -199,15 +196,14 @@ class EtteroppgjoerDao(
                     statement.setTidspunkt(3, Tidspunkt(java.time.Instant.now()))
                     statement.setString(4, status.name)
                     statement.setBoolean(5, harOpphoer)
-                    statement.setBoolean(6, harInstitusjonsopphold)
-                    statement.setBoolean(7, harSanksjon)
-                    statement.setBoolean(8, harBosattUtland)
-                    statement.setBoolean(9, harUtlandstilsnitt)
-                    statement.setBoolean(10, harAdressebeskyttelseEllerSkjermet)
-                    statement.setBoolean(11, harAktivitetskrav)
-                    statement.setBoolean(12, harOverstyrtBeregning)
-                    statement.setTidspunkt(13, Tidspunkt.now())
-                    statement.setObject(14, sisteFerdigstilteForbehandling)
+                    statement.setBoolean(6, harSanksjon)
+                    statement.setBoolean(7, harBosattUtland)
+                    statement.setBoolean(8, harUtlandstilsnitt)
+                    statement.setBoolean(9, harAdressebeskyttelseEllerSkjermet)
+                    statement.setBoolean(10, harAktivitetskrav)
+                    statement.setBoolean(11, harOverstyrtBeregning)
+                    statement.setTidspunkt(12, Tidspunkt.now())
+                    statement.setObject(13, sisteFerdigstilteForbehandling)
 
                     statement.executeUpdate().also {
                         krev(it == 1) {
@@ -224,7 +220,6 @@ class EtteroppgjoerDao(
             inntektsaar = getInt("inntektsaar"),
             status = EtteroppgjoerStatus.valueOf(getString("status")),
             harOpphoer = getBoolean("har_opphoer"),
-            harInstitusjonsopphold = getBoolean("har_institusjonsopphold"),
             harSanksjon = getBoolean("har_sanksjon"),
             harBosattUtland = getBoolean("har_bosatt_utland"),
             harUtlandstilsnitt = getBoolean("har_utlandstilsnitt"),

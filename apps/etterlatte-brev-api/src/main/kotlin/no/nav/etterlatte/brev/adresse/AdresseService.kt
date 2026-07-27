@@ -18,8 +18,10 @@ import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.hentAlder
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.sikkerLogg
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -35,71 +37,80 @@ class AdresseService(
     suspend fun hentMottakere(
         sakType: SakType,
         personerISak: PersonerISak,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Mottaker> =
         with(personerISak) {
             val soekerFoedselsdato = pdltjenesterKlient.hentFoedselsdato(soeker.fnr.value, brukerTokenInfo)
+            val soekerErMyndig = soekerFoedselsdato != null && soekerFoedselsdato.hentAlder() >= 18
+            val soekerSkalHaBrev = soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() >= 15
 
-            val soekerAdresse =
-                if (soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() > 18) {
-                    hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.HOVED)
-                } else if (soekerFoedselsdato.hentAlder() < 15) {
-                    null
-                } else {
-                    hentMottakerAdresse(sakType, soeker.fnr.value, MottakerType.KOPI)
-                }
+            val soekerMottaker: Mottaker? =
+                soeker.fnr.value
+                    .takeIf { soekerSkalHaBrev }
+                    ?.let { hentMottakerAdresse(sakType, it) }
+
             // soekerAdresse er gjenlevende hvis det er en OMS saktype, men hvis det er BP må vi sjekke det opp
-            val gjenlevendeAdresse =
-                if (sakType == SakType.BARNEPENSJON &&
-                    gjenlevende.isNotEmpty() &&
-                    gjenlevende.first() != soeker.fnr.value &&
-                    gjenlevende.first() != innsender?.fnr?.value
-                ) {
-                    hentMottakerAdresse(
-                        sakType,
-                        gjenlevende.first(),
-                        if (soekerAdresse?.type == MottakerType.HOVED) {
-                            MottakerType.KOPI
-                        } else {
-                            MottakerType.HOVED
-                        },
-                    )
-                } else {
-                    null
-                }
+            val gjenlevendeMottaker: Mottaker? =
+                gjenlevende
+                    .firstOrNull { soeker.ansvarligeForeldre.contains(it) }
+                    ?.takeIf { sakType == SakType.BARNEPENSJON && !soekerErMyndig }
+                    ?.let { hentMottakerAdresse(sakType, it) }
 
-            val vergeMottakerType =
-                if (soekerAdresse?.type == MottakerType.HOVED || gjenlevendeAdresse?.type == MottakerType.HOVED) {
-                    MottakerType.KOPI
-                } else {
-                    MottakerType.HOVED
-                }
-
-            val vergeAdresse: Mottaker? =
+            val vergeMottaker: Mottaker? =
                 when (verge) {
                     is Vergemaal -> {
                         logger.warn("Er verge, kan ikke ferdigstille uten å legge til adresse manuelt.")
-                        tomVergeMottaker(MottakerFoedselsnummer(verge.foedselsnummer.value), vergeMottakerType)
+                        tomVergeMottaker(MottakerFoedselsnummer(verge.foedselsnummer.value))
                     }
 
                     is UkjentVergemaal -> {
                         logger.warn("Verge med ukjent vergemål, kan ikke ferdigstille uten å legge til adresse manuelt.")
-                        tomVergeMottaker(type = vergeMottakerType)
+                        tomVergeMottaker()
                     }
 
                     else -> {
-                        if (
-                            Folkeregisteridentifikator.isValid(innsender?.fnr?.value) &&
-                            innsender!!.fnr.value != soeker.fnr.value
-                        ) {
-                            hentMottakerAdresse(sakType, innsender.fnr.value, vergeMottakerType)
-                        } else {
-                            null
-                        }
+                        null
                     }
                 }
 
-            listOfNotNull(soekerAdresse, vergeAdresse, gjenlevendeAdresse)
+            // Legger til innsender som mottaker dersom innsender ikke er gjenlevende, soeker eller verge
+            val innsenderMottaker: Mottaker? =
+                innsender
+                    ?.fnr
+                    ?.value
+                    ?.takeIf {
+                        Folkeregisteridentifikator.isValid(it) && it !in
+                            listOfNotNull(
+                                soeker.fnr.value,
+                                gjenlevende.firstOrNull(),
+                                (verge as? Vergemaal)?.foedselsnummer?.value,
+                            )
+                    }?.let { hentMottakerAdresse(sakType, it) }
+
+            val mottakereIPrioritertRekkefoelge: List<Mottaker> =
+                if (soekerErMyndig || soekerFoedselsdato == null) {
+                    listOfNotNull(vergeMottaker, soekerMottaker)
+                } else {
+                    listOfNotNull(vergeMottaker, gjenlevendeMottaker, innsenderMottaker, soekerMottaker)
+                }
+
+            val hovedmottaker =
+                mottakereIPrioritertRekkefoelge.firstOrNull()
+                    ?: ukjentMottaker().let { ukjentMottaker ->
+                        logger.warn(
+                            "Kunne ikke utlede mottakere for brev i sak $sakId. Dette betyr at vi gir en tom " +
+                                "mottaker til saksbehandler og de må manuelt fylle ut mottakerinformasjon. " +
+                                "Se sikkerlogg for hvilke personer vi har sett på i utledning av mottaker.",
+                        )
+                        sikkerLogg.warn(
+                            "Kunne ikke finne en gyldig mottaker i sak $sakId. Personer vi tok inn i saken:" +
+                                "$personerISak, soekerErMyndig=$soekerErMyndig, soekerFoedselsdato=$soekerFoedselsdato",
+                        )
+                        return@let ukjentMottaker
+                    }
+            val kopimottakere = mottakereIPrioritertRekkefoelge.drop(1)
+            listOf(hovedmottaker.copy(type = MottakerType.HOVED)) + kopimottakere.map { it.copy(type = MottakerType.KOPI) }
         }
 
     suspend fun hentAvsender(
@@ -127,16 +138,17 @@ class AdresseService(
     private suspend fun hentMottakerAdresse(
         sakType: SakType,
         ident: String,
-        type: MottakerType,
     ): Mottaker {
         val regoppslag = regoppslagKlient.hentMottakerAdresse(sakType, ident)
-
         val fnr = Folkeregisteridentifikator.of(ident)
-
         return if (regoppslag == null) {
-            tomMottaker(fnr, type)
+            tomMottaker(fnr, MottakerType.HOVED)
         } else {
-            mottakerFraAdresse(fnr, regoppslag, type)
+            mottakerFraAdresse(
+                fnr,
+                regoppslag,
+                MottakerType.HOVED,
+            )
         }
     }
 
@@ -165,16 +177,19 @@ class AdresseService(
         )
     }
 
-    private fun tomVergeMottaker(
-        fnr: MottakerFoedselsnummer? = null,
-        type: MottakerType,
-    ): Mottaker =
+    private fun tomVergeMottaker(fnr: MottakerFoedselsnummer? = null): Mottaker =
         Mottaker(
             UUID.randomUUID(),
             navn = VERGENAVN_FOR_MOTTAKER,
             foedselsnummer = fnr,
             orgnummer = null,
             adresse = Adresse(adresseType = "", landkode = "", land = ""),
-            type = type,
+        )
+
+    private fun ukjentMottaker(): Mottaker =
+        Mottaker(
+            id = UUID.randomUUID(),
+            navn = "UKJENT MOTTAKER",
+            adresse = Adresse(adresseType = "", landkode = "", land = ""),
         )
 }

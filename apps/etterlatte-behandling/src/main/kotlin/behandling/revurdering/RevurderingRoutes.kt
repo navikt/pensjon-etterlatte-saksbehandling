@@ -74,8 +74,8 @@ internal fun Route.revurderingRoutes(
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
                         // TODO: er feil i denne flyten da vi ikke kan gjøre tilgangssjekk for grunnlag da behandlingen ikke finnes enda
                         val revurdering =
-                            inTransaction {
-                                if (opprettRevurderingRequest.aarsak != OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV) {
+                            if (opprettRevurderingRequest.aarsak != OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV) {
+                                inTransaction {
                                     manuellRevurderingService.opprettManuellRevurderingWrapper(
                                         sakId = sakId,
                                         aarsak = opprettRevurderingRequest.aarsak,
@@ -85,13 +85,13 @@ internal fun Route.revurderingRoutes(
                                         fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
                                         saksbehandler = saksbehandler,
                                     )
-                                } else {
-                                    etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurderingEgetInitiativ(
-                                        sakId = sakId,
-                                        inntektsaar = krevIkkeNull(opprettRevurderingRequest.inntektsaar) { "Mangler inntektsår" },
-                                        brukerTokenInfo = saksbehandler,
-                                    )
                                 }
+                            } else {
+                                etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurderingEgetInitiativ(
+                                    sakId = sakId,
+                                    inntektsaar = krevIkkeNull(opprettRevurderingRequest.inntektsaar) { "Mangler inntektsår" },
+                                    brukerTokenInfo = saksbehandler,
+                                )
                             }
 
                         call.respond(revurdering.id)

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.shouldBe
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -153,17 +155,19 @@ internal class RevurderingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val revurderingAarsak: List<Revurderingaarsak> = response.body()
-            assertEquals(HttpStatusCode.OK, response.status)
+            val aarsaker: List<Revurderingaarsak> = response.body()
 
-            assertTrue(
-                revurderingAarsak.containsAll(
-                    Revurderingaarsak.entries
-                        .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
-                        .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() }
-                        .filter { it.name !== Revurderingaarsak.AARLIG_INNTEKTSJUSTERING.toString() },
-                ),
-            )
+            response.status shouldBe HttpStatusCode.OK
+            aarsaker shouldContainExactlyInAnyOrder
+                Revurderingaarsak.entries
+                    .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
+                    .filter {
+                        it.name !in
+                            listOf(
+                                Revurderingaarsak.AARLIG_INNTEKTSJUSTERING.toString(),
+                                Revurderingaarsak.OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV.toString(), // toggle
+                            )
+                    }
         }
     }
 

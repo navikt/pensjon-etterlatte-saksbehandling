@@ -7,13 +7,17 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak.OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -26,6 +30,7 @@ import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 import java.util.UUID
+import kotlin.collections.filterNot as exclude
 
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService,
@@ -34,8 +39,12 @@ internal fun Route.revurderingRoutes(
     automatiskRevurderingService: AutomatiskRevurderingService,
     aarligInntektsjusteringJobbService: AarligInntektsjusteringJobbService,
     etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
+    featureToggleService: FeatureToggleService,
 ) {
     val logger = LoggerFactory.getLogger("RevurderingRoute")
+
+    fun omgjoeringEtteroppgjoerEgetInitiativAktivert(): Boolean =
+        featureToggleService.isEnabled(EtteroppgjoerToggles.OMGJOER_ETTEROPPGJOER_EGET_INITIATIV, false)
 
     route("/api/revurdering") {
         route("{$BEHANDLINGID_CALL_PARAMETER}") {
@@ -66,16 +75,25 @@ internal fun Route.revurderingRoutes(
                         // TODO: er feil i denne flyten da vi ikke kan gjøre tilgangssjekk for grunnlag da behandlingen ikke finnes enda
                         val revurdering =
                             inTransaction {
-                                manuellRevurderingService.opprettManuellRevurderingWrapper(
-                                    sakId = sakId,
-                                    aarsak = opprettRevurderingRequest.aarsak,
-                                    paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
-                                    paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
-                                    begrunnelse = opprettRevurderingRequest.begrunnelse,
-                                    fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
-                                    saksbehandler = saksbehandler,
-                                )
+                                if (opprettRevurderingRequest.aarsak != OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV) {
+                                    manuellRevurderingService.opprettManuellRevurderingWrapper(
+                                        sakId = sakId,
+                                        aarsak = opprettRevurderingRequest.aarsak,
+                                        paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
+                                        paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
+                                        begrunnelse = opprettRevurderingRequest.begrunnelse,
+                                        fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
+                                        saksbehandler = saksbehandler,
+                                    )
+                                } else {
+                                    etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurderingEgetInitiativ(
+                                        sakId = sakId,
+                                        inntektsaar = krevIkkeNull(opprettRevurderingRequest.inntektsaar) { "Mangler inntektsår" },
+                                        brukerTokenInfo = saksbehandler,
+                                    )
+                                }
                             }
+
                         call.respond(revurdering.id)
                     }
                 }
@@ -129,23 +147,6 @@ internal fun Route.revurderingRoutes(
                 }
             }
 
-            post("omgjoering-etteroppgjoer") {
-                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                    medBody<OpprettOmgjoeringEtteroppgjoerRequest> {
-                        logger.info(
-                            "Oppretter omgjøring av etteroppgjør på eget initiativ på sakId=$sakId for året ${it.inntektsaar}",
-                        )
-                        val revurdering =
-                            etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurderingEgetInitiativ(
-                                sakId = sakId,
-                                inntektsaar = it.inntektsaar,
-                                brukerTokenInfo = saksbehandler,
-                            )
-                        call.respond(revurdering.id)
-                    }
-                }
-            }
-
             get("/{revurderingsaarsak}") {
                 val revurderingsaarsak =
                     call.parameters["revurderingsaarsak"]?.let { Revurderingaarsak.valueOf(it) }
@@ -168,8 +169,11 @@ internal fun Route.revurderingRoutes(
                 call.parameters["saktype"]?.let { SakType.valueOf(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger = hentRevurderingaarsaker(sakType)
-
+            val stoettedeRevurderinger =
+                hentRevurderingaarsaker(sakType)
+                    .exclude {
+                        it == OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV && !omgjoeringEtteroppgjoerEgetInitiativAktivert()
+                    }
             call.respond(stoettedeRevurderinger)
         }
     }
@@ -193,16 +197,13 @@ data class OpprettOmgjoeringKlageRequest(
     val oppgaveIdOmgjoering: UUID,
 )
 
-data class OpprettOmgjoeringEtteroppgjoerRequest(
-    val inntektsaar: Int,
-)
-
 data class OpprettRevurderingRequest(
     val aarsak: Revurderingaarsak,
     val paaGrunnAvHendelseId: String? = null,
     val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,
+    val inntektsaar: Int? = null,
 )
 
 data class OpprettManuellInntektsjustering(

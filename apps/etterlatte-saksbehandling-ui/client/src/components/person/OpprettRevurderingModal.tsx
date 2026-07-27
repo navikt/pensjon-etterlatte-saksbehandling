@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  hentStoettedeRevurderinger,
-  opprettOmgjoeringEtteroppgjoer as opprettOmgjoeringEtteroppgjoerApi,
-  opprettRevurdering as opprettRevurderingApi,
-} from '~shared/api/revurdering'
+import { hentStoettedeRevurderinger, opprettRevurdering } from '~shared/api/revurdering'
 import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
 import { Alert, Button, Heading, HStack, Modal, Select, TextField, VStack } from '@navikt/ds-react'
 import { ArrowCirclepathIcon } from '@navikt/aksel-icons'
@@ -46,10 +42,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
   const [valgtEtteroppgjoersAar, setValgtEtteroppgjoersAar] = useState<string>('')
 
   const [muligeRevurderingAarsakerResult, muligeRevurderingeraarsakerFetch] = useApiCall(hentStoettedeRevurderinger)
-  const [opprettRevurderingResult, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
-  const [opprettOmgjoeringEtteroppgjoerResult, opprettOmgjoeringEtteroppgjoer, resetOmgjoeringApiCall] = useApiCall(
-    opprettOmgjoeringEtteroppgjoerApi
-  )
+  const [opprettRevurderingResult, opprettRevurderingCall, resetApiCall] = useApiCall(opprettRevurdering)
 
   const {
     register,
@@ -59,26 +52,15 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
   } = useForm<OpprettRevurderingSkjema>()
 
   const paaOpprett = ({ aarsak, fritekstAarsak }: OpprettRevurderingSkjema) => {
-    if (aarsak === Revurderingaarsak.OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV) {
-      if (!valgtEtteroppgjoersAar) return
-      opprettOmgjoeringEtteroppgjoer(
-        {
-          sakId,
-          inntektsaar: valgtEtteroppgjoersAar,
-        },
-        (revurderingId: string) => navigate(`/behandling/${revurderingId}/`)
-      )
-      return
-    }
-
-    opprettRevurdering(
+    opprettRevurderingCall(
       {
-        sakId,
-        begrunnelse,
-        aarsak,
-        fritekstAarsak,
+        sakId: sakId,
+        begrunnelse: begrunnelse,
+        aarsak: aarsak,
+        fritekstAarsak: fritekstAarsak,
         paaGrunnAvHendelseId: hendelseId,
         paaGrunnAvOppgaveId: oppgaveId,
+        inntektsaar: valgtEtteroppgjoersAar,
       },
       (revurderingId: string) => navigate(`/behandling/${revurderingId}/`)
     )
@@ -86,7 +68,6 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
 
   const lukkModal = () => {
     resetApiCall()
-    resetOmgjoeringApiCall()
     setValgtEtteroppgjoersAar('')
     setAapen(false)
   }
@@ -177,18 +158,13 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
                       {mapFailure(opprettRevurderingResult, (error) => (
                         <ApiErrorAlert>{error.detail || 'Kunne ikke opprette revurdering'}</ApiErrorAlert>
                       ))}
-                      {mapFailure(opprettOmgjoeringEtteroppgjoerResult, (error) => (
-                        <ApiErrorAlert>{error.detail || 'Kunne ikke opprette omgjøring av etteroppgjør'}</ApiErrorAlert>
-                      ))}
 
                       <HStack gap="space-8" justify="end">
                         <Button variant="secondary" type="button" onClick={lukkModal}>
                           Avbryt
                         </Button>
                         <Button
-                          loading={
-                            isPending(opprettRevurderingResult) || isPending(opprettOmgjoeringEtteroppgjoerResult)
-                          }
+                          loading={isPending(opprettRevurderingResult)}
                           disabled={
                             watch().aarsak === Revurderingaarsak.OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV &&
                             !valgtEtteroppgjoersAar

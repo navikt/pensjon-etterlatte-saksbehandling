@@ -19,6 +19,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-brev-kafka/**
       - "!apps/etterlatte-brev-kafka/.nais/*"
       - libs/saksbehandling-common/**

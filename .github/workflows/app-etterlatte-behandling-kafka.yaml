@@ -27,6 +27,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-behandling-kafka/**
       - "!apps/etterlatte-behandling-kafka/.nais/*"
       - libs/saksbehandling-common/**

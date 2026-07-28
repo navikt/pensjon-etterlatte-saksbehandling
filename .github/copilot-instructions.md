@@ -28,7 +28,7 @@ Systemet heter **Gjenny** internt.
 ~25 Kotlin/Ktor-backend-mikrotjenester + én React/TypeScript-frontend:
 
 - **`etterlatte-behandling`** – kjerne-saksbehandlingstjeneste. Mesteparten av domenelogikken lever her, inkludert vilkårsvurdering.
-- **`etterlatte-*-kafka`** – separate apper som konsumerer meldinger fra Rapids-en og kaller tilhørende REST-app. Mønsteret sikrer at en hengende kafka-melding ikke låser ned selve REST-tjenesten. Gjelder appene `beregning`, `trygdetid`, `behandling`, `brev-api` og `vilkaarsvurdering`.
+- **`etterlatte-*-kafka`** – separate apper som konsumerer meldinger fra Rapids-en og kaller tilhørende REST-app. Mønsteret sikrer at en hengende kafka-melding ikke låser ned selve REST-tjenesten.
 - **`etterlatte-saksbehandling-ui`** – React-frontend med Node/Express som BFF (backend-for-frontend)
 - **`etterlatte-api`** – eksternt API for tjenestepensjonsleverandører (TP-ordninger) og andre Nav-team. Ikke det samme som frontendens BFF.
 - **`etterlatte-pdltjenester`** – proxy mot PDL (Folkeregisteret). Persondata som er avgjørende for vedtaksdokumentasjon lagres i grunnlagshendelse-tabellen i `etterlatte-behandling` sin database.
@@ -66,7 +66,7 @@ Delte Kotlin-biblioteker. Konvensjon: `*-model`-biblioteker inneholder kun datak
 # Test alt
 ./gradlew test
 
-# Test ett enkelt modul
+# Test én enkelt modul
 ./gradlew :apps:etterlatte-behandling:test
 
 # Test én enkelt testklasse
@@ -116,10 +116,15 @@ For mer detaljert kontekst om domener, se:
 
 **`etterlatte-behandling`** er autoriteten på tilgang i Gjenny. De andre appene sjekker tilgang ved å kalle behandling, ikke ved å tolke tokens lokalt. `Kontekst`-objektet (tråd-lokal brukerinfo) er spesifikt for `etterlatte-behandling` og gjenfinnes ikke i de øvrige appene.
 
-Grunnlag (persondata og opplysninger knyttet til sak/behandling) og vilkårsvurdering var tidligere egne tjenester, men er begge slått sammen med `etterlatte-behandling`. `GrunnlagKlient` i andre apper peker derfor nå mot `etterlatte-behandling`. `etterlatte-vilkaarsvurdering-model` eksisterer fortsatt som separat lib siden vilkårsvurdering er et eget domenekonsept, og `etterlatte-vilkaarsvurdering-kafka` gjenstår ennå som egen kafka-app.
+Tjenester som har blitt utfaset:
+* Grunnlag (persondata og opplysninger knyttet til sak/behandling)
+* Vilkårsvurdering
+* Vedtaksvurdering
+* Trygdetid
+Disse er blitt slettet og tjenestene har blitt flyttet inn i `etterlatte-behandling`. `GrunnlagKlient` i andre apper peker derfor nå mot `etterlatte-behandling`. `etterlatte-vilkaarsvurdering-model` eksisterer fortsatt som separat lib siden vilkårsvurdering er et eget domenekonsept, og `etterlatte-vilkaarsvurdering-kafka` og `etterlatte-vedtaksvurdering-kafka` består ennå som egne kafka-apper.
 
 ### Dependency injection (Kotlin)
-Inget DI-rammeverk brukes. Hver app har en `ApplicationContext`-klasse (i `config/`) som manuelt kobler sammen alle avhengigheter. Tjenester, DAO-er og klienter er properties på denne klassen. Tester overstyrer spesifikke konstruktørparametere for å injisere mock-er/stub-er.
+Ingen DI-rammeverk brukes. Hver app har en `ApplicationContext`-klasse (i `config/`) som manuelt kobler sammen alle avhengigheter. Tjenester, DAO-er og klienter er properties på denne klassen. Tester overstyrer spesifikke konstruktørparametere for å injisere mock-er/stub-er.
 
 ### Database (Kotlin)
 - Flyway-migreringer ligger i `src/main/resources/db/migration/`

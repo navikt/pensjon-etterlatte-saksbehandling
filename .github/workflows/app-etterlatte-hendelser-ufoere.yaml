@@ -7,6 +7,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-hendelser-ufoere/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**

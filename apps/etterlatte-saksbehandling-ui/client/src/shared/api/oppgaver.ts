@@ -8,6 +8,8 @@ import {
   NyOppgaveDto,
   OppgaveDTO,
   OppgaveKommentar,
+  OppgaveSoekRequest,
+  OppgaveSoekRespons,
   Oppgavetype,
 } from '~shared/types/oppgave'
 
@@ -49,6 +51,9 @@ export const hentAttesterbarBehandlingOppgaveForReferanse = async (
 ): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/referanse/${referanse}/attesterbar-behandling`)
 
 export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
+
+export const soekOppgaver = async (request: OppgaveSoekRequest): Promise<ApiResponse<OppgaveSoekRespons>> =>
+  apiClient.post('/oppgaver/soek', { ...request })
 
 export const hentOppgaverTilknyttetSak = async (sakId: number): Promise<ApiResponse<Array<OppgaveDTO>>> => {
   return apiClient.get(`/oppgaver/sak/${sakId}/oppgaver`)

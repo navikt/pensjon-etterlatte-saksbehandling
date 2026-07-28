@@ -7,9 +7,14 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgave.OppgaveFristFilter
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveOrderBy
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandlerFilter
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRequest
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRespons
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -27,6 +32,7 @@ import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.LocalTime
@@ -61,6 +67,12 @@ interface OppgaveDao {
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern>
+
+    fun soekOppgaver(
+        enheter: List<Enhetsnummer>,
+        request: OppgaveSoekRequest,
+        innloggetSaksbehandlerIdent: String,
+    ): OppgaveSoekRespons
 
     fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats
 
@@ -378,6 +390,152 @@ class OppgaveDaoImpl(
                     }.also { oppgaveliste ->
                         logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
                     }
+            }
+        }
+
+    override fun soekOppgaver(
+        enheter: List<Enhetsnummer>,
+        request: OppgaveSoekRequest,
+        innloggetSaksbehandlerIdent: String,
+    ): OppgaveSoekRespons =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val whereConditions = mutableListOf<String>()
+                val setParams = mutableListOf<(PreparedStatement, Int) -> Int>()
+
+                val resolvertSaksbehandlerIdent =
+                    if (request.kunInnloggetBruker) innloggetSaksbehandlerIdent else request.saksbehandlerIdent
+
+                whereConditions.add("o.enhet = ANY(?)")
+                val enheterArray = enheter.map { e -> e.enhetNr }.toTypedArray()
+                setParams.add { stmt, idx ->
+                    stmt.setArray(idx, createArrayOf("text", enheterArray))
+                    idx + 1
+                }
+
+                if (request.enhet != null) {
+                    whereConditions.add("o.enhet = ?")
+                    setParams.add { stmt, idx ->
+                        stmt.setString(idx, request.enhet)
+                        idx + 1
+                    }
+                }
+
+                if (request.statuser.isNotEmpty()) {
+                    whereConditions.add("o.status = ANY(?)")
+                    val statArray = request.statuser.map { s -> s.name }.toTypedArray()
+                    setParams.add { stmt, idx ->
+                        stmt.setArray(idx, createArrayOf("text", statArray))
+                        idx + 1
+                    }
+                }
+
+                if (request.typer.isNotEmpty()) {
+                    whereConditions.add("o.type = ANY(?)")
+                    val typeArray = request.typer.map { t -> t.name }.toTypedArray()
+                    setParams.add { stmt, idx ->
+                        stmt.setArray(idx, createArrayOf("text", typeArray))
+                        idx + 1
+                    }
+                }
+
+                val sakType = request.sakType
+                if (sakType != null) {
+                    whereConditions.add("o.saktype = ?")
+                    setParams.add { stmt, idx ->
+                        stmt.setString(idx, sakType.name)
+                        idx + 1
+                    }
+                }
+
+                when (request.saksbehandlerFilter) {
+                    OppgaveSaksbehandlerFilter.TILDELT -> {
+                        whereConditions.add("o.saksbehandler IS NOT NULL")
+                    }
+
+                    OppgaveSaksbehandlerFilter.IKKE_TILDELT -> {
+                        whereConditions.add("o.saksbehandler IS NULL")
+                    }
+
+                    OppgaveSaksbehandlerFilter.ALLE -> {
+                        if (resolvertSaksbehandlerIdent != null) {
+                            whereConditions.add("o.saksbehandler = ?")
+                            setParams.add { stmt, idx ->
+                                stmt.setString(idx, resolvertSaksbehandlerIdent)
+                                idx + 1
+                            }
+                        }
+                    }
+                }
+
+                when (request.fristFilter) {
+                    OppgaveFristFilter.HAR_PASSERT -> {
+                        whereConditions.add("o.frist IS NOT NULL")
+                        whereConditions.add("o.frist < NOW()")
+                    }
+
+                    OppgaveFristFilter.MANGLER_FRIST -> {
+                        whereConditions.add("o.frist IS NULL")
+                    }
+
+                    OppgaveFristFilter.ALLE -> {}
+                }
+
+                val sakEllerFnr = request.sakEllerFnr
+                if (!sakEllerFnr.isNullOrBlank()) {
+                    if (sakEllerFnr.length == 11) {
+                        whereConditions.add("o.fnr = ?")
+                        setParams.add { stmt, idx ->
+                            stmt.setString(idx, sakEllerFnr)
+                            idx + 1
+                        }
+                    } else {
+                        sakEllerFnr.toLongOrNull()?.let { sakId ->
+                            whereConditions.add("o.sak_id = ?")
+                            setParams.add { stmt, idx ->
+                                stmt.setLong(idx, sakId)
+                                idx + 1
+                            }
+                        }
+                    }
+                }
+
+                val orderByClause =
+                    when (request.orderBy) {
+                        OppgaveOrderBy.OPPRETTET -> "o.opprettet"
+                        OppgaveOrderBy.FRIST -> "o.frist"
+                        OppgaveOrderBy.FNR -> "o.fnr"
+                    }
+                val direction = if (request.orderAsc) "ASC" else "DESC"
+
+                val sql =
+                    """
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gjelder_aar, o.gruppe_id, 
+                        o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn,
+                        COUNT(*) OVER() AS total_count
+                    FROM oppgave o 
+                        INNER JOIN sak s ON o.sak_id = s.id 
+                        LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                    WHERE ${whereConditions.joinToString(" AND ")}
+                    ORDER BY $orderByClause $direction NULLS LAST
+                    LIMIT ? OFFSET ?
+                    """.trimIndent()
+
+                val statement = prepareStatement(sql)
+                var idx = 1
+                for (setParam in setParams) {
+                    idx = setParam(statement, idx)
+                }
+                statement.setInt(idx++, request.antall)
+                statement.setInt(idx, request.side * request.antall)
+
+                var totaltAntall = 0L
+                val oppgaver =
+                    statement.executeQuery().toList {
+                        totaltAntall = getLong("total_count")
+                        asOppgave()
+                    }
+                OppgaveSoekRespons(oppgaver, totaltAntall)
             }
         }
 

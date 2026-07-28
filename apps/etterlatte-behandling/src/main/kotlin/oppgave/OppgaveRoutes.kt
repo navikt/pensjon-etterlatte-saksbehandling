@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKommentarRequest
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRequest
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -135,6 +136,20 @@ internal fun Route.oppgaveRoutes(
                         },
                     )
                 }
+            }
+        }
+
+        post("/soek") {
+            kunSaksbehandler {
+                val request = call.receive<OppgaveSoekRequest>()
+                call.respond(
+                    inTransaction {
+                        service.soekOppgaverForBruker(
+                            Kontekst.get().appUserAsSaksbehandler(),
+                            request,
+                        )
+                    },
+                )
             }
         }
 

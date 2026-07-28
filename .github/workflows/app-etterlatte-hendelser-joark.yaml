@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-hendelser-joark/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**

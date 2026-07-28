@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-behandling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**

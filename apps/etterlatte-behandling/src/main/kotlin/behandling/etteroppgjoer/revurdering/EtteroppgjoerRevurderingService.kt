@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
+import java.time.Month.JANUARY
 import java.time.YearMonth
 import java.util.UUID
 
@@ -208,6 +209,7 @@ class EtteroppgjoerRevurderingService(
                         "Fant ingen ferdigstilt forbehandling for etteroppgjøret til sakId=$sakId og inntektsår=$inntektsaar"
                     }
 
+                // TODO finnes det bare ett eo per sak per år?
                 etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                     sakId,
                     inntektsaar,
@@ -216,11 +218,19 @@ class EtteroppgjoerRevurderingService(
                 )
                 omgjoerForbehandlingId
             }
+        val skalOmgjoeres =
+            inTransaction {
+                behandlingService
+                    .hentBehandlingerForSak(sakId)
+                    .filter { it.status in BehandlingStatus.iverksattEllerAttestert() }
+                    .filter { erKnyttetTilEtteroppgjoerForAar(it, inntektsaar) }
+                    .maxBy { it.sistEndret }
+            }
 
         return opprettEtteroppgjoerRevurdering(
             sakId = sakId,
             inntektsaar = inntektsaar,
-            opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
+            opprinnelse = skalOmgjoeres.opprinnelse,
             omgjoerForbehandlingId = omgjoerForbehandlingId,
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -403,6 +413,17 @@ class EtteroppgjoerRevurderingService(
             )
         }
     }
+
+    private fun erKnyttetTilEtteroppgjoerForAar(
+        behandling: Behandling,
+        inntektsaar: Int,
+    ): Boolean =
+        (
+            behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER &&
+                behandling.behandlingOpprettet > YearMonth.of(inntektsaar, JANUARY).atDay(1).atStartOfDay() &&
+                behandling.relatertBehandlingId != null &&
+                hentForbehandlingForRevurdering(behandling).aar == inntektsaar
+        )
 }
 
 private fun VedtakSammendragDto.opphoersdato(): YearMonth? {

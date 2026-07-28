@@ -60,7 +60,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
         fritekstAarsak: fritekstAarsak,
         paaGrunnAvHendelseId: hendelseId,
         paaGrunnAvOppgaveId: oppgaveId,
-        inntektsaar: valgtEtteroppgjoersAar,
+        inntektsaar: numberOrUndefined(valgtEtteroppgjoersAar),
       },
       (revurderingId: string) => navigate(`/behandling/${revurderingId}/`)
     )
@@ -197,3 +197,8 @@ const AnnenRevurderingWrapper = styled(VStack)`
 const AnnenRevurderingAlert = styled(Alert)`
   max-width: 20rem;
 `
+
+const numberOrUndefined = (stringValue: string) => {
+  const num = Number(stringValue)
+  return Number.isFinite(num) ? num : undefined
+}

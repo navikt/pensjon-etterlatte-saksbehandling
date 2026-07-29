@@ -93,7 +93,9 @@ internal fun Route.revurderingRoutes(
                     logger.info("Oppretter ny revurdering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
                         // TODO: er feil i denne flyten da vi ikke kan gjøre tilgangssjekk for grunnlag da behandlingen ikke finnes enda
-                        sjekkStoettetRevurderingsaarsak(sakId, opprettRevurderingRequest.aarsak)
+                        inTransaction {
+                            sjekkStoettetRevurderingsaarsak(sakId, opprettRevurderingRequest.aarsak)
+                        }
 
                         val revurdering =
                             if (opprettRevurderingRequest.aarsak != OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV) {

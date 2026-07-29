@@ -7,12 +7,14 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
@@ -52,6 +54,10 @@ internal class RevurderingRoutesTest {
         every {
             applicationContext.sakTilgangDao.hentSakMedGraderingOgSkjerming(any())
         } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
+        every { applicationContext.sakService.finnSak(any()) } returns
+            mockk {
+                every { sakType } returns SakType.BARNEPENSJON
+            }
     }
 
     @AfterAll
@@ -95,6 +101,19 @@ internal class RevurderingRoutesTest {
                 }
 
             assertEquals(HttpStatusCode.OK, response.status)
+            verify {
+                applicationContext.manuellRevurderingService.opprettManuellRevurderingWrapper(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 

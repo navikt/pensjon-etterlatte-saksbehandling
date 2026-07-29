@@ -418,12 +418,10 @@ class EtteroppgjoerRevurderingService(
         behandling: Behandling,
         inntektsaar: Int,
     ): Boolean =
-        (
-            behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER &&
-                behandling.behandlingOpprettet > YearMonth.of(inntektsaar, JANUARY).atDay(1).atStartOfDay() &&
-                behandling.relatertBehandlingId != null &&
-                hentForbehandlingForRevurdering(behandling).aar == inntektsaar
-        )
+        behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER &&
+            behandling.sistEndret > YearMonth.of(inntektsaar + 1, JANUARY).atDay(1).atStartOfDay() &&
+            behandling.relatertBehandlingId != null &&
+            hentForbehandlingForRevurdering(behandling).aar == inntektsaar
 }
 
 private fun VedtakSammendragDto.opphoersdato(): YearMonth? {

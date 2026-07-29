@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.revurdering
 
+import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -13,6 +15,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
@@ -21,15 +24,21 @@ import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Month.JANUARY
+import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerRevurderingServiceEgetInitiativTest {
@@ -37,13 +46,15 @@ class EtteroppgjoerRevurderingServiceEgetInitiativTest {
     private val inntektsaar = 2024
 
     private val etteroppgjoerService = mockk<EtteroppgjoerService>(relaxed = true)
+    private val behandlingService = mockk<BehandlingService>()
+    private val etteroppgjoerForbehandlingService = mockk<EtteroppgjoerForbehandlingService>()
 
     private val service =
         spyk(
             EtteroppgjoerRevurderingService(
-                behandlingService = mockk<BehandlingService>(),
+                behandlingService = behandlingService,
                 etteroppgjoerService = etteroppgjoerService,
-                etteroppgjoerForbehandlingService = mockk<EtteroppgjoerForbehandlingService>(),
+                etteroppgjoerForbehandlingService = etteroppgjoerForbehandlingService,
                 grunnlagService = mockk<GrunnlagService>(),
                 revurderingService = mockk<RevurderingService>(),
                 vilkaarsvurderingService = mockk<VilkaarsvurderingService>(),
@@ -91,28 +102,48 @@ class EtteroppgjoerRevurderingServiceEgetInitiativTest {
     @Test
     fun `setter status OMGJOERING og oppretter revurdering fra sisteFerdigstilteForbehandling`() {
         val forbehandlingId = UUID.randomUUID()
+        val etteroppgjoer = etteroppgjoer(EtteroppgjoerStatus.FERDIGSTILT, forbehandlingId)
         every { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) } returns
-            etteroppgjoer(EtteroppgjoerStatus.FERDIGSTILT, forbehandlingId)
+            etteroppgjoer
 
-        val revurdering = mockk<Revurdering>()
+        val revurderingForbehandlingId = UUID.randomUUID()
+        val revurderingForbehandling =
+            mockk<EtteroppgjoerForbehandling> {
+                every { id } returns revurderingForbehandlingId
+                every { aar } returns inntektsaar
+            }
+        val revurdering =
+            revurdering(
+                status = BehandlingStatus.IVERKSATT,
+                revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
+                relatertBehandlingId = revurderingForbehandlingId,
+                sistEndret = YearMonth.of(inntektsaar + 1, JANUARY).atDay(20).atStartOfDay(),
+                opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
+                sakId = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+            )
+        every { etteroppgjoerForbehandlingService.hentForbehandling(revurderingForbehandlingId) } returns revurderingForbehandling
+        val nyEoRevurdering = mockk<Revurdering>()
         val opprinnelseSlot = slot<BehandlingOpprinnelse>()
-        val forbehandlingIdSlot = slot<UUID>()
+        val omgjoerForbehandlingIdSlot = slot<UUID>()
         every {
             service.opprettEtteroppgjoerRevurdering(
                 sakId = sakId,
                 inntektsaar = inntektsaar,
                 opprinnelse = capture(opprinnelseSlot),
-                omgjoerForbehandlingId = capture(forbehandlingIdSlot),
+                omgjoerForbehandlingId = capture(omgjoerForbehandlingIdSlot),
                 brukerTokenInfo = any(),
             )
-        } returns revurdering
+        } returns nyEoRevurdering
+        every { behandlingService.hentBehandlingerForSak(sakId) } returns
+            listOf(revurdering)
 
         val resultat =
             service.omgjoerEtteroppgjoerRevurderingEgetInitiativ(sakId, inntektsaar, simpleSaksbehandler())
 
-        assertEquals(revurdering, resultat)
-        assertEquals(BehandlingOpprinnelse.SAKSBEHANDLER, opprinnelseSlot.captured)
-        assertEquals(forbehandlingId, forbehandlingIdSlot.captured)
+        resultat shouldBe nyEoRevurdering
+        opprinnelseSlot.captured shouldBe BehandlingOpprinnelse.SAKSBEHANDLER
+        omgjoerForbehandlingIdSlot.captured shouldBe forbehandlingId
         verify(exactly = 1) {
             etteroppgjoerService.oppdaterEtteroppgjoerStatus(
                 sakId,

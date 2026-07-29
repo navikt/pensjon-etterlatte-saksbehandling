@@ -86,7 +86,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
 
   useEffect(() => {
     hentOppgaver()
-  }, [page, rowsPerPage, sortering])
+  }, [filter, page, rowsPerPage, sortering])
 
   const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => {
     setTimeout(() => {
@@ -129,7 +129,6 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
         setFilter={(nyFilter) => {
           setFilter(nyFilter)
           setPage(1)
-          hentOppgaver(nyFilter, 1)
         }}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         oppgavelisteValg={OppgavelisteValg.MIN_OPPGAVELISTE}

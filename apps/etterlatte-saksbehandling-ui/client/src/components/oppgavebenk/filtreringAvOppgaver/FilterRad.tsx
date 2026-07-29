@@ -41,6 +41,7 @@ export const FilterRad = ({
   const [sakEllerFnr, setSakEllerFnr] = useState<string>(filter.sakEllerFnrFilter)
 
   useEffect(() => {
+    if (sakEllerFnr === filter.sakEllerFnrFilter) return
     const delay = setTimeout(() => setFilter({ ...filter, sakEllerFnrFilter: sakEllerFnr }), 500)
     return () => clearTimeout(delay)
   }, [sakEllerFnr])
@@ -116,7 +117,6 @@ export const FilterRad = ({
               values={filter.oppgavestatusFilter}
               onChange={(statuser) => {
                 const statusFilter = statuser.includes(OPPGAVESTATUSFILTER.visAlle) ? [] : statuser
-                hentAlleOppgaver(statusFilter)
                 setFilter({ ...filter, oppgavestatusFilter: statusFilter })
               }}
             />
@@ -146,10 +146,9 @@ export const FilterRad = ({
         <Button
           variant="secondary"
           onClick={() => {
-            const filter =
+            const initialF =
               oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA ? initialFilter() : initialMinOppgavelisteFiltre()
-            hentAlleOppgaver(filter.oppgavestatusFilter)
-            setFilter(filter)
+            setFilter(initialF)
           }}
           size="small"
           icon={<ArrowUndoIcon aria-hidden />}

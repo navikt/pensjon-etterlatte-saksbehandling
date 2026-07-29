@@ -1,6 +1,4 @@
-import { isBefore } from 'date-fns'
 import {
-  EnhetFilterKeys,
   Filter,
   FristFilterKeys,
   OPPGAVESTATUSFILTER,
@@ -8,9 +6,8 @@ import {
   OPPGAVETYPEFILTER,
   OppgavetypeFilterKeys,
   SAKSBEHANDLERFILTER,
-  YtelseFilterKeys,
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { OppgaveDTO, OppgaveSoekRequest } from '~shared/types/oppgave'
+import { OppgaveSoekRequest } from '~shared/types/oppgave'
 import { OppgaveSortering } from '~components/oppgavebenk/utils/oppgaveSortering'
 
 export const konverterOppgavestatusFilterValuesTilKeys = (

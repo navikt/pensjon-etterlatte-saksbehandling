@@ -32,14 +32,14 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
       throw new Error('Ugyldig issuer')
     }
     if (!hasBeenIssued(parsedToken.iat)) {
-      throw new Error(`Ugyldig iat: ${parsedToken.iat}`)
+      throw new Error(`Ugyldig iat`)
     }
     if (hasExpired(parsedToken.exp)) {
       throw new Error('Token expired')
     }
   } catch (e) {
     logger.error('Feil ved validering av token', e)
-    res.status(401).send('ugyldig token')
+    res.status(401).send('Ugyldig token')
     return
   }
 

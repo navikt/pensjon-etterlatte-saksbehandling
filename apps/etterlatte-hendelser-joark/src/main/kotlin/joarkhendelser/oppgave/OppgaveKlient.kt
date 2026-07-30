@@ -7,7 +7,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.joarkhendelser.KjenteSkjemaKoder
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
@@ -54,7 +53,7 @@ class OppgaveKlient(
                         setBody(opprettOppgaveRequest)
                     }.body<JsonNode>()
             logger.info("Opprettet oppgave for kabal (id=${response["id"]}, status=${response["status"]}, tema=${response["tema"]})")
-            sikkerlogger().info("Opprettet oppgave for kabal med respons", kv("response", response))
+            sikkerlogger().info("Opprettet oppgave for kabal med respons: \n$response")
         } catch (e: Exception) {
             logger.error(
                 "Kunne ikke opprette oppgave for journalpost med id=${journalpost.journalpostId} til kabal, på grunn av feil. Se sikkerlogg for detaljer.",

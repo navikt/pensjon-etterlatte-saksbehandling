@@ -134,12 +134,6 @@ class OppgaveDaoMedEndringssporingImpl(
             typer,
         )
 
-    override fun hentOppgaver(
-        enheter: List<Enhetsnummer>,
-        oppgaveStatuser: List<String>,
-        minOppgavelisteIdentFilter: String?,
-    ): List<OppgaveIntern> = oppgaveDao.hentOppgaver(enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
-
     override fun soekOppgaver(
         enheter: List<Enhetsnummer>,
         request: OppgaveSoekRequest,

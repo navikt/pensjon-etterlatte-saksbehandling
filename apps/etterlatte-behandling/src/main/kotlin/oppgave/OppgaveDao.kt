@@ -38,6 +38,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.util.UUID
 
+const val VISALLE = "VISALLE"
+
 interface OppgaveDao {
     fun opprettOppgave(oppgaveIntern: OppgaveIntern)
 
@@ -60,12 +62,6 @@ interface OppgaveDao {
     fun hentOppgaverForSakMedType(
         sakId: SakId,
         typer: List<OppgaveType>,
-    ): List<OppgaveIntern>
-
-    fun hentOppgaver(
-        enheter: List<Enhetsnummer>,
-        oppgaveStatuser: List<String>,
-        minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern>
 
     fun soekOppgaver(
@@ -351,44 +347,6 @@ class OppgaveDaoImpl(
                         asOppgave()
                     }.also { oppgaveliste ->
                         logger.info("Hentet antall nye oppgaver for sak: ${oppgaveliste.size} sak: $sakId")
-                    }
-            }
-        }
-
-    override fun hentOppgaver(
-        enheter: List<Enhetsnummer>,
-        oppgaveStatuser: List<String>,
-        minOppgavelisteIdentFilter: String?,
-    ): List<OppgaveIntern> =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gjelder_aar, o.gruppe_id, 
-                            o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
-                        FROM oppgave o 
-                            INNER JOIN sak s ON o.sak_id = s.id 
-                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
-                        WHERE (? OR o.status = ANY(?))
-                        AND o.enhet = ANY(?)
-                        AND (? OR o.saksbehandler = ?)
-                        ORDER BY o.opprettet DESC
-                        """.trimIndent(),
-                    )
-
-                statement.setBoolean(1, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
-                statement.setArray(2, createArrayOf("text", oppgaveStatuser.toTypedArray()))
-                statement.setArray(3, createArrayOf("text", enheter.map { it.enhetNr }.toTypedArray()))
-                statement.setBoolean(4, minOppgavelisteIdentFilter == null)
-                statement.setString(5, minOppgavelisteIdentFilter)
-
-                statement
-                    .executeQuery()
-                    .toList {
-                        asOppgave()
-                    }.also { oppgaveliste ->
-                        logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
                     }
             }
         }

@@ -48,18 +48,6 @@ class OppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun finnOppgaverForBruker(
-        bruker: SaksbehandlerMedEnheterOgRoller,
-        oppgaveStatuser: List<String>,
-        minOppgavelisteIdentFilter: String? = null,
-    ): List<OppgaveIntern> =
-        oppgaveDao
-            .hentOppgaver(
-                bruker.enheter(),
-                oppgaveStatuser,
-                minOppgavelisteIdentFilter,
-            )
-
     fun soekOppgaverForBruker(
         bruker: SaksbehandlerMedEnheterOgRoller,
         request: OppgaveSoekRequest,

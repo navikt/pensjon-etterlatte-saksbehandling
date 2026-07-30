@@ -146,9 +146,9 @@ export const FilterRad = ({
         <Button
           variant="secondary"
           onClick={() => {
-            const initialF =
+            const nyttFilter =
               oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA ? initialFilter() : initialMinOppgavelisteFiltre()
-            setFilter(initialF)
+            setFilter(nyttFilter)
           }}
           size="small"
           icon={<ArrowUndoIcon aria-hidden />}

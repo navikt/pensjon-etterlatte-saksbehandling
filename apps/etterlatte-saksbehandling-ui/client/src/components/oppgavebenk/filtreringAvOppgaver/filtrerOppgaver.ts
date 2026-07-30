@@ -113,7 +113,7 @@ export function byggOppgaveSoekRequest(
     saksbehandlerIdent = filter.saksbehandlerFilter
   }
 
-  const enhet = filter.enhetsFilter === 'visAlle' ? undefined : filter.enhetsFilter.substring(1) // strip 'E' prefix
+  const enhet = filter.enhetsFilter === 'visAlle' ? undefined : filter.enhetsFilter.substring(1) // fjern 'E'-prefiks
 
   const sakType = filter.ytelseFilter === 'visAlle' ? undefined : (filter.ytelseFilter as string)
 

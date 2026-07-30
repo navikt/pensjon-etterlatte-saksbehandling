@@ -56,29 +56,29 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
   }
 
   const handleSort = (sortKey: string) => {
-    const newSort: SortState =
+    const nySortering: SortState =
       sort && sortKey === sort.orderBy && sort.direction === 'descending'
         ? { orderBy: sortKey, direction: 'none' }
         : {
             orderBy: sortKey,
             direction: sort && sortKey === sort.orderBy && sort.direction === 'ascending' ? 'descending' : 'ascending',
           }
-    setSort(newSort)
+    setSort(nySortering)
 
-    let nySortering: OppgaveSortering = { ...initialSortering }
+    let nyOppgaveSortering: OppgaveSortering = { ...initialSortering }
     switch (sortKey as SortKey) {
       case SortKey.REGISTRERINGSDATO:
-        nySortering = { ...initialSortering, registreringsdatoSortering: newSort.direction }
+        nyOppgaveSortering = { ...initialSortering, registreringsdatoSortering: nySortering.direction }
         break
       case SortKey.FRIST:
-        nySortering = { ...initialSortering, fristSortering: newSort.direction }
+        nyOppgaveSortering = { ...initialSortering, fristSortering: nySortering.direction }
         break
       case SortKey.FNR:
-        nySortering = { ...initialSortering, fnrSortering: newSort.direction }
+        nyOppgaveSortering = { ...initialSortering, fnrSortering: nySortering.direction }
         break
     }
-    setSortering(nySortering)
-    leggTilSorteringILocalStorage(nySortering)
+    setSortering(nyOppgaveSortering)
+    leggTilSorteringILocalStorage(nyOppgaveSortering)
   }
 
   useEffect(() => {

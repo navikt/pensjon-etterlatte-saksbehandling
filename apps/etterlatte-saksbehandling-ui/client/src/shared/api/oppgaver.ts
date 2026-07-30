@@ -1,5 +1,4 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavebenkStats } from '~components/oppgavebenk/state/oppgavebenkState'
 import {
@@ -12,26 +11,6 @@ import {
   OppgaveSoekRespons,
   Oppgavetype,
 } from '~shared/types/oppgave'
-
-export const hentOppgaverMedStatus = async (args: {
-  oppgavestatusFilter: Array<string>
-  minOppgavelisteIdent?: boolean
-}): Promise<ApiResponse<OppgaveDTO[]>> => {
-  const konverterteFiltre = konverterOppgavestatusFilterValuesTilKeys(args.oppgavestatusFilter)
-
-  const queryParams = konverterteFiltre
-    .map((i) => `oppgaveStatus=${i}&`)
-    .join('')
-    .slice(0, -1)
-
-  const identfilterGenerator = () => {
-    if (args.minOppgavelisteIdent) {
-      return `&kunInnloggetOppgaver=${args.minOppgavelisteIdent}`
-    }
-    return ''
-  }
-  return apiClient.get(`/oppgaver?${queryParams}${identfilterGenerator()}`)
-}
 
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
 

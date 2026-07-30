@@ -62,10 +62,10 @@ spec:
     pool: nav-dev
   resources:
     requests:
-      cpu: 50m
-      memory: 8192Mi
+      cpu: 210m
+      memory: 2048Mi
     limits:
-      memory: 8192Mi
+      memory: 2048Mi
   replicas:
     scalingStrategy:
       cpu:
@@ -73,6 +73,8 @@ spec:
     max: 2
     min: 1
   env:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-XX:MaxRAMPercentage=50"
     - name: KODEVERK_URL
       value: "https://kodeverk-api.nav.no/api/v1/kodeverk"
     - name: KODEVERK_CLIENT_ID

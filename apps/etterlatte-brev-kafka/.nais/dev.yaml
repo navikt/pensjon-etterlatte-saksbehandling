@@ -33,10 +33,10 @@ spec:
   kafka:
     pool: nav-dev
   resources:
-    limits:
-      memory: 640Mi
     requests:
-      cpu: 20m
+      cpu: 50m
+      memory: 512Mi
+    limits:
       memory: 512Mi
   replicas:
     max: 1

@@ -32,8 +32,10 @@ spec:
       enabled: true
   resources:
     requests:
-      cpu: 25m
-      memory: 320Mi
+      cpu: 130m
+      memory: 448Mi
+    limits:
+      memory: 448Mi
   replicas:
     max: 1
     min: 1

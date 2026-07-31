@@ -21,7 +21,7 @@ export const PagineringsKontroller = ({
 }: Props): ReactNode => {
   return (
     <HStack gap="space-16" justify="center" align="center">
-      <Pagination page={page} onPageChange={setPage} count={antallSider} size="small" />
+      <Pagination page={page} onPageChange={setPage} count={Math.max(1, antallSider)} size="small" />
       {totalAvOppgaverTeksts && <BodyShort>{totalAvOppgaverTeksts}</BodyShort>}
       {raderPerSide && setRaderPerSide && (
         <select

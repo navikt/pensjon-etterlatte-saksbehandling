@@ -43,6 +43,19 @@ export const OppgaverTable = ({
       sort={sort && sort.direction !== 'none' ? { direction: sort.direction, orderBy: sort.orderBy } : undefined}
       onSortChange={handleSort}
     >
+      <colgroup>
+        <col style={{ width: '110px' }} />
+        <col style={{ width: '140px' }} />
+        <col style={{ width: '140px' }} />
+        <col style={{ width: '190px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '250px' }} />
+        <col style={{ width: '600px' }} />
+        <col style={{ width: '250px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '250px' }} />
+        <col style={{ width: '250px' }} />
+      </colgroup>
       <OppgaverTableHeader />
       <Table.Body>
         {isLoading ? (

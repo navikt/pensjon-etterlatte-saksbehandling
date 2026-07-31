@@ -52,6 +52,8 @@ import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRequest
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRespons
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -171,12 +173,14 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
             val oppgaver: List<OppgaveIntern> =
                 client
-                    .get("/api/oppgaver") {
+                    .post("/api/oppgaver/soek") {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(OppgaveSoekRequest())
                     }.also {
                         assertEquals(HttpStatusCode.OK, it.status)
-                    }.body()
+                    }.body<OppgaveSoekRespons>()
+                    .oppgaver
 
             val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
             client
@@ -342,12 +346,14 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
             val oppgaveroppgaveliste: List<OppgaveIntern> =
                 client
-                    .get("/api/oppgaver") {
+                    .post("/api/oppgaver/soek") {
                         addAuthToken(tokenAttestant)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(OppgaveSoekRequest())
                     }.also {
                         assertEquals(HttpStatusCode.OK, it.status)
-                    }.body()
+                    }.body<OppgaveSoekRespons>()
+                    .oppgaver
             val oppgaverforattestant = oppgaveroppgaveliste.filter { it.referanse == behandlingId.toString() }
             val saksbehandler02 = "Saksbehandler02"
             client
@@ -485,12 +491,14 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
             val oppgaverKlage: List<OppgaveIntern> =
                 client
-                    .get("/api/oppgaver") {
+                    .post("/api/oppgaver/soek") {
                         addAuthToken(tokenSaksbehandler)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(OppgaveSoekRequest())
                     }.also {
                         assertEquals(HttpStatusCode.OK, it.status)
-                    }.body()
+                    }.body<OppgaveSoekRespons>()
+                    .oppgaver
             val oppgaverforbehandlingKlage = oppgaverKlage.filter { it.referanse == klage.id.toString() }
             client
                 .post("/api/oppgaver/${oppgaverforbehandlingKlage[0].id}/tildel-saksbehandler/") {
@@ -584,12 +592,14 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
             val nyOppgaveliste: List<OppgaveIntern> =
                 client
-                    .get("/api/oppgaver") {
+                    .post("/api/oppgaver/soek") {
                         addAuthToken(tokenAttestant)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(OppgaveSoekRequest())
                     }.also {
                         assertEquals(HttpStatusCode.OK, it.status)
-                    }.body()
+                    }.body<OppgaveSoekRespons>()
+                    .oppgaver
             val nyOppgavelisteForAttestant =
                 nyOppgaveliste.filter { it.referanse == behandlingIdNyFoerstegangsbehandling.toString() }
             client

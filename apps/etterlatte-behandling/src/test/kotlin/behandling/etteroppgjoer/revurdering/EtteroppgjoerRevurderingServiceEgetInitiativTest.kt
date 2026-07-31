@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.revurdering
 
 import io.kotest.matchers.shouldBe
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -33,7 +32,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -133,6 +131,7 @@ class EtteroppgjoerRevurderingServiceEgetInitiativTest {
                 opprinnelse = capture(opprinnelseSlot),
                 omgjoerForbehandlingId = capture(omgjoerForbehandlingIdSlot),
                 brukerTokenInfo = any(),
+                omgjoeringEgetInitiativ = true,
             )
         } returns nyEoRevurdering
         every { behandlingService.hentBehandlingerForSak(sakId) } returns

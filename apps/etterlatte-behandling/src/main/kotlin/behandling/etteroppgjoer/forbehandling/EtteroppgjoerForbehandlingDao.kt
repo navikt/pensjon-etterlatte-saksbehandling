@@ -79,9 +79,9 @@ class EtteroppgjoerForbehandlingDao(
                         """
                         INSERT INTO etteroppgjoer_behandling(
                             id, status, sak_id, opprettet, aar, fom, tom, brev_id, kopiert_fra, siste_iverksatte_behandling, har_mottatt_ny_informasjon, endring_er_til_ugunst_for_bruker, beskrivelse_av_ugunst, varselbrev_sendt, etteroppgjoer_resultat_type,
-                            aarsak_til_avbrytelse, kommentar_til_avbrytelse, har_vedtak_av_type_opphoer, opphoer_skyldes_doedsfall, opphoer_skyldes_doedsfall_i_etteroppgjoersaar, mottatt_skatteoppgjoer, klage_omgjoering, aktivitetsplikt_overholdt, aktivitetsplikt_begrunnelse
+                            aarsak_til_avbrytelse, kommentar_til_avbrytelse, har_vedtak_av_type_opphoer, opphoer_skyldes_doedsfall, opphoer_skyldes_doedsfall_i_etteroppgjoersaar, mottatt_skatteoppgjoer, klage_omgjoering, aktivitetsplikt_overholdt, aktivitetsplikt_begrunnelse, omgjoering_eget_initiativ
                         ) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (id) DO UPDATE SET
                             status = excluded.status,
                             brev_id = excluded.brev_id,
@@ -98,7 +98,8 @@ class EtteroppgjoerForbehandlingDao(
                             mottatt_skatteoppgjoer = excluded.mottatt_skatteoppgjoer,
                             klage_omgjoering = excluded.klage_omgjoering,
                             aktivitetsplikt_overholdt = excluded.aktivitetsplikt_overholdt,
-                            aktivitetsplikt_begrunnelse = excluded.aktivitetsplikt_begrunnelse
+                            aktivitetsplikt_begrunnelse = excluded.aktivitetsplikt_begrunnelse,
+                            omgjoering_eget_initiativ = excluded.omgjoering_eget_initiativ
                         """.trimIndent(),
                     )
                 statement.setObject(1, forbehandling.id)
@@ -123,7 +124,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setDate(14, forbehandling.varselbrevSendt?.let { Date.valueOf(it) })
                 statement.setString(15, forbehandling.etteroppgjoerResultatType?.name)
                 statement.setString(16, forbehandling.aarsakTilAvbrytelse?.name)
-                statement.setString(17, forbehandling.aarsakTilAvbrytelseBeskrivelse.orEmpty())
+                statement.setString(17, forbehandling.aarsakTilAvbrytelseBeskrivelse)
                 statement.setNullableBoolean(18, forbehandling.harVedtakAvTypeOpphoer)
                 statement.setString(19, forbehandling.opphoerSkyldesDoedsfall?.name)
                 statement.setString(20, forbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar?.name)
@@ -131,6 +132,7 @@ class EtteroppgjoerForbehandlingDao(
                 statement.setObject(22, forbehandling.klageOmgjoering)
                 statement.setString(23, forbehandling.aktivitetspliktOverholdt?.name)
                 statement.setString(24, forbehandling.aktivitetspliktBegrunnelse)
+                statement.setBoolean(25, forbehandling.omgjoeringEgetInitiativ)
 
                 statement.executeUpdate().also {
                     krev(it == 1) {
@@ -329,7 +331,7 @@ class EtteroppgjoerForbehandlingDao(
             varselbrevSendt = getDate("varselbrev_sendt")?.toLocalDate(),
             etteroppgjoerResultatType = getString("etteroppgjoer_resultat_type")?.let { enumValueOf<EtteroppgjoerResultatType>(it) },
             aarsakTilAvbrytelse = getString("aarsak_til_avbrytelse")?.let { enumValueOf<AarsakTilAvbryteForbehandling>(it) },
-            aarsakTilAvbrytelseBeskrivelse = getString("kommentar_til_avbrytelse"),
+            aarsakTilAvbrytelseBeskrivelse = getString("kommentar_til_avbrytelse").orEmpty(),
             harVedtakAvTypeOpphoer = getBoolean("har_vedtak_av_type_opphoer"),
             opphoerSkyldesDoedsfall = getString("opphoer_skyldes_doedsfall")?.let { enumValueOf<JaNei>(it) },
             opphoerSkyldesDoedsfallIEtteroppgjoersaar =
@@ -340,6 +342,7 @@ class EtteroppgjoerForbehandlingDao(
             klageOmgjoering = getString("klage_omgjoering")?.let { UUID.fromString(it) },
             aktivitetspliktOverholdt = getString("aktivitetsplikt_overholdt")?.let { enumValueOf<JaNei>(it) },
             aktivitetspliktBegrunnelse = getString("aktivitetsplikt_begrunnelse"),
+            omgjoeringEgetInitiativ = getBoolean("omgjoering_eget_initiativ"),
         )
 
     private fun ResultSet.toSummertePensjonsgivendeInntekter(): SummertePensjonsgivendeInntekter =

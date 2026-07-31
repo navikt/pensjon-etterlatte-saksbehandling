@@ -635,6 +635,7 @@ class EtteroppgjoerForbehandlingService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
         klageId: UUID?,
+        omgjoeringEgetInitiativ: Boolean,
     ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
             runBlocking {
@@ -653,6 +654,7 @@ class EtteroppgjoerForbehandlingService(
                 brevId = null,
                 varselbrevSendt = null,
                 klageOmgjoering = klageId,
+                omgjoeringEgetInitiativ = omgjoeringEgetInitiativ,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

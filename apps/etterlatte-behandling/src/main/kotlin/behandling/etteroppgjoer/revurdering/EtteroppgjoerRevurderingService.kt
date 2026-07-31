@@ -60,6 +60,7 @@ class EtteroppgjoerRevurderingService(
         klageId: UUID? = null,
         omgjoerForbehandlingId: UUID? = null,
         brukerTokenInfo: BrukerTokenInfo,
+        omgjoeringEgetInitiativ: Boolean,
     ): Revurdering {
         val etteroppgjoer =
             inTransaction { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) }
@@ -98,6 +99,7 @@ class EtteroppgjoerRevurderingService(
                             },
                         klageId = klageId,
                         brukerTokenInfo = brukerTokenInfo,
+                        omgjoeringEgetInitiativ = omgjoeringEgetInitiativ,
                     )
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
@@ -183,6 +185,7 @@ class EtteroppgjoerRevurderingService(
             klageId = forbehandling.klageOmgjoering,
             omgjoerForbehandlingId = forbehandling.kopiertFra?.takeIf { forbehandling.klageOmgjoering != null },
             brukerTokenInfo = brukerTokenInfo,
+            omgjoeringEgetInitiativ = forbehandling.omgjoeringEgetInitiativ,
         )
     }
 
@@ -233,6 +236,7 @@ class EtteroppgjoerRevurderingService(
             opprinnelse = skalOmgjoeres.opprinnelse,
             omgjoerForbehandlingId = omgjoerForbehandlingId,
             brukerTokenInfo = brukerTokenInfo,
+            omgjoeringEgetInitiativ = true,
         )
     }
 
@@ -268,9 +272,10 @@ class EtteroppgjoerRevurderingService(
             sakId = behandling.sak.id,
             inntektsaar = forbehandling.aar,
             opprinnelse = behandling.opprinnelse,
-            brukerTokenInfo = brukerTokenInfo,
             klageId = klageId,
             omgjoerForbehandlingId = forbehandling.id,
+            brukerTokenInfo = brukerTokenInfo,
+            omgjoeringEgetInitiativ = false,
         )
     }
 
@@ -313,13 +318,15 @@ class EtteroppgjoerRevurderingService(
         opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling?,
         klageId: UUID? = null,
         brukerTokenInfo: BrukerTokenInfo,
+        omgjoeringEgetInitiativ: Boolean,
     ): Revurdering {
         val forbehandling =
             etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(
-                kildeForbehandlingId,
-                sakId,
-                brukerTokenInfo,
-                klageId,
+                forbehandlingId = kildeForbehandlingId,
+                sakId = sakId,
+                brukerTokenInfo = brukerTokenInfo,
+                klageId = klageId,
+                omgjoeringEgetInitiativ = omgjoeringEgetInitiativ,
             )
 
         val persongalleri =

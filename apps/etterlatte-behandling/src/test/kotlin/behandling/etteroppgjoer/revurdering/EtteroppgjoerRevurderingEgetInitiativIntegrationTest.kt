@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.Month.JANUARY
 import java.time.YearMonth
 import java.util.UUID
@@ -57,10 +58,14 @@ import javax.sql.DataSource
  * tester og krever et fullt sett av nedstrøms-klienter (beregning, trygdetid, vedtak).
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith(DatabaseExtension::class)
 class EtteroppgjoerRevurderingEgetInitiativIntegrationTest(
     val dataSource: DataSource,
 ) {
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
+
     private val inntektsaar = 2024
 
     private lateinit var sakSkrivDao: SakSkrivDao
@@ -169,6 +174,7 @@ class EtteroppgjoerRevurderingEgetInitiativIntegrationTest(
                 opprinnelse = capture(opprinnelseSlot),
                 omgjoerForbehandlingId = capture(omgjoerForbehandlingIdSlot),
                 brukerTokenInfo = any(),
+                omgjoeringEgetInitiativ = any(),
             )
         } returns nyRevurdering
 
@@ -209,6 +215,7 @@ class EtteroppgjoerRevurderingEgetInitiativIntegrationTest(
                 opprinnelse = any(),
                 omgjoerForbehandlingId = any(),
                 brukerTokenInfo = any(),
+                omgjoeringEgetInitiativ = any(),
             )
         }
     }

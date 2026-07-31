@@ -1,20 +1,18 @@
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode } from 'react'
 import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
-import {
-  initialSortering,
-  leggTilSorteringILocalStorage,
-  OppgaveSortering,
-} from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
+import Spinner from '~shared/Spinner'
 
 export enum SortKey {
   REGISTRERINGSDATO = 'registreringsdato',
   FRIST = 'frist',
   FNR = 'fnr',
 }
+
+const ANTALL_KOLONNER = 11
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
@@ -23,7 +21,9 @@ interface Props {
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
   oppdaterMerknad: (oppgaveId: string, merknad: string) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
-  setSortering: (nySortering: OppgaveSortering) => void
+  sort: SortState | undefined
+  handleSort: (sortKey: string) => void
+  isLoading?: boolean
 }
 
 export const OppgaverTable = ({
@@ -33,69 +33,50 @@ export const OppgaverTable = ({
   oppdaterStatus,
   oppdaterMerknad,
   saksbehandlereIEnhet,
-  setSortering,
+  sort,
+  handleSort,
+  isLoading,
 }: Props): ReactNode => {
-  const [sort, setSort] = useState<SortState>()
-
-  const handleSort = (sortKey: SortKey) => {
-    setSort(
-      sort && sortKey === sort.orderBy && sort.direction === 'descending'
-        ? { orderBy: sortKey, direction: 'none' }
-        : {
-            orderBy: sortKey,
-            direction: sort && sortKey === sort.orderBy && sort.direction === 'ascending' ? 'descending' : 'ascending',
-          }
-    )
-  }
-
-  useEffect(() => {
-    switch (sort?.orderBy) {
-      case SortKey.REGISTRERINGSDATO:
-        const nySorteringRegistreringsdato: OppgaveSortering = {
-          ...initialSortering,
-          registreringsdatoSortering: sort ? sort.direction : 'none',
-        }
-        setSortering(nySorteringRegistreringsdato)
-        leggTilSorteringILocalStorage(nySorteringRegistreringsdato)
-        break
-      case SortKey.FRIST:
-        const nySorteringFrist: OppgaveSortering = {
-          ...initialSortering,
-          fristSortering: sort ? sort.direction : 'none',
-        }
-        setSortering(nySorteringFrist)
-        leggTilSorteringILocalStorage(nySorteringFrist)
-        break
-      case SortKey.FNR:
-        const nySorteringFnr: OppgaveSortering = {
-          ...initialSortering,
-          fnrSortering: sort ? sort.direction : 'none',
-        }
-        setSortering(nySorteringFnr)
-        leggTilSorteringILocalStorage(nySorteringFnr)
-        break
-    }
-  }, [sort])
-
   return (
     <Table
       size="small"
       sort={sort && sort.direction !== 'none' ? { direction: sort.direction, orderBy: sort.orderBy } : undefined}
-      onSortChange={(sortKey) => handleSort(sortKey as SortKey)}
+      onSortChange={handleSort}
     >
+      <colgroup>
+        <col style={{ width: '110px' }} />
+        <col style={{ width: '140px' }} />
+        <col style={{ width: '140px' }} />
+        <col style={{ width: '190px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '250px' }} />
+        <col style={{ width: '600px' }} />
+        <col style={{ width: '250px' }} />
+        <col style={{ width: '100px' }} />
+        <col style={{ width: '250px' }} />
+        <col style={{ width: '250px' }} />
+      </colgroup>
       <OppgaverTableHeader />
       <Table.Body>
-        {oppgaver?.map((oppgave: OppgaveDTO) => (
-          <OppgaverTableRow
-            key={oppgave.id}
-            oppgave={oppgave}
-            saksbehandlereIEnhet={saksbehandlereIEnhet}
-            oppdaterTildeling={oppdaterTildeling}
-            oppdaterFrist={oppdaterFrist}
-            oppdaterStatus={oppdaterStatus}
-            oppdaterMerknad={oppdaterMerknad}
-          />
-        ))}
+        {isLoading ? (
+          <Table.Row>
+            <Table.DataCell colSpan={ANTALL_KOLONNER}>
+              <Spinner label="Henter oppgaver" />
+            </Table.DataCell>
+          </Table.Row>
+        ) : (
+          oppgaver?.map((oppgave: OppgaveDTO) => (
+            <OppgaverTableRow
+              key={oppgave.id}
+              oppgave={oppgave}
+              saksbehandlereIEnhet={saksbehandlereIEnhet}
+              oppdaterTildeling={oppdaterTildeling}
+              oppdaterFrist={oppdaterFrist}
+              oppdaterStatus={oppdaterStatus}
+              oppdaterMerknad={oppdaterMerknad}
+            />
+          ))
+        )}
       </Table.Body>
     </Table>
   )

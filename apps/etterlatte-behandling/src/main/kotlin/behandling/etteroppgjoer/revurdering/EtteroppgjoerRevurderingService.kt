@@ -318,8 +318,8 @@ class EtteroppgjoerRevurderingService(
             etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(
                 kildeForbehandlingId,
                 sakId,
-                klageId,
                 brukerTokenInfo,
+                klageId,
             )
 
         val persongalleri =

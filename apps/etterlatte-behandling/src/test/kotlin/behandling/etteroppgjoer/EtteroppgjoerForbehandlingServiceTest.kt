@@ -407,7 +407,7 @@ class EtteroppgjoerForbehandlingServiceTest {
             )
         every { ctx.behandlingService.hentBehandlingerForSak(any()) } returns listOf(ctx.behandling)
 
-        val kopiertForbehandling = ctx.service.kopierOgLagreNyForbehandling(uuid, sakId1, null, mockk())
+        val kopiertForbehandling = ctx.service.kopierOgLagreNyForbehandling(uuid, sakId1, mockk(), null)
 
         with(kopiertForbehandling) {
             assertNotEquals(id, forbehandling.id)

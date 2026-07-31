@@ -633,8 +633,8 @@ class EtteroppgjoerForbehandlingService(
     fun kopierOgLagreNyForbehandling(
         forbehandlingId: UUID,
         sakId: SakId,
-        klageId: UUID?,
         brukerTokenInfo: BrukerTokenInfo,
+        klageId: UUID?,
     ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
             runBlocking {

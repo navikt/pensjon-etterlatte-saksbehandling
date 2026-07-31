@@ -21,6 +21,7 @@ export interface Props {
   setRowsPerPage: (rows: number) => void
   sort: SortState | undefined
   handleSort: (sortKey: string) => void
+  isLoading?: boolean
 }
 
 export const Oppgaver = ({
@@ -37,10 +38,11 @@ export const Oppgaver = ({
   setRowsPerPage,
   sort,
   handleSort,
+  isLoading,
 }: Props): ReactNode => {
   const antallSider = Math.ceil(totaltAntall / rowsPerPage)
 
-  if (!oppgaver.length) return AlertIngenOppgaver
+  if (!isLoading && !oppgaver.length) return AlertIngenOppgaver
 
   return (
     <VStack gap="space-8">
@@ -54,6 +56,7 @@ export const Oppgaver = ({
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         sort={sort}
         handleSort={handleSort}
+        isLoading={isLoading}
       />
       <PagineringsKontroller
         page={page}

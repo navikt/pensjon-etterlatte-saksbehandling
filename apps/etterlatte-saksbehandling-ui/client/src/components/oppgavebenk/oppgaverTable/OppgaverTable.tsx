@@ -4,12 +4,15 @@ import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/Oppga
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
+import Spinner from '~shared/Spinner'
 
 export enum SortKey {
   REGISTRERINGSDATO = 'registreringsdato',
   FRIST = 'frist',
   FNR = 'fnr',
 }
+
+const ANTALL_KOLONNER = 11
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
@@ -20,6 +23,7 @@ interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   sort: SortState | undefined
   handleSort: (sortKey: string) => void
+  isLoading?: boolean
 }
 
 export const OppgaverTable = ({
@@ -31,6 +35,7 @@ export const OppgaverTable = ({
   saksbehandlereIEnhet,
   sort,
   handleSort,
+  isLoading,
 }: Props): ReactNode => {
   return (
     <Table
@@ -40,17 +45,25 @@ export const OppgaverTable = ({
     >
       <OppgaverTableHeader />
       <Table.Body>
-        {oppgaver?.map((oppgave: OppgaveDTO) => (
-          <OppgaverTableRow
-            key={oppgave.id}
-            oppgave={oppgave}
-            saksbehandlereIEnhet={saksbehandlereIEnhet}
-            oppdaterTildeling={oppdaterTildeling}
-            oppdaterFrist={oppdaterFrist}
-            oppdaterStatus={oppdaterStatus}
-            oppdaterMerknad={oppdaterMerknad}
-          />
-        ))}
+        {isLoading ? (
+          <Table.Row>
+            <Table.DataCell colSpan={ANTALL_KOLONNER}>
+              <Spinner label="Henter oppgaver" />
+            </Table.DataCell>
+          </Table.Row>
+        ) : (
+          oppgaver?.map((oppgave: OppgaveDTO) => (
+            <OppgaverTableRow
+              key={oppgave.id}
+              oppgave={oppgave}
+              saksbehandlereIEnhet={saksbehandlereIEnhet}
+              oppdaterTildeling={oppdaterTildeling}
+              oppdaterFrist={oppdaterFrist}
+              oppdaterStatus={oppdaterStatus}
+              oppdaterMerknad={oppdaterMerknad}
+            />
+          ))
+        )}
       </Table.Body>
     </Table>
   )

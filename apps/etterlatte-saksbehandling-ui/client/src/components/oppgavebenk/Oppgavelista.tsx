@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { SortState } from '@navikt/ds-react'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { isPendingOrInitial, mapResult } from '~shared/api/apiUtils'
 import { soekOppgaver } from '~shared/api/oppgaver'
 import {
   finnOgOppdaterOppgave,
@@ -8,7 +8,6 @@ import {
 } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
 import {
@@ -135,28 +134,26 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
         oppgavelisteValg={OppgavelisteValg.OPPGAVELISTA}
       />
 
-      {oppgaver.length >= 0 && !isPending(soekResult) ? (
-        <Oppgaver
-          oppgaver={oppgaver}
-          totaltAntall={totaltAntall}
-          saksbehandlereIEnhet={saksbehandlereIEnhet}
-          oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
-          oppdaterStatus={oppdaterStatus}
-          oppdaterFrist={oppdaterFrist}
-          oppdaterMerknad={oppdaterMerknad}
-          page={page}
-          setPage={setPage}
-          rowsPerPage={rowsPerPage}
-          setRowsPerPage={setRowsPerPage}
-          sort={sort}
-          handleSort={handleSort}
-        />
-      ) : (
-        mapResult(soekResult, {
-          pending: <Spinner label="Henter oppgaver" />,
-          error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppgaver'}</ApiErrorAlert>,
-        })
-      )}
+      {mapResult(soekResult, {
+        error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppgaver'}</ApiErrorAlert>,
+      })}
+
+      <Oppgaver
+        oppgaver={oppgaver}
+        totaltAntall={totaltAntall}
+        saksbehandlereIEnhet={saksbehandlereIEnhet}
+        oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
+        oppdaterStatus={oppdaterStatus}
+        oppdaterFrist={oppdaterFrist}
+        oppdaterMerknad={oppdaterMerknad}
+        page={page}
+        setPage={setPage}
+        rowsPerPage={rowsPerPage}
+        setRowsPerPage={setRowsPerPage}
+        sort={sort}
+        handleSort={handleSort}
+        isLoading={isPendingOrInitial(soekResult)}
+      />
     </>
   )
 }

@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim as base
+FROM node:25-bookworm-slim as base
 
 WORKDIR /app
 COPY ./client/dist ./client

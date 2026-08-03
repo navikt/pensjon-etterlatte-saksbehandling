@@ -34,9 +34,9 @@ spec:
   resources:
     requests:
       cpu: 90m
-      memory: 448Mi
+      memory: 512Mi
     limits:
-      memory: 448Mi
+      memory: 512Mi
   replicas:
     max: 1
     min: 1

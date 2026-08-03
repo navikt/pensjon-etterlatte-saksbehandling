@@ -73,8 +73,10 @@ export function OppfoelgingAvOppgaveModal({
   }
 
   useEffect(() => {
-    hentOppgaveKommentarerRequest({ oppgaveId: oppgave.id })
-  }, [])
+    if (visModal) {
+      hentOppgaveKommentarerRequest({ oppgaveId: oppgave.id })
+    }
+  }, [visModal])
 
   return (
     <>

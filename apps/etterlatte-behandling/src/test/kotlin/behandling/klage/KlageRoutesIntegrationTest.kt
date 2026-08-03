@@ -41,6 +41,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRequest
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRespons
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
@@ -397,12 +399,14 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     ) {
         val oppgaver: List<OppgaveIntern> =
             client
-                .get("/api/oppgaver") {
+                .post("/api/oppgaver/soek") {
                     addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(OppgaveSoekRequest())
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
-                }.body()
+                }.body<OppgaveSoekRespons>()
+                .oppgaver
 
         val oppgave = oppgaver.single { it.referanse == klage.id.toString() }
 

@@ -47,17 +47,16 @@ export const Oppgavebenk = () => {
     }
   }, [])
 
-  // Sett tab i URL ved mount hvis den mangler
+  // Sett tab i URL ved mount hvis den mangler.
+  // Vi leser window.location.search direkte fordi barnekomponenter (useFilterMedUrl) kan ha
+  // satt filter-params via history.replaceState før denne effekten kjører, men React Routers
+  // interne state (prev) er ikke oppdatert ennå og er stale. Leser vi window.location.search
+  // her bevares filter-params som barnet satte.
   useEffect(() => {
-    if (!searchParams.get('tab')) {
-      setSearchParams(
-        (prev) => {
-          const nyeParams = new URLSearchParams(prev)
-          nyeParams.set('tab', TAB_NUMMER[oppgavelisteValg])
-          return nyeParams
-        },
-        { replace: true }
-      )
+    const faktiskeParams = new URLSearchParams(window.location.search)
+    if (!faktiskeParams.get('tab')) {
+      faktiskeParams.set('tab', TAB_NUMMER[oppgavelisteValg])
+      setSearchParams(faktiskeParams, { replace: true })
     }
   }, [])
 

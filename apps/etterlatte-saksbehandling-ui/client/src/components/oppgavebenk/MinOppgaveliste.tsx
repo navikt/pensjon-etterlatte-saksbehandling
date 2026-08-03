@@ -27,13 +27,22 @@ import {
 } from '~components/oppgavebenk/utils/oppgaveSortering'
 import { SortKey } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { VStack } from '@navikt/ds-react'
+import {
+  MIN_OPPGAVELISTE_URL_NOKLER,
+  useFilterMedUrl,
+} from '~components/oppgavebenk/filtreringAvOppgaver/useFilterMedUrl'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
 }
 
 export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
-  const [filter, setFilter] = useState<Filter>(hentMinOppgavelisteFilterFraLocalStorage())
+  const [filter, setFilter] = useFilterMedUrl(
+    MIN_OPPGAVELISTE_URL_NOKLER,
+    hentMinOppgavelisteFilterFraLocalStorage,
+    leggMinOppgavelisteFilterILocalsotrage
+  )
+
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(hentPagineringSizeFraLocalStorage())
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
@@ -79,10 +88,6 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     setSortering(nyOppgaveSortering)
     leggTilSorteringILocalStorage(nyOppgaveSortering)
   }
-
-  useEffect(() => {
-    leggMinOppgavelisteFilterILocalsotrage(filter)
-  }, [filter])
 
   useEffect(() => {
     hentOppgaver()

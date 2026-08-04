@@ -284,5 +284,4 @@ export const Unntaksvilkaar = styled.div`
 
 export const VilkaarVurdertInformasjon = styled.div`
   margin-bottom: 1.5em;
-  color: var(--ax-neutral-800);
 `

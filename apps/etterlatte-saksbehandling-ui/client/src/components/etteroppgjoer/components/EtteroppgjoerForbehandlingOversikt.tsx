@@ -186,19 +186,28 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         />
       )}
       {forbehandling.harVedtakAvTypeOpphoer && (
-        <OpphoerSkyldesDoedsfall
-          erRedigerbar={erRedigerbar}
-          setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerDoedsfallErrors}
-        />
+        <Box background="neutral-soft" borderRadius="12" padding="space-16">
+          <OpphoerSkyldesDoedsfall
+            erRedigerbar={erRedigerbar}
+            setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerDoedsfallErrors}
+          />
+        </Box>
       )}
       {!doedsfallIEtteroppgjoersaaret && !forbehandlingSkalAvsluttes && (
-        <FastsettFaktiskInntekt
-          erRedigerbar={erRedigerbartFaktiskInntekt}
-          setFastsettFaktiskInntektSkjemaErrors={setFaktiskInntektErrors}
-        />
+        <Box background="neutral-soft" borderRadius="12" padding="space-16">
+          <FastsettFaktiskInntekt
+            erRedigerbar={erRedigerbartFaktiskInntekt}
+            setFastsettFaktiskInntektSkjemaErrors={setFaktiskInntektErrors}
+          />
+        </Box>
       )}
 
-      <AktivitetspliktSpørsmål erRedigerbar={erRedigerbar} setAktivitetspliktSkjemaErrors={setAktivitetspliktErrors} />
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <AktivitetspliktSpørsmål
+          erRedigerbar={erRedigerbar}
+          setAktivitetspliktSkjemaErrors={setAktivitetspliktErrors}
+        />
+      </Box>
 
       {visBeregnetResultat && (
         <VStack gap="space-16">
@@ -249,11 +258,13 @@ function RevurderingSpesifikkeSeksjoner({
 
   return (
     <>
-      <InformasjonFraBruker
-        behandling={behandling}
-        setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerErrors}
-        setValideringFeilmedling={setValideringFeilmelding}
-      />
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <InformasjonFraBruker
+          behandling={behandling}
+          setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerErrors}
+          setValideringFeilmedling={setValideringFeilmelding}
+        />
+      </Box>
 
       {forbehandling.endringErTilUgunstForBruker === JaNei.JA && !erFerdigBehandlet(behandling.status) && (
         <Box maxWidth="42.5rem">

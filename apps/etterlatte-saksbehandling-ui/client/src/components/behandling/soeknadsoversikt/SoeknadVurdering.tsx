@@ -1,4 +1,4 @@
-import { Heading, HStack, VStack } from '@navikt/ds-react'
+import { Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { ReactNode } from 'react'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
@@ -13,21 +13,23 @@ interface Props {
 
 export const SoeknadVurdering = (props: Props) => {
   return (
-    <VStack gap="space-8" paddingBlock="space-48">
-      <HStack gap="space-24" align="center">
-        {props.status && <StatusIcon status={props.status} />}
-        <Heading size="medium" level="2">
-          {props.tittel}
-        </Heading>
-      </HStack>
-      <HStack gap="space-16">
-        {props.hjemler.map((hjemmel, idx) => (
-          <HjemmelLenke key={`hjemmel-${idx}`} {...hjemmel} />
-        ))}
-      </HStack>
-      <HStack justify="space-between" wrap={false}>
-        {props.children}
-      </HStack>
-    </VStack>
+    <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32">
+      <VStack gap="space-8">
+        <HStack gap="space-24" align="center">
+          {props.status && <StatusIcon status={props.status} />}
+          <Heading size="medium" level="2">
+            {props.tittel}
+          </Heading>
+        </HStack>
+        <HStack gap="space-16">
+          {props.hjemler.map((hjemmel, idx) => (
+            <HjemmelLenke key={`hjemmel-${idx}`} {...hjemmel} />
+          ))}
+        </HStack>
+        <HStack justify="space-between" wrap={false}>
+          {props.children}
+        </HStack>
+      </VStack>
+    </Box>
   )
 }

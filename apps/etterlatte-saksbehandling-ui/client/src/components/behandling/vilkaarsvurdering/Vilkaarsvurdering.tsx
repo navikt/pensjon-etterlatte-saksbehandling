@@ -128,21 +128,20 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             </AlertWrapper>
           )}
 
-          <Box paddingInline="space-64" paddingBlock="space-64 space-16">
-            {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-              vilkaarsvurdering.resultat == null && (
-                <KopierVilkaarAvdoed behandlingId={behandling.id} vilkaar={vilkaarsvurdering.vilkaar} />
-              )}
-          </Box>
+          {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+            vilkaarsvurdering.resultat == null && (
+              <KopierVilkaarAvdoed behandlingId={behandling.id} vilkaar={vilkaarsvurdering.vilkaar} />
+            )}
 
           {vilkaarsvurdering.vilkaar.map((value, index) => (
-            <ManueltVilkaar
-              key={index}
-              vilkaar={value}
-              oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
-              behandlingId={behandlingId}
-              redigerbar={redigerbar && !vilkaarsvurdering.resultat && !redigerTotalvurdering}
-            />
+            <Box key={index} paddingInline="space-64 space-32">
+              <ManueltVilkaar
+                vilkaar={value}
+                oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
+                behandlingId={behandlingId}
+                redigerbar={redigerbar && !vilkaarsvurdering.resultat && !redigerTotalvurdering}
+              />
+            </Box>
           ))}
 
           <Resultat

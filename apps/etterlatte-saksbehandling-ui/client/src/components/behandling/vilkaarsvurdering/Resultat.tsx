@@ -100,105 +100,107 @@ export const Resultat = (props: Props) => {
   const nySoeknad = revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
 
   return (
-    <VStack gap="space-16" paddingInline="space-64 space-16" paddingBlock="space-64 space-0">
-      <Heading size="small" level="2">
-        {erRevurdering
-          ? 'Utfall etter revurdering'
-          : `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`}
-      </Heading>
-      {vilkaarsvurdering.resultat && (
-        <VStack gap="space-8">
-          <Box>
-            <HStack gap="space-8" align="center">
-              <StatusIcon status={status} />
-              <BodyShort textColor="subtle">{resultatTekst()}</BodyShort>
-            </HStack>
-            {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
-              <BodyShort textColor="subtle">
-                {!erRevurdering &&
-                  `${formaterSakstype(sakstype)} er innvilget f.o.m ${formaterDato(
-                    vilkaarsvurdering.virkningstidspunkt
-                  )}`}
-              </BodyShort>
-            )}
-          </Box>
-          {vilkaarsvurdering?.resultat?.kommentar && (
-            <Box>
-              <Heading size="xsmall" level="3">
-                Begrunnelse
-              </Heading>
-              <ResultatKommentar>{vilkaarsvurdering.resultat.kommentar}</ResultatKommentar>
-            </Box>
+    <VStack gap="space-16" paddingInline="space-64 space-32" paddingBlock="space-32 space-0">
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <VStack gap="space-16">
+          <Heading size="small" level="2">
+            {erRevurdering
+              ? 'Utfall etter revurdering'
+              : `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`}
+          </Heading>
+          {vilkaarsvurdering.resultat && (
+            <VStack gap="space-8">
+              <Box>
+                <HStack gap="space-8" align="center">
+                  <StatusIcon status={status} />
+                  <BodyShort textColor="subtle">{resultatTekst()}</BodyShort>
+                </HStack>
+                {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
+                  <BodyShort textColor="subtle">
+                    {!erRevurdering &&
+                      `${formaterSakstype(sakstype)} er innvilget f.o.m ${formaterDato(
+                        vilkaarsvurdering.virkningstidspunkt
+                      )}`}
+                  </BodyShort>
+                )}
+              </Box>
+              {vilkaarsvurdering?.resultat?.kommentar && (
+                <Box>
+                  <Heading size="xsmall" level="3">
+                    Begrunnelse
+                  </Heading>
+                  <ResultatKommentar>{vilkaarsvurdering.resultat.kommentar}</ResultatKommentar>
+                </Box>
+              )}
+              <HStack gap="space-16">
+                {redigerbar && (
+                  <Button
+                    loading={isPending(slettVurderingStatus)}
+                    onClick={() => {
+                      slettVilkaarsvurderingResultat()
+                      setRedigerTotalvurdering(false)
+                    }}
+                    variant="tertiary"
+                    size="small"
+                    icon={<PencilWritingIcon aria-hidden />}
+                  >
+                    Rediger vurdering
+                  </Button>
+                )}
+              </HStack>
+            </VStack>
           )}
-          <HStack gap="space-16">
-            {redigerbar && (
-              <Button
-                loading={isPending(slettVurderingStatus)}
-                onClick={() => {
-                  slettVilkaarsvurderingResultat()
-                  setRedigerTotalvurdering(false)
-                }}
-                variant="tertiary"
-                size="small"
-                icon={<PencilWritingIcon aria-hidden />}
-              >
-                Rediger vurdering
-              </Button>
-            )}
-          </HStack>
+          {!vilkaarsvurdering.resultat && !alleVilkaarErVurdert && (
+            <BodyShort>Alle vilkår må vurderes før man kan gå videre</BodyShort>
+          )}
+          {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
+            <VurderAlleVilkaarBox>
+              <VStack gap="space-16">
+                <RadioGroup
+                  legend=""
+                  size="small"
+                  value={svar || ''}
+                  onChange={(event) => {
+                    setSvar(ISvar[event as ISvar])
+                    setRadioError(undefined)
+                  }}
+                  error={radioError ? radioError : false}
+                >
+                  <Radio value={ISvar.JA}>{erRevurdering ? 'Fortsatt oppfylt' : 'Ja, vilkår er oppfylt'}</Radio>
+                  <Radio value={ISvar.NEI}>
+                    {erRevurdering && !nySoeknad ? 'Opphør av ytelse' : 'Nei, vilkår er ikke oppfylt'}
+                  </Radio>
+                </RadioGroup>
+                <Textarea
+                  label="Begrunnelse"
+                  placeholder="Valgfritt"
+                  value={kommentar}
+                  onChange={(e) => setKommentar(e.target.value)}
+                  minRows={3}
+                  size="medium"
+                  autoComplete="off"
+                />
+                <Box>
+                  <Button
+                    variant="primary"
+                    size="small"
+                    onClick={lagreVilkaarsvurderingResultat}
+                    loading={isPending(totalVurderingStatus)}
+                  >
+                    Lagre
+                  </Button>
+                </Box>
+              </VStack>
+            </VurderAlleVilkaarBox>
+          )}
         </VStack>
-      )}
-      {!vilkaarsvurdering.resultat && !alleVilkaarErVurdert && (
-        <BodyShort>Alle vilkår må vurderes før man kan gå videre</BodyShort>
-      )}
-      {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
-        <VurderAlleVilkaarBox>
-          <VStack gap="space-16">
-            <RadioGroup
-              legend=""
-              size="small"
-              value={svar || ''}
-              onChange={(event) => {
-                setSvar(ISvar[event as ISvar])
-                setRadioError(undefined)
-              }}
-              error={radioError ? radioError : false}
-            >
-              <Radio value={ISvar.JA}>{erRevurdering ? 'Fortsatt oppfylt' : 'Ja, vilkår er oppfylt'}</Radio>
-              <Radio value={ISvar.NEI}>
-                {erRevurdering && !nySoeknad ? 'Opphør av ytelse' : 'Nei, vilkår er ikke oppfylt'}
-              </Radio>
-            </RadioGroup>
-            <Textarea
-              label="Begrunnelse"
-              placeholder="Valgfritt"
-              value={kommentar}
-              onChange={(e) => setKommentar(e.target.value)}
-              minRows={3}
-              size="medium"
-              autoComplete="off"
-            />
-            <Box>
-              <Button
-                variant="primary"
-                size="small"
-                onClick={lagreVilkaarsvurderingResultat}
-                loading={isPending(totalVurderingStatus)}
-              >
-                Lagre
-              </Button>
-            </Box>
-          </VStack>
-        </VurderAlleVilkaarBox>
-      )}
-      <Box paddingBlock="space-16 space-32" paddingInline="space-64 space-16">
-        {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
-          <OppdatertGrunnlagAlert variant="warning">
-            Virkningstidspunktet er endret siden vilkårene ble vurdert sist. Du må se over vurderingene og sjekke at de
-            fortsatt er riktige. Velg &quot;Rediger vurdering&quot; for å gjøre dette.
-          </OppdatertGrunnlagAlert>
-        )}
       </Box>
+      {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
+        <OppdatertGrunnlagAlert variant="warning">
+          Virkningstidspunktet er endret siden vilkårene ble vurdert sist. Du må se over vurderingene og sjekke at de
+          fortsatt er riktige. Velg &quot;Rediger vurdering&quot; for å gjøre dette.
+        </OppdatertGrunnlagAlert>
+      )}
       <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar && vilkaarsvurdering.isGrunnlagUtdatert && (
           <OppdatertGrunnlagAlert variant="warning">
@@ -213,7 +215,7 @@ export const Resultat = (props: Props) => {
 }
 
 const VurderAlleVilkaarBox = styled(Box)`
-  width: 20rem;
+  max-width: 42.5rem;
 `
 
 const ResultatKommentar = styled(BodyShort)`

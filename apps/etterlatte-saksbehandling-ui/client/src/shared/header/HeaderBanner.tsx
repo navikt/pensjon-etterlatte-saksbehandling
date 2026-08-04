@@ -53,7 +53,7 @@ export const HeaderBanner = () => {
           name={innloggetSaksbehandler.navn}
           description={innloggetSaksbehandler.ident}
         />
-        <Dropdown.Menu>
+        <Dropdown.Menu placement="bottom-start" style={{ width: 'fit-content' }}>
           <Dropdown.Menu.List>
             <Dropdown.Menu.List.Item as="a" href="/oauth2/logout">
               <LeaveIcon aria-hidden /> Logg ut

@@ -8,6 +8,11 @@ type Props = {
 }
 export const BeregnetFremtidigTrygdetid = ({ beregnetTrygdetid }: Props) => (
   <Table size="small">
+    <colgroup>
+      <col />
+      <col width="180px" />
+      <col width="200px" />
+    </colgroup>
     <Table.Header>
       <Table.Row>
         <Table.HeaderCell>Fremtidig trygdetid</Table.HeaderCell>

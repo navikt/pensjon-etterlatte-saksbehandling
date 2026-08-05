@@ -9,6 +9,7 @@ import { AdresseVedDoedsfall } from '~components/behandling/soeknadsoversikt/fam
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
 import { ListeOverInnflyttingTilNorge } from '~components/behandling/soeknadsoversikt/familieforhold/ListeOverInnflyttingTilNorge'
 import { ListeOverUtflyttingFraNorge } from '~components/behandling/soeknadsoversikt/familieforhold/ListeOverUtflyttingFraNorge'
+import React from 'react'
 interface Props {
   avdoede: Personopplysning[] | undefined
   alleLand: ILand[]
@@ -23,7 +24,15 @@ export const TabellOverAvdoede = ({ avdoede, alleLand }: Props) => {
           Avdøde
         </Heading>
       </HStack>
-      <Table size="small">
+      <Table size="small" style={{ width: '100%', tableLayout: 'fixed' }}>
+        <colgroup>
+          <col style={{ width: '20%' }} />
+          <col style={{ width: '16%' }} />
+          <col style={{ width: '20%' }} />
+          <col style={{ width: '10%' }} />
+          <col style={{ width: '10%' }} />
+          <col />
+        </colgroup>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell scope="col">Navn</Table.HeaderCell>

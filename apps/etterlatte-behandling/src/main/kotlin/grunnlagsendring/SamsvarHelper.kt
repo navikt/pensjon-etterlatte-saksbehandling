@@ -73,7 +73,10 @@ internal fun finnSamsvarForHendelse(
 
         GrunnlagsendringsType.SIVILSTAND -> {
             when (sakType) {
-                SakType.BARNEPENSJON -> samsvarSivilstandBP()
+                SakType.BARNEPENSJON -> {
+                    samsvarSivilstandBP()
+                }
+
                 SakType.OMSTILLINGSSTOENAD -> {
                     val pdlSivilstand = pdlData.hentSivilstand()
                     val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
@@ -101,7 +104,7 @@ internal fun finnSamsvarForHendelse(
             }
             if (personRolle == PersonRolle.TILKNYTTET_BARN && sakType == SakType.OMSTILLINGSSTOENAD) {
                 val foedselsdato = pdlData.foedselsdato?.verdi
-                val erOver18Aar = foedselsdato?.plusYears(18)?.plusDays(1)?.isAfter(LocalDate.now())
+                val erOver18Aar = foedselsdato?.plusYears(18)?.let { it <= LocalDate.now() }
                 if (erOver18Aar == true) {
                     return SamsvarMellomKildeOgGrunnlag.Adresse(
                         samsvar = true,

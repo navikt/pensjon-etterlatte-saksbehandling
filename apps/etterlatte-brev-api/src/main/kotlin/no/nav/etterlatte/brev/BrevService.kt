@@ -316,7 +316,7 @@ class BrevService(
         val brev = sjekkOmBrevKanEndres(brevId)
         logger.info("Tilbakestiller mottakere for brev=$brevId")
         val personerISakOgSak = brevdataFacade.hentPersonerISakforBrev(brev.sakId, brev.behandlingId, bruker)
-        val nyeMottakere = adresseService.hentMottakere(personerISakOgSak.sak.sakType, personerISakOgSak.personerISak, bruker)
+        val nyeMottakere = adresseService.hentMottakere(personerISakOgSak.sak.sakType, personerISakOgSak.personerISak, brev.sakId, bruker)
 
         val maksAntallMottakere = 3
 

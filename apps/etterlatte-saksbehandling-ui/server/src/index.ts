@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express'
 import path from 'path'
-import { ApiConfig, appConf, brukInternTrygdetid, ClientConfig } from './config/config'
+import { ApiConfig, appConf, ClientConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { logger } from './monitoring/logger'
 import { tokenMiddleware } from './middleware/getOboToken'
@@ -102,8 +102,7 @@ app.use('/api/vedtak', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiCon
 
 app.use('/api/trygdetid', tokenMiddleware(ApiConfig.trygdetid.scope), proxy(ApiConfig.trygdetid.url))
 
-const trygdetidV2Config = brukInternTrygdetid ? ApiConfig.behandling : ApiConfig.trygdetid
-app.use('/api/trygdetid_v2', tokenMiddleware(trygdetidV2Config.scope), proxy(trygdetidV2Config.url))
+app.use('/api/trygdetid_v2', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
 
 app.use('/api/utbetaling', tokenMiddleware(ApiConfig.utbetaling.scope), proxy(ApiConfig.utbetaling.url))
 

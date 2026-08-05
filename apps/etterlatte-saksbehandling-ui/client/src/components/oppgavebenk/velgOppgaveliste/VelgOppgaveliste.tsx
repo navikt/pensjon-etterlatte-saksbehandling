@@ -1,4 +1,4 @@
-import React, { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
+import React, { ReactNode, useEffect } from 'react'
 import styled from 'styled-components'
 import { Loader, Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
@@ -10,7 +10,7 @@ import { mapResult } from '~shared/api/apiUtils'
 
 interface Props {
   oppgavelisteValg: OppgavelisteValg
-  setOppgavelisteValg: Dispatch<SetStateAction<OppgavelisteValg>>
+  setOppgavelisteValg: (valg: OppgavelisteValg) => void
 }
 
 export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Props): ReactNode => {

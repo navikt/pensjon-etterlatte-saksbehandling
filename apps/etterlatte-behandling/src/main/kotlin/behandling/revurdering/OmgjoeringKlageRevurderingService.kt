@@ -3,9 +3,7 @@ package no.nav.etterlatte.behandling.revurdering
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
-import no.nav.etterlatte.behandling.klage.KlageFeatureToggle
 import no.nav.etterlatte.behandling.klage.KlageService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -30,7 +28,6 @@ class OmgjoeringKlageRevurderingService(
     private val behandlingDao: BehandlingDao,
     private val grunnlagService: GrunnlagService,
     private val etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun opprettOmgjoeringKlage(
         sakId: SakId,

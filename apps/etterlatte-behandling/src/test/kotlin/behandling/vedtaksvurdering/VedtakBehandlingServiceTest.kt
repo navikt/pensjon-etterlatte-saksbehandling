@@ -1774,7 +1774,6 @@ internal class VedtakBehandlingServiceTest(
             utbetaltBeloep = 100,
             soeskenFlokk = null,
             grunnbelop = 10000,
-            grunnbelopMnd = 1000,
             trygdetid = 40,
             regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
         )
@@ -1806,7 +1805,6 @@ internal class VedtakBehandlingServiceTest(
                     utbetaltBeloep = 100,
                     soeskenFlokk = null,
                     grunnbelop = 10000,
-                    grunnbelopMnd = 1000,
                     trygdetid = 40,
                 ),
             ),

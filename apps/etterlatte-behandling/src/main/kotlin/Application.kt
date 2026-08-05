@@ -113,6 +113,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.etteroppgjoerSvarfristUtloeptJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
         context.sjekkAdressebeskyttelseJob,
+        context.hengendeBehandlingJob,
         context.uttrekkLoependeYtelseEtter67Job,
         context.lesSkatteoppgjoerHendelserJob,
         context.oppdaterSkatteoppgjoerIkkeMottattJob,
@@ -223,6 +224,8 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         automatiskRevurderingService = applicationContext.automatiskRevurderingService,
         aarligInntektsjusteringJobbService = applicationContext.aarligInntektsjusteringJobbService,
         etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
+        featureToggleService = applicationContext.featureToggleService,
+        sakService = applicationContext.sakService,
     )
     omregningRoutes(omregningService = applicationContext.omregningService)
     aarligInntektsjusteringRoute(service = applicationContext.aarligInntektsjusteringJobbService)
@@ -258,13 +261,11 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
 
-    if (applicationContext.internTrygdetidAktivert) {
-        trygdetid(
-            trygdetidService = applicationContext.trygdetidService,
-            behandlingsStatusService = applicationContext.behandlingsStatusService,
-        )
-        avtale(applicationContext.avtaleService)
-    }
+    trygdetid(
+        trygdetidService = applicationContext.trygdetidService,
+        behandlingsStatusService = applicationContext.behandlingsStatusService,
+    )
+    avtale(applicationContext.avtaleService)
 
     arbeidOgInntekt(applicationContext.arbeidOgInntektKlient)
 

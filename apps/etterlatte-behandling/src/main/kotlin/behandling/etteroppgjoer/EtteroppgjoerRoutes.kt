@@ -22,7 +22,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AvbrytForbehandlingRequest
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -55,6 +54,7 @@ enum class EtteroppgjoerToggles(
     ETTEROPPGJOER_KAN_FERDIGSTILLE_FORBEHANDLING("etteroppgjoer_kan_ferdigstille_forbehandling"),
     VIS_TILBAKESTILL_ETTEROPPGJOER("vis-tilbakestill-etteroppgjoer"),
     OPPDATER_SKATTEOPPGJOER_IKKE_MOTTATT("etteroppgjoer-skatteoppgjoer-ikke-mottatt"),
+    OMGJOER_ETTEROPPGJOER_EGET_INITIATIV("omgjoer-etteroppgjoer-eget-initiativ"),
     ;
 
     override fun key(): String = toggle

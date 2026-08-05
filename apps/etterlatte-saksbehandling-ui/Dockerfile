@@ -1,5 +1,6 @@
-FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24-slim as base
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24-dev as base
 
+USER root
 WORKDIR /app
 COPY ./client/dist ./client
 COPY ./server/build ./server/package.json ./server/yarn.lock ./server/
@@ -9,7 +10,7 @@ ENV NODE_ENV="production"
 RUN cd ./server && yarn install --frozen-lockfile
 
 
-FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24 as prod
+FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/node:24-slim as prod
 COPY --from=base /app /app
 
 USER nonroot

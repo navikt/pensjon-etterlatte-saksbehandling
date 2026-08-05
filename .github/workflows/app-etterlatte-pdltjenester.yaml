@@ -7,6 +7,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-pdltjenester/**
       - libs/etterlatte-sporingslogg/**
       - libs/saksbehandling-common/**
@@ -19,6 +20,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-pdltjenester/**
       - "!apps/etterlatte-pdltjenester/.nais/*"
       - libs/etterlatte-sporingslogg/**

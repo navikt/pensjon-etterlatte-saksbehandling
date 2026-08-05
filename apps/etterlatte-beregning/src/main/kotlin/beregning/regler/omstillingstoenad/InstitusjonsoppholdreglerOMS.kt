@@ -43,5 +43,5 @@ val institusjonsoppholdSatsRegelOMS =
         beskrivelse = "Finner satsen for institusjonsoppholdberegning",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-INSTITUSJONSOPPHOLD-SATS"),
     ) benytter grunnbeloep og institusjonsoppholdRegelOMS med { grunnbeloep, prosent ->
-        Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloepPerMaaned)
+        Beregningstall.somBroek(prosent).multiply(grunnbeloep.grunnbeloep).divide(12)
     }

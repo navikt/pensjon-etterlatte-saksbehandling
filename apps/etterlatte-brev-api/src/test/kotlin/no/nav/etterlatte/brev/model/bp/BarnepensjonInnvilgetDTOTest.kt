@@ -95,7 +95,6 @@ internal class BarnepensjonInnvilgetDTOTest {
                     Grunnbeloep(
                         dato = YearMonth.of(2023, Month.JANUARY),
                         grunnbeloep = grunnbeloep,
-                        grunnbeloepPerMaaned = grunnbeloepPerMaaned,
                         omregningsfaktor = null,
                     ),
                 innhold = lagInnholdMedVedlegg(),

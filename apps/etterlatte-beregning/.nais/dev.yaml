@@ -74,8 +74,6 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-trygdetid
-    - name: ETTERLATTE_BEHANDLING_TRYGDETID_ENABLED
-      value: "true"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

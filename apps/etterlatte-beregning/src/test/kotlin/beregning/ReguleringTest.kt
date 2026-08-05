@@ -134,10 +134,10 @@ class ReguleringTest {
                     utbetaltBeloep shouldBe 3547
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2022, Month.APRIL)
-                    grunnbelopMnd shouldBe
+                    grunnbelop shouldBe
                         hentGjeldendeGrunnbeloep(
                             this.datoFOM,
-                        ).grunnbeloepPerMaaned
+                        ).grunnbeloep
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
@@ -149,9 +149,9 @@ class ReguleringTest {
             val utbetaltBeloep23 = beregning22.beregningsperioder.get(1).utbetaltBeloep
             val faktorUtbetalt = utbetaltBeloep23.toDouble().div(utbetaltBeloep22)
 
-            val grunnbeloep22 = hentGjeldendeGrunnbeloep(YearMonth.of(2022, Month.JANUARY)).grunnbeloepPerMaaned
+            val grunnbeloep22 = hentGjeldendeGrunnbeloep(YearMonth.of(2022, Month.JANUARY)).grunnbeloep / 12.0
             val grunnbeloep23 =
-                hentGjeldendeGrunnbeloep(BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_2023).grunnbeloepPerMaaned
+                hentGjeldendeGrunnbeloep(BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_2023).grunnbeloep / 12.0
             val faktorGrunnbeloep = grunnbeloep23.toDouble().div(grunnbeloep22)
 
             Assertions.assertTrue(

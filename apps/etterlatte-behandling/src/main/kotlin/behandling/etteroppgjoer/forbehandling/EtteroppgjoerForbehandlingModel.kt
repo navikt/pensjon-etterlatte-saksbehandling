@@ -42,6 +42,7 @@ data class EtteroppgjoerForbehandling(
     val klageOmgjoering: UUID? = null,
     val aktivitetspliktOverholdt: JaNei? = null,
     val aktivitetspliktBegrunnelse: String? = null,
+    // TODO noe for å signalisere at det er omgjøring på eget initiativ? Holder det at klageOmgjoering ikke er satt?
 ) {
     companion object {
         fun opprett(

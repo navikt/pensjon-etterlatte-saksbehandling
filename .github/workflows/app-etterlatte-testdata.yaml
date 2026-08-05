@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-testdata/**
       - libs/etterlatte-omregning-model/**
       - libs/etterlatte-ktor/**
@@ -20,6 +21,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-testdata/**
       - libs/etterlatte-omregning-model/**
       - "!apps/etterlatte-testdata/.nais/*"

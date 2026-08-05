@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
-import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -254,7 +253,6 @@ internal class BeregningRoutesTest {
                     datoTOM = null,
                     utbetaltBeloep = 3000,
                     soeskenFlokk = listOf(HELSOESKEN_FOEDSELSNUMMER.value),
-                    grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,
                     trygdetid = 40,
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),

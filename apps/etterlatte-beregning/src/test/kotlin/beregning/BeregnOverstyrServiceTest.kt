@@ -135,7 +135,6 @@ internal class BeregnOverstyrServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
                     grunnbelop shouldBe 99858
-                    grunnbelopMnd shouldBe 8322
                     soeskenFlokk shouldBe null
                     institusjonsopphold shouldBe null
                     trygdetid shouldBe 20
@@ -230,7 +229,6 @@ internal class BeregnOverstyrServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
                     grunnbelop shouldBe 99858
-                    grunnbelopMnd shouldBe 8322
                     soeskenFlokk shouldBe null
                     institusjonsopphold shouldBe null
                     trygdetid shouldBe 10
@@ -332,7 +330,6 @@ internal class BeregnOverstyrServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
                     grunnbelop shouldBe 99858
-                    grunnbelopMnd shouldBe 8322
                     soeskenFlokk shouldBe null
                     institusjonsopphold shouldBe null
                     trygdetid shouldBe 20
@@ -434,7 +431,6 @@ internal class BeregnOverstyrServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
                     grunnbelop shouldBe 99858
-                    grunnbelopMnd shouldBe 8322
                     soeskenFlokk shouldBe null
                     institusjonsopphold shouldBe null
                     trygdetid shouldBe 0

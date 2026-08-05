@@ -195,7 +195,12 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
             val statusOppdatert =
-                inTransaction { vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo) }
+                inTransaction {
+                    vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(
+                        behandlingId,
+                        brukerTokenInfo,
+                    )
+                }
             call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
         }
 
@@ -204,7 +209,13 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
                 try {
                     val vilkaarsvurdering =
-                        inTransaction { vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, brukerTokenInfo, vilkaarId) }
+                        inTransaction {
+                            vilkaarsvurderingService.slettVurderingPaaVilkaar(
+                                behandlingId,
+                                brukerTokenInfo,
+                                vilkaarId,
+                            )
+                        }
                     call.respond(
                         vilkaarsvurdering.toDto(
                             inTransaction { behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId) },
@@ -257,7 +268,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                         }
                     call.respond(vilkaarsvurdering.toDto(behandlingGrunnlagversjon))
                 } catch (e: BehandlingstilstandException) {
-                    logger.error(
+                    logger.warn(
                         "Kunne ikke oppdatere total-vurdering for behandling $behandlingId. " +
                             "Statussjekk for behandling feilet",
                         e,

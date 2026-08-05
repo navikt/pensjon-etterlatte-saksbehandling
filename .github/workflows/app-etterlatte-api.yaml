@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-api/src/**
       - apps/etterlatte-api/*.kts
       - apps/etterlatte-api/.nais/**
@@ -22,6 +23,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-api/src/**
       - apps/etterlatte-api/*.kts
       - '!apps/etterlatte-api/**.md'

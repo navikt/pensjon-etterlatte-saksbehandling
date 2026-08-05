@@ -10,6 +10,7 @@ import {
   oppdaterBehandlingsstatus,
   oppdaterBeregning,
   oppdaterBeregningsGrunnlag,
+  resetAvkorting,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useContext, useEffect, useState } from 'react'
@@ -93,6 +94,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
   }
 
   useEffect(() => {
+    dispatch(resetAvkorting())
     hentBeregningsgrunnlagRequest(behandling.id, (result) => {
       if (result) {
         dispatch(oppdaterBeregningsGrunnlag(result))

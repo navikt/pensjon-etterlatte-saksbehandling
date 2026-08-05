@@ -15,6 +15,7 @@ import {
   leggOppgavelistenFilterILocalStorage,
 } from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
 import { byggOppgaveSoekRequest } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import { OPPGAVELISTA_URL_NOKLER, useFilterMedUrl } from '~components/oppgavebenk/filtreringAvOppgaver/useFilterMedUrl'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
@@ -33,7 +34,12 @@ interface Props {
 }
 
 export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
-  const [filter, setFilter] = useState<Filter>(hentOppgavelistenFilterFraLocalStorage())
+  const [filter, setFilter] = useFilterMedUrl(
+    OPPGAVELISTA_URL_NOKLER,
+    hentOppgavelistenFilterFraLocalStorage,
+    (f: Filter) => leggOppgavelistenFilterILocalStorage({ ...f, sakEllerFnrFilter: '' })
+  )
+
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(hentPagineringSizeFraLocalStorage())
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
@@ -79,10 +85,6 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
     setSortering(nyOppgaveSortering)
     leggTilSorteringILocalStorage(nyOppgaveSortering)
   }
-
-  useEffect(() => {
-    leggOppgavelistenFilterILocalStorage({ ...filter, sakEllerFnrFilter: '' })
-  }, [filter])
 
   useEffect(() => {
     hentOppgaver()

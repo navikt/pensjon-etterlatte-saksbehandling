@@ -37,6 +37,7 @@ class TidshendelseRiver(
 
     init {
         initialiserRiver(rapidsConnection, EventNames.TIDSHENDELSE) {
+            // Denne håndterer automatiske opphør, derfor ser vi ikke på beregning / trygdetid / avkorting
             validate {
                 it.requireAny(
                     TIDSHENDELSE_STEG_KEY,

@@ -8,6 +8,29 @@ export function summerPerioder(perioder: SimulertBeregningsperiode[]) {
   return perioder.map((row) => row.beloep).reduce((sum, current) => sum + current, 0)
 }
 
+export function summerEtterbetaling(perioder: SimulertBeregningsperiode[]) {
+  const brutto = perioder
+    .filter((periode) => periode.klasseType === 'YTEL')
+    .reduce((sum, periode) => sum + periode.beloep, 0)
+  const netto = summerPerioder(perioder)
+  const skatt = netto - brutto
+  return { brutto, skatt, netto }
+}
+
+export function summerFeilutbetaling(
+  etterbetaling: SimulertBeregningsperiode[],
+  tilbakekreving: SimulertBeregningsperiode[]
+) {
+  const netto = summerPerioder(tilbakekreving)
+  const brutto = Math.abs(
+    etterbetaling
+      .filter((periode) => periode.tilbakefoering && periode.klasseType === 'YTEL')
+      .reduce((sum, periode) => sum + periode.beloep, 0)
+  )
+  const skatt = brutto - netto
+  return { brutto, skatt, netto }
+}
+
 export const UtbetalingTable = ({ tittel, perioder }: { tittel: string; perioder: SimulertBeregningsperiode[] }) => {
   const sortertePerioder = [...perioder].sort((a, b) => compareDesc(new Date(a.fom), new Date(b.fom)))
 

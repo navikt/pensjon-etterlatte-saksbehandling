@@ -2,7 +2,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { IBehandlingReducer, oppdaterAvkorting } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { erBehandlingRedigerbar, hasValue } from '~components/behandling/felles/utils'
 import { isFailure, isPending, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
@@ -35,8 +35,6 @@ import {
   valgbareSanksjonstyper,
   visbareSanksjonstyper,
 } from '~shared/types/sanksjon'
-import { useAppDispatch } from '~store/Store'
-import { hentAvkorting } from '~shared/api/avkorting'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
@@ -83,8 +81,6 @@ export const Sanksjon = ({
   const [visForm, setVisForm] = useState(false)
   const [redigerSanksjonId, setRedigerSanksjonId] = useState('')
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const [avkortingStatus, fetchAvkorting] = useApiCall(hentAvkorting)
-  const dispatch = useAppDispatch()
 
   const redigerbar =
     erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
@@ -123,7 +119,6 @@ export const Sanksjon = ({
         hentSanksjoner()
         setRedigerSanksjonId('')
         setVisForm(false)
-        fetchAvkorting(behandling.id, (hentetAvkorting) => dispatch(oppdaterAvkorting(hentetAvkorting)))
       }
     )
   }
@@ -131,7 +126,6 @@ export const Sanksjon = ({
   const slettEnkeltSanksjon = (behandlingId: string, sanksjonId: string) => {
     slettSanksjonRequest({ behandlingId, sanksjonId }, () => {
       hentSanksjoner()
-      fetchAvkorting(behandling.id, (hentetAvkorting) => dispatch(oppdaterAvkorting(hentetAvkorting)))
     })
   }
 
@@ -310,9 +304,6 @@ export const Sanksjon = ({
               </Table>
             </TableBox>
 
-            {mapResult(avkortingStatus, {
-              pending: 'Henter oppdatert avkortet ytelse',
-            })}
             {isFailure(slettSanksjonStatus) && (
               <Alert variant="error">
                 {slettSanksjonStatus.error.detail || 'Det skjedde en feil ved sletting av sanksjon'}

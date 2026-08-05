@@ -121,6 +121,7 @@ fun vedtak(
     vedtakFattet: VedtakFattet? = null,
     attestasjon: Attestasjon? = null,
     utbetalingsperioder: List<Utbetalingsperiode>? = null,
+    type: VedtakType = VedtakType.INNVILGELSE,
 ) = Vedtak(
     id = id,
     status = status,
@@ -128,7 +129,7 @@ fun vedtak(
     sakId = sakId,
     sakType = sakType,
     behandlingId = behandlingId,
-    type = VedtakType.INNVILGELSE,
+    type = type,
     vedtakFattet = vedtakFattet,
     attestasjon = attestasjon,
     innhold =

@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKommentarRequest
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRequest
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -53,45 +54,11 @@ inline val RoutingContext.gruppeId: String
             detail = "Mangler gruppeId i forespørselen",
         )
 
-const val VISALLE = "VISALLE"
-
-fun filtrerGyldigeStatuser(statuser: List<String>?): List<String> =
-    statuser
-        ?.map { i -> i.uppercase() }
-        ?.filter { i -> Status.entries.map { it.name }.contains(i) || i == VISALLE } ?: emptyList()
-
-inline val RoutingContext.minOppgavelisteidentQueryParam: String?
-    get() {
-        val minOppgavelisteIdentFilter = call.request.queryParameters["kunInnloggetOppgaver"].toBoolean()
-        return if (minOppgavelisteIdentFilter) {
-            brukerTokenInfo.ident()
-        } else {
-            null
-        }
-    }
-
 internal fun Route.oppgaveRoutes(
     service: OppgaveService,
     kommentarService: OppgaveKommentarService,
 ) {
     route("/api/oppgaver") {
-        get {
-            kunSaksbehandler {
-                val oppgaveStatuser = call.request.queryParameters.getAll("oppgaveStatus")
-                val filtrerteStatuser = filtrerGyldigeStatuser(oppgaveStatuser)
-
-                call.respond(
-                    inTransaction {
-                        service.finnOppgaverForBruker(
-                            Kontekst.get().appUserAsSaksbehandler(),
-                            filtrerteStatuser,
-                            minOppgavelisteidentQueryParam,
-                        )
-                    },
-                )
-            }
-        }
-
         get("/referanse/{referanse}") {
             kunSaksbehandler {
                 call.respond(
@@ -135,6 +102,20 @@ internal fun Route.oppgaveRoutes(
                         },
                     )
                 }
+            }
+        }
+
+        post("/soek") {
+            kunSaksbehandler {
+                val request = call.receive<OppgaveSoekRequest>()
+                call.respond(
+                    inTransaction {
+                        service.soekOppgaverForBruker(
+                            Kontekst.get().appUserAsSaksbehandler(),
+                            request,
+                        )
+                    },
+                )
             }
         }
 

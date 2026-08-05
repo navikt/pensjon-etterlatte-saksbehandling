@@ -145,7 +145,10 @@ data class Avkorting(
                                                         ),
                                                     maanederInnvilget =
                                                         inntektsavkorting.grunnlag.maanederInnvilget
-                                                            ?: fallbackMaanederInnvilget(inntektsavkorting, aarsoppgjoerFom),
+                                                            ?: fallbackMaanederInnvilget(
+                                                                inntektsavkorting,
+                                                                aarsoppgjoerFom,
+                                                            ),
                                                 ),
                                             avkortingsperioder =
                                                 if (nullstillAvkortetYtelse) {
@@ -582,7 +585,9 @@ data class Avkorting(
                 )
             } else {
                 reberegnetInntektsavkorting.first().let {
-                    val tomSluttenAvAaret = tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, opphoerFom)
+                    val tomSluttenAvAaret =
+                        tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
+
                     val sistePeriode =
                         when (val tomForPeriode = it.grunnlag.periode.tom) {
                             null -> {
@@ -608,11 +613,56 @@ data class Avkorting(
                 }
             }
 
+        val avkortetYtelseJustert =
+            aapneSistePeriodeHvisBeregningErAapen(avkortetYtelse, aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
+
         return aarsoppgjoer.copy(
             ytelseFoerAvkorting = ytelseFoerAvkorting,
             inntektsavkorting = reberegnetInntektsavkorting,
-            avkortetYtelse = avkortetYtelse,
+            avkortetYtelse = avkortetYtelseJustert,
         )
+    }
+
+    /**
+     * Hvis dette er det siste årsoppgjøret og den underliggende beregningen har åpen TOM (f.eks. permanent stans),
+     * skal siste periode i avkortet ytelse også ha åpen TOM. Beregningen kjøres trygt med lukket periode
+     * (tom=desember) for å unngå problemer i regelkjøringen, og siste periode åpnes i etterkant.
+     */
+    private fun aapneSistePeriodeHvisBeregningErAapen(
+        avkortetYtelse: List<AvkortetYtelse>,
+        aarsoppgjoer: AarsoppgjoerLoepende,
+        ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
+        opphoerFom: YearMonth?,
+    ): List<AvkortetYtelse> {
+        if (avkortetYtelse.isEmpty()) {
+            return avkortetYtelse
+        }
+        val harAarsoppgjoerNesteAar = this.aarsoppgjoer.any { it.aar == aarsoppgjoer.aar + 1 }
+        if (harAarsoppgjoerNesteAar) {
+            return avkortetYtelse
+        }
+        if (opphoerFom != null) {
+            return avkortetYtelse
+        }
+        val sisteBeregning = ytelseFoerAvkorting.maxByOrNull { it.periode.fom } ?: return avkortetYtelse
+        if (sisteBeregning.periode.tom != null) {
+            return avkortetYtelse
+        }
+        val harBeregningsperioderSomIkkeErNullEtterSisteAarsoppgjoeret =
+            ytelseFoerAvkorting.any {
+                it.beregning != 0 && it.periode.fom.year > aarsoppgjoer.aar
+            }
+        if (harBeregningsperioderSomIkkeErNullEtterSisteAarsoppgjoeret) {
+            throw InternfeilException(
+                "Vi har ikke nok grunnlag for å beregne avkortingen for årsoppgjør ${aarsoppgjoer.id}, " +
+                    "siden vi har en åpen beregningsperiode med fom > det siste årsoppgjøret vi har grunnlag for, " +
+                    "med en beregning som ikke er 0 kr. Dette betyr at vi har ytelse som skal avkortes som ikke " +
+                    "blir det, avbryter derfor beregning av avkorting. " +
+                    "${ytelseFoerAvkorting.joinToString { "${it.periode to it.beregningsreferanse}" }}",
+            )
+        }
+        val sistePeriode = avkortetYtelse.last()
+        return avkortetYtelse.dropLast(1) + sistePeriode.copy(periode = sistePeriode.periode.copy(tom = null))
     }
 
     /**
@@ -639,7 +689,7 @@ data class Avkorting(
                 .sortedBy { it.fom }
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
 
-        val tomSluttenAvAaret = tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, opphoerFom)
+        val tomSluttenAvAaret = tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
 
         reberegnetInntektsavkorting.forEachIndexed { i, inntektsavkorting ->
             // Kun de sanksjonene som er lagt inn fom < denne inntektsavkortingen er tidligere beregnet med
@@ -749,6 +799,7 @@ data class Avkorting(
      */
     private fun tomSluttenAvAaretForAvkortetYtelse(
         aarsoppgjoer: AarsoppgjoerLoepende,
+        ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         opphoerFom: YearMonth?,
     ): YearMonth? {
         val harAaroppgjoerNesteAaar =
@@ -767,7 +818,19 @@ data class Avkorting(
                 if (opphoerFom != null && opphoerFom.minusMonths(1).year == aarsoppgjoer.aar) {
                     opphoerFom.minusMonths(1)
                 } else {
-                    null
+                    // Har vi beregning som krysser året uten et neste årsoppgjør må vi lukke dette året.
+                    // Dette er kun trygt å gjøre hvis vi beregner 0 for denne perioden
+                    val harBeregningSenereEnnDetteAarsoppgjoer =
+                        ytelseFoerAvkorting.any { ytelse ->
+                            val tom = ytelse.periode.tom
+                            ytelse.periode.fom.year == aarsoppgjoer.aar && tom != null && tom.year > aarsoppgjoer.aar &&
+                                ytelse.beregning == 0
+                        }
+                    if (harBeregningSenereEnnDetteAarsoppgjoer) {
+                        YearMonth.of(aarsoppgjoer.aar, 12)
+                    } else {
+                        null
+                    }
                 }
             }
         }

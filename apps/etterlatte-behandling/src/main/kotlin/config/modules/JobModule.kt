@@ -13,6 +13,8 @@ import no.nav.etterlatte.behandling.jobs.etteroppgjoer.EtteroppgjoerSvarfristUtl
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.LesSkatteoppgjoerHendelserJobService
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJob
 import no.nav.etterlatte.behandling.jobs.etteroppgjoer.OppdaterSkatteoppgjoerIkkeMottattJobService
+import no.nav.etterlatte.behandling.jobs.hengendebehandling.HengendeBehandlingJob
+import no.nav.etterlatte.behandling.jobs.hengendebehandling.HengendeBehandlingJobService
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJob
 import no.nav.etterlatte.behandling.jobs.saksbehandler.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.sjekkadressebeskyttelse.SjekkAdressebeskyttelseJob
@@ -148,6 +150,12 @@ class JobModule(
         )
     }
 
+    private val hengendeBehandlingJobService by lazy {
+        HengendeBehandlingJobService(
+            dao = daoModule.hengendeBehandlingDao,
+        )
+    }
+
     val aarligInntektsjusteringJobbService by lazy {
         AarligInntektsjusteringJobbService(
             omregningService = serviceModule.omregningService,
@@ -269,6 +277,17 @@ class JobModule(
             erLeader = { erLeader() },
             initialDelay = Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(5, ChronoUnit.MINUTES),
+        )
+    }
+
+    val hengendeBehandlingJob: HengendeBehandlingJob by lazy {
+        HengendeBehandlingJob(
+            service = hengendeBehandlingJobService,
+            sakTilgangDao = daoModule.sakTilgangDao,
+            dataSource = dataSource,
+            erLeader = { erLeader() },
+            initialDelay = Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.HOURS),
         )
     }
 

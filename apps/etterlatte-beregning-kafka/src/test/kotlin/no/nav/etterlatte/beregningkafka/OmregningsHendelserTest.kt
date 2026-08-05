@@ -45,7 +45,6 @@ internal class OmregningsHendelserTest {
                         Beregningsperiode(
                             datoFOM = YearMonth.of(2023, Month.JANUARY),
                             utbetaltBeloep = 1000,
-                            grunnbelopMnd = 1000,
                             grunnbelop = 12000,
                             trygdetid = 40,
                         ),
@@ -78,7 +77,7 @@ internal class OmregningsHendelserTest {
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(capture(omregningsid)) } returns mockk()
         every { beregningService.beregn(capture(omregningsid)) }.returns(returnValue)
         every { beregningService.hentBeregning(any()) }.returns(returnValue)
-        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal.ONE)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, BigDecimal.ONE)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 

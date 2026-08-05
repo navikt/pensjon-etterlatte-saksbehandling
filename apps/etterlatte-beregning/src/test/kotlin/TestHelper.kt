@@ -397,13 +397,11 @@ fun beregningsperiode(
     utbetaltBeloep: Int = 3000,
     trygdetid: Int = 40,
     grunnbeloep: Int = 100_000,
-    grunnbeloepMnd: Int = 10_000,
 ) = Beregningsperiode(
     datoFOM = datoFOM,
     datoTOM = datoTOM,
     utbetaltBeloep = utbetaltBeloep,
     soeskenFlokk = listOf(HELSOESKEN_FOEDSELSNUMMER.value),
-    grunnbelopMnd = grunnbeloepMnd,
     grunnbelop = grunnbeloep,
     trygdetid = trygdetid,
     regelResultat = mapOf("regel" to "resultat").toObjectNode(),

@@ -58,7 +58,6 @@ class OmregningHendelserBeregningRiverTest {
             Grunnbeloep(
                 YearMonth.now(),
                 1000,
-                100,
                 BigDecimal("1.2"),
             )
 
@@ -97,7 +96,6 @@ class OmregningHendelserBeregningRiverTest {
             Grunnbeloep(
                 YearMonth.now(),
                 1000,
-                100,
                 BigDecimal("1.2"),
             )
 
@@ -140,7 +138,6 @@ class OmregningHendelserBeregningRiverTest {
             Grunnbeloep(
                 YearMonth.now(),
                 1000,
-                100,
                 BigDecimal("1.2"),
             )
 
@@ -179,7 +176,6 @@ class OmregningHendelserBeregningRiverTest {
             Grunnbeloep(
                 YearMonth.now(),
                 1000,
-                100,
                 BigDecimal("1.2"),
             )
 
@@ -227,7 +223,6 @@ class OmregningHendelserBeregningRiverTest {
             Grunnbeloep(
                 YearMonth.now(),
                 1000,
-                100,
                 BigDecimal("1.2"),
             )
         val omregningData =
@@ -274,7 +269,6 @@ class OmregningHendelserBeregningRiverTest {
             Grunnbeloep(
                 YearMonth.now(),
                 1000,
-                100,
                 BigDecimal("1.01169"),
             )
 

@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-trygdetid/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-trygdetid-model/**
@@ -21,6 +22,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-trygdetid/**
       - "!apps/etterlatte-trygdetid/.nais/*"
       - libs/saksbehandling-common/**

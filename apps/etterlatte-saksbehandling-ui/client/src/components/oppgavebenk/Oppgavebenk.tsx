@@ -1,4 +1,5 @@
 import React, { ReactNode, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
@@ -6,7 +7,9 @@ import { Saksbehandler } from '~shared/types/saksbehandler'
 import {
   hentValgFraLocalStorage,
   leggValgILocalstorage,
+  NUMMER_TIL_TAB,
   OppgavelisteValg,
+  TAB_NUMMER,
 } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
 import { GosysOppgaveliste } from '~components/oppgavebenk/GosysOppgaveliste'
@@ -25,9 +28,13 @@ export const Oppgavebenk = () => {
     return <Tilgangsmelding />
   }
 
-  const [oppgavelisteValg, setOppgavelisteValg] = useState<OppgavelisteValg>(
-    hentValgFraLocalStorage() as OppgavelisteValg
-  )
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const [oppgavelisteValg, setOppgavelisteValg] = useState<OppgavelisteValg>(() => {
+    const tabFraUrl = searchParams.get('tab')
+    if (tabFraUrl && NUMMER_TIL_TAB[tabFraUrl]) return NUMMER_TIL_TAB[tabFraUrl]
+    return hentValgFraLocalStorage() as OppgavelisteValg
+  })
 
   const [, hentSaksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
@@ -40,9 +47,27 @@ export const Oppgavebenk = () => {
     }
   }, [])
 
+  // Sett tab i URL ved mount hvis den mangler.
+  // Vi leser window.location.search direkte fordi barnekomponenter (useFilterMedUrl) kan ha
+  // satt filter-params via history.replaceState før denne effekten kjører, men React Routers
+  // interne state (prev) er ikke oppdatert ennå og er stale. Leser vi window.location.search
+  // her bevares filter-params som barnet satte.
   useEffect(() => {
-    leggValgILocalstorage(oppgavelisteValg)
-  }, [oppgavelisteValg])
+    const faktiskeParams = new URLSearchParams(window.location.search)
+    if (!faktiskeParams.get('tab')) {
+      faktiskeParams.set('tab', TAB_NUMMER[oppgavelisteValg])
+      setSearchParams(faktiskeParams, { replace: true })
+    }
+  }, [])
+
+  // Byttter tab: oppdaterer URL (fjerner filter-params), localStorage og state
+  const byttTab = (nyValg: OppgavelisteValg) => {
+    setOppgavelisteValg(nyValg)
+    leggValgILocalstorage(nyValg)
+    // Setter kun tab i URL – filtere fra forrige tab fjernes bevisst.
+    // Det nye tabets filter-params settes av useFilterMedUrl ved mount.
+    setSearchParams({ tab: TAB_NUMMER[nyValg] }, { replace: true })
+  }
 
   const rendreValgtOppgaveliste = (): ReactNode => {
     switch (oppgavelisteValg) {
@@ -58,7 +83,7 @@ export const Oppgavebenk = () => {
   return (
     <ProvideOppgavebenkContext>
       <Box padding="space-32">
-        <VelgOppgaveliste oppgavelisteValg={oppgavelisteValg} setOppgavelisteValg={setOppgavelisteValg} />
+        <VelgOppgaveliste oppgavelisteValg={oppgavelisteValg} setOppgavelisteValg={byttTab} />
         {rendreValgtOppgaveliste()}
       </Box>
     </ProvideOppgavebenkContext>

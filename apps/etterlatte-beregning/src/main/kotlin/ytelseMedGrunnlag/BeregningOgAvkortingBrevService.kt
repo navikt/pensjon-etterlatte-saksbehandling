@@ -59,7 +59,6 @@ class BeregningOgAvkortingBrevService(
                         fratrekkInnAar = fratrekkInnAar,
                         innvilgaMaaneder = grunnlag.innvilgaMaaneder,
                         grunnbelop = beregningIPeriode.grunnbelop,
-                        grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                         beregningsMetode = beregningIPeriode.beregningsMetode,
                         beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
                         sanksjon = avkortetYtelse.sanksjon,
@@ -79,7 +78,6 @@ class BeregningOgAvkortingBrevService(
                         fratrekkInnAar = 0, // TODO
                         innvilgaMaaneder = grunnlag.innvilgaMaaneder,
                         grunnbelop = beregningIPeriode.grunnbelop,
-                        grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                         beregningsMetode = beregningIPeriode.beregningsMetode,
                         beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
                         sanksjon = avkortetYtelse.sanksjon,
@@ -94,7 +92,10 @@ class BeregningOgAvkortingBrevService(
             erInnvilgelsesaar = avkortingUtenLoependeYtelse.aarsoppgjoer.minBy { it.aar }.aar == behandling.virkningstidspunkt().dato.year,
             endringIUtbetalingVedVirk =
                 when (behandling.behandlingType) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING -> false
+                    BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                        false
+                    }
+
                     else -> {
                         val forrigeAvkorting =
                             avkortingService.hentAvkortingForrigeBehandling(

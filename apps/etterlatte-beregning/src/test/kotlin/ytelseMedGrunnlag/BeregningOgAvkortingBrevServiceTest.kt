@@ -70,7 +70,6 @@ internal class BeregningOgAvkortingBrevServiceTest {
                             utbetaltBeloep = 20000,
                             trygdetid = 40,
                             grunnbeloep = 120000,
-                            grunnbeloepMnd = 10000,
                         ),
                         beregningsperiode(
                             datoFOM = YearMonth.of(2024, 6),
@@ -78,7 +77,6 @@ internal class BeregningOgAvkortingBrevServiceTest {
                             utbetaltBeloep = 21000,
                             trygdetid = 40,
                             grunnbeloep = 132000,
-                            grunnbeloepMnd = 11000,
                         ),
                     ),
             )
@@ -148,7 +146,6 @@ internal class BeregningOgAvkortingBrevServiceTest {
             oppgittInntekt shouldBe 300000
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 120000
-            grunnbelopMnd shouldBe 10000
             beregningsMetodeFraGrunnlag shouldBe BeregningsMetode.BEST
         }
         with(ytelse.perioder[1]) {
@@ -159,7 +156,6 @@ internal class BeregningOgAvkortingBrevServiceTest {
             oppgittInntekt shouldBe 350000
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 120000
-            grunnbelopMnd shouldBe 10000
             beregningsMetodeFraGrunnlag shouldBe BeregningsMetode.BEST
         }
         with(ytelse.perioder[2]) {
@@ -170,7 +166,6 @@ internal class BeregningOgAvkortingBrevServiceTest {
             oppgittInntekt shouldBe 350000
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 132000
-            grunnbelopMnd shouldBe 11000
             beregningsMetodeFraGrunnlag shouldBe BeregningsMetode.BEST
         }
     }

@@ -149,7 +149,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
@@ -209,7 +208,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23_PRORATA
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe PRORATA_TRYGDETID_30_AAR / 2
                     regelResultat shouldNotBe null
@@ -249,7 +247,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
@@ -289,7 +286,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value)
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
@@ -329,7 +325,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_TO_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value, HELSOESKEN2_FOEDSELSNUMMER.value)
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
@@ -369,7 +364,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
@@ -429,7 +423,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe 0
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe null
                     trygdetid shouldBe 0
                 }
@@ -474,7 +467,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_TO_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.MARCH)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value, HELSOESKEN2_FOEDSELSNUMMER.value)
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
@@ -483,17 +475,14 @@ internal class BeregnBarnepensjonServiceTest {
                 }
                 with(beregningsperioder.single { p -> YearMonth.of(2023, 4).equals(p.datoFOM) }) {
                     utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_JAN_23
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                 }
                 with(beregningsperioder.single { p -> YearMonth.of(2023, 5).equals(p.datoFOM) }) {
                     utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_MAI_23
-                    grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                     regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                 }
                 with(beregningsperioder.single { p -> YearMonth.of(2024, 1).equals(p.datoFOM) }) {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
-                    grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                     regelverk shouldBe Regelverk.REGELVERK_FOM_JAN_2024
                 }
             }
@@ -761,7 +750,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
@@ -814,7 +802,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_TO_DOEDE_FORELDRE
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2024, Month.MARCH)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
@@ -827,7 +814,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
                     datoFOM shouldBe YearMonth.of(2024, Month.APRIL)
                     datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
@@ -1244,9 +1230,7 @@ internal class BeregnBarnepensjonServiceTest {
         const val TRYGDETID_40_AAR: Int = 40
         const val PRORATA_TRYGDETID_30_AAR: Int = 30
         val PRORATA_BROEK: IntBroek = IntBroek(1, 2)
-        const val GRUNNBELOEP_JAN_23: Int = 9290
         const val GRUNNBELOEP_MAI_23: Int = 9885
-        const val GRUNNBELOEP_MAI_24: Int = 10336
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23: Int = 3716
         const val BP_BELOEP_INGEN_SOESKEN_MAI_23: Int = 3954
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23_PRORATA: Int = 1393

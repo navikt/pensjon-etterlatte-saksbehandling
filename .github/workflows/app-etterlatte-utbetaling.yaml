@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-utbetaling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
@@ -24,6 +25,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-utbetaling/**
       - "!apps/etterlatte-utbetaling/.nais/*"
       - libs/saksbehandling-common/**

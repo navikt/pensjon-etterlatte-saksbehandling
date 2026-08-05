@@ -72,10 +72,10 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
   const klage = mapSuccess(klageResult, (hentetKlage) => hentetKlage)
 
   useEffect(() => {
-    if (oppgave.referanse) {
+    if (open && oppgave.referanse) {
       fetchKlage(oppgave.referanse)
     }
-  }, [oppgave.referanse])
+  }, [open])
 
   useEffect(() => {
     if (klage) {

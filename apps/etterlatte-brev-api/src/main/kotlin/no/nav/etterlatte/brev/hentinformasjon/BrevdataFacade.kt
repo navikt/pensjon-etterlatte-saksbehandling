@@ -66,6 +66,7 @@ class BrevdataFacade(
                     soeker = grunnlag.mapSoeker(brevutfallDto?.aldersgruppe),
                     avdoede = grunnlag.mapAvdoede(),
                     verge = verge,
+                    gjenlevende = grunnlag.hentGjenlevende(),
                 )
             PersonerISakOgSak(
                 personerISak = personerISak,

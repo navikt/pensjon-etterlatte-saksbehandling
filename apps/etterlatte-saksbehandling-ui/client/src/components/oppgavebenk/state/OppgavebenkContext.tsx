@@ -14,6 +14,7 @@ export interface OppgavebenkStateDispatcher {
   setMinOppgavelisteOppgaver: (oppgaver: OppgaveDTO[]) => void
   setGosysOppgavelisteOppgaver: (oppgaver: GosysOppgave[]) => void
   setOppgavebenkStats: (stats: OppgavebenkStats) => void
+  refreshStats: () => void
 }
 
 const oppgavebenkContext = createContext(initialOppgavebenkState)
@@ -37,6 +38,9 @@ const ProvideOppgavebenkContext = ({ children }: { children: ReactNode | Array<R
     },
     setGosysOppgavelisteOppgaver: (oppgaver) => setState({ ...state, gosysOppgavelisteOppgaver: oppgaver }),
     setOppgavebenkStats: (stats) => setState({ ...state, oppgpavebenkStats: stats }),
+    refreshStats: () => {
+      oppgavebenkStatsFetch({}, (result) => setState((prev) => ({ ...prev, oppgpavebenkStats: result })))
+    },
   }
 
   return (

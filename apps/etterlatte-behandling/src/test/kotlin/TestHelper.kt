@@ -335,6 +335,7 @@ fun revurdering(
     tidligereFamiliepleier: TidligereFamiliepleier? = null,
     adressebeskyttelse: AdressebeskyttelseGradering? = null,
     erSkjermet: Boolean = false,
+    opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.UKJENT,
 ) = Revurdering.opprett(
     id = id,
     sak =
@@ -362,7 +363,7 @@ fun revurdering(
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
     tidligereFamiliepleier = tidligereFamiliepleier,
-    opprinnelse = BehandlingOpprinnelse.UKJENT,
+    opprinnelse = opprinnelse,
 )
 
 val soeker = "11057523044"

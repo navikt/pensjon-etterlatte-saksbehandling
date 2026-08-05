@@ -34,7 +34,6 @@ class ReguleringService(
         }
         when (jobb.type) {
             JobbType.REGULERING -> startRegulering(konfigurasjon)
-            JobbType.FINN_SAKER_TIL_REGULERING -> finnSakerTilRegulering(konfigurasjon)
             else -> throw IllegalArgumentException("Ikke-støttet jobbtype: ${jobb.type}")
         }
         return emptyList()
@@ -47,22 +46,6 @@ class ReguleringService(
             createRecord(konfigurasjon),
         )
         logger.info("StartReguleringJob ferdig")
-    }
-
-    private fun finnSakerTilRegulering(konfigurasjon: Omregningskonfigurasjon) {
-        logger.info("Finner saker til regulering startet")
-        rapidsPublisher(
-            UUID.randomUUID(),
-            JsonMessage
-                .newMessage(
-                    mapOf(
-                        ReguleringHendelseType.FINN_SAKER_TIL_REGULERING.lagParMedEventNameKey(),
-                        ReguleringEvents.DATO to konfigurasjon.datoVirkFom.atDay(1).toString(),
-                        RapidEvents.KJOERING to kjoering(konfigurasjon),
-                    ),
-                ).toJson(),
-        )
-        logger.info("Finner saker til regulering ferdig")
     }
 }
 

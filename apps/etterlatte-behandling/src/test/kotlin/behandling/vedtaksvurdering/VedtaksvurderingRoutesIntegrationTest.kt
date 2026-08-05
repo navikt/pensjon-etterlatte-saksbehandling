@@ -278,7 +278,6 @@ class VedtaksvurderingRoutesIntegrationTest : BehandlingIntegrationTest() {
                         soeskenFlokk = emptyList(),
                         institusjonsopphold = null,
                         grunnbelop = 118620,
-                        grunnbelopMnd = 9885,
                         trygdetid = 40,
                         trygdetidForIdent = "avdød",
                         beregningsMetode = BeregningsMetode.NASJONAL,

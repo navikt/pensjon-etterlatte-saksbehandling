@@ -89,7 +89,6 @@ class BeregningServiceTest {
         beloep,
         soeskenFlokk,
         null,
-        1000,
         10000,
         10,
         beregningsMetode = BeregningsMetode.NASJONAL,

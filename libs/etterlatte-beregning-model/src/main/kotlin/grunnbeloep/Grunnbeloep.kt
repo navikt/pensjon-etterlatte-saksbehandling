@@ -8,7 +8,5 @@ data class Grunnbeloep(
     val dato: YearMonth,
     @JsonProperty("grunnbeløp")
     val grunnbeloep: Int,
-    @JsonProperty("grunnbeløpPerMåned")
-    val grunnbeloepPerMaaned: Int,
     val omregningsfaktor: BigDecimal?,
 )

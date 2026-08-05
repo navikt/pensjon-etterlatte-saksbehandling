@@ -101,7 +101,6 @@ class EtteroppgjoerForbehandlingServiceTest {
                 inntektsaar = 2024,
                 status = EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
                 harSanksjon = false,
-                harInstitusjonsopphold = false,
                 harOpphoer = false,
                 harAdressebeskyttelseEllerSkjermet = false,
                 harAktivitetskrav = false,

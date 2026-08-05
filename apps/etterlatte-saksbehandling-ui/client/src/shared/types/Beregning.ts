@@ -60,7 +60,6 @@ export interface Beregningsperiode {
   utbetaltBeloep: number
   soeskenFlokk: string[]
   institusjonsopphold: InstitusjonsoppholdIBeregning | undefined
-  grunnbelopMnd: number
   grunnbelop: number
   trygdetid: number
   beregningsMetode: string | undefined

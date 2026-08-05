@@ -215,7 +215,6 @@ internal class BeregningRepositoryTest(
                     utbetaltBeloep = 3000,
                     soeskenFlokk = listOf(HELSOESKEN_FOEDSELSNUMMER.value),
                     institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
-                    grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,
                     trygdetid = 40,
                     beregningsMetode = beregningsMetode,

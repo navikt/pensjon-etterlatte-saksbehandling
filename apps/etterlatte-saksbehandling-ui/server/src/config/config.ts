@@ -106,8 +106,6 @@ const API_CONFIG_FROM_ENV = (): ApiConfig => {
 
 export const ApiConfig = hentApiConfigFraEnv()
 
-export const brukInternTrygdetid = process.env.BRUK_INTERN_TRYGDETID === 'true'
-
 export const ClientConfig = {
   gosysUrl: requireEnvValue('GOSYS_URL'),
   eessiPensjonUrl: requireEnvValue('EESSI_PENSJON_URL'),

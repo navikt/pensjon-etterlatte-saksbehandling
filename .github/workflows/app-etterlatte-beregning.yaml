@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-beregning/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-funksjonsbrytere/**
@@ -26,6 +27,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-beregning/**
       - "!apps/etterlatte-beregning/.nais/*"
       - libs/saksbehandling-common/**

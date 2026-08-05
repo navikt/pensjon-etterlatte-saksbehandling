@@ -178,7 +178,7 @@ export function EndeligVurdering(props: { klage: Klage }) {
             <>
               <Box>
                 <Button size="small" onClick={mellomLagring} loading={isPending(lagreUtfallStatus)}>
-                  {teksterLagring[valgtUtfall].toLowerCase()}
+                  {teksterLagring[valgtUtfall]}
                 </Button>
               </Box>
               {isSuccess(lagreUtfallStatus) && (

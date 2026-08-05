@@ -131,3 +131,24 @@ export const erOppgaveTildeltInnloggetSaksbehandler = (
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => {
   return oppgavestatuserForRedigerbarOppgave.includes(status)
 }
+
+export interface OppgaveSoekRequest {
+  statuser: string[]
+  typer: string[]
+  saksbehandlerFilter: 'ALLE' | 'TILDELT' | 'IKKE_TILDELT'
+  saksbehandlerIdent?: string
+  kunInnloggetBruker: boolean
+  sakType?: string
+  enhet?: string
+  fristFilter: 'ALLE' | 'HAR_PASSERT' | 'MANGLER_FRIST'
+  sakEllerFnr?: string
+  side: number
+  antall: number
+  orderBy: 'OPPRETTET' | 'FRIST' | 'FNR'
+  orderAsc: boolean
+}
+
+export interface OppgaveSoekRespons {
+  oppgaver: OppgaveDTO[]
+  totaltAntall: number
+}

@@ -7,6 +7,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-hendelser-pdl/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
@@ -18,6 +19,7 @@ on:
     branches:
       - main
     paths:
+      - docker/**
       - apps/etterlatte-hendelser-pdl/**
       - "!apps/etterlatte-hendelser-pdl/.nais/*"
       - libs/saksbehandling-common/**

@@ -1,6 +1,7 @@
 import { Search } from './Search'
 import { ReleaseAlerts } from './ReleaseAlerts'
-import { HStack, InternalHeader, Spacer } from '@navikt/ds-react'
+import { Dropdown, HStack, InternalHeader, Spacer } from '@navikt/ds-react'
+import { LeaveIcon } from '@navikt/aksel-icons'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AppSwitcher } from '~shared/header/AppSwitcher'
 
@@ -45,11 +46,21 @@ export const HeaderBanner = () => {
       <Search />
       <AppSwitcher />
       <ReleaseAlerts />
-      <InternalHeader.User
-        data-theme="dark"
-        name={innloggetSaksbehandler.navn}
-        description={innloggetSaksbehandler.ident}
-      />
+      <Dropdown>
+        <InternalHeader.UserButton
+          data-theme="dark"
+          as={Dropdown.Toggle}
+          name={innloggetSaksbehandler.navn}
+          description={innloggetSaksbehandler.ident}
+        />
+        <Dropdown.Menu placement="bottom-start" style={{ width: 'fit-content' }}>
+          <Dropdown.Menu.List>
+            <Dropdown.Menu.List.Item as="a" href="/oauth2/logout">
+              <LeaveIcon aria-hidden /> Logg ut
+            </Dropdown.Menu.List.Item>
+          </Dropdown.Menu.List>
+        </Dropdown.Menu>
+      </Dropdown>
     </InternalHeader>
   )
 }

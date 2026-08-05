@@ -81,3 +81,11 @@
 **2026-07-03 — Flyway-migrasjonsnummerering**
 - Observation: Jeg valgte neste Flyway-versjonsnummer ved kun å se på `src/main/resources/db/migration/`, og overså at appen også har `db/prod/`, `db/dev/` og `db/gcp/` med egne nummererte filer i samme sekvens. Det ga et versjonskollisjon (`V348` fantes allerede i `prod/`).
 - Action: Før du navngir en ny Flyway-migrasjon: finn høyeste versjonsnummer på tvers av ALLE undermapper under `src/main/resources/db/` for den aktuelle appen (ikke bare `migration/`), og velg neste ledige nummer basert på det.
+
+**2026-07-03 — Testkjøring / miljøfeil**
+- Observation: Jeg itererte to ganger på egen testkode (TestHelper-NPE, mockkStatic) før jeg oppdaget at feilen var Java 25 vs. Byte Buddy – en eksisterende test feilet 22/22 på samme måte, og en Java 21-JDK fantes lokalt.
+- Action: Når en test feiler med infrastruktur-/toolchain-feil (Byte Buddy, class-init, instrumentering), kjør først en eksisterende test for å isolere miljø vs. egen kode, og sjekk tilgjengelige JDK-er før du endrer testkoden.
+
+**2026-07-27 — Arkitekturvurdering / klient vs. HTTP**
+- Observation: Jeg påstod at `TrygdetidKlient` gjorde HTTP-kall til en ekstern app. Konvensjonen er riktignok at `*Klient` = nettverkskall-utfører, men under fusjonering får interfacet midlertidig en lokal `*Intern`-impl (her `TrygdetidKlientIntern` → lokal innfusjonert service, ingen `downstreamResourceClient`). Navnet stemmer med intensjonen, men ikke med kjøretidsstien akkurat nå.
+- Action: `*Klient` indikerer normalt nettverk, men når et domene er/blir innfusjonert i behandling: åpne den konkrete impl-en (og wiringen i ServiceModule) og se om det er en `*Intern`-variant på lokal service vs. en HTTP-impl med `downstreamResourceClient`. Skill også «app-mappe deployes fortsatt» fra «kjøres denne kodestien over HTTP».

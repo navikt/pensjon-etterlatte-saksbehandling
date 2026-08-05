@@ -68,7 +68,7 @@ export const FyllUtVilkaarsvurderingIDev = ({
     dispatch(updateVilkaarsvurdering(totalVurderingRes.data))
     dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
 
-    setLagrer(false)
+    window.location.reload()
   }
 
   return (

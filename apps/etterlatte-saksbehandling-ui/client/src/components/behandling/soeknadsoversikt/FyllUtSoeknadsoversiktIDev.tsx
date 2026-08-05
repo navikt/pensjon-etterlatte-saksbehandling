@@ -113,7 +113,7 @@ export const FyllUtSoeknadsoversiktIDev = ({ behandlingId, sakType }: { behandli
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
     }
 
-    setLagrer(false)
+    window.location.reload()
   }
 
   return (

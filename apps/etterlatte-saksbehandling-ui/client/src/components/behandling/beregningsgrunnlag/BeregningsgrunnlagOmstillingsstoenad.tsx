@@ -121,13 +121,15 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
           success: () => (
             <>
-              <BeregningsMetodeBrukt
-                redigerbar={redigerbar}
-                navn={hentNavn()}
-                behandling={behandling}
-                oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
-                lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
-              />
+              <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+                <BeregningsMetodeBrukt
+                  redigerbar={redigerbar}
+                  navn={hentNavn()}
+                  behandling={behandling}
+                  oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
+                  lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
+                />
+              </Box>
 
               {mapFailure(lagreBeregningsGrunnlagResult, (error) => (
                 <ApiErrorAlert>{error.detail}</ApiErrorAlert>
@@ -136,16 +138,26 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
               <Box maxWidth="70rem">
                 <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
               </Box>
-              <InstitusjonsoppholdBeregningsgrunnlag
-                redigerbar={redigerbar}
-                behandling={behandling}
-                sakType={SakType.OMSTILLINGSSTOENAD}
-                beregningsgrunnlag={behandling.beregningsGrunnlag}
-                institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
-              />
+              <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+                <InstitusjonsoppholdBeregningsgrunnlag
+                  redigerbar={redigerbar}
+                  behandling={behandling}
+                  sakType={SakType.OMSTILLINGSSTOENAD}
+                  beregningsgrunnlag={behandling.beregningsGrunnlag}
+                  institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
+                />
+              </Box>
 
-              {brukNyeBeregningsregler && <Sanksjon behandling={behandling} manglerInntektVirkAar={false} />}
-              {brukNyeBeregningsregler && <IkkeInnvilgetPeriode behandling={behandling} />}
+              {brukNyeBeregningsregler && (
+                <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+                  <Sanksjon behandling={behandling} manglerInntektVirkAar={false} />
+                </Box>
+              )}
+              {brukNyeBeregningsregler && (
+                <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+                  <IkkeInnvilgetPeriode behandling={behandling} />
+                </Box>
+              )}
             </>
           ),
         })}

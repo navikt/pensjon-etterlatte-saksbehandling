@@ -20,7 +20,7 @@ export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
   }, [])
 
   return (
-    <VStack gap="space-16">
+    <VStack gap="space-16" marginBlock="space-64 space-32">
       <HStack gap="space-8" align="center">
         <HospitalIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small" level="3">

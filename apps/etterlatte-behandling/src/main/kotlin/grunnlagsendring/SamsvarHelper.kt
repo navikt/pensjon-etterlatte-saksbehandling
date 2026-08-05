@@ -104,7 +104,7 @@ internal fun finnSamsvarForHendelse(
             }
             if (personRolle == PersonRolle.TILKNYTTET_BARN && sakType == SakType.OMSTILLINGSSTOENAD) {
                 val foedselsdato = pdlData.foedselsdato?.verdi
-                val erOver18Aar = foedselsdato?.plusYears(18)?.let { attenAarsdag -> !attenAarsdag.isAfter(LocalDate.now()) }
+                val erOver18Aar = foedselsdato?.plusYears(18)?.let { it <= LocalDate.now() }
                 if (erOver18Aar == true) {
                     return SamsvarMellomKildeOgGrunnlag.Adresse(
                         samsvar = true,

@@ -2,15 +2,25 @@ package no.nav.etterlatte.grunnlagsendring
 
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
+import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.mockPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -208,6 +218,65 @@ internal class SamsvarHelperKtTest {
             )
 
         assertEquals(true, samsvar.samsvar)
+    }
+
+    @Test
+    fun `BOSTED-hendelse for barn tilknyttet OMS-sak skal ignoreres naar barnet er over 18 aar`() {
+        val fnr = KONTANT_FOT.value
+        val pdlData = mockPerson().copy(foedselsdato = OpplysningDTO(LocalDate.now().minusYears(29), null))
+        val hendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                gjelderPerson = fnr,
+                hendelseGjelderRolle = Saksrolle.SOESKEN,
+                samsvarMellomKildeOgGrunnlag = null,
+            ).copy(type = GrunnlagsendringsType.BOSTED)
+
+        val resultat =
+            finnSamsvarForHendelse(
+                hendelse = hendelse,
+                pdlData = pdlData,
+                grunnlag = null,
+                personRolle = PersonRolle.TILKNYTTET_BARN,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+            ) as SamsvarMellomKildeOgGrunnlag.Adresse
+
+        assertTrue(resultat.samsvar)
+        assertEquals("BARN_OVER_18AAR", resultat.aarsakIgnorert)
+    }
+
+    @Test
+    fun `BOSTED-hendelse for barn tilknyttet OMS-sak skal ikke ignoreres naar barnet er under 18 aar`() {
+        val fnr = KONTANT_FOT.value
+        val pdlAdresse =
+            adresse(
+                type = AdresseType.VEGADRESSE,
+                aktiv = true,
+                gyldigFraOgMed = LocalDateTime.of(2024, 1, 1, 0, 0),
+                adresselinje1 = "Nyveien 1",
+            )
+        val pdlData =
+            mockPerson().copy(
+                foedselsdato = OpplysningDTO(LocalDate.now().minusYears(10), null),
+                bostedsadresse = listOf(OpplysningDTO(pdlAdresse, null)),
+            )
+        val hendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                gjelderPerson = fnr,
+                hendelseGjelderRolle = Saksrolle.SOESKEN,
+                samsvarMellomKildeOgGrunnlag = null,
+            ).copy(type = GrunnlagsendringsType.BOSTED)
+
+        val resultat =
+            finnSamsvarForHendelse(
+                hendelse = hendelse,
+                pdlData = pdlData,
+                grunnlag = Grunnlag.empty(),
+                personRolle = PersonRolle.TILKNYTTET_BARN,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+            ) as SamsvarMellomKildeOgGrunnlag.Adresse
+
+        assertNull(resultat.aarsakIgnorert)
+        assertFalse(resultat.samsvar)
     }
 
     private fun adresse(

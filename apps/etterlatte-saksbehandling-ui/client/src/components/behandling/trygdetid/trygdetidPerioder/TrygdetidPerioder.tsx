@@ -9,7 +9,7 @@ import {
 } from '~shared/api/trygdetid'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { CalendarIcon, PlusIcon } from '@navikt/aksel-icons'
+import { PlusIcon } from '@navikt/aksel-icons'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 import {
   FaktiskTrygdetidHjelpeTekst,
@@ -112,7 +112,6 @@ export const TrygdetidPerioder = ({
   return (
     <VStack gap="space-16">
       <HStack gap="space-8" align="center">
-        <CalendarIcon aria-hidden height="1.5rem" width="1.5rem" />
         <Heading level="2" size="small">
           {formaterEnumTilLesbarString(trygdetidGrunnlagType)} trygdetid
         </Heading>

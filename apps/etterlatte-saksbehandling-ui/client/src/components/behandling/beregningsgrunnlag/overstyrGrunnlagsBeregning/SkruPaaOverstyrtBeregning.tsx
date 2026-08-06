@@ -1,5 +1,5 @@
 import React, { Dispatch, useState } from 'react'
-import { ArrowCirclepathIcon, ArrowsCirclepathIcon } from '@navikt/aksel-icons'
+import { ArrowCirclepathIcon } from '@navikt/aksel-icons'
 import { Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
 import { OverstyrBeregning } from '~shared/types/Beregning'
@@ -48,7 +48,6 @@ export const SkruPaaOverstyrtBeregning = ({
   return (
     <VStack gap="space-16" maxWidth="20rem">
       <HStack gap="space-8" align="center">
-        <ArrowsCirclepathIcon aria-hidden fontSize="1.5rem" />
         <Heading size="medium">Skal beregning overstyres?</Heading>
       </HStack>
       <Select

@@ -13,7 +13,7 @@ export const BegrunnelseForTrygdetid = ({
   trygdetid: ITrygdetid
   oppdaterTrygdetidBegrunnelse: (begrunnelse: string | undefined) => void
 }) => {
-  const [redigerBegrunnelse, setRedigerBegrunnelse] = useState<boolean>(false)
+  const [redigerBegrunnelse, setRedigerBegrunnelse] = useState<boolean>(redigerbar && !trygdetid.begrunnelse)
   const { register, getValues, reset, handleSubmit } = useForm<{ begrunnelse: string | undefined }>({
     defaultValues: {
       begrunnelse: trygdetid.begrunnelse,

@@ -112,7 +112,7 @@ export const TrygdetidPerioder = ({
   return (
     <VStack gap="space-16">
       <HStack gap="space-8" align="center">
-        <Heading level="2" size="small">
+        <Heading level="2" size="medium">
           {formaterEnumTilLesbarString(trygdetidGrunnlagType)} trygdetid
         </Heading>
       </HStack>

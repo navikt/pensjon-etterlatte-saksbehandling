@@ -26,6 +26,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { KopierVilkaarAvdoed } from '~components/behandling/vilkaarsvurdering/KopierVilkaarAvdoed'
+import { miljoeErDev } from '~utils/miljoe'
+import { FyllUtVilkaarsvurderingIDev } from '~components/behandling/vilkaarsvurdering/FyllUtVilkaarsvurderingIDev'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -96,6 +98,9 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
           Vilkårsvurdering
         </Heading>
       </Box>
+      {miljoeErDev && behandlingId && vilkaarsvurdering && redigerbar && !vilkaarsvurdering.resultat && (
+        <FyllUtVilkaarsvurderingIDev behandlingId={behandlingId} vilkaarsvurdering={vilkaarsvurdering} />
+      )}
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
         <>
           {visHarGammelVilkaarsvurdering() && (

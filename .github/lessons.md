@@ -89,3 +89,7 @@
 **2026-07-27 — Arkitekturvurdering / klient vs. HTTP**
 - Observation: Jeg påstod at `TrygdetidKlient` gjorde HTTP-kall til en ekstern app. Konvensjonen er riktignok at `*Klient` = nettverkskall-utfører, men under fusjonering får interfacet midlertidig en lokal `*Intern`-impl (her `TrygdetidKlientIntern` → lokal innfusjonert service, ingen `downstreamResourceClient`). Navnet stemmer med intensjonen, men ikke med kjøretidsstien akkurat nå.
 - Action: `*Klient` indikerer normalt nettverk, men når et domene er/blir innfusjonert i behandling: åpne den konkrete impl-en (og wiringen i ServiceModule) og se om det er en `*Intern`-variant på lokal service vs. en HTTP-impl med `downstreamResourceClient`. Skill også «app-mappe deployes fortsatt» fra «kjøres denne kodestien over HTTP».
+
+**2026-07-30 — Ressursdimensjonering av containere**
+- Observation: Jeg holdt på å applisere Nais sine memory-anbefalinger rått, uten å sjekke at JVM-appene kjører uten heap-flagg. Da er max heap 25 % av memory limit — så å kutte limit kutter heapen tilsvarende, og anbefalingen (som er målt med den gamle heapen) blir selvmotsigende.
+- Action: Ved endring av memory limit for JVM-apper: finn først hvordan heapen dimensjoneres (flagg i Dockerfile/nais-env, ellers HotSpot-default 25 %). Regn ut ny heap og native-budsjett (peak RSS − gammel heap-cap) før du velger tall — et anbefalt tall er bare gyldig sammen med den heap-konfigurasjonen det ble målt under.

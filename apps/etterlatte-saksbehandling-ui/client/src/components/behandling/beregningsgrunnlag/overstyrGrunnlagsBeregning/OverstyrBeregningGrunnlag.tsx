@@ -2,7 +2,7 @@ import { Beregning, OverstyrBeregning } from '~shared/types/Beregning'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { erBehandlingRedigerbar } from '../../felles/utils'
 import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
-import { CalculatorIcon, PlusIcon } from '@navikt/aksel-icons'
+import { PlusIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
@@ -65,8 +65,9 @@ const OverstyrBeregningGrunnlag = (props: {
       <BeregningErOverstyrtAlert />
       <VStack gap="space-16">
         <HStack gap="space-8">
-          <CalculatorIcon fontSize="1.5rem" aria-hidden />
-          <Heading size="small">Beregningsgrunnlag for overstyrt beregning</Heading>
+          <Heading size="medium" level="2">
+            Beregningsgrunnlag for overstyrt beregning
+          </Heading>
         </HStack>
         <VStack gap="space-16" maxWidth="70rem">
           {mapResult(overstyrBeregningGrunnlagResult, {

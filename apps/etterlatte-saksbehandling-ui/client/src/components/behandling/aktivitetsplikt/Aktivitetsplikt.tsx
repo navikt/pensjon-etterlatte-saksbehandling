@@ -148,7 +148,9 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
 
         {behandling.behandlingType === IBehandlingsType.REVURDERING && (
           <VStack maxWidth="42.5rem">
-            <Heading size="small">Status på informasjonsbrev</Heading>
+            <Heading size="medium" level="2">
+              Status på informasjonsbrev
+            </Heading>
             <BodyLong>
               Se hvilken dato infobrevet er sendt for å vurdere når du skal sende oppgave til lokalkontor (tre uker
               etter infobrevet er sendt ut), og når du eventuelt skal sende varsel om stans (tre uker før vedtak),

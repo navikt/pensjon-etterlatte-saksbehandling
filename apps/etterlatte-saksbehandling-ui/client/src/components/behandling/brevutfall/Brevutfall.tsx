@@ -112,7 +112,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
   return behandling.sendeBrev ? (
     <BrevutfallContent id="brevutfall">
       {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />}
-      <Heading level="2" size="small" spacing>
+      <Heading level="2" size="medium" spacing>
         Valg av utfall i brev
       </Heading>
       <BodyLong spacing>

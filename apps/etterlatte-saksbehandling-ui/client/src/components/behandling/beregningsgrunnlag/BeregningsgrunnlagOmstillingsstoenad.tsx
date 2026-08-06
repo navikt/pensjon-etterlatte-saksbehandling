@@ -1,4 +1,4 @@
-import { Box, Button } from '@navikt/ds-react'
+import { Box, Button, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
 import { erBehandlingRedigerbar } from '../felles/utils'
@@ -136,8 +136,10 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
               ))}
 
               <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <Heading size="medium" level="2">
+                  Institusjonsopphold
+                </Heading>
                 <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
-
                 <InstitusjonsoppholdBeregningsgrunnlag
                   redigerbar={redigerbar}
                   behandling={behandling}

@@ -49,7 +49,7 @@ export const SkruPaaOverstyrtBeregning = ({
     <VStack gap="space-16" maxWidth="20rem">
       <HStack gap="space-8" align="center">
         <ArrowsCirclepathIcon aria-hidden fontSize="1.5rem" />
-        <Heading size="small">Skal beregning overstyres?</Heading>
+        <Heading size="medium">Skal beregning overstyres?</Heading>
       </HStack>
       <Select
         label="Årsak for overstyring"

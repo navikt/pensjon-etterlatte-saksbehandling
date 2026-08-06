@@ -101,7 +101,7 @@ export const Resultat = (props: Props) => {
 
   return (
     <VStack gap="space-16" paddingInline="space-64 space-32">
-      <Box background="brand-beige-soft" borderRadius="12" padding="space-16">
+      <Box background="meta-purple-soft" borderRadius="12" padding="space-16">
         <VStack gap="space-16">
           <Heading size="medium" level="2">
             {erRevurdering

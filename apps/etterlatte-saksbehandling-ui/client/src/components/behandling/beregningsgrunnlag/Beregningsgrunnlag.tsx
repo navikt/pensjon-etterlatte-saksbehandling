@@ -80,9 +80,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
             )}
 
             {visOverstyrtBeregningGrunnlag && (
-              <Box background="neutral-soft" borderRadius="12" padding="space-16">
-                <OverstyrBeregningGrunnlag behandling={behandling} setOverstyrt={setOverstyrtBeregning} />
-              </Box>
+              <OverstyrBeregningGrunnlag behandling={behandling} setOverstyrt={setOverstyrtBeregning} />
             )}
 
             {!visOverstyrtBeregningGrunnlag &&

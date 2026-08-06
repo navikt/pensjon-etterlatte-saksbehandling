@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
-import { HospitalIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGrunnlagsendringshendelserInstitusjonsoppholdForSak } from '~shared/api/behandling'
 import { mapResult } from '~shared/api/apiUtils'
@@ -22,7 +21,6 @@ export const InstitusjonsoppholdHendelser = ({ sakId }: { sakId: number }) => {
   return (
     <VStack gap="space-16" marginBlock="space-32">
       <HStack gap="space-8" align="center">
-        <HospitalIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small" level="3">
           Hendelser registrert i inst2
         </Heading>

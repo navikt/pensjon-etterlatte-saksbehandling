@@ -7,10 +7,12 @@ export type StatusIconProps = 'warning' | 'success' | 'error'
 export const StatusIcon = (props: { status: StatusIconProps }) => {
   switch (props.status) {
     case 'success':
-      return <CheckmarkCircleIcon color={Success600} stroke={Success600} aria-hidden="true" />
+      return <CheckmarkCircleIcon color={Success600} stroke={Success600} aria-hidden="true" fontSize="1.5rem" />
     case 'error':
-      return <XMarkOctagonIcon color={TextLogo} stroke={TextLogo} fill={TextLogo} aria-hidden="true" />
+      return (
+        <XMarkOctagonIcon color={TextLogo} stroke={TextLogo} fill={TextLogo} aria-hidden="true" fontSize="1.5rem" />
+      )
     case 'warning':
-      return <ExclamationmarkTriangleIcon color={Warning700} stroke={Warning700} aria-hidden="true" />
+      return <ExclamationmarkTriangleIcon color={Warning700} stroke={Warning700} aria-hidden="true" fontSize="1.5rem" />
   }
 }

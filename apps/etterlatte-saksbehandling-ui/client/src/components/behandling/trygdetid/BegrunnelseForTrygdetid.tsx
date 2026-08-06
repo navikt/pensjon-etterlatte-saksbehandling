@@ -2,7 +2,7 @@ import { BodyLong, BodyShort, Box, Button, Heading, HStack, Textarea, VStack } f
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { DocPencilIcon, FloppydiskIcon, PencilIcon, PlusIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { FloppydiskIcon, PencilIcon, PlusIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 
 export const BegrunnelseForTrygdetid = ({
   redigerbar,
@@ -34,7 +34,6 @@ export const BegrunnelseForTrygdetid = ({
       >
         <VStack gap="space-16">
           <HStack gap="space-8" align="center">
-            <DocPencilIcon aria-hidden height="1.5rem" width="1.5rem" />
             <Heading size="small" level="3">
               Begrunnelse for trygdetid
             </Heading>

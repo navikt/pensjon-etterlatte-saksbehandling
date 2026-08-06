@@ -64,7 +64,7 @@ export const Avkorting = () => {
     <Box paddingBlock="space-32 space-0">
       <VStack gap="space-32">
         <VStack maxWidth="70rem">
-          <Heading spacing size="small" level="2">
+          <Heading spacing size="medium" level="2">
             Inntektsavkorting
           </Heading>
           <HjemmelLenke tittel="Folketrygdloven § 17-9" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-9" />

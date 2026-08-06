@@ -43,11 +43,11 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
 
   return (
     <>
-      <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32">
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
         <VStack gap="space-8">
           <HStack align="center" gap="space-16">
             <StatusIcon status={status()} aria-hidden />
-            <Heading size="small" level="3">
+            <Heading size="medium" level="2">
               {vilkaar.hovedvilkaar.tittel}
             </Heading>
           </HStack>

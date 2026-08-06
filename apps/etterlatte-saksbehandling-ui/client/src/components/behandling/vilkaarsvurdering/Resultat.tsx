@@ -101,9 +101,9 @@ export const Resultat = (props: Props) => {
 
   return (
     <VStack gap="space-16" paddingInline="space-64 space-32" paddingBlock="space-32 space-0">
-      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+      <Box background="brand-beige-soft" borderRadius="12" padding="space-16">
         <VStack gap="space-16">
-          <Heading size="small" level="2">
+          <Heading size="medium" level="2">
             {erRevurdering
               ? 'Utfall etter revurdering'
               : `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`}

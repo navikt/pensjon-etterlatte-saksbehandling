@@ -56,7 +56,7 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
   return (
     <>
       <Box paddingBlock="space-48">
-        <Heading spacing size="small" level="2">
+        <Heading spacing size="medium" level="2">
           Simulere utbetaling
         </Heading>
 

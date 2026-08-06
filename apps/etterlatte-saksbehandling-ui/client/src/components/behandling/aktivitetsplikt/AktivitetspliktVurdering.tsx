@@ -68,7 +68,7 @@ export const AktivitetspliktVurdering = ({
 
   const typeVurdering6eller12MndVurdering = typeVurderingFraDoedsdato(doedsdato)
   return (
-    <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32">
+    <Box background="neutral-soft" borderRadius="12" padding="space-16">
       <VStack gap="space-24">
         <VStack gap="space-12">
           <Heading size="medium" level="2">

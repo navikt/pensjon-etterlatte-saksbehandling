@@ -25,7 +25,7 @@ export const BegrunnelseForTrygdetid = ({
   }, [trygdetid])
 
   return (
-    <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32">
+    <Box background="neutral-soft" borderRadius="12" padding="space-16">
       <form
         onSubmit={handleSubmit((data) => {
           oppdaterTrygdetidBegrunnelse(data.begrunnelse)

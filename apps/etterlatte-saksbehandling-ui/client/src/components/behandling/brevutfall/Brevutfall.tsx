@@ -156,7 +156,6 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
 }
 
 const BrevutfallContent = styled.div`
-  margin-top: 4rem;
   margin-bottom: 4rem;
   max-width: 500px;
 `

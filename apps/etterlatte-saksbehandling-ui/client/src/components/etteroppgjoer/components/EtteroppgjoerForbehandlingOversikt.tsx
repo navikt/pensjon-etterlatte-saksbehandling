@@ -163,7 +163,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
 
   return (
     <VStack gap="space-40" paddingInline="space-64" paddingBlock="space-64 space-16">
-      <Heading size="xlarge" level="1">
+      <Heading size="large" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
 

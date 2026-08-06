@@ -59,7 +59,9 @@ export const AktivitetspliktSpørsmål = ({ erRedigerbar, setAktivitetspliktSkje
   return (
     <form>
       <VStack gap="space-16">
-        <Heading size="large">Vurder aktivitetsplikt</Heading>
+        <Heading size="medium" level="2">
+          Vurder aktivitetsplikt
+        </Heading>
         <Box maxWidth="60rem">
           <BodyShort>
             Vurder om brukeren har oppfylt aktivitetsplikten i etteroppgjørsåret. Hvis aktivitetsplikten ikke er
@@ -76,6 +78,7 @@ export const AktivitetspliktSpørsmål = ({ erRedigerbar, setAktivitetspliktSkje
               legend="Er aktivitetsplikten overholdt i etteroppgjørsåret?"
               errorVedTomInput="Du må svare på om aktivitetsplikten er overholdt"
               readOnly={!erRedigerbar}
+              size="small"
               radios={
                 <>
                   <Radio value={JaNei.JA}>Ja</Radio>

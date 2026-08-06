@@ -41,7 +41,7 @@ export const Inntektsopplysninger = ({ forbehandling, erRedigerbar }: Props) => 
         borderWidth="0 0 0 4"
       >
         <VStack gap="space-32">
-          <Heading size="large" level="2">
+          <Heading size="medium" level="2">
             Inntektsopplysninger
           </Heading>
 

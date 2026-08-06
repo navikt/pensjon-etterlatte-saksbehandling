@@ -5,6 +5,7 @@ WORKDIR /app
 COPY ./client/dist ./client
 COPY ./server/build ./server
 COPY ./server/package.json ./server
+COPY ./server/yarn.lock ./server
 
 ENV NODE_ENV="production"
 

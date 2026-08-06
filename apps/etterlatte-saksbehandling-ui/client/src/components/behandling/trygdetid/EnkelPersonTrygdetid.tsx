@@ -132,7 +132,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
   return (
     <>
       {trygdetid && (
-        <VStack gap="space-48" maxWidth="69rem">
+        <VStack gap="space-32" maxWidth="69rem">
           {!skalViseTrygdeavtale(behandling) && <AvdoedesTrygdetidReadMore />}
 
           <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />

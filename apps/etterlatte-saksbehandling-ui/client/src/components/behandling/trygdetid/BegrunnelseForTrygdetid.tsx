@@ -34,7 +34,7 @@ export const BegrunnelseForTrygdetid = ({
       >
         <VStack gap="space-16">
           <HStack gap="space-8" align="center">
-            <Heading size="small" level="3">
+            <Heading size="medium" level="2">
               Begrunnelse for trygdetid
             </Heading>
           </HStack>

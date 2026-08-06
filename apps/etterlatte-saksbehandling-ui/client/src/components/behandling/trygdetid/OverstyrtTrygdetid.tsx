@@ -54,7 +54,7 @@ export const OverstyrtTrygdetid = ({
     >
       <VStack gap="space-16">
         <HStack gap="space-8" align="center">
-          <Heading size="small" level="3">
+          <Heading size="medium" level="2">
             Poengår i Norge - registreres kun ved eksportvurdering
           </Heading>
         </HStack>

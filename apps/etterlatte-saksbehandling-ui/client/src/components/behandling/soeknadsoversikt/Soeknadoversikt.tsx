@@ -24,6 +24,8 @@ import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/
 import SluttBehandlingOmgjoering from '~components/behandling/soeknadsoversikt/SluttbehandlingOmgjoering'
 import { SoeknadInformasjon } from '~components/behandling/soeknadsoversikt/SoeknadInformasjon'
 import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
+import { miljoeErDev } from '~utils/miljoe'
+import { FyllUtSoeknadsoversiktIDev } from '~components/behandling/soeknadsoversikt/FyllUtSoeknadsoversiktIDev'
 
 export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -44,6 +46,9 @@ export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandl
           Søknadsoversikt
         </Heading>
       </Box>
+      {miljoeErDev && redigerbar && (
+        <FyllUtSoeknadsoversiktIDev behandlingId={behandling.id} sakType={behandling.sakType} />
+      )}
       <Box paddingInline="space-80 space-0" paddingBlock="space-32 space-32" maxWidth="70rem">
         <SoeknadInformasjon behandling={behandling} />
       </Box>

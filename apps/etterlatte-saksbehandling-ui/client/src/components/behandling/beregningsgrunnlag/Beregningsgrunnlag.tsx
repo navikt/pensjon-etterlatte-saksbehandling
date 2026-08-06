@@ -70,7 +70,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         </Heading>
         <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
-      <VStack paddingInline="space-64">
+      <VStack paddingInline="space-64" gap="space-32">
         {(isSuccess(overstyrtBeregningResponse) || isSuccess(overstyrtBeregningGrunnlagResponse)) && (
           <>
             {visOverstyrKnapp && !erBehandlingFerdigstilt && !overstyrtBeregning && (

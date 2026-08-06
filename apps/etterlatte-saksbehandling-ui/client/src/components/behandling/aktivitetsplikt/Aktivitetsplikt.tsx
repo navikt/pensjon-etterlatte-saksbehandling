@@ -88,7 +88,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
       </Box>
       <VStack gap="space-40" paddingInline="space-64" paddingBlock="space-32">
         <VStack maxWidth="42.5rem">
-          <Heading level="1" spacing size="medium">
+          <Heading level="2" spacing size="medium">
             Gjenlevende sin situasjon
           </Heading>
           <ReadMore header="Slik vurderer du gjenlevendes situasjon">

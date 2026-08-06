@@ -1,4 +1,4 @@
-import { Box, Heading } from '@navikt/ds-react'
+import { Box, Heading, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { erBehandlingRedigerbar, soeknadsoversiktErFerdigUtfylt } from '../felles/utils'
@@ -49,13 +49,13 @@ export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandl
       {miljoeErDev && redigerbar && (
         <FyllUtSoeknadsoversiktIDev behandlingId={behandling.id} sakType={behandling.sakType} />
       )}
-      <Box paddingInline="space-80 space-0" paddingBlock="space-32 space-32" maxWidth="70rem">
+      <Box paddingInline="space-80 space-0" maxWidth="70rem">
         <SoeknadInformasjon behandling={behandling} />
       </Box>
-      <Box paddingBlock="space-16" borderWidth="0 0 1 0" borderColor="neutral-subtle">
+      <Box paddingBlock="space-16" borderWidth="0 0 1 0" borderColor="neutral-subtle" marginBlock="space-16">
         <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
       </Box>
-      <Box paddingBlock="space-32" paddingInline="space-64 space-32">
+      <VStack paddingBlock="space-32" paddingInline="space-64 space-32" gap="space-32">
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
 
         {personopplysninger && (
@@ -96,7 +96,7 @@ export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandl
           </>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
-      </Box>
+      </VStack>
       <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>

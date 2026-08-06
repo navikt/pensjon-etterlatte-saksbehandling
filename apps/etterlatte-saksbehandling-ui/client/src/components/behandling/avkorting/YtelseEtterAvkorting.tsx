@@ -47,7 +47,7 @@ export const YtelseEtterAvkorting = ({
     <>
       {ytelser.length > 0 && (
         <TableBox>
-          <Heading spacing size="small" level="2">
+          <Heading spacing size="small" level="3">
             Beregning etter avkorting og sanksjon
           </Heading>
           <Table className="table" zebraStripes>

@@ -121,7 +121,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
           success: () => (
             <>
-              <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
                 <BeregningsMetodeBrukt
                   redigerbar={redigerbar}
                   navn={hentNavn()}
@@ -135,10 +135,9 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
                 <ApiErrorAlert>{error.detail}</ApiErrorAlert>
               ))}
 
-              <Box maxWidth="70rem">
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
                 <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
-              </Box>
-              <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+
                 <InstitusjonsoppholdBeregningsgrunnlag
                   redigerbar={redigerbar}
                   behandling={behandling}
@@ -149,12 +148,12 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
               </Box>
 
               {brukNyeBeregningsregler && (
-                <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+                <Box background="neutral-soft" borderRadius="12" padding="space-16">
                   <Sanksjon behandling={behandling} manglerInntektVirkAar={false} />
                 </Box>
               )}
               {brukNyeBeregningsregler && (
-                <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+                <Box background="neutral-soft" borderRadius="12" padding="space-16">
                   <IkkeInnvilgetPeriode behandling={behandling} />
                 </Box>
               )}

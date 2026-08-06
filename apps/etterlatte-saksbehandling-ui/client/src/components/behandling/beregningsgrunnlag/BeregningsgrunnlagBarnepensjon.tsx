@@ -216,7 +216,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
                     <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
                   </Box>
 
-                  <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
                     <InstitusjonsoppholdBeregningsgrunnlag
                       redigerbar={redigerbar}
                       behandling={behandling}
@@ -226,7 +226,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
                     />
                   </Box>
                   {skalViseSoeskenjustering && (
-                    <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32 space-0">
+                    <Box background="neutral-soft" borderRadius="12" padding="space-16">
                       <Soeskenjustering
                         behandling={behandling}
                         onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag)}

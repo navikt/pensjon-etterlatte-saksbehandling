@@ -10,7 +10,7 @@ import {
   updateVilkaarsvurdering,
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { Alert, BodyLong, Box, Button, Heading } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -102,7 +102,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
         <FyllUtVilkaarsvurderingIDev behandlingId={behandlingId} vilkaarsvurdering={vilkaarsvurdering} />
       )}
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
-        <>
+        <VStack gap="space-32">
           {visHarGammelVilkaarsvurdering() && (
             <AlertWrapper>
               <Alert variant="info">
@@ -161,7 +161,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             behandlingstype={behandling.behandlingType}
             revurderingsaarsak={behandling.revurderingsaarsak}
           />
-        </>
+        </VStack>
       )}
       <Spinner visible={isPending(vilkaarsvurderingStatus)} label="Henter vilkårsvurdering" />
       <Spinner visible={isPending(opprettNyVilkaarsvurderingStatus)} label="Oppretter vilkårsvurdering" />

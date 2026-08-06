@@ -23,14 +23,18 @@ export const Grunnlagopplysninger = ({
 }) => {
   const visDifferanse = redigerbar ? trygdetid.opplysningerDifferanse?.differanse : false
   return (
-    <VStack gap="space-16">
-      <Heading size="medium">Grunnlagsopplysninger om avdød</Heading>
-      {visDifferanse ? (
-        <DifferanseVisning trygdetid={trygdetid} onOppdatert={onOppdatert} />
-      ) : (
-        <OpplysningerTabell opplysninger={trygdetid.opplysninger} fnr={trygdetid.ident} />
-      )}
-    </VStack>
+    <Box background="brand-blue-soft" borderRadius="12" padding="space-16">
+      <VStack gap="space-16">
+        <Heading level="2" size="medium">
+          Grunnlagsopplysninger om avdød
+        </Heading>
+        {visDifferanse ? (
+          <DifferanseVisning trygdetid={trygdetid} onOppdatert={onOppdatert} />
+        ) : (
+          <OpplysningerTabell opplysninger={trygdetid.opplysninger} fnr={trygdetid.ident} />
+        )}
+      </VStack>
+    </Box>
   )
 }
 

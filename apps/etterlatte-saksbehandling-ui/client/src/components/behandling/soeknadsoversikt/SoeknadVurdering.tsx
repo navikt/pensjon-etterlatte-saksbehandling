@@ -15,7 +15,7 @@ export const SoeknadVurdering = (props: Props) => {
   const [leftContent, rightContent] = Children.toArray(props.children)
 
   return (
-    <Box background="neutral-soft" borderRadius="12" padding="space-16" marginBlock="space-32">
+    <Box background="neutral-soft" borderRadius="12" padding="space-16">
       <VStack gap="space-8">
         <HStack gap="space-24" align="center">
           {props.status && <StatusIcon status={props.status} />}

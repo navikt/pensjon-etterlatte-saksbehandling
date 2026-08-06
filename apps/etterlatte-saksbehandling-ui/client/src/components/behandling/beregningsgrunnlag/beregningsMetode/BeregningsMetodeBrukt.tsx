@@ -85,7 +85,7 @@ export const BeregningsMetodeBrukt = ({
     <VStack gap="space-16">
       <HStack gap="space-8" align="center">
         <TagIcon aria-hidden fontSize="1.5rem" />
-        <Heading size="small" level="3">
+        <Heading size="medium" level="3">
           Trygdetid i beregning
         </Heading>
       </HStack>

@@ -158,7 +158,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
         error: <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>,
         success: () => (
           <VStack gap="space-16">
-            <Heading size="small" level="2">
+            <Heading size="medium" level="2">
               Vilkår ikke oppfylt tilbake i tid
             </Heading>
 

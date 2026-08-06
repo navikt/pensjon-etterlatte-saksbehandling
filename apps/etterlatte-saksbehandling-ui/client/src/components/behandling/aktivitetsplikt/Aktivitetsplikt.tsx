@@ -158,7 +158,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
 
         <Box background="neutral-soft" borderRadius="12" padding="space-16">
           <VStack maxWidth="42.5rem">
-            <Heading size="small" spacing>
+            <Heading size="medium" spacing>
               Trengs det oppfølging fra lokalkontor?
             </Heading>
             <BodyLong spacing>

@@ -113,7 +113,9 @@ export const TrygdetidPerioder = ({
     <VStack gap="space-16">
       <HStack gap="space-8" align="center">
         <CalendarIcon aria-hidden height="1.5rem" width="1.5rem" />
-        <Heading size="small">{formaterEnumTilLesbarString(trygdetidGrunnlagType)} trygdetid</Heading>
+        <Heading level="2" size="small">
+          {formaterEnumTilLesbarString(trygdetidGrunnlagType)} trygdetid
+        </Heading>
       </HStack>
       {faktiskTrygdetid ? <FaktiskTrygdetidHjelpeTekst /> : <FremtidigTrygdetidHjelpeTekst />}
       <TrygdetidPerioderTable

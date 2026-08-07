@@ -10,7 +10,8 @@ export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
 
   const forbehandlingErFerdigstilt = forbehandling.status === EtteroppgjoerForbehandlingStatus.FERDIGSTILT
   const forbehandlingErAvbrutt = forbehandling.status === EtteroppgjoerForbehandlingStatus.AVBRUTT
-  const forbheandlingErKlage = forbehandling.klageOmgjoering
+  const omgjoeringPgaKlage = !!forbehandling.klageOmgjoering
+  const omgjoeringPaaEgetInitiativ = forbehandling.klageOmgjoering
 
   return (
     <SidebarPanel $border>
@@ -29,9 +30,15 @@ export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
             </Heading>
           )}
 
-          {forbheandlingErKlage && (
+          {omgjoeringPgaKlage && (
             <Heading size="xsmall" style={{ color: 'var(--a-yellow-400)' }}>
               Omgjøring pga klage
+            </Heading>
+          )}
+
+          {omgjoeringPaaEgetInitiativ && (
+            <Heading size="xsmall" style={{ color: 'var(--a-yellow-400)' }}>
+              Omgjøring på eget initiativ
             </Heading>
           )}
         </VStack>

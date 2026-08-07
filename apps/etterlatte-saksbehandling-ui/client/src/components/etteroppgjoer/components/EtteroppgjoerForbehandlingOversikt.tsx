@@ -171,6 +171,10 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         <Alert variant="info">Dette etteroppgjøret er opprettet som en del av en klageomgjøring</Alert>
       )}
 
+      {forbehandling.omgjoeringEgetInitiativ && (
+        <Alert variant="info">Dette etteroppgjøret er en omgjøring på eget initiativ</Alert>
+      )}
+
       <Inntektsopplysninger forbehandling={forbehandling} erRedigerbar={erRedigerbar} />
 
       {erRevurdering && (
@@ -200,7 +204,7 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         <VStack gap="space-16">
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
-          {forbehandling.klageOmgjoering && <InfoOppgaveOmgjoering />}
+          {(forbehandling.klageOmgjoering || forbehandling.omgjoeringEgetInitiativ) && <InfoOppgaveOmgjoering />}
         </VStack>
       )}
       <Box maxWidth="42.5rem">

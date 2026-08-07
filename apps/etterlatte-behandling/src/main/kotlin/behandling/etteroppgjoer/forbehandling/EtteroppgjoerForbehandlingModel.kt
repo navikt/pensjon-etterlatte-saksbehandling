@@ -32,7 +32,7 @@ data class EtteroppgjoerForbehandling(
     val endringErTilUgunstForBruker: JaNei?,
     val beskrivelseAvUgunst: String?,
     val aarsakTilAvbrytelse: AarsakTilAvbryteForbehandling? = null,
-    val aarsakTilAvbrytelseBeskrivelse: String? = null,
+    val aarsakTilAvbrytelseBeskrivelse: String = "",
     val kopiertFra: UUID? = null,
     val etteroppgjoerResultatType: EtteroppgjoerResultatType? = null,
     val harVedtakAvTypeOpphoer: Boolean? = null,
@@ -42,7 +42,7 @@ data class EtteroppgjoerForbehandling(
     val klageOmgjoering: UUID? = null,
     val aktivitetspliktOverholdt: JaNei? = null,
     val aktivitetspliktBegrunnelse: String? = null,
-    // TODO noe for å signalisere at det er omgjøring på eget initiativ? Holder det at klageOmgjoering ikke er satt?
+    val omgjoeringEgetInitiativ: Boolean = false,
 ) {
     companion object {
         fun opprett(
@@ -132,7 +132,7 @@ data class EtteroppgjoerForbehandling(
 
     fun tilAvbrutt(
         aarsak: AarsakTilAvbryteForbehandling,
-        kommentar: String?,
+        kommentar: String,
     ): EtteroppgjoerForbehandling {
         if (!erRedigerbar()) {
             throw EtteroppgjoerForbehandlingStatusException(this, EtteroppgjoerForbehandlingStatus.AVBRUTT)

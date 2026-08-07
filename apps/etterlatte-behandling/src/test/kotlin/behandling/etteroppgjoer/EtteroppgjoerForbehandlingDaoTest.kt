@@ -32,11 +32,14 @@ import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbe
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.Inntektsmaaned
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
+import no.nav.etterlatte.sak
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeAll
@@ -44,6 +47,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
@@ -89,41 +94,14 @@ class EtteroppgjoerForbehandlingDaoTest(
             )
     }
 
-    @Test
-    fun `lagre og oppdatere forbehandling`() {
-        val dato = LocalDate.now()
-        val kopiertFra = UUID.randomUUID()
-        val ny =
-            EtteroppgjoerForbehandling(
-                id = UUID.randomUUID(),
-                status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
-                aar = 2024,
-                opprettet = Tidspunkt.now(),
-                sak = sak,
-                brevId = null,
-                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
-                kopiertFra = kopiertFra,
-                sisteIverksatteBehandlingId = UUID.randomUUID(),
-                harMottattNyInformasjon = null,
-                endringErTilUgunstForBruker = null,
-                beskrivelseAvUgunst = null,
-                varselbrevSendt = dato,
-                etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
-                opphoerSkyldesDoedsfall = null,
-                opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
-            )
+    @ParameterizedTest
+    @MethodSource("forbehandlingVarianter")
+    fun `lagre og oppdatere forbehandling`(variant: EtteroppgjoerForbehandling) {
+        val ny = variant.copy(sak = sak)
 
         etteroppgjoerForbehandlingDao.lagreForbehandling(ny.copy())
-        val lagret = etteroppgjoerForbehandlingDao.hentForbehandling(ny.id)
-        with(lagret!!) {
-            id shouldBe ny.id
-            status shouldBe ny.status
-            aar shouldBe ny.aar
-            opprettet shouldBe ny.opprettet
-            innvilgetPeriode shouldBe ny.innvilgetPeriode
-            kopiertFra shouldBe kopiertFra
-            varselbrevSendt shouldBe dato
-        }
+        val lagret = etteroppgjoerForbehandlingDao.hentForbehandling(ny.id) ?: throw GenerellIkkeFunnetException()
+        lagret.shouldBeEqualToIgnoringFields(ny, EtteroppgjoerForbehandling::id)
     }
 
     @Test
@@ -505,4 +483,70 @@ class EtteroppgjoerForbehandlingDaoTest(
             resultSet.next() shouldBe false
             value
         }
+
+    companion object {
+        @JvmStatic
+        fun forbehandlingVarianter(): List<EtteroppgjoerForbehandling> =
+            listOf(
+                EtteroppgjoerForbehandling(
+                    id = UUID.fromString("11111111-1111-1111-1111-111111111111"),
+                    status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                    aar = 2021,
+                    opprettet = Tidspunkt.now(),
+                    sak = sak(SakId(1)),
+                    brevId = 12,
+                    innvilgetPeriode = Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
+                    kopiertFra = UUID.randomUUID(),
+                    sisteIverksatteBehandlingId = UUID.fromString("aaaaaaaa-1111-1111-1111-111111111111"),
+                    harMottattNyInformasjon = JaNei.JA,
+                    endringErTilUgunstForBruker = JaNei.JA,
+                    beskrivelseAvUgunst = "ja da",
+                    varselbrevSendt = LocalDate.of(2021, 2, 1),
+                    etteroppgjoerResultatType = EtteroppgjoerResultatType.TILBAKEKREVING,
+                    harVedtakAvTypeOpphoer = false,
+                    opphoerSkyldesDoedsfall = JaNei.JA,
+                    opphoerSkyldesDoedsfallIEtteroppgjoersaar = JaNei.JA,
+                    omgjoeringEgetInitiativ = true,
+                ),
+                EtteroppgjoerForbehandling(
+                    id = UUID.fromString("22222222-2222-2222-2222-222222222222"),
+                    status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                    aar = 2023,
+                    opprettet = Tidspunkt.now(),
+                    sak = sak(SakId(1)),
+                    brevId = null,
+                    innvilgetPeriode = Periode(YearMonth.of(2023, 3), YearMonth.of(2023, 9)),
+                    kopiertFra = UUID.fromString("bbbbbbbb-2222-2222-2222-222222222222"),
+                    sisteIverksatteBehandlingId = UUID.fromString("aaaaaaaa-2222-2222-2222-222222222222"),
+                    harMottattNyInformasjon = JaNei.NEI,
+                    endringErTilUgunstForBruker = JaNei.NEI,
+                    beskrivelseAvUgunst = null,
+                    varselbrevSendt = LocalDate.of(2024, 5, 15),
+                    etteroppgjoerResultatType = EtteroppgjoerResultatType.ETTERBETALING,
+                    harVedtakAvTypeOpphoer = true,
+                    opphoerSkyldesDoedsfall = JaNei.NEI,
+                    opphoerSkyldesDoedsfallIEtteroppgjoersaar = JaNei.NEI,
+                    omgjoeringEgetInitiativ = true,
+                ),
+                EtteroppgjoerForbehandling(
+                    id = UUID.fromString("33333333-3333-3333-3333-333333333333"),
+                    status = EtteroppgjoerForbehandlingStatus.OPPRETTET,
+                    aar = 2025,
+                    opprettet = Tidspunkt.now(),
+                    sak = sak(SakId(1)),
+                    brevId = null,
+                    innvilgetPeriode = Periode(YearMonth.of(2025, 1), YearMonth.of(2025, 6)),
+                    kopiertFra = null,
+                    sisteIverksatteBehandlingId = UUID.fromString("aaaaaaaa-3333-3333-3333-333333333333"),
+                    harMottattNyInformasjon = null,
+                    endringErTilUgunstForBruker = null,
+                    beskrivelseAvUgunst = null,
+                    varselbrevSendt = LocalDate.of(2026, 2, 1),
+                    etteroppgjoerResultatType = EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING,
+                    harVedtakAvTypeOpphoer = false,
+                    opphoerSkyldesDoedsfall = null,
+                    opphoerSkyldesDoedsfallIEtteroppgjoersaar = null,
+                ),
+            )
+    }
 }

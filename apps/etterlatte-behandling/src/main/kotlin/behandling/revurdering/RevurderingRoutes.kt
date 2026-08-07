@@ -133,6 +133,7 @@ internal fun Route.revurderingRoutes(
                                 inntektsaar = it.inntektsaar,
                                 opprinnelse = it.opprinnelse,
                                 brukerTokenInfo = saksbehandler,
+                                omgjoeringEgetInitiativ = false,
                             )
 
                         call.respond(revurdering.id)

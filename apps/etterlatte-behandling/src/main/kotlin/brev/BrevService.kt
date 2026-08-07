@@ -91,6 +91,7 @@ class BrevService(
 
             else -> {
                 videresendInterneFeil {
+                    logger.info("Har ikke håndtering for $behandlingMedBrevType i sak $sakId, sender videre til brev for gammel brevflyt.")
                     brevApiKlient.opprettVedtaksbrev(behandlingId, sakId, bruker)
                 }
             }

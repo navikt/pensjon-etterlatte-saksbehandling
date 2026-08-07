@@ -19,7 +19,6 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
-import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
@@ -92,7 +91,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
-import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -115,6 +113,7 @@ import no.nav.etterlatte.oppgaveGosys.RedigerFristGosysRequest
 import no.nav.etterlatte.oppgaveGosys.SaksbehandlerEndringGosysRequest
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -243,20 +242,6 @@ class BeregningKlientTest :
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): MaanederMedGammelSanksjonIAvkorting = MaanederMedGammelSanksjonIAvkorting(false, emptyList())
-}
-
-class TrygdetidKlientTest : TrygdetidKlient {
-    override suspend fun kopierTrygdetidFraForrigeBehandling(
-        behandlingId: UUID,
-        forrigeBehandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-    }
-
-    override suspend fun hentTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): List<TrygdetidDto> = emptyList()
 }
 
 class VedtakInternalServiceTest : VedtakInternalService {
@@ -702,6 +687,16 @@ class PesysKlientTest : PesysKlient {
         fnr: String,
         bruker: BrukerTokenInfo,
     ): List<SakSammendragResponse> = emptyList()
+}
+
+class TrygdetidPesysKlientTest : no.nav.etterlatte.trygdetid.klienter.PesysKlient {
+    override suspend fun hentTrygdetidsgrunnlag(
+        avdoedMedFnr: Pair<String, LocalDate>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(
+        trygdetidUfoeretrygdpensjon = null,
+        trygdetidAlderspensjon = null,
+    )
 }
 
 class KrrklientTest : KrrKlient {

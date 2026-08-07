@@ -109,7 +109,7 @@ internal class ApplicationContext {
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val oppgaveKlient = OppgaveKlient(config, httpClient())
     val trygdetidKlient =
-        TrygdetidKlient(config, httpClient(), config.getString("behandling.trygdetid.enabled") == "true")
+        TrygdetidKlient(config, httpClient())
     val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlient(config, httpClient())
 
     val behandlingService = BehandlingService(behandlingKlient)

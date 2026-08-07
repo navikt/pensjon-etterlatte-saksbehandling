@@ -51,11 +51,6 @@ enum class JobbType(
         JobbKategori.REGULERING,
         sakType = null,
     ),
-    FINN_SAKER_TIL_REGULERING(
-        "Finner saker som skal reguleres",
-        JobbKategori.REGULERING,
-        sakType = null,
-    ),
     AARLIG_INNTEKTSJUSTERING(
         "Årlig inntektsjustering - varselbrev og utkast til vedtak",
         JobbKategori.AARLIG_INNTEKTSJUSTERING,

@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRequest
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -931,7 +932,7 @@ internal class OppgaveServiceTest(
         sakSkrivDao.oppdaterEnhet(sakMedEnhet)
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaver = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
 
         oppgaver shouldHaveSize 1
         ikkeAdressebeskyttetOppgave.id shouldBe oppgaver.first().id
@@ -973,7 +974,7 @@ internal class OppgaveServiceTest(
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
 
         // Returnerer begge oppgavene, selv om den ene saken ikke har markert adressegradering
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaver = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
 
         oppgaver shouldHaveSize 2
     }
@@ -993,7 +994,7 @@ internal class OppgaveServiceTest(
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaverUtenEndring = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
         assertEquals(1, oppgaverUtenEndring.size)
         assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
 
@@ -1005,7 +1006,7 @@ internal class OppgaveServiceTest(
                 ),
             ),
         )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaverMedEndring = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
 
         assertEquals(1, oppgaverMedEndring.size)
         assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
@@ -1026,7 +1027,7 @@ internal class OppgaveServiceTest(
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaverUtenEndring = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
         assertEquals(1, oppgaverUtenEndring.size)
         val oppgaveUtenEndring = oppgaverUtenEndring.first()
         assertEquals(Enheter.AALESUND.enhetNr, oppgaveUtenEndring.enhet)
@@ -1040,7 +1041,7 @@ internal class OppgaveServiceTest(
                 ),
             ),
         )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaverMedEndring = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
 
         assertEquals(1, oppgaverMedEndring.size)
         assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring.first().enhet)
@@ -1062,7 +1063,7 @@ internal class OppgaveServiceTest(
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaverUtenEndring = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
         assertEquals(1, oppgaverUtenEndring.size)
         assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
         oppgaveService.tildelSaksbehandler(oppgaverUtenEndring[0].id, saksbehandlerMedRoller.saksbehandler.ident())
@@ -1077,7 +1078,7 @@ internal class OppgaveServiceTest(
                 ),
             ),
         )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaverMedEndring = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
 
         assertEquals(1, oppgaverMedEndring.size)
         assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
@@ -1098,7 +1099,7 @@ internal class OppgaveServiceTest(
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaverUtenEndring = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
         assertEquals(1, oppgaverUtenEndring.size)
         val oppgaveUtenEndring = oppgaverUtenEndring.single()
 
@@ -1113,7 +1114,7 @@ internal class OppgaveServiceTest(
                 ),
             ),
         )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaverMedEndring = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
 
         assertEquals(1, oppgaverMedEndring.size)
         val oppgaveMedEndring = oppgaverMedEndring.single()
@@ -1140,6 +1141,7 @@ internal class OppgaveServiceTest(
         val attestant =
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+                every { name() } returns "attestant-ident"
                 every { saksbehandlerMedRoller } returns generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
             }
 
@@ -1150,7 +1152,7 @@ internal class OppgaveServiceTest(
 
         oppgaveService.tildelSaksbehandler(oppgave.id, attestantmedRoller.saksbehandler.ident)
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(attestant, Status.entries.map { it.name })
+        val oppgaver = oppgaveService.soekOppgaverForBruker(attestant, OppgaveSoekRequest(antall = 100)).oppgaver
         assertEquals(1, oppgaver.size)
         val attesteringsoppgave = oppgaver[0]
         assertEquals(oppgave.id, attesteringsoppgave.id)
@@ -1268,10 +1270,10 @@ internal class OppgaveServiceTest(
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        val oppgaver = oppgaveService.soekOppgaverForBruker(saksbehandler, OppgaveSoekRequest(antall = 100)).oppgaver
 
-        assertEquals(1, finnOppgaverForBruker.size)
-        val aalesundfunnetOppgave = finnOppgaverForBruker[0]
+        assertEquals(1, oppgaver.size)
+        val aalesundfunnetOppgave = oppgaver[0]
         assertEquals(Enheter.AALESUND.enhetNr, aalesundfunnetOppgave.enhet)
     }
 

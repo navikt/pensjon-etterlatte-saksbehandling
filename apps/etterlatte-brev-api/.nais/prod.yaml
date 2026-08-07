@@ -66,15 +66,17 @@ spec:
   kafka:
     pool: nav-prod
   resources:
-    limits:
-      memory: 2048Mi
     requests:
-      cpu: 20m
-      memory: 2048Mi
+      cpu: 260m
+      memory: 1152Mi
+    limits:
+      memory: 1152Mi
   replicas:
     max: 4
     min: 2
   env:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-XX:MaxRAMPercentage=50"
     - name: BREVBAKER_URL
       value: http://pensjon-brevbaker.pensjonsbrev
     - name: BREVBAKER_SCOPE
@@ -125,8 +127,6 @@ spec:
       value: http://etterlatte-pdltjenester
     - name: ETTERLATTE_PDLTJENESTER_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-pdltjenester
-    - name: ETTERLATTE_BEHANDLING_TRYGDETID_ENABLED
-      value: "true"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

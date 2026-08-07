@@ -31,7 +31,10 @@ spec:
         - id: loki
   resources:
     requests:
-      cpu: 25m
+      cpu: 50m
+      memory: 512Mi
+    limits:
+      memory: 512Mi
   replicas:
     max: 1
     min: 1

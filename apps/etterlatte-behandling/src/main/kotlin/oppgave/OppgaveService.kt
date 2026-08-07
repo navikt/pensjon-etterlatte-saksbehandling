@@ -18,6 +18,8 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRequest
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRespons
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -46,17 +48,15 @@ class OppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun finnOppgaverForBruker(
+    fun soekOppgaverForBruker(
         bruker: SaksbehandlerMedEnheterOgRoller,
-        oppgaveStatuser: List<String>,
-        minOppgavelisteIdentFilter: String? = null,
-    ): List<OppgaveIntern> =
-        oppgaveDao
-            .hentOppgaver(
-                bruker.enheter(),
-                oppgaveStatuser,
-                minOppgavelisteIdentFilter,
-            )
+        request: OppgaveSoekRequest,
+    ): OppgaveSoekRespons =
+        oppgaveDao.soekOppgaver(
+            enheter = bruker.enheter(),
+            request = request,
+            innloggetSaksbehandlerIdent = bruker.name(),
+        )
 
     fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =
         oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)

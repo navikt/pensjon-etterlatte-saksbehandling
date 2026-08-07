@@ -240,3 +240,30 @@ fun standardfristForOppgave(
         OppgaveType.JOURNALFOERING -> opprettet.toLocalDatetimeUTC().plusDays(1L).toTidspunkt()
         else -> opprettet.toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
     }
+
+enum class OppgaveSaksbehandlerFilter { ALLE, TILDELT, IKKE_TILDELT }
+
+enum class OppgaveFristFilter { ALLE, HAR_PASSERT, MANGLER_FRIST }
+
+enum class OppgaveOrderBy { OPPRETTET, FRIST, FNR }
+
+data class OppgaveSoekRequest(
+    val statuser: List<Status> = emptyList(),
+    val typer: List<OppgaveType> = emptyList(),
+    val saksbehandlerFilter: OppgaveSaksbehandlerFilter = OppgaveSaksbehandlerFilter.ALLE,
+    val saksbehandlerIdent: String? = null,
+    val kunInnloggetBruker: Boolean = false,
+    val sakType: SakType? = null,
+    val enhet: String? = null,
+    val fristFilter: OppgaveFristFilter = OppgaveFristFilter.ALLE,
+    val sakEllerFnr: String? = null,
+    val side: Int = 0,
+    val antall: Int = 20,
+    val orderBy: OppgaveOrderBy = OppgaveOrderBy.OPPRETTET,
+    val orderAsc: Boolean = false,
+)
+
+data class OppgaveSoekRespons(
+    val oppgaver: List<OppgaveIntern>,
+    val totaltAntall: Long,
+)

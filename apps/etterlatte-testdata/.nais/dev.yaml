@@ -29,7 +29,10 @@ spec:
         - id: loki
   resources:
     requests:
-      cpu: 10m
+      cpu: 50m
+      memory: 512Mi
+    limits:
+      memory: 512Mi
   replicas:
     max: 2
     min: 2
@@ -63,9 +66,9 @@ spec:
     - name: TESTNAV_RESOURCE_URL
       value: http://testnav-person-service.dolly/api/v2
     - name: ETTERLATTE_BEHANDLING_URL
-      value: http://etterlatte-vedtaksvurdering
+      value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:
     outbound:
       rules:

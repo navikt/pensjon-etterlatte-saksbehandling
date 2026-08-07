@@ -77,3 +77,19 @@
 **2026-06-22 — Transaksjonskontext ved intern migrering**
 - Observation: Brute-force lesing av kode for å finne logikkforskjeller – uten å trace infrastruktur-forutsetningene – kostet mange omganger. Feilen lå ikke i forretningslogikken, men i at `ConnectionAutoclosing.hentConnection` krever en åpen transaksjon når `Kontekst` er satt, og den nye route-laget manglet `inTransaction`.
 - Action: Ved migrering av logikk fra en app til en annen – sjekk infrastruktur-kontrakten (transaksjonsoppsett, Kontekst, DB-tilkoblingsmønster) like grundig som forretningslogikken. Finn tidlig "hvem setter opp DB-konteksten i den nye appen?"
+
+**2026-07-03 — Flyway-migrasjonsnummerering**
+- Observation: Jeg valgte neste Flyway-versjonsnummer ved kun å se på `src/main/resources/db/migration/`, og overså at appen også har `db/prod/`, `db/dev/` og `db/gcp/` med egne nummererte filer i samme sekvens. Det ga et versjonskollisjon (`V348` fantes allerede i `prod/`).
+- Action: Før du navngir en ny Flyway-migrasjon: finn høyeste versjonsnummer på tvers av ALLE undermapper under `src/main/resources/db/` for den aktuelle appen (ikke bare `migration/`), og velg neste ledige nummer basert på det.
+
+**2026-07-03 — Testkjøring / miljøfeil**
+- Observation: Jeg itererte to ganger på egen testkode (TestHelper-NPE, mockkStatic) før jeg oppdaget at feilen var Java 25 vs. Byte Buddy – en eksisterende test feilet 22/22 på samme måte, og en Java 21-JDK fantes lokalt.
+- Action: Når en test feiler med infrastruktur-/toolchain-feil (Byte Buddy, class-init, instrumentering), kjør først en eksisterende test for å isolere miljø vs. egen kode, og sjekk tilgjengelige JDK-er før du endrer testkoden.
+
+**2026-07-27 — Arkitekturvurdering / klient vs. HTTP**
+- Observation: Jeg påstod at `TrygdetidKlient` gjorde HTTP-kall til en ekstern app. Konvensjonen er riktignok at `*Klient` = nettverkskall-utfører, men under fusjonering får interfacet midlertidig en lokal `*Intern`-impl (her `TrygdetidKlientIntern` → lokal innfusjonert service, ingen `downstreamResourceClient`). Navnet stemmer med intensjonen, men ikke med kjøretidsstien akkurat nå.
+- Action: `*Klient` indikerer normalt nettverk, men når et domene er/blir innfusjonert i behandling: åpne den konkrete impl-en (og wiringen i ServiceModule) og se om det er en `*Intern`-variant på lokal service vs. en HTTP-impl med `downstreamResourceClient`. Skill også «app-mappe deployes fortsatt» fra «kjøres denne kodestien over HTTP».
+
+**2026-07-30 — Ressursdimensjonering av containere**
+- Observation: Jeg holdt på å applisere Nais sine memory-anbefalinger rått, uten å sjekke at JVM-appene kjører uten heap-flagg. Da er max heap 25 % av memory limit — så å kutte limit kutter heapen tilsvarende, og anbefalingen (som er målt med den gamle heapen) blir selvmotsigende.
+- Action: Ved endring av memory limit for JVM-apper: finn først hvordan heapen dimensjoneres (flagg i Dockerfile/nais-env, ellers HotSpot-default 25 %). Regn ut ny heap og native-budsjett (peak RSS − gammel heap-cap) før du velger tall — et anbefalt tall er bare gyldig sammen med den heap-konfigurasjonen det ble målt under.

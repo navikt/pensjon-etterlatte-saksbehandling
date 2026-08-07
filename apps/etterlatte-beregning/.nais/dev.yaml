@@ -29,8 +29,10 @@ spec:
         - id: loki
   resources:
     requests:
-      cpu: 25m
-      memory: 384Mi
+      cpu: 90m
+      memory: 576Mi
+    limits:
+      memory: 576Mi
   replicas:
     scalingStrategy:
       cpu:
@@ -74,8 +76,6 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-trygdetid
-    - name: ETTERLATTE_BEHANDLING_TRYGDETID_ENABLED
-      value: "true"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

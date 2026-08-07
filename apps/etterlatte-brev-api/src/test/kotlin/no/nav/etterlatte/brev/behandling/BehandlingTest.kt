@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.collections.listOf
 
 internal class BehandlingTest {
     @Test
@@ -47,7 +48,14 @@ internal class BehandlingTest {
         val grunnlag = opprettGrunnlag()
 
         assertEquals(
-            Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
+            Soeker(
+                "Unormal",
+                "Frisk",
+                "Herresykkel",
+                Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                false,
+                ansvarligeForeldre = listOf("08498224343", "01498344336"),
+            ),
             grunnlag.mapSoeker(null),
         )
     }
@@ -71,7 +79,14 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
+            Soeker(
+                "Unormal-Kar",
+                "Frisk-Is",
+                "Herresykkel",
+                Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                false,
+                ansvarligeForeldre = listOf("08498224343", "01498344336"),
+            ),
             grunnlag.mapSoeker(null),
         )
         assertEquals(
@@ -95,7 +110,14 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
+            Soeker(
+                "Unormal Kar",
+                "Frisk Is",
+                "Herresykkel",
+                Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                false,
+                ansvarligeForeldre = listOf("08498224343", "01498344336"),
+            ),
             grunnlag.mapSoeker(null),
         )
         assertEquals(
@@ -125,6 +147,7 @@ internal class BehandlingTest {
                 "Herresykkel Bom",
                 Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                 false,
+                ansvarligeForeldre = listOf("08498224343", "01498344336"),
             ),
             grunnlag.mapSoeker(null),
         )

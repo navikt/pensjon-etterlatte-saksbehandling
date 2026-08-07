@@ -89,7 +89,7 @@ class OversendelseBrevServiceImpl(
         val klage = behandlingService.hentKlage(behandlingId, brukerTokenInfo)
         val (spraak, personerISak) = hentSpraakOgPersonerISak(klage, brukerTokenInfo)
 
-        val mottakere = adresseService.hentMottakere(klage.sak.sakType, personerISak, brukerTokenInfo)
+        val mottakere = adresseService.hentMottakere(klage.sak.sakType, personerISak, klage.sak.id, brukerTokenInfo)
 
         val brev =
             brevRepository.opprettBrev(
@@ -254,7 +254,6 @@ data class OversendelseBrevFerdigstillingData(
     override val innhold: List<Slate.Element> = emptyList(),
     override val data: OversendelseBrevFerdigstillingDataData,
 ) : BrevDataFerdigstilling {
-
     companion object {
         fun fra(
             request: BrevDataFerdigstillingRequest,
@@ -270,32 +269,35 @@ data class OversendelseBrevFerdigstillingData(
                         utfall.innstilling
                     }
 
-                    else -> throw UgyldigForespoerselException(
-                        "FEIL_DATA_KLAGE",
-                        "Klagen med id=${klage.id} har ikke en innstilling, så kan ikke lage et oversendelsesbrev",
-                    )
+                    else -> {
+                        throw UgyldigForespoerselException(
+                            "FEIL_DATA_KLAGE",
+                            "Klagen med id=${klage.id} har ikke en innstilling, så kan ikke lage et oversendelsesbrev",
+                        )
+                    }
                 }
 
             return OversendelseBrevFerdigstillingData(
-                data = OversendelseBrevFerdigstillingDataData(
-                    sakType = request.sakType,
-                    klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
-                    vedtakDato =
-                        krevIkkeNull(
-                            klage.formkrav
-                                ?.formkrav
-                                ?.vedtaketKlagenGjelder
-                                ?.datoAttestert
-                                ?.toLocalDate(),
-                        ) {
-                            "Klagen har en ugyldig referanse til når originalt vedtak ble attestert, klageId=${klage.id}"
-                        },
-                    innstillingTekst = innstilling.innstillingTekst,
-                    under18Aar = request.soekerUnder18 ?: false,
-                    harVerge = request.harVerge,
-                    // TODO: støtte bosatt utland klage
-                    bosattIUtlandet = false,
-                ),
+                data =
+                    OversendelseBrevFerdigstillingDataData(
+                        sakType = request.sakType,
+                        klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
+                        vedtakDato =
+                            krevIkkeNull(
+                                klage.formkrav
+                                    ?.formkrav
+                                    ?.vedtaketKlagenGjelder
+                                    ?.datoAttestert
+                                    ?.toLocalDate(),
+                            ) {
+                                "Klagen har en ugyldig referanse til når originalt vedtak ble attestert, klageId=${klage.id}"
+                            },
+                        innstillingTekst = innstilling.innstillingTekst,
+                        under18Aar = request.soekerUnder18 ?: false,
+                        harVerge = request.harVerge,
+                        // TODO: støtte bosatt utland klage
+                        bosattIUtlandet = false,
+                    ),
             )
         }
     }

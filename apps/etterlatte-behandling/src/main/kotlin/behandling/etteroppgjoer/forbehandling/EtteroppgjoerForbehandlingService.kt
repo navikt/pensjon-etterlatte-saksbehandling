@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto

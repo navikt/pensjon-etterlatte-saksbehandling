@@ -15,9 +15,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerFilter
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.FilterVerdi
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
@@ -194,7 +192,6 @@ class EtteroppgjoerDaoTest(
             harSanksjon shouldBe false
             harOpphoer shouldBe false
             harBosattUtland shouldBe false
-            harInstitusjonsopphold shouldBe false
         }
 
         etteroppgjoerDao.lagreEtteroppgjoer(
@@ -202,7 +199,6 @@ class EtteroppgjoerDaoTest(
                 sak.id,
                 2024,
                 EtteroppgjoerStatus.UNDER_FORBEHANDLING,
-                true,
                 true,
                 true,
                 true,
@@ -223,7 +219,6 @@ class EtteroppgjoerDaoTest(
             harOpphoer shouldBe true
             harBosattUtland shouldBe true
             harUtlandstilsnitt shouldBe true
-            harInstitusjonsopphold shouldBe true
             harAdressebeskyttelseEllerSkjermet shouldBe true
             harAktivitetskrav shouldBe true
             harOverstyrtBeregning shouldBe true

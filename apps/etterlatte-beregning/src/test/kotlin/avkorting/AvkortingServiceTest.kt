@@ -39,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Month
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
@@ -75,7 +76,7 @@ internal class AvkortingServiceTest {
         coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns
             listOf(
                 InnvilgetPeriodeDto(
-                    Periode(YearMonth.of(1960, 1), YearMonth.of(9999, 12)),
+                    Periode(YearMonth.of(1960, 1), null),
                     listOf(mockk()),
                 ),
             )
@@ -191,7 +192,15 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting andThen lagretAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
-            every { eksisterendeAvkorting.beregnAvkorting(any(), any(), any(), any(), any()) } returns reberegnetAvkorting
+            every {
+                eksisterendeAvkorting.beregnAvkorting(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns reberegnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -457,7 +466,15 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
-            every { eksisterendeAvkorting.beregnAvkorting(any(), any(), any(), any(), any()) } returns reberegnetAvkorting
+            every {
+                eksisterendeAvkorting.beregnAvkorting(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns reberegnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
             mockkObject(AvkortingMapper)
@@ -547,7 +564,7 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
             mockkObject(AvkortingValider)
-            every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any()) } returns Unit
+            every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any(), any()) } returns Unit
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(1900, 1)
@@ -585,6 +602,7 @@ internal class AvkortingServiceTest {
                     nyeGrunnlag = listOf(endretGrunnlag),
                     any(),
                     any(),
+                    any(),
                 )
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
@@ -603,6 +621,7 @@ internal class AvkortingServiceTest {
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
                 AvkortingMapper.avkortingForFrontend(lagretAvkorting, behandling)
+                vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
             }
             coVerify(exactly = 2) {
                 featureToggleService.isEnabled(any(), any(), any())
@@ -631,7 +650,7 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(revurderingId) } returns eksisterendeAvkorting andThen lagretAvkorting
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns revurdering
             mockkObject(AvkortingValider)
-            every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any()) } returns Unit
+            every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any(), any()) } returns Unit
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(revurderingId) } returns emptyList()
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(1900, 1)
@@ -672,6 +691,7 @@ internal class AvkortingServiceTest {
                     nyeGrunnlag = listOf(endretGrunnlag),
                     sanksjoner = emptyList(),
                     krevInntektForNesteAar = true,
+                    eksisterendeOpphoerFom = null,
                 )
                 beregningService.hentBeregningNonnull(revurderingId)
                 sanksjonService.hentSanksjon(revurderingId)
@@ -688,7 +708,6 @@ internal class AvkortingServiceTest {
                     any(),
                 )
                 avkortingRepository.lagreAvkorting(revurderingId, sakId, beregnetAvkorting)
-                vedtaksvurderingKlient.hentIverksatteVedtak(sakId, bruker)
                 avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
                     alleVedtak,
@@ -697,11 +716,12 @@ internal class AvkortingServiceTest {
                 avkortingRepository.hentAvkorting(forrigeBehandling)
                 behandlingKlient.avkort(revurderingId, bruker, true)
                 AvkortingMapper.avkortingForFrontend(lagretAvkorting, revurdering, forrigeAvkorting)
-                vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
+                vedtaksvurderingKlient.hentIverksatteVedtak(sakId, bruker)
             }
             coVerify(exactly = 2) {
                 featureToggleService.isEnabled(any(), any(), any())
                 avkortingRepository.hentAvkorting(revurderingId)
+                vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
             }
         }
 
@@ -748,7 +768,7 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
             mockkObject(AvkortingValider)
-            every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any()) } returns Unit
+            every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any(), any()) } returns Unit
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns foedselsdato67aar
@@ -779,6 +799,7 @@ internal class AvkortingServiceTest {
                     nyeGrunnlag = listOf(endretGrunnlag),
                     sanksjoner = emptyList(),
                     krevInntektForNesteAar = true,
+                    eksisterendeOpphoerFom = null,
                 )
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
@@ -796,6 +817,7 @@ internal class AvkortingServiceTest {
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
                 AvkortingMapper.avkortingForFrontend(lagretAvkorting, behandling)
+                vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
             }
             coVerify(exactly = 2) {
                 featureToggleService.isEnabled(any(), any(), any())
@@ -829,6 +851,56 @@ internal class AvkortingServiceTest {
         coVerify {
             avkortingRepository.hentAvkorting(forrigeBehandlingId)
             vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+            vedtaksvurderingKlient.hentInnvilgedePerioder(behandling.sak, bruker)
+        }
+    }
+
+    @Test
+    fun `opphørt sak som starter opp igjen midt i et nytt år kaster ikke feil`() {
+        val behandling = behandling()
+        val forrigeBehandlingId = UUID.randomUUID()
+        val forrigeAvkorting = Avkorting(listOf(aarsoppgjoer(2025)))
+        val reparertAvkorting = mockk<Avkorting>()
+
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+            listOf(
+                vedtakSammendragDto(forrigeBehandlingId)
+                    .copy(virkningstidspunkt = YearMonth.of(2025, Month.JANUARY)),
+            )
+        every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
+        // Saken var opphørt etter november 2025 (tom = november) → eksisterendeOpphoerFom = desember 2025
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(
+                    Periode(YearMonth.of(2025, Month.JANUARY), YearMonth.of(2025, Month.NOVEMBER)),
+                    listOf(mockk()),
+                ),
+            )
+        every {
+            avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(any(), any(), any())
+        } returns reparertAvkorting
+
+        // virk = mars 2026 > desember 2025 (opphoerFom) → skal ikke kaste NyeAarMedInntektMaaStarteIJanuar
+        val result =
+            runBlocking {
+                service.hentAvkortingForrigeBehandling(
+                    behandling = behandling,
+                    brukerTokenInfo = bruker,
+                    virkningstidspunkt = YearMonth.of(2026, Month.MARCH),
+                )
+            }
+
+        result shouldBeSameInstanceAs reparertAvkorting
+
+        coVerify {
+            avkortingRepository.hentAvkorting(forrigeBehandlingId)
+            vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+            vedtaksvurderingKlient.hentInnvilgedePerioder(behandling.sak, bruker)
+            avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
+                forrigeAvkorting,
+                any(),
+                any(),
+            )
         }
     }
 
@@ -871,7 +943,13 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(behandlingId)
                 featureToggleService.isEnabled(any(), any(), any())
                 sanksjonService.hentSanksjon(behandlingId)
-                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(avkorting, beregning, BehandlingType.REVURDERING, any(), any())
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
+                    avkorting,
+                    beregning,
+                    BehandlingType.REVURDERING,
+                    any(),
+                    any(),
+                )
             }
         }
 
@@ -912,7 +990,13 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(behandlingId)
                 featureToggleService.isEnabled(any(), any(), any())
                 sanksjonService.hentSanksjon(behandlingId)
-                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(avkorting, beregning, BehandlingType.REVURDERING, any(), any())
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
+                    avkorting,
+                    beregning,
+                    BehandlingType.REVURDERING,
+                    any(),
+                    any(),
+                )
             }
         }
 
@@ -953,7 +1037,13 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(behandlingId)
                 featureToggleService.isEnabled(any(), any(), any())
                 sanksjonService.hentSanksjon(behandlingId)
-                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(avkorting, beregning, BehandlingType.REVURDERING, any(), any())
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
+                    avkorting,
+                    beregning,
+                    BehandlingType.REVURDERING,
+                    any(),
+                    any(),
+                )
             }
         }
     }

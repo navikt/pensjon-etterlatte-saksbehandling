@@ -74,6 +74,7 @@ data class BrevRequest(
     val soeker: Soeker,
     val avdoede: List<Avdoed>,
     val verge: Verge?,
+    val gjenlevende: List<String> = emptyList(),
     val saksbehandlerIdent: String,
     val attestantIdent: String?,
     val skalLagre: Boolean,

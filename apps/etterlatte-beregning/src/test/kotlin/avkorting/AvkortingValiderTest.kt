@@ -75,6 +75,7 @@ class AvkortingValiderTest {
             listOf(inntektMedFratrekk),
             emptyList(),
             true,
+            null,
             naa = YearMonth.of(2024, 12),
         )
     }
@@ -109,6 +110,7 @@ class AvkortingValiderTest {
                 listOf(inntektMedFratrekk),
                 emptyList(),
                 true,
+                null,
                 naa = fom,
             )
         }
@@ -155,6 +157,7 @@ class AvkortingValiderTest {
             listOf(inntektMedFratrekk),
             emptyList(),
             true,
+            null,
             naa = fom,
         )
     }
@@ -198,6 +201,7 @@ class AvkortingValiderTest {
                 listOf(inntektMedFratrekk),
                 emptyList(),
                 true,
+                null,
                 naa = fom,
             )
         }
@@ -246,6 +250,7 @@ class AvkortingValiderTest {
             listOf(inntektMedFratrekk),
             emptyList(),
             true,
+            null,
             naa = YearMonth.of(2024, 6),
         )
     }
@@ -269,6 +274,7 @@ class AvkortingValiderTest {
                 listOf(utenFratrekk),
                 emptyList(),
                 true,
+                null,
                 naa = YearMonth.of(2024, 3),
             )
 
@@ -286,6 +292,7 @@ class AvkortingValiderTest {
                     listOf(inntektMedFratrekk),
                     emptyList(),
                     true,
+                    null,
                     naa = YearMonth.of(2024, 3),
                 )
             }
@@ -305,6 +312,7 @@ class AvkortingValiderTest {
                     listOf(inntektMedFratrekkUtland),
                     emptyList(),
                     true,
+                    null,
                     naa = YearMonth.of(2024, 3),
                 )
             }
@@ -337,6 +345,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(utenFratrekk),
                 emptyList(),
                 true,
+                null,
             )
 
             assertThrows<HarFratrekkInnAarForFulltAar> {
@@ -353,6 +362,7 @@ class AvkortingValiderTest {
                     listOf(inntektMedFratrekk),
                     emptyList(),
                     true,
+                    null,
                 )
             }
 
@@ -370,6 +380,7 @@ class AvkortingValiderTest {
                     listOf(inntektMedFratrekkUtland),
                     emptyList(),
                     true,
+                    null,
                 )
             }
         }
@@ -407,6 +418,7 @@ class AvkortingValiderTest {
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
             sanksjoner = emptyList(),
             krevInntektForNesteAar = true,
+            eksisterendeOpphoerFom = null,
             naa = YearMonth.of(2024, 5),
         )
     }
@@ -444,6 +456,7 @@ class AvkortingValiderTest {
             beregning = beregning(beregningsperiode(datoFOM = YearMonth.of(2024, 2))),
             sanksjoner = emptyList(),
             krevInntektForNesteAar = true,
+            eksisterendeOpphoerFom = null,
         )
     }
 
@@ -547,6 +560,7 @@ class AvkortingValiderTest {
                         nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.MARCH))),
                         sanksjoner = emptyList(),
                         krevInntektForNesteAar = false,
+                        eksisterendeOpphoerFom = null,
                         naa = virk,
                     )
                 }
@@ -569,6 +583,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.JANUARY))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
         }
@@ -589,6 +604,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.FEBRUARY))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
         }
@@ -612,6 +628,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.MARCH))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = YearMonth.of(2025, Month.JANUARY),
             )
         }
@@ -632,6 +649,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.APRIL))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
         }
@@ -675,6 +693,7 @@ class AvkortingValiderTest {
                     nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2024, Month.MARCH))),
                     sanksjoner = emptyList(),
                     krevInntektForNesteAar = false,
+                    eksisterendeOpphoerFom = null,
                     naa = virk,
                 )
             }
@@ -696,6 +715,7 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2024, Month.JANUARY))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
         }
@@ -716,8 +736,122 @@ class AvkortingValiderTest {
                 nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2024, Month.JUNE))),
                 sanksjoner = emptyList(),
                 krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = null,
                 naa = virk,
             )
+        }
+
+        private fun inntektDto(fom: YearMonth) =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 0,
+                spesifikasjon = "",
+                fom = fom,
+            )
+    }
+
+    @Nested
+    inner class RevurderingEtterOpphoor {
+        // Scenario: saken var opphørt og startes opp igjen. Virk er midt i et nytt år (ikke januar),
+        // men etter det tidspunktet saken var opphørt fra (eksisterendeOpphoerFom).
+        private val eksisterendeAvkorting =
+            Avkorting(
+                aarsoppgjoer = listOf(aarsoppgjoer(aar = 2024, fom = YearMonth.of(2024, Month.JANUARY))),
+            )
+
+        // Saken var opphørt fra mars 2025 (siste innvilgede periode tom = september 2024, opphoerFom = oktober 2024)
+        private val eksisterendeOpphoerFom = YearMonth.of(2024, Month.OCTOBER)
+        private val virk = YearMonth.of(2025, Month.MAY)
+
+        @Test
+        fun `Inntekt fra virk er godtatt når saken gjenopptas etter opphør`() {
+            validerInntekter(
+                behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                beregning =
+                    beregning(
+                        beregningsperiode(
+                            datoFOM = virk,
+                            datoTOM =
+                                YearMonth.of(
+                                    2025,
+                                    Month.DECEMBER,
+                                ),
+                            // lukker så vi ikke trenger inntekt for 2026 også
+                        ),
+                    ),
+                eksisterendeAvkorting = eksisterendeAvkorting,
+                nyeGrunnlag = listOf(inntektDto(fom = virk)),
+                sanksjoner = emptyList(),
+                krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = eksisterendeOpphoerFom,
+                naa = virk,
+            )
+        }
+
+        @Test
+        fun `Inntekt fra januar er godtatt når saken gjenopptas etter opphør`() {
+            validerInntekter(
+                behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                beregning =
+                    beregning(
+                        beregningsperiode(
+                            datoFOM = virk,
+                            datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                        ),
+                    ),
+                eksisterendeAvkorting = eksisterendeAvkorting,
+                nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.JANUARY))),
+                sanksjoner = emptyList(),
+                krevInntektForNesteAar = false,
+                eksisterendeOpphoerFom = eksisterendeOpphoerFom,
+                naa = virk,
+            )
+        }
+
+        @Test
+        fun `Inntekt fra verken januar eller virk kaster feil selv om saken er opphørt`() {
+            assertThrows<NyeAarMedInntektMaaStarteIJanuar> {
+                validerInntekter(
+                    behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                    beregning =
+                        beregning(
+                            beregningsperiode(
+                                datoFOM = virk,
+                                datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                            ),
+                        ),
+                    eksisterendeAvkorting = eksisterendeAvkorting,
+                    nyeGrunnlag = listOf(inntektDto(fom = YearMonth.of(2025, Month.APRIL))),
+                    sanksjoner = emptyList(),
+                    krevInntektForNesteAar = false,
+                    eksisterendeOpphoerFom = eksisterendeOpphoerFom,
+                    naa = virk,
+                )
+            }
+        }
+
+        @Test
+        fun `Uten opphoerFom kaster vanlig revurdering feil når inntekt ikke starter i januar`() {
+            assertThrows<NyeAarMedInntektMaaStarteIJanuar> {
+                validerInntekter(
+                    behandling = behandling(BehandlingType.REVURDERING, virk = virk),
+                    beregning =
+                        beregning(
+                            beregningsperiode(
+                                datoFOM = virk,
+                                datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                            ),
+                        ),
+                    eksisterendeAvkorting = eksisterendeAvkorting,
+                    nyeGrunnlag = listOf(inntektDto(fom = virk)),
+                    sanksjoner = emptyList(),
+                    krevInntektForNesteAar = false,
+                    eksisterendeOpphoerFom = null,
+                    naa = virk,
+                )
+            }
         }
 
         private fun inntektDto(fom: YearMonth) =

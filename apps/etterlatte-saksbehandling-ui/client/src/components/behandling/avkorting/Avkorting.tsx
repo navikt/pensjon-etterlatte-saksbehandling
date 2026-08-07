@@ -49,7 +49,7 @@ export const Avkorting = () => {
         })
       })
     }
-  }, [])
+  }, [avkorting])
 
   const avkortingGrunnlagInnevaerendeAar = () => {
     return avkorting?.avkortingGrunnlag.find(
@@ -84,15 +84,17 @@ export const Avkorting = () => {
           error: (e) => <ApiErrorAlert>En feil har oppstått: {e.detail}</ApiErrorAlert>,
         })}
 
-        <AvkortingInntekt redigerbar={redigerbar} />
-
-        {!brukNyeBeregningsregler && (
-          <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
-        )}
-        {!brukNyeBeregningsregler && <IkkeInnvilgetPeriode behandling={behandling} />}
-
         {avkorting && (
-          <YtelseEtterAvkorting avkortetYtelse={avkortetYtelse} tidligereAvkortetYtelse={tidligereAvkortetYtelse} />
+          <>
+            <AvkortingInntekt redigerbar={redigerbar} />
+
+            {!brukNyeBeregningsregler && (
+              <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
+            )}
+            {!brukNyeBeregningsregler && <IkkeInnvilgetPeriode behandling={behandling} />}
+
+            <YtelseEtterAvkorting avkortetYtelse={avkortetYtelse} tidligereAvkortetYtelse={tidligereAvkortetYtelse} />
+          </>
         )}
       </VStack>
     </Box>

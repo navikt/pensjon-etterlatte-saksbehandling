@@ -38,8 +38,10 @@ spec:
     pool: nav-dev
   resources:
     requests:
-      cpu: 25m
-      memory: 384Mi
+      cpu: 130m
+      memory: 768Mi
+    limits:
+      memory: 768Mi
   replicas:
     max: 1
     min: 1
@@ -47,6 +49,8 @@ spec:
     application:
       enabled: true
   env:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-XX:MaxRAMPercentage=50"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: BEHANDLING_AZURE_SCOPE

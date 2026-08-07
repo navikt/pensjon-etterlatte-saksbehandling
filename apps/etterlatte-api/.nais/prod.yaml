@@ -31,11 +31,11 @@ spec:
         - id: elastic
         - id: loki
   resources:
-    limits:
-      memory: 640Mi
     requests:
-      cpu: 10m
-      memory: 320Mi
+      cpu: 80m
+      memory: 576Mi
+    limits:
+      memory: 576Mi
   replicas:
     min: 2
     max: 4

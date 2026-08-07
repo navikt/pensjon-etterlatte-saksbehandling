@@ -93,3 +93,7 @@
 **2026-07-30 — Ressursdimensjonering av containere**
 - Observation: Jeg holdt på å applisere Nais sine memory-anbefalinger rått, uten å sjekke at JVM-appene kjører uten heap-flagg. Da er max heap 25 % av memory limit — så å kutte limit kutter heapen tilsvarende, og anbefalingen (som er målt med den gamle heapen) blir selvmotsigende.
 - Action: Ved endring av memory limit for JVM-apper: finn først hvordan heapen dimensjoneres (flagg i Dockerfile/nais-env, ellers HotSpot-default 25 %). Regn ut ny heap og native-budsjett (peak RSS − gammel heap-cap) før du velger tall — et anbefalt tall er bare gyldig sammen med den heap-konfigurasjonen det ble målt under.
+
+**2026-08-07 — Avhengighetsoppgradering / Node engines**
+- Observation: Jeg prøvde først å løse en transitive sårbarhet ved å hoppe rett til nyeste versjoner, men overså at repoets Node-versjon setter en hard ramme for hvilke pakker som faktisk kan brukes. Det skapte unødige feilslag før jeg sjekket engine-feltene.
+- Action: Ved avhengighetsbumping: sjekk tidlig både hvem som trekker inn pakken og hvilke kandidater som er kompatible med repoets Node-versjon. Søk etter første sikre versjon innenfor gjeldende runtime før du prøver "latest".

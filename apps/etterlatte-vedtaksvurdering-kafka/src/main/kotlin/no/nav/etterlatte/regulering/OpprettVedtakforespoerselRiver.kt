@@ -5,7 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.klienter.BrevKlient
+import no.nav.etterlatte.klienter.BrevService
 import no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -40,7 +40,7 @@ internal class OpprettVedtakforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService,
     private val utbetalingKlient: UtbetalingKlient,
-    private val brevKlient: BrevKlient,
+    private val brevService: BrevService,
     private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -174,7 +174,7 @@ internal class OpprettVedtakforespoerselRiver(
         utbetalingVerifikasjon: UtbetalingVerifikasjon,
     ): VedtakOgRapid {
         val fattetVedtak = vedtak.opprettVedtakOgFatt(sakId, behandlingId)
-        val brev = brevKlient.opprettBrev(behandlingId, sakId)
+        val brev = brevService.opprettBrev(behandlingId, sakId)
         if (skalStoppeEtterFattet(revurderingaarsak)) {
             return fattetVedtak
         }
@@ -217,7 +217,7 @@ internal class OpprettVedtakforespoerselRiver(
     ) {
         when (revurderingaarsak) {
             Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {
-                brevKlient.genererPdfOgFerdigstillVedtaksbrev(behandlingId, sakId, brevId)
+                brevService.genererPdfOgFerdigstillVedtaksbrev(behandlingId, sakId, brevId)
             }
 
             else -> {

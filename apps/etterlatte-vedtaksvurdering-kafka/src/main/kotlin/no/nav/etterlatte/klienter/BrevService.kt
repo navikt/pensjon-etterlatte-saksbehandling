@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.UUID
 
-class BrevKlient(
+class BrevService(
     private val httpClient: HttpClient,
     private val url: String,
 ) {
@@ -28,12 +28,11 @@ class BrevKlient(
     ): Brev =
         runBlocking {
             try {
-                logger.info("Ber brev-api om å opprette vedtaksbrev for behandling id=$behandlingId")
+                logger.info("Ber behandling om å opprette vedtaksbrev for behandling id=$behandlingId")
                 retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
                     httpClient
                         .post("$url/api/behandling/brev/$behandlingId?sakId=$sakId") {
                             contentType(ContentType.Application.Json)
-                            // setBody(opprett.toJson())
                         }.body<Brev>()
                 }
             } catch (e: ResponseException) {

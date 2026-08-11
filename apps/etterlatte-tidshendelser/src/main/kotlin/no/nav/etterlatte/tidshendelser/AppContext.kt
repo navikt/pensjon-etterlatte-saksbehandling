@@ -3,9 +3,12 @@ package no.nav.etterlatte.tidshendelser
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
@@ -27,6 +30,8 @@ import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.hendelser.HendelsePoller
 import no.nav.etterlatte.tidshendelser.hendelser.HendelsePollerTask
 import no.nav.etterlatte.tidshendelser.hendelser.HendelsePublisher
+import no.nav.etterlatte.tidshendelser.hendelser.UferdigeJobberPoller
+import no.nav.etterlatte.tidshendelser.hendelser.UferdigeJobberPollerTask
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.omregning.OmregningDao
 import no.nav.etterlatte.tidshendelser.omregning.ReguleringService
@@ -34,6 +39,10 @@ import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadServ
 import no.nav.etterlatte.tidshendelser.oppgave.OppdaterSkjermingBpService
 import no.nav.etterlatte.tidshendelser.oppgave.OppfoelgingBpFylt18Service
 import java.time.Duration
+import java.time.Instant
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
+import java.util.Date
 import java.util.UUID
 
 class AppContext(
@@ -106,6 +115,13 @@ class AppContext(
                 ),
             maxAntallHendelsePerPoll = env.requireEnvValue(HENDELSE_POLLER_MAX_ANTALL).toInt(),
         )
+
+    val uferdigeJobberPollerTask =
+        UferdigeJobberPollerTask(
+            periode = Duration.ofDays(1),
+            startAt = Tidspunkt(Instant.now(norskKlokke()).plusSeconds(120)).next(LocalTime.of(12, 0)),
+            poller = UferdigeJobberPoller(hendelseDao = hendelseDao),
+        )
 }
 
 enum class TidshendelserKey : EnvEnum {
@@ -123,3 +139,10 @@ enum class TidshendelserKey : EnvEnum {
 
     override fun key() = name
 }
+
+fun Tidspunkt.next(atTime: LocalTime): Date =
+    if (this.toLocalTime().isAfter(atTime)) {
+        this.plus(1, ChronoUnit.DAYS).medTimeMinuttSekund(atTime).toJavaUtilDate()
+    } else {
+        this.medTimeMinuttSekund(atTime).toJavaUtilDate()
+    }

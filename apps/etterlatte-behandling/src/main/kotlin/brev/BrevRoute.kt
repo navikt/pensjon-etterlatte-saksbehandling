@@ -90,13 +90,11 @@ fun Route.brevRoute(service: BrevService) {
         post("/generer-pdf-og-ferdigstill") {
             kunSkrivetilgang {
                 logger.info("Genererer PDF og ferdigstiller brev for behandling (behandlingId=$behandlingId)")
-                inTransaction {
-                    measureTimedValue {
-                        genererPdf(logger, service)
-                        ferdigstill(logger, service)
-                    }.let { (_, varighet) ->
-                        logger.info("Generering og ferdigstilling av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
-                    }
+                measureTimedValue {
+                    genererPdf(logger, service)
+                    ferdigstill(logger, service)
+                }.let { (_, varighet) ->
+                    logger.info("Generering og ferdigstilling av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                 }
             }
         }

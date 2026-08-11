@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.JobbScheduler
+import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus.FEILET
+import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus.FERDIG
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -96,7 +98,7 @@ class HendelseDao(
     }
 
     fun oppdaterJobbstatusFerdig(hendelserJobb: HendelserJobb) {
-        oppdaterJobbstatus(hendelserJobb, JobbStatus.FERDIG)
+        oppdaterJobbstatus(hendelserJobb, FERDIG)
     }
 
     private fun oppdaterJobbstatus(
@@ -352,6 +354,26 @@ class HendelseDao(
                 LIMIT $limit
                 """.trimIndent(),
             ).let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
+        }
+
+    fun uferdigeJobber(): List<HendelserJobb> =
+        datasource.transaction {
+            queryOf(
+                """
+                SELECT *
+                FROM jobb
+                WHERE status != 'FERDIG'
+                  AND kjoeredato < CURRENT_DATE
+                  AND kjoeredato > CURRENT_DATE - INTERVAL '3 months'
+                  AND NOT EXISTS(
+                    SELECT 1
+                    FROM jobb ny
+                    WHERE ny.id > jobb.id
+                      AND ny.type = jobb.type
+                      AND ny.behandlingsmaaned = jobb.behandlingsmaaned
+                      AND (ny.status = '$FERDIG' OR (ny.status != '$FEILET' AND ny.kjoeredato >= CURRENT_DATE)))
+                """.trimIndent(),
+            ).let { query -> it.run(query.map { row -> row.toHendelserJobb() }.asList) }
         }
 
     private fun Row.toHendelse() =

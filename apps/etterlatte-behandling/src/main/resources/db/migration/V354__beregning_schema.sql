@@ -31,9 +31,6 @@ create table public.beregningsperiode
     har_foreldreloessats       boolean
 );
 
-alter table public.beregningsperiode
-    owner to "etterlatte-beregning";
-
 create index index_name
     on public.beregningsperiode (behandlingid);
 
@@ -59,9 +56,6 @@ create table public.avkortingsgrunnlag_forventet
     inntekt_utland_tom                      bigint
 );
 
-alter table public.avkortingsgrunnlag_forventet
-    owner to "etterlatte-beregning";
-
 create table public.avkortingsperioder
 (
     id               uuid not null
@@ -78,9 +72,6 @@ create table public.avkortingsperioder
     aarsoppgjoer_id  uuid not null
 );
 
-alter table public.avkortingsperioder
-    owner to "etterlatte-beregning";
-
 create table public.beregningsgrunnlag
 (
     behandlings_id                   uuid not null
@@ -94,9 +85,6 @@ create table public.beregningsgrunnlag
     beregnings_metode_flere_avdoede  jsonb,
     kun_en_juridisk_forelder         jsonb
 );
-
-alter table public.beregningsgrunnlag
-    owner to "etterlatte-beregning";
 
 create table public.avkortet_ytelse
 (
@@ -119,9 +107,6 @@ create table public.avkortet_ytelse
     sanksjon_id                          uuid
 );
 
-alter table public.avkortet_ytelse
-    owner to "etterlatte-beregning";
-
 create table public.avkorting_aarsoppgjoer_ytelse_foer_avkorting
 (
     id                  uuid   not null,
@@ -132,9 +117,6 @@ create table public.avkorting_aarsoppgjoer_ytelse_foer_avkorting
     beregningsreferanse uuid,
     aarsoppgjoer_id     uuid   not null
 );
-
-alter table public.avkorting_aarsoppgjoer_ytelse_foer_avkorting
-    owner to "etterlatte-beregning";
 
 create table public.avkorting_aarsoppgjoer_restanse
 (
@@ -148,9 +130,6 @@ create table public.avkorting_aarsoppgjoer_restanse
     aarsoppgjoer_id  uuid   not null
 );
 
-alter table public.avkorting_aarsoppgjoer_restanse
-    owner to "etterlatte-beregning";
-
 create table public.overstyr_beregning
 (
     sak_id      bigint                          not null
@@ -160,9 +139,6 @@ create table public.overstyr_beregning
     status      text      default 'AKTIV'::text not null,
     kategori    text
 );
-
-alter table public.overstyr_beregning
-    owner to "etterlatte-beregning";
 
 create table public.overstyr_beregningsgrunnlag
 (
@@ -184,9 +160,6 @@ create table public.overstyr_beregningsgrunnlag
     har_foreldreloessats     boolean
 );
 
-alter table public.overstyr_beregningsgrunnlag
-    owner to "etterlatte-beregning";
-
 create table public.sanksjon
 (
     id            uuid                       not null
@@ -201,9 +174,6 @@ create table public.sanksjon
     sanksjon_type text default 'STANS'::text not null
 );
 
-alter table public.sanksjon
-    owner to "etterlatte-beregning";
-
 create table public.avkorting_aarsoppgjoer
 (
     id                uuid                  not null
@@ -217,9 +187,6 @@ create table public.avkorting_aarsoppgjoer
     unique (behandling_id, aar)
 );
 
-alter table public.avkorting_aarsoppgjoer
-    owner to "etterlatte-beregning";
-
 create table public.anvendt_trygdetid
 (
     id                uuid default gen_random_uuid() not null
@@ -228,9 +195,6 @@ create table public.anvendt_trygdetid
     foer_kombinering  jsonb                          not null,
     etter_kombinering jsonb                          not null
 );
-
-alter table public.anvendt_trygdetid
-    owner to "etterlatte-beregning";
 
 create table public.inntekt_innvilget
 (
@@ -243,9 +207,6 @@ create table public.inntekt_innvilget
     kilde          text                           not null,
     tidspunkt      timestamp                      not null
 );
-
-alter table public.inntekt_innvilget
-    owner to "etterlatte-beregning";
 
 create table public.avkortingsgrunnlag_faktisk
 (
@@ -263,9 +224,6 @@ create table public.avkortingsgrunnlag_faktisk
     kilde               text                           not null,
     spesifikasjon       text
 );
-
-alter table public.avkortingsgrunnlag_faktisk
-    owner to "etterlatte-beregning";
 
 create table public.etteroppgjoer_beregnet_resultat
 (
@@ -288,6 +246,3 @@ create table public.etteroppgjoer_beregnet_resultat
     constraint etteroppgjoer_beregnet_result_aar_siste_iverksatte_behandli_key
         unique (aar, siste_iverksatte_behandling_id, forbehandling_id)
 );
-
-alter table public.etteroppgjoer_beregnet_resultat
-    owner to "etterlatte-beregning";

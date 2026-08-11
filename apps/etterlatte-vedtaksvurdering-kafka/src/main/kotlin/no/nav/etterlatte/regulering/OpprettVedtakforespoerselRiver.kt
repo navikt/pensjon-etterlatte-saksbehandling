@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.GenererOgFerdigstillVedtaksbrev
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BrevKlient
 import no.nav.etterlatte.klienter.UtbetalingKlient
@@ -186,7 +185,7 @@ internal class OpprettVedtakforespoerselRiver(
                 skalAvbryte = utbetalingVerifikasjon == UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING,
             )
         }
-        ferdigstillBrev(behandlingId, brev.id, revurderingaarsak)
+        ferdigstillBrev(behandlingId, sakId, brev.id, revurderingaarsak)
         return vedtak.attesterVedtak(sakId, behandlingId)
     }
 
@@ -212,15 +211,13 @@ internal class OpprettVedtakforespoerselRiver(
 
     private fun ferdigstillBrev(
         behandlingId: UUID,
+        sakId: SakId,
         brevId: BrevID,
         revurderingaarsak: Revurderingaarsak,
     ) {
         when (revurderingaarsak) {
             Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {
-                brevKlient.genererPdfOgFerdigstillVedtaksbrev(
-                    behandlingId,
-                    GenererOgFerdigstillVedtaksbrev(behandlingId, brevId),
-                )
+                brevKlient.genererPdfOgFerdigstillVedtaksbrev(behandlingId, sakId, brevId)
             }
 
             else -> {

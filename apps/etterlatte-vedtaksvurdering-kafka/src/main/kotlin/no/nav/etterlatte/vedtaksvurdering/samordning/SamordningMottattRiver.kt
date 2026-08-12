@@ -27,6 +27,11 @@ internal class SamordningMottattRiver(
         val vedtakId = packet["vedtakId"].asText()
         logger.info("Behandle mottatt samordning for vedtak [vedtakId=$vedtakId]")
 
+        if (vedtakId == "93403") {
+            logger.info("Hopper over allerede samordnet vedtak som ble stuck i produksjon")
+            return
+        }
+
         try {
             vedtaksvurderingService.samordnetVedtak(vedtakId)?.let {
                 logger.info("Behandlet samordning ferdig for vedtak [behandlingId=${it.behandlingId}]")

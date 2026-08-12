@@ -7,7 +7,7 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "monthly" 
+      interval: "weekly"
       day: "sunday"
     cooldown:
       default-days: 7
@@ -63,79 +63,23 @@ updates:
       - "/apps/etterlatte-saksbehandling-ui/client"
       - "/apps/etterlatte-saksbehandling-ui/server"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "sunday"
     cooldown:
       default-days: 7
     open-pull-requests-limit: 10
     groups:
-      eslint:
+      minor-and-patch-dependencies:
         patterns:
-          - "prettier"
-          - "eslint"
-          - "eslint-*"
-          - "husky"
-          - "lint-staged"
-          - "@typescript-eslint/*"
-          - "@testing-library/*"
-          - "@types/chai"
-          - "@types/mocha"
-          - "chai"
-          - "mocha"
-      ds:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      major-dependencies:
         patterns:
-          - "@navikt/ds-*"
-          - "@navikt/aksel-icons"
-      diverse:
-        patterns:
-          - "slate"
-          - "slate-*"
-          - "vite"
-          - "vite-tsconfig-paths"
-          - "vitest"
-          - "@vitejs/plugin-react-swc"
-          - "@types/node"
-          - "jsdom"
-          - "react"
-          - "react*"
-          - "redux"
-          - "@types/react*"
-          - "@reduxjs/toolkit"
-          - "typescript"
-          - "express"
-          - "http-proxy-middleware"
-          - "@types/express"
-          - "node-fetch"
-          - "@types/node"
-          - "@types/node-fetch"
-          - "ts-node"
-          - "ts-node-dev"
-          - "@types/cors"
-          - "winston*"
-          - "@types/request"
-          - "prom-client"
-          - "unleash-client"
-          - "license-checker-rseidelsohn"
-
-  # =============
-  # FRONTEND ROOT
-  # =============
-  - package-ecosystem: "npm"
-    directory: "/apps/etterlatte-saksbehandling-ui/"
-    schedule:
-      interval: "monthly"
-      day: "sunday"
-    cooldown:
-      default-days: 7
-    open-pull-requests-limit: 10
-    groups:
-      eslint:
-        patterns:
-          - "prettier"
-          - "eslint"
-          - "husky"
-          - "lint-staged"
-          - "@typescript-eslint/*"
+          - '*'
+        update-types:
+          - 'major'
 
   # ==============
   # GITHUB ACTIONS
@@ -143,10 +87,14 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "sunday"
     cooldown:
       default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   # ==============
   # Docker
@@ -156,7 +104,7 @@ updates:
       - /docker
       - /apps/etterlatte-saksbehandling-ui
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "sunday"
     cooldown:
       default-days: 7

@@ -13,47 +13,18 @@ updates:
       default-days: 7
     open-pull-requests-limit: 10
     groups:
-      avro-og-kafka:
+      minor-and-patch-dependencies:
         patterns:
-          - "org.apache.avro*"
-          - "no.nav:kafka*"
-          - "org.apache.kafka*"
-          - "com.github.davidmc24.gradle.plugin.avro"
-      backend:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      major-dependencies:
         patterns:
-          - "io.prometheus*"
-          - "com.fasterxml.jackson*"
-          - "no.nav.security*"
-          - "io.getunleash*"
-          - "com.zaxxer:HikariCP"
-          - "org.postgresql*"
-          - "org.flyway*"
-          - "com.github.seratch:kotliquery"
-          - "com.github.ben-manes.caffeine:caffeine"
-          - "no.nav.klage:klage-kodeverk"
-          - "com.michael-bull.kotlin-result:kotlin-result"
-          - "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas"
-          - "org.slf4j*"
-          - "ch.qos.logback*"
-          - "net.logstash*"
-          - "com.github.navikt:rapids-and-rivers"
-          - "io.ktor*"
-          - "org.jetbrains.kotlinx*"
-          - "org.apache.commons:commons-compress"
-          - "org.junit*"
-          - "io.kotest*"
-          - "org.testcontainers*"
-          - "io.mockk:mockk"
-          - "no.nav.security:mock-oauth2-server"
-          - "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"
-          - "com.github.jk1.dependency-license-report"
-      jms-mq:
-        patterns:
-          - "org.messaginghub:pooled-jms"
-          - "com.ibm.mq:com.ibm.mq.jakarta.client"
-      micrometer:
-        patterns:
-          - "io.micrometer*"
+          - '*'
+        update-types:
+          - 'major'
+
 
   # =============
   # FRONTEND

@@ -5,7 +5,7 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '3.1.4' }
 [versions]
 jackson-version = "2.22.1"
 jupiter-version = "6.1.2"
-ktor-version = "3.5.2"
+ktor-version = "3.5.1"
 navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.21.4"
@@ -65,7 +65,7 @@ brevbaker-api-model-common = { module = "no.nav.pensjon.brevbaker:brevbaker-api-
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.18" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.6.1" }
-logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.1" }
+logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.17.0" }
 

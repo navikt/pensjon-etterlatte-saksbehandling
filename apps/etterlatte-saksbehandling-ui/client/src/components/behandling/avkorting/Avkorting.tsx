@@ -84,17 +84,15 @@ export const Avkorting = () => {
           error: (e) => <ApiErrorAlert>En feil har oppstått: {e.detail}</ApiErrorAlert>,
         })}
 
+        <AvkortingInntekt redigerbar={redigerbar} />
+
+        {!brukNyeBeregningsregler && (
+          <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
+        )}
+        {!brukNyeBeregningsregler && <IkkeInnvilgetPeriode behandling={behandling} />}
+
         {avkorting && (
-          <>
-            <AvkortingInntekt redigerbar={redigerbar} />
-
-            {!brukNyeBeregningsregler && (
-              <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
-            )}
-            {!brukNyeBeregningsregler && <IkkeInnvilgetPeriode behandling={behandling} />}
-
-            <YtelseEtterAvkorting avkortetYtelse={avkortetYtelse} tidligereAvkortetYtelse={tidligereAvkortetYtelse} />
-          </>
+          <YtelseEtterAvkorting avkortetYtelse={avkortetYtelse} tidligereAvkortetYtelse={tidligereAvkortetYtelse} />
         )}
       </VStack>
     </Box>

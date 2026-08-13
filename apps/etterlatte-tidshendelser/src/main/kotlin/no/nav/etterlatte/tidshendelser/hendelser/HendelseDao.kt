@@ -354,6 +354,26 @@ class HendelseDao(
             ).let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
         }
 
+    fun uferdigeJobber(): List<HendelserJobb> =
+        datasource.transaction {
+            queryOf(
+                """
+                SELECT *
+                FROM jobb
+                WHERE status != 'FERDIG'
+                  AND kjoeredato < CURRENT_DATE
+                  AND kjoeredato > CURRENT_DATE - INTERVAL '3 months'
+                  AND NOT EXISTS(
+                    SELECT 1
+                    FROM jobb ny
+                    WHERE ny.id > jobb.id
+                      AND ny.type = jobb.type
+                      AND ny.behandlingsmaaned = jobb.behandlingsmaaned
+                      AND (ny.status = 'FERDIG' OR (ny.status != 'FEILET' AND ny.kjoeredato >= CURRENT_DATE)))
+                """.trimIndent(),
+            ).let { query -> it.run(query.map { row -> row.toHendelserJobb() }.asList) }
+        }
+
     private fun Row.toHendelse() =
         Hendelse(
             id = uuid("id"),

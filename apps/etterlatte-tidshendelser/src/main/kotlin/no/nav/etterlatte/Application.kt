@@ -24,6 +24,7 @@ fun main() =
                         timers.add(appContext.jobbPollerTask.schedule())
                         timers.add(appContext.hendelsePollerTask.schedule())
                         timers.add(appContext.jobberTaskScheduler.schedule())
+                        timers.add(appContext.uferdigeJobberPollerTask.schedule())
                     }
 
                     override fun onShutdownSignal(rapidsConnection: RapidsConnection) {

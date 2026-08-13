@@ -633,8 +633,9 @@ class EtteroppgjoerForbehandlingService(
     fun kopierOgLagreNyForbehandling(
         forbehandlingId: UUID,
         sakId: SakId,
-        klageId: UUID?,
         brukerTokenInfo: BrukerTokenInfo,
+        klageId: UUID?,
+        omgjoeringEgetInitiativ: Boolean,
     ): EtteroppgjoerForbehandling {
         val sisteIverksatteBehandling =
             runBlocking {
@@ -653,6 +654,7 @@ class EtteroppgjoerForbehandlingService(
                 brevId = null,
                 varselbrevSendt = null,
                 klageOmgjoering = klageId,
+                omgjoeringEgetInitiativ = omgjoeringEgetInitiativ,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

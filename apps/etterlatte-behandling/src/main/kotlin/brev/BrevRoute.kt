@@ -80,14 +80,12 @@ fun Route.brevRoute(service: BrevService) {
 
         post("ferdigstill") {
             kunSkrivetilgang {
-                inTransaction {
-                    ferdigstill(logger, service)
-                }
+                ferdigstill(logger, service)
                 call.respond(HttpStatusCode.OK)
             }
         }
 
-        post("/generer-pdf-og-ferdigstill") {
+        post("generer-pdf-og-ferdigstill") {
             kunSkrivetilgang {
                 logger.info("Genererer PDF og ferdigstiller brev for behandling (behandlingId=$behandlingId)")
                 measureTimedValue {
@@ -96,6 +94,7 @@ fun Route.brevRoute(service: BrevService) {
                 }.let { (_, varighet) ->
                     logger.info("Generering og ferdigstilling av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                 }
+                call.respond(HttpStatusCode.OK)
             }
         }
 
@@ -169,8 +168,10 @@ private fun RoutingContext.ferdigstill(
 ): TimedValue<Unit> {
     logger.info("Ferdigstiller strukturert brev for behandling (id=$behandlingId)")
     return measureTimedValue {
-        runBlocking {
-            service.ferdigstillStrukturertBrev(behandlingId, brukerTokenInfo)
+        inTransaction {
+            runBlocking {
+                service.ferdigstillStrukturertBrev(behandlingId, brukerTokenInfo)
+            }
         }
     }.also { (_, varighet) ->
         logger.info("Ferdigstilling av strukturert brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")

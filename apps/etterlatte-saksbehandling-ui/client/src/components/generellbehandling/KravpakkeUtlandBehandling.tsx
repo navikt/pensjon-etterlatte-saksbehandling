@@ -55,10 +55,6 @@ const StandardBreddeTabell = styled(Table)`
   margin-top: 2rem;
 `
 
-const LenkeMargin = styled(Link)`
-  margin: 2rem 0rem 0.5rem 0;
-`
-
 export const hentSakOgNavigerTilSaksoversikt = (sakId: number, navigate: NavigateFunction) => {
   hentSak(sakId)
     .then((sak) => {
@@ -161,7 +157,7 @@ const KravpakkeUtlandBehandling = (props: {
   return (
     <HStack height="100%" minHeight="100vh" wrap={false}>
       <Box width="100%" style={{ whiteSpace: 'pre-wrap' }}>
-        <div style={{ maxWidth: '55rem', margin: 'auto' }}>
+        <VStack style={{ maxWidth: '50em' }}>
           <Box paddingInline="space-64" paddingBlock="space-64 space-16">
             <Heading spacing size="large" level="1">
               Kravpakke til utland
@@ -171,323 +167,341 @@ const KravpakkeUtlandBehandling = (props: {
               her for hvilke SED`er som blir sendt, og fyll inn nødvendig informasjon. Bruk notatfeltet ved behov for
               utfyllende informasjon.
             </p>
-          </Box>
-          <Box padding="space-16" borderRadius="2">
-            <div>
-              {utlandsBehandling.tilknyttetBehandling ? (
-                <div>
-                  {mapResult(avdoedeStatus, {
-                    pending: <Spinner label="Henter opplysninger om avdøde" />,
-                    error: (error) => (
-                      <ApiErrorAlert>Klarte ikke å hente informasjon om avdød: {error.detail}</ApiErrorAlert>
-                    ),
-                    success: (avdoed) => (
-                      <>
-                        <h3>Informasjon om avdøde</h3>
-                        <VStack gap="space-16">
-                          <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
-                          <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
-                        </VStack>
-                      </>
-                    ),
-                  })}
-                </div>
-              ) : (
-                <Alert variant="warning">
-                  Denne utlandsbehandlingen er ikke tilknyttet en behandling. Vi kan derfor ikke hente avdoedes
-                  informasjon
-                </Alert>
-              )}
-              {mapApiResult(
-                hentAlleLandRequest,
-                <Spinner label="Laster landliste" />,
-                () => (
-                  <ApiErrorAlert>Vi klarte ikke å hente landlisten</ApiErrorAlert>
-                ),
-                (landListe: ILand[]) => (
-                  <>
-                    <Heading size="medium" level="3" style={{ marginTop: '2rem' }}>
-                      Kravpakke sendes til
-                    </Heading>
-                    <Select
-                      readOnly={!redigerbar}
-                      label="Land"
-                      value={valgtLandIsoKode || ''}
-                      onChange={(e) => {
-                        setValgtLandIsoKode(e.target.value)
-                        setErrLand(false)
-                      }}
-                      onBlur={() => setLandAlleredeValgt(false)}
-                    >
-                      <option value="" disabled={true}>
-                        Velg land
-                      </option>
-                      {landListe.map((land) => (
-                        <option key={land.isoLandkode} value={land.isoLandkode}>
-                          {land.beskrivelse.tekst}
+
+            <VStack gap="space-32">
+              <VStack gap="space-32">
+                {utlandsBehandling.tilknyttetBehandling ? (
+                  <div>
+                    {mapResult(avdoedeStatus, {
+                      pending: <Spinner label="Henter opplysninger om avdøde" />,
+                      error: (error) => (
+                        <ApiErrorAlert>Klarte ikke å hente informasjon om avdød: {error.detail}</ApiErrorAlert>
+                      ),
+                      success: (avdoed) => (
+                        <>
+                          <h3>Informasjon om avdøde</h3>
+                          <HStack gap="space-16">
+                            <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
+                            <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
+                          </HStack>
+                        </>
+                      ),
+                    })}
+                  </div>
+                ) : (
+                  <Alert variant="warning">
+                    Denne utlandsbehandlingen er ikke tilknyttet en behandling. Vi kan derfor ikke hente avdoedes
+                    informasjon
+                  </Alert>
+                )}
+                {mapApiResult(
+                  hentAlleLandRequest,
+                  <Spinner label="Laster landliste" />,
+                  () => (
+                    <ApiErrorAlert>Vi klarte ikke å hente landlisten</ApiErrorAlert>
+                  ),
+                  (landListe: ILand[]) => (
+                    <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                      <Heading size="medium" level="2">
+                        Kravpakke sendes til
+                      </Heading>
+                      <Select
+                        readOnly={!redigerbar}
+                        label="Land"
+                        value={valgtLandIsoKode || ''}
+                        onChange={(e) => {
+                          setValgtLandIsoKode(e.target.value)
+                          setErrLand(false)
+                        }}
+                        onBlur={() => setLandAlleredeValgt(false)}
+                      >
+                        <option value="" disabled={true}>
+                          Velg land
                         </option>
-                      ))}
-                    </Select>
-                    {errorLand && <Alert variant="error">Du må velge land</Alert>}
-                    <div style={{ margin: '1rem 0rem' }}>
-                      <Button
-                        disabled={!redigerbar}
-                        onClick={() => {
-                          setLandAlleredeValgt(false)
-                          if (valgtLandIsoKode) {
-                            const finnesAllerede = valgteLandIsoKode.includes(valgtLandIsoKode)
-                            if (finnesAllerede) {
-                              setLandAlleredeValgt(true)
-                            } else {
-                              const nyLandListe = valgteLandIsoKode.concat([valgtLandIsoKode])
-                              setvalgteLandIsoKode(nyLandListe)
+                        {landListe.map((land) => (
+                          <option key={land.isoLandkode} value={land.isoLandkode}>
+                            {land.beskrivelse.tekst}
+                          </option>
+                        ))}
+                      </Select>
+                      {errorLand && <Alert variant="error">Du må velge land</Alert>}
+                      <div style={{ margin: '1rem 0rem' }}>
+                        <Button
+                          disabled={!redigerbar}
+                          onClick={() => {
+                            setLandAlleredeValgt(false)
+                            if (valgtLandIsoKode) {
+                              const finnesAllerede = valgteLandIsoKode.includes(valgtLandIsoKode)
+                              if (finnesAllerede) {
+                                setLandAlleredeValgt(true)
+                              } else {
+                                const nyLandListe = valgteLandIsoKode.concat([valgtLandIsoKode])
+                                setvalgteLandIsoKode(nyLandListe)
+                              }
                             }
+                          }}
+                        >
+                          Legg til land
+                        </Button>
+                        {landAlleredeValgt && <p>Landet er allerede valgt</p>}
+                      </div>
+                      {valgteLandIsoKode.length ? (
+                        <Heading size="small" level="3">
+                          Valgte land
+                        </Heading>
+                      ) : null}
+                      {valgteLandIsoKode && (
+                        <Chips>
+                          {valgteLandIsoKode.map((landIsoKode) => {
+                            const kodeverkLandMatch = alleLandKodeverk?.find(
+                              (kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode
+                            )
+                            return (
+                              <Fragment key={landIsoKode}>
+                                {redigerbar ? (
+                                  <Chips.Removable
+                                    style={{ cursor: 'pointer' }}
+                                    variant="action"
+                                    onClick={() => {
+                                      if (redigerbar) {
+                                        setLandAlleredeValgt(false)
+                                        const nyLandliste = valgteLandIsoKode.filter(
+                                          (isolandkode) => isolandkode !== landIsoKode
+                                        )
+                                        setvalgteLandIsoKode(nyLandliste)
+                                      }
+                                    }}
+                                  >
+                                    {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
+                                  </Chips.Removable>
+                                ) : (
+                                  <Chips.Toggle variant="neutral">
+                                    {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
+                                  </Chips.Toggle>
+                                )}
+                              </Fragment>
+                            )
+                          })}
+                        </Chips>
+                      )}
+                    </Box>
+                  )
+                )}
+
+                <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                  <VStack gap="space-16">
+                    <Heading size="medium" level="2">
+                      RINA
+                    </Heading>
+                    <Link href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
+                      Gå til RINA for å opprette kravpakke til utlandet
+                      <ExternalLinkIcon fill={Accent600} aria-hidden />
+                    </Link>
+                    <TextField
+                      label="Saksnummer RINA"
+                      value={rinanummer}
+                      onChange={(e) => setRinanummer(e.target.value)}
+                      readOnly={!redigerbar}
+                    />
+                  </VStack>
+                </Box>
+              </VStack>
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <VStack gap="space-16">
+                  {' '}
+                  <Heading size="medium" level="2">
+                    Dokumenter
+                  </Heading>
+                  <Select
+                    label="Hvile dokumenter vil du legge til?"
+                    value={dokumentDropdown}
+                    onChange={(e) => setDokumentDropdown(e.target.value)}
+                  >
+                    <option value="" disabled={true}>
+                      Velg dokument
+                    </option>
+                    <option value="P2100">P2100</option>
+                    <option value="P3000">P3000</option>
+                    <option value="P4000">P4000</option>
+                    <option value="P5000">P5000</option>
+                    <option value="P6000">P6000</option>
+                    <option value="P8000">P8000</option>
+                    <option value="velg dokument">Annet</option>
+                  </Select>
+                  {redigerbar && (
+                    <div>
+                      <Button
+                        style={{ marginTop: '0.5rem' }}
+                        onClick={() => {
+                          if (dokumentDropdown) {
+                            const nyttDokument: DokumentSendtMedDato = {
+                              dokumenttype: dokumentDropdown,
+                              sendt: false,
+                              dato: '',
+                            }
+                            setDokumenter((prev) => prev.concat([nyttDokument]))
                           }
                         }}
                       >
-                        Legg til land
+                        Legg til valgt dokument
                       </Button>
-                      {landAlleredeValgt && <p>Landet er allerede valgt</p>}
                     </div>
-                    {valgteLandIsoKode.length ? (
-                      <Heading size="medium" level="3">
-                        Valgte land
-                      </Heading>
-                    ) : null}
-                    {valgteLandIsoKode && (
-                      <Chips>
-                        {valgteLandIsoKode.map((landIsoKode) => {
-                          const kodeverkLandMatch = alleLandKodeverk?.find(
-                            (kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode
-                          )
-                          return (
-                            <Fragment key={landIsoKode}>
+                  )}
+                  <StandardBreddeTabell>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.HeaderCell scope="col">Dokumenttype(feks P2000)</Table.HeaderCell>
+                        <Table.HeaderCell scope="col">Sendt</Table.HeaderCell>
+                        <Table.HeaderCell scope="col">Dato sendt</Table.HeaderCell>
+                        <Table.HeaderCell scope="col" />
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                      {dokumenter.map((dokument, idx) => {
+                        const fjernDokument = () => {
+                          setDokumenter((dokumenter) => dokumenter.filter((_, i) => idx !== i))
+                        }
+                        return (
+                          <Table.Row key={idx}>
+                            <Table.DataCell>
                               {redigerbar ? (
-                                <Chips.Removable
-                                  style={{ cursor: 'pointer' }}
-                                  variant="action"
-                                  onClick={() => {
-                                    if (redigerbar) {
-                                      setLandAlleredeValgt(false)
-                                      const nyLandliste = valgteLandIsoKode.filter(
-                                        (isolandkode) => isolandkode !== landIsoKode
-                                      )
-                                      setvalgteLandIsoKode(nyLandliste)
-                                    }
+                                <TextField
+                                  label=""
+                                  value={dokument.dokumenttype}
+                                  size="medium"
+                                  style={{ maxWidth: '16rem' }}
+                                  onChange={(e) => {
+                                    const oppdaterteDocType = dokumenter.map((doc, i) => {
+                                      if (idx === i) {
+                                        return { ...doc, dokumenttype: e.target.value }
+                                      }
+                                      return doc
+                                    })
+                                    setDokumenter(oppdaterteDocType)
                                   }}
-                                >
-                                  {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
-                                </Chips.Removable>
+                                />
                               ) : (
-                                <Chips.Toggle variant="neutral">
-                                  {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
-                                </Chips.Toggle>
+                                <BodyShort>{dokument.dokumenttype}</BodyShort>
                               )}
-                            </Fragment>
-                          )
-                        })}
-                      </Chips>
-                    )}
-                  </>
-                )
-              )}
-
-              <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
-                Gå til RINA for å opprette kravpakke til utlandet
-                <ExternalLinkIcon fill={Accent600} aria-hidden />
-              </LenkeMargin>
-              <TextField
-                label="Saksnummer RINA"
-                value={rinanummer}
-                onChange={(e) => setRinanummer(e.target.value)}
-                readOnly={!redigerbar}
-              />
-            </div>
-            <div style={{ marginTop: '2rem' }}>
-              <Select
-                label="Hvile dokumenter vil du legge til?"
-                value={dokumentDropdown}
-                onChange={(e) => setDokumentDropdown(e.target.value)}
-              >
-                <option value="" disabled={true}>
-                  Velg dokument
-                </option>
-                <option value="P2100">P2100</option>
-                <option value="P3000">P3000</option>
-                <option value="P4000">P4000</option>
-                <option value="P5000">P5000</option>
-                <option value="P6000">P6000</option>
-                <option value="P8000">P8000</option>
-                <option value="velg dokument">Annet</option>
-              </Select>
-              {redigerbar && (
-                <Button
-                  style={{ marginTop: '0.5rem' }}
-                  onClick={() => {
-                    if (dokumentDropdown) {
-                      const nyttDokument: DokumentSendtMedDato = {
-                        dokumenttype: dokumentDropdown,
-                        sendt: false,
-                        dato: '',
-                      }
-                      setDokumenter((prev) => prev.concat([nyttDokument]))
-                    }
-                  }}
-                >
-                  Legg til valgt dokument
-                </Button>
-              )}
-            </div>
-            <StandardBreddeTabell>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell scope="col">Dokumenttype(feks P2000)</Table.HeaderCell>
-                  <Table.HeaderCell scope="col">Sendt</Table.HeaderCell>
-                  <Table.HeaderCell scope="col">Dato sendt</Table.HeaderCell>
-                  <Table.HeaderCell scope="col" />
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {dokumenter.map((dokument, idx) => {
-                  const fjernDokument = () => {
-                    setDokumenter((dokumenter) => dokumenter.filter((_, i) => idx !== i))
-                  }
-                  return (
-                    <Table.Row key={idx}>
-                      <Table.DataCell>
-                        {redigerbar ? (
-                          <TextField
-                            label=""
-                            value={dokument.dokumenttype}
-                            size="medium"
-                            style={{ maxWidth: '16rem' }}
-                            onChange={(e) => {
-                              const oppdaterteDocType = dokumenter.map((doc, i) => {
-                                if (idx === i) {
-                                  return { ...doc, dokumenttype: e.target.value }
-                                }
-                                return doc
-                              })
-                              setDokumenter(oppdaterteDocType)
-                            }}
-                          />
-                        ) : (
-                          <BodyShort>{dokument.dokumenttype}</BodyShort>
-                        )}
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <Checkbox
-                          readOnly={!redigerbar}
-                          checked={dokument.sendt}
-                          onChange={(e) => {
-                            const oppdaterteDocSendt = dokumenter.map((doc, i) => {
-                              if (idx === i) {
-                                return { ...doc, sendt: e.target.checked }
-                              }
-                              return doc
-                            })
-                            setDokumenter(oppdaterteDocSendt)
-                          }}
-                        >
-                          <></>
-                        </Checkbox>
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <DatoVelger
-                          disabled={!redigerbar}
-                          label=""
-                          value={dokument.dato ? new Date(dokument.dato) : undefined}
-                          onChange={(date) => {
-                            const oppdaterteDocDato = dokumenter.map((doc, i) => {
-                              if (idx === i) {
-                                return { ...doc, dato: formatDateToLocaleDateOrEmptyString(date) }
-                              }
-                              return doc
-                            })
-                            setDokumenter(oppdaterteDocDato)
-                          }}
-                        />
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <Button
-                          disabled={!redigerbar}
-                          variant="tertiary"
-                          icon={<TrashIcon aria-hidden />}
-                          onClick={() => fjernDokument()}
-                          style={{ marginLeft: '5rem' }}
-                        >
-                          Slett dokument
-                        </Button>
-                      </Table.DataCell>
-                    </Table.Row>
-                  )
-                })}
-              </Table.Body>
-            </StandardBreddeTabell>
-            <div style={{ marginTop: '3.5rem', marginBottom: '3rem' }}>
-              <Heading size="medium" level="3">
-                Varsling til bruker
-              </Heading>
-              <p>
-                Når nødvendige SED`er er sendt i RINA skal bruker varsles(om at krav er sendt). Opprett brev til bruker
-                her. Tekstmal finner du her i tekstbiblioteket.
-              </p>
-              <div>
-                <Button
-                  disabled={!redigerbar}
-                  icon={<PencilWritingIcon aria-hidden />}
-                  onClick={opprettNyttBrevINyFane}
-                  loading={isPending(nyttBrevStatus)}
-                  iconPosition="right"
-                >
-                  Åpne brev i ny fane
-                </Button>
-              </div>
-            </div>
-            <TextFieldBegrunnelse
-              disabled={!redigerbar}
-              label="Notater(valgfri)"
-              value={notater}
-              onChange={(e) => setNotater(e.target.value)}
-            />
-            {isFailureHandler({
-              apiResult: oppdaterGenerellBehandlingStatus,
-              errorMessage: 'Kunne ikke oppdatere generell behandling utland',
-            })}
-            {isSuccess(oppdaterGenerellBehandlingStatus || avbrytbehandlingStatus) && (
-              <Alert style={{ margin: '1rem', width: '20rem' }} variant="success">
-                Behandlingen er oppdatert
-              </Alert>
-            )}
-
-            <Spinner visible={isPendingOrInitial(gjeldendeSakStatus)} label="Henter opplysninger om sak" />
-
-            {isFailureHandler({
-              errorMessage: 'Vi klarte ikke å hente gjeldende sak',
-              apiResult: gjeldendeSakStatus,
-            })}
-            {isFailureHandler({
-              apiResult: avbrytbehandlingStatus,
-              errorMessage: 'Kunne ikke avbryte generell behandling utland',
-            })}
-            <HStack gap="space-8" justify="end">
-              {redigerbar && (
-                <>
-                  <Button onClick={() => avbrytBehandling()} loading={isPending(avbrytbehandlingStatus)}>
-                    Avbryt
-                  </Button>
+                            </Table.DataCell>
+                            <Table.DataCell>
+                              <Checkbox
+                                readOnly={!redigerbar}
+                                checked={dokument.sendt}
+                                onChange={(e) => {
+                                  const oppdaterteDocSendt = dokumenter.map((doc, i) => {
+                                    if (idx === i) {
+                                      return { ...doc, sendt: e.target.checked }
+                                    }
+                                    return doc
+                                  })
+                                  setDokumenter(oppdaterteDocSendt)
+                                }}
+                              >
+                                <></>
+                              </Checkbox>
+                            </Table.DataCell>
+                            <Table.DataCell>
+                              <DatoVelger
+                                disabled={!redigerbar}
+                                label=""
+                                value={dokument.dato ? new Date(dokument.dato) : undefined}
+                                onChange={(date) => {
+                                  const oppdaterteDocDato = dokumenter.map((doc, i) => {
+                                    if (idx === i) {
+                                      return { ...doc, dato: formatDateToLocaleDateOrEmptyString(date) }
+                                    }
+                                    return doc
+                                  })
+                                  setDokumenter(oppdaterteDocDato)
+                                }}
+                              />
+                            </Table.DataCell>
+                            <Table.DataCell>
+                              <Button
+                                disabled={!redigerbar}
+                                variant="tertiary"
+                                icon={<TrashIcon aria-hidden />}
+                                onClick={() => fjernDokument()}
+                                style={{ marginLeft: '5rem' }}
+                              >
+                                Slett dokument
+                              </Button>
+                            </Table.DataCell>
+                          </Table.Row>
+                        )
+                      })}
+                    </Table.Body>
+                  </StandardBreddeTabell>
+                </VStack>
+              </Box>
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <Heading size="medium" level="3">
+                  Varsling til bruker
+                </Heading>
+                <p>
+                  Når nødvendige SED`er er sendt i RINA skal bruker varsles(om at krav er sendt). Opprett brev til
+                  bruker her. Tekstmal finner du her i tekstbiblioteket.
+                </p>
+                <div>
                   <Button
-                    onClick={() => oppdaterGenerellbehandlingUtland()}
-                    loading={isPending(oppdaterGenerellBehandlingStatus)}
+                    disabled={!redigerbar}
+                    icon={<PencilWritingIcon aria-hidden />}
+                    onClick={opprettNyttBrevINyFane}
+                    loading={isPending(nyttBrevStatus)}
+                    iconPosition="right"
                   >
-                    Lagre opplysninger
+                    Åpne brev i ny fane
                   </Button>
-                  <SendtilAttesteringModal utlandsBehandling={generellBehandlingMedLocalState} />
-                </>
+                </div>
+              </Box>
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <TextFieldBegrunnelse
+                  disabled={!redigerbar}
+                  label="Notater(valgfri)"
+                  value={notater}
+                  onChange={(e) => setNotater(e.target.value)}
+                />
+              </Box>
+              {isFailureHandler({
+                apiResult: oppdaterGenerellBehandlingStatus,
+                errorMessage: 'Kunne ikke oppdatere generell behandling utland',
+              })}
+              {isSuccess(oppdaterGenerellBehandlingStatus || avbrytbehandlingStatus) && (
+                <Alert style={{ margin: '1rem', width: '20rem' }} variant="success">
+                  Behandlingen er oppdatert
+                </Alert>
               )}
-            </HStack>
+
+              <Spinner visible={isPendingOrInitial(gjeldendeSakStatus)} label="Henter opplysninger om sak" />
+
+              {isFailureHandler({
+                errorMessage: 'Vi klarte ikke å hente gjeldende sak',
+                apiResult: gjeldendeSakStatus,
+              })}
+              {isFailureHandler({
+                apiResult: avbrytbehandlingStatus,
+                errorMessage: 'Kunne ikke avbryte generell behandling utland',
+              })}
+              <HStack gap="space-8" justify="end">
+                {redigerbar && (
+                  <>
+                    <Button onClick={() => avbrytBehandling()} loading={isPending(avbrytbehandlingStatus)}>
+                      Avbryt
+                    </Button>
+                    <Button
+                      onClick={() => oppdaterGenerellbehandlingUtland()}
+                      loading={isPending(oppdaterGenerellBehandlingStatus)}
+                    >
+                      Lagre opplysninger
+                    </Button>
+                    <SendtilAttesteringModal utlandsBehandling={generellBehandlingMedLocalState} />
+                  </>
+                )}
+              </HStack>
+            </VStack>
           </Box>
-        </div>
+        </VStack>
       </Box>
       <GenerellbehandlingSidemeny utlandsBehandling={generellBehandlingMedLocalState} />
     </HStack>

@@ -90,6 +90,8 @@ enum class Revurderingaarsak(
 
     REVURDERE_ETTER_OPPHOER(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
+    NYTT_FNUMMER(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
+
     // Mangler funksjonalitet
     UTSENDELSE_AV_SED(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
     SANKSJON_PGA_MANGLENDE_OPPLYSNINGER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),

@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.logging.logstashlogbackencoder) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")
+        exclude("tools.jackson.core")
     }
 
     // Testing

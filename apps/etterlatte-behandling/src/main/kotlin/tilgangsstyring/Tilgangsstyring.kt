@@ -8,12 +8,12 @@ import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.log
+import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.request.path
 import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingContext
-import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
@@ -59,18 +59,18 @@ class PluginConfiguration {
     Denne sjekker på både adressebeskyttelse og egen ansatt og returnerer http statuscode 403 hvis man mangler tilgang.
  */
 private object SpesialtilgangsHook : Hook<suspend (ApplicationCall) -> Unit> {
-    private val AdressebeskyttelseHook: PipelinePhase = PipelinePhase("Adressebeskyttelse")
-    private val AuthenticatePhase: PipelinePhase = PipelinePhase("Authenticate")
-
     override fun install(
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit,
     ) {
-        // Inspirasjon AuthenticationChecked
-        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AuthenticatePhase)
-        pipeline.insertPhaseAfter(AuthenticatePhase, AdressebeskyttelseHook)
-        pipeline.insertPhaseBefore(ApplicationCallPipeline.Call, AdressebeskyttelseHook)
-        pipeline.intercept(AdressebeskyttelseHook) { handler(call) }
+        // Delegerer til Ktors offisielle AuthenticationChecked-hook, som garanterer at autentisering
+        // (inkl. token-validering/principal-setting) allerede har kjørt før handleren kalles. Vi hadde
+        // tidligere en egen manuell reimplementasjon av fase-rekkefølgen her
+        // (insertPhaseAfter(ApplicationCallPipeline.Plugins, ...)), men den var skjør fordi Ktor kan
+        // flytte hvor selve autentiseringen kjører internt (skjedde i 3.5.2 da JWT-valideringen ble
+        // flyttet til en ny Validators-fase), noe som førte til at denne hooken kjørte FØR
+        // autentisering og dermed alltid så en null-principal.
+        AuthenticationChecked.install(pipeline, handler)
     }
 }
 
@@ -205,7 +205,9 @@ suspend inline fun RoutingContext.withFoedselsnummerInternal(
             }
         }
 
-        else -> onSuccess(foedselsnummer)
+        else -> {
+            onSuccess(foedselsnummer)
+        }
     }
 }
 
@@ -228,8 +230,13 @@ fun RoutingContext.sjekkSkrivetilgang(
             }
         }
 
-        is SystemUser -> true
-        else -> false
+        is SystemUser -> {
+            true
+        }
+
+        else -> {
+            false
+        }
     }
 }
 
@@ -245,18 +252,33 @@ private fun RoutingContext.finnSkriveTilgangForId(sakId: SakId? = null): Enhetsn
     } else {
         val idForRequest = call.parameters[funnetCallIdParametersType.value]!!
         when (funnetCallIdParametersType) {
-            CallParamAuthId.BEHANDLINGID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId)?.enhetNr
-            CallParamAuthId.SAKID -> sakTilgangDao.hentSakMedGraderingOgSkjerming(idForRequest.tilSakId())?.enhetNr
-            CallParamAuthId.OPPGAVEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId)?.enhetNr
-            CallParamAuthId.KLAGEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(klageId)?.enhetNr
-            CallParamAuthId.GENERELLBEHANDLINGID ->
+            CallParamAuthId.BEHANDLINGID -> {
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId)?.enhetNr
+            }
+
+            CallParamAuthId.SAKID -> {
+                sakTilgangDao.hentSakMedGraderingOgSkjerming(idForRequest.tilSakId())?.enhetNr
+            }
+
+            CallParamAuthId.OPPGAVEID -> {
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId)?.enhetNr
+            }
+
+            CallParamAuthId.KLAGEID -> {
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(klageId)?.enhetNr
+            }
+
+            CallParamAuthId.GENERELLBEHANDLINGID -> {
                 sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(generellBehandlingId)?.enhetNr
+            }
 
-            CallParamAuthId.TILBAKEKREVINGID ->
+            CallParamAuthId.TILBAKEKREVINGID -> {
                 sakTilgangDao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId)?.enhetNr
+            }
 
-            CallParamAuthId.ETTEROPPGJOERID ->
+            CallParamAuthId.ETTEROPPGJOERID -> {
                 sakTilgangDao.hentSakMedGraderingOgSkjermingPaaEtteroppgjoer(forbehandlingId)?.enhetNr
+            }
         }
     }
 }
@@ -333,6 +355,8 @@ suspend inline fun RoutingContext.kunAttestant(onSuccess: () -> Unit) {
             }
         }
 
-        else -> onSuccess()
+        else -> {
+            onSuccess()
+        }
     }
 }

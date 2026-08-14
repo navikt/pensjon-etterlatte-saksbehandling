@@ -7,6 +7,7 @@ import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.hooks.ResponseSent
+import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.auth.principal
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
@@ -14,7 +15,6 @@ import io.ktor.server.routing.RoutingCall
 import io.ktor.server.routing.RoutingPipelineCall
 import io.ktor.util.AttributeKey
 import io.ktor.util.logging.KtorSimpleLogger
-import io.ktor.util.pipeline.PipelinePhase
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.PluginConfiguration
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -41,17 +41,13 @@ private val startTimeAttribute = AttributeKey<Long>(STARTTIME)
 private val loggingPerformed = AttributeKey<Boolean>("requestLoggingPerformed")
 
 private object UserIdMdcHook : Hook<suspend (ApplicationCall) -> Unit> {
-    private val UserIdMdcHook: PipelinePhase = PipelinePhase("UserIdMdc")
-    private val AuthenticatePhase: PipelinePhase = PipelinePhase("Authenticate")
-
+    // Delegerer til Ktors offisielle AuthenticationChecked-hook (se Tilgangsstyring.kt for begrunnelse) i stedet
+    // for å reimplementere fase-rekkefølgen selv, som var skjørt og gikk i stykker i Ktor 3.5.2 (KTOR-8032).
     override fun install(
         pipeline: ApplicationCallPipeline,
         handler: suspend (ApplicationCall) -> Unit,
     ) {
-        // Se Tilgangsstyring.kt
-        pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AuthenticatePhase)
-        pipeline.insertPhaseAfter(AuthenticatePhase, UserIdMdcHook)
-        pipeline.intercept(UserIdMdcHook) { handler(call) }
+        AuthenticationChecked.install(pipeline, handler)
     }
 }
 
@@ -71,12 +67,15 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                     "Selvbetjening" // Altså en borger/privatperson
                 } else if (principal?.context?.issuers?.contains(Issuer.AZURE.issuerName) == true) {
                     when (val bruker = call.brukerTokenInfo) {
-                        is Systembruker ->
+                        is Systembruker -> {
                             bruker.jwtTokenClaims?.getClaimAsString(Claims.azp_name)
                                 ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha ${Claims.azp_name.name} for å være systembruker")
-                        is Saksbehandler ->
+                        }
+
+                        is Saksbehandler -> {
                             bruker.jwtTokenClaims?.getClaimAsString(Claims.NAVident)
                                 ?: throw IkkeTillattException("NOT_SUPPORTED", "Må ha ${Claims.NAVident.name} for å være saksbehandler")
+                        }
                     }
                 } else if (principal?.context?.issuers?.contains(Issuer.MASKINPORTEN.issuerName) == true) {
                     call.orgNummer
@@ -136,7 +135,7 @@ val serverRequestLoggerPlugin =
  */
 private fun extractUrlTemplate(call: ApplicationCall): String? =
     when (call) { // TODO sjekk at logging-markers fortsatt er med
-        is RoutingPipelineCall ->
+        is RoutingPipelineCall -> {
             (call.route.parent ?: call.route) // Drop METHOD part
                 .toString()
                 .replace("/(authenticate \"default\")", "", true) // Alle sikrede endepunkter wrappes av authenticate
@@ -145,5 +144,9 @@ private fun extractUrlTemplate(call: ApplicationCall): String? =
                         .entries()
                         .joinToString(prefix = "?", separator = ",") { it.key },
                 )
-        else -> null
+        }
+
+        else -> {
+            null
+        }
     }

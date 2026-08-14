@@ -259,6 +259,30 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
         }
 
         @Test
+        fun `skal generere pdf og ferdigstille`() {
+            val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
+            val behandling = opprettBehandling(sak)
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, behandling.id, vedtakBehandlingDto(behandling))
+            coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns
+                mockk {
+                    every { kanEndres() } returns true
+                }
+
+            withTestApplication { client ->
+                val response =
+                    client.post(
+                        "/api/behandling/brev/${behandling.id}/generer-pdf-og-ferdigstill?" +
+                            "brevId=42&sakId=${behandling.sak.id}",
+                    ) {
+                        addAuthToken(tokenSaksbehandler)
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                coVerify { brevApiKlientMock.genererPdf(42, behandling.id, any()) }
+                coVerify { brevApiKlientMock.ferdigstillVedtaksbrev(behandling.id, any()) }
+            }
+        }
+
+        @Test
         fun `skal hente vedtaksbrev`() {
             val sak = opprettSakMedGrunnlag(SakType.BARNEPENSJON)
             val behandling = opprettBehandling(sak)
@@ -388,6 +412,32 @@ internal class BrevRouteIntegrationTest : BehandlingIntegrationTest() {
                         any(),
                     )
                 }
+            }
+        }
+
+        @Test
+        fun `skal generere pdf og ferdigstille`() {
+            val sak = opprettSakMedGrunnlag(SakType.OMSTILLINGSSTOENAD)
+            val tilbakekrevingBehandling = opprettTilbakekreving(sak)
+            val tilbakekrevingId = tilbakekrevingBehandling.id
+            val vedtakInnhold = vedtakTilbakekrevingBehandlingDto(tilbakekrevingBehandling.tilbakekreving)
+            coEvery { vedtakInternalService.hentVedtak(any(), any()) } returns vedtak(sak, tilbakekrevingId, vedtakInnhold)
+            coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns
+                mockk {
+                    every { kanEndres() } returns true
+                }
+
+            withTestApplication { client ->
+                val response =
+                    client.post(
+                        "/api/behandling/brev/$tilbakekrevingId/generer-pdf-og-ferdigstill?" +
+                            "brevId=42&sakId=${sak.id}",
+                    ) {
+                        addAuthToken(tokenSaksbehandler)
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                coVerify { brevKlientMock.genererPdf(42, tilbakekrevingId, any(), any()) }
+                coVerify { brevKlientMock.ferdigstillStrukturertBrev(tilbakekrevingId, Brevtype.VEDTAK, any()) }
             }
         }
 

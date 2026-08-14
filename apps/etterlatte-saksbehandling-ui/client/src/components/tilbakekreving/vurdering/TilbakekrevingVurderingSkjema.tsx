@@ -118,251 +118,282 @@ export function TilbakekrevingVurderingSkjema({
   return (
     <>
       <Box paddingBlock="space-32" paddingInline="space-64 space-32">
-        <VStack gap="space-32" style={{ width: '50em' }}>
-          <Select {...register('aarsak')} label="Årsak til sak om feilutbetaling" readOnly={!redigerbar}>
-            <option value="">Velg..</option>
-            {Object.values(TilbakekrevingAarsak).map((aarsak) => (
-              <option key={aarsak} value={aarsak}>
-                {teksterTilbakekrevingAarsak[aarsak]}
-              </option>
-            ))}
-          </Select>
-
-          <ControlledRadioGruppe
-            name="forhaandsvarsel"
-            control={control}
-            legend={<RadioGroupLegend label="Forhåndsvarsel" />}
-            size="small"
-            readOnly={!redigerbar}
-            radios={
-              <>
-                {Object.values(TilbakekrevingVarsel).map((varsel) => (
-                  <Radio key={varsel} value={varsel}>
-                    {teksterTilbakekrevingVarsel[varsel]}
-                  </Radio>
-                ))}
-              </>
-            }
-          />
-
-          <ControlledDatoVelger
-            name="forhaandsvarselDato"
-            label="Forhåndsvarseldato / vedtaksdato"
-            description="Angi forhåndsvarseldato, eller vedtaksdato dersom forhåndsvarsel ikke ble sendt ut."
-            control={control}
-            readOnly={!redigerbar}
-            shouldUnregister={true}
-          />
-
-          <Textarea
-            {...register('beskrivelse')}
-            label="Beskriv feilutbetalingen"
-            readOnly={!redigerbar}
-            description="Gi en kort beskrivelse av bakgrunnen for feilutbetalingen og når ble den oppdaget."
-          />
-
-          <ControlledRadioGruppe
-            name="doedsbosak"
-            control={control}
-            legend={<RadioGroupLegend label="Dødsbosak?" />}
-            size="small"
-            readOnly={!redigerbar}
-            radios={
-              <>
-                {Object.values(JaNei).map((svar) => (
-                  <Radio key={svar} value={svar}>
-                    {JaNeiRec[svar]}
-                  </Radio>
-                ))}
-              </>
-            }
-          />
-
-          <Textarea {...register('foraarsaketAv')} label="Hvem forårsaket feilutbetalingen?" readOnly={!redigerbar} />
-
-          <ControlledRadioGruppe
-            name="tilsvar.tilsvar"
-            control={control}
-            legend={<RadioGroupLegend label="Tilsvar til varsel om mulig tilbakekreving?" />}
-            size="small"
-            readOnly={!redigerbar}
-            radios={
-              <>
-                {Object.values(JaNei).map((svar) => (
-                  <Radio key={svar} value={svar}>
-                    {JaNeiRec[svar]}
-                  </Radio>
-                ))}
-              </>
-            }
-          />
-          {watch().tilsvar?.tilsvar == JaNei.JA && (
-            <>
-              <ControlledDatoVelger
-                name="tilsvar.dato"
-                label="Tilsvar dato"
-                control={control}
-                readOnly={!redigerbar}
-                shouldUnregister={true}
-              />
-
-              <Textarea
-                {...register('tilsvar.beskrivelse', { shouldUnregister: true })}
-                label="Beskriv tilsvar"
-                readOnly={!redigerbar}
-              />
-            </>
-          )}
-
-          <ControlledRadioGruppe
-            name="rettsligGrunnlag"
-            control={control}
-            legend={<RadioGroupLegend label="Rettslig grunnlag" />}
-            size="small"
-            readOnly={!redigerbar}
-            radios={
-              <>
-                {Object.values(TilbakekrevingHjemmel)
-                  .filter((hjemmel) => hjemmel != TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD)
-                  .map((hjemmel) => (
-                    <Radio key={hjemmel} value={hjemmel}>
-                      {teksterTilbakekrevingHjemmel[hjemmel]}
+        <VStack gap="space-32" style={{ maxWidth: '50em' }}>
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <Select {...register('aarsak')} label="Årsak til sak om feilutbetaling" readOnly={!redigerbar}>
+              <option value="">Velg..</option>
+              {Object.values(TilbakekrevingAarsak).map((aarsak) => (
+                <option key={aarsak} value={aarsak}>
+                  {teksterTilbakekrevingAarsak[aarsak]}
+                </option>
+              ))}
+            </Select>
+          </Box>
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <ControlledRadioGruppe
+              name="forhaandsvarsel"
+              control={control}
+              legend={<RadioGroupLegend label="Forhåndsvarsel" />}
+              size="small"
+              readOnly={!redigerbar}
+              radios={
+                <>
+                  {Object.values(TilbakekrevingVarsel).map((varsel) => (
+                    <Radio key={varsel} value={varsel}>
+                      {teksterTilbakekrevingVarsel[varsel]}
                     </Radio>
                   ))}
-              </>
-            }
-          />
+                </>
+              }
+            />
+          </Box>
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <ControlledDatoVelger
+              name="forhaandsvarselDato"
+              label="Forhåndsvarseldato / vedtaksdato"
+              description="Angi forhåndsvarseldato, eller vedtaksdato dersom forhåndsvarsel ikke ble sendt ut."
+              control={control}
+              readOnly={!redigerbar}
+              shouldUnregister={true}
+            />
+          </Box>
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <Textarea
+              {...register('beskrivelse')}
+              label="Beskriv feilutbetalingen"
+              readOnly={!redigerbar}
+              description="Gi en kort beskrivelse av bakgrunnen for feilutbetalingen og når ble den oppdaget."
+            />
+          </Box>
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <ControlledRadioGruppe
+              name="doedsbosak"
+              control={control}
+              legend={<RadioGroupLegend label="Dødsbosak?" />}
+              size="small"
+              readOnly={!redigerbar}
+              radios={
+                <>
+                  {Object.values(JaNei).map((svar) => (
+                    <Radio key={svar} value={svar}>
+                      {JaNeiRec[svar]}
+                    </Radio>
+                  ))}
+                </>
+              }
+            />
+          </Box>
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <Textarea {...register('foraarsaketAv')} label="Hvem forårsaket feilutbetalingen?" readOnly={!redigerbar} />
+          </Box>
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <ControlledRadioGruppe
+              name="tilsvar.tilsvar"
+              control={control}
+              legend={<RadioGroupLegend label="Tilsvar til varsel om mulig tilbakekreving?" />}
+              size="small"
+              readOnly={!redigerbar}
+              radios={
+                <>
+                  {Object.values(JaNei).map((svar) => (
+                    <Radio key={svar} value={svar}>
+                      {JaNeiRec[svar]}
+                    </Radio>
+                  ))}
+                </>
+              }
+            />
+          </Box>
+          {watch().tilsvar?.tilsvar == JaNei.JA && (
+            <>
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <ControlledDatoVelger
+                  name="tilsvar.dato"
+                  label="Tilsvar dato"
+                  control={control}
+                  readOnly={!redigerbar}
+                  shouldUnregister={true}
+                />
+              </Box>
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <Textarea
+                  {...register('tilsvar.beskrivelse', { shouldUnregister: true })}
+                  label="Beskriv tilsvar"
+                  readOnly={!redigerbar}
+                />
+              </Box>
+            </>
+          )}
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <ControlledRadioGruppe
+              name="rettsligGrunnlag"
+              control={control}
+              legend={<RadioGroupLegend label="Rettslig grunnlag" />}
+              size="small"
+              readOnly={!redigerbar}
+              radios={
+                <>
+                  {Object.values(TilbakekrevingHjemmel)
+                    .filter((hjemmel) => hjemmel != TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD)
+                    .map((hjemmel) => (
+                      <Radio key={hjemmel} value={hjemmel}>
+                        {teksterTilbakekrevingHjemmel[hjemmel]}
+                      </Radio>
+                    ))}
+                </>
+              }
+            />
+          </Box>
 
           {rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt() && (
             <>
-              <Textarea
-                {...register('objektivtVilkaarOppfylt', { shouldUnregister: true })}
-                label="Er det objektive vilkåret oppfylt?"
-                description="Foreligger det en feilutbetaling?"
-                readOnly={!redigerbar}
-              />
-
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <Textarea
+                  {...register('objektivtVilkaarOppfylt', { shouldUnregister: true })}
+                  label="Er det objektive vilkåret oppfylt?"
+                  description="Foreligger det en feilutbetaling?"
+                  readOnly={!redigerbar}
+                />
+              </Box>
               {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM].includes(
                 watch().rettsligGrunnlag!
               ) && (
-                <Textarea
-                  {...register('burdeBrukerForstaatt', { shouldUnregister: true })}
-                  label="Er de subjektive vilkårene oppfylt?"
-                  description="Forstod eller burde brukeren forstått at ubetalingen skyldes en feil?"
-                  readOnly={!redigerbar}
-                />
+                <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                  <Textarea
+                    {...register('burdeBrukerForstaatt', { shouldUnregister: true })}
+                    label="Er de subjektive vilkårene oppfylt?"
+                    description="Forstod eller burde brukeren forstått at ubetalingen skyldes en feil?"
+                    readOnly={!redigerbar}
+                  />
+                </Box>
               )}
 
               {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM].includes(watch().rettsligGrunnlag!) && (
-                <Textarea
-                  {...register('uaktsomtForaarsaketFeilutbetaling', { shouldUnregister: true })}
-                  label="Er de subjektive vilkårene oppfylt?"
-                  description="Har brukeren uaktsomt forårsaket feilutbetalingen?"
-                  readOnly={!redigerbar}
-                />
+                <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                  <Textarea
+                    {...register('uaktsomtForaarsaketFeilutbetaling', { shouldUnregister: true })}
+                    label="Er de subjektive vilkårene oppfylt?"
+                    description="Har brukeren uaktsomt forårsaket feilutbetalingen?"
+                    readOnly={!redigerbar}
+                  />
+                </Box>
               )}
 
               {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM].includes(
                 watch().rettsligGrunnlag!
               ) && (
-                <Textarea
-                  {...register('burdeBrukerForstaattEllerUaktsomtForaarsaket', { shouldUnregister: true })}
-                  label="Er de subjektive vilkårene oppfylt?"
-                  description="Forstod eller burde brukeren forstått at utbetalingen skyldtes en feil, og/eller har brukeren uaktsomt forårsaket feilutbetalingen?"
-                  readOnly={!redigerbar}
-                />
+                <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                  <Textarea
+                    {...register('burdeBrukerForstaattEllerUaktsomtForaarsaket', { shouldUnregister: true })}
+                    label="Er de subjektive vilkårene oppfylt?"
+                    description="Forstod eller burde brukeren forstått at utbetalingen skyldtes en feil, og/eller har brukeren uaktsomt forårsaket feilutbetalingen?"
+                    readOnly={!redigerbar}
+                  />
+                </Box>
               )}
-
-              <ControlledRadioGruppe
-                name="vilkaarsresultat"
-                control={control}
-                legend=""
-                size="small"
-                readOnly={!redigerbar}
-                radios={
-                  <>
-                    {Object.values(TilbakekrevingVilkaar).map((vilkaar) => (
-                      <Radio key={vilkaar} value={vilkaar}>
-                        {teksterTilbakekrevingVilkaar[vilkaar]}
-                      </Radio>
-                    ))}
-                  </>
-                }
-                shouldUnregister={true}
-              />
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <ControlledRadioGruppe
+                  name="vilkaarsresultat"
+                  control={control}
+                  legend="Er vilkår oppfylt?"
+                  size="medium"
+                  readOnly={!redigerbar}
+                  radios={
+                    <>
+                      {Object.values(TilbakekrevingVilkaar).map((vilkaar) => (
+                        <Radio size="small" key={vilkaar} value={vilkaar}>
+                          {teksterTilbakekrevingVilkaar[vilkaar]}
+                        </Radio>
+                      ))}
+                    </>
+                  }
+                  shouldUnregister={true}
+                />
+              </Box>
 
               {!vilkaarOppfylt() && (
                 <>
-                  <Textarea
-                    {...register('beloepBehold.beskrivelse', { shouldUnregister: true })}
-                    label="Tilbakekreving etter folketrygdloven § 22-15 femte ledd?"
-                    description="Er noe av det feilutbetalte beløpet i behold?"
-                    readOnly={!redigerbar}
-                  />
-
-                  <ControlledRadioGruppe
-                    name="beloepBehold.behold"
-                    control={control}
-                    legend=""
-                    size="small"
-                    readOnly={!redigerbar}
-                    radios={
-                      <>
-                        {Object.values(TilbakekrevingBeloepBeholdSvar).map((behold) => (
-                          <Radio key={behold} value={behold}>
-                            {teksterTilbakekrevingBeloepBehold[behold]}
-                          </Radio>
-                        ))}
-                      </>
-                    }
-                    shouldUnregister={true}
-                  />
+                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                    <Textarea
+                      {...register('beloepBehold.beskrivelse', { shouldUnregister: true })}
+                      label="Tilbakekreving etter folketrygdloven § 22-15 femte ledd?"
+                      description="Er noe av det feilutbetalte beløpet i behold?"
+                      readOnly={!redigerbar}
+                    />
+                  </Box>
+                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                    <ControlledRadioGruppe
+                      name="beloepBehold.behold"
+                      control={control}
+                      legend="Er beløp i behold?"
+                      size="medium"
+                      readOnly={!redigerbar}
+                      radios={
+                        <>
+                          {Object.values(TilbakekrevingBeloepBeholdSvar).map((behold) => (
+                            <Radio size="small" key={behold} value={behold}>
+                              {teksterTilbakekrevingBeloepBehold[behold]}
+                            </Radio>
+                          ))}
+                        </>
+                      }
+                      shouldUnregister={true}
+                    />
+                  </Box>
 
                   {!beloepIBehold() && (
+                    <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                      <Textarea
+                        {...register('vedtak', { shouldUnregister: true })}
+                        label="Vedtak"
+                        description="Oppgi resultat og hjemmel."
+                        readOnly={!redigerbar}
+                      />
+                    </Box>
+                  )}
+                </>
+              )}
+              {(vilkaarOppfylt() || beloepIBehold()) && (
+                <>
+                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                    <Textarea
+                      {...register('reduseringAvKravet', { shouldUnregister: true })}
+                      label="Er det særlige grunner til å frafalle eller redusere kravet?"
+                      description="Det legges blant annet vekt på graden av uaktsomhet hos brukeren, størrelsen på det feilutbetalte beløpet, hvor lang tid det er gått siden utbetalingen fant sted og om noe av feilen helt eller delvis kan tilskrives NAV. Kravet kan frafalles helt, eller settes til en del av det feilutbetalte beløpet. Ved utvist forsett skal krav alltid fremmes, og beløpet kan ikke settes ned."
+                      readOnly={!redigerbar}
+                    />
+                  </Box>
+                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                    <Textarea
+                      {...register('foreldet', { shouldUnregister: true })}
+                      label="Er noen deler av kravet foreldet?"
+                      description="Det er bestemt i folketrygdloven § 22-14 første ledd at våre krav om tilbakebetaling i utgangspunktet foreldes etter foreldelsesloven. Etter foreldelsesloven § 2, jf. § 3 nr. 1 er den alminnelige foreldelsesfristen tre år. Fristen løper særskilt for hver månedsutbetaling. Vurder også om foreldelsesloven § 10 om ett års tilleggsfrist får anvendelse."
+                      readOnly={!redigerbar}
+                    />
+                  </Box>
+                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                    <Textarea
+                      {...register('rentevurdering', { shouldUnregister: true })}
+                      label="Skal det ilegges renter?"
+                      description="Det følger av folketrygdloven § 22-17 a at det skal beregnes et rentetillegg på 10 prosent av det beløpet som kreves tilbake når brukeren har opptrådt grovt uaktsomt eller med forsett."
+                      readOnly={!redigerbar}
+                    />
+                  </Box>
+                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
                     <Textarea
                       {...register('vedtak', { shouldUnregister: true })}
                       label="Vedtak"
                       description="Oppgi resultat og hjemmel."
                       readOnly={!redigerbar}
                     />
-                  )}
-                </>
-              )}
-              {(vilkaarOppfylt() || beloepIBehold()) && (
-                <>
-                  <Textarea
-                    {...register('reduseringAvKravet', { shouldUnregister: true })}
-                    label="Er det særlige grunner til å frafalle eller redusere kravet?"
-                    description="Det legges blant annet vekt på graden av uaktsomhet hos brukeren, størrelsen på det feilutbetalte beløpet, hvor lang tid det er gått siden utbetalingen fant sted og om noe av feilen helt eller delvis kan tilskrives NAV. Kravet kan frafalles helt, eller settes til en del av det feilutbetalte beløpet. Ved utvist forsett skal krav alltid fremmes, og beløpet kan ikke settes ned."
-                    readOnly={!redigerbar}
-                  />
-
-                  <Textarea
-                    {...register('foreldet', { shouldUnregister: true })}
-                    label="Er noen deler av kravet foreldet?"
-                    description="Det er bestemt i folketrygdloven § 22-14 første ledd at våre krav om tilbakebetaling i utgangspunktet foreldes etter foreldelsesloven. Etter foreldelsesloven § 2, jf. § 3 nr. 1 er den alminnelige foreldelsesfristen tre år. Fristen løper særskilt for hver månedsutbetaling. Vurder også om foreldelsesloven § 10 om ett års tilleggsfrist får anvendelse."
-                    readOnly={!redigerbar}
-                  />
-
-                  <Textarea
-                    {...register('rentevurdering', { shouldUnregister: true })}
-                    label="Skal det ilegges renter?"
-                    description="Det følger av folketrygdloven § 22-17 a at det skal beregnes et rentetillegg på 10 prosent av det beløpet som kreves tilbake når brukeren har opptrådt grovt uaktsomt eller med forsett."
-                    readOnly={!redigerbar}
-                  />
-
-                  <Textarea
-                    {...register('vedtak', { shouldUnregister: true })}
-                    label="Vedtak"
-                    description="Oppgi resultat og hjemmel."
-                    readOnly={!redigerbar}
-                  />
-
-                  <Textarea
-                    {...register('vurderesForPaatale', { shouldUnregister: true })}
-                    label="Skal saken vurderes for påtale?"
-                    readOnly={!redigerbar}
-                  />
+                  </Box>
+                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                    <Textarea
+                      {...register('vurderesForPaatale', { shouldUnregister: true })}
+                      label="Skal saken vurderes for påtale?"
+                      readOnly={!redigerbar}
+                    />
+                  </Box>
                 </>
               )}
             </>

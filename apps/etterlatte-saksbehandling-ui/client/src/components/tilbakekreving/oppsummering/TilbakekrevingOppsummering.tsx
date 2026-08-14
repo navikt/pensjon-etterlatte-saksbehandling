@@ -141,31 +141,33 @@ export function TilbakekrevingOppsummering({
         )}
 
         <div style={{ marginTop: '3rem' }}>
-          <VStack gap="space-24">
-            <ControlledRadioGruppe
-              name="skalSendeBrev"
-              control={control}
-              legend={<RadioGroupLegend label="Skal det sendes vedtak for tilbakekrevingen?" />}
-              size="small"
-              readOnly={!redigerbar}
-              radios={
-                <>
-                  <Radio value={true}>Ja</Radio>
-                  <Radio value={false}>Nei</Radio>
-                </>
-              }
-            />
-            {mapResult(lagreSkalSendeBrevStatus, {
-              success: () => <Toast melding="Brevvalg lagret" position="bottom-center" />,
-              error: (error) => (
-                <FixedAlert
-                  variant="error"
-                  melding={`Kunne ikke lagre brevvalg: ${error.detail}`}
-                  position="bottom-center"
-                />
-              ),
-            })}
-          </VStack>
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <VStack gap="space-24">
+              <ControlledRadioGruppe
+                name="skalSendeBrev"
+                control={control}
+                legend={<RadioGroupLegend label="Skal det sendes vedtak for tilbakekrevingen?" />}
+                size="small"
+                readOnly={!redigerbar}
+                radios={
+                  <>
+                    <Radio value={true}>Ja</Radio>
+                    <Radio value={false}>Nei</Radio>
+                  </>
+                }
+              />
+              {mapResult(lagreSkalSendeBrevStatus, {
+                success: () => <Toast melding="Brevvalg lagret" position="bottom-center" />,
+                error: (error) => (
+                  <FixedAlert
+                    variant="error"
+                    melding={`Kunne ikke lagre brevvalg: ${error.detail}`}
+                    position="bottom-center"
+                  />
+                ),
+              })}
+            </VStack>
+          </Box>
         </div>
 
         {mapResult(validerTilbakekrevingStatus, {

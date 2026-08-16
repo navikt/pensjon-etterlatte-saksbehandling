@@ -27,7 +27,7 @@
     "globals": "^17.7.0",
     "mocha": "~11.7.6",
     "ts-node": "~10.9.2",
-    "typescript": "~6.0.3"
+    "typescript": "~7.0.2"
   },
   "scripts": {
     "dev": "ts-node ./src/index.ts",

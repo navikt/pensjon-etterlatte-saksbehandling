@@ -57,6 +57,8 @@ jobs:
         with:
           node-version: '24.x'
           registry-url: 'https://npm.pkg.github.com'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Install client
         working-directory: apps/${{ github.workflow }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build

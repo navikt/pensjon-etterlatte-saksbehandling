@@ -63,8 +63,6 @@ jobs:
       - name: Run tests
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Build and publish Docker image
         uses: nais/docker-build-push@2d2b0a7193e65422b7f0355d4afb445e0a8b2cc3 # ratchet:nais/docker-build-push@v0
         id: docker-build-push

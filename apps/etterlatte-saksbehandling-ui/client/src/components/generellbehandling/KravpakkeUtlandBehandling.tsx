@@ -312,7 +312,7 @@ const KravpakkeUtlandBehandling = (props: {
                     Dokumenter
                   </Heading>
                   <Select
-                    label="Hvile dokumenter vil du legge til?"
+                    label="Hvilke dokumenter vil du legge til?"
                     value={dokumentDropdown}
                     onChange={(e) => setDokumentDropdown(e.target.value)}
                   >

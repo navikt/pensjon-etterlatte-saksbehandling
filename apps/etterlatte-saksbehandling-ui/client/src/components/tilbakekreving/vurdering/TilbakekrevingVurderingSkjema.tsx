@@ -320,12 +320,11 @@ export function TilbakekrevingVurderingSkjema({
                       description="Er noe av det feilutbetalte beløpet i behold?"
                       readOnly={!redigerbar}
                     />
-                  </Box>
-                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
+
                     <ControlledRadioGruppe
                       name="beloepBehold.behold"
                       control={control}
-                      legend="Er beløp i behold?"
+                      legend=""
                       size="medium"
                       readOnly={!redigerbar}
                       radios={

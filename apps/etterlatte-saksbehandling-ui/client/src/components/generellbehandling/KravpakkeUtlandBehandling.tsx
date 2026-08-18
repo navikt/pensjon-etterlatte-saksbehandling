@@ -308,7 +308,6 @@ const KravpakkeUtlandBehandling = (props: {
               </VStack>
               <Box background="neutral-soft" borderRadius="12" padding="space-16">
                 <VStack gap="space-16">
-                  {' '}
                   <Heading size="medium" level="2">
                     Dokumenter
                   </Heading>

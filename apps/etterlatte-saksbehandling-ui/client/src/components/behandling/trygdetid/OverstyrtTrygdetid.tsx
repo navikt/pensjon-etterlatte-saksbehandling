@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import { PoengaarReadMore } from '~components/behandling/trygdetid/components/PoengaarReadMore'
 import { useForm } from 'react-hook-form'
-import { FloppydiskIcon, PencilIcon, PlusIcon, TrashIcon, TruckIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { FloppydiskIcon, PencilIcon, PlusIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 
 interface Props {
   redigerbar: boolean
@@ -54,8 +54,7 @@ export const OverstyrtTrygdetid = ({
     >
       <VStack gap="space-16">
         <HStack gap="space-8" align="center">
-          <TruckIcon aria-hidden height="1.5rem" width="1.5rem" />
-          <Heading size="small" level="3">
+          <Heading size="medium" level="2">
             Poengår i Norge - registreres kun ved eksportvurdering
           </Heading>
         </HStack>

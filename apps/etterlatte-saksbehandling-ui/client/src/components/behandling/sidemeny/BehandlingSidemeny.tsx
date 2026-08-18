@@ -187,7 +187,12 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
 
       <Spinner label="Henter saksbehandler for oppgave" visible={isPending(oppgaveResult)} />
 
-      <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
+      <Tabs
+        value={fane}
+        iconPosition="top"
+        onChange={(val) => dispatch(visFane(val as BehandlingFane))}
+        style={{ marginTop: 'var(--ax-space-32)' }}
+      >
         <Tabs.List>
           <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
           {skalViseSjekkliste(behandling) && (

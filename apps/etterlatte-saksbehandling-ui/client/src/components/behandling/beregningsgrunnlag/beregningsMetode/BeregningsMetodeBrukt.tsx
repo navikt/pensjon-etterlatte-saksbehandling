@@ -6,7 +6,7 @@ import {
   BeregningsMetodeBeregningsgrunnlagForm,
 } from '~shared/types/Beregning'
 import { BodyShort, Box, Button, Heading, HStack, Radio, Table, Tag, Textarea, VStack } from '@navikt/ds-react'
-import { FloppydiskIcon, PencilIcon, TagIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { FloppydiskIcon, PencilIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
@@ -84,8 +84,7 @@ export const BeregningsMetodeBrukt = ({
   return (
     <VStack gap="space-16">
       <HStack gap="space-8" align="center">
-        <TagIcon aria-hidden fontSize="1.5rem" />
-        <Heading size="small" level="3">
+        <Heading size="medium" level="3">
           Trygdetid i beregning
         </Heading>
       </HStack>

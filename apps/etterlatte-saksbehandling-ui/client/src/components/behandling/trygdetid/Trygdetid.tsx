@@ -156,7 +156,11 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         />
       )}
       <VStack gap="space-44">
-        {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
+        {skalViseTrygdeavtale(behandling) && (
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <TrygdeAvtale redigerbar={redigerbar} />
+          </Box>
+        )}
         {landListe && (
           <>
             {trygdetider.length == 1 && (

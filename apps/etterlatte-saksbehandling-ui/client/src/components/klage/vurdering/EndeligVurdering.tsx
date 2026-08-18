@@ -137,69 +137,71 @@ export function EndeligVurdering(props: { klage: Klage }) {
 
   return (
     <>
-      <Heading level="2" size="medium" spacing>
-        Endelig vurdering
-      </Heading>
-      <form onSubmit={handleSubmit(skjemaLagring)}>
-        <VStack gap="space-16">
-          <ControlledRadioGruppe
-            name="utfall"
-            control={control}
-            legend="Velg utfall"
-            errorVedTomInput="Du må velge utfall for klagen"
-            radios={
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <form onSubmit={handleSubmit(skjemaLagring)}>
+          <VStack gap="space-16">
+            <Heading level="2" size="medium">
+              Endelig vurdering
+            </Heading>
+            <ControlledRadioGruppe
+              name="utfall"
+              control={control}
+              legend="Velg utfall"
+              errorVedTomInput="Du må velge utfall for klagen"
+              radios={
+                <>
+                  <Radio value={Utfall.OMGJOERING}> {teksterKlageutfall[Utfall.OMGJOERING]}</Radio>
+                  {stoetterDelvisOmgjoering && (
+                    <Radio value={Utfall.DELVIS_OMGJOERING}>{teksterKlageutfall[Utfall.DELVIS_OMGJOERING]}</Radio>
+                  )}
+                  <Radio value={Utfall.STADFESTE_VEDTAK}> {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]}</Radio>
+                </>
+              }
+            />
+
+            {valgtUtfall === Utfall.STADFESTE_VEDTAK || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
+              <KlageInnstilling register={register} errors={errors} />
+            ) : null}
+
+            {valgtUtfall === Utfall.OMGJOERING || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
+              <KlageOmgjoering register={register} errors={errors} />
+            ) : null}
+
+            {isFailureHandler({
+              apiResult: lagreUtfallStatus,
+              errorMessage:
+                'Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
+            })}
+
+            {!!skjemaErFyltUtFeilmelding && <Alert variant="error">{skjemaErFyltUtFeilmelding}</Alert>}
+
+            {!!valgtUtfall && (
               <>
-                <Radio value={Utfall.OMGJOERING}> {teksterKlageutfall[Utfall.OMGJOERING]}</Radio>
-                {stoetterDelvisOmgjoering && (
-                  <Radio value={Utfall.DELVIS_OMGJOERING}>{teksterKlageutfall[Utfall.DELVIS_OMGJOERING]}</Radio>
-                )}
-                <Radio value={Utfall.STADFESTE_VEDTAK}> {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]}</Radio>
-              </>
-            }
-          />
-
-          {valgtUtfall === Utfall.STADFESTE_VEDTAK || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
-            <KlageInnstilling register={register} errors={errors} />
-          ) : null}
-
-          {valgtUtfall === Utfall.OMGJOERING || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
-            <KlageOmgjoering register={register} errors={errors} />
-          ) : null}
-
-          {isFailureHandler({
-            apiResult: lagreUtfallStatus,
-            errorMessage:
-              'Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
-          })}
-
-          {!!skjemaErFyltUtFeilmelding && <Alert variant="error">{skjemaErFyltUtFeilmelding}</Alert>}
-
-          {!!valgtUtfall && (
-            <>
-              <Box>
-                <Button size="small" onClick={mellomLagring} loading={isPending(lagreUtfallStatus)}>
-                  {teksterLagring[valgtUtfall]}
-                </Button>
-              </Box>
-              {isSuccess(lagreUtfallStatus) && (
-                <Box maxWidth="fit-content">
-                  <Alert size="small" variant="success">
-                    Utfall er lagret!
-                  </Alert>
+                <Box>
+                  <Button size="small" onClick={mellomLagring} loading={isPending(lagreUtfallStatus)}>
+                    {teksterLagring[valgtUtfall]}
+                  </Button>
                 </Box>
-              )}
-            </>
-          )}
-          <HStack gap="space-16" justify="center">
-            <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
-              Gå tilbake
-            </Button>
-            <Button loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">
-              {kanSeBrev(valgtUtfall) ? 'Gå til brev' : 'Gå til oppsummering'}
-            </Button>
-          </HStack>
-        </VStack>
-      </form>
+                {isSuccess(lagreUtfallStatus) && (
+                  <Box maxWidth="fit-content">
+                    <Alert size="small" variant="success">
+                      Utfall er lagret!
+                    </Alert>
+                  </Box>
+                )}
+              </>
+            )}
+            <HStack gap="space-16" justify="center">
+              <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
+                Gå tilbake
+              </Button>
+              <Button loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">
+                {kanSeBrev(valgtUtfall) ? 'Gå til brev' : 'Gå til oppsummering'}
+              </Button>
+            </HStack>
+          </VStack>
+        </form>
+      </Box>
     </>
   )
 }

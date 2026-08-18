@@ -38,7 +38,6 @@ const PeriodeAccordion = (props: PeriodeAccordionProps) => {
 
 const PeriodeAccordionWrapper = styled.div<{ $feilBorder: boolean }>`
   border: ${(props) => (props.$feilBorder ? '2px solid var(--ax-border-danger)' : '1px solid')};
-  margin: 0 3em 2em 3em;
   padding: 1em 0;
 
   &:last-child {
@@ -53,7 +52,7 @@ const PeriodeAccordionHead = styled.div`
 `
 
 const PeriodeAccordionContent = styled.div`
-  padding: 0 3em;
+  padding: 1em 3em;
 `
 
 PeriodeAccordion.defaultProps = defaultAccordionProps

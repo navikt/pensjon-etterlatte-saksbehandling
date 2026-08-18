@@ -8,6 +8,11 @@ type Props = {
 }
 export const BeregnetFaktiskTrygdetid = ({ beregnetTrygdetid }: Props) => (
   <Table size="small">
+    <colgroup>
+      <col />
+      <col width="180px" />
+      <col width="200px" />
+    </colgroup>
     <Table.Header>
       <Table.Row>
         <Table.HeaderCell>Faktisk trygdetid</Table.HeaderCell>

@@ -1,4 +1,4 @@
-import { Box, Button } from '@navikt/ds-react'
+import { Box, Button, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
 import { erBehandlingRedigerbar } from '../felles/utils'
@@ -121,31 +121,44 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
           success: () => (
             <>
-              <BeregningsMetodeBrukt
-                redigerbar={redigerbar}
-                navn={hentNavn()}
-                behandling={behandling}
-                oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
-                lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
-              />
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <BeregningsMetodeBrukt
+                  redigerbar={redigerbar}
+                  navn={hentNavn()}
+                  behandling={behandling}
+                  oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
+                  lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
+                />
+              </Box>
 
               {mapFailure(lagreBeregningsGrunnlagResult, (error) => (
                 <ApiErrorAlert>{error.detail}</ApiErrorAlert>
               ))}
 
-              <Box maxWidth="70rem">
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <Heading size="medium" level="2">
+                  Institusjonsopphold
+                </Heading>
                 <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
+                <InstitusjonsoppholdBeregningsgrunnlag
+                  redigerbar={redigerbar}
+                  behandling={behandling}
+                  sakType={SakType.OMSTILLINGSSTOENAD}
+                  beregningsgrunnlag={behandling.beregningsGrunnlag}
+                  institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
+                />
               </Box>
-              <InstitusjonsoppholdBeregningsgrunnlag
-                redigerbar={redigerbar}
-                behandling={behandling}
-                sakType={SakType.OMSTILLINGSSTOENAD}
-                beregningsgrunnlag={behandling.beregningsGrunnlag}
-                institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
-              />
 
-              {brukNyeBeregningsregler && <Sanksjon behandling={behandling} manglerInntektVirkAar={false} />}
-              {brukNyeBeregningsregler && <IkkeInnvilgetPeriode behandling={behandling} />}
+              {brukNyeBeregningsregler && (
+                <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                  <Sanksjon behandling={behandling} manglerInntektVirkAar={false} />
+                </Box>
+              )}
+              {brukNyeBeregningsregler && (
+                <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                  <IkkeInnvilgetPeriode behandling={behandling} />
+                </Box>
+              )}
             </>
           ),
         })}

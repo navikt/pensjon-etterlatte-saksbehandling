@@ -13,7 +13,9 @@ export const OpplysningerFraSkatteetaten = ({
 
   return (
     <VStack gap="space-16">
-      <Heading size="small">Opplysninger fra Skatteetaten</Heading>
+      <Heading level="3" size="small">
+        Opplysninger fra Skatteetaten
+      </Heading>
       <BodyShort>Pensjonsgivende inntekt for {forbehandling.aar}.</BodyShort>
       <Box width="25rem">
         <Table>

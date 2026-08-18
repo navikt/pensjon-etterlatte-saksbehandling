@@ -88,7 +88,7 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
       </Box>
       <VStack gap="space-40" paddingInline="space-64" paddingBlock="space-32">
         <VStack maxWidth="42.5rem">
-          <Heading level="1" spacing size="medium">
+          <Heading level="2" spacing size="medium">
             Gjenlevende sin situasjon
           </Heading>
           <ReadMore header="Slik vurderer du gjenlevendes situasjon">
@@ -148,7 +148,9 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
 
         {behandling.behandlingType === IBehandlingsType.REVURDERING && (
           <VStack maxWidth="42.5rem">
-            <Heading size="small">Status på informasjonsbrev</Heading>
+            <Heading size="medium" level="2">
+              Status på informasjonsbrev
+            </Heading>
             <BodyLong>
               Se hvilken dato infobrevet er sendt for å vurdere når du skal sende oppgave til lokalkontor (tre uker
               etter infobrevet er sendt ut), og når du eventuelt skal sende varsel om stans (tre uker før vedtak),
@@ -156,43 +158,47 @@ export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandli
           </VStack>
         )}
 
-        <VStack maxWidth="42.5rem">
-          <Heading size="small" spacing>
-            Trengs det oppfølging fra lokalkontor?
-          </Heading>
-          <BodyLong spacing>
-            Trenger etterlatte ekstra oppfølging skal man sende oppgave til lokalkontor. Dette gjelder de som er utenfor
-            arbeidslivet og/ eller ikke har varige ytelser fra Nav. Det er lokalkontor som skal følge opp disse
-            brukerne, og de må derfor vite om at bruker har omstillingsstønad.
-          </BodyLong>
-          {behandling.behandlingType === IBehandlingsType.REVURDERING && (
+        <Box background="neutral-soft" borderRadius="12" padding="space-16">
+          <VStack maxWidth="42.5rem">
+            <Heading size="medium" spacing>
+              Trengs det oppfølging fra lokalkontor?
+            </Heading>
             <BodyLong spacing>
-              Kopier inn i vurderingen over det alternativet som gjelder:
-              <Box marginBlock="space-16" asChild>
-                <List>
-                  <List.Item>Ja, har sendt oppgave om at bruker har omstillingsstønad og trenger oppfølging</List.Item>
-                  <List.Item>
-                    Ja, har sendt oppgave om at bruker har omstillingsstønad, vi ser at hen er under oppfølging, og at
-                    de må informere oss hvis brukers situasjon endrer seg
-                  </List.Item>
-                  <List.Item>Nei, unødvendig å sende oppgave</List.Item>
-                </List>
-              </Box>
+              Trenger etterlatte ekstra oppfølging skal man sende oppgave til lokalkontor. Dette gjelder de som er
+              utenfor arbeidslivet og/ eller ikke har varige ytelser fra Nav. Det er lokalkontor som skal følge opp
+              disse brukerne, og de må derfor vite om at bruker har omstillingsstønad.
             </BodyLong>
-          )}
-          <div>
-            <Button
-              variant="secondary"
-              size="small"
-              disabled={!redigerbar}
-              as="a"
-              href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
-              target="_blank"
-            >
-              Lag oppgave til lokalkontor <ExternalLinkIcon aria-hidden />
-            </Button>
-          </div>
-        </VStack>
+            {behandling.behandlingType === IBehandlingsType.REVURDERING && (
+              <BodyLong spacing>
+                Kopier inn i vurderingen over det alternativet som gjelder:
+                <Box marginBlock="space-16" asChild>
+                  <List>
+                    <List.Item>
+                      Ja, har sendt oppgave om at bruker har omstillingsstønad og trenger oppfølging
+                    </List.Item>
+                    <List.Item>
+                      Ja, har sendt oppgave om at bruker har omstillingsstønad, vi ser at hen er under oppfølging, og at
+                      de må informere oss hvis brukers situasjon endrer seg
+                    </List.Item>
+                    <List.Item>Nei, unødvendig å sende oppgave</List.Item>
+                  </List>
+                </Box>
+              </BodyLong>
+            )}
+            <div>
+              <Button
+                variant="secondary"
+                size="small"
+                disabled={!redigerbar}
+                as="a"
+                href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
+                target="_blank"
+              >
+                Lag oppgave til lokalkontor <ExternalLinkIcon aria-hidden />
+              </Button>
+            </div>
+          </VStack>
+        </Box>
 
         {visFeilmelding && (
           <Box maxWidth="fit-content">

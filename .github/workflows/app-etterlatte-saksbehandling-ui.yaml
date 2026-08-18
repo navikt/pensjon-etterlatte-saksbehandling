@@ -63,6 +63,8 @@ jobs:
       - name: Run tests
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Build and publish Docker image
         uses: nais/docker-build-push@2d2b0a7193e65422b7f0355d4afb445e0a8b2cc3 # ratchet:nais/docker-build-push@v0
         id: docker-build-push
@@ -94,7 +96,7 @@ jobs:
   deploy-to-prod-gcp:
     name: Deploy to prod-gcp
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
-    needs: [build, deploy-to-dev-gcp]
+    needs: [ build, deploy-to-dev-gcp ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1

@@ -11,8 +11,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.azureAdAttestantClaim
-import no.nav.etterlatte.azureAdSaksbehandlerClaim
+import no.nav.etterlatte.azureAdAttestantGjennyClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
@@ -82,8 +81,7 @@ class GosysOppgaveServiceImplTest {
 
     val azureGroupToGroupIDMap =
         mapOf(
-            AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
-            AzureGroup.ATTESTANT to azureAdAttestantClaim,
+            AzureGroup.ATTESTANT_GJENNY to azureAdAttestantGjennyClaim,
             AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim,
         )
 
@@ -97,7 +95,7 @@ class GosysOppgaveServiceImplTest {
 
     @BeforeEach
     fun beforeEach() {
-        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
         every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
 
         nyKontekstMedBruker(saksbehandler)
@@ -113,7 +111,7 @@ class GosysOppgaveServiceImplTest {
 
     @Test
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
-        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
         every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
         every { saksbehandler.name() } returns "ident"
 

@@ -95,7 +95,7 @@ internal class OppgaveServiceTest(
         val groupId = azureGroup?.let { azureGroupToGroupIDMap[it]!! }
         return SaksbehandlerMedRoller(
             simpleSaksbehandler(
-                ident = azureGroup?.name ?: "SAKSBEHANDLER",
+                ident = azureGroup?.name ?: "saksbehandler",
                 claims = groupId?.let { mapOf(Claims.groups to it) } ?: emptyMap(),
             ),
             groupId?.let { mapOf(azureGroup to it) } ?: emptyMap(),

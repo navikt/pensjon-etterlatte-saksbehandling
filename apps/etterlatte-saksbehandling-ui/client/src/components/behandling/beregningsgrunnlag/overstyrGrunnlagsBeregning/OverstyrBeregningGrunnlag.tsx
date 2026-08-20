@@ -2,7 +2,7 @@ import { Beregning, OverstyrBeregning } from '~shared/types/Beregning'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { erBehandlingRedigerbar } from '../../felles/utils'
 import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
-import { CalculatorIcon, PlusIcon } from '@navikt/aksel-icons'
+import { PlusIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
@@ -62,49 +62,54 @@ const OverstyrBeregningGrunnlag = (props: {
 
   return (
     <VStack gap="space-48">
-      <BeregningErOverstyrtAlert />
-      <VStack gap="space-16">
-        <HStack gap="space-8">
-          <CalculatorIcon fontSize="1.5rem" aria-hidden />
-          <Heading size="small">Beregningsgrunnlag for overstyrt beregning</Heading>
-        </HStack>
-        <VStack gap="space-16" maxWidth="70rem">
-          {mapResult(overstyrBeregningGrunnlagResult, {
-            pending: <Spinner label="Henter overstyrt beregning grunnlag..." />,
-            error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente grunnlag'}</ApiErrorAlert>,
-            success: () => (
-              <>
-                <OverstyrtBeregningsgrunnlagTable behandling={behandling} />
-                {redigerbar && visOverstyrBeregningPeriodeSkjema ? (
-                  <OverstyrBeregningsgrunnlagPeriodeSkjema
-                    behandling={behandling}
-                    paaAvbryt={() => setVisOverstyrBeregningPeriodeSkjema(false)}
-                    paaLagre={() => setVisOverstyrBeregningPeriodeSkjema(false)}
-                  />
-                ) : (
-                  <div>
-                    <Button
-                      size="small"
-                      variant="secondary"
-                      icon={<PlusIcon aria-hidden />}
-                      onClick={() => setVisOverstyrBeregningPeriodeSkjema(true)}
-                    >
-                      Ny periode
-                    </Button>
-                  </div>
-                )}
-              </>
-            ),
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <VStack gap="space-48">
+          <BeregningErOverstyrtAlert />
+          <VStack gap="space-16">
+            <HStack gap="space-8">
+              <Heading size="medium" level="2">
+                Beregningsgrunnlag for overstyrt beregning
+              </Heading>
+            </HStack>
+            <VStack gap="space-16" maxWidth="70rem">
+              {mapResult(overstyrBeregningGrunnlagResult, {
+                pending: <Spinner label="Henter overstyrt beregning grunnlag..." />,
+                error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente grunnlag'}</ApiErrorAlert>,
+                success: () => (
+                  <>
+                    <OverstyrtBeregningsgrunnlagTable behandling={behandling} />
+                    {redigerbar && visOverstyrBeregningPeriodeSkjema ? (
+                      <OverstyrBeregningsgrunnlagPeriodeSkjema
+                        behandling={behandling}
+                        paaAvbryt={() => setVisOverstyrBeregningPeriodeSkjema(false)}
+                        paaLagre={() => setVisOverstyrBeregningPeriodeSkjema(false)}
+                      />
+                    ) : (
+                      <div>
+                        <Button
+                          size="small"
+                          variant="secondary"
+                          icon={<PlusIcon aria-hidden />}
+                          onClick={() => setVisOverstyrBeregningPeriodeSkjema(true)}
+                        >
+                          Ny periode
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                ),
+              })}
+            </VStack>
+          </VStack>
+          <div>
+            <SkruAvOverstyrtBeregningModal behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
+          </div>
+          {isFailureHandler({
+            errorMessage: 'Kunne ikke opprette ny beregning',
+            apiResult: opprettEllerEndreBeregningResult,
           })}
         </VStack>
-      </VStack>
-      <div>
-        <SkruAvOverstyrtBeregningModal behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
-      </div>
-      {isFailureHandler({
-        errorMessage: 'Kunne ikke opprette ny beregning',
-        apiResult: opprettEllerEndreBeregningResult,
-      })}
+      </Box>
       <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>

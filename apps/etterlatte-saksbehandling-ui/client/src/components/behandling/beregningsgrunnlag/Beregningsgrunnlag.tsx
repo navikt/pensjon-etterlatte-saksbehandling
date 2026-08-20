@@ -70,11 +70,13 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         </Heading>
         <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
-      <VStack gap="space-48" paddingInline="space-64">
+      <VStack paddingInline="space-64" gap="space-32">
         {(isSuccess(overstyrtBeregningResponse) || isSuccess(overstyrtBeregningGrunnlagResponse)) && (
           <>
             {visOverstyrKnapp && !erBehandlingFerdigstilt && !overstyrtBeregning && (
-              <SkruPaaOverstyrtBeregning behandlingId={behandling.id} setOverstyrt={setOverstyrtBeregning} />
+              <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                <SkruPaaOverstyrtBeregning behandlingId={behandling.id} setOverstyrt={setOverstyrtBeregning} />
+              </Box>
             )}
 
             {visOverstyrtBeregningGrunnlag && (

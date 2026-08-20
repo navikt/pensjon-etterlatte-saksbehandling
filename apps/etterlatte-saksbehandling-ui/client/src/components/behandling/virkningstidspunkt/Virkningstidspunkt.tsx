@@ -135,13 +135,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, erBosattUtland, hjemler, b
           <HStack gap="space-16">{children}</HStack>
         </VStack>
 
-        <Box
-          paddingInline="space-12 space-0"
-          minWidth="18.75rem"
-          width="10rem"
-          borderWidth="0 0 0 2"
-          borderColor="neutral-subtle"
-        >
+        <Box paddingInline="space-12 space-0" minWidth="18.75rem" borderWidth="0 0 0 2" borderColor="neutral-subtle">
           <VurderingsboksWrapper
             tittel="Hva er virkningstidspunkt for behandlingen?"
             subtittelKomponent={

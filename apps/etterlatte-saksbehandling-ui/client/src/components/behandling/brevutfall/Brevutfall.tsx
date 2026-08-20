@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Alert, BodyLong, Heading } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Heading } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevutfallOgEtterbetalingApi } from '~shared/api/behandling'
@@ -112,40 +112,42 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
   return behandling.sendeBrev ? (
     <BrevutfallContent id="brevutfall">
       {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />}
-      <Heading level="2" size="small" spacing>
-        Valg av utfall i brev
-      </Heading>
-      <BodyLong spacing>
-        Velg hvilke utfall som gjelder i saken for å få riktig informasjon i brevet. Valgene du gjør under har bare
-        betydning for hvilken tekst som kommer i brevet.
-      </BodyLong>
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <Heading level="2" size="medium" spacing>
+          Valg av utfall i brev
+        </Heading>
+        <BodyLong spacing>
+          Velg hvilke utfall som gjelder i saken for å få riktig informasjon i brevet. Valgene du gjør under har bare
+          betydning for hvilken tekst som kommer i brevet.
+        </BodyLong>
 
-      <MapApiResult
-        result={hentBrevutfallOgEtterbetalingResult}
-        mapInitialOrPending={<Spinner label="Henter brevutfall .." />}
-        mapError={(apiError) => <Alert variant="error">{apiError.detail}</Alert>}
-        mapSuccess={() =>
-          visSkjema ? (
-            <BrevutfallSkjema
-              behandlingErOpphoer={behandlingErOpphoer}
-              resetBrevutfallvalidering={props.resetBrevutfallvalidering}
-              behandling={behandling}
-              brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
-              setBrevutfallOgEtterbetaling={setBrevutfallOgEtterbetaling}
-              setVisSkjema={setVisSkjema}
-              onAvbryt={hentBrevutfall}
-            />
-          ) : (
-            <BrevutfallVisning
-              behandlingErOpphoer={behandlingErOpphoer}
-              redigerbar={redigerbar}
-              brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
-              sakType={behandling.sakType}
-              setVisSkjema={setVisSkjema}
-            />
-          )
-        }
-      />
+        <MapApiResult
+          result={hentBrevutfallOgEtterbetalingResult}
+          mapInitialOrPending={<Spinner label="Henter brevutfall .." />}
+          mapError={(apiError) => <Alert variant="error">{apiError.detail}</Alert>}
+          mapSuccess={() =>
+            visSkjema ? (
+              <BrevutfallSkjema
+                behandlingErOpphoer={behandlingErOpphoer}
+                resetBrevutfallvalidering={props.resetBrevutfallvalidering}
+                behandling={behandling}
+                brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
+                setBrevutfallOgEtterbetaling={setBrevutfallOgEtterbetaling}
+                setVisSkjema={setVisSkjema}
+                onAvbryt={hentBrevutfall}
+              />
+            ) : (
+              <BrevutfallVisning
+                behandlingErOpphoer={behandlingErOpphoer}
+                redigerbar={redigerbar}
+                brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
+                sakType={behandling.sakType}
+                setVisSkjema={setVisSkjema}
+              />
+            )
+          }
+        />
+      </Box>
     </BrevutfallContent>
   ) : (
     <>
@@ -156,9 +158,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
 }
 
 const BrevutfallContent = styled.div`
-  margin-top: 4rem;
   margin-bottom: 4rem;
-  max-width: 500px;
 `
 const InfoAlert = styled(Alert)`
   margin-top: 2rem;

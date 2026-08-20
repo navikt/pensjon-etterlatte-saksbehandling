@@ -28,7 +28,7 @@ const SammendragGammeltRegelverk = (props: {
 
   return (
     <div>
-      <Heading level="3" size="small">
+      <Heading level="2" size="medium">
         Søskenjustering
       </Heading>
       <BodyShort spacing>

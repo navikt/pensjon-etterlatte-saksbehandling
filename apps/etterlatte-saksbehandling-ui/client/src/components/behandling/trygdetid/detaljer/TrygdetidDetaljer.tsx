@@ -16,7 +16,7 @@ export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
     <VStack gap="space-16" paddingBlock="space-0 space-32">
       <HStack gap="space-8" align="center">
         <CalculatorIcon fontSize={IconSize.DEFAULT} aria-hidden />
-        <Heading size="small" level="3">
+        <Heading size="medium" level="2">
           Beregnet trygdetid
         </Heading>
       </HStack>

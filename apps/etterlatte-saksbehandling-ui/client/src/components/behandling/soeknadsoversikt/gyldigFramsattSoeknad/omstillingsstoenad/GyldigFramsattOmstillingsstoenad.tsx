@@ -54,13 +54,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
           <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
         </HStack>
       </div>
-      <Box
-        paddingInline="space-12 space-0"
-        minWidth="18.75rem"
-        width="10rem"
-        borderWidth="0 0 0 2"
-        borderColor="neutral-subtle"
-      >
+      <Box paddingInline="space-12 space-0" minWidth="18.75rem" borderWidth="0 0 0 2" borderColor="neutral-subtle">
         <GyldigFramsattVurdering
           behandlingId={behandling.id}
           gyldigFramsatt={behandling.gyldighetsprøving}

@@ -45,6 +45,7 @@ export enum Revurderingaarsak {
   AKTIVITETSPLIKT = 'AKTIVITETSPLIKT',
   AARLIG_INNTEKTSJUSTERING = 'AARLIG_INNTEKTSJUSTERING',
   OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV = 'OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV',
+  NYTT_FNUMMER = 'NYTT_FNUMMER',
 }
 
 // se også behandlingsslistemappere.ts
@@ -93,4 +94,5 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   UTSENDELSE_AV_SED: 'Utsendelse av SED',
   AKTIVITETSPLIKT: 'Aktivitetsplikt',
   AARLIG_INNTEKTSJUSTERING: 'Årlig inntektsjustering',
+  NYTT_FNUMMER: 'Nytt fødselsnummer / d-nummer',
 } as const

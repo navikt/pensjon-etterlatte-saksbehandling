@@ -68,7 +68,7 @@ export const KopierVilkaarAvdoed = ({ behandlingId, vilkaar }: { behandlingId: s
         success: (behandlingId) => (
           <>
             {behandlingId && (
-              <Box maxWidth="50rem" marginBlock="space-0 space-40">
+              <Box maxWidth="50rem" marginBlock="space-32 space-8" marginInline="space-64 space-0">
                 <Alert variant="info">
                   <HStack gap="space-24" align="center" justify="end" minWidth="45rem">
                     <Heading size="small" level="2">

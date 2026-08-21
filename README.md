@@ -1,3 +1,4 @@
+TEST
 # pensjon-etterlatte-saksbehandling
 
 ### Ny saksbehandlingsløsning for ytelser til etterlatte

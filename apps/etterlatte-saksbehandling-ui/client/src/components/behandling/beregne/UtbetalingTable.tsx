@@ -37,7 +37,7 @@ export const UtbetalingTable = ({ tittel, perioder }: { tittel: string; perioder
   if (sortertePerioder.length > 0) {
     return (
       <Box maxWidth="70rem" marginBlock="space-16">
-        <Heading level="3" size="xsmall">
+        <Heading level="3" size="small">
           {tittel}
         </Heading>
         <Table zebraStripes>

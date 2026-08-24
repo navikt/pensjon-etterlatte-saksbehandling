@@ -18,7 +18,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
 
   return (
     <TableBox>
-      <Heading spacing size="small" level="2">
+      <Heading spacing size="medium" level="2">
         Beregning før avkorting
       </Heading>
       <Table className="table" zebraStripes>

@@ -112,157 +112,177 @@ export const ValgForInfobrev = () => {
 
   return (
     <Box paddingInline="space-64" paddingBlock="space-64" maxWidth="120rem">
-      <VStack gap="space-16" maxWidth="30rem">
-        <HStack gap="space-16" align="center">
-          <Heading level="1" size="large">
-            Valg for infobrev
-          </Heading>
-        </HStack>
-        {isSuccess(hentSisteIverksatteBehandlingStatus) && (
-          <Link
-            onClick={() => trackClick(ClickEvent.SJEKKER_SISTE_BEREGNING)}
-            href={`/behandling/${hentSisteIverksatteBehandlingStatus.data.id}/beregne`}
-            as="a"
-            target="_blank"
-          >
-            Vis siste beregning
-            <ExternalLinkIcon aria-hidden />
-          </Link>
-        )}
-        {redigeres ? (
-          <form onSubmit={handleSubmit(lagreBrevutfall)}>
-            <VStack gap="space-16">
-              <ControlledRadioGruppe
-                name="skalSendeBrev"
-                control={control}
-                legend="Skal sende brev"
-                errorVedTomInput="Du må velge om du skal sende brev eller ikke"
-                radios={
-                  <>
-                    <Radio value={JaNei.JA}>{JaNeiRec.JA}</Radio>
-                    <Radio value={JaNei.NEI}>{JaNeiRec.NEI}</Radio>
-                  </>
-                }
-              />
-              {skalsendebrev === JaNei.NEI && (
-                <Textarea
-                  label="Begrunnelse"
-                  {...register('begrunnelse', {
-                    required: {
-                      value: true,
-                      message: 'Du må si hvorfor brev ikke skal sendes',
-                    },
-                  })}
-                  error={errors?.begrunnelse?.message}
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <VStack gap="space-16" maxWidth="30rem">
+          <HStack gap="space-16" align="center">
+            <Heading level="1" size="large">
+              Valg for infobrev
+            </Heading>
+          </HStack>
+          {isSuccess(hentSisteIverksatteBehandlingStatus) && (
+            <Link
+              onClick={() => trackClick(ClickEvent.SJEKKER_SISTE_BEREGNING)}
+              href={`/behandling/${hentSisteIverksatteBehandlingStatus.data.id}/beregne`}
+              as="a"
+              target="_blank"
+            >
+              Vis siste beregning
+              <ExternalLinkIcon aria-hidden />
+            </Link>
+          )}
+          {redigeres ? (
+            <form onSubmit={handleSubmit(lagreBrevutfall)}>
+              <VStack gap="space-16">
+                <ControlledRadioGruppe
+                  name="skalSendeBrev"
+                  control={control}
+                  legend="Skal sende brev"
+                  errorVedTomInput="Du må velge om du skal sende brev eller ikke"
+                  radios={
+                    <>
+                      <Radio size="small" value={JaNei.JA}>
+                        {JaNeiRec.JA}
+                      </Radio>
+                      <Radio size="small" value={JaNei.NEI}>
+                        {JaNeiRec.NEI}
+                      </Radio>
+                    </>
+                  }
                 />
-              )}
-              {skalsendebrev === JaNei.JA && (
-                <>
-                  <ControlledRadioGruppe
-                    name="utbetaling"
-                    control={control}
-                    legend="Har bruker utbetaling?"
-                    errorVedTomInput="Du må velge ja eller nei"
-                    radios={
-                      <>
-                        <Radio value={JaNei.JA}>{JaNeiRec.JA}</Radio>
-                        <Radio value={JaNei.NEI}>{JaNeiRec.NEI}</Radio>
-                      </>
-                    }
+                {skalsendebrev === JaNei.NEI && (
+                  <Textarea
+                    label="Begrunnelse"
+                    {...register('begrunnelse', {
+                      required: {
+                        value: true,
+                        message: 'Du må si hvorfor brev ikke skal sendes',
+                      },
+                    })}
+                    error={errors?.begrunnelse?.message}
                   />
-
-                  <ControlledRadioGruppe
-                    name="redusertEtterInntekt"
-                    control={control}
-                    legend="Er ytelsen til bruker redusert på grunn av inntekt?"
-                    errorVedTomInput="Du må velge ja eller nei"
-                    radios={
-                      <>
-                        <Radio value={JaNei.JA}>{JaNeiRec.JA}</Radio>
-                        <Radio value={JaNei.NEI}>{JaNeiRec.NEI}</Radio>
-                      </>
-                    }
-                  />
-
-                  <ControlledRadioGruppe
-                    name="spraak"
-                    control={control}
-                    legend="Hvilken målform skal brevet ha?"
-                    errorVedTomInput="Du må velge målformen til brevet."
-                    radios={
-                      <>
-                        <Radio value={Spraak.NB}>Bokmål</Radio>
-                        <Radio value={Spraak.NN}>Nynorsk</Radio>
-                        <Radio value={Spraak.EN}>Engelsk</Radio>
-                      </>
-                    }
-                  />
-                </>
-              )}
-
-              {isFailureHandler({
-                apiResult: lagrebrevdataStatus,
-                errorMessage: 'Kan ikke lagre valg for infobrevet',
-              })}
-              <Box>
-                <Button size="small" type="submit" loading={isPending(lagrebrevdataStatus)} variant="primary">
-                  Lagre valg for infobrev
-                </Button>
-              </Box>
-            </VStack>
-          </form>
-        ) : (
-          <VStack gap="space-16">
-            {!!brevdata && (
-              <HStack gap="space-16">
-                <Info label="Skal sende brev" tekst={brevdata.skalSendeBrev ? JaNeiRec.JA : JaNeiRec.NEI} />
-                {!brevdata.skalSendeBrev && brevdata.begrunnelse && (
-                  <Info label="Begrunnelse" tekst={brevdata.begrunnelse} />
                 )}
-                {brevdata.skalSendeBrev && (
+                {skalsendebrev === JaNei.JA && (
                   <>
-                    <Info label="Utbetaling" tekst={brevdata.utbetaling ? JaNeiRec.JA : JaNeiRec.NEI} />
-                    <Info
-                      label="Redusert etter inntekt"
-                      tekst={brevdata.redusertEtterInntekt ? JaNeiRec.JA : JaNeiRec.NEI}
+                    <ControlledRadioGruppe
+                      name="utbetaling"
+                      control={control}
+                      legend="Har bruker utbetaling?"
+                      errorVedTomInput="Du må velge ja eller nei"
+                      radios={
+                        <>
+                          <Radio size="small" value={JaNei.JA}>
+                            {JaNeiRec.JA}
+                          </Radio>
+                          <Radio size="small" value={JaNei.NEI}>
+                            {JaNeiRec.NEI}
+                          </Radio>
+                        </>
+                      }
                     />
-                    <Info label="Målform" tekst={brevdata.spraak ? formaterSpraak(brevdata.spraak) : '-'} />
+
+                    <ControlledRadioGruppe
+                      name="redusertEtterInntekt"
+                      control={control}
+                      legend="Er ytelsen til bruker redusert på grunn av inntekt?"
+                      errorVedTomInput="Du må velge ja eller nei"
+                      radios={
+                        <>
+                          <Radio size="small" value={JaNei.JA}>
+                            {JaNeiRec.JA}
+                          </Radio>
+                          <Radio size="small" value={JaNei.NEI}>
+                            {JaNeiRec.NEI}
+                          </Radio>
+                        </>
+                      }
+                    />
+
+                    <ControlledRadioGruppe
+                      name="spraak"
+                      control={control}
+                      legend="Hvilken målform skal brevet ha?"
+                      errorVedTomInput="Du må velge målformen til brevet."
+                      radios={
+                        <>
+                          <Radio size="small" value={Spraak.NB}>
+                            Bokmål
+                          </Radio>
+                          <Radio size="small" value={Spraak.NN}>
+                            Nynorsk
+                          </Radio>
+                          <Radio size="small" value={Spraak.EN}>
+                            Engelsk
+                          </Radio>
+                        </>
+                      }
+                    />
                   </>
                 )}
-                <BodyShort>
-                  Sist endret {formaterDatoMedTidspunkt(new Date(brevdata.kilde.tidspunkt))} av {brevdata.kilde.ident}
-                </BodyShort>
-              </HStack>
-            )}
-            {erOppgaveRedigerbar(oppgave.status) && (
-              <>
+
+                {isFailureHandler({
+                  apiResult: lagrebrevdataStatus,
+                  errorMessage: 'Kan ikke lagre valg for infobrevet',
+                })}
                 <Box>
-                  <Button
-                    type="button"
-                    size="small"
-                    icon={<PencilIcon aria-hidden />}
-                    variant="secondary"
-                    onClick={() => setRedigeres(true)}
-                  >
-                    Rediger
+                  <Button size="small" type="submit" loading={isPending(lagrebrevdataStatus)} variant="primary">
+                    Lagre valg for infobrev
                   </Button>
                 </Box>
-                {aktivtetspliktbrevdata?.brevId && (
-                  <Alert variant="info">Hvis valgene redigeres vil innholdet i brevet tilbakestilles.</Alert>
-                )}
-                <LoependeUnntakInfo />
-              </>
-            )}
-          </VStack>
-        )}
-        {gammelFlyt && (
-          <BodyShort>
-            Denne oppgaven er fra en gammel vurdering, derfor har den ingen brevvalg eller muligheten til å lagre dette.
-            For å se på brevet må du gå til brevoversikten til brukeren.
-          </BodyShort>
-        )}
-        <NesteEllerOpprettBrevValg gammelFlyt={gammelFlyt} />
-      </VStack>
+              </VStack>
+            </form>
+          ) : (
+            <VStack gap="space-16">
+              {!!brevdata && (
+                <HStack gap="space-16">
+                  <Info label="Skal sende brev" tekst={brevdata.skalSendeBrev ? JaNeiRec.JA : JaNeiRec.NEI} />
+                  {!brevdata.skalSendeBrev && brevdata.begrunnelse && (
+                    <Info label="Begrunnelse" tekst={brevdata.begrunnelse} />
+                  )}
+                  {brevdata.skalSendeBrev && (
+                    <>
+                      <Info label="Utbetaling" tekst={brevdata.utbetaling ? JaNeiRec.JA : JaNeiRec.NEI} />
+                      <Info
+                        label="Redusert etter inntekt"
+                        tekst={brevdata.redusertEtterInntekt ? JaNeiRec.JA : JaNeiRec.NEI}
+                      />
+                      <Info label="Målform" tekst={brevdata.spraak ? formaterSpraak(brevdata.spraak) : '-'} />
+                    </>
+                  )}
+                  <BodyShort>
+                    Sist endret {formaterDatoMedTidspunkt(new Date(brevdata.kilde.tidspunkt))} av {brevdata.kilde.ident}
+                  </BodyShort>
+                </HStack>
+              )}
+              {erOppgaveRedigerbar(oppgave.status) && (
+                <>
+                  <Box>
+                    <Button
+                      type="button"
+                      size="small"
+                      icon={<PencilIcon aria-hidden />}
+                      variant="secondary"
+                      onClick={() => setRedigeres(true)}
+                    >
+                      Rediger
+                    </Button>
+                  </Box>
+                  {aktivtetspliktbrevdata?.brevId && (
+                    <Alert variant="info">Hvis valgene redigeres vil innholdet i brevet tilbakestilles.</Alert>
+                  )}
+                  <LoependeUnntakInfo />
+                </>
+              )}
+            </VStack>
+          )}
+          {gammelFlyt && (
+            <BodyShort>
+              Denne oppgaven er fra en gammel vurdering, derfor har den ingen brevvalg eller muligheten til å lagre
+              dette. For å se på brevet må du gå til brevoversikten til brukeren.
+            </BodyShort>
+          )}
+          <NesteEllerOpprettBrevValg gammelFlyt={gammelFlyt} />
+        </VStack>
+      </Box>
     </Box>
   )
 }

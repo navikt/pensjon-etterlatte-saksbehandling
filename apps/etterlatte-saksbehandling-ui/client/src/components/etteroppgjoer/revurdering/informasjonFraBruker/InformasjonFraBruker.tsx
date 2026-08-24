@@ -37,7 +37,9 @@ export const InformasjonFraBruker = ({
 
   return (
     <VStack gap="space-16">
-      <Heading size="large">Informasjon fra bruker</Heading>
+      <Heading size="medium" level="2">
+        Informasjon fra bruker
+      </Heading>
       {informasjonFraBrukerSkjemaErAapen && erRedigerbar ? (
         <InformasjonFraBrukerSkjema
           behandling={behandling}

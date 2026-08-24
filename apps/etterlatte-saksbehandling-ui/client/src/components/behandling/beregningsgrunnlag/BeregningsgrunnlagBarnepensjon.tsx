@@ -1,4 +1,4 @@
-import { Box, Button } from '@navikt/ds-react'
+import { Box, Button, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
 import { erBehandlingRedigerbar } from '../felles/utils'
@@ -175,11 +175,18 @@ const BeregningsgrunnlagBarnepensjon = () => {
                       {trygdetider?.length &&
                         trygdetider.length > 1 &&
                         (!!tidligsteAvdoede ? (
-                          <BeregningsmetoderFlereAvdoede
-                            redigerbar={redigerbar}
-                            trygdetider={trygdetider}
-                            tidligsteAvdoede={tidligsteAvdoede}
-                          />
+                          <Box
+                            background="neutral-soft"
+                            borderRadius="12"
+                            padding="space-16"
+                            marginBlock="space-32 space-0"
+                          >
+                            <BeregningsmetoderFlereAvdoede
+                              redigerbar={redigerbar}
+                              trygdetider={trygdetider}
+                              tidligsteAvdoede={tidligsteAvdoede}
+                            />
+                          </Box>
                         ) : (
                           <ApiErrorAlert>
                             Fant ikke avdøde i persongalleriet. For å beregne barnepensjonen riktig må det være en eller
@@ -187,34 +194,45 @@ const BeregningsgrunnlagBarnepensjon = () => {
                           </ApiErrorAlert>
                         ))}
                       {trygdetider.length === 1 && (
-                        <BeregningsMetodeBrukt
-                          redigerbar={redigerbar}
-                          navn={mapNavn(trygdetider[0].ident, personopplysninger)}
-                          behandling={behandling}
-                          oppdaterBeregningsgrunnlag={oppdaterBeregningsgrunnlag}
-                          lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
-                        />
+                        <Box
+                          background="neutral-soft"
+                          borderRadius="12"
+                          padding="space-16"
+                          marginBlock="space-32 space-0"
+                        >
+                          <BeregningsMetodeBrukt
+                            redigerbar={redigerbar}
+                            navn={mapNavn(trygdetider[0].ident, personopplysninger)}
+                            behandling={behandling}
+                            oppdaterBeregningsgrunnlag={oppdaterBeregningsgrunnlag}
+                            lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
+                          />
+                        </Box>
                       )}
                     </>
                   )}
 
-                  <Box maxWidth="70rem">
+                  <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                    <Heading size="medium" level="2">
+                      Institusjonsopphold
+                    </Heading>
                     <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
-                  </Box>
-
-                  <InstitusjonsoppholdBeregningsgrunnlag
-                    redigerbar={redigerbar}
-                    behandling={behandling}
-                    sakType={SakType.BARNEPENSJON}
-                    beregningsgrunnlag={behandling.beregningsGrunnlag}
-                    institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
-                  />
-                  {skalViseSoeskenjustering && (
-                    <Soeskenjustering
+                    <InstitusjonsoppholdBeregningsgrunnlag
+                      redigerbar={redigerbar}
                       behandling={behandling}
-                      onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag)}
-                      setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
+                      sakType={SakType.BARNEPENSJON}
+                      beregningsgrunnlag={behandling.beregningsGrunnlag}
+                      institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
                     />
+                  </Box>
+                  {skalViseSoeskenjustering && (
+                    <Box background="neutral-soft" borderRadius="12" padding="space-16">
+                      <Soeskenjustering
+                        behandling={behandling}
+                        onSubmit={(soeskenGrunnlag) => oppdaterSoeskenJustering(soeskenGrunnlag)}
+                        setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
+                      />
+                    </Box>
                   )}
                 </>
               ),

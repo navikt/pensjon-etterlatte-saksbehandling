@@ -43,36 +43,38 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
 
   return (
     <>
-      <Box paddingInline="space-64 space-16" paddingBlock="space-16" borderWidth="1 0 0 0" borderColor="neutral-subtle">
-        <HStack justify="space-between">
-          <VStack gap="space-4">
-            <HStack align="center" gap="space-16">
-              <StatusIcon status={status()} aria-hidden />
-              <Heading size="small" level="3">
-                {vilkaar.hovedvilkaar.tittel}
-              </Heading>
-            </HStack>
-            {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
-              <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
-                {paragrafType(vilkaar)} {formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}
-                <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
-              </Link>
-            ) : (
-              <>
-                {paragrafType(vilkaar)} {vilkaar.hovedvilkaar.lovreferanse.paragraf}
-              </>
-            )}
-            <Box marginBlock="space-12" marginInline="space-0" maxWidth="41rem" style={{ whiteSpace: 'pre-line' }}>
-              {vilkaar.hovedvilkaar.beskrivelse}
-            </Box>
-          </VStack>
-          <Vurdering
-            vilkaar={vilkaar}
-            oppdaterVilkaar={props.oppdaterVilkaar}
-            behandlingId={props.behandlingId}
-            redigerbar={props.redigerbar}
-          />
-        </HStack>
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <VStack gap="space-8">
+          <HStack align="center" gap="space-16">
+            <StatusIcon status={status()} aria-hidden />
+            <Heading size="medium" level="2">
+              {vilkaar.hovedvilkaar.tittel}
+            </Heading>
+          </HStack>
+          <HStack justify="space-between" wrap={false} align="start">
+            <VStack gap="space-4" paddingInline="space-0 space-16">
+              {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
+                <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
+                  {paragrafType(vilkaar)} {formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}
+                  <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
+                </Link>
+              ) : (
+                <>
+                  {paragrafType(vilkaar)} {vilkaar.hovedvilkaar.lovreferanse.paragraf}
+                </>
+              )}
+              <Box marginBlock="space-12" marginInline="space-0" maxWidth="41rem" style={{ whiteSpace: 'pre-line' }}>
+                {vilkaar.hovedvilkaar.beskrivelse}
+              </Box>
+            </VStack>
+            <Vurdering
+              vilkaar={vilkaar}
+              oppdaterVilkaar={props.oppdaterVilkaar}
+              behandlingId={props.behandlingId}
+              redigerbar={props.redigerbar}
+            />
+          </HStack>
+        </VStack>
       </Box>
     </>
   )

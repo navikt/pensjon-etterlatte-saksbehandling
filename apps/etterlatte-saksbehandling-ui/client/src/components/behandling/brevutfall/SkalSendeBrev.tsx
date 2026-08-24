@@ -42,7 +42,7 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer; behandlin
 
   return (
     <SkalSendeBrevContent>
-      <Heading size="small" level="2">
+      <Heading size="medium" level="2">
         Skal sende vedtaksbrev
       </Heading>
       {redigere ? (

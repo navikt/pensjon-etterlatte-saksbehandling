@@ -44,7 +44,7 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
 
   return (
     <TableWrapper>
-      <Heading spacing size="small" level="2">
+      <Heading spacing size="medium" level="2">
         Beregningssammendrag
       </Heading>
       <Table className="table" zebraStripes>

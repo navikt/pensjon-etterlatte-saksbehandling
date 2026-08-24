@@ -174,143 +174,152 @@ export function KlageFormkravRedigering() {
             at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
             tolkes som id'en til det vedtaket. */}
           <VStack gap="space-16">
-            <Controller
-              rules={{
-                required: true,
-                minLength: 0,
-              }}
-              render={({ field, fieldState }) => {
-                const { value, ...rest } = field
-                return (
-                  <>
-                    <Box maxWidth="30rem">
-                      <Select
-                        label="Hvilket vedtak klages det på?"
-                        value={value ?? ''}
-                        {...rest}
-                        readOnly={!redigerModus}
-                      >
-                        <option value="">Velg vedtak</option>
-                        {kjenteVedtak.map((vedtak) => (
-                          <option key={vedtak.id} value={vedtak.id}>
-                            Vedtak {vedtak.id} om {formaterVedtakType(vedtak.vedtakType!!)} -{' '}
-                            {formaterKanskjeStringDato(vedtak.datoAttestert)}
-                          </option>
-                        ))}
-                        <option value="-1">Det klages ikke på et konkret vedtak</option>
-                      </Select>
-                      {fieldState.error && (
-                        <ErrorMessage>
-                          Du må velge vedtaket det klages på, eller svare at det ikke klages på et konkret vedtak
-                        </ErrorMessage>
-                      )}
-                    </Box>
-                  </>
-                )
-              }}
-              name="vedtaketKlagenGjelderId"
-              control={control}
-            />
-            <Heading level="2" size="medium">
-              Klagefrist
-            </Heading>
-            <ControlledRadioGruppe
-              name="erKlagenFramsattInnenFrist"
-              control={control}
-              legend="Er klagefristen overholdt?"
-              description={
-                <ReadMore header="Hjelp til å vurdere kravet">
-                  Etter folketrygdloven § 21-12 femte ledd er klagefristen seks uker. Etter forvaltningsloven § 29
-                  begynner klagefristen å løpe fra det tidspunkt underretning om vedtaket er kommet frem til parten.
-                  <br />
-                  Hvis klagefristen ikke er overholdt, må det vurderes om klagen likevel kan behandles jamfør
-                  forvaltningsloven § 31.
-                </ReadMore>
-              }
-              errorVedTomInput="Du må sette om klagen er framsatt innenfor klagefristen"
-              radios={
-                <>
-                  <Radio value={JaNei.JA}>Ja</Radio>
-                  <Radio value={JaNei.NEI}>Nei</Radio>
-                </>
-              }
-            />
+            <Box background="neutral-soft" borderRadius="12" padding="space-16">
+              <Controller
+                rules={{
+                  required: true,
+                  minLength: 0,
+                }}
+                render={({ field, fieldState }) => {
+                  const { value, ...rest } = field
+                  return (
+                    <>
+                      <Box maxWidth="30rem">
+                        <Select
+                          label="Hvilket vedtak klages det på?"
+                          value={value ?? ''}
+                          {...rest}
+                          readOnly={!redigerModus}
+                        >
+                          <option value="">Velg vedtak</option>
+                          {kjenteVedtak.map((vedtak) => (
+                            <option key={vedtak.id} value={vedtak.id}>
+                              Vedtak {vedtak.id} om {formaterVedtakType(vedtak.vedtakType!!)} -{' '}
+                              {formaterKanskjeStringDato(vedtak.datoAttestert)}
+                            </option>
+                          ))}
+                          <option value="-1">Det klages ikke på et konkret vedtak</option>
+                        </Select>
+                        {fieldState.error && (
+                          <ErrorMessage>
+                            Du må velge vedtaket det klages på, eller svare at det ikke klages på et konkret vedtak
+                          </ErrorMessage>
+                        )}
+                      </Box>
+                    </>
+                  )
+                }}
+                name="vedtaketKlagenGjelderId"
+                control={control}
+              />
+            </Box>
 
-            <Heading level="2" size="medium">
-              Formkrav
-            </Heading>
-            <BodyShort textColor="subtle">
-              Etter forvaltningsloven § 32 må klagen oppfylle visse formkrav. Inneholder klagen feil eller mangler, skal
-              det settes en kort frist for rettelse eller utfylling.
-            </BodyShort>
-            <ControlledRadioGruppe
-              name="erKlagerPartISaken"
-              control={control}
-              legend="Er klagen fremsatt av parten eller annen med rettslig klageinteresse?"
-              description={
-                <ReadMore header="Hjelp til å vurdere kravet">
-                  Etter forvaltningsloven § 28 er det bare part i saken eller annen med rettslig klageinteresse som kan
-                  klage på vedtaket. Den som uten å være part i saken har en nær tilknytning til saken, kan ha rettslig
-                  klageinteresse. Både parten og andre med rettslig klageinteresse kan etter forvaltningsloven § 12 la
-                  seg representere av advokat eller annen fullmektig.
-                </ReadMore>
-              }
-              errorVedTomInput="Du må sette om klager er part i saken"
-              radios={
-                <>
-                  <Radio value={JaNei.JA}>Ja</Radio>
-                  <Radio value={JaNei.NEI}>Nei</Radio>
-                </>
-              }
-            />
+            <Box background="neutral-soft" borderRadius="12" padding="space-16">
+              <VStack gap="space-16">
+                <Heading level="2" size="medium">
+                  Klagefrist
+                </Heading>
+                <ControlledRadioGruppe
+                  name="erKlagenFramsattInnenFrist"
+                  control={control}
+                  legend="Er klagefristen overholdt?"
+                  description={
+                    <ReadMore header="Hjelp til å vurdere kravet">
+                      Etter folketrygdloven § 21-12 femte ledd er klagefristen seks uker. Etter forvaltningsloven § 29
+                      begynner klagefristen å løpe fra det tidspunkt underretning om vedtaket er kommet frem til parten.
+                      <br />
+                      Hvis klagefristen ikke er overholdt, må det vurderes om klagen likevel kan behandles jamfør
+                      forvaltningsloven § 31.
+                    </ReadMore>
+                  }
+                  errorVedTomInput="Du må sette om klagen er framsatt innenfor klagefristen"
+                  radios={
+                    <>
+                      <Radio value={JaNei.JA}>Ja</Radio>
+                      <Radio value={JaNei.NEI}>Nei</Radio>
+                    </>
+                  }
+                />
+              </VStack>
+            </Box>
 
-            <ControlledRadioGruppe
-              name="erKlagenSignert"
-              control={control}
-              legend="Er klagen signert?"
-              description={
-                <ReadMore header="Hjelp til å vurdere kravet">
-                  En klage skal være underskrevet av klageren eller hans fullmektig eller ha en kvalifisert elektronisk
-                  signatur. Dette følger av forvaltningsloven § 32, lov om elektroniske tilleggstjenester § 1 og
-                  eIDAS-forordningen artikkel 25 nr. 2.
-                </ReadMore>
-              }
-              errorVedTomInput="Du må sette om klagen er signert"
-              radios={
-                <>
-                  <Radio value={JaNei.JA}>Ja</Radio>
-                  <Radio value={JaNei.NEI}>Nei</Radio>
-                </>
-              }
-            />
+            <Box background="neutral-soft" borderRadius="12" padding="space-16">
+              <VStack gap="space-16">
+                <Heading level="2" size="medium">
+                  Formkrav
+                </Heading>
+                <BodyShort textColor="subtle">
+                  Etter forvaltningsloven § 32 må klagen oppfylle visse formkrav. Inneholder klagen feil eller mangler,
+                  skal det settes en kort frist for rettelse eller utfylling.
+                </BodyShort>
+                <ControlledRadioGruppe
+                  name="erKlagerPartISaken"
+                  control={control}
+                  legend="Er klagen fremsatt av parten eller annen med rettslig klageinteresse?"
+                  description={
+                    <ReadMore header="Hjelp til å vurdere kravet">
+                      Etter forvaltningsloven § 28 er det bare part i saken eller annen med rettslig klageinteresse som
+                      kan klage på vedtaket. Den som uten å være part i saken har en nær tilknytning til saken, kan ha
+                      rettslig klageinteresse. Både parten og andre med rettslig klageinteresse kan etter
+                      forvaltningsloven § 12 la seg representere av advokat eller annen fullmektig.
+                    </ReadMore>
+                  }
+                  errorVedTomInput="Du må sette om klager er part i saken"
+                  radios={
+                    <>
+                      <Radio value={JaNei.JA}>Ja</Radio>
+                      <Radio value={JaNei.NEI}>Nei</Radio>
+                    </>
+                  }
+                />
+                <ControlledRadioGruppe
+                  name="erKlagenSignert"
+                  control={control}
+                  legend="Er klagen signert?"
+                  description={
+                    <ReadMore header="Hjelp til å vurdere kravet">
+                      En klage skal være underskrevet av klageren eller hans fullmektig eller ha en kvalifisert
+                      elektronisk signatur. Dette følger av forvaltningsloven § 32, lov om elektroniske
+                      tilleggstjenester § 1 og eIDAS-forordningen artikkel 25 nr. 2.
+                    </ReadMore>
+                  }
+                  errorVedTomInput="Du må sette om klagen er signert"
+                  radios={
+                    <>
+                      <Radio value={JaNei.JA}>Ja</Radio>
+                      <Radio value={JaNei.NEI}>Nei</Radio>
+                    </>
+                  }
+                />
+                <ControlledRadioGruppe
+                  name="gjelderKlagenNoeKonkretIVedtaket"
+                  control={control}
+                  legend="Klages det på konkrete elementer i vedtaket?"
+                  description="Etter forvaltningsloven § 32 skal klageren vise til vedtaket det klages over og hvilke endringer som ønskes. Klagen bør grunngis av klageren."
+                  errorVedTomInput="Du må sette om det klages på elementer i vedtaket"
+                  radios={
+                    <>
+                      <Radio value={JaNei.JA}>Ja</Radio>
+                      <Radio value={JaNei.NEI}>Nei</Radio>
+                    </>
+                  }
+                />
+                <ControlledRadioGruppe
+                  name="erFormkraveneOppfylt"
+                  control={control}
+                  legend="Er formkravene til klagen oppfylt?"
+                  errorVedTomInput="Du må sette om formkravene til klagen er oppfylt"
+                  radios={
+                    <>
+                      <Radio value={JaNei.JA}>Ja</Radio>
+                      <Radio value={JaNei.NEI}>Nei</Radio>
+                    </>
+                  }
+                />
+              </VStack>
+            </Box>
 
-            <ControlledRadioGruppe
-              name="gjelderKlagenNoeKonkretIVedtaket"
-              control={control}
-              legend="Klages det på konkrete elementer i vedtaket?"
-              description="Etter forvaltningsloven § 32 skal klageren vise til vedtaket det klages over og hvilke endringer som ønskes. Klagen bør grunngis av klageren."
-              errorVedTomInput="Du må sette om det klages på elementer i vedtaket"
-              radios={
-                <>
-                  <Radio value={JaNei.JA}>Ja</Radio>
-                  <Radio value={JaNei.NEI}>Nei</Radio>
-                </>
-              }
-            />
-
-            <ControlledRadioGruppe
-              name="erFormkraveneOppfylt"
-              control={control}
-              legend="Er formkravene til klagen oppfylt?"
-              errorVedTomInput="Du må sette om formkravene til klagen er oppfylt"
-              radios={
-                <>
-                  <Radio value={JaNei.JA}>Ja</Radio>
-                  <Radio value={JaNei.NEI}>Nei</Radio>
-                </>
-              }
-            />
-            <Box maxWidth="42.5rem">
+            <Box background="neutral-soft" borderRadius="12" padding="space-16">
               <Textarea
                 {...register('begrunnelse')}
                 label="Totalvurdering (valgfritt)"
@@ -318,6 +327,7 @@ export function KlageFormkravRedigering() {
                 resize
               />
             </Box>
+
             {redigerModus ? (
               <HStack gap="space-16" justify="center">
                 <Button type="submit" loading={isPending(lagreFormkravStatus)}>

@@ -22,7 +22,7 @@ export default function SlateEditor({ value, onChange, readonly, editKey = '' }:
   const [editor] = useState(() => withReact(withHistory(createEditor())))
 
   return (
-    <EditorBox borderColor="border-subtle" borderWidth="1">
+    <EditorBox borderColor="neutral-subtle" borderWidth="1">
       <Slate editor={editor} onChange={(text) => onChange(text, editKey)} initialValue={value}>
         {!readonly && (
           <Box

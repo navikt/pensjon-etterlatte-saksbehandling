@@ -125,7 +125,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
                         </Alert>
                       )}
                       {watch().aarsak === Revurderingaarsak.ANNEN && (
-                        <AnnenRevurderingWrapper gap="4">
+                        <AnnenRevurderingWrapper gap="space-4">
                           <TextField
                             {...register('fritekstAarsak', {
                               required: {

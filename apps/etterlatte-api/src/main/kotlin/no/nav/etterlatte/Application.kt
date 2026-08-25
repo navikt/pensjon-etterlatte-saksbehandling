@@ -34,12 +34,10 @@ class Server(
         ) {
             samordningVedtakRoute(
                 samordningVedtakService = applicationContext.samordningVedtakService,
-                config = applicationContext.config,
             )
 
             barnepensjonVedtakRoute(
                 samordningVedtakService = applicationContext.samordningVedtakService,
-                config = applicationContext.config,
             )
 
             behandlingSakRoutes(

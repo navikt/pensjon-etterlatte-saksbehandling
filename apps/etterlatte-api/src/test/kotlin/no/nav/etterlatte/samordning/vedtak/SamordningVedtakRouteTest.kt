@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
-import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SamordningVedtakRouteTest {
@@ -325,7 +324,6 @@ class SamordningVedtakRouteTest {
         runServerWithConfig(applicationConfig = config) {
             samordningVedtakRoute(
                 samordningVedtakService = samordningVedtakService,
-                config = config,
             )
         }
 
@@ -353,10 +351,6 @@ private fun config(
                     "issuer_name" to issuerId,
                     "validation.optional_claims" to "aud,nbf,sub",
                 ),
-            ),
-        "roller" to
-            mapOf(
-                "pensjon-saksbehandler" to UUID.randomUUID().toString(),
             ),
     ),
 )

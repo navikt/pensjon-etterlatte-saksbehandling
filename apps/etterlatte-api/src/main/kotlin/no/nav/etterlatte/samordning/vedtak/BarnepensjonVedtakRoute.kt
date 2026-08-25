@@ -1,9 +1,6 @@
 package no.nav.etterlatte.samordning.vedtak
 
-import com.typesafe.config.Config
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
-import io.ktor.server.application.install
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
@@ -16,14 +13,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
 
-fun Route.barnepensjonVedtakRoute(
-    samordningVedtakService: SamordningVedtakService,
-    config: Config,
-) {
+fun Route.barnepensjonVedtakRoute(samordningVedtakService: SamordningVedtakService) {
     route("api/barnepensjon/har-loepende-bp") {
         install(AuthorizationPlugin) {
-            accessPolicyRolesEllerAdGrupper =
-                setOf("les-bp-vedtak", "les-bp-samordning-vedtak", config.getString("roller.pensjon-saksbehandler"))
+            accessPolicyRolesEllerAdGrupper = setOf("les-bp-vedtak", "les-bp-samordning-vedtak")
             issuers = setOf(Issuer.AZURE.issuerName)
         }
 

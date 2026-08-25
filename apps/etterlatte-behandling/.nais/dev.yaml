@@ -54,6 +54,7 @@ spec:
           - id: a1b518e2-3947-478d-8929-e5d685c47cac # 0000-GA-Strengt_Fortrolig_Adresse
           - id: 2e1dc582-f762-4510-a660-88bf68fb7128 # 0000-GA-Fortrolig_Adresse
           - id: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d # 0000-GA-Egne_ansatte
+          - id: 928636f4-fd0d-4149-978e-a6fb68bb19de # prosessering.rolle (efterlatte-verktoy)
   kafka:
     pool: nav-dev
   resources:
@@ -109,6 +110,8 @@ spec:
       value: a1b518e2-3947-478d-8929-e5d685c47cac
     - name: AZUREAD_EGEN_ANSATT_GROUPID
       value: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d
+    - name: AZUREAD_PROSESSERING_ROLLE_GROUPID
+      value: 928636f4-fd0d-4149-978e-a6fb68bb19de
     - name: NORG2_URL
       value: https://norg2.dev-fss-pub.nais.io/norg2/api/v1
     - name: NAVANSATT_URL
@@ -194,6 +197,7 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
+        - application: efterlatte-verktoy
         - application: etterlatte-behandling-kafka
         - application: etterlatte-vedtaksvurdering-kafka
         - application: etterlatte-hendelser-joark

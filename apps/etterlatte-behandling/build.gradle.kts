@@ -29,6 +29,10 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-regler"))
 
+    implementation(libs.prosessering.core)
+    implementation(libs.prosessering.postgres)
+    implementation(libs.prosessering.ktor)
+
     implementation(libs.cache.caffeine)
     implementation(libs.navfelles.tokenvalidationktor) {
         exclude("io.ktor", "ktor-server")

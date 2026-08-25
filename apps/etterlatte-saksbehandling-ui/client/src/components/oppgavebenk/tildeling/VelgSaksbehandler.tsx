@@ -327,7 +327,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
           </DropdownMeny>
         </Dropdown>
       ) : (
-        <SaksbehandlerNavnHStack gap="2" align="center">
+        <SaksbehandlerNavnHStack gap="space-2" align="center">
           <PersonIcon width="1.5rem" height="1.5rem" aria-hidden />
           <Label size="small" textColor="subtle">
             {saksbehandler ? saksbehandler.navn : 'Navn mangler'}

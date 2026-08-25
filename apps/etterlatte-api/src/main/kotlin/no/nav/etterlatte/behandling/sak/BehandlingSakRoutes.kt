@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.ktor.token.Issuer
 
 private fun generateGjennyRoller(config: Config): Set<String> =
     setOf(
+        config.getString("roller.pensjon-saksbehandler"),
         config.getString("roller.gjenny-saksbehandler"),
     )
 

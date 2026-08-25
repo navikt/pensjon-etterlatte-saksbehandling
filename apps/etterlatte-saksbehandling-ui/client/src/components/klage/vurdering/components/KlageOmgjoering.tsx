@@ -12,39 +12,41 @@ export const KlageOmgjoering = ({
   errors: FieldErrors<FormdataVurdering>
 }) => {
   return (
-    <VStack gap="space-16" width="41.5rem">
-      <Heading level="3" size="medium">
-        Omgjøring
-      </Heading>
-      <Box maxWidth="fit-content">
-        <Select
-          label="Hvorfor skal saken omgjøres?"
-          error={errors.omgjoering?.grunnForOmgjoering?.message}
-          {...register('omgjoering.grunnForOmgjoering', {
+    <Box background="neutral-soft" borderRadius="12" padding="space-16">
+      <VStack gap="space-16" width="41.5rem">
+        <Heading level="3" size="small">
+          Omgjøring
+        </Heading>
+        <Box maxWidth="fit-content">
+          <Select
+            label="Hvorfor skal saken omgjøres?"
+            error={errors.omgjoering?.grunnForOmgjoering?.message}
+            {...register('omgjoering.grunnForOmgjoering', {
+              required: {
+                value: true,
+                message: 'Du må velge en årsak for omgjøringen.',
+              },
+            })}
+          >
+            <option value="">Velg grunn</option>
+            {AARSAKER_OMGJOERING.map((aarsak) => (
+              <option key={aarsak} value={aarsak}>
+                {TEKSTER_AARSAK_OMGJOERING[aarsak]}
+              </option>
+            ))}
+          </Select>
+        </Box>
+        <Textarea
+          label="Begrunnelse"
+          error={errors.omgjoering?.begrunnelse?.message}
+          {...register('omgjoering.begrunnelse', {
             required: {
               value: true,
-              message: 'Du må velge en årsak for omgjøringen.',
+              message: 'Du må gi en begrunnelse for omgjøringen.',
             },
           })}
-        >
-          <option value="">Velg grunn</option>
-          {AARSAKER_OMGJOERING.map((aarsak) => (
-            <option key={aarsak} value={aarsak}>
-              {TEKSTER_AARSAK_OMGJOERING[aarsak]}
-            </option>
-          ))}
-        </Select>
-      </Box>
-      <Textarea
-        label="Begrunnelse"
-        error={errors.omgjoering?.begrunnelse?.message}
-        {...register('omgjoering.begrunnelse', {
-          required: {
-            value: true,
-            message: 'Du må gi en begrunnelse for omgjøringen.',
-          },
-        })}
-      />
-    </VStack>
+        />
+      </VStack>
+    </Box>
   )
 }

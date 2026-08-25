@@ -157,7 +157,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
 
   return (
     <VStack gap="space-16">
-      <Heading level="3" size="small">
+      <Heading level="2" size="medium">
         Søskenjustering
       </Heading>
       {manglendeSoesken.length > 0 && !skjulManglendeSoesken && (
@@ -287,10 +287,9 @@ export const UstiletListe = styled.ul`
 `
 
 const FamilieforholdWrapper = styled.div`
-  padding: 1em 4em;
   display: grid;
   gap: 4rem;
-  margin-bottom: 4rem;
+  margin-bottom: 0.5rem;
 `
 
 export default Soeskenjustering

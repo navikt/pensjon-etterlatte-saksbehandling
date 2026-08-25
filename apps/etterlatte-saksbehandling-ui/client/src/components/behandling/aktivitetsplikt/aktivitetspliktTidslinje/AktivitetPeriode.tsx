@@ -101,90 +101,94 @@ export const AktivitetPeriode = ({
   }
 
   return (
-    <form onSubmit={handleSubmit(lagreAktivitetPeriode)}>
-      <VStack gap="space-16">
-        <Heading size="small">Legg til aktivitet</Heading>
-        <HStack gap="space-16">
-          <ControlledDatoVelger
-            name="fom"
-            label="Fra dato"
-            description="Fra dato oppgitt"
-            control={control}
-            errorVedTomInput="Du må sette en fra og med dato"
-          />
-          <ControlledDatoVelger
-            name="tom"
-            label="Dato til og med"
-            description="Hvis det er oppgitt sluttdato"
-            control={control}
-            required={false}
-          />
-        </HStack>
+    <Box background="neutral-soft" borderRadius="12" padding="space-16">
+      <form onSubmit={handleSubmit(lagreAktivitetPeriode)}>
         <VStack gap="space-16">
-          <Box maxWidth="fit-content">
-            <Select
-              {...register('type', {
-                required: { value: true, message: 'Du må velge en aktivitetstype' },
-              })}
-              label="Aktivitetstype"
-              description="Velg aktivitet"
-              error={errors.type?.message}
-            >
-              <option value="">Velg aktivitet</option>
-              {Object.keys(AktivitetspliktType).map((type) => (
-                <option key={type} value={type}>
-                  {aktivitetspliktTypeTilLesbarStreng(type)}
-                </option>
-              ))}
-            </Select>
-          </Box>
-          <Box maxWidth="fit-content">
-            <Textarea
-              {...register('beskrivelse', {
-                required: { value: true, message: 'Beskrivelse må gis' },
-              })}
-              label="Beskrivelse"
-              description="Gjerne oppgi brukers aktivitetsgrad og annen relevant informasjon"
-              error={errors.beskrivelse?.message}
-            />
-          </Box>
-        </VStack>
-        {isFailureHandler({
-          apiResult: opprettAktivitetPeriodeForBehandlingResult,
-          errorMessage: 'Kunne ikke opprette/oppdatere aktivitet periode',
-        })}
-        {isFailureHandler({
-          apiResult: opprettAktivitetPeriodeForSakResult,
-          errorMessage: 'Kunne ikke opprette/oppdatere aktivitet periode',
-        })}
-        <HStack gap="space-16">
-          <Button
-            size="small"
-            variant="secondary"
-            type="button"
-            loading={
-              isPending(opprettAktivitetPeriodeForBehandlingResult) || isPending(opprettAktivitetPeriodeForSakResult)
-            }
-            onClick={() =>
-              setAktivitetspliktRedigeringModus({
-                aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.INGEN,
-                aktivitetHendelse: undefined,
-                aktivitetPeriode: undefined,
-              })
-            }
-          >
-            Avbryt
-          </Button>
-          <Button
-            size="small"
-            loading={
-              isPending(opprettAktivitetPeriodeForBehandlingResult) || isPending(opprettAktivitetPeriodeForSakResult)
-            }
-          >
+          <Heading level="2" size="medium">
             Legg til aktivitet
-          </Button>
-        </HStack>
-      </VStack>
-    </form>
+          </Heading>
+          <HStack gap="space-16">
+            <ControlledDatoVelger
+              name="fom"
+              label="Fra dato"
+              description="Fra dato oppgitt"
+              control={control}
+              errorVedTomInput="Du må sette en fra og med dato"
+            />
+            <ControlledDatoVelger
+              name="tom"
+              label="Dato til og med"
+              description="Hvis det er oppgitt sluttdato"
+              control={control}
+              required={false}
+            />
+          </HStack>
+          <VStack gap="space-16">
+            <Box maxWidth="fit-content">
+              <Select
+                {...register('type', {
+                  required: { value: true, message: 'Du må velge en aktivitetstype' },
+                })}
+                label="Aktivitetstype"
+                description="Velg aktivitet"
+                error={errors.type?.message}
+              >
+                <option value="">Velg aktivitet</option>
+                {Object.keys(AktivitetspliktType).map((type) => (
+                  <option key={type} value={type}>
+                    {aktivitetspliktTypeTilLesbarStreng(type)}
+                  </option>
+                ))}
+              </Select>
+            </Box>
+            <Box maxWidth="fit-content">
+              <Textarea
+                {...register('beskrivelse', {
+                  required: { value: true, message: 'Beskrivelse må gis' },
+                })}
+                label="Beskrivelse"
+                description="Gjerne oppgi brukers aktivitetsgrad og annen relevant informasjon"
+                error={errors.beskrivelse?.message}
+              />
+            </Box>
+          </VStack>
+          {isFailureHandler({
+            apiResult: opprettAktivitetPeriodeForBehandlingResult,
+            errorMessage: 'Kunne ikke opprette/oppdatere aktivitet periode',
+          })}
+          {isFailureHandler({
+            apiResult: opprettAktivitetPeriodeForSakResult,
+            errorMessage: 'Kunne ikke opprette/oppdatere aktivitet periode',
+          })}
+          <HStack gap="space-16">
+            <Button
+              size="small"
+              variant="secondary"
+              type="button"
+              loading={
+                isPending(opprettAktivitetPeriodeForBehandlingResult) || isPending(opprettAktivitetPeriodeForSakResult)
+              }
+              onClick={() =>
+                setAktivitetspliktRedigeringModus({
+                  aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.INGEN,
+                  aktivitetHendelse: undefined,
+                  aktivitetPeriode: undefined,
+                })
+              }
+            >
+              Avbryt
+            </Button>
+            <Button
+              size="small"
+              loading={
+                isPending(opprettAktivitetPeriodeForBehandlingResult) || isPending(opprettAktivitetPeriodeForSakResult)
+              }
+            >
+              Legg til aktivitet
+            </Button>
+          </HStack>
+        </VStack>
+      </form>
+    </Box>
   )
 }

@@ -27,7 +27,16 @@ export const TabellOverGjenlevende = ({ gjenlevende, alleLand, sakType }: Props)
           {sakType === SakType.OMSTILLINGSSTOENAD ? 'Gjenlevende' : 'Biologisk forelder'}
         </Heading>
       </HStack>
-      <Table size="small">
+      <Table size="small" style={{ width: '100%', tableLayout: 'fixed' }}>
+        <colgroup>
+          <col style={{ width: '20%' }} />
+          <col style={{ width: '16%' }} />
+          <col style={{ width: '20%' }} />
+          <col style={{ width: '10%' }} />
+          <col style={{ width: '10%' }} />
+          <col />
+          <col />
+        </colgroup>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell scope="col">Navn</Table.HeaderCell>

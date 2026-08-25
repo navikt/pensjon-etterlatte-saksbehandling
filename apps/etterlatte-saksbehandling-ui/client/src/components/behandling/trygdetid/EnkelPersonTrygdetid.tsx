@@ -132,23 +132,30 @@ export const EnkelPersonTrygdetid = (props: Props) => {
   return (
     <>
       {trygdetid && (
-        <VStack gap="space-48" maxWidth="69rem">
-          <VStack gap="space-16">
-            {!skalViseTrygdeavtale(behandling) && <AvdoedesTrygdetidReadMore />}
-            <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
-          </VStack>
+        <VStack gap="space-32" maxWidth="69rem">
+          {!skalViseTrygdeavtale(behandling) && <AvdoedesTrygdetidReadMore />}
 
-          <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
+          <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
 
-          <TrygdetidPerioder
-            trygdetid={trygdetid}
-            oppdaterTrygdetid={oppdaterTrygdetid}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
-            landListe={landListe}
-            redigerbar={redigerbar}
-            behandling={behandling}
-            setTrygdetider={setTrygdetider}
-          />
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <YrkesskadeTrygdetid
+              redigerbar={redigerbar}
+              trygdetid={trygdetid}
+              oppdaterYrkesskade={oppdaterYrkesskade}
+            />
+          </Box>
+
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <TrygdetidPerioder
+              trygdetid={trygdetid}
+              oppdaterTrygdetid={oppdaterTrygdetid}
+              trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
+              landListe={landListe}
+              redigerbar={redigerbar}
+              behandling={behandling}
+              setTrygdetider={setTrygdetider}
+            />
+          </Box>
 
           {flereLandProrata && (
             <Box maxWidth="41.5rem">
@@ -162,23 +169,27 @@ export const EnkelPersonTrygdetid = (props: Props) => {
             </Box>
           )}
 
-          <TrygdetidPerioder
-            trygdetid={trygdetid}
-            oppdaterTrygdetid={oppdaterTrygdetid}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
-            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
-            redigerbar={redigerbar}
-            behandling={behandling}
-            setTrygdetider={setTrygdetider}
-          />
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <TrygdetidPerioder
+              trygdetid={trygdetid}
+              oppdaterTrygdetid={oppdaterTrygdetid}
+              trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+              landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
+              redigerbar={redigerbar}
+              behandling={behandling}
+              setTrygdetider={setTrygdetider}
+            />
+          </Box>
 
-          <OverstyrtTrygdetid
-            redigerbar={redigerbar}
-            sakType={behandling.sakType}
-            trygdetid={trygdetid}
-            overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
-            virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
-          />
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <OverstyrtTrygdetid
+              redigerbar={redigerbar}
+              sakType={behandling.sakType}
+              trygdetid={trygdetid}
+              overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
+              virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
+            />
+          </Box>
 
           <BegrunnelseForTrygdetid
             redigerbar={redigerbar}

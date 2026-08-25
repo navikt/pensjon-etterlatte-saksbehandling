@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { HospitalIcon, PlusIcon } from '@navikt/aksel-icons'
+import { PlusIcon } from '@navikt/aksel-icons'
 import { HvaSkalRegistreresReadMore } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/HvaSkalRegistreresReadMore'
 import { InstitusjonsoppholdBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlagTable'
 import { BeregningsGrunnlagDto, InstitusjonsoppholdGrunnlagDTO } from '~shared/types/Beregning'
@@ -31,7 +31,6 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
   return (
     <VStack gap="space-16">
       <HStack gap="space-8" align="center">
-        <HospitalIcon aria-hidden fontSize="1.5rem" />
         <Heading size="small" level="3">
           Beregningsgrunnlag for institusjonsopphold
         </Heading>

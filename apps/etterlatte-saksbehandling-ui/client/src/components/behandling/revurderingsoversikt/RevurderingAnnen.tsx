@@ -6,12 +6,11 @@ import {
   RevurderingInfo,
 } from '~shared/types/RevurderingInfo'
 import { FormEvent, useState } from 'react'
-import { BodyLong, BodyShort, Button, Heading, Textarea, TextField, VStack } from '@navikt/ds-react'
+import { BodyLong, BodyShort, Box, Button, Heading, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
-import styled from 'styled-components'
 
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { useAppDispatch } from '~store/Store'
@@ -69,58 +68,55 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
   }
 
   return (
-    <>
-      <SkjemaWrapper onSubmit={handlesubmit}>
-        <VStack gap="space-40">
-          <VStack gap="space-8">
-            <Heading size="medium" level="3">
-              Årsak til revurdering
-            </Heading>
-            {redigerbar ? (
-              <TextField
-                value={revurderingsaarsak ?? ''}
-                onChange={(e) => setRevurderingsaarsak(e.target.value)}
-                error={feilmelding && !revurderingsaarsak && 'Årsak kan ikke være tom'}
-                label=""
-              />
-            ) : (
-              <BodyShort>{revurderingsaarsak}</BodyShort>
-            )}
-          </VStack>
-          <VStack gap="space-8">
-            <Heading size="medium" level="3">
-              Begrunnelse
-            </Heading>
-            {redigerbar ? (
-              <VStack gap="space-20">
-                <Textarea
-                  value={begrunnelse}
-                  onChange={(e) => {
-                    setBegrunnelse(e.target.value)
-                  }}
-                  placeholder="Begrunnelse"
-                  error={feilmelding && !begrunnelse && 'Begrunnelse kan ikke være tom'}
+    <form onSubmit={handlesubmit}>
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <Box maxWidth="40rem">
+          <VStack gap="space-40">
+            <VStack gap="space-8">
+              <Heading size="medium" level="3">
+                Årsak til revurdering
+              </Heading>
+              {redigerbar ? (
+                <TextField
+                  value={revurderingsaarsak ?? ''}
+                  onChange={(e) => setRevurderingsaarsak(e.target.value)}
+                  error={feilmelding && !revurderingsaarsak && 'Årsak kan ikke være tom'}
                   label=""
                 />
-                <Button loading={isPending(lagrestatus)} variant="primary" size="small" style={{ maxWidth: '5em' }}>
-                  Lagre
-                </Button>
-                {mapResult(lagrestatus, {
-                  success: () => <Toast melding="Lagret" />,
-                  error: (error) => <ApiErrorAlert>Kunne ikke lagre: {error.detail}</ApiErrorAlert>,
-                })}
-              </VStack>
-            ) : (
-              <BodyLong>{begrunnelse}</BodyLong>
-            )}
+              ) : (
+                <BodyShort>{revurderingsaarsak}</BodyShort>
+              )}
+            </VStack>
+            <VStack gap="space-8">
+              <Heading size="medium" level="3">
+                Begrunnelse
+              </Heading>
+              {redigerbar ? (
+                <VStack gap="space-20">
+                  <Textarea
+                    value={begrunnelse}
+                    onChange={(e) => {
+                      setBegrunnelse(e.target.value)
+                    }}
+                    placeholder="Begrunnelse"
+                    error={feilmelding && !begrunnelse && 'Begrunnelse kan ikke være tom'}
+                    label=""
+                  />
+                  <Button loading={isPending(lagrestatus)} variant="primary" size="small" style={{ maxWidth: '5em' }}>
+                    Lagre
+                  </Button>
+                  {mapResult(lagrestatus, {
+                    success: () => <Toast melding="Lagret" />,
+                    error: (error) => <ApiErrorAlert>Kunne ikke lagre: {error.detail}</ApiErrorAlert>,
+                  })}
+                </VStack>
+              ) : (
+                <BodyLong>{begrunnelse}</BodyLong>
+              )}
+            </VStack>
           </VStack>
-        </VStack>
-      </SkjemaWrapper>
-    </>
+        </Box>
+      </Box>
+    </form>
   )
 }
-
-const SkjemaWrapper = styled.form`
-  max-width: 40rem;
-  margin-top: 3rem;
-`

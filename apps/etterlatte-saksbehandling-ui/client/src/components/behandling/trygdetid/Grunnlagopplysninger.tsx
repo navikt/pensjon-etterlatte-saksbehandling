@@ -24,7 +24,9 @@ export const Grunnlagopplysninger = ({
   const visDifferanse = redigerbar ? trygdetid.opplysningerDifferanse?.differanse : false
   return (
     <VStack gap="space-16">
-      <Heading size="medium">Grunnlagsopplysninger om avdød</Heading>
+      <Heading level="2" size="small">
+        Grunnlagsopplysninger om avdød
+      </Heading>
       {visDifferanse ? (
         <DifferanseVisning trygdetid={trygdetid} onOppdatert={onOppdatert} />
       ) : (

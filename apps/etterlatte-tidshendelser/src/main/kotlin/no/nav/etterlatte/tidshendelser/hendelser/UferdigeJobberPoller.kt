@@ -24,7 +24,7 @@ class UferdigeJobberPollerTask(
         logger.info("Starter polling av uferdige jobber")
 
         return fixedRateCancellableTimer(
-            name = "HENDELSE_POLLER_TASK",
+            name = "UFERDIGE_JOBBER_POLLER_TASK",
             period = periode.toMillis(),
             startAt = startAt,
             loggerInfo = LoggerInfo(logger = logger),
@@ -53,9 +53,9 @@ class UferdigeJobberPoller(
     fun loggUferdigeJobber(jobber: List<HendelserJobb>) {
         logger.error(
             "Fant uferdige jobber som ikke vil bli forsøkt på nytt: " +
-                jobber
-                    .map { "(type: ${it.type}, id: ${it.id})" }
-                    .joinToString { "," } +
+                jobber.joinToString(separator = ",") {
+                    "(type: ${it.type}, id: ${it.id})"
+                } +
                 ". Disse må det opprettes nye jobber for.",
         )
     }

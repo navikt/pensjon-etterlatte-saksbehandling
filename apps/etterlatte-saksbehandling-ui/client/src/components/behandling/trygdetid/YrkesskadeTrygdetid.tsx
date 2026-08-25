@@ -21,6 +21,7 @@ export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade 
   return (
     <CheckboxGroup
       legend="Skyldtes dødsfallet en godkjent yrkesskade/sykdom"
+      size="medium"
       description={
         redigerbar && (
           <>

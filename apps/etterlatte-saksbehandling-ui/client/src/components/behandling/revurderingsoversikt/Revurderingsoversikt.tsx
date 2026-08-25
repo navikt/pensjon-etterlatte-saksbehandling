@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Box, Heading } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { erBehandlingRedigerbar, requireNotNull } from '../felles/utils'
@@ -138,7 +138,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
       <Box paddingBlock="space-16 space-0" borderWidth="1 0 1 0" borderColor="neutral-subtle">
         <Familieforhold behandling={behandling} redigerbar={redigerbar} personopplysninger={personopplysninger} />
       </Box>
-      <Box paddingBlock="space-32" paddingInline="space-64 space-32">
+      <VStack paddingBlock="space-32" paddingInline="space-64 space-32" gap="space-32">
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         {!!behandling.begrunnelse && (
           <>
@@ -189,7 +189,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
         )}
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
-      </Box>
+      </VStack>
       <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar && ikkeGyldigFremsattSoeknad && (
           <Box paddingInline="space-64" paddingBlock="space-24 space-64" maxWidth="42rem">

@@ -33,7 +33,7 @@ export const ControlledSingleSelectCombobox = <T extends FieldValues>({
         <UNSAFE_Combobox
           label={label}
           options={options}
-          selectedOptions={[value]}
+          selectedOptions={value ? [value] : []}
           onToggleSelected={(option, isSelected) => {
             if (isSelected) {
               onChange(option)

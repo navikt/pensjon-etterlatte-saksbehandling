@@ -84,11 +84,15 @@ abstract class BehandlingIntegrationTest {
             DatabaseConfig.DB_PASSWORD to props.password,
             DatabaseConfig.DB_PORT to props.firstMappedPort.toString(),
             DatabaseConfig.DB_DATABASE to props.databaseName,
+            AzureKey.AZUREAD_ATTESTANT_GROUPID to azureAdAttestantClaim,
             AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID to azureAdAttestantGjennyClaim,
+            AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID to azureAdSaksbehandlerClaim,
             AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
             AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
             AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,
             AzureKey.AZUREAD_PROSESSERING_ROLLE_GROUPID to azureAdProsesseringRolleClaim,
+            AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID to azureAdNasjonUtenLoggClaim,
+            AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID to azureAdNasjonMedLoggClaim,
             EnvKey.NORG2_URL to "http://localhost",
             EnvKey.NAVANSATT_URL to "http://localhost",
             EnvKey.SKJERMING_URL to "http://localhost",
@@ -167,7 +171,7 @@ abstract class BehandlingIntegrationTest {
         mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = saksbehandlerIdent,
-            groups = emptyList(),
+            groups = listOf(azureAdAttestantClaim),
         )
     }
 
@@ -175,7 +179,7 @@ abstract class BehandlingIntegrationTest {
         mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = attestantIdent,
-            groups = listOf(azureAdAttestantGjennyClaim),
+            groups = listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim),
         )
     }
 
@@ -185,7 +189,8 @@ abstract class BehandlingIntegrationTest {
             navIdent = saksbehandlerStrengtFortroligIdent,
             groups =
                 listOf(
-                    azureAdAttestantGjennyClaim,
+                    azureAdSaksbehandlerClaim,
+                    azureAdAttestantClaim,
                     azureAdStrengtFortroligClaim,
                 ),
         )
@@ -197,8 +202,9 @@ abstract class BehandlingIntegrationTest {
             navIdent = saksbehandlerSkjermetIdent,
             groups =
                 listOf(
-                    azureAdAttestantGjennyClaim,
+                    azureAdAttestantClaim,
                     azureAdEgenAnsattClaim,
+                    azureAdSaksbehandlerClaim,
                 ),
         )
     }

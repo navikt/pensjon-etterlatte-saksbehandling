@@ -1,5 +1,6 @@
 package no.nav.etterlatte.samordning.vedtak
 
+import com.typesafe.config.Config
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -25,7 +26,10 @@ fun haandterUgyldigIdent(fnr: String): Folkeregisteridentifikator {
     }
 }
 
-fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService) {
+fun Route.samordningVedtakRoute(
+    samordningVedtakService: SamordningVedtakService,
+    config: Config,
+) {
     route("api/vedtak") {
         install(MaskinportenScopeAuthorizationPlugin) {
             scopes =
@@ -90,7 +94,7 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
     route("api/pensjon/vedtak") {
         install(AuthorizationPlugin) {
             accessPolicyRolesEllerAdGrupper =
-                setOf("les-oms-vedtak", "les-oms-samordning-vedtak")
+                setOf("les-oms-vedtak", "les-oms-samordning-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf(Issuer.AZURE.issuerName)
         }
         install(selvbetjeningAuthorizationPlugin()) {

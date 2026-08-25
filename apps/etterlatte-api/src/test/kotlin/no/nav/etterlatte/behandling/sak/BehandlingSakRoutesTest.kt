@@ -109,10 +109,10 @@ class BehandlingSakRoutesTest {
     }
 
     @Test
-    fun `skal gi 500 når body mangler gjennySaksbehandler`() {
-        val gjennySaksbehandler = UUID.randomUUID().toString()
+    fun `skal gi 500 når body mangler pensjonSaksbehandler`() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
         val conff =
-            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, gjennySaksbehandler = gjennySaksbehandler)
+            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
         testApplication {
             runServerWithConfig(applicationConfig = conff) {
                 behandlingSakRoutes(
@@ -126,7 +126,7 @@ class BehandlingSakRoutesTest {
                     contentType(ContentType.Application.Json)
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(gjennySaksbehandler))}",
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.InternalServerError
@@ -135,10 +135,10 @@ class BehandlingSakRoutesTest {
     }
 
     @Test
-    fun `gjennySaksbehandler kan hente saksliste for fnr`() {
-        val gjennySaksbehandler = UUID.randomUUID().toString()
+    fun `pensjonSaksbehandler kan hente saksliste for fnr`() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
         val conff =
-            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, gjennySaksbehandler = gjennySaksbehandler)
+            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
         val requestFnr = FoedselsnummerDTO(fnr)
         val sakIdListesvar = listOf(sakId1)
         coEvery { behandlingService.hentSakforPerson(requestFnr) } returns sakIdListesvar
@@ -157,7 +157,7 @@ class BehandlingSakRoutesTest {
                     setBody(requestFnr.toJson())
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(gjennySaksbehandler))}",
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.OK
@@ -171,9 +171,9 @@ class BehandlingSakRoutesTest {
 
     @Test
     fun `Kan hente sak men sak er null og kaster da exception IkkeFunnetException men logges `() {
-        val gjennySaksbehandler = UUID.randomUUID().toString()
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
         val conff =
-            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, gjennySaksbehandler = gjennySaksbehandler)
+            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
         coEvery { behandlingService.hentSak(any()) } returns null
         testApplication {
             runServerWithConfig(applicationConfig = conff) {
@@ -208,9 +208,9 @@ class BehandlingSakRoutesTest {
 
     @Test
     fun `Kan hente sak, verifiserer at den blir returnert`() {
-        val gjennySaksbehandler = UUID.randomUUID().toString()
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
         val conff =
-            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, gjennySaksbehandler = gjennySaksbehandler)
+            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
         val sakId: Long = 12
         val funnetSak =
             SakUtenGradering(
@@ -252,6 +252,7 @@ class BehandlingSakRoutesTest {
 private fun configMedRoller(
     port: Int,
     issuerId: String,
+    pensjonSaksbehandler: String? = UUID.randomUUID().toString(),
     gjennySaksbehandler: String? = UUID.randomUUID().toString(),
 ): Config =
     ConfigFactory.parseMap(
@@ -266,6 +267,7 @@ private fun configMedRoller(
                 ),
             "roller" to
                 mapOf(
+                    "pensjon-saksbehandler" to pensjonSaksbehandler,
                     "gjenny-saksbehandler" to gjennySaksbehandler,
                 ),
         ),

@@ -11,7 +11,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.etterlatte.azureAdAttestantGjennyClaim
+import no.nav.etterlatte.azureAdAttestantClaim
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.ktor.runServerWithModule
@@ -39,7 +40,8 @@ internal class BehandlingsstatusRoutesTest {
 
         val azureAdGroupIds =
             mapOf(
-                Pair(AzureGroup.ATTESTANT_GJENNY, azureAdAttestantGjennyClaim),
+                Pair(AzureGroup.ATTESTANT, azureAdAttestantClaim),
+                Pair(AzureGroup.SAKSBEHANDLER, azureAdSaksbehandlerClaim),
             )
 
         every { applicationContext.saksbehandlerGroupIdsByKey } returns azureAdGroupIds
@@ -158,10 +160,10 @@ internal class BehandlingsstatusRoutesTest {
         }
     }
 
-    private val tokenSaksbehandler: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(groups = emptyList()) }
+    private val tokenSaksbehandler: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
 
     private val tokenAttestant: String by lazy {
-        mockOAuth2Server.issueSaksbehandlerToken(navIdent = "Saksbehandler02", groups = listOf(azureAdAttestantGjennyClaim))
+        mockOAuth2Server.issueSaksbehandlerToken(navIdent = "Saksbehandler02", groups = listOf(azureAdAttestantClaim))
     }
 
     private companion object {

@@ -15,7 +15,8 @@ import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.azureAdAttestantGjennyClaim
+import no.nav.etterlatte.azureAdAttestantClaim
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -87,18 +88,16 @@ internal class OppgaveServiceTest(
 
     private val azureGroupToGroupIDMap =
         mapOf(
-            AzureGroup.ATTESTANT_GJENNY to azureAdAttestantGjennyClaim,
+            AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
+            AzureGroup.ATTESTANT to azureAdAttestantClaim,
             AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim,
         )
 
-    private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup? = null): SaksbehandlerMedRoller {
-        val groupId = azureGroup?.let { azureGroupToGroupIDMap[it]!! }
+    private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {
+        val groupId = azureGroupToGroupIDMap[azureGroup]!!
         return SaksbehandlerMedRoller(
-            simpleSaksbehandler(
-                ident = azureGroup?.name ?: "saksbehandler",
-                claims = groupId?.let { mapOf(Claims.groups to it) } ?: emptyMap(),
-            ),
-            groupId?.let { mapOf(azureGroup to it) } ?: emptyMap(),
+            simpleSaksbehandler(ident = azureGroup.name, claims = mapOf(Claims.groups to groupId)),
+            mapOf(azureGroup to groupId),
         )
     }
 
@@ -111,7 +110,7 @@ internal class OppgaveServiceTest(
 
     @BeforeEach
     fun beforeEach() {
-        val saksbehandlerRoller = generateSaksbehandlerMedRoller()
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
         every { saksbehandler.name() } returns "ident"
 
@@ -209,7 +208,7 @@ internal class OppgaveServiceTest(
 
         val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
         nyKontekstMedBruker(attestantSaksbehandler)
-        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
+        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         mockForSaksbehandlerMedRoller(attestantSaksbehandler, attestantmedRoller)
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, attestantmedRoller.saksbehandler.ident)
@@ -243,7 +242,7 @@ internal class OppgaveServiceTest(
         val saksbehandlerto =
             mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
         nyKontekstMedBruker(saksbehandlerto)
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller()
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
 
         assertThrows<BrukerManglerAttestantRolleException> {
@@ -277,7 +276,7 @@ internal class OppgaveServiceTest(
         val saksbehandlerto =
             mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
         nyKontekstMedBruker(saksbehandlerto)
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, saksbehandlerMedRoller.saksbehandler.ident)
@@ -309,7 +308,7 @@ internal class OppgaveServiceTest(
         val saksbehandlerto =
             mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
         nyKontekstMedBruker(saksbehandlerto)
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, saksbehandlerMedRoller.saksbehandler.ident)
@@ -905,7 +904,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Skal kun få saker som ikke er adressebeskyttet tilbake hvis saksbehandler ikke har spesialroller`() {
-        val saksbehandlerRoller = generateSaksbehandlerMedRoller()
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
@@ -942,7 +941,7 @@ internal class OppgaveServiceTest(
 
     @Test
     fun `Skal få alle saker tilbake for enhet hvis saksbehandler har spesialroller`() {
-        val saksbehandlerRoller = generateSaksbehandlerMedRoller()
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
@@ -991,7 +990,7 @@ internal class OppgaveServiceTest(
             merknad = null,
         )
 
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller()
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
@@ -1024,7 +1023,7 @@ internal class OppgaveServiceTest(
             merknad = null,
         )
 
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller()
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
@@ -1060,7 +1059,7 @@ internal class OppgaveServiceTest(
             merknad = null,
         )
 
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller()
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
@@ -1096,7 +1095,7 @@ internal class OppgaveServiceTest(
             type = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = null,
         )
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller()
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
@@ -1143,12 +1142,12 @@ internal class OppgaveServiceTest(
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { enheter() } returns listOf(Enheter.AALESUND.enhetNr)
                 every { name() } returns "attestant-ident"
-                every { saksbehandlerMedRoller } returns generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
+                every { saksbehandlerMedRoller } returns generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
             }
 
         val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
         nyKontekstMedBruker(attestantSaksbehandler)
-        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
+        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         mockForSaksbehandlerMedRoller(attestantSaksbehandler, attestantmedRoller)
 
         oppgaveService.tildelSaksbehandler(oppgave.id, attestantmedRoller.saksbehandler.ident)
@@ -1267,7 +1266,7 @@ internal class OppgaveServiceTest(
 
         oppgaveService.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)
 
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller()
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
@@ -1426,7 +1425,7 @@ internal class OppgaveServiceTest(
     private fun opprettAttestantKontekst(ident: String = "ident"): SaksbehandlerMedEnheterOgRoller {
         val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns ident }
         nyKontekstMedBruker(attestantmock)
-        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY))
+        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         return attestantmock
     }
 

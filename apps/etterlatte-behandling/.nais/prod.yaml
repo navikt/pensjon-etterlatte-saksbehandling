@@ -58,6 +58,8 @@ spec:
       tenant: nav.no
       claims:
         groups:
+          - id: 11053fd7-e674-4552-9a88-f9fcedfa70b3 # 0000-GA-PENSJON_ATTESTERING
+          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # 0000-GA-PENSJON_SAKSBEHANDLER
           - id: e4eb614b-d37d-4721-ba1b-df8f0fd16f85 # 0000-GA-GJENNY_SAKSBEHANDLER
           - id: 2093e59c-d0a4-41c0-9dfc-39f710da5bba # 0000-GA-GJENNY_LES
           - id: 278dc5e6-89f5-4f2d-9b7f-d9389999201b # 0000-GA-GJENNY_ATTESTERING
@@ -65,6 +67,8 @@ spec:
           - id: 2931da41-8b8e-42cd-99c0-04a169ddae40 # 0000-GA-Strengt_Fortrolig_Adresse
           - id: e98efc34-12d1-401f-b059-f17e62834065 # 0000-GA-Fortrolig_Adresse
           - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
+          - id: baf0a4b6-71ca-45dd-9731-9f3469627c38 # 0000-GA-PENSJON_NASJONAL_M_LOGG
+          - id: f8ceac75-30fe-4f0f-aec6-db706986caf0 # 0000-GA-PENSJON_NASJONAL_U_LOGG
   kafka:
     pool: nav-prod
   resources:
@@ -115,14 +119,22 @@ spec:
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
       value: api://prod-gcp.etterlatte.etterlatte-tilbakekreving/.default
+    - name: AZUREAD_ATTESTANT_GROUPID
+      value: 11053fd7-e674-4552-9a88-f9fcedfa70b3
     - name: AZUREAD_ATTESTANT_GJENNY_GROUPID
       value: 278dc5e6-89f5-4f2d-9b7f-d9389999201b
+    - name: AZUREAD_SAKSBEHANDLER_GROUPID
+      value: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e
     - name: AZUREAD_STRENGT_FORTROLIG_GROUPID
       value: 2931da41-8b8e-42cd-99c0-04a169ddae40
     - name: AZUREAD_FORTROLIG_GROUPID
       value: e98efc34-12d1-401f-b059-f17e62834065
     - name: AZUREAD_EGEN_ANSATT_GROUPID
       value: e750ceb5-b70b-4d94-b4fa-9d22467b786b
+    - name: AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID
+      value: baf0a4b6-71ca-45dd-9731-9f3469627c38
+    - name: AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID
+      value: f8ceac75-30fe-4f0f-aec6-db706986caf0
     - name: NORG2_URL
       value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1
     - name: NAVANSATT_URL

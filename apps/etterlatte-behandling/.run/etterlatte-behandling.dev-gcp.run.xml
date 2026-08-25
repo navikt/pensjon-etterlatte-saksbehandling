@@ -7,8 +7,12 @@
       <env name="AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING" value="api://dev-gcp.etterlatte.etterlatte-tilbakekreving/.default" />
       <env name="AZURE_SCOPE_SKJERMEDE_PIP" value="api://dev-gcp.nom.skjermede-personer-pip/.default" />
       <env name="AZUREAD_ATTESTANT_GJENNY_GROUPID" value="70cfce24-7865-4676-9fdc-b676e90bfc92" />
+      <env name="AZUREAD_ATTESTANT_GROUPID" value="63f46f74-84a8-4d1c-87a8-78532ab3ae60" />
       <env name="AZUREAD_EGEN_ANSATT_GROUPID" value="dbe4ad45-320b-4e9a-aaa1-73cca4ee124d" />
       <env name="AZUREAD_FORTROLIG_GROUPID" value="2e1dc582-f762-4510-a660-88bf68fb7128" />
+      <env name="AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID" value="ea7411eb-8b48-41a0-bc56-7b521fbf0c25" />
+      <env name="AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID" value="753805ea-65a7-4855-bdc3-e6130348df9f" />
+      <env name="AZUREAD_SAKSBEHANDLER_GROUPID" value="8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf" />
       <env name="AZUREAD_STRENGT_FORTROLIG_GROUPID" value="a1b518e2-3947-478d-8929-e5d685c47cac" />
       <env name="DB_DATABASE" value="postgres" />
       <env name="DB_HOST" value="localhost" />

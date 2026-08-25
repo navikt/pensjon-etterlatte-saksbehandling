@@ -10,13 +10,16 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -65,8 +68,8 @@ class SaksbehandlerServiceImplTest(
 
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(),
-                emptyMap(),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
+                mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
@@ -93,8 +96,8 @@ class SaksbehandlerServiceImplTest(
 
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(),
-                emptyMap(),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
+                mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)

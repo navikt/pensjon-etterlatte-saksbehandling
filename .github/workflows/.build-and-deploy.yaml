@@ -37,6 +37,7 @@ jobs:
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          READER_TOKEN: ${{ secrets.READER_TOKEN }}
         run: ./gradlew :apps:${{ github.workflow }}:build --configuration-cache
 
       - name: Build and publish docker image

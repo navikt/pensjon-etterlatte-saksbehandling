@@ -11,8 +11,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.azureAdAttestantClaim
-import no.nav.etterlatte.azureAdSaksbehandlerClaim
+import no.nav.etterlatte.azureAdAttestantGjennyClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
@@ -82,22 +81,24 @@ class GosysOppgaveServiceImplTest {
 
     val azureGroupToGroupIDMap =
         mapOf(
-            AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
-            AzureGroup.ATTESTANT to azureAdAttestantClaim,
+            AzureGroup.ATTESTANT_GJENNY to azureAdAttestantGjennyClaim,
             AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim,
         )
 
-    private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {
-        val groupId = azureGroupToGroupIDMap[azureGroup]!!
+    private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup? = null): SaksbehandlerMedRoller {
+        val groupId = azureGroup?.let { azureGroupToGroupIDMap[it]!! }
         return SaksbehandlerMedRoller(
-            simpleSaksbehandler(ident = azureGroup.name, claims = mapOf(Claims.groups to groupId)),
-            mapOf(azureGroup to groupId),
+            simpleSaksbehandler(
+                ident = azureGroup?.name ?: "saksbehandler",
+                claims = groupId?.let { mapOf(Claims.groups to it) } ?: emptyMap(),
+            ),
+            groupId?.let { mapOf(azureGroup to it) } ?: emptyMap(),
         )
     }
 
     @BeforeEach
     fun beforeEach() {
-        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller()
         every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
 
         nyKontekstMedBruker(saksbehandler)
@@ -113,7 +114,7 @@ class GosysOppgaveServiceImplTest {
 
     @Test
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
-        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller()
         every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
         every { saksbehandler.name() } returns "ident"
 

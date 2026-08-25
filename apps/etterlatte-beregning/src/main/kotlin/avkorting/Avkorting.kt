@@ -1369,7 +1369,7 @@ fun finnAntallInnvilgaMaanederForAar(
             beregningsperioder =
                 FaktumNode(
                     ytelse,
-                    ytelse.map { it.beregningsreferanse }.distinct().joinToString { ", " },
+                    ytelse.map { it.beregningsreferanse }.distinct().joinToString(separator = ", "),
                     "Beregningsperioder i året",
                 ),
             tilOgMed =

@@ -30,6 +30,8 @@ import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.prosessering.ProsesseringAdminDao
+import no.nav.etterlatte.prosessering.SoeknadSkyggeDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 
 private fun featureToggleProperties(config: Config) =
@@ -73,6 +75,9 @@ internal class ApplicationContext(
     private val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
 
     private val daoModule = DaoModule(autoClosingDatabase, dataSource)
+
+    val prosesseringAdminDao = ProsesseringAdminDao(dataSource)
+    val soeknadSkyggeDao = SoeknadSkyggeDao(dataSource)
 
     private val kafkaModule = KafkaModule(rapid, rapidVedtak)
 

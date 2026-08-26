@@ -12,9 +12,16 @@ testcontainer-version = "1.21.4"
 tjenestespesifikasjoner-version = "1.1436e29"
 rapidsandrivers-version = "2026021921161771532161.7a37f8c9e0cc" # OBS! tbdlibs brukes av denne. De bør stemme overens
 tbdlibs-version = "2026.02.19-20.58-521cdd3c" # OBS! rapidsandrivers bruker denne. De bør stemme overens
+prosessering-version = "1.20260824100828_0d24e53"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.4" }
+
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2" }
+
+prosessering-core = { module = "no.nav.efterlatte:prosessering-core", version.ref = "prosessering-version" }
+prosessering-postgres = { module = "no.nav.efterlatte:prosessering-postgres", version.ref = "prosessering-version" }
+prosessering-ktor = { module = "no.nav.efterlatte:prosessering-ktor", version.ref = "prosessering-version" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "7.1.0" }
 database-flywaydb = { module = "org.flywaydb:flyway-core", version = "13.1.0" }

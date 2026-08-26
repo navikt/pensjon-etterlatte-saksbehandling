@@ -37,7 +37,7 @@ fun Project.setupRepositories() {
                 url = uri("https://maven.pkg.github.com/navikt/efterlatte-prosessering")
                 credentials {
                     username = "x-access-token"
-                    password = System.getenv("READER_TOKEN") ?: throw IllegalStateException("READER_TOKEN is not set")
+                    password = System.getenv("READER_TOKEN").orEmpty()
                 }
             }
         }

@@ -29,6 +29,7 @@ class AktivitetspliktBrevDaoTest(
         val sak = sakSkrivDao.opprettSak("person", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
 
+        if (1 == 1) throw RuntimeException("Feiler")
         val brevdata =
             AktivitetspliktInformasjonBrevdata(
                 sakid = sak.id,

@@ -27,5 +27,6 @@ internal class GrunnbeloepRepositoryTest {
     fun `skal hente grunnbeloep for en gitt periode - siste maaned`() {
         val grunnbeloep = GrunnbeloepRepository.hentGjeldendeGrunnbeloep(YearMonth.of(2022, 4))
         grunnbeloep.grunnbeloep shouldBe 106399
+        // some change
     }
 }

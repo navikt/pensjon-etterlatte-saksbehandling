@@ -8,6 +8,7 @@ import { sendHendelseTilUmami } from '~shared/umami/umami'
 export enum LogEvents {
   CLICK = 'klikk',
   BREVMAL = 'brevmal',
+  BEHANDLINGSTEG = 'behandlingsteg',
 }
 
 export enum BrevmalHendelse {
@@ -97,6 +98,14 @@ export const trackClickMedSvar = (name: ClickEvent, svar: string) => {
 // Brukes til å måle hvilke brevmaler (Brevkoder på backend) som faktisk tas i bruk, for dashboard i Umami.
 export const trackBrevmalBrukt = (mal: string, hendelse: BrevmalHendelse) => {
   sendHendelseTilUmami(LogEvents.BREVMAL, { mal, hendelse })
+}
+
+export const trackBehandlingSteg = (steg: string, varighetMs: number, behandlingId?: string) => {
+  sendHendelseTilUmami(LogEvents.BEHANDLINGSTEG, {
+    steg,
+    varighetSekunder: Math.round(varighetMs / 1000),
+    behandlingId,
+  })
 }
 
 export function velgTilbakemeldingClickEventForUtlandsbehandling(

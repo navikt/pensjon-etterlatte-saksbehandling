@@ -24,7 +24,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formatering/formatering'
-import { ClickEvent, trackClick } from '~utils/analytics'
+import { BrevmalHendelse, ClickEvent, trackBrevmalBrukt, trackClick } from '~utils/analytics'
 import { hentGjeldendeGrunnbeloep } from '~shared/api/beregning'
 import Spinner from '~shared/Spinner'
 
@@ -160,6 +160,7 @@ export const NyttBrevModal = ({
     trackClick(ClickEvent.OPPRETT_NYTT_BREV)
 
     opprettBrevApiCall({ sakId: sakId, body: brevParametre }, (brev) => {
+      trackBrevmalBrukt(brev.brevkoder, BrevmalHendelse.OPPRETTET)
       setOpen(false)
       navigate(`/person/sak/${brev.sakId}/brev/${brev.id}`)
     })

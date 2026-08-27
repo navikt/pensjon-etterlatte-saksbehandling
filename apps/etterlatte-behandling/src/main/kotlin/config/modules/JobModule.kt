@@ -302,7 +302,7 @@ class JobModule(
                 } else {
                     Duration.of(5, ChronoUnit.MINUTES)
                 },
-            hendelserBatchSize = 1000,
+            hendelserBatchSize = 2000,
             dataSource = dataSource,
             sakTilgangDao = daoModule.sakTilgangDao,
             featureToggleService = featureToggleService,

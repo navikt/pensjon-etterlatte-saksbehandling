@@ -8,6 +8,10 @@ plugins {
     application
 }
 
+kotlin {
+    jvmToolchain(25)
+}
+
 dependencies {
     implementation(kotlin("stdlib"))
 

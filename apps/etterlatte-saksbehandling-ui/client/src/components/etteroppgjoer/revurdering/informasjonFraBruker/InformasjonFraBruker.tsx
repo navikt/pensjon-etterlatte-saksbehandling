@@ -38,7 +38,7 @@ export const InformasjonFraBruker = ({
   return (
     <VStack gap="space-16">
       <Heading size="medium" level="2">
-        Informasjon fra bruker
+        Er det ny informasjon i saken?
       </Heading>
       {informasjonFraBrukerSkjemaErAapen && erRedigerbar ? (
         <InformasjonFraBrukerSkjema

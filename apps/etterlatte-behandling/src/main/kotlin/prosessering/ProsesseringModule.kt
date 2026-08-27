@@ -19,8 +19,11 @@ import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
@@ -28,16 +31,25 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.slf4j.LoggerFactory
+import java.time.Instant
+import java.util.UUID
 import javax.sql.DataSource
 
 fun Application.installProsessering(dataSource: DataSource) {
     install(Prosessering) {
         repository = PostgresTaskRepository(dataSource)
-        steg = listOf(SoeknadMottakSkyggeTaskStep())
+        steg = listOfNotNull(SoeknadMottakSkyggeTaskStep(), FeilbarDemoTaskStep().takeIf { erDemomiljoe() })
         node = "etterlatte-behandling"
         reaperPaa = true
     }
 }
+
+/**
+ * Demo-tasken og endepunktet som køer den hører hjemme i dev og lokalt, ikke i prod. Sjekken bor
+ * ett sted slik at steget og ruta ikke kan komme i utakt: er ruta stengt, finnes det ingen tasker
+ * av typen, og da er det ingen grunn til å ha steget registrert heller.
+ */
+private fun erDemomiljoe(): Boolean = !appIsInGCP() || isDev()
 
 data class SoeknadSkyggeRequest(
     val soeknadId: String,
@@ -137,6 +149,63 @@ fun Route.prosesseringRoutes(
 data class TaskHandling(
     val versjon: Long,
 )
+
+data class FeilbarDemoRespons(
+    val taskId: Long,
+    val simulertOppeFra: Instant,
+)
+
+/**
+ * Køer en [FeilbarDemo]-task så det finnes noe å faktisk rekjøre fra prosessering-dashboardet.
+ * `vinduSekunder` styrer hvor lenge den simulerte avhengigheten er nede; tasken står som
+ * `STOPPET` nesten umiddelbart, og fullfører ved rekjøring etter at vinduet har gått.
+ *
+ * Bare tilgjengelig i dev og lokalt — se [erDemomiljoe]. Vinduet tas som query-parameter og ikke
+ * som kropp, slik at en `curl -X POST` uten mer seremoni er nok.
+ */
+fun Route.feilbarDemoRoute(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) {
+    route("/api/prosessering/demo/feilbar") {
+        post {
+            if (!erDemomiljoe()) {
+                call.respond(HttpStatusCode.NotFound)
+                return@post
+            }
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
+                val vinduSekunder = call.request.queryParameters["vinduSekunder"]?.toLongOrNull() ?: STANDARD_DEMOVINDU
+                if (vinduSekunder !in 0..MAKS_DEMOVINDU) {
+                    throw UgyldigForespoerselException(
+                        code = "UGYLDIG_DEMOVINDU",
+                        detail = "vinduSekunder må være mellom 0 og $MAKS_DEMOVINDU, var $vinduSekunder",
+                    )
+                }
+
+                val simulertOppeFra = Instant.now().plusSeconds(vinduSekunder)
+                val taskId =
+                    call.application.taskProdusent.opprettIEgenTransaksjon(
+                        type = FeilbarDemo,
+                        payload =
+                            FeilbarDemoPayload(
+                                demoId = UUID.randomUUID().toString(),
+                                simulertOppeFra = simulertOppeFra,
+                            ),
+                    )
+                operatorlogg.info(
+                    "{} opprettet feilbar demo-task {} — simulert avhengighet er nede til {}",
+                    saksbehandler.ident(),
+                    taskId.verdi,
+                    simulertOppeFra,
+                )
+                call.respond(
+                    HttpStatusCode.Created,
+                    FeilbarDemoRespons(taskId = taskId.verdi, simulertOppeFra = simulertOppeFra),
+                )
+            }
+        }
+    }
+}
+
+private const val STANDARD_DEMOVINDU = 20L
+private const val MAKS_DEMOVINDU = 3600L
 
 /**
  * Prosessering-endepunktene er ikke saksbehandlingsflate, men en operatørinngang for

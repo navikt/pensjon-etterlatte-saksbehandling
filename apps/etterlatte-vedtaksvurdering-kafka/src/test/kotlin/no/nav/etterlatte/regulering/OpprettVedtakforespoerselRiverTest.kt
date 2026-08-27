@@ -11,8 +11,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.klienter.BrevKlient
+import no.nav.etterlatte.klienter.BrevService
 import no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -49,10 +50,11 @@ import java.util.UUID
 internal class OpprettVedtakforespoerselRiverTest {
     private val fraDato = LocalDate.of(2023, 5, 1)
     private val sakId = randomSakId()
+    private val idNyttBrev: BrevID = 5L
 
     private val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
     private val utbetalingKlientMock = mockk<UtbetalingKlient>(relaxed = true)
-    private val brevKlientMock = mockk<BrevKlient>(relaxed = true)
+    private val brevServiceMock = mockk<BrevService>(relaxed = true)
     private val featureToggleService = DummyFeatureToggleService()
 
     private fun genererOpprettVedtakforespoersel(
@@ -103,12 +105,16 @@ internal class OpprettVedtakforespoerselRiverTest {
                 attestertRapidInfo(vedtakDto),
                 null,
             )
+        every { brevServiceMock.opprettBrev(any(), any()) } returns
+            mockk {
+                every { id } returns idNyttBrev
+            }
     }
 
     @AfterEach
     fun tearDown() {
         verify(atLeast = 0) { vedtakServiceMock.hentInnvilgedePerioder(any()) }
-        confirmVerified(vedtakServiceMock, utbetalingKlientMock, brevKlientMock)
+        confirmVerified(vedtakServiceMock, utbetalingKlientMock, brevServiceMock)
         clearAllMocks()
     }
 
@@ -340,8 +346,8 @@ internal class OpprettVedtakforespoerselRiverTest {
         verify { vedtakServiceMock.hentVedtak(any()) }
         verify { vedtakServiceMock.opprettVedtakOgFatt(sakId, behandlingId) }
         verify { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
-        verify { brevKlientMock.opprettBrev(behandlingId, sakId) }
-        verify { brevKlientMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, any()) }
+        verify { brevServiceMock.opprettBrev(behandlingId, sakId) }
+        verify { brevServiceMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, sakId, idNyttBrev) }
         verify { vedtakServiceMock.hentVedtakForSak(any()) }
     }
 
@@ -364,11 +370,11 @@ internal class OpprettVedtakforespoerselRiverTest {
 
         verify { vedtakServiceMock.hentVedtak(forrigeBehandlingId) }
         verify { vedtakServiceMock.opprettVedtakOgFatt(sakId, behandlingId) }
-        verify { brevKlientMock.opprettBrev(behandlingId, sakId) }
+        verify { brevServiceMock.opprettBrev(behandlingId, sakId) }
         verify { vedtakServiceMock.hentVedtakForSak(sakId) }
 
         verify(exactly = 0) { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
-        verify(exactly = 0) { brevKlientMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, any()) }
+        verify(exactly = 0) { brevServiceMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, sakId, idNyttBrev) }
     }
 
     private fun TestRapid.river() {
@@ -376,7 +382,7 @@ internal class OpprettVedtakforespoerselRiverTest {
             this,
             vedtakServiceMock,
             utbetalingKlientMock,
-            brevKlientMock,
+            brevServiceMock,
             featureToggleService,
         )
     }

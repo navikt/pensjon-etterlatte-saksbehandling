@@ -21,6 +21,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.clusterNavn
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.isDev
@@ -164,11 +166,24 @@ data class FeilbarDemoRespons(
  * som kropp, slik at en `curl -X POST` uten mer seremoni er nok.
  */
 fun Route.feilbarDemoRoute(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) {
+    // Skrives ved oppstart. Er den ikke i Loki, kjører podden et image uten denne ruta — og da
+    // er en 404 fra endepunktet et deploy-problem, ikke et kodeproblem.
+    logger.info(
+        "Registrerer POST /api/prosessering/demo/feilbar (cluster={}, demomiljø={})",
+        clusterNavn() ?: "ukjent",
+        erDemomiljoe(),
+    )
     route("/api/prosessering/demo/feilbar") {
         post {
+            // Eksplisitt kropp, ikke `call.respond(HttpStatusCode.NotFound)`. StatusPages skriver
+            // om alle kroppsløse 404-er til «ruta er ikke konfigurert opp», og da blir «demoen er
+            // avskrudd her» umulig å skille fra «ruta finnes ikke i imaget». Den forskjellen er
+            // hele svaret når noen feilsøker fra dashboardet.
             if (!erDemomiljoe()) {
-                call.respond(HttpStatusCode.NotFound)
-                return@post
+                throw IkkeFunnetException(
+                    code = "DEMO_IKKE_TILGJENGELIG",
+                    detail = "Feilbar demo-task finnes bare i dev og lokalt, ikke i ${clusterNavn() ?: "ukjent miljø"}",
+                )
             }
             medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
                 val vinduSekunder = call.request.queryParameters["vinduSekunder"]?.toLongOrNull() ?: STANDARD_DEMOVINDU
@@ -273,3 +288,4 @@ private fun utfoerOgLogg(
     }
 
 private val operatorlogg = LoggerFactory.getLogger("prosessering.operator")
+private val logger = LoggerFactory.getLogger("no.nav.etterlatte.prosessering.ProsesseringModule")

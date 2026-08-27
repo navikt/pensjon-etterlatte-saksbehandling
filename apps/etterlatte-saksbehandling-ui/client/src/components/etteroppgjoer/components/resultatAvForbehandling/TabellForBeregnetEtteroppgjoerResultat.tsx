@@ -11,7 +11,7 @@ export const TabellForBeregnetEtteroppgjoerResultat = () => {
 
   return (
     <VStack gap="space-16">
-      <Heading size="large">
+      <Heading size="medium" level="2">
         <HStack gap="space-8">Resultat</HStack>
       </Heading>
       <Box maxWidth="42.5rem">

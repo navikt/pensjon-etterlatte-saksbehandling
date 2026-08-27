@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
+import io.kotest.matchers.equals.shouldNotEqual
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
@@ -387,7 +389,11 @@ class EtteroppgjoerForbehandlingServiceTest {
                     sak = ctx.behandling.sak,
                     innvilgetPeriode = Periode(YearMonth.now().minusYears(1), null),
                     sisteIverksatteBehandling = ctx.behandling.id,
-                ).copy(brevId = 123L, varselbrevSendt = LocalDate.now())
+                ).copy(
+                    brevId = 123L,
+                    varselbrevSendt = LocalDate.now(),
+                    klageOmgjoering = UUID.randomUUID(),
+                )
 
         ctx.returnsForbehandling(forbehandling)
         coEvery { ctx.vedtakInternalService.hentIverksatteVedtak(sakId1, any()) } returns
@@ -407,14 +413,23 @@ class EtteroppgjoerForbehandlingServiceTest {
             )
         every { ctx.behandlingService.hentBehandlingerForSak(any()) } returns listOf(ctx.behandling)
 
-        val kopiertForbehandling = ctx.service.kopierOgLagreNyForbehandling(uuid, sakId1, null, mockk())
+        val nyKlageOmgjoering = UUID.randomUUID()
+        val kopiertForbehandling =
+            ctx.service.kopierOgLagreNyForbehandling(
+                forbehandlingId = uuid,
+                sakId = sakId1,
+                brukerTokenInfo = mockk(),
+                klageId = nyKlageOmgjoering,
+                omgjoeringEgetInitiativ = false,
+            )
 
         with(kopiertForbehandling) {
-            assertNotEquals(id, forbehandling.id)
-            assertEquals(kopiertFra, forbehandling.id)
-            assertEquals(sisteIverksatteBehandlingId, ctx.behandling.id)
-            assertNull(brevId)
-            assertNull(varselbrevSendt)
+            id shouldNotEqual forbehandling.id
+            kopiertFra shouldBe forbehandling.id
+            sisteIverksatteBehandlingId shouldBe ctx.behandling.id
+            brevId shouldBe null
+            varselbrevSendt shouldBe null
+            klageOmgjoering shouldBe nyKlageOmgjoering
         }
 
         verify {

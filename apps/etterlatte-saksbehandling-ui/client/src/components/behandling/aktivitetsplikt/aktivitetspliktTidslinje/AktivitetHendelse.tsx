@@ -1,6 +1,6 @@
 import { IAktivitetHendelse, OpprettAktivitetHendelse } from '~shared/types/Aktivitetsplikt'
 import { useForm } from 'react-hook-form'
-import { Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
+import { Box, Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import {
   AktivitetspliktRedigeringModus,
@@ -95,59 +95,65 @@ export const AktivitetHendelse = ({
   }
 
   return (
-    <form onSubmit={handleSubmit(lagreAktivitetHendelse)}>
-      <VStack gap="space-16" maxWidth="20rem">
-        <Heading size="small">Legg til hendelse</Heading>
-        <ControlledDatoVelger
-          name="dato"
-          label="Dato for hendelse"
-          control={control}
-          errorVedTomInput="Dato må settes"
-        />
-        <Textarea
-          {...register('beskrivelse', {
-            required: { value: true, message: 'Beskrivelse må gis' },
-          })}
-          label="Hva gjelder hendelsen"
-          description="Gi en kort beskrivelse"
-          error={errors.beskrivelse?.message}
-        />
-        {isFailureHandler({
-          apiResult: opprettAktivitetHendelseForBehandlingResult,
-          errorMessage: 'Kunne ikke opprette/oppdatere aktivitet hendelse',
-        })}
-        {isFailureHandler({
-          apiResult: opprettAktivitetHendelseForSakResult,
-          errorMessage: 'Kunne ikke opprette/oppdatere aktivitet hendelse',
-        })}
-        <HStack gap="space-16">
-          <Button
-            size="small"
-            variant="secondary"
-            type="button"
-            loading={
-              isPending(opprettAktivitetHendelseForBehandlingResult) || isPending(opprettAktivitetHendelseForSakResult)
-            }
-            onClick={() =>
-              setAktivitetspliktRedigeringModus({
-                aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.INGEN,
-                aktivitetHendelse: undefined,
-                aktivitetPeriode: undefined,
-              })
-            }
-          >
-            Avbryt
-          </Button>
-          <Button
-            size="small"
-            loading={
-              isPending(opprettAktivitetHendelseForBehandlingResult) || isPending(opprettAktivitetHendelseForSakResult)
-            }
-          >
+    <Box background="neutral-soft" borderRadius="12" padding="space-16">
+      <form onSubmit={handleSubmit(lagreAktivitetHendelse)}>
+        <VStack gap="space-16" maxWidth="20rem">
+          <Heading level="2" size="medium">
             Legg til hendelse
-          </Button>
-        </HStack>
-      </VStack>
-    </form>
+          </Heading>
+          <ControlledDatoVelger
+            name="dato"
+            label="Dato for hendelse"
+            control={control}
+            errorVedTomInput="Dato må settes"
+          />
+          <Textarea
+            {...register('beskrivelse', {
+              required: { value: true, message: 'Beskrivelse må gis' },
+            })}
+            label="Hva gjelder hendelsen"
+            description="Gi en kort beskrivelse"
+            error={errors.beskrivelse?.message}
+          />
+          {isFailureHandler({
+            apiResult: opprettAktivitetHendelseForBehandlingResult,
+            errorMessage: 'Kunne ikke opprette/oppdatere aktivitet hendelse',
+          })}
+          {isFailureHandler({
+            apiResult: opprettAktivitetHendelseForSakResult,
+            errorMessage: 'Kunne ikke opprette/oppdatere aktivitet hendelse',
+          })}
+          <HStack gap="space-16">
+            <Button
+              size="small"
+              variant="secondary"
+              type="button"
+              loading={
+                isPending(opprettAktivitetHendelseForBehandlingResult) ||
+                isPending(opprettAktivitetHendelseForSakResult)
+              }
+              onClick={() =>
+                setAktivitetspliktRedigeringModus({
+                  aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.INGEN,
+                  aktivitetHendelse: undefined,
+                  aktivitetPeriode: undefined,
+                })
+              }
+            >
+              Avbryt
+            </Button>
+            <Button
+              size="small"
+              loading={
+                isPending(opprettAktivitetHendelseForBehandlingResult) ||
+                isPending(opprettAktivitetHendelseForSakResult)
+              }
+            >
+              Legg til hendelse
+            </Button>
+          </HStack>
+        </VStack>
+      </form>
+    </Box>
   )
 }

@@ -76,14 +76,16 @@ spec:
     - secret: my-application-unleash-api-token
   resources:
     requests:
-      cpu: 40m
-      memory: 2048Mi
+      cpu: 50m
+      memory: 1280Mi
     limits:
-      memory: 4096Mi
+      memory: 1280Mi
   replicas:
     max: 1
     min: 1
   env:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-XX:MaxRAMPercentage=50"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY

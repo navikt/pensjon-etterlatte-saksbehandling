@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRequest
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRespons
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -132,11 +134,11 @@ class OppgaveDaoMedEndringssporingImpl(
             typer,
         )
 
-    override fun hentOppgaver(
+    override fun soekOppgaver(
         enheter: List<Enhetsnummer>,
-        oppgaveStatuser: List<String>,
-        minOppgavelisteIdentFilter: String?,
-    ): List<OppgaveIntern> = oppgaveDao.hentOppgaver(enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
+        request: OppgaveSoekRequest,
+        innloggetSaksbehandlerIdent: String,
+    ): OppgaveSoekRespons = oppgaveDao.soekOppgaver(enheter, request, innloggetSaksbehandlerIdent)
 
     override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =
         oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)

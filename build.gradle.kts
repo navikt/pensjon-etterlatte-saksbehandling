@@ -33,6 +33,13 @@ fun Project.setupRepositories() {
                     password = System.getenv("GITHUB_TOKEN")
                 }
             }
+            maven {
+                url = uri("https://maven.pkg.github.com/navikt/efterlatte-prosessering")
+                credentials {
+                    username = "x-access-token"
+                    password = System.getenv("READER_TOKEN").orEmpty()
+                }
+            }
         }
     }
 }

@@ -13,21 +13,21 @@ import rapidsandrivers.initRogR
 fun main() {
     initRogR("vedtaksvurdering-kafka") { rapidsConnection, rapidEnv ->
         val appBuilder = AppBuilder(rapidEnv)
-        val vedtakKlient = appBuilder.lagVedtakKlient()
-        val utbetalingKlient = appBuilder.lagUtbetalingKlient()
-        val brevKlient = appBuilder.lagBrevKlient()
-        LoependeYtelserforespoerselRiver(rapidsConnection, vedtakKlient)
+        val vedtakService = appBuilder.lagVedtakService()
+        val utbetalingService = appBuilder.lagUtbetalingService()
+        val brevService = appBuilder.lagBrevService()
+        LoependeYtelserforespoerselRiver(rapidsConnection, vedtakService)
         OpprettVedtakforespoerselRiver(
             rapidsConnection,
-            vedtakKlient,
-            utbetalingKlient,
-            brevKlient,
+            vedtakService,
+            utbetalingService,
+            brevService,
             appBuilder.lagFeatureToggleService(),
         )
-        LagreIverksattVedtakRiver(rapidsConnection, vedtakKlient)
-        AttestertVedtakRiver(rapidsConnection, vedtakKlient)
-        SamordningMottattRiver(rapidsConnection, vedtakKlient)
-        TilSamordningRiver(rapidsConnection, vedtakKlient)
-        TidshendelseRiver(rapidsConnection, vedtakKlient)
+        LagreIverksattVedtakRiver(rapidsConnection, vedtakService)
+        AttestertVedtakRiver(rapidsConnection, vedtakService)
+        SamordningMottattRiver(rapidsConnection, vedtakService)
+        TilSamordningRiver(rapidsConnection, vedtakService)
+        TidshendelseRiver(rapidsConnection, vedtakService)
     }
 }

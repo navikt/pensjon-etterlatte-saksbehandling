@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
+import java.time.Month.JANUARY
 import java.time.YearMonth
 import java.util.UUID
 
@@ -59,6 +60,7 @@ class EtteroppgjoerRevurderingService(
         klageId: UUID? = null,
         omgjoerForbehandlingId: UUID? = null,
         brukerTokenInfo: BrukerTokenInfo,
+        omgjoeringEgetInitiativ: Boolean,
     ): Revurdering {
         val etteroppgjoer =
             inTransaction { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) }
@@ -97,6 +99,7 @@ class EtteroppgjoerRevurderingService(
                             },
                         klageId = klageId,
                         brukerTokenInfo = brukerTokenInfo,
+                        omgjoeringEgetInitiativ = omgjoeringEgetInitiativ,
                     )
 
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
@@ -182,6 +185,58 @@ class EtteroppgjoerRevurderingService(
             klageId = forbehandling.klageOmgjoering,
             omgjoerForbehandlingId = forbehandling.kopiertFra?.takeIf { forbehandling.klageOmgjoering != null },
             brukerTokenInfo = brukerTokenInfo,
+            omgjoeringEgetInitiativ = forbehandling.omgjoeringEgetInitiativ,
+        )
+    }
+
+    fun omgjoerEtteroppgjoerRevurderingEgetInitiativ(
+        sakId: SakId,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Revurdering {
+        val omgjoerForbehandlingId =
+            inTransaction {
+                val etteroppgjoer =
+                    etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+
+                if (etteroppgjoer.status != EtteroppgjoerStatus.FERDIGSTILT) {
+                    throw IkkeTillattException(
+                        "ETTEROPPGJOER_IKKE_IVERKSATT",
+                        "Etteroppgjøret for sakId=$sakId og inntektsår=$inntektsaar har status ${etteroppgjoer.status} " +
+                            "og kan ikke omgjøres. Kun iverksatte etteroppgjør kan omgjøres på eget initiativ.",
+                    )
+                }
+
+                val omgjoerForbehandlingId =
+                    krevIkkeNull(etteroppgjoer.sisteFerdigstilteForbehandling) {
+                        "Fant ingen ferdigstilt forbehandling for etteroppgjøret til sakId=$sakId og inntektsår=$inntektsaar"
+                    }
+
+                // TODO finnes det bare ett eo per sak per år?
+                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                    sakId,
+                    inntektsaar,
+                    EtteroppgjoerStatus.OMGJOERING,
+                    EtteroppgjoerHendelser.OMGJOERING,
+                )
+                omgjoerForbehandlingId
+            }
+        val skalOmgjoeres =
+            inTransaction {
+                behandlingService
+                    .hentBehandlingerForSak(sakId)
+                    .filter { it.status in BehandlingStatus.iverksattEllerAttestert() }
+                    .filter { erKnyttetTilEtteroppgjoerForAar(it, inntektsaar) }
+                    .maxBy { it.sistEndret }
+            }
+
+        return opprettEtteroppgjoerRevurdering(
+            sakId = sakId,
+            inntektsaar = inntektsaar,
+            opprinnelse = skalOmgjoeres.opprinnelse,
+            omgjoerForbehandlingId = omgjoerForbehandlingId,
+            brukerTokenInfo = brukerTokenInfo,
+            omgjoeringEgetInitiativ = true,
         )
     }
 
@@ -217,9 +272,10 @@ class EtteroppgjoerRevurderingService(
             sakId = behandling.sak.id,
             inntektsaar = forbehandling.aar,
             opprinnelse = behandling.opprinnelse,
-            brukerTokenInfo = brukerTokenInfo,
             klageId = klageId,
             omgjoerForbehandlingId = forbehandling.id,
+            brukerTokenInfo = brukerTokenInfo,
+            omgjoeringEgetInitiativ = false,
         )
     }
 
@@ -262,13 +318,15 @@ class EtteroppgjoerRevurderingService(
         opphoerFraTidligereBehandling: OpphoerFraTidligereBehandling?,
         klageId: UUID? = null,
         brukerTokenInfo: BrukerTokenInfo,
+        omgjoeringEgetInitiativ: Boolean,
     ): Revurdering {
         val forbehandling =
             etteroppgjoerForbehandlingService.kopierOgLagreNyForbehandling(
-                kildeForbehandlingId,
-                sakId,
-                klageId,
-                brukerTokenInfo,
+                forbehandlingId = kildeForbehandlingId,
+                sakId = sakId,
+                brukerTokenInfo = brukerTokenInfo,
+                klageId = klageId,
+                omgjoeringEgetInitiativ = omgjoeringEgetInitiativ,
             )
 
         val persongalleri =
@@ -363,12 +421,14 @@ class EtteroppgjoerRevurderingService(
         }
     }
 
-    private fun String.parseUuid(): UUID? =
-        try {
-            UUID.fromString(this)
-        } catch (_: IllegalArgumentException) {
-            null
-        }
+    private fun erKnyttetTilEtteroppgjoerForAar(
+        behandling: Behandling,
+        inntektsaar: Int,
+    ): Boolean =
+        behandling.revurderingsaarsak() == Revurderingaarsak.ETTEROPPGJOER &&
+            behandling.sistEndret > YearMonth.of(inntektsaar + 1, JANUARY).atDay(1).atStartOfDay() &&
+            behandling.relatertBehandlingId != null &&
+            hentForbehandlingForRevurdering(behandling).aar == inntektsaar
 }
 
 private fun VedtakSammendragDto.opphoersdato(): YearMonth? {

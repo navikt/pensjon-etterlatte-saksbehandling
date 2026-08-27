@@ -62,6 +62,9 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
+import no.nav.etterlatte.prosessering.installProsessering
+import no.nav.etterlatte.prosessering.prosesseringLesRoutes
+import no.nav.etterlatte.prosessering.soeknadSkyggeRoute
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
@@ -93,6 +96,7 @@ private class Server(
             applicationConfig = context.config,
             cronJobs = timerJobs(context),
             routes = { selfTestRoute(context.selfTestService) },
+            applicationModule = { installProsessering(context.dataSource) },
         ) {
             settOppApplikasjonen(context)
         }
@@ -122,6 +126,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
 internal fun Application.module(context: ApplicationContext) {
+    installProsessering(context.dataSource)
     restModule(
         sikkerLogg,
         withMetrics = true,
@@ -168,6 +173,9 @@ private fun Route.attachContekst(
 }
 
 private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
+    soeknadSkyggeRoute(applicationContext.soeknadSkyggeDao)
+    prosesseringLesRoutes(applicationContext.prosesseringAdminDao, applicationContext.saksbehandlerGroupIdsByKey)
+
     sakSystemRoutes(
         tilgangService = applicationContext.tilgangService,
         sakService = applicationContext.sakService,
@@ -224,6 +232,8 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         automatiskRevurderingService = applicationContext.automatiskRevurderingService,
         aarligInntektsjusteringJobbService = applicationContext.aarligInntektsjusteringJobbService,
         etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
+        featureToggleService = applicationContext.featureToggleService,
+        sakService = applicationContext.sakService,
     )
     omregningRoutes(omregningService = applicationContext.omregningService)
     aarligInntektsjusteringRoute(service = applicationContext.aarligInntektsjusteringJobbService)

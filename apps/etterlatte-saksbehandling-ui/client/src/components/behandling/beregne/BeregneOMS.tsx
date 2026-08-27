@@ -6,7 +6,7 @@ import { hentBeregning } from '~shared/api/beregning'
 import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { Alert, Box, Button, HStack } from '@navikt/ds-react'
+import { Alert, Box, Button, HStack, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -101,7 +101,7 @@ export const BeregneOMS = () => {
               <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
             ),
             (beregning) => (
-              <Box paddingInline="space-72" paddingBlock="space-16">
+              <VStack paddingInline="space-72" paddingBlock="space-16" gap="space-32">
                 <>
                   <OmstillingsstoenadSammendrag beregning={beregning} />
                   <Avkorting />
@@ -115,7 +115,7 @@ export const BeregneOMS = () => {
                     Du må fylle ut utfall i brev
                   </Alert>
                 )}
-              </Box>
+              </VStack>
             )
           )}
         </>

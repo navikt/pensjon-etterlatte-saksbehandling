@@ -69,6 +69,7 @@ enum class Revurderingaarsak(
     UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
     SLUTTBEHANDLING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     FENGSELSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     UT_AV_FENGSEL(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
@@ -88,6 +89,8 @@ enum class Revurderingaarsak(
     OMGJOERING_ETTER_KRAV_FRA_BRUKER(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
 
     REVURDERE_ETTER_OPPHOER(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
+
+    NYTT_FNUMMER(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
     // Mangler funksjonalitet
     UTSENDELSE_AV_SED(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),

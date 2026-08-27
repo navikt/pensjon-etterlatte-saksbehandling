@@ -53,6 +53,7 @@ export interface EtteroppgjoerForbehandling {
   klageOmgjoering?: string
   aktivitetspliktOverholdt?: JaNei
   aktivitetspliktBegrunnelse?: string
+  omgjoeringEgetInitiativ: boolean
 }
 
 export interface DetaljertEtteroppgjoerForbehandling {

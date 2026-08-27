@@ -52,10 +52,10 @@ spec:
     pool: nav-prod
   resources:
     requests:
-      cpu: 25m
-      memory: 2000Mi
+      cpu: 50m
+      memory: 1152Mi
     limits:
-      memory: 2000Mi
+      memory: 1152Mi
   replicas:
     max: 1
     min: 1
@@ -63,6 +63,8 @@ spec:
     application:
       enabled: true
   env:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-XX:MaxRAMPercentage=50"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
     - name: BEHANDLING_AZURE_SCOPE

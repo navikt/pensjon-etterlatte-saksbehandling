@@ -90,6 +90,7 @@ abstract class BehandlingIntegrationTest {
             AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
             AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
             AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,
+            AzureKey.AZUREAD_PROSESSERING_ROLLE_GROUPID to azureAdProsesseringRolleClaim,
             AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID to azureAdNasjonUtenLoggClaim,
             AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID to azureAdNasjonMedLoggClaim,
             EnvKey.NORG2_URL to "http://localhost",

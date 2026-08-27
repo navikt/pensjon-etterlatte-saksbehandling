@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Button, Heading, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, Heading, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { IniteltUtfallMedBegrunnelseDto, Klage, teksterKlageutfall, Utfall } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -72,59 +72,68 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
   const stoetterDelvisOmgjoering = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering)
 
   return (
-    <VStack gap="space-16" width="30rem">
-      <Heading level="2" size="medium" spacing>
-        Første vurdering
-      </Heading>
+    <VStack gap="space-16">
       <>
         {redigeres ? (
-          <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
-            <VStack gap="space-16" width="41.5rem">
-              <ControlledRadioGruppe
-                name="utfall"
-                control={control}
-                legend=""
-                errorVedTomInput="Du må velge et initielt utfall"
-                radios={
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
+              <VStack gap="space-16" width="41.5rem">
+                <Heading level="2" size="medium">
+                  Første vurdering
+                </Heading>
+                <ControlledRadioGruppe
+                  name="utfall"
+                  control={control}
+                  legend=""
+                  errorVedTomInput="Du må velge et initielt utfall"
+                  radios={
+                    <>
+                      <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
+                      {stoetterDelvisOmgjoering && (
+                        <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>
+                      )}
+                      <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
+                    </>
+                  }
+                />
+                {formUtfall && (
                   <>
-                    <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
-                    {stoetterDelvisOmgjoering && (
-                      <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>
-                    )}
-                    <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
+                    <Textarea size="medium" label={getTextFromutfall(formUtfall)} {...register('begrunnelse')} />
+                    <div>
+                      <Button type="submit" variant="primary" loading={isPending(lagreInitiellStatus)} size="small">
+                        Lagre vurdering
+                      </Button>
+                    </div>
+                    {isFailureHandler({
+                      apiResult: lagreInitiellStatus,
+                      errorMessage:
+                        'Kunne ikke lagre initielt utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
+                    })}
                   </>
-                }
-              />
-              {formUtfall && (
-                <>
-                  <Textarea size="medium" label={getTextFromutfall(formUtfall)} {...register('begrunnelse')} />
-                  <div>
-                    <Button type="submit" variant="primary" loading={isPending(lagreInitiellStatus)} size="small">
-                      Lagre vurdering
-                    </Button>
-                  </div>
-                  {isFailureHandler({
-                    apiResult: lagreInitiellStatus,
-                    errorMessage:
-                      'Kunne ikke lagre initielt utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
-                  })}
-                </>
-              )}
-            </VStack>
-          </form>
+                )}
+              </VStack>
+            </form>
+          </Box>
         ) : (
-          <div>
-            <InitiellVurderingVisningContent klage={klage} />
-            <Button
-              type="button"
-              size="small"
-              icon={<PencilIcon aria-hidden />}
-              variant="secondary"
-              onClick={() => setRedigeres(true)}
-            >
-              Rediger
-            </Button>
-          </div>
+          <Box background="neutral-soft" borderRadius="12" padding="space-16">
+            <VStack gap="space-8">
+              <Heading level="2" size="medium">
+                Første vurdering
+              </Heading>
+              <InitiellVurderingVisningContent klage={klage} />
+              <div>
+                <Button
+                  type="button"
+                  size="small"
+                  icon={<PencilIcon aria-hidden />}
+                  variant="secondary"
+                  onClick={() => setRedigeres(true)}
+                >
+                  Rediger
+                </Button>
+              </div>
+            </VStack>
+          </Box>
         )}
         {klage.initieltUtfall?.utfallMedBegrunnelse?.utfall === Utfall.STADFESTE_VEDTAK && !klage.utfall && (
           <Alert variant="info">

@@ -27,7 +27,7 @@ spec:
         - id: loki
   resources:
     requests:
-      cpu: 25m
+      cpu: 200m
       memory: 1024Mi
     limits:
       memory: 1024Mi
@@ -55,6 +55,8 @@ spec:
           - id: baf0a4b6-71ca-45dd-9731-9f3469627c38 # 0000-GA-PENSJON_NASJONAL_M_LOGG
           - id: f8ceac75-30fe-4f0f-aec6-db706986caf0 # 0000-GA-PENSJON_NASJONAL_U_LOGG
   env:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-XX:MaxRAMPercentage=50"
     - name: PDL_URL
       value: https://pdl-api.prod-fss-pub.nais.io/graphql
     - name: PDL_OUTBOUND_SCOPE

@@ -17,45 +17,47 @@ export const KlageInnstilling = ({
   const aktuelleHjemler = klage?.sak.sakType === SakType.BARNEPENSJON ? LOVHJEMLER_BP : LOVHJEMLER_OMS
 
   return (
-    <VStack gap="space-16" width="41.5rem">
-      <Heading level="3" size="medium">
-        Innstilling til KA
-      </Heading>
-      <Box width="fit-content">
-        <Select
-          {...register('innstilling.lovhjemmel', {
-            required: true,
+    <Box background="neutral-soft" borderRadius="12" padding="space-16">
+      <VStack gap="space-16" width="41.5rem">
+        <Heading level="3" size="small">
+          Innstilling til KA
+        </Heading>
+        <Box width="fit-content">
+          <Select
+            {...register('innstilling.lovhjemmel', {
+              required: true,
+            })}
+            label="Hjemmel"
+            description="Velg hvilken hjemmel klagen knytter seg til"
+          >
+            <option value="">Velg hjemmel</option>
+            {aktuelleHjemler.map((hjemmel) => (
+              <option key={hjemmel} value={hjemmel}>
+                {TEKSTER_LOVHJEMLER[hjemmel]}
+              </option>
+            ))}
+          </Select>
+          {errors.innstilling?.lovhjemmel && (
+            <ErrorMessage>Du må angi hjemmelen klagen hovedsakelig knytter seg til.</ErrorMessage>
+          )}
+        </Box>
+        <Textarea
+          {...register('innstilling.innstillingTekst', {
+            required: {
+              value: true,
+              message: 'Du må skrive en innstillingstekst som begrunner hvorfor klagen står seg.',
+            },
           })}
-          label="Hjemmel"
-          description="Velg hvilken hjemmel klagen knytter seg til"
-        >
-          <option value="">Velg hjemmel</option>
-          {aktuelleHjemler.map((hjemmel) => (
-            <option key={hjemmel} value={hjemmel}>
-              {TEKSTER_LOVHJEMLER[hjemmel]}
-            </option>
-          ))}
-        </Select>
-        {errors.innstilling?.lovhjemmel && (
-          <ErrorMessage>Du må angi hjemmelen klagen hovedsakelig knytter seg til.</ErrorMessage>
-        )}
-      </Box>
-      <Textarea
-        {...register('innstilling.innstillingTekst', {
-          required: {
-            value: true,
-            message: 'Du må skrive en innstillingstekst som begrunner hvorfor klagen står seg.',
-          },
-        })}
-        label="Innstilling"
-        description="Innstillingen blir med i brev til klager og til KA"
-        error={errors.innstilling?.innstillingTekst?.message}
-      />
-      <Textarea
-        {...register('innstilling.internKommentar')}
-        label="Intern kommentar til KA (valgfri)"
-        description="Kommentaren blir ikke synlig for bruker"
-      />
-    </VStack>
+          label="Innstilling"
+          description="Innstillingen blir med i brev til klager og til KA"
+          error={errors.innstilling?.innstillingTekst?.message}
+        />
+        <Textarea
+          {...register('innstilling.internKommentar')}
+          label="Intern kommentar til KA (valgfri)"
+          description="Kommentaren blir ikke synlig for bruker"
+        />
+      </VStack>
+    </Box>
   )
 }

@@ -10,7 +10,7 @@ import {
   updateVilkaarsvurdering,
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { Alert, BodyLong, Box, Button, Heading } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -26,6 +26,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { KopierVilkaarAvdoed } from '~components/behandling/vilkaarsvurdering/KopierVilkaarAvdoed'
+import { miljoeErDev } from '~utils/miljoe'
+import { FyllUtVilkaarsvurderingIDev } from '~components/behandling/vilkaarsvurdering/FyllUtVilkaarsvurderingIDev'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -96,8 +98,11 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
           Vilkårsvurdering
         </Heading>
       </Box>
+      {miljoeErDev && behandlingId && vilkaarsvurdering && redigerbar && !vilkaarsvurdering.resultat && (
+        <FyllUtVilkaarsvurderingIDev behandlingId={behandlingId} vilkaarsvurdering={vilkaarsvurdering} />
+      )}
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
-        <>
+        <VStack gap="space-32">
           {visHarGammelVilkaarsvurdering() && (
             <AlertWrapper>
               <Alert variant="info">
@@ -128,21 +133,20 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             </AlertWrapper>
           )}
 
-          <Box paddingInline="space-64" paddingBlock="space-64 space-16">
-            {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-              vilkaarsvurdering.resultat == null && (
-                <KopierVilkaarAvdoed behandlingId={behandling.id} vilkaar={vilkaarsvurdering.vilkaar} />
-              )}
-          </Box>
+          {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+            vilkaarsvurdering.resultat == null && (
+              <KopierVilkaarAvdoed behandlingId={behandling.id} vilkaar={vilkaarsvurdering.vilkaar} />
+            )}
 
           {vilkaarsvurdering.vilkaar.map((value, index) => (
-            <ManueltVilkaar
-              key={index}
-              vilkaar={value}
-              oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
-              behandlingId={behandlingId}
-              redigerbar={redigerbar && !vilkaarsvurdering.resultat && !redigerTotalvurdering}
-            />
+            <Box key={index} paddingInline="space-64 space-32">
+              <ManueltVilkaar
+                vilkaar={value}
+                oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
+                behandlingId={behandlingId}
+                redigerbar={redigerbar && !vilkaarsvurdering.resultat && !redigerTotalvurdering}
+              />
+            </Box>
           ))}
 
           <Resultat
@@ -157,7 +161,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             behandlingstype={behandling.behandlingType}
             revurderingsaarsak={behandling.revurderingsaarsak}
           />
-        </>
+        </VStack>
       )}
       <Spinner visible={isPending(vilkaarsvurderingStatus)} label="Henter vilkårsvurdering" />
       <Spinner visible={isPending(opprettNyVilkaarsvurderingStatus)} label="Oppretter vilkårsvurdering" />

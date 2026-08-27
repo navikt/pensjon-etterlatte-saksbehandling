@@ -58,6 +58,9 @@
       "moduleLicense": "LGPL"
     },
     {
+      "moduleLicense": "LGPL-2.1-only"
+    },
+    {
       "moduleLicense": "GNU General Public License, version 2 with the GNU Classpath Exception"
     },
     {

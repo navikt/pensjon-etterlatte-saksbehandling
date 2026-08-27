@@ -57,15 +57,17 @@ spec:
   kafka:
     pool: nav-dev
   resources:
-    limits:
-      memory: 2048Mi
     requests:
-      cpu: 20m
-      memory: 2048Mi
+      cpu: 150m
+      memory: 1024Mi
+    limits:
+      memory: 1024Mi
   replicas:
     max: 4
     min: 2
   env:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-XX:MaxRAMPercentage=50"
     - name: BREVBAKER_URL
       value: http://pensjon-brevbaker.pensjonsbrev
     - name: BREVBAKER_SCOPE
@@ -149,7 +151,6 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-testdata-behandler
         - application: etterlatte-brev-kafka
-        - application: etterlatte-vedtaksvurdering-kafka
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: nais
           cluster: dev-gcp

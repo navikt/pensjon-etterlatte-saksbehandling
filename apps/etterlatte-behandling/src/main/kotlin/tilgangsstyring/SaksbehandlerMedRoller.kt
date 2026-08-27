@@ -21,4 +21,6 @@ data class SaksbehandlerMedRoller(
     fun harRolleFortrolig() = harRolle(AzureGroup.FORTROLIG)
 
     fun harRolleEgenAnsatt() = harRolle(AzureGroup.EGEN_ANSATT)
+
+    fun harRolleProsessering() = harRolle(AzureGroup.PROSESSERING_ROLLE)
 }

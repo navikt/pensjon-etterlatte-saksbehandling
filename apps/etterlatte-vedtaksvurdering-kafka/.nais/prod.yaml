@@ -32,8 +32,10 @@ spec:
       enabled: true
   resources:
     requests:
-      cpu: 25m
-      memory: 320Mi
+      cpu: 310m
+      memory: 512Mi
+    limits:
+      memory: 512Mi
   replicas:
     max: 1
     min: 1
@@ -50,10 +52,6 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-utbetaling/.default
     - name: ETTERLATTE_UTBETALING_URL
       value: http://etterlatte-utbetaling
-    - name: BREV_AZURE_SCOPE
-      value: api://prod-gcp.etterlatte.etterlatte-brev-api/.default
-    - name: ETTERLATTE_BREV_API_URL
-      value: http://etterlatte-brev-api
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -61,7 +59,6 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-utbetaling
-        - application: etterlatte-brev-api
         - application: logging
           namespace: nais-system
       external:

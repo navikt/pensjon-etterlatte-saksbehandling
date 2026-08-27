@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.4.10"
     `kotlin-dsl`
 }
 
@@ -21,7 +21,7 @@ dependencies {
 tasks {
     kotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
 }

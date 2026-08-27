@@ -8,6 +8,10 @@ plugins {
     application
 }
 
+kotlin {
+    jvmToolchain(25)
+}
+
 dependencies {
     implementation(kotlin("stdlib"))
 
@@ -20,6 +24,7 @@ dependencies {
     implementation(libs.logging.logstashlogbackencoder) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")
+        exclude("tools.jackson.core")
     }
 
     // Testing

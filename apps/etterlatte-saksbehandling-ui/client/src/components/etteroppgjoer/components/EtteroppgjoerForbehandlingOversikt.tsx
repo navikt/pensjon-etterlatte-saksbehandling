@@ -163,12 +163,16 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
 
   return (
     <VStack gap="space-40" paddingInline="space-64" paddingBlock="space-64 space-16">
-      <Heading size="xlarge" level="1">
+      <Heading size="large" level="1">
         Etteroppgjør for {forbehandling.aar}
       </Heading>
 
       {forbehandling.klageOmgjoering && (
         <Alert variant="info">Dette etteroppgjøret er opprettet som en del av en klageomgjøring</Alert>
+      )}
+
+      {forbehandling.omgjoeringEgetInitiativ && (
+        <Alert variant="info">Dette etteroppgjøret er en omgjøring på eget initiativ</Alert>
       )}
 
       <Inntektsopplysninger forbehandling={forbehandling} erRedigerbar={erRedigerbar} />
@@ -182,25 +186,34 @@ export function EtteroppgjoerOversikt({ kontekst }: Props) {
         />
       )}
       {forbehandling.harVedtakAvTypeOpphoer && (
-        <OpphoerSkyldesDoedsfall
-          erRedigerbar={erRedigerbar}
-          setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerDoedsfallErrors}
-        />
+        <Box background="neutral-soft" borderRadius="12" padding="space-16">
+          <OpphoerSkyldesDoedsfall
+            erRedigerbar={erRedigerbar}
+            setOpphoerSkyldesDoedsfallSkjemaErrors={setOpphoerDoedsfallErrors}
+          />
+        </Box>
       )}
       {!doedsfallIEtteroppgjoersaaret && !forbehandlingSkalAvsluttes && (
-        <FastsettFaktiskInntekt
-          erRedigerbar={erRedigerbartFaktiskInntekt}
-          setFastsettFaktiskInntektSkjemaErrors={setFaktiskInntektErrors}
-        />
+        <Box background="neutral-soft" borderRadius="12" padding="space-16">
+          <FastsettFaktiskInntekt
+            erRedigerbar={erRedigerbartFaktiskInntekt}
+            setFastsettFaktiskInntektSkjemaErrors={setFaktiskInntektErrors}
+          />
+        </Box>
       )}
 
-      <AktivitetspliktSpørsmål erRedigerbar={erRedigerbar} setAktivitetspliktSkjemaErrors={setAktivitetspliktErrors} />
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <AktivitetspliktSpørsmål
+          erRedigerbar={erRedigerbar}
+          setAktivitetspliktSkjemaErrors={setAktivitetspliktErrors}
+        />
+      </Box>
 
       {visBeregnetResultat && (
         <VStack gap="space-16">
           <TabellForBeregnetEtteroppgjoerResultat />
           <ResultatAvForbehandling />
-          {forbehandling.klageOmgjoering && <InfoOppgaveOmgjoering />}
+          {(forbehandling.klageOmgjoering || forbehandling.omgjoeringEgetInitiativ) && <InfoOppgaveOmgjoering />}
         </VStack>
       )}
       <Box maxWidth="42.5rem">
@@ -245,11 +258,13 @@ function RevurderingSpesifikkeSeksjoner({
 
   return (
     <>
-      <InformasjonFraBruker
-        behandling={behandling}
-        setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerErrors}
-        setValideringFeilmedling={setValideringFeilmelding}
-      />
+      <Box background="neutral-soft" borderRadius="12" padding="space-16">
+        <InformasjonFraBruker
+          behandling={behandling}
+          setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerErrors}
+          setValideringFeilmedling={setValideringFeilmelding}
+        />
+      </Box>
 
       {forbehandling.endringErTilUgunstForBruker === JaNei.JA && !erFerdigBehandlet(behandling.status) && (
         <Box maxWidth="42.5rem">

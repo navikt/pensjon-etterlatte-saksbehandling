@@ -29,7 +29,9 @@ export const FastsettFaktiskInntekt = ({ erRedigerbar, setFastsettFaktiskInntekt
 
   return (
     <VStack gap="space-16">
-      <Heading size="large">Fastsett faktisk inntekt</Heading>
+      <Heading size="medium" level="2">
+        Fastsett faktisk inntekt
+      </Heading>
       <BodyShort>Fastsett den faktiske inntekten for bruker i den innvilgede perioden.</BodyShort>
       <VStack gap="space-16" maxWidth="42.5rem">
         <div>

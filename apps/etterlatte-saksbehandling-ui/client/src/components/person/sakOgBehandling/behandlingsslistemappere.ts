@@ -91,6 +91,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Inntektsendring'
     case Revurderingaarsak.SLUTTBEHANDLING:
       return 'Sluttbehandling'
+    case Revurderingaarsak.NYTT_FNUMMER:
+      return 'Nytt fødselsnummer / d-nummer'
   }
 }
 

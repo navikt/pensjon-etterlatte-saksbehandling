@@ -36,7 +36,10 @@ internal class ParallelleSannheterKlientTest {
                         "/url/api/navn" -> {
                             respond(mockResponse("navn", mockNavn(FREG)), headers = headers)
                         }
-                        else -> error(request.url.fullPath)
+
+                        else -> {
+                            error(request.url.fullPath)
+                        }
                     }
                 }
             }
@@ -62,7 +65,7 @@ internal class ParallelleSannheterKlientTest {
     ): String =
         objectMapper
             .createObjectNode()
-            .set<JsonNode?>(feltnavn, objectMapper.readValue(listOf(verdi).toJson(), JsonNode::class.java))
+            .set<JsonNode>(feltnavn, objectMapper.readValue(listOf(verdi).toJson(), JsonNode::class.java))
             .toJson()
 
     private fun mockNavn(master: String): PdlNavn =

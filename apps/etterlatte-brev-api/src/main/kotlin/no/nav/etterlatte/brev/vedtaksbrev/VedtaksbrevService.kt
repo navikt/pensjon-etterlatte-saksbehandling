@@ -135,15 +135,6 @@ class VedtaksbrevService(
         return pdf
     }
 
-    suspend fun genererPdfOgFerdigstill(
-        behandlingId: UUID,
-        brevId: BrevID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        genererPdf(brevId, brukerTokenInfo)
-        ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
-    }
-
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

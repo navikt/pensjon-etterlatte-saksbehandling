@@ -12,7 +12,6 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.VedtakTilJournalfoering
-import no.nav.etterlatte.brev.model.GenererOgFerdigstillVedtaksbrev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -93,28 +92,6 @@ fun Route.vedtaksbrevRoute(
                 }.let { (pdf, varighet) ->
                     logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(pdf)
-                }
-            }
-        }
-
-        post("vedtak/generer-pdf-og-ferdigstill") {
-            kunSystembruker { systembruker ->
-                val behandlingId = behandlingId
-                val request = call.receive<GenererOgFerdigstillVedtaksbrev>()
-                logger.info("Generere og ferdigstille vedtaksbrev for behandling (behandlingId=$behandlingId)")
-
-                measureTimedValue {
-                    service.genererPdfOgFerdigstill(request.behandlingId, request.brevId, systembruker)
-                }.also { (_, varighet) ->
-                    logger.info(
-                        "Generere og ferdigstilling av vedtaksbrev tok ${
-                            varighet.toString(
-                                DurationUnit.SECONDS,
-                                2,
-                            )
-                        }",
-                    )
-                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

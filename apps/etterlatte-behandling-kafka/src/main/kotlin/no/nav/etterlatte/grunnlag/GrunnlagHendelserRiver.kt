@@ -46,12 +46,12 @@ class GrunnlagHendelserRiver(
         context: MessageContext,
     ) {
         val sakId = SakId(packet[SAK_ID_KEY].asLong())
-        val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
+        val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asString()) }
 
         val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
             objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
 
-        val fnr = packet[FNR_KEY].textValue()
+        val fnr = packet[FNR_KEY].asString(null)
         if (fnr == null) {
             logger.info("Lagrer nye saksopplysninger på sak $sakId")
 

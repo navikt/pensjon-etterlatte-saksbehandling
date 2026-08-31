@@ -25,7 +25,7 @@ class GrunnlagsversjoneringRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText())
+        val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asString())
 
         try {
             logger.info("Mottok melding om attestert behandling (id=$behandlingId). Forsøker å låse grunnlagsversjon..")

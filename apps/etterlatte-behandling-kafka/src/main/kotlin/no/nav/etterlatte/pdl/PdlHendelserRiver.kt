@@ -50,7 +50,7 @@ internal class PdlHendelserRiver(
         try {
             val hendelse =
                 packet["hendelse"]
-                    .asText()
+                    .asString()
                     .takeIf { LeesahOpplysningstype.entries.map { it.name }.contains(it) }
                     ?.let { LeesahOpplysningstype.valueOf(it) }
             when (hendelse) {

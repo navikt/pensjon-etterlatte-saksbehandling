@@ -93,7 +93,7 @@ open class JsonMessage(
     init {
         json = objectMapper.readTree(originalMessage)
 
-        id = json.path("@id").takeUnless { it.isMissingOrNull() }?.asText() ?: idGenerator.generateId().also {
+        id = json.path("@id").takeUnless { it.isMissingOrNull() }?.asString() ?: idGenerator.generateId().also {
             set("@id", it)
         }
         val opprettet = Tidspunkt.now().toLocalDatetimeUTC()

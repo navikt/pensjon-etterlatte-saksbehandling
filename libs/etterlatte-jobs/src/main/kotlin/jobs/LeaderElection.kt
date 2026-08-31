@@ -35,7 +35,7 @@ open class LeaderElection(
                             .bodyAsText()
                             .let(objectMapper::readTree)
                             .get("name")
-                            .asText()
+                            .asString()
                     }
                 } catch (e: ConnectException) {
                     throw LeaderElectionDownException("Kan ikke nå leaderelection", e)

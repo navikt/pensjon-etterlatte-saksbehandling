@@ -46,11 +46,6 @@ fun Application.installProsessering(dataSource: DataSource) {
     }
 }
 
-/**
- * Demo-tasken og endepunktet som køer den hører hjemme i dev og lokalt, ikke i prod. Sjekken bor
- * ett sted slik at steget og ruta ikke kan komme i utakt: er ruta stengt, finnes det ingen tasker
- * av typen, og da er det ingen grunn til å ha steget registrert heller.
- */
 private fun erDemomiljoe(): Boolean = !appIsInGCP() || isDev()
 
 data class SoeknadSkyggeRequest(
@@ -147,7 +142,6 @@ fun Route.prosesseringRoutes(
     }
 }
 
-/** Optimistisk lås. Uten den ville to operatører kunnet overskrive hverandre uoppdaget. */
 data class TaskHandling(
     val versjon: Long,
 )
@@ -157,14 +151,6 @@ data class FeilbarDemoRespons(
     val simulertOppeFra: Instant,
 )
 
-/**
- * Køer en [FeilbarDemo]-task så det finnes noe å faktisk rekjøre fra prosessering-dashboardet.
- * `vinduSekunder` styrer hvor lenge den simulerte avhengigheten er nede; tasken står som
- * `STOPPET` nesten umiddelbart, og fullfører ved rekjøring etter at vinduet har gått.
- *
- * Bare tilgjengelig i dev og lokalt — se [erDemomiljoe]. Vinduet tas som query-parameter og ikke
- * som kropp, slik at en `curl -X POST` uten mer seremoni er nok.
- */
 fun Route.feilbarDemoRoute(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) {
     // Skrives ved oppstart. Er den ikke i Loki, kjører podden et image uten denne ruta — og da
     // er en 404 fra endepunktet et deploy-problem, ikke et kodeproblem.
@@ -175,14 +161,10 @@ fun Route.feilbarDemoRoute(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) 
     )
     route("/api/prosessering/demo/feilbar") {
         post {
-            // Eksplisitt kropp, ikke `call.respond(HttpStatusCode.NotFound)`. StatusPages skriver
-            // om alle kroppsløse 404-er til «ruta er ikke konfigurert opp», og da blir «demoen er
-            // avskrudd her» umulig å skille fra «ruta finnes ikke i imaget». Den forskjellen er
-            // hele svaret når noen feilsøker fra dashboardet.
             if (!erDemomiljoe()) {
                 throw IkkeFunnetException(
                     code = "DEMO_IKKE_TILGJENGELIG",
-                    detail = "Feilbar demo-task finnes bare i dev og lokalt, ikke i ${clusterNavn() ?: "ukjent miljø"}",
+                    detail = "Feilbar demo task finnes bare i dev og lokalt, ikke i ${clusterNavn() ?: "ukjent miljø"}",
                 )
             }
             medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
@@ -222,11 +204,6 @@ fun Route.feilbarDemoRoute(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) 
 private const val STANDARD_DEMOVINDU = 20L
 private const val MAKS_DEMOVINDU = 3600L
 
-/**
- * Prosessering-endepunktene er ikke saksbehandlingsflate, men en operatørinngang for
- * utviklere. Derfor kreves både et brukertoken — maskintoken avvises, en rekjøring må kunne
- * tilskrives et menneske — og den egne AD-rollen for prosessering.
- */
 private suspend fun RoutingContext.medProsesseringTilgang(
     saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
     haandter: suspend (Saksbehandler) -> Unit,
@@ -245,16 +222,6 @@ private fun ApplicationCall.taskId(): Long =
         "id mangler eller er ugyldig"
     }
 
-/**
- * Tilgangslogging for de to skrivende handlingene.
- *
- * En rekjøring endrer produksjonstilstand, og «hvem rørte hva?» må kunne besvares i
- * ettertid. Loggingen ligger her og ikke i DAO-en fordi det er her identiteten finnes, og
- * den dekker alle utfall — også avviste forsøk, som er de interessante.
- *
- * Dette er ikke sporingslogg: en task er ikke et personoppslag. Det som logges er hvilken
- * ansatt som gjorde hva med hvilken task.
- */
 private fun utfoerOgLogg(
     prosesseringAdminDao: ProsesseringAdminDao,
     saksbehandler: Saksbehandler,

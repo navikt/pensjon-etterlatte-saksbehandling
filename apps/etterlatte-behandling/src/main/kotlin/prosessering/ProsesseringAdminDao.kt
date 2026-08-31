@@ -10,14 +10,6 @@ import java.sql.Connection
 import java.sql.ResultSet
 import javax.sql.DataSource
 
-/**
- * Handlingene en operatør kan utføre på en task fra efterlatte-verktoy.
- *
- * Hvilke overganger som er lovlige står **ikke** her — [TaskStateMachine] i biblioteket er
- * fasiten, og er allerede den ene kilden til sannhet for motoren selv. Her står bare hvilken
- * tilstand hver handling sikter mot, og hvordan handlingen omtales i en feilmelding et
- * menneske skal lese.
- */
 enum class OperatorHandling(
     val nyStatus: Status,
     val verb: String,
@@ -33,12 +25,6 @@ class TaskIkkeFunnet(
         detail = "Fant ingen task med id $id",
     )
 
-/**
- * Den optimistiske låsen slo til: raden er endret etter at operatøren leste den.
- *
- * Skilt fra [UlovligTaskOvergang] med vilje. «Noen andre rakk å endre den» og «tasken kan
- * ikke rekjøres i denne statusen» krever helt ulik handling av den som får svaret.
- */
 class TaskEndretAvAndre(
     id: Long,
     forventetVersjon: Long,
@@ -61,13 +47,6 @@ class UlovligTaskOvergang(
         detail = "Task $id har status $status og kan ikke ${handling.verb}",
     )
 
-/**
- * DAO over prosessering_task, brukt av efterlatte-verktoy.
- *
- * Lesing brukes til oversikten, skriving til de to operatørhandlingene. Dette er bevisst en
- * smal operatørinngang og ikke en generell skriveflate: motoren eier tasken, og alt et
- * menneske skal kunne gjøre er å be om en ny kjøring eller å legge tasken død.
- */
 class ProsesseringAdminDao(
     private val dataSource: DataSource,
 ) {
@@ -106,43 +85,16 @@ class ProsesseringAdminDao(
             }
         }
 
-    /**
-     * Setter en stoppet eller avbrutt task tilbake til KLAR, med fersk trigger_tid slik at
-     * motoren plukker den ved neste runde.
-     *
-     * `stoppaarsak` og `plukket_tid` nullstilles: begge beskriver forrige kjøring, og ville
-     * ellers blitt stående som påstander om nåtiden. Det er samme grep biblioteket selv gjør
-     * når det tar tilbake en hengende task.
-     *
-     * `antall_feil` nullstilles bevisst **ikke**. At noe har feilet tre ganger er verdt å
-     * vite for den som rekjører den fjerde gangen.
-     */
     fun rekjoer(
         id: Long,
         forventetVersjon: Long,
     ): Task = utfoer(id = id, forventetVersjon = forventetVersjon, handling = OperatorHandling.REKJOER)
 
-    /**
-     * Legger tasken død. Den kjøres aldri igjen med mindre noen rekjører den eksplisitt.
-     *
-     * `stoppaarsak` røres ikke. Statusen AVBRUTT sier allerede at et menneske avfeide tasken,
-     * mens `stoppaarsak` svarer på noe annet — hvorfor *motoren* ga seg. Å overskrive den her
-     * ville visket ut skillet mellom «avbrutt etter at den feilet» og «avbrutt mens den var
-     * klar», og gjort [Stoppaarsak.MANUELL] tvetydig: den betyr at task-steget selv ba om en
-     * saksbehandler.
-     */
     fun avbryt(
         id: Long,
         forventetVersjon: Long,
     ): Task = utfoer(id = id, forventetVersjon = forventetVersjon, handling = OperatorHandling.AVBRYT)
 
-    /**
-     * Leser raden under lås, avgjør de tre utfallene, og skriver — alt i én transaksjon.
-     *
-     * Utfallene holdes fra hverandre med vilje: ukjent id, utdatert versjon og ulovlig
-     * overgang krever tre forskjellige ting av operatøren, og en felles 409 ville gjort
-     * svaret ubrukelig.
-     */
     private fun utfoer(
         id: Long,
         forventetVersjon: Long,

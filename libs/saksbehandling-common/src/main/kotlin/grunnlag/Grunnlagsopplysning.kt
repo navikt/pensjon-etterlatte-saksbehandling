@@ -2,16 +2,15 @@ package no.nav.etterlatte.libs.common.grunnlag
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Kilde
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.util.UUID
 
 open class Grunnlagsopplysning<T>(
@@ -177,9 +176,9 @@ open class Grunnlagsopplysning<T>(
 }
 
 val objectMapperKilde =
-    jacksonObjectMapper().registerModule(JavaTimeModule()).disable(
-        SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
-    )
+    jacksonMapperBuilder()
+        .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .build()
 
 fun <T : Any> lagOpplysning(
     opplysningsType: Opplysningstype,

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.varselbrev
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID.randomUUID

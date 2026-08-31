@@ -1,7 +1,5 @@
 package no.nav.etterlatte.beregning
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
@@ -22,6 +20,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 import java.io.Serializable
 import java.time.YearMonth
 import java.util.UUID

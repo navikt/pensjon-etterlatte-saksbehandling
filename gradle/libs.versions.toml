@@ -3,15 +3,15 @@ versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 license = { id = 'com.github.jk1.dependency-license-report', version = '3.1.4' }
 
 [versions]
-jackson-version = "2.22.1"
+jackson-version = "3.1.2"
 jupiter-version = "6.1.2"
 ktor-version = "3.5.2"
 navfelles-token-version = "5.0.30"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.21.4"
 tjenestespesifikasjoner-version = "1.1436e29"
-rapidsandrivers-version = "2026021921161771532161.7a37f8c9e0cc" # OBS! tbdlibs brukes av denne. De bør stemme overens
-tbdlibs-version = "2026.02.19-20.58-521cdd3c" # OBS! rapidsandrivers bruker denne. De bør stemme overens
+rapidsandrivers-version = "2026071513121784113927" # OBS! tbdlibs brukes av denne. De bør stemme overens
+tbdlibs-version = "20260823.1727" # OBS! rapidsandrivers bruker denne. De bør stemme overens
 prosessering-version = "1.20260824100828_0d24e53"
 
 [libraries]
@@ -29,9 +29,8 @@ database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql"
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.13" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.1" }
 
-jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }
-jackson-datatypejdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson-version" }
-jackson-modulekotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson-version" }
+jackson-bom = { module = "tools.jackson:jackson-bom", version.ref = "jackson-version" }
+jackson-modulekotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson-version" }
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "4.3.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.12.1" }
@@ -53,7 +52,7 @@ ktor-servercio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor-versi
 ktor-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor-version" }
 ktor-servercontentnegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor-version" }
 ktor-clientcontentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor-version" }
-ktor-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor-version" }
+ktor-jackson = { module = "io.ktor:ktor-serialization-jackson3", version.ref = "ktor-version" }
 ktor-calllogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor-version" }
 ktor-callid = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor-version" }
 ktor-statuspages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor-version" }
@@ -108,4 +107,4 @@ commons-compress = { module = "org.apache.commons:commons-compress", version = "
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "12.2.3" }
 
 [bundles]
-jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]
+jackson = ["jackson-modulekotlin"]

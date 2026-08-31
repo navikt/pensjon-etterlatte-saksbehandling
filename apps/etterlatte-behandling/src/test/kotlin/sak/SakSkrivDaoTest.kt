@@ -1,6 +1,5 @@
 package no.nav.etterlatte.sak
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAnyOf
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -54,6 +53,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth

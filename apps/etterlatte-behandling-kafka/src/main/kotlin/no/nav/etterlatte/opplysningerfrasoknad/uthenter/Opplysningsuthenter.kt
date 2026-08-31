@@ -1,6 +1,5 @@
 package no.nav.etterlatte.opplysningerfrasoknad.uthenter
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.UtbetalingsInformasjon
@@ -13,6 +12,7 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.AvdoedSoeknad
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utbetalingsinformasjon
+import tools.jackson.databind.JsonNode
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utenlandsopphold as UtenlandsoppholdOpplysningstype
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld
 

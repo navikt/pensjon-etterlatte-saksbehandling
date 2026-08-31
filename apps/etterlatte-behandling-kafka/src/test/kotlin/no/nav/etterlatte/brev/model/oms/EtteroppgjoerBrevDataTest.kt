@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.model.oms
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
 import no.nav.etterlatte.brev.BrevFastInnholdData
 import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
@@ -12,6 +11,7 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertInstanceOf
+import tools.jackson.module.kotlin.readValue
 import java.time.Month
 import java.time.YearMonth
 

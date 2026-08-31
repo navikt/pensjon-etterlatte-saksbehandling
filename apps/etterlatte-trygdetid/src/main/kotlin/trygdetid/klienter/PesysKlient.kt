@@ -1,7 +1,6 @@
 package no.nav.etterlatte.trygdetid.klienter
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 interface PesysKlient {

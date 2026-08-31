@@ -50,7 +50,7 @@ fun River.correlationId() {
 }
 
 var JsonMessage.correlationId: String?
-    get() = this[CORRELATION_ID_KEY].textValue()
+    get() = this[CORRELATION_ID_KEY].takeIf { it.isTextual }?.textValue()
     set(name) {
         name?.also { this[CORRELATION_ID_KEY] = it }
             ?: throw IllegalArgumentException("Kan ikke sette correlationId til null")

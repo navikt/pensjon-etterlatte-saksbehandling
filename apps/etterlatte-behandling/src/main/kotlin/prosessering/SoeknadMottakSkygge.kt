@@ -1,6 +1,5 @@
 package no.nav.etterlatte.prosessering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import efterlatte.prosessering.TaskKontekst
 import efterlatte.prosessering.TaskStep
 import efterlatte.prosessering.TaskType
@@ -8,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 /** Task-type for skyggekjøring av søknadsmottak. Ingen sideeffekter: validerer og logger, oppretter aldri en behandling. */
 data class SoeknadMottakSkyggePayload(

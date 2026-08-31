@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid.avtale
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -8,6 +7,7 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 import javax.sql.DataSource
 

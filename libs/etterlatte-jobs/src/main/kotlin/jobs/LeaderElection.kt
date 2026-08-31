@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.jobs
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -8,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.net.ConnectException
 import java.net.InetAddress
 

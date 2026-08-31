@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.sak.SakId
+import tools.jackson.databind.JsonNode
 import kotlin.random.Random
 
 val sakId1 = SakId(1L)

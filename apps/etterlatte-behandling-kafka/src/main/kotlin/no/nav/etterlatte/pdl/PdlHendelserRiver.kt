@@ -1,6 +1,5 @@
 package no.nav.etterlatte.pdl
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -28,6 +27,7 @@ import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype.VERGEMAAL_ELLER_FREM
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.treeToValue
 
 internal class PdlHendelserRiver(
     rapidsConnection: RapidsConnection,

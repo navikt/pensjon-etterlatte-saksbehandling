@@ -5,6 +5,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
@@ -17,8 +18,10 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
+import kotlin.time.TimedValue
 import kotlin.time.measureTimedValue
 
 /**
@@ -70,38 +73,26 @@ fun Route.brevRoute(service: BrevService) {
 
         get("pdf") {
             kunSkrivetilgang {
-                val pdf =
-                    inTransaction {
-                        val brevId =
-                            krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
-                                "Kan ikke generere PDF uten brevId"
-                            }
-                        logger.info("Genererer PDF for strukturert brev (id=$brevId)")
-
-                        measureTimedValue {
-                            runBlocking {
-                                service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
-                            }
-                        }.let { (pdf, varighet) ->
-                            logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
-                            pdf
-                        }
-                    }
+                val pdf = genererPdf(logger, service)
                 call.respondBytes(pdf, contentType = ContentType.Application.Pdf)
             }
         }
 
         post("ferdigstill") {
             kunSkrivetilgang {
-                inTransaction {
-                    logger.info("Ferdigstiller strukturert brev for behandling (id=$behandlingId)")
-                    measureTimedValue {
-                        runBlocking {
-                            service.ferdigstillStrukturertBrev(behandlingId, brukerTokenInfo)
-                        }
-                    }.also { (_, varighet) ->
-                        logger.info("Ferdigstilling av strukturert brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
-                    }
+                ferdigstill(logger, service)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("generer-pdf-og-ferdigstill") {
+            kunSkrivetilgang {
+                logger.info("Genererer PDF og ferdigstiller brev for behandling (behandlingId=$behandlingId)")
+                measureTimedValue {
+                    genererPdf(logger, service)
+                    ferdigstill(logger, service)
+                }.let { (_, varighet) ->
+                    logger.info("Generering og ferdigstilling av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                 }
                 call.respond(HttpStatusCode.OK)
             }
@@ -141,5 +132,48 @@ fun Route.brevRoute(service: BrevService) {
                 call.respond(brevPayload)
             }
         }
+    }
+}
+
+private fun RoutingContext.genererPdf(
+    logger: Logger,
+    service: BrevService,
+): ByteArray {
+    val brevId =
+        krevIkkeNull(
+            this.call.request.queryParameters["brevId"]
+                ?.toLong(),
+        ) {
+            "Kan ikke generere PDF uten brevId"
+        }
+    val pdf =
+        inTransaction {
+            logger.info("Genererer PDF for strukturert brev (id=$brevId)")
+
+            measureTimedValue {
+                runBlocking {
+                    service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
+                }
+            }.let { (pdf, varighet) ->
+                logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                pdf
+            }
+        }
+    return pdf
+}
+
+private fun RoutingContext.ferdigstill(
+    logger: Logger,
+    service: BrevService,
+): TimedValue<Unit> {
+    logger.info("Ferdigstiller strukturert brev for behandling (id=$behandlingId)")
+    return measureTimedValue {
+        inTransaction {
+            runBlocking {
+                service.ferdigstillStrukturertBrev(behandlingId, brukerTokenInfo)
+            }
+        }
+    }.also { (_, varighet) ->
+        logger.info("Ferdigstilling av strukturert brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
     }
 }

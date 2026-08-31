@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.revurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
@@ -18,6 +17,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
+import tools.jackson.module.kotlin.readValue
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types

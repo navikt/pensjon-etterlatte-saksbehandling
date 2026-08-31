@@ -9,7 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.Norg2Epost
 import no.nav.etterlatte.brev.adresse.Norg2Klient
@@ -69,15 +69,25 @@ internal class Norg2KlientTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/enhet/${PORSGRUNN.enhetNr}" -> respond(porsgrunnEnhetJson, HttpStatusCode.OK, defaultHeaders)
-                            "/enhet/${PORSGRUNN.enhetNr}/kontaktinformasjon" ->
+                            "/enhet/${PORSGRUNN.enhetNr}" -> {
+                                respond(porsgrunnEnhetJson, HttpStatusCode.OK, defaultHeaders)
+                            }
+
+                            "/enhet/${PORSGRUNN.enhetNr}/kontaktinformasjon" -> {
                                 respond(
                                     porsgrunnKontaktinfoJson,
                                     HttpStatusCode.OK,
                                     defaultHeaders,
                                 )
-                            "/enhet/${UKJENT.enhetNr}" -> respond(errorJson, HttpStatusCode.NotFound, defaultHeaders)
-                            else -> error("Unhandled ${request.url.fullPath}")
+                            }
+
+                            "/enhet/${UKJENT.enhetNr}" -> {
+                                respond(errorJson, HttpStatusCode.NotFound, defaultHeaders)
+                            }
+
+                            else -> {
+                                error("Unhandled ${request.url.fullPath}")
+                            }
                         }
                     }
                 }

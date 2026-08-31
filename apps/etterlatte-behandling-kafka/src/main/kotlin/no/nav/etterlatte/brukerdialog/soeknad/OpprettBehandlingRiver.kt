@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -15,6 +14,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.treeToValue
 
 internal class OpprettBehandlingRiver(
     rapidsConnection: RapidsConnection,

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.testdata.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.grunnlag.GenerellKilde
@@ -25,6 +24,7 @@ import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
+import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.UUID.randomUUID

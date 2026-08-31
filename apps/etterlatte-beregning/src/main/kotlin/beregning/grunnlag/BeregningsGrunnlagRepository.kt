@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
@@ -11,6 +10,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
 import org.postgresql.util.PGobject
+import tools.jackson.module.kotlin.readValue
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource

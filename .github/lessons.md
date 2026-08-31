@@ -93,3 +93,7 @@
 **2026-07-30 — Ressursdimensjonering av containere**
 - Observation: Jeg holdt på å applisere Nais sine memory-anbefalinger rått, uten å sjekke at JVM-appene kjører uten heap-flagg. Da er max heap 25 % av memory limit — så å kutte limit kutter heapen tilsvarende, og anbefalingen (som er målt med den gamle heapen) blir selvmotsigende.
 - Action: Ved endring av memory limit for JVM-apper: finn først hvordan heapen dimensjoneres (flagg i Dockerfile/nais-env, ellers HotSpot-default 25 %). Regn ut ny heap og native-budsjett (peak RSS − gammel heap-cap) før du velger tall — et anbefalt tall er bare gyldig sammen med den heap-konfigurasjonen det ble målt under.
+
+**2026-08-31 — Scope ved konfigurasjonsendring**
+- Observation: Oppgaven var å bytte en AD-gruppe-id. Jeg oppdaget at prod hadde en tvilsom placeholder-verdi og bygde om `AzureGroup`/`ApplicationContext` til påkrevd/valgfri i samme slengen. Brukeren ville bare ha id-byttet og ta resten senere — alt måtte reverteres.
+- Action: Når jeg finner et tilgrensende problem under en avgrenset endring: rapporter funnet og foreslå det som eget steg, ikke implementer det uoppfordret. Strukturendringer i felles konfigurasjonsmekanikk skal alltid være brukerens valg.

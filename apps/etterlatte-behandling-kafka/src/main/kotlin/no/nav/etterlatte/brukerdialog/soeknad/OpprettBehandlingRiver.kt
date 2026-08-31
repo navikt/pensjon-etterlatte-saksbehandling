@@ -36,7 +36,7 @@ internal class OpprettBehandlingRiver(
     ) {
         try {
             val soeknad = packet.soeknad()
-            val soeknadId = packet[GyldigSoeknadVurdert.lagretSoeknadIdKey].asText().takeIf { it.isNotBlank() }
+            val soeknadId = packet[GyldigSoeknadVurdert.lagretSoeknadIdKey].asString().takeIf { it.isNotBlank() }
 
             val personGalleri = PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad)
 

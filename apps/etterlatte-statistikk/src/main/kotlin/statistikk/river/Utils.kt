@@ -16,7 +16,7 @@ private val defaultLog = LoggerFactory.getLogger("parseTekniskTid")
 fun parseTekniskTid(
     packet: JsonMessage,
     logger: Logger = defaultLog,
-) = parseTekniskTid(packet[TEKNISK_TID_KEY].textValue(), packet.eventName, logger)
+) = parseTekniskTid(packet[TEKNISK_TID_KEY].asString(null), packet.eventName, logger)
 
 internal fun parseTekniskTid(
     pakkeTid: String?,

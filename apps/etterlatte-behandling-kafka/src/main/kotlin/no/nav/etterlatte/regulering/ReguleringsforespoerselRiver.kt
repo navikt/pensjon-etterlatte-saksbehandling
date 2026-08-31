@@ -99,7 +99,7 @@ internal class ReguleringsforespoerselRiver(
     private fun JsonMessage.optionalSakType(): SakType? =
         when (val node = this[SAK_TYPE]) {
             is MissingNode -> null
-            else -> SakType.valueOf(node.asText())
+            else -> SakType.valueOf(node.asString())
         }
 
     private fun flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakslisteDTOTilOmregning: SakslisteDTO): SakIDListe =

@@ -62,8 +62,9 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
+import no.nav.etterlatte.prosessering.feilbarDemoRoute
 import no.nav.etterlatte.prosessering.installProsessering
-import no.nav.etterlatte.prosessering.prosesseringLesRoutes
+import no.nav.etterlatte.prosessering.prosesseringRoutes
 import no.nav.etterlatte.prosessering.soeknadSkyggeRoute
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
@@ -174,7 +175,8 @@ private fun Route.attachContekst(
 
 private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     soeknadSkyggeRoute(applicationContext.soeknadSkyggeDao)
-    prosesseringLesRoutes(applicationContext.prosesseringAdminDao, applicationContext.saksbehandlerGroupIdsByKey)
+    prosesseringRoutes(applicationContext.prosesseringAdminDao, applicationContext.saksbehandlerGroupIdsByKey)
+    feilbarDemoRoute(applicationContext.saksbehandlerGroupIdsByKey)
 
     sakSystemRoutes(
         tilgangService = applicationContext.tilgangService,

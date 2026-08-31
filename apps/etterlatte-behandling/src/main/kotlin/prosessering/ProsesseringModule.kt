@@ -41,10 +41,12 @@ fun Application.installProsessering(dataSource: DataSource) {
     install(Prosessering) {
         repository = PostgresTaskRepository(dataSource)
         steg = listOfNotNull(SoeknadMottakSkyggeTaskStep(), FeilbarDemoTaskStep().takeIf { erDemomiljoe() })
-        node = "etterlatte-behandling"
+        node = PROSESSERING_NODE
         reaperPaa = true
     }
 }
+
+const val PROSESSERING_NODE = "etterlatte-behandling"
 
 private fun erDemomiljoe(): Boolean = !appIsInGCP() || isDev()
 
@@ -139,8 +141,53 @@ fun Route.prosesseringRoutes(
                 }
             }
         }
+
+        get("/{id}/hendelser") {
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) {
+                call.respond(prosesseringAdminDao.hentHendelser(call.taskId()))
+            }
+        }
+
+        // Se TaskHendelse.kt: forbereder på TaskLoggRepository fra navikt/efterlatte-prosessering#25.
+        post("/{id}/kommentar") {
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
+                medBody<TaskHendelseRequest> { kropp ->
+                    call.respond(
+                        HttpStatusCode.Created,
+                        leggTilHendelseOgLogg(
+                            prosesseringAdminDao = prosesseringAdminDao,
+                            saksbehandler = saksbehandler,
+                            id = call.taskId(),
+                            type = TaskHendelseType.KOMMENTAR,
+                            melding = kropp.melding,
+                        ),
+                    )
+                }
+            }
+        }
+
+        post("/{id}/avvik") {
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
+                medBody<TaskHendelseRequest> { kropp ->
+                    call.respond(
+                        HttpStatusCode.Created,
+                        leggTilHendelseOgLogg(
+                            prosesseringAdminDao = prosesseringAdminDao,
+                            saksbehandler = saksbehandler,
+                            id = call.taskId(),
+                            type = TaskHendelseType.AVVIK,
+                            melding = kropp.melding,
+                        ),
+                    )
+                }
+            }
+        }
     }
 }
+
+data class TaskHendelseRequest(
+    val melding: String,
+)
 
 data class TaskHandling(
     val versjon: Long,
@@ -246,6 +293,30 @@ private fun utfoerOgLogg(
         )
         throw feil
     }
+
+private fun leggTilHendelseOgLogg(
+    prosesseringAdminDao: ProsesseringAdminDao,
+    saksbehandler: Saksbehandler,
+    id: Long,
+    type: TaskHendelseType,
+    melding: String,
+): TaskHendelse {
+    val hendelse =
+        prosesseringAdminDao.leggTilHendelse(
+            taskId = id,
+            type = type,
+            melding = melding,
+            endretAv = saksbehandler.ident(),
+            node = PROSESSERING_NODE,
+        )
+    operatorlogg.info(
+        "{} registrerte {} på task {}",
+        saksbehandler.ident(),
+        type,
+        id,
+    )
+    return hendelse
+}
 
 private val operatorlogg = LoggerFactory.getLogger("prosessering.operator")
 private val logger = LoggerFactory.getLogger("no.nav.etterlatte.prosessering.ProsesseringModule")

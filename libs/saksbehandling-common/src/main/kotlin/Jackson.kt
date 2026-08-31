@@ -17,6 +17,8 @@ val objectMapper: ObjectMapper =
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
         .enable(EnumFeature.FAIL_ON_NUMBERS_FOR_ENUMS)
+        .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
+        .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
         .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
         .build()
 

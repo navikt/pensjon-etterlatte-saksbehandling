@@ -212,7 +212,7 @@ data class GeografiskTilknytning(
         }
 }
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = Vergemaal::class, name = "Vergemaal"),
     JsonSubTypes.Type(value = UkjentVergemaal::class, name = "UkjentVergemaal"),

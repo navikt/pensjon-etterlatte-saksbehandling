@@ -152,13 +152,6 @@ data class FeilbarDemoRespons(
 )
 
 fun Route.feilbarDemoRoute(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) {
-    // Skrives ved oppstart. Er den ikke i Loki, kjører podden et image uten denne ruta — og da
-    // er en 404 fra endepunktet et deploy-problem, ikke et kodeproblem.
-    logger.info(
-        "Registrerer POST /api/prosessering/demo/feilbar (cluster={}, demomiljø={})",
-        clusterNavn() ?: "ukjent",
-        erDemomiljoe(),
-    )
     route("/api/prosessering/demo/feilbar") {
         post {
             if (!erDemomiljoe()) {

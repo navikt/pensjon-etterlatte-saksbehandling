@@ -314,7 +314,7 @@ class BrevService(
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
-                } else if (erVedtaksbrevPaaNyBrevflyt(behandlingId, bruker)) {
+                } else if (brevType == Brevtype.VEDTAK && erVedtaksbrevPaaNyBrevflyt(behandlingId, bruker)) {
                     vedtaksbrevService.tilbakestillVedtaksbrev(brevID, behandlingId, bruker)
                 } else {
                     videresendInterneFeil {

@@ -12,16 +12,19 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Properties
+import java.util.concurrent.atomic.AtomicBoolean
 
 class UfoerehendelseKonsument(
     topic: String,
     kafkaProperties: Properties,
     private val ufoereHendelseFordeler: UfoereHendelseFordeler,
+    closed: AtomicBoolean = AtomicBoolean(false),
 ) : Kafkakonsument<String, String>(
         logger = LoggerFactory.getLogger(KafkaConsumer::class.java.name),
         consumer = KafkaConsumer<String, String>(kafkaProperties),
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
+        closed = closed,
     ) {
     override fun start() {
         pollLoop { hendelser ->

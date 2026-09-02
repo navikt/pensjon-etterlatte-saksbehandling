@@ -1,7 +1,6 @@
 package no.nav.etterlatte.samordning
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import io.ktor.server.application.Application
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.kafka.KafkaConsumerEnvironmentTest
@@ -9,14 +8,14 @@ import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaContainer
 import no.nav.etterlatte.kafka.KafkaProducerTestImpl
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
-import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.common.objectMapper
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Serializer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.slf4j.LoggerFactory
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class SamordningHendelseIntegrationTest {
@@ -32,6 +31,7 @@ class SamordningHendelseIntegrationTest {
                 LocalKafkaConfig(kafkaContainer.bootstrapServers).rapidsAndRiversProducer("etterlatte.dodsmelding"),
             )
 
+        val closed = AtomicBoolean(false)
         val konsument =
             SamordningHendelseKonsument(
                 topic = SAMORDNINGVEDTAK_HENDELSE_TOPIC,
@@ -41,6 +41,7 @@ class SamordningHendelseIntegrationTest {
                         KafkaEnvironmentJsonDeserializer::class.java.canonicalName,
                     ),
                 handler = SamordningHendelseHandler(rapidsKafkaProducer),
+                closed = closed,
             )
 
         val produsent = KafkaProducerTestImpl<SamordningVedtakHendelse>(kafkaContainer, SamJsonSerializer::class.java.canonicalName)
@@ -63,16 +64,31 @@ class SamordningHendelseIntegrationTest {
             },
         )
 
-        startLytting(konsument, LoggerFactory.getLogger(Application::class.java))
+        // Kjør konsumenten på en tråd vi selv styrer og lukker, i stedet for produksjonskoden sin
+        // startLytting() (som bruker exitProcess ved feil og aldri lukkes eksplisitt i tester).
+        val konsumentTraad =
+            thread(start = true) {
+                try {
+                    konsument.start()
+                } catch (e: Exception) {
+                    // Forventet ved wakeup() under nedstenging - konsumenten lukkes uansett i pollLoop sin finally.
+                }
+            }
 
-        verify(exactly = 1, timeout = 10000) {
-            rapidsKafkaProducer.publiser(
-                any(),
-                match {
-                    val hendelse = objectMapper.readTree(it.toJson())
-                    hendelse.get("vedtakId").asLong() == 99900022201L
-                },
-            )
+        try {
+            verify(exactly = 1, timeout = 10000) {
+                rapidsKafkaProducer.publiser(
+                    any(),
+                    match {
+                        val hendelse = objectMapper.readTree(it.toJson())
+                        hendelse.get("vedtakId").asLong() == 99900022201L
+                    },
+                )
+            }
+        } finally {
+            closed.set(true)
+            konsument.consumer.wakeup()
+            konsumentTraad.join(5000)
         }
     }
 }

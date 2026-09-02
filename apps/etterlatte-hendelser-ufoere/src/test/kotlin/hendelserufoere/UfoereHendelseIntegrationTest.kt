@@ -12,7 +12,6 @@ import no.nav.etterlatte.kafka.KafkaConsumerEnvironmentTest
 import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.SCHEMA_REGISTRY_URL
 import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaContainer
 import no.nav.etterlatte.kafka.KafkaProducerTestImpl
-import no.nav.etterlatte.lesHendelserFraUfoere
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -20,6 +19,8 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class UfoereHendelseIntegrationTest {
@@ -29,6 +30,7 @@ internal class UfoereHendelseIntegrationTest {
     fun `skal opprette ufoerehendelse paa topicen, konsumere den, og sende videre til behandling`() {
         coEvery { behandlingKlient.postTilBehandling(any()) } just runs
 
+        val closed = AtomicBoolean(false)
         val ufoerehendelseKonsument =
             UfoerehendelseKonsument(
                 UFOERE_TOPIC,
@@ -37,6 +39,7 @@ internal class UfoereHendelseIntegrationTest {
                     StringDeserializer::class.java.canonicalName,
                 ),
                 UfoereHendelseFordeler(behandlingKlient),
+                closed = closed,
             )
 
         val ufoerehendelseProdusent =
@@ -56,13 +59,26 @@ internal class UfoereHendelseIntegrationTest {
 
         ufoerehendelseProdusent.sendMelding(UFOERE_TOPIC, "test-key", hendelse.toJson())
 
-        lesHendelserFraUfoere(ufoerehendelseKonsument)
+        val konsumentTraad =
+            thread(start = true) {
+                try {
+                    ufoerehendelseKonsument.start()
+                } catch (e: Exception) {
+                    // Forventet ved wakeup() under nedstenging - konsumenten lukkes uansett i pollLoop sin finally.
+                }
+            }
 
-        coVerify(exactly = 1, timeout = 5000) {
-            behandlingKlient.postTilBehandling(hendelse)
+        try {
+            coVerify(exactly = 1, timeout = 5000) {
+                behandlingKlient.postTilBehandling(hendelse)
+            }
+
+            confirmVerified(behandlingKlient)
+        } finally {
+            closed.set(true)
+            ufoerehendelseKonsument.consumer.wakeup()
+            konsumentTraad.join(5000)
         }
-
-        confirmVerified(behandlingKlient)
     }
 
     private companion object {

@@ -21,7 +21,6 @@ import no.nav.etterlatte.kafka.KafkaContainerHelper.Companion.kafkaContainer
 import no.nav.etterlatte.kafka.KafkaProducerTestImpl
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
-import no.nav.etterlatte.lesHendelserFraLeesah
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
@@ -36,6 +35,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class IntegrationTest {
@@ -44,6 +45,7 @@ class IntegrationTest {
     @Test
     fun `skal opprette doedshendelse paa leesah, konsumere den, mappe om og publisere paa rapid`() {
         val rapidsKafkaProducer = spyk(LocalKafkaConfig(kafkaContainer.bootstrapServers).rapidsAndRiversProducer("etterlatte.dodsmelding"))
+        val closed = AtomicBoolean(false)
 
         val personhendelseKonsument =
             PersonhendelseKonsument(
@@ -53,6 +55,7 @@ class IntegrationTest {
                     KafkaAvroDeserializer::class.java.canonicalName,
                 ),
                 PersonHendelseFordeler(rapidsKafkaProducer, pdlTjenesterKlient),
+                closed = closed,
             )
 
         val personHendelse =
@@ -90,16 +93,32 @@ class IntegrationTest {
             )
         producerForLeesah.sendMelding(LEESAH_TOPIC_PERSON, "key", personHendelse)
 
-        lesHendelserFraLeesah(personhendelseKonsument)
+        // Kjør konsumenten på en tråd vi selv styrer og lukker, i stedet for produksjonskoden sin
+        // lesHendelserFraLeesah()/startLytting() (som bruker exitProcess ved feil og aldri lukkes
+        // eksplisitt i tester).
+        val konsumentTraad =
+            thread(start = true) {
+                try {
+                    personhendelseKonsument.start()
+                } catch (e: Exception) {
+                    // Forventet ved wakeup() under nedstenging - konsumenten lukkes uansett i pollLoop sin finally.
+                }
+            }
 
-        verify(exactly = 1, timeout = 5000) {
-            rapidsKafkaProducer.publiser(
-                any(),
-                match {
-                    val hendelse: MeldingSendtPaaRapid<DoedshendelsePdl> = objectMapper.readValue(it.toJson())
-                    hendelse == forventetMeldingPaaRapid
-                },
-            )
+        try {
+            verify(exactly = 1, timeout = 5000) {
+                rapidsKafkaProducer.publiser(
+                    any(),
+                    match {
+                        val hendelse: MeldingSendtPaaRapid<DoedshendelsePdl> = objectMapper.readValue(it.toJson())
+                        hendelse == forventetMeldingPaaRapid
+                    },
+                )
+            }
+        } finally {
+            closed.set(true)
+            personhendelseKonsument.consumer.wakeup()
+            konsumentTraad.join(5000)
         }
     }
 

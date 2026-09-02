@@ -92,14 +92,14 @@ internal class ReguleringsforespoerselRiverTest {
                 inspector.inspektør
                     .message(i)
                     .get(EVENT_NAME_KEY)
-                    .asText(),
+                    .asString(),
             )
             Assertions.assertEquals(
                 foersteMai2023.toString(),
                 inspector.inspektør
                     .message(i)
                     .get(DATO_KEY)
-                    .asText(),
+                    .asString(),
             )
         }
     }

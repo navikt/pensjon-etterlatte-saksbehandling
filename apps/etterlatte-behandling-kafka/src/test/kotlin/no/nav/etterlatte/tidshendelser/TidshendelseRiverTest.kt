@@ -59,9 +59,9 @@ internal class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
-            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
+            field(0, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asString() shouldBe "OPPGAVE_OPPRETTET"
+            field(0, TIDSHENDELSE_TYPE_KEY).asString() shouldBe "AO_BP20"
             field(0, TIDSHENDELSE_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 1
@@ -102,9 +102,9 @@ internal class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "BEHANDLING_OPPRETTET"
-            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "OMS_DOED_5AAR"
+            field(0, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asString() shouldBe "BEHANDLING_OPPRETTET"
+            field(0, TIDSHENDELSE_TYPE_KEY).asString() shouldBe "OMS_DOED_5AAR"
             field(0, TIDSHENDELSE_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
@@ -140,9 +140,9 @@ internal class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "HOPPET_OVER"
-            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
+            field(0, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asString() shouldBe "HOPPET_OVER"
+            field(0, TIDSHENDELSE_TYPE_KEY).asString() shouldBe "AO_BP20"
             field(0, TIDSHENDELSE_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0

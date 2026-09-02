@@ -360,7 +360,7 @@ class ApplicationIntegrationTest {
         val message = objectMapper.readTree(this)
 
         return Pair(
-            message[EVENT_NAME_KEY].asText(),
+            message[EVENT_NAME_KEY].asString(),
             objectMapper.treeToValue(
                 message[UTBETALING_RESPONSE],
             ),

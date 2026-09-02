@@ -155,11 +155,11 @@ internal class OpprettVedtakforespoerselRiverTest {
             verify { vedtakServiceMock.hentVedtakForSak(sakId) }
 
             size shouldBe 2
-            field(0, EVENT_NAME_KEY).asText() shouldBe VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType()
+            field(0, EVENT_NAME_KEY).asString() shouldBe VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType()
             field(
                 1,
                 EVENT_NAME_KEY,
-            ).asText() shouldBe VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()
+            ).asString() shouldBe VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()
             (0..1)
                 .forEach { index ->
                     deserialize<VedtakDto>(field(index, "vedtak").toJson())

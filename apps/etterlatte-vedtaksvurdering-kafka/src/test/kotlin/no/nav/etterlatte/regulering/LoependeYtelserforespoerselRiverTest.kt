@@ -79,7 +79,7 @@ internal class LoependeYtelserforespoerselRiverTest {
 
         sendtMelding
             .get(EVENT_NAME_KEY)
-            .asText() shouldBe ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET.lagEventnameForType()
+            .asString() shouldBe ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET.lagEventnameForType()
 
         objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), OmregningData::class.java) shouldBe
             OmregningData("kjoering", sakId, Revurderingaarsak.REGULERING, fraDato)
@@ -103,7 +103,7 @@ internal class LoependeYtelserforespoerselRiverTest {
             inspector.inspektør
                 .message(0)
                 .get(EVENT_NAME_KEY)
-                .asText(),
+                .asString(),
             ReguleringHendelseType.YTELSE_IKKE_LOEPENDE.lagEventnameForType(),
         )
     }
@@ -157,7 +157,7 @@ internal class LoependeYtelserforespoerselRiverTest {
             inspector.inspektør
                 .message(0)
                 .get(EVENT_NAME_KEY)
-                .asText(),
+                .asString(),
             ReguleringHendelseType.YTELSE_IKKE_LOEPENDE.lagEventnameForType(),
         )
     }

@@ -7,7 +7,7 @@
 -- Her flytter vi kun ATTESTERT-radens teknisk_tid ett millisekund fram, slik at de to
 -- radene for samme behandling ikke lenger er identiske.
 UPDATE sak s
-SET teknisk_tid = teknisk_tid + interval '1 millisecond'
+SET teknisk_tid = teknisk_tid + interval '1 millisecond', tidspunkt_registrert = now()
 WHERE behandling_status = 'ATTESTERT'
   AND teknisk_tid >= '2026-05-20'
   AND EXISTS (

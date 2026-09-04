@@ -33,6 +33,9 @@ import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.MmelDto
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -115,7 +118,8 @@ internal class TilbakekrevingskomponentenKlientTest {
         val vedtakId = 123L
         val sakId = SakId(27L)
 
-        val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, alleredeBehandletResponse)
+        val httpClient =
+            mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, alleredeBehandletResponse)
         val tilbakekrevingskomponentenKlient = TilbakekrevingskomponentenKlient("", httpClient, hendelseRepository)
         val tilbakekrevingsvedtak = tilbakekrevingsvedtak(vedtakId = vedtakId, sakId = sakId)
 
@@ -155,7 +159,8 @@ internal class TilbakekrevingskomponentenKlientTest {
                         this.vedtakId = BigInteger.valueOf(vedtakId)
                     }
             }
-        val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, alleredeBehandletResponse)
+        val httpClient =
+            mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, alleredeBehandletResponse)
         val tilbakekrevingskomponentenKlient = TilbakekrevingskomponentenKlient("", httpClient, hendelseRepository)
         val tilbakekrevingsvedtak = tilbakekrevingsvedtak(vedtakId = vedtakId, sakId = sakId)
 
@@ -239,7 +244,8 @@ internal class TilbakekrevingskomponentenKlientTest {
                     }
             }
 
-        val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, alleredeBehandletResponse)
+        val httpClient =
+            mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, alleredeBehandletResponse)
         val tilbakekrevingskomponentenKlient = TilbakekrevingskomponentenKlient("", httpClient, hendelseRepository)
         val tilbakekrevingsvedtak = tilbakekrevingsvedtak(vedtakId = nyVedtakId, sakId = sakId)
 
@@ -321,6 +327,41 @@ internal class TilbakekrevingskomponentenKlientTest {
                 TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_KVITTERING,
             )
         }
+    }
+
+    @Test
+    fun `skal serialisere xml datoer uten timestamp i payload som sendes til tilbakekrevingskomponenten`() {
+        val response =
+            TilbakekrevingsvedtakResponse().apply {
+                mmel = MmelDto().apply { alvorlighetsgrad = "00" }
+            }
+        val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, response)
+        val tilbakekrevingskomponentenKlient = TilbakekrevingskomponentenKlient("", httpClient, hendelseRepository)
+        val vedtak = tilbakekrevingsvedtak()
+
+        tilbakekrevingskomponentenKlient.sendTilbakekrevingsvedtak(vedtak)
+
+        val payloadSlot = mutableListOf<String>()
+        verify {
+            hendelseRepository.lagreTilbakekrevingHendelse(
+                vedtak.sakId,
+                capture(payloadSlot),
+                TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT,
+            )
+        }
+        val payload = objectMapper.readTree(payloadSlot.single())
+        val tilbakekrevingsvedtak = payload["tilbakekrevingsvedtak"]
+
+        val datoVedtakFagsystem = tilbakekrevingsvedtak["datoVedtakFagsystem"].asString()
+        val fom = tilbakekrevingsvedtak["tilbakekrevingsperiode"][0]["periode"]["fom"].asString()
+        val tom = tilbakekrevingsvedtak["tilbakekrevingsperiode"][0]["periode"]["tom"].asString()
+
+        assertTrue(datoVedtakFagsystem.matches("""\d{4}-\d{2}-\d{2}""".toRegex()))
+        assertEquals("2023-01-01", fom)
+        assertEquals("2023-01-31", tom)
+        assertFalse(datoVedtakFagsystem.contains("T"))
+        assertFalse(fom.contains("T"))
+        assertFalse(tom.contains("T"))
     }
 
     private fun mockedHttpClient(

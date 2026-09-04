@@ -1,6 +1,5 @@
 package no.nav.etterlatte.sak
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import tools.jackson.module.kotlin.readValue
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.YearMonth

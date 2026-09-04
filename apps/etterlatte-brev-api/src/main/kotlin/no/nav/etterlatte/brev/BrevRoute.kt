@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
@@ -39,6 +38,7 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue

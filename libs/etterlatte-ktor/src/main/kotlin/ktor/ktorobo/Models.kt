@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.ktor.ktor.ktorobo
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import io.ktor.client.call.body
@@ -8,6 +7,7 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import tools.jackson.databind.JsonNode
 
 data class Resource(
     val clientId: String,

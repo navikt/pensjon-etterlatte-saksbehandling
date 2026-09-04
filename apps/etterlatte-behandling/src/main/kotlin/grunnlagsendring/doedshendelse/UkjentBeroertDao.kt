@@ -1,12 +1,12 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
+import tools.jackson.module.kotlin.readValue
 
 class UkjentBeroertDao(
     private val connectionAutoclosing: ConnectionAutoclosing,

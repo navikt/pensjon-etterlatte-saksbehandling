@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -48,6 +47,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

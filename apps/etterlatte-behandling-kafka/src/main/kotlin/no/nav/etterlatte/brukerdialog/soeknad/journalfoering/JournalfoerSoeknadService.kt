@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad.journalfoering
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brukerdialog.soeknad.pdf.PdfGeneratorKlient
@@ -12,6 +11,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Base64
 
 class JournalfoerSoeknadService(
@@ -132,7 +132,10 @@ class JournalfoerSoeknadService(
                 pdfgenKlient.genererPdf(soeknad, template)
             }.let {
                 when (it) {
-                    is RetryResult.Success -> DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    is RetryResult.Success -> {
+                        DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    }
+
                     is RetryResult.Failure -> {
                         logger.error("Kunne ikke opprette PDF for søknad med id=$soeknadId")
                         throw it.samlaExceptions()

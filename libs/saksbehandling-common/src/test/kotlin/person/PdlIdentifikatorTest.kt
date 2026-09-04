@@ -1,12 +1,12 @@
 package no.nav.etterlatte.person
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 
 class PdlIdentifikatorTest {
     @Test

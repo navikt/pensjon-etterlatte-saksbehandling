@@ -1,6 +1,5 @@
 package no.nav.etterlatte.hendelserpdl
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.ktor.client.HttpClient
@@ -10,7 +9,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
@@ -34,6 +33,7 @@ import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.doedsfall.Doedsfall
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.module.kotlin.readValue
 import java.time.Instant
 import java.time.LocalDate
 

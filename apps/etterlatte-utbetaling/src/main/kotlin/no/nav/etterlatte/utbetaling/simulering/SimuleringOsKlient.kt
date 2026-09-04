@@ -1,11 +1,5 @@
 package no.nav.etterlatte.utbetaling.simulering
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -20,11 +14,21 @@ import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
 import org.slf4j.LoggerFactory
+import tools.jackson.core.JsonParser
+import tools.jackson.core.StreamWriteFeature
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.databind.cfg.EnumFeature
+import tools.jackson.databind.deser.std.StdScalarDeserializer
+import tools.jackson.databind.module.SimpleModule
+import tools.jackson.module.kotlin.jacksonMapperBuilder
+import tools.jackson.module.kotlin.readValue
 import java.io.IOException
 import java.time.Duration
 
@@ -32,9 +36,15 @@ private typealias RequestWrapper = no.nav.system.os.tjenester.simulerfpservice.s
 private typealias ResponseWrapper = no.nav.system.os.tjenester.simulerfpservice.simulerfpservicegrensesnitt.SimulerBeregningResponse
 
 fun simuleringObjectMapper(): ObjectMapper =
-    objectMapper
-        .copy()
-        .registerModule(StringTrimModule())
+    jacksonMapperBuilder()
+        .disable(DateTimeFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+        .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+        .enable(EnumFeature.FAIL_ON_NUMBERS_FOR_ENUMS)
+        .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
+        .addModule(StringTrimModule())
+        .build()
 
 class SimuleringOsKlient(
     config: Config,

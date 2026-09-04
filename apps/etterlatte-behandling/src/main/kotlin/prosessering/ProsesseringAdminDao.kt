@@ -51,6 +51,7 @@ class ProsesseringAdminDao(
     private val dataSource: DataSource,
 ) {
     private val tabell = "public.prosessering_task"
+    private val hendelseTabell = "public.prosessering_task_hendelse"
 
     fun list(
         status: Status?,
@@ -177,6 +178,67 @@ class ProsesseringAdminDao(
             }
         }
     }
+
+    /** Erstattes av TaskLoggRepository.leggTil (se TaskHendelse.kt) når biblioteket publiseres. */
+    fun leggTilHendelse(
+        taskId: Long,
+        type: TaskHendelseType,
+        melding: String,
+        endretAv: String,
+        node: String,
+    ): TaskHendelse {
+        require(type != TaskHendelseType.STATUS_ENDRET) {
+            "STATUS_ENDRET skrives av motoren selv, ikke av admin-API-et"
+        }
+        if (finn(taskId) == null) throw TaskIkkeFunnet(taskId)
+
+        return dataSource.connection.use { connection ->
+            connection
+                .prepareStatement(
+                    """
+                    INSERT INTO $hendelseTabell (task_id, type, melding, endret_av, node)
+                    VALUES (?, ?, ?, ?, ?)
+                    RETURNING *
+                    """.trimIndent(),
+                ).use { statement ->
+                    statement.setLong(1, taskId)
+                    statement.setString(2, type.name)
+                    statement.setString(3, melding)
+                    statement.setString(4, endretAv)
+                    statement.setString(5, node)
+                    statement.executeQuery().use { resultSet ->
+                        resultSet.next()
+                        resultSet.tilTaskHendelse()
+                    }
+                }
+        }
+    }
+
+    fun hentHendelser(taskId: Long): List<TaskHendelse> =
+        dataSource.connection.use { connection ->
+            connection
+                .prepareStatement(
+                    "SELECT * FROM $hendelseTabell WHERE task_id = ? ORDER BY tidspunkt, id",
+                ).use { statement ->
+                    statement.setLong(1, taskId)
+                    statement.executeQuery().use { resultSet ->
+                        buildList {
+                            while (resultSet.next()) add(resultSet.tilTaskHendelse())
+                        }
+                    }
+                }
+        }
+
+    private fun ResultSet.tilTaskHendelse(): TaskHendelse =
+        TaskHendelse(
+            id = getLong("id"),
+            taskId = getLong("task_id"),
+            type = TaskHendelseType.valueOf(getString("type")),
+            melding = getString("melding"),
+            endretAv = getString("endret_av"),
+            node = getString("node"),
+            tidspunkt = getTimestamp("tidspunkt").toInstant(),
+        )
 
     private fun ResultSet.tilTask(): Task =
         Task(

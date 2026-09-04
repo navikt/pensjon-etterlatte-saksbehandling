@@ -161,7 +161,9 @@ fun Route.vedtaksvurderingRoute(
                 }
 
                 val vedtak =
-                    inTransaction { vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo) }
+                    withSerializableRetry {
+                        inTransaction { vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo) }
+                    }
                 call.respond(vedtak.toDto())
             }
         }
@@ -170,7 +172,9 @@ fun Route.vedtaksvurderingRoute(
             kunSkrivetilgang {
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
                 val nyttVedtak =
-                    inTransaction { vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo) }
+                    withSerializableRetry {
+                        inTransaction { vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo) }
+                    }
                 call.respond(nyttVedtak.toDto())
             }
         }

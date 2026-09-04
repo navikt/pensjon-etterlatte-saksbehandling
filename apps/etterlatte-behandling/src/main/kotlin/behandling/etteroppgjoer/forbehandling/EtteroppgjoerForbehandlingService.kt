@@ -215,6 +215,11 @@ class EtteroppgjoerForbehandlingService(
 
     fun hentForbehandlinger(sakId: SakId): List<EtteroppgjoerForbehandling> = dao.hentForbehandlingerForSak(sakId)
 
+    fun harForbehandlingForAar(
+        sakId: SakId,
+        inntektsaar: Int,
+    ): Boolean = hentForbehandlinger(sakId).any { it.aar == inntektsaar }
+
     fun hentDetaljertForbehandling(
         forbehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

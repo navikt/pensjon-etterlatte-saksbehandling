@@ -5,6 +5,8 @@ import efterlatte.prosessering.Reaper
 import efterlatte.prosessering.StandardTaskProdusent
 import efterlatte.prosessering.Status
 import efterlatte.prosessering.Task
+import efterlatte.prosessering.TaskLogg
+import efterlatte.prosessering.TaskLoggType
 import efterlatte.prosessering.TaskProdusent
 import efterlatte.prosessering.ktor.Prosessering
 import efterlatte.prosessering.ktor.taskProdusent
@@ -148,7 +150,6 @@ fun Route.prosesseringRoutes(
             }
         }
 
-        // Se TaskHendelse.kt: forbereder på TaskLoggRepository fra navikt/efterlatte-prosessering#25.
         post("/{id}/kommentar") {
             medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
                 medBody<TaskHendelseRequest> { kropp ->
@@ -158,7 +159,7 @@ fun Route.prosesseringRoutes(
                             prosesseringAdminDao = prosesseringAdminDao,
                             saksbehandler = saksbehandler,
                             id = call.taskId(),
-                            type = TaskHendelseType.KOMMENTAR,
+                            type = TaskLoggType.KOMMENTAR,
                             melding = kropp.melding,
                         ),
                     )
@@ -175,7 +176,7 @@ fun Route.prosesseringRoutes(
                             prosesseringAdminDao = prosesseringAdminDao,
                             saksbehandler = saksbehandler,
                             id = call.taskId(),
-                            type = TaskHendelseType.AVVIK,
+                            type = TaskLoggType.AVVIK,
                             melding = kropp.melding,
                         ),
                     )
@@ -298,9 +299,9 @@ private fun leggTilHendelseOgLogg(
     prosesseringAdminDao: ProsesseringAdminDao,
     saksbehandler: Saksbehandler,
     id: Long,
-    type: TaskHendelseType,
+    type: TaskLoggType,
     melding: String,
-): TaskHendelse {
+): TaskLogg {
     val hendelse =
         prosesseringAdminDao.leggTilHendelse(
             taskId = id,

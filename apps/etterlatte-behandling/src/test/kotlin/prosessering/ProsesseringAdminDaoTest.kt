@@ -1,5 +1,7 @@
 package no.nav.etterlatte.prosessering
 
+import efterlatte.prosessering.TaskLogg
+import efterlatte.prosessering.TaskLoggType
 import no.nav.etterlatte.DatabaseExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -12,7 +14,7 @@ import java.sql.Timestamp
 import java.time.Instant
 import javax.sql.DataSource
 
-/** Forbereder på TaskLoggRepository fra navikt/efterlatte-prosessering#25 (se TaskHendelse.kt). */
+/** Dekker guards (eksistens + STATUS_ENDRET-sperre) rundt bibliotekets TaskLoggRepository. */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class ProsesseringAdminDaoTest(
@@ -49,7 +51,7 @@ internal class ProsesseringAdminDaoTest(
 
         prosesseringAdminDao.leggTilHendelse(
             taskId = taskId,
-            type = TaskHendelseType.KOMMENTAR,
+            type = TaskLoggType.KOMMENTAR,
             melding = "Undersøker en treg respons fra PDL",
             endretAv = "Z123456",
             node = PROSESSERING_NODE,
@@ -57,27 +59,27 @@ internal class ProsesseringAdminDaoTest(
         val avvik =
             prosesseringAdminDao.leggTilHendelse(
                 taskId = taskId,
-                type = TaskHendelseType.AVVIK,
+                type = TaskLoggType.AVVIK,
                 melding = "PdlKlient svarte 503 tre ganger på rad",
                 endretAv = "Z123456",
                 node = PROSESSERING_NODE,
             )
 
-        assertEquals(TaskHendelseType.AVVIK, avvik.type)
+        assertEquals(TaskLoggType.AVVIK, avvik.type)
         assertEquals(taskId, avvik.taskId)
         assertEquals(PROSESSERING_NODE, avvik.node)
 
         val hendelser = prosesseringAdminDao.hentHendelser(taskId)
         assertEquals(2, hendelser.size)
-        assertEquals(TaskHendelseType.KOMMENTAR, hendelser[0].type)
-        assertEquals(TaskHendelseType.AVVIK, hendelser[1].type)
+        assertEquals(TaskLoggType.KOMMENTAR, hendelser[0].type)
+        assertEquals(TaskLoggType.AVVIK, hendelser[1].type)
     }
 
     @Test
     fun `hentHendelser for task uten hendelser gir tom liste`() {
         val taskId = opprettTask()
 
-        assertEquals(emptyList<TaskHendelse>(), prosesseringAdminDao.hentHendelser(taskId))
+        assertEquals(emptyList<TaskLogg>(), prosesseringAdminDao.hentHendelser(taskId))
     }
 
     @Test
@@ -85,7 +87,7 @@ internal class ProsesseringAdminDaoTest(
         assertThrows(TaskIkkeFunnet::class.java) {
             prosesseringAdminDao.leggTilHendelse(
                 taskId = -1,
-                type = TaskHendelseType.KOMMENTAR,
+                type = TaskLoggType.KOMMENTAR,
                 melding = "skal ikke lagres",
                 endretAv = "Z123456",
                 node = PROSESSERING_NODE,
@@ -100,7 +102,7 @@ internal class ProsesseringAdminDaoTest(
         assertThrows(IllegalArgumentException::class.java) {
             prosesseringAdminDao.leggTilHendelse(
                 taskId = taskId,
-                type = TaskHendelseType.STATUS_ENDRET,
+                type = TaskLoggType.STATUS_ENDRET,
                 melding = "skal ikke skrives herfra",
                 endretAv = "system",
                 node = PROSESSERING_NODE,

@@ -3,7 +3,11 @@ package no.nav.etterlatte.prosessering
 import efterlatte.prosessering.Status
 import efterlatte.prosessering.Stoppaarsak
 import efterlatte.prosessering.Task
+import efterlatte.prosessering.TaskLogg
+import efterlatte.prosessering.TaskLoggRepository
+import efterlatte.prosessering.TaskLoggType
 import efterlatte.prosessering.TaskStateMachine
+import efterlatte.prosessering.postgres.PostgresTaskLoggRepository
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import java.sql.Connection
@@ -49,9 +53,9 @@ class UlovligTaskOvergang(
 
 class ProsesseringAdminDao(
     private val dataSource: DataSource,
+    private val taskLoggRepository: TaskLoggRepository = PostgresTaskLoggRepository(dataSource),
 ) {
     private val tabell = "public.prosessering_task"
-    private val hendelseTabell = "public.prosessering_task_hendelse"
 
     fun list(
         status: Status?,
@@ -179,66 +183,28 @@ class ProsesseringAdminDao(
         }
     }
 
-    /** Erstattes av TaskLoggRepository.leggTil (se TaskHendelse.kt) når biblioteket publiseres. */
     fun leggTilHendelse(
         taskId: Long,
-        type: TaskHendelseType,
+        type: TaskLoggType,
         melding: String,
         endretAv: String,
         node: String,
-    ): TaskHendelse {
-        require(type != TaskHendelseType.STATUS_ENDRET) {
+    ): TaskLogg {
+        require(type != TaskLoggType.STATUS_ENDRET) {
             "STATUS_ENDRET skrives av motoren selv, ikke av admin-API-et"
         }
         if (finn(taskId) == null) throw TaskIkkeFunnet(taskId)
 
-        return dataSource.connection.use { connection ->
-            connection
-                .prepareStatement(
-                    """
-                    INSERT INTO $hendelseTabell (task_id, type, melding, endret_av, node)
-                    VALUES (?, ?, ?, ?, ?)
-                    RETURNING *
-                    """.trimIndent(),
-                ).use { statement ->
-                    statement.setLong(1, taskId)
-                    statement.setString(2, type.name)
-                    statement.setString(3, melding)
-                    statement.setString(4, endretAv)
-                    statement.setString(5, node)
-                    statement.executeQuery().use { resultSet ->
-                        resultSet.next()
-                        resultSet.tilTaskHendelse()
-                    }
-                }
-        }
+        return taskLoggRepository.leggTil(
+            taskId = taskId,
+            type = type,
+            melding = melding,
+            endretAv = endretAv,
+            node = node,
+        )
     }
 
-    fun hentHendelser(taskId: Long): List<TaskHendelse> =
-        dataSource.connection.use { connection ->
-            connection
-                .prepareStatement(
-                    "SELECT * FROM $hendelseTabell WHERE task_id = ? ORDER BY tidspunkt, id",
-                ).use { statement ->
-                    statement.setLong(1, taskId)
-                    statement.executeQuery().use { resultSet ->
-                        buildList {
-                            while (resultSet.next()) add(resultSet.tilTaskHendelse())
-                        }
-                    }
-                }
-        }
-
-    private fun ResultSet.tilTaskHendelse(): TaskHendelse =
-        TaskHendelse(
-            id = getLong("id"),
-            taskId = getLong("task_id"),
-            type = TaskHendelseType.valueOf(getString("type")),
-            melding = getString("melding"),
-            endretAv = getString("endret_av"),
-            node = getString("node"),
-            tidspunkt = getTimestamp("tidspunkt").toInstant(),
-        )
+    fun hentHendelser(taskId: Long): List<TaskLogg> = taskLoggRepository.hent(taskId)
 
     private fun ResultSet.tilTask(): Task =
         Task(

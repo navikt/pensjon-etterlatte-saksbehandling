@@ -324,7 +324,7 @@ class VedtaksvurderingRepository(
                 .oppdater(
                     query = """
                 UPDATE vedtak 
-                SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, datoFattet = now(), 
+                SET saksbehandlerId = :saksbehandlerId, fattetVedtakEnhet = :saksbehandlerEnhet, datoFattet = :datoFattet, 
                     vedtakstatus = :vedtakstatus  
                 WHERE behandlingId = :behandlingId
                 """,
@@ -334,6 +334,7 @@ class VedtaksvurderingRepository(
                             "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet.enhetNr,
                             "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
                             "behandlingId" to behandlingId,
+                            "datoFattet" to vedtakFattet.tidspunkt.toNorskTid(),
                         ),
                     loggtekst = "Fatter vedtak for behandling $behandlingId",
                 ).also { krev(it == 1) { "Vedtak ble ikke oppdatert etter fatting behandlingid: $behandlingId" } }
@@ -349,7 +350,7 @@ class VedtaksvurderingRepository(
                 .oppdater(
                     query = """
                 UPDATE vedtak 
-                SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = now(), 
+                SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = :datoAttestert, 
                     vedtakstatus = :vedtakstatus 
                 WHERE behandlingId = :behandlingId
                 """,
@@ -359,6 +360,7 @@ class VedtaksvurderingRepository(
                             "attestertVedtakEnhet" to attestasjon.attesterendeEnhet.enhetNr,
                             "vedtakstatus" to VedtakStatus.ATTESTERT.name,
                             "behandlingId" to behandlingId,
+                            "datoAttestert" to attestasjon.tidspunkt.toNorskTid(),
                         ),
                     loggtekst = "Attesterer vedtak $behandlingId",
                 ).also {

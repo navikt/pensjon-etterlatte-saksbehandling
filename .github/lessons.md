@@ -95,5 +95,5 @@
 - Action: Ved endring av memory limit for JVM-apper: finn først hvordan heapen dimensjoneres (flagg i Dockerfile/nais-env, ellers HotSpot-default 25 %). Regn ut ny heap og native-budsjett (peak RSS − gammel heap-cap) før du velger tall — et anbefalt tall er bare gyldig sammen med den heap-konfigurasjonen det ble målt under.
 
 **2026-08-31 — Scope ved konfigurasjonsendring**
-- Observation: Oppgaven var å bytte en AD-gruppe-id. Jeg oppdaget at prod hadde en tvilsom placeholder-verdi og bygde om `AzureGroup`/`ApplicationContext` til påkrevd/valgfri i samme slengen. Brukeren ville bare ha id-byttet og ta resten senere — alt måtte reverteres.
-- Action: Når jeg finner et tilgrensende problem under en avgrenset endring: rapporter funnet og foreslå det som eget steg, ikke implementer det uoppfordret. Strukturendringer i felles konfigurasjonsmekanikk skal alltid være brukerens valg.
+- Observation: To ganger på rad gikk jeg utover mandatet på samme AD-rolle-oppgave: først bygget jeg om `AzureGroup`/`ApplicationContext` fordi prod hadde en tvilsom verdi, deretter byttet jeg dev-rollen til en nyopprettet gruppe selv om brukeren hadde sagt at dev skulle ha én rolle. Begge måtte reverteres.
+- Action: Ved avgrensede konfigurasjonsendringer (AD-grupper, ids, felles config-mekanikk): endre kun det brukeren eksplisitt ba om. Tilgrensende funn og alternative ids rapporteres som forslag til eget steg — aldri implementert uoppfordret.

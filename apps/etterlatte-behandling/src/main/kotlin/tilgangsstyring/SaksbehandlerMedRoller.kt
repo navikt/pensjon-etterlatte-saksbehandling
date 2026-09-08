@@ -14,6 +14,8 @@ data class SaksbehandlerMedRoller(
             ?: false
     }
 
+    fun harRolleSaksbehandler() = harRolle(AzureGroup.SAKSBEHANDLER)
+
     fun harRolleAttestant() = (harRolle(AzureGroup.ATTESTANT) || harRolle(AzureGroup.ATTESTANT_GJENNY))
 
     fun harRolleStrengtFortrolig() = harRolle(AzureGroup.STRENGT_FORTROLIG)

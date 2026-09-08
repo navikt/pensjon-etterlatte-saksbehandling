@@ -101,3 +101,7 @@
 **2026-09-08 — Rollesjekk i tilgangsstyring**
 - Observation: Forrige forsøk sperret på `AzureGroup.SAKSBEHANDLER` uten å sjekke hva den faktisk er mappet til i nais-env. Den er `PENSJON_SAKSBEHANDLER`, mens Gjenny-saksbehandlere har `GJENNY_SAKSBEHANDLER` — som ikke fantes som `AzureGroup` i det hele tatt. Sperren ville låst ute ekte saksbehandlere.
 - Action: Enum-navn på AD-roller er ikke fasit. Slå alltid opp env-verdien i `.nais/dev.yaml`/`prod.yaml` og sammenlign med `accessPolicy.claims.groups` — der står de faktiske gruppenavnene. Sjekk om det finnes en Gjenny-variant av rollen før du bruker den i en sperre.
+
+**2026-09-08 — Relaxed mockk skjuler tilgangskonfigurasjon**
+- Observation: Etter at skrivetilgang begynte å kreve AD-rolle, feilet fire rutetester. Rotårsaken var at `ApplicationContext` er `mockk(relaxed = true)`, og MockK returnerer et **ekte tomt HashMap** (ikke en mock) for `Map`-returtyper. `saksbehandlerGroupIdsByKey` ble dermed tomt, alle `harRolle()` ble false, og skrivetilgang ga 403.
+- Action: Når en ny sperre begynner å lese konfigurasjon fra `ApplicationContext`, sjekk hvilke tester som bruker `mockk(relaxed = true)` på den. Relaxed mocks gir tomme collections i stillhet — sperren slår inn uten synlig årsak. Stub `saksbehandlerGroupIdsByKey` og gi tokenet matchende `groups` (mønster: `BehandlingsstatusRoutesTest`).

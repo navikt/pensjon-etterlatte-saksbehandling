@@ -87,6 +87,7 @@ abstract class BehandlingIntegrationTest {
             AzureKey.AZUREAD_ATTESTANT_GROUPID to azureAdAttestantClaim,
             AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID to azureAdAttestantGjennyClaim,
             AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID to azureAdSaksbehandlerClaim,
+            AzureKey.AZUREAD_SAKSBEHANDLER_GJENNY_GROUPID to azureAdSaksbehandlerGjennyClaim,
             AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
             AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
             AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,

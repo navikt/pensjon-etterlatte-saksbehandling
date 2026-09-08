@@ -12,6 +12,14 @@ val azureAdSaksbehandlerClaim: String by lazy {
     "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
 }
 
+val azureAdSaksbehandlerGjennyClaim: String by lazy {
+    "5b6745de-b65d-40eb-a6f5-860c8b61c27f"
+}
+
+val azureAdLesetilgangGjennyClaim: String by lazy {
+    "609a78e7-e0bd-491c-a63b-96a09ec62b9b"
+}
+
 val azureAdAttestantClaim: String by lazy {
     "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
 }

@@ -17,14 +17,9 @@ import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-
-// Denne AD-gruppe-iden brukes kun i denne testen for å simulere en saksbehandler som har en
-// generell lesetilgangs-claim ("GJENNY_LES") i Azure AD, men IKKE er medlem av SAKSBEHANDLER-gruppen.
-private const val GJENNY_LES_CLAIM = "9d9c6e2b-0000-0000-0000-000000000000"
 
 class SaksbehandlerMedEnheterOgRollerTest {
     @ParameterizedTest(
@@ -71,67 +66,74 @@ class SaksbehandlerMedEnheterOgRollerTest {
         saksbehandler.kanSeOppgaveBenken() shouldBe tilgangTilOppgavebenken
     }
 
-    /*
-     * Regresjonstest for et tidligere sikkerhetshull: enheterMedSkrivetilgang() ga skrivetilgang basert
-     * utelukkende på enhetsmedlemskap, uten å sjekke om saksbehandleren faktisk hadde SAKSBEHANDLER- eller
-     * ATTESTANT-rollen i Azure AD. En bruker med kun en generell lesetilgangs-claim ("GJENNY_LES") fikk
-     * dermed feilaktig skrivetilgang så lenge de tilhørte en saksbehandlende enhet.
-     */
-    @Test
-    fun `saksbehandler med kun GJENNY_LES-tilgang faar ikke skrivetilgang selv om de tilhoerer en saksbehandlende enhet`() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("roller")
+    fun `skrivetilgang krever saksbehandler- eller attestantrolle i tillegg til saksbehandlende enhet`(
+        beskrivelse: String,
+        adGrupper: List<String>,
+        forventetSkriveEnheter: List<Enhetsnummer>,
+    ) {
         val saksbehandlerService = mockk<SaksbehandlerService>()
         val identifiedBy = mockk<TokenValidationContext>()
         mockkStatic(TokenValidationContext::hentTokenClaimsForIssuerName)
         val tokenClaims = mockk<JwtTokenClaims>()
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
-        every { tokenClaims.getStringClaim(Claims.NAVident.name) } returns "GjennyLeser01"
+        every { tokenClaims.getStringClaim(Claims.NAVident.name) } returns "NAVIdent"
         every { identifiedBy.hentTokenClaimsForIssuerName(any()) } returns tokenClaims
         every {
             saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
         } returns listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name))
 
-        // Saksbehandleren har KUN "GJENNY_LES"-claimen i Azure AD - ikke SAKSBEHANDLER- eller ATTESTANT-gruppen.
-        val leser = simpleSaksbehandler(ident = "GjennyLeser01", claims = mapOf(Claims.groups to GJENNY_LES_CLAIM))
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                saksbehandler = leser,
-                saksbehandlerGroupIdsByKey = mapOf(AzureGroup.SAKSBEHANDLER to "annen-groupid-enn-gjenny-les"),
+                saksbehandler = simpleSaksbehandler(ident = "NAVIdent", claims = mapOf(Claims.groups to adGrupper)),
+                saksbehandlerGroupIdsByKey =
+                    mapOf(
+                        AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
+                        AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerGjennyClaim,
+                        AzureGroup.ATTESTANT to azureAdAttestantClaim,
+                        AzureGroup.ATTESTANT_GJENNY to azureAdAttestantGjennyClaim,
+                    ),
             )
 
-        val bruker = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
+        val saksbehandler =
+            SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
 
-        bruker.enheterMedSkrivetilgang() shouldBe emptyList()
-    }
-
-    @Test
-    fun `saksbehandler med SAKSBEHANDLER-rollen faar skrivetilgang for sin enhet`() {
-        val saksbehandlerService = mockk<SaksbehandlerService>()
-        val identifiedBy = mockk<TokenValidationContext>()
-        mockkStatic(TokenValidationContext::hentTokenClaimsForIssuerName)
-        val tokenClaims = mockk<JwtTokenClaims>()
-        val brukerTokenInfo = mockk<BrukerTokenInfo>()
-
-        every { tokenClaims.getStringClaim(Claims.NAVident.name) } returns "Saksbehandler01"
-        every { identifiedBy.hentTokenClaimsForIssuerName(any()) } returns tokenClaims
-        every {
-            saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
-        } returns listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name))
-
-        val saksbehandlerToken =
-            simpleSaksbehandler(ident = "Saksbehandler01", claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim))
-        val saksbehandlerMedRoller =
-            SaksbehandlerMedRoller(
-                saksbehandler = saksbehandlerToken,
-                saksbehandlerGroupIdsByKey = mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
-            )
-
-        val bruker = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
-
-        bruker.enheterMedSkrivetilgang() shouldBe listOf(Enheter.PORSGRUNN.enhetNr)
+        saksbehandler.enheterMedSkrivetilgang() shouldContainExactlyInAnyOrder forventetSkriveEnheter
     }
 
     companion object {
+        @JvmStatic
+        fun roller() =
+            listOf(
+                Arguments.of(
+                    "Kun lesetilgang i Gjenny gir ingen skrivetilgang",
+                    listOf(azureAdLesetilgangGjennyClaim),
+                    emptyList<Enhetsnummer>(),
+                ),
+                Arguments.of(
+                    "Ingen roller gir ingen skrivetilgang",
+                    emptyList<String>(),
+                    emptyList<Enhetsnummer>(),
+                ),
+                Arguments.of(
+                    "Saksbehandler i Gjenny gir skrivetilgang",
+                    listOf(azureAdSaksbehandlerGjennyClaim),
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                ),
+                Arguments.of(
+                    "Saksbehandler i Pesys gir skrivetilgang",
+                    listOf(azureAdSaksbehandlerClaim),
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                ),
+                Arguments.of(
+                    "Attestant i Gjenny gir skrivetilgang",
+                    listOf(azureAdAttestantGjennyClaim),
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                ),
+            )
+
         @JvmStatic
         fun saksbehandlere() =
             listOf(

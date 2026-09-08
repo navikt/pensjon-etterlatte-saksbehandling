@@ -97,3 +97,7 @@
 **2026-08-31 — Scope ved konfigurasjonsendring**
 - Observation: To ganger på rad gikk jeg utover mandatet på samme AD-rolle-oppgave: først bygget jeg om `AzureGroup`/`ApplicationContext` fordi prod hadde en tvilsom verdi, deretter byttet jeg dev-rollen til en nyopprettet gruppe selv om brukeren hadde sagt at dev skulle ha én rolle. Begge måtte reverteres.
 - Action: Ved avgrensede konfigurasjonsendringer (AD-grupper, ids, felles config-mekanikk): endre kun det brukeren eksplisitt ba om. Tilgrensende funn og alternative ids rapporteres som forslag til eget steg — aldri implementert uoppfordret.
+
+**2026-09-08 — Rollesjekk i tilgangsstyring**
+- Observation: Forrige forsøk sperret på `AzureGroup.SAKSBEHANDLER` uten å sjekke hva den faktisk er mappet til i nais-env. Den er `PENSJON_SAKSBEHANDLER`, mens Gjenny-saksbehandlere har `GJENNY_SAKSBEHANDLER` — som ikke fantes som `AzureGroup` i det hele tatt. Sperren ville låst ute ekte saksbehandlere.
+- Action: Enum-navn på AD-roller er ikke fasit. Slå alltid opp env-verdien i `.nais/dev.yaml`/`prod.yaml` og sammenlign med `accessPolicy.claims.groups` — der står de faktiske gruppenavnene. Sjekk om det finnes en Gjenny-variant av rollen før du bruker den i en sperre.

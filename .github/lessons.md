@@ -6,9 +6,9 @@
 - Observation: Lessons.md ble ikke oppdatert underveis fordi planmodus absorberte all oppmerksomhet, og meta-oppgaver ble behandlet som cleanup, ikke inline-forpliktelse.
 - Action: Lessons-oppdatering er ikke en post-task jobb – den skal skje i samme svar som kursjusteringen, også under planlegging.
 
-**2026-04-10 — Datamodellendringer**
-- Observation: Feil plassering av data og feil scope-reduksjon skyldes begge at lag ble vurdert isolert, ikke som del av en sammenhengende pipeline.
-- Action: Før enhver datamodellendring – forstå den semantiske kontrakten til hvert lag (hva representerer det, hvem leser det, hvordan brukes det), og spor hele flyten fra kilde til konsument.
+**2026-04-10 / 2026-09-08 — Endring av semantikk i delt kode**
+- Observation: Samme feil i to former. (1) Ved datamodellendring vurderte jeg lag isolert i stedet for som en sammenhengende pipeline, og plasserte data feil. (2) Da `enheterMedSkrivetilgang()` fikk rollekrav, endret betydningen av *alle* `kunSkrivetilgang`-kallsteder seg samtidig — flere lå på rene lese-operasjoner (bl.a. `get("pdf")` for forhåndsvisning) fordi «skrivetilgang» tidligere de facto var enhetstilgang. Regresjonen ble funnet av brukeren i UI.
+- Action: Når semantikken til et delt element (datamodell, tilgangssjekk, felles hjelpefunksjon) endres: list opp alle konsumenter/kallsteder og vurder hver enkelt mot den *nye* betydningen — kallstedene ble skrevet under den gamle. Se særlig etter GET-ruter bak skrive-sperrer. Er en operasjon lese-orientert men har en muterende bieffekt, gate bieffekten på tilgang i stedet for å blokkere hele endepunktet.
 
 **2026-04-10 — Sparring / løsningsdesign**
 - Observation: Løsninger ble foreslått før eksisterende sperrer/constraints var kartlagt, og scope vokste uten eksplisitt avklaring.

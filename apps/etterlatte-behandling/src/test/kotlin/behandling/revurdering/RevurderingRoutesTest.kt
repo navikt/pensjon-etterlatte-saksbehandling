@@ -2,12 +2,12 @@ package no.nav.etterlatte.behandling.revurdering
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -18,13 +18,13 @@ import io.mockk.verify
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
-import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
-import no.nav.etterlatte.module
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.settOppApplikasjonen
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,11 +37,11 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RevurderingRoutesTest {
     private val applicationContext: ApplicationContext = mockk(relaxed = true)
-    private val server: MockOAuth2Server = MockOAuth2Server()
+    private val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server()
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.start()
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true
@@ -63,17 +63,12 @@ internal class RevurderingRoutesTest {
     @AfterAll
     fun after() {
         applicationContext.close()
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
     fun `kan opprette manuell revurdering inntektsjustering`() {
-        testApplication {
-            val client =
-                runServerWithModule(server) {
-                    module(applicationContext)
-                }
-
+        withTestApplication { client ->
             val response =
                 client.post("api/revurdering/1/manuell-inntektsjustering") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -87,12 +82,7 @@ internal class RevurderingRoutesTest {
 
     @Test
     fun `kan opprette en revurdering`() {
-        testApplication {
-            val client =
-                runServerWithModule(server) {
-                    module(applicationContext)
-                }
-
+        withTestApplication { client ->
             val response =
                 client.post("api/revurdering/1") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -119,9 +109,7 @@ internal class RevurderingRoutesTest {
 
     @Test
     fun `returnerer bad request hvis payloaden er ugyldig for opprettelse av en revurdering`() {
-        testApplication {
-            val client = runServerWithModule(server) { module(applicationContext) }
-
+        withTestApplication { client ->
             val response =
                 client.post("api/revurdering/1") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -135,12 +123,7 @@ internal class RevurderingRoutesTest {
 
     @Test
     fun `returnerer gyldig revurderingstyper for barnepensjon`() {
-        testApplication {
-            val client =
-                runServerWithModule(server) {
-                    module(applicationContext)
-                }
-
+        withTestApplication { client ->
             val response =
                 client.get("api/stoettederevurderinger/${SakType.BARNEPENSJON.name}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -162,12 +145,7 @@ internal class RevurderingRoutesTest {
 
     @Test
     fun `returnerer gyldig revurderingstyper for omstillingsstoenad`() {
-        testApplication {
-            val client =
-                runServerWithModule(server) {
-                    module(applicationContext)
-                }
-
+        withTestApplication { client ->
             val response =
                 client.get("api/stoettederevurderinger/${SakType.OMSTILLINGSSTOENAD.name}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -184,7 +162,6 @@ internal class RevurderingRoutesTest {
                         it.name !in
                             listOf(
                                 Revurderingaarsak.AARLIG_INNTEKTSJUSTERING.toString(),
-                                Revurderingaarsak.OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV.toString(), // toggle
                             )
                     }
         }
@@ -192,12 +169,7 @@ internal class RevurderingRoutesTest {
 
     @Test
     fun `returnerer bad request hvis saktype ikke er angitt ved uthenting av gyldig revurderingstyper`() {
-        testApplication {
-            val client =
-                runServerWithModule(server) {
-                    module(applicationContext)
-                }
-
+        withTestApplication { client ->
             val response =
                 client.get("api/stoettederevurderinger/ugyldigtype") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -208,5 +180,15 @@ internal class RevurderingRoutesTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken() }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+
+    private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
+        testApplication {
+            val client =
+                runServer(mockOAuth2Server, withMetrics = true) {
+                    settOppApplikasjonen(applicationContext)
+                }
+            block(client)
+        }
+    }
 }

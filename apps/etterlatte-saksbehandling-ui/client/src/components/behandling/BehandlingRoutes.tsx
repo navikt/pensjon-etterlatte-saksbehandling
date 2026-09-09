@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react'
+import React, { createContext, useEffect, useRef, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router'
 import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
@@ -30,6 +30,7 @@ import {
 import { DetaljertEtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { useAppSelector } from '~store/Store'
 import { JaNei } from '~shared/types/ISvar'
+import { trackBehandlingSteg } from '~utils/analytics'
 
 type BehandlingRouteTypesPath =
   | 'soeknadsoversikt'
@@ -226,9 +227,37 @@ function useRouteNavigation() {
   const [currentRoute, setCurrentRoute] = useState<string | undefined>(match?.params?.section)
   const navigate = useNavigate()
 
+  // Holder styr på hvilket steg vi er på og når vi kom dit, slik at vi kan måle tid brukt per steg.
+  const behandlingIdRef = useRef(match?.params?.behandlingId)
+  behandlingIdRef.current = match?.params?.behandlingId
+  const stegStartetRef = useRef<{ steg: string | undefined; tidspunkt: number }>({
+    steg: currentRoute,
+    tidspunkt: Date.now(),
+  })
+
   useEffect(() => {
     setCurrentRoute(match?.params?.section)
   }, [match])
+
+  // Måler tid brukt på hvert steg i behandlingsflyten, for dashboard i Umami.
+  useEffect(() => {
+    const forrigeSteg = stegStartetRef.current
+    if (forrigeSteg.steg && forrigeSteg.steg !== currentRoute) {
+      trackBehandlingSteg(forrigeSteg.steg, Date.now() - forrigeSteg.tidspunkt, behandlingIdRef.current)
+    }
+    stegStartetRef.current = { steg: currentRoute, tidspunkt: Date.now() }
+  }, [currentRoute])
+
+  // Måler siste steg dersom saksbehandler forlater behandlingen uten å navigere videre i flyten.
+  useEffect(
+    () => () => {
+      const forrigeSteg = stegStartetRef.current
+      if (forrigeSteg.steg) {
+        trackBehandlingSteg(forrigeSteg.steg, Date.now() - forrigeSteg.tidspunkt, behandlingIdRef.current)
+      }
+    },
+    []
+  )
 
   const goto = (path: BehandlingRouteTypesPath) => {
     setCurrentRoute(path)

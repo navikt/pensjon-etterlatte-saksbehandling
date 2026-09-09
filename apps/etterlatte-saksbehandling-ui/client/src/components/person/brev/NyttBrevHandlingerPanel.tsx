@@ -4,6 +4,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
+import { BrevmalHendelse, trackBrevmalBrukt } from '~utils/analytics'
 
 import { isPending, mapResult } from '~shared/api/apiUtils'
 
@@ -36,7 +37,10 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
         sakId: brev.sakId,
         brevtype: brev.brevtype,
       },
-      () => journalfoer()
+      () => {
+        trackBrevmalBrukt(brev.brevkoder, BrevmalHendelse.FERDIGSTILT)
+        journalfoer()
+      }
     )
     setStatusModalOpen(true)
     setIsOpen(false)

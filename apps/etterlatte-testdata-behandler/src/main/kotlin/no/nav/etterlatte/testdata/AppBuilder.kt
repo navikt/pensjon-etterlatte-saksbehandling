@@ -50,7 +50,7 @@ class AppBuilder {
             )
         val trygdetidService =
             TrygdetidService(
-                settOppHttpClient("trygdetid"),
+                settOppHttpClient("behandling"),
                 "http://etterlatte-behandling",
                 config.getString("behandling.client.id"),
             )

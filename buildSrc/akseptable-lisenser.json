@@ -119,6 +119,22 @@
     },
     {
       "moduleName": "com.github.navikt.tbd-libs:rapids-and-rivers-api"
+    },
+    {
+      "moduleName": "com.github.navikt:rapids-and-rivers",
+      "moduleLicense": ""
+    },
+    {
+      "moduleName": "com.github.navikt.rapids-and-rivers:rapids-and-rivers-api",
+      "moduleLicense": ""
+    },
+    {
+      "moduleName": "com.github.navikt.rapids-and-rivers:rapids-and-rivers-impl",
+      "moduleLicense": ""
+    },
+    {
+      "moduleName": "com.github.navikt.rapids-and-rivers:kafka",
+      "moduleLicense": ""
     }
   ]
 }

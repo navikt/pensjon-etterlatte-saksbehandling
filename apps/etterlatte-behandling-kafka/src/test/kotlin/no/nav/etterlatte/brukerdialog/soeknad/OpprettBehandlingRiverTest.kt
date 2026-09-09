@@ -40,16 +40,17 @@ internal class OpprettBehandlingRiverTest {
         } returns Sak(soeker, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
         every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
 
-        val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/omstillingsstoenad.json")) }.inspektør
+        val inspector =
+            testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/omstillingsstoenad.json")) }.inspektør
         val message = inspector.message(0)
 
         assertEquals(1, inspector.size)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
-            message.get(EVENT_NAME_KEY).asText(),
+            message.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
-        assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asText())
+        assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asString())
 
         coVerify(exactly = 1) { behandlingClientMock.finnEllerOpprettSak(soeker, SakType.OMSTILLINGSSTOENAD) }
         coVerify(exactly = 1) { behandlingClientMock.opprettBehandling(sakId, any(), any()) }
@@ -71,10 +72,10 @@ internal class OpprettBehandlingRiverTest {
 
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
-            message.get(EVENT_NAME_KEY).asText(),
+            message.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
-        assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asText())
+        assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asString())
 
         assertEquals(1, inspector.size)
 

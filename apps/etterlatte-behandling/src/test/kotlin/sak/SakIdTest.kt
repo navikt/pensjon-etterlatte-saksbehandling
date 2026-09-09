@@ -1,10 +1,10 @@
 package no.nav.etterlatte.libs.common.sak
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 
 class SakIdTest {
     @Test

@@ -1,10 +1,10 @@
 package no.nav.etterlatte.rapidsandrivers
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.etterlatte.libs.common.sak.SakId
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 
@@ -48,7 +48,7 @@ var JsonMessage.brevId: Long
     }
 
 var JsonMessage.brevKode: String
-    get() = this[BREV_KODE].asText()
+    get() = this[BREV_KODE].asString()
     set(name) {
         this[BREV_KODE] = name
     }
@@ -67,7 +67,7 @@ var JsonMessage.oppgaveId: UUID
 var JsonMessage.tilbakestilteBehandlinger: List<UUID>
     get() =
         this[TILBAKESTILTE_BEHANDLINGER_KEY]
-            .asText()
+            .asString()
             .trim()
             .split(";")
             .filter { it.isNotEmpty() }
@@ -79,7 +79,7 @@ var JsonMessage.tilbakestilteBehandlinger: List<UUID>
 var JsonMessage.aapneBehandlinger: List<UUID>
     get() =
         this[AAPNE_BEHANDLINGER_KEY]
-            .asText()
+            .asString()
             .trim()
             .split(";")
             .filter { it.isNotEmpty() }
@@ -88,4 +88,4 @@ var JsonMessage.aapneBehandlinger: List<UUID>
         this[AAPNE_BEHANDLINGER_KEY] = name.joinToString(";") { it.toString() }
     }
 
-fun JsonNode.asUUID() = this.asText().toUUID()
+fun JsonNode.asUUID() = this.asString().toUUID()

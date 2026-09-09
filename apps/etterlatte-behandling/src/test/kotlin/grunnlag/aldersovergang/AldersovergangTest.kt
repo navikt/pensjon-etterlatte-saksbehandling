@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlag.aldersovergang
 
-import com.fasterxml.jackson.databind.node.TextNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -35,6 +34,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import tools.jackson.databind.node.StringNode
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -60,21 +60,21 @@ class AldersovergangTest(
         val sakId = randomSakId()
         val fnrInnenfor = SOEKER_FOEDSELSNUMMER
         val opplysningDao = OpplysningDao(dataSource)
-        opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, TextNode("2018-01-01"), fnrInnenfor)
-        opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, TextNode("2020-01-01"), fnrInnenfor)
-        opplysningDao.leggTilOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, TextNode("hei, hallo"), fnrInnenfor)
+        opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, StringNode("2018-01-01"), fnrInnenfor)
+        opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, StringNode("2020-01-01"), fnrInnenfor)
+        opplysningDao.leggTilOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, StringNode("hei, hallo"), fnrInnenfor)
         opplysningDao.leggTilOpplysning(
             sakId,
             Opplysningstype.FOEDSELSDATO,
-            TextNode("1987-04-20"),
+            StringNode("1987-04-20"),
             AVDOED_FOEDSELSNUMMER,
         )
 
         val sakIdUtenfor = randomSakId()
         val fnrUtenfor = HELSOESKEN_FOEDSELSNUMMER
-        opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.FOEDSELSDATO, TextNode("2020-01-01"), fnrUtenfor)
-        opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.FOEDSELSDATO, TextNode("2022-01-01"), fnrUtenfor)
-        opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.SOEKER_PDL_V1, TextNode("søsken her"), fnrUtenfor)
+        opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.FOEDSELSDATO, StringNode("2020-01-01"), fnrUtenfor)
+        opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.FOEDSELSDATO, StringNode("2022-01-01"), fnrUtenfor)
+        opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.SOEKER_PDL_V1, StringNode("søsken her"), fnrUtenfor)
 
         testApplication {
             val response =
@@ -95,14 +95,14 @@ class AldersovergangTest(
         val sakEn = SakId(1000L)
         val fnrAvdoedEn = AVDOED_FOEDSELSNUMMER
         val opplysningDao = OpplysningDao(dataSource)
-        opplysningDao.leggTilOpplysning(sakEn, Opplysningstype.DOEDSDATO, TextNode("2024-02-11"), fnrAvdoedEn)
-        opplysningDao.leggTilOpplysning(sakEn, Opplysningstype.AVDOED_PDL_V1, TextNode("hei, hallo"), fnrAvdoedEn)
+        opplysningDao.leggTilOpplysning(sakEn, Opplysningstype.DOEDSDATO, StringNode("2024-02-11"), fnrAvdoedEn)
+        opplysningDao.leggTilOpplysning(sakEn, Opplysningstype.AVDOED_PDL_V1, StringNode("hei, hallo"), fnrAvdoedEn)
 
         val sakTo = SakId(2000L)
         val fnrAvdoedTo = AVDOED2_FOEDSELSNUMMER
-        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.AVDOED_PDL_V1, TextNode("hei, hallo igjen"), fnrAvdoedTo)
-        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, TextNode("2024-01-31"), fnrAvdoedTo)
-        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, TextNode("2024-02-05"), fnrAvdoedTo)
+        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.AVDOED_PDL_V1, StringNode("hei, hallo igjen"), fnrAvdoedTo)
+        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, StringNode("2024-01-31"), fnrAvdoedTo)
+        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, StringNode("2024-02-05"), fnrAvdoedTo)
 
         testApplication {
             val httpClient = createHttpClient(AldersovergangService(AldersovergangDao(dataSource)))
@@ -136,7 +136,7 @@ class AldersovergangTest(
     private fun OpplysningDao.leggTilOpplysning(
         sakId: SakId,
         opplysningTypeSoeker: Opplysningstype,
-        node: TextNode,
+        node: StringNode,
         fnr: Folkeregisteridentifikator,
     ) = leggOpplysningTilGrunnlag(
         sakId = sakId,

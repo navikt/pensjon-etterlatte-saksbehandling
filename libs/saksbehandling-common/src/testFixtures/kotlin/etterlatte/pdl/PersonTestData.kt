@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.testdata.pdl
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentAdressebeskyttelse
@@ -22,6 +21,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentStatsborgerskap
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Person
+import tools.jackson.databind.JsonNode
 
 fun personTestData(opplysningsmap: Map<Opplysningstype, Opplysning<JsonNode>>): Person =
     Person(

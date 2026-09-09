@@ -6,6 +6,7 @@ import efterlatte.prosessering.TaskStep
 import efterlatte.prosessering.TaskType
 import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.time.Instant
 
 data class FeilbarDemoPayload(

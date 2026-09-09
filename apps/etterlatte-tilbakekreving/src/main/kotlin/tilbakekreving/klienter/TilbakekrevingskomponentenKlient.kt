@@ -1,11 +1,5 @@
 package no.nav.etterlatte.tilbakekreving.klienter
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonSerializer
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -44,6 +38,17 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsperi
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.LoggerFactory
+import tools.jackson.core.JsonGenerator
+import tools.jackson.core.StreamWriteFeature
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.ValueSerializer
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.databind.cfg.EnumFeature
+import tools.jackson.databind.module.SimpleModule
+import tools.jackson.module.kotlin.jacksonMapperBuilder
+import tools.jackson.module.kotlin.readValue
 import java.math.BigDecimal
 import java.time.LocalDate
 import javax.xml.datatype.DatatypeFactory
@@ -61,9 +66,15 @@ class TilbakekrevingskomponentenKlient(
 ) {
     // Egen objectmapper for å fjerne timestamp fra xml-datoer da dette ikke blir riktig mot tilbakekrevingskomponenten
     private val tilbakekrevingObjectMapper: ObjectMapper =
-        objectMapper.copy().registerModule(
-            CustomXMLGregorianCalendarModule(),
-        )
+        jacksonMapperBuilder()
+            .disable(DateTimeFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+            .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .enable(EnumFeature.FAIL_ON_NUMBERS_FOR_ENUMS)
+            .enable(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
+            .addModule(CustomXMLGregorianCalendarModule())
+            .build()
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg = sikkerlogger()
@@ -456,11 +467,11 @@ private class CustomXMLGregorianCalendarModule : SimpleModule() {
     init {
         addSerializer(
             XMLGregorianCalendar::class.java,
-            object : JsonSerializer<XMLGregorianCalendar>() {
+            object : ValueSerializer<XMLGregorianCalendar>() {
                 override fun serialize(
                     value: XMLGregorianCalendar?,
                     gen: JsonGenerator?,
-                    ser: SerializerProvider?,
+                    ser: SerializationContext?,
                 ) {
                     if (value != null) {
                         gen?.writeString(

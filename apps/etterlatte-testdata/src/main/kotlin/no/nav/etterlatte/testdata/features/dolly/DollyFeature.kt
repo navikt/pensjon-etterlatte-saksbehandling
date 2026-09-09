@@ -1,6 +1,5 @@
 package no.nav.etterlatte.testdata.features.dolly
 
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receive
@@ -27,6 +26,7 @@ import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.jacksonTypeRef
 import java.math.BigDecimal
 import java.time.LocalDate
 

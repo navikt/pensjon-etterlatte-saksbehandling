@@ -1,7 +1,5 @@
 package no.nav.etterlatte.testdata.dolly
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -11,6 +9,8 @@ import io.ktor.http.HttpHeaders
 import no.nav.etterlatte.getTestnavAccessToken
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 
 class TestnavClient(
     private val config: Config,

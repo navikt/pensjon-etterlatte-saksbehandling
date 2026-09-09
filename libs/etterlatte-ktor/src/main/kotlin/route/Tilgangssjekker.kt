@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.ktor.route
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.time.Duration
 import java.util.UUID
 

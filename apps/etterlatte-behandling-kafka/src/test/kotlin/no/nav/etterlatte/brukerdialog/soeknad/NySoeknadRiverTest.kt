@@ -84,7 +84,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertTrue(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
@@ -126,7 +126,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertTrue(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
@@ -177,7 +177,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Ny søknad skal IKKE fordeles")
@@ -262,7 +262,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Ny søknad skal IKKE fordeles")
@@ -318,7 +318,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Ny søknad skal IKKE fordeles")
@@ -450,7 +450,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertNull(melding.get(GyldigSoeknadVurdert.sakIdKey))
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())

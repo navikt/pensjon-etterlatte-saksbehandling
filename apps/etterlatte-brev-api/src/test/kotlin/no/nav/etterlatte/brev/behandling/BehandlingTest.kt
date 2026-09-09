@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.behandling
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.beregningsperiode
@@ -37,6 +36,7 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID

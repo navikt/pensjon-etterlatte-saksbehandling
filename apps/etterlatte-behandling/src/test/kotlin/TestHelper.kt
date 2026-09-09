@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.intercept
@@ -73,6 +72,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
+import tools.jackson.databind.ObjectMapper
 import java.sql.Connection
 import java.time.Instant
 import java.time.LocalDate

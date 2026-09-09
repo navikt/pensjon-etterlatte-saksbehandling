@@ -7,7 +7,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -226,7 +226,10 @@ internal class PdlKlientTest {
                                 val json = javaClass.getResource(jsonUrl)!!.readText()
                                 respond(json, headers = headers)
                             }
-                            else -> error(request.url.fullPath)
+
+                            else -> {
+                                error(request.url.fullPath)
+                            }
                         }
                     }
                 }

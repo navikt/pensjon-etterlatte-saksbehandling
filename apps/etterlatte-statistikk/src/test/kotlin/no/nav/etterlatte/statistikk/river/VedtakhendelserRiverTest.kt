@@ -77,7 +77,10 @@ internal class VedtakhendelserRiverTest {
         } returns (null to mockStoenadRad)
         val inspector = testRapid.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals(StatistikkhendelseType.REGISTRERT.lagEventnameForType(), inspector.message(0).get(EVENT_NAME_KEY).asText())
+        Assertions.assertEquals(
+            StatistikkhendelseType.REGISTRERT.lagEventnameForType(),
+            inspector.message(0).get(EVENT_NAME_KEY).asString(),
+        )
         Assertions.assertEquals(
             mockStoenadRad.toJson(),
             inspector.message(0).get("stoenad_rad").toString(),

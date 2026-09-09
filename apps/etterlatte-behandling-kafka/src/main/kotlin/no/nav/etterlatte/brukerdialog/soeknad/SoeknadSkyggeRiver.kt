@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -15,6 +14,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.treeToValue
 
 data class SoeknadSkyggeRequest(
     val soeknadId: String,
@@ -56,7 +56,8 @@ internal class SoeknadSkyggeRiver(
         }
 
         try {
-            val soeknadId = packet[SoeknadInnsendt.lagretSoeknadIdKey].longValue().toString()
+            val soeknadIdNode = packet[SoeknadInnsendt.lagretSoeknadIdKey]
+            val soeknadId = if (soeknadIdNode.isNumber) soeknadIdNode.longValue().toString() else soeknadIdNode.textValue()
             val soeknad = objectMapper.treeToValue<InnsendtSoeknad>(packet[SoeknadInnsendt.skjemaInfoKey])
             val sakType =
                 when (soeknad.type) {

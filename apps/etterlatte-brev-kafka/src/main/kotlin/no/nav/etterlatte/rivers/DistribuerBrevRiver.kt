@@ -47,7 +47,7 @@ internal class DistribuerBrevRiver(
 
     private fun JsonMessage.distribusjonType(): DistribusjonsType =
         try {
-            DistribusjonsType.valueOf(this["distribusjonType"].asText())
+            DistribusjonsType.valueOf(this["distribusjonType"].asString())
         } catch (ex: Exception) {
             logger.error("Klarte ikke hente ut distribusjonstype:", ex)
             throw ex

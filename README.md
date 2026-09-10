@@ -166,3 +166,6 @@ Dette oppretter en envFile som lastes i app/*/.nais/(dev|prod).yaml filene og so
 # Kode generert av GitHub Copilot
 
 Dette repoet inneholder forekomster av kode generert av GitHub Copilot.
+
+# Test
+hva skjer om vi ikke toucher noen bygg / tester?

@@ -1,0 +1,14 @@
+name: .test-fallback.yaml
+
+on:
+  workflow_call:
+
+jobs:
+  verify:
+    name: Verify pull request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ingen relevante endringer
+        run: |
+          echo "Denne PR-en endrer ikke apps/**, libs/**, docker/**, gradle/libs.versions.toml eller settings.gradle.kts."
+          echo "Ingen app-workflow trenger å bygge/teste, så denne sjekken bekrefter status i stedet."

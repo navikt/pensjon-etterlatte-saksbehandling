@@ -1,0 +1,33 @@
+name: pr-status-fallback
+
+# Denne workflowen finnes fordi alle app-*.yaml-workflowene trigges av pull_request
+# med "paths"-filter (kun relevante apper/libs bygges og testes). Når en PR ikke
+# rører noen av disse stiene (f.eks. kun README/dokumentasjon), trigges ingen av
+# app-workflowene i det hele tatt - og required status check "test / Verify pull
+# request" i branch protection for "main branch"-ruleset blir da stående som
+# "Expected"/gul for alltid, siden ingen workflow noensinne rapporterer status.
+#
+# Denne workflowen dekker akkurat det motsatte stimønsteret (paths-ignore) og
+# rapporterer umiddelbart samme sjekknavn ("test / Verify pull request") som bestått
+# når ingen app-relevante stier er endret. Den maskerer aldri en reell testfeil:
+# GitHub krever at ALLE sjekker med samme navn for en commit er success/skipped for
+# at en required check skal telle som bestått, så hvis denne workflowen skulle
+# trigges samtidig med en ekte app-workflow (blandet PR), og den ekte testen feiler,
+# forblir PR-en fortsatt blokkert.
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - apps/**
+      - libs/**
+      - docker/**
+      - gradle/libs.versions.toml
+      - settings.gradle.kts
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: ./.github/workflows/.test-fallback.yaml

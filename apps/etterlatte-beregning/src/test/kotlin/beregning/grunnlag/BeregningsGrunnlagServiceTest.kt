@@ -808,7 +808,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         val grunnlag =
-            runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandlingId, mockk(relaxed = true)) }
+            runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandlingId) }
 
         grunnlag.perioder.let { perioder ->
             perioder.size shouldBe 2
@@ -1169,7 +1169,7 @@ internal class BeregningsGrunnlagServiceTest {
         } just Runs
 
         val grunnlag =
-            runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(revurderingId, mockk(relaxed = true)) }
+            runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(revurderingId) }
         assertEquals(1, grunnlag.perioder.size)
 
         val forrigePeriode = overstyrtePerioderForrigeBehandling.single()

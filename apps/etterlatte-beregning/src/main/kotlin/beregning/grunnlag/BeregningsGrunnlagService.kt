@@ -2,7 +2,6 @@ package no.nav.etterlatte.beregning.grunnlag
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregningRepository
-import no.nav.etterlatte.beregning.regler.overstyr.nyttGrunnbeloep
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -249,12 +248,18 @@ class BeregningsGrunnlagService(
         return soeskenjusteringErLiktFoerVirk && institusjonsoppholdErLiktFoerVirk
     }
 
-    suspend fun hentBeregningsGrunnlag(
+    fun hentBeregningsGrunnlag(behandlingId: UUID): BeregningsGrunnlag? {
+        logger.info("Henter grunnlag $behandlingId")
+        val grunnlag = beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
+        return grunnlag
+    }
+
+    suspend fun hentEllerKopierBeregningsGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningsGrunnlag? {
-        logger.info("Henter grunnlag $behandlingId")
-        val grunnlag = beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
+        logger.info("Henter eller kopierer grunnlag $behandlingId")
+        val grunnlag = hentBeregningsGrunnlag(behandlingId)
         if (grunnlag != null) {
             return grunnlag
         }
@@ -336,23 +341,25 @@ class BeregningsGrunnlagService(
         }
     }
 
-    suspend fun hentOverstyrBeregningGrunnlag(
+    fun hentOverstyrBeregningGrunnlag(behandlingId: UUID): OverstyrBeregningGrunnlag =
+        beregningsGrunnlagRepository
+            .finnOverstyrBeregningGrunnlagForBehandling(
+                behandlingId,
+            ).let { overstyrBeregningGrunnlagDaoListe ->
+                OverstyrBeregningGrunnlag(
+                    perioder =
+                        overstyrBeregningGrunnlagDaoListe.map(OverstyrBeregningGrunnlagDao::tilGrunnlagMedPeriode),
+                    kilde = overstyrBeregningGrunnlagDaoListe.firstOrNull()?.kilde ?: automatiskSaksbehandler,
+                )
+            }
+
+    suspend fun hentEllerKopierOverstyrBeregningGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregningGrunnlag {
         logger.info("Henter overstyr beregning grunnlag $behandlingId")
+        val overstyrtePerioder = hentOverstyrBeregningGrunnlag(behandlingId)
 
-        val overstyrtePerioder =
-            beregningsGrunnlagRepository
-                .finnOverstyrBeregningGrunnlagForBehandling(
-                    behandlingId,
-                ).let { overstyrBeregningGrunnlagDaoListe ->
-                    OverstyrBeregningGrunnlag(
-                        perioder =
-                            overstyrBeregningGrunnlagDaoListe.map(OverstyrBeregningGrunnlagDao::tilGrunnlagMedPeriode),
-                        kilde = overstyrBeregningGrunnlagDaoListe.firstOrNull()?.kilde ?: automatiskSaksbehandler,
-                    )
-                }
         return if (overstyrtePerioder.perioder.isEmpty()) {
             // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
             val forrigeIverksatte = forrigeIverksatteBehandling(behandlingId, brukerTokenInfo)
@@ -441,7 +448,7 @@ class BeregningsGrunnlagService(
                 },
             )
             behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
-            return hentOverstyrBeregningGrunnlag(behandlingId, brukerTokenInfo)
+            return hentOverstyrBeregningGrunnlag(behandlingId)
         } else {
             throw OverstyrtBeregningFeilBehandlingStatusException(behandlingId, behandling.status)
         }
@@ -517,14 +524,14 @@ class BeregningsGrunnlagService(
         if (forrigeIverksatteBehandling != null) {
             // har vi overstyrt beregning for denne behandlingen?
             val forrigeOverstyrBeregningGrunnlagPerioder =
-                runBlocking { hentOverstyrBeregningGrunnlag(forrigeIverksatteBehandling.behandlingId, brukerTokenInfo) }
+                runBlocking { hentOverstyrBeregningGrunnlag(forrigeIverksatteBehandling.behandlingId) }
                     .perioder
                     .mapVerdier(OverstyrBeregningGrunnlagData::tilSammenligningsperiode)
             if (forrigeOverstyrBeregningGrunnlagPerioder.isEmpty()) {
                 return
             }
             val naavaerendeGrunnlagPerioder =
-                runBlocking { hentOverstyrBeregningGrunnlag(behandlingId, brukerTokenInfo) }
+                runBlocking { hentOverstyrBeregningGrunnlag(behandlingId) }
                     .perioder
                     .mapVerdier(OverstyrBeregningGrunnlagData::tilSammenligningsperiode)
             if (!erGrunnlagLiktFoerEnDato(

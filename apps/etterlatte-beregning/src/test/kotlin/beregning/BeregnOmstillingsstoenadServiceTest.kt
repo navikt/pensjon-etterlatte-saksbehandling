@@ -116,7 +116,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns
             omstillingstoenadBeregningsGrunnlag(
@@ -139,7 +138,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
@@ -182,7 +180,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
@@ -242,7 +239,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id, BeregningsMetode.PRORATA)
 
@@ -279,7 +275,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id, BeregningsMetode.BEST)
@@ -323,7 +318,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
@@ -362,7 +356,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
@@ -397,7 +390,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
@@ -417,7 +409,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns emptyList()
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
@@ -443,7 +434,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
             coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
             coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
             coEvery {
-                beregningsGrunnlagService.hentBeregningsGrunnlag(any(), any())
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
                 omstillingstoenadBeregningsGrunnlagMedVedtaksperioder(
                     behandling.id,
@@ -480,7 +471,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
             coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
             coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
             coEvery {
-                beregningsGrunnlagService.hentBeregningsGrunnlag(any(), any())
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
                 omstillingstoenadBeregningsGrunnlagMedVedtaksperioder(
                     behandling.id,
@@ -530,7 +521,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
             coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
             coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
             coEvery {
-                beregningsGrunnlagService.hentBeregningsGrunnlag(any(), any())
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
                 omstillingstoenadBeregningsGrunnlagMedVedtaksperioder(
                     behandling.id,

@@ -110,7 +110,6 @@ class ReguleringTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns
             barnepensjonBeregningsGrunnlag(

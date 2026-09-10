@@ -1,7 +1,6 @@
 package no.nav.etterlatte.beregning.grunnlag
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -55,9 +54,9 @@ fun Route.beregningsGrunnlag(
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter beregningsgrunnlag for behandling $behandlingId")
+                logger.info("Henter eller kopierer beregningsgrunnlag for behandling $behandlingId")
                 val grunnlag =
-                    beregningsGrunnlagService.hentBeregningsGrunnlag(
+                    beregningsGrunnlagService.hentEllerKopierBeregningsGrunnlag(
                         behandlingId,
                         brukerTokenInfo,
                     )
@@ -77,7 +76,7 @@ fun Route.beregningsGrunnlag(
                     OverstyrBeregningGrunnlagDTO(
                         perioder =
                             beregningsGrunnlagService
-                                .hentOverstyrBeregningGrunnlag(
+                                .hentEllerKopierOverstyrBeregningGrunnlag(
                                     behandlingId,
                                     brukerTokenInfo,
                                 ).perioder,

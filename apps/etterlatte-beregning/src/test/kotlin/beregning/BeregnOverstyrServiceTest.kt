@@ -61,7 +61,7 @@ internal class BeregnOverstyrServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -155,7 +155,7 @@ internal class BeregnOverstyrServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -256,7 +256,7 @@ internal class BeregnOverstyrServiceTest {
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.OPPFYLT
             }
-        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -357,7 +357,7 @@ internal class BeregnOverstyrServiceTest {
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
             }
-        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -458,7 +458,7 @@ internal class BeregnOverstyrServiceTest {
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
             }
-        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder = emptyList(),
                 kilde = Grunnlagsopplysning.automatiskSaksbehandler,

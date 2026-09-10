@@ -56,7 +56,7 @@ class BeregnOverstyrBeregningService(
 
         val beregningsGrunnlag =
             krevIkkeNull(
-                beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandling.id, brukerTokenInfo),
+                beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandling.id),
             ) { "Behandling ${behandling.id} mangler overstyr beregningsgrunnlag" }
 
         beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(

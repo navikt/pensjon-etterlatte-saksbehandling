@@ -140,7 +140,7 @@ class BeregnBarnepensjonService(
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
         val beregningsGrunnlag =
-            beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id, brukerTokenInfo)
+            beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
         if (beregningsGrunnlag.behandlingId != behandling.id) {
             throw BeregningsgrunnlagMangler(behandling.id)

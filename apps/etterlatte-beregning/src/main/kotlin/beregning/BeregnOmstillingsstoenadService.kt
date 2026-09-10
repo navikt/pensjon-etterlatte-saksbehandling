@@ -98,7 +98,7 @@ class BeregnOmstillingsstoenadService(
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val beregningsgrunnlag =
-            beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id, brukerTokenInfo)
+            beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
         if (beregningsgrunnlag.behandlingId != behandling.id) {
             throw BeregningsgrunnlagMangler(behandling.id)

@@ -343,7 +343,7 @@ internal class BehandlingRoutesTest {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { saksbehandlerMedRoller } returns mockk<SaksbehandlerMedRoller>()
-                every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+                every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
                 every { name() } returns this::class.java.simpleName
             }
 

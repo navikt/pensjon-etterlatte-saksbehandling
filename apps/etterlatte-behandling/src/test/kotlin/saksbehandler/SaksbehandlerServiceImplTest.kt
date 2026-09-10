@@ -73,7 +73,7 @@ class SaksbehandlerServiceImplTest(
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
-        every { user.enheterMedSkrivetilgang() } returns emptyList()
+        every { user.hentEnheterMedSkrivetilgang() } returns emptyList()
         every { user.kanSeOppgaveBenken() } returns true
 
         service.hentKomplettSaksbehandler(nyidentSaksbehandler)
@@ -101,7 +101,7 @@ class SaksbehandlerServiceImplTest(
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
-        every { user.enheterMedSkrivetilgang() } returns emptyList()
+        every { user.hentEnheterMedSkrivetilgang() } returns emptyList()
         every { user.kanSeOppgaveBenken() } returns true
 
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen"))

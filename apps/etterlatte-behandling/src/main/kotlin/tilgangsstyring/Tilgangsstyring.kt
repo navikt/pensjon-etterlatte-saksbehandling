@@ -5,7 +5,6 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.Hook
 import io.ktor.server.application.RouteScopedPlugin
-import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
@@ -226,7 +225,7 @@ fun RoutingContext.sjekkSkrivetilgang(
 
             when (enhetNrSomSkalTestes) {
                 null -> false
-                else -> user.enheterMedSkrivetilgang().contains(enhetNrSomSkalTestes)
+                else -> user.hentEnheterMedSkrivetilgang().contains(enhetNrSomSkalTestes)
             }
         }
 

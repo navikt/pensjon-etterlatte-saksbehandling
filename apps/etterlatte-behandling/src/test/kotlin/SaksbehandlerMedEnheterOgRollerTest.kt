@@ -57,7 +57,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
         } returns enheterForSaksbehandler
 
         val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
-        val skriveEnheter = saksbehandler.enheterMedSkrivetilgang()
+        val skriveEnheter = saksbehandler.hentEnheterMedSkrivetilgang()
         val leseEnheter = saksbehandler.enheterMedLesetilgang(enheterForSaksbehandler.map { it.enhetsNummer }.toSet())
 
         skriveEnheter shouldContainExactlyInAnyOrder forventetSkriveEnheter
@@ -100,7 +100,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
         val saksbehandler =
             SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
 
-        saksbehandler.enheterMedSkrivetilgang() shouldContainExactlyInAnyOrder forventetSkriveEnheter
+        saksbehandler.hentEnheterMedSkrivetilgang() shouldContainExactlyInAnyOrder forventetSkriveEnheter
     }
 
     companion object {

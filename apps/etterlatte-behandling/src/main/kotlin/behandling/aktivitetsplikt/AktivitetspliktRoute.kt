@@ -278,11 +278,13 @@ internal fun Route.aktivitetspliktRoutes(
         }
 
         post("/opprett") {
-            val request = call.receive<OpprettOppfoelgingsoppgave>()
-            inTransaction {
-                aktivitetspliktOppgaveService.opprettOppfoelgingsoppgave(request)
+            kunSkrivetilgang {
+                val request = call.receive<OpprettOppfoelgingsoppgave>()
+                inTransaction {
+                    aktivitetspliktOppgaveService.opprettOppfoelgingsoppgave(request)
+                }
+                call.respond(HttpStatusCode.OK)
             }
-            call.respond(HttpStatusCode.OK)
         }
 
         route("oppgave-oppfoelging") {

@@ -12,7 +12,7 @@ testcontainer-version = "1.21.4"
 tjenestespesifikasjoner-version = "1.1436e29"
 rapidsandrivers-version = "2026021921161771532161.7a37f8c9e0cc" # OBS! tbdlibs brukes av denne. De bør stemme overens
 tbdlibs-version = "2026.02.19-20.58-521cdd3c" # OBS! rapidsandrivers bruker denne. De bør stemme overens
-prosessering-version = "1.20260824100828_0d24e53"
+prosessering-version = "0.0.0-dev.20260907124257_289ef44"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.4" }

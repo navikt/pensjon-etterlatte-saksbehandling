@@ -72,9 +72,9 @@ class SaksbehandlerMedEnheterOgRoller(
         Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 
     fun kanSeOppgaveBenken() =
-        saksbehandlersEnheter().any { enhetNr ->
-            Enheter.entries.firstOrNull { it.enhetNr == enhetNr }?.harTilgangTilOppgavebenken ?: false
-        }
+        saksbehandlerMedRoller.harRolleLesetilgang() ||
+            saksbehandlerMedRoller.harRolleSaksbehandler() ||
+            saksbehandlerMedRoller.harRolleAttestant()
 
     fun hentEnheterMedSkrivetilgang(): List<Enhetsnummer> {
         // Enhetsmedlemskap alene gir ikke skrivetilgang. Brukeren må i tillegg ha saksbehandler- eller

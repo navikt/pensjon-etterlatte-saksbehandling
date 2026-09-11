@@ -31,7 +31,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
         enheterForSaksbehandler: List<SaksbehandlerEnhet>,
         forventetSkriveEnheter: List<String>,
         forventetLeseEnheter: List<String>,
-        tilgangTilOppgavebenken: Boolean,
     ) {
         val saksbehandlerService = mockk<SaksbehandlerService>()
         val identifiedBy = mockk<TokenValidationContext>()
@@ -62,8 +61,37 @@ class SaksbehandlerMedEnheterOgRollerTest {
 
         skriveEnheter shouldContainExactlyInAnyOrder forventetSkriveEnheter
         leseEnheter shouldContainExactlyInAnyOrder forventetLeseEnheter
+    }
 
-        saksbehandler.kanSeOppgaveBenken() shouldBe tilgangTilOppgavebenken
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("oppgavebenkRoller")
+    fun `kanSeOppgaveBenken avgjoeres av rolle, ikke enhet`(
+        beskrivelse: String,
+        harRolleLesetilgang: Boolean,
+        harRolleSaksbehandler: Boolean,
+        harRolleAttestant: Boolean,
+        forventetTilgangTilOppgavebenken: Boolean,
+    ) {
+        val saksbehandlerService = mockk<SaksbehandlerService>()
+        val identifiedBy = mockk<TokenValidationContext>()
+        mockkStatic(TokenValidationContext::hentTokenClaimsForIssuerName)
+        val tokenClaims = mockk<JwtTokenClaims>()
+        val saksbehandlerMedRoller =
+            mockk<SaksbehandlerMedRoller> {
+                every { harRolleLesetilgang() } returns harRolleLesetilgang
+                every { harRolleSaksbehandler() } returns harRolleSaksbehandler
+                every { harRolleAttestant() } returns harRolleAttestant
+            }
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
+
+        every { tokenClaims.getStringClaim(Claims.NAVident.name) } returns "NAVIdent"
+        every { identifiedBy.hentTokenClaimsForIssuerName(any()) } returns tokenClaims
+        // Enhetene er uten betydning for kanSeOppgaveBenken() – kun rolle skal avgjøre dette.
+        every { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns emptyList()
+
+        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
+
+        saksbehandler.kanSeOppgaveBenken() shouldBe forventetTilgangTilOppgavebenken
     }
 
     @ParameterizedTest(name = "{0}")
@@ -135,6 +163,15 @@ class SaksbehandlerMedEnheterOgRollerTest {
             )
 
         @JvmStatic
+        fun oppgavebenkRoller() =
+            listOf(
+                Arguments.of("Lesetilgang (GJENNY_LES) gir tilgang til oppgavebenken", true, false, false, true),
+                Arguments.of("Saksbehandlerrolle gir tilgang til oppgavebenken", false, true, false, true),
+                Arguments.of("Attestantrolle gir tilgang til oppgavebenken", false, false, true, true),
+                Arguments.of("Ingen av rollene gir ikke tilgang til oppgavebenken", false, false, false, false),
+            )
+
+        @JvmStatic
         fun saksbehandlere() =
             listOf(
                 Arguments.of(
@@ -147,7 +184,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    true,
                 ),
                 Arguments.of(
                     "Vanlig saksbehandler med utland",
@@ -161,7 +197,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.STEINKJER.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    true,
                 ),
                 Arguments.of(
                     "Kontaktsenter",
@@ -174,14 +209,12 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    false,
                 ),
                 Arguments.of(
                     "Ukjent",
                     listOf(SaksbehandlerEnhet(Enhetsnummer("9876"), "En annen enhet")),
                     emptyList<String>(),
                     emptyList<String>(),
-                    false,
                 ),
                 Arguments.of(
                     "Vanlig saksbehandler med andre enheter enn bare de etterlatte kjenner til",
@@ -196,7 +229,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    true,
                 ),
                 Arguments.of(
                     "Kontaktsenter med andre enheter enn bare de etterlatte kjenner til",
@@ -212,7 +244,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    false,
                 ),
             )
     }

@@ -144,7 +144,7 @@ fun Route.prosesseringRoutes(
             }
         }
 
-        get("/{id}/hendelser") {
+        get("/{id}/logg") {
             medProsesseringTilgang(saksbehandlerGroupIdsByKey) {
                 call.respond(prosesseringAdminDao.hentHendelser(call.taskId()))
             }
@@ -169,14 +169,19 @@ fun Route.prosesseringRoutes(
 
         post("/{id}/avvik") {
             medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
-                medBody<TaskHendelseRequest> { kropp ->
+                medBody<RegistrerAvvikRequest> { kropp ->
+                    if (kropp.melding.isBlank()) {
+                        throw UgyldigForespoerselException(
+                            code = "PROSESSERING_AVVIK_UTEN_MELDING",
+                            detail = "melding må være satt for å registrere avvik",
+                        )
+                    }
                     call.respond(
-                        HttpStatusCode.Created,
-                        leggTilHendelseOgLogg(
+                        registrerAvvikOgLogg(
                             prosesseringAdminDao = prosesseringAdminDao,
                             saksbehandler = saksbehandler,
                             id = call.taskId(),
-                            type = TaskLoggType.AVVIK,
+                            forventetVersjon = kropp.versjon,
                             melding = kropp.melding,
                         ),
                     )
@@ -187,6 +192,12 @@ fun Route.prosesseringRoutes(
 }
 
 data class TaskHendelseRequest(
+    val melding: String,
+)
+
+/** Kroppen til `POST .../task/{id}/avvik` — samme optimistiske lås som `rekjor`/`avbryt`. */
+data class RegistrerAvvikRequest(
+    val versjon: Long,
     val melding: String,
 )
 
@@ -318,6 +329,44 @@ private fun leggTilHendelseOgLogg(
     )
     return hendelse
 }
+
+/**
+ * Samme mønster som [utfoerOgLogg]: statusen sier hva som ble avgjort, avslaget sier hvorfor
+ * — men her er det [ProsesseringAdminDao.registrerAvvik] som både gjør overgangen og skriver
+ * `AVVIK`-raden.
+ */
+private fun registrerAvvikOgLogg(
+    prosesseringAdminDao: ProsesseringAdminDao,
+    saksbehandler: Saksbehandler,
+    id: Long,
+    forventetVersjon: Long,
+    melding: String,
+): Task =
+    try {
+        val task =
+            prosesseringAdminDao.registrerAvvik(
+                id = id,
+                forventetVersjon = forventetVersjon,
+                melding = melding,
+                endretAv = saksbehandler.ident(),
+                node = PROSESSERING_NODE,
+            )
+        operatorlogg.info(
+            "{} registrerte avvik på task {} — ny status {}",
+            saksbehandler.ident(),
+            id,
+            task.status,
+        )
+        task
+    } catch (feil: Throwable) {
+        operatorlogg.warn(
+            "{} fikk avvist avvik på task {}: {}",
+            saksbehandler.ident(),
+            id,
+            feil.message,
+        )
+        throw feil
+    }
 
 private val operatorlogg = LoggerFactory.getLogger("prosessering.operator")
 private val logger = LoggerFactory.getLogger("no.nav.etterlatte.prosessering.ProsesseringModule")

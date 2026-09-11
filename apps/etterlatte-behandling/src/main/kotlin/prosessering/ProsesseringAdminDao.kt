@@ -100,6 +100,24 @@ class ProsesseringAdminDao(
         forventetVersjon: Long,
     ): Task = utfoer(id = id, forventetVersjon = forventetVersjon, handling = OperatorHandling.AVBRYT)
 
+    fun registrerAvvik(
+        id: Long,
+        forventetVersjon: Long,
+        melding: String,
+        endretAv: String,
+        node: String,
+    ): Task {
+        val oppdatert = utfoer(id = id, forventetVersjon = forventetVersjon, handling = OperatorHandling.AVBRYT)
+        taskLoggRepository.leggTil(
+            taskId = id,
+            type = TaskLoggType.AVVIK,
+            melding = melding,
+            endretAv = endretAv,
+            node = node,
+        )
+        return oppdatert
+    }
+
     private fun utfoer(
         id: Long,
         forventetVersjon: Long,

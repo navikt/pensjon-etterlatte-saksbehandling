@@ -6,9 +6,9 @@
 - Observation: Lessons.md ble ikke oppdatert underveis fordi planmodus absorberte all oppmerksomhet, og meta-oppgaver ble behandlet som cleanup, ikke inline-forpliktelse.
 - Action: Lessons-oppdatering er ikke en post-task jobb – den skal skje i samme svar som kursjusteringen, også under planlegging.
 
-**2026-04-10 — Datamodellendringer**
-- Observation: Feil plassering av data og feil scope-reduksjon skyldes begge at lag ble vurdert isolert, ikke som del av en sammenhengende pipeline.
-- Action: Før enhver datamodellendring – forstå den semantiske kontrakten til hvert lag (hva representerer det, hvem leser det, hvordan brukes det), og spor hele flyten fra kilde til konsument.
+**2026-04-10 / 2026-09-08 — Endring av semantikk i delt kode**
+- Observation: Samme feil i to former. (1) Ved datamodellendring vurderte jeg lag isolert i stedet for som en sammenhengende pipeline, og plasserte data feil. (2) Da `enheterMedSkrivetilgang()` fikk rollekrav, endret betydningen av *alle* `kunSkrivetilgang`-kallsteder seg samtidig — flere lå på rene lese-operasjoner (bl.a. `get("pdf")` for forhåndsvisning) fordi «skrivetilgang» tidligere de facto var enhetstilgang. Regresjonen ble funnet av brukeren i UI.
+- Action: Når semantikken til et delt element (datamodell, tilgangssjekk, felles hjelpefunksjon) endres: list opp alle konsumenter/kallsteder og vurder hver enkelt mot den *nye* betydningen — kallstedene ble skrevet under den gamle. Se særlig etter GET-ruter bak skrive-sperrer. Er en operasjon lese-orientert men har en muterende bieffekt, gate bieffekten på tilgang i stedet for å blokkere hele endepunktet.
 
 **2026-04-10 — Sparring / løsningsdesign**
 - Observation: Løsninger ble foreslått før eksisterende sperrer/constraints var kartlagt, og scope vokste uten eksplisitt avklaring.
@@ -97,3 +97,11 @@
 **2026-08-31 — Scope ved konfigurasjonsendring**
 - Observation: To ganger på rad gikk jeg utover mandatet på samme AD-rolle-oppgave: først bygget jeg om `AzureGroup`/`ApplicationContext` fordi prod hadde en tvilsom verdi, deretter byttet jeg dev-rollen til en nyopprettet gruppe selv om brukeren hadde sagt at dev skulle ha én rolle. Begge måtte reverteres.
 - Action: Ved avgrensede konfigurasjonsendringer (AD-grupper, ids, felles config-mekanikk): endre kun det brukeren eksplisitt ba om. Tilgrensende funn og alternative ids rapporteres som forslag til eget steg — aldri implementert uoppfordret.
+
+**2026-09-08 — Rollesjekk i tilgangsstyring**
+- Observation: Forrige forsøk sperret på `AzureGroup.SAKSBEHANDLER` uten å sjekke hva den faktisk er mappet til i nais-env. Den er `PENSJON_SAKSBEHANDLER`, mens Gjenny-saksbehandlere har `GJENNY_SAKSBEHANDLER` — som ikke fantes som `AzureGroup` i det hele tatt. Sperren ville låst ute ekte saksbehandlere.
+- Action: Enum-navn på AD-roller er ikke fasit. Slå alltid opp env-verdien i `.nais/dev.yaml`/`prod.yaml` og sammenlign med `accessPolicy.claims.groups` — der står de faktiske gruppenavnene. Sjekk om det finnes en Gjenny-variant av rollen før du bruker den i en sperre.
+
+**2026-09-08 — Relaxed mockk skjuler tilgangskonfigurasjon**
+- Observation: Etter at skrivetilgang begynte å kreve AD-rolle, feilet fire rutetester. Rotårsaken var at `ApplicationContext` er `mockk(relaxed = true)`, og MockK returnerer et **ekte tomt HashMap** (ikke en mock) for `Map`-returtyper. `saksbehandlerGroupIdsByKey` ble dermed tomt, alle `harRolle()` ble false, og skrivetilgang ga 403.
+- Action: Når en ny sperre begynner å lese konfigurasjon fra `ApplicationContext`, sjekk hvilke tester som bruker `mockk(relaxed = true)` på den. Relaxed mocks gir tomme collections i stillhet — sperren slår inn uten synlig årsak. Stub `saksbehandlerGroupIdsByKey` og gi tokenet matchende `groups` (mønster: `BehandlingsstatusRoutesTest`).

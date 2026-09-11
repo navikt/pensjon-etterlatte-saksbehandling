@@ -83,7 +83,7 @@ import javax.sql.DataSource
 
 private val user =
     mockk<SaksbehandlerMedEnheterOgRoller> {
-        every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
     }
 
 fun mockedSakTilgangDao(): SakTilgangDao =

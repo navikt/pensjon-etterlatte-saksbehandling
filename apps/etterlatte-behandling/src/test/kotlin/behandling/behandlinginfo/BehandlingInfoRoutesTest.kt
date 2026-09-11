@@ -13,6 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -34,6 +35,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.mockedSakTilgangDao
 import no.nav.etterlatte.module
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -57,6 +59,8 @@ internal class BehandlingInfoRoutesTest {
         server.start()
 
         behandlingInfoDao = mockk()
+        every { applicationContext.saksbehandlerGroupIdsByKey } returns
+            mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim)
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true
@@ -227,5 +231,5 @@ internal class BehandlingInfoRoutesTest {
                 ),
         )
 
-    private val token: String by lazy { server.issueSaksbehandlerToken() }
+    private val token: String by lazy { server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
 }

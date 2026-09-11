@@ -6,12 +6,14 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
@@ -29,13 +31,16 @@ class SaksbehandlerMedEnheterOgRollerTest {
         enheterForSaksbehandler: List<SaksbehandlerEnhet>,
         forventetSkriveEnheter: List<String>,
         forventetLeseEnheter: List<String>,
-        tilgangTilOppgavebenken: Boolean,
     ) {
         val saksbehandlerService = mockk<SaksbehandlerService>()
         val identifiedBy = mockk<TokenValidationContext>()
         mockkStatic(TokenValidationContext::hentTokenClaimsForIssuerName)
         val tokenClaims = mockk<JwtTokenClaims>()
-        val saksbehandlerMedRoller = mockk<SaksbehandlerMedRoller>()
+        val saksbehandlerMedRoller =
+            mockk<SaksbehandlerMedRoller> {
+                every { harRolleSaksbehandler() } returns true
+                every { harRolleAttestant() } returns false
+            }
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
         every {
@@ -51,16 +56,121 @@ class SaksbehandlerMedEnheterOgRollerTest {
         } returns enheterForSaksbehandler
 
         val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
-        val skriveEnheter = saksbehandler.enheterMedSkrivetilgang()
+        val skriveEnheter = saksbehandler.hentEnheterMedSkrivetilgang()
         val leseEnheter = saksbehandler.enheterMedLesetilgang(enheterForSaksbehandler.map { it.enhetsNummer }.toSet())
 
         skriveEnheter shouldContainExactlyInAnyOrder forventetSkriveEnheter
         leseEnheter shouldContainExactlyInAnyOrder forventetLeseEnheter
+    }
 
-        saksbehandler.kanSeOppgaveBenken() shouldBe tilgangTilOppgavebenken
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("oppgavebenkRoller")
+    fun `kanSeOppgaveBenken avgjoeres av rolle, ikke enhet`(
+        beskrivelse: String,
+        harRolleLesetilgang: Boolean,
+        harRolleSaksbehandler: Boolean,
+        harRolleAttestant: Boolean,
+        forventetTilgangTilOppgavebenken: Boolean,
+    ) {
+        val saksbehandlerService = mockk<SaksbehandlerService>()
+        val identifiedBy = mockk<TokenValidationContext>()
+        mockkStatic(TokenValidationContext::hentTokenClaimsForIssuerName)
+        val tokenClaims = mockk<JwtTokenClaims>()
+        val saksbehandlerMedRoller =
+            mockk<SaksbehandlerMedRoller> {
+                every { harRolleLesetilgang() } returns harRolleLesetilgang
+                every { harRolleSaksbehandler() } returns harRolleSaksbehandler
+                every { harRolleAttestant() } returns harRolleAttestant
+            }
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
+
+        every { tokenClaims.getStringClaim(Claims.NAVident.name) } returns "NAVIdent"
+        every { identifiedBy.hentTokenClaimsForIssuerName(any()) } returns tokenClaims
+        // Enhetene er uten betydning for kanSeOppgaveBenken() – kun rolle skal avgjøre dette.
+        every { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns emptyList()
+
+        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
+
+        saksbehandler.kanSeOppgaveBenken() shouldBe forventetTilgangTilOppgavebenken
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("roller")
+    fun `skrivetilgang krever saksbehandler- eller attestantrolle i tillegg til saksbehandlende enhet`(
+        beskrivelse: String,
+        adGrupper: List<String>,
+        forventetSkriveEnheter: List<Enhetsnummer>,
+    ) {
+        val saksbehandlerService = mockk<SaksbehandlerService>()
+        val identifiedBy = mockk<TokenValidationContext>()
+        mockkStatic(TokenValidationContext::hentTokenClaimsForIssuerName)
+        val tokenClaims = mockk<JwtTokenClaims>()
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
+
+        every { tokenClaims.getStringClaim(Claims.NAVident.name) } returns "NAVIdent"
+        every { identifiedBy.hentTokenClaimsForIssuerName(any()) } returns tokenClaims
+        every {
+            saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
+        } returns listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name))
+
+        val saksbehandlerMedRoller =
+            SaksbehandlerMedRoller(
+                saksbehandler = simpleSaksbehandler(ident = "NAVIdent", claims = mapOf(Claims.groups to adGrupper)),
+                saksbehandlerGroupIdsByKey =
+                    mapOf(
+                        AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
+                        AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerGjennyClaim,
+                        AzureGroup.ATTESTANT to azureAdAttestantClaim,
+                        AzureGroup.ATTESTANT_GJENNY to azureAdAttestantGjennyClaim,
+                    ),
+            )
+
+        val saksbehandler =
+            SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
+
+        saksbehandler.hentEnheterMedSkrivetilgang() shouldContainExactlyInAnyOrder forventetSkriveEnheter
     }
 
     companion object {
+        @JvmStatic
+        fun roller() =
+            listOf(
+                Arguments.of(
+                    "Kun lesetilgang i Gjenny gir ingen skrivetilgang",
+                    listOf(azureAdLesetilgangGjennyClaim),
+                    emptyList<Enhetsnummer>(),
+                ),
+                Arguments.of(
+                    "Ingen roller gir ingen skrivetilgang",
+                    emptyList<String>(),
+                    emptyList<Enhetsnummer>(),
+                ),
+                Arguments.of(
+                    "Saksbehandler i Gjenny gir skrivetilgang",
+                    listOf(azureAdSaksbehandlerGjennyClaim),
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                ),
+                Arguments.of(
+                    "Saksbehandler i Pesys gir skrivetilgang",
+                    listOf(azureAdSaksbehandlerClaim),
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                ),
+                Arguments.of(
+                    "Attestant i Gjenny gir skrivetilgang",
+                    listOf(azureAdAttestantGjennyClaim),
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                ),
+            )
+
+        @JvmStatic
+        fun oppgavebenkRoller() =
+            listOf(
+                Arguments.of("Lesetilgang (GJENNY_LES) gir tilgang til oppgavebenken", true, false, false, true),
+                Arguments.of("Saksbehandlerrolle gir tilgang til oppgavebenken", false, true, false, true),
+                Arguments.of("Attestantrolle gir tilgang til oppgavebenken", false, false, true, true),
+                Arguments.of("Ingen av rollene gir ikke tilgang til oppgavebenken", false, false, false, false),
+            )
+
         @JvmStatic
         fun saksbehandlere() =
             listOf(
@@ -74,7 +184,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    true,
                 ),
                 Arguments.of(
                     "Vanlig saksbehandler med utland",
@@ -88,7 +197,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.STEINKJER.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    true,
                 ),
                 Arguments.of(
                     "Kontaktsenter",
@@ -101,14 +209,12 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    false,
                 ),
                 Arguments.of(
                     "Ukjent",
                     listOf(SaksbehandlerEnhet(Enhetsnummer("9876"), "En annen enhet")),
                     emptyList<String>(),
                     emptyList<String>(),
-                    false,
                 ),
                 Arguments.of(
                     "Vanlig saksbehandler med andre enheter enn bare de etterlatte kjenner til",
@@ -123,7 +229,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    true,
                 ),
                 Arguments.of(
                     "Kontaktsenter med andre enheter enn bare de etterlatte kjenner til",
@@ -139,7 +244,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
-                    false,
                 ),
             )
     }

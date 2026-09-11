@@ -24,7 +24,7 @@ export const Oppgavebenk = () => {
   useSidetittel('Oppgavebenk')
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  if (!innloggetSaksbehandler.skriveEnheter.length) {
+  if (!innloggetSaksbehandler.kanSeOppgaveliste) {
     return <Tilgangsmelding />
   }
 

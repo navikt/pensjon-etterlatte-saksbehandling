@@ -30,7 +30,7 @@ export const sorterOppgaverEtterOpprettetGosys = (oppgaver: GosysOppgave[]) => {
 export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  if (!innloggetSaksbehandler.skriveEnheter.length) {
+  if (!innloggetSaksbehandler.kanSeOppgaveliste) {
     return <Tilgangsmelding />
   }
 

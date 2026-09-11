@@ -90,7 +90,7 @@ internal class AutomatiskVedtakBehandlingRoutesTest(
 
     @BeforeEach
     fun beforeEach() {
-        every { user.enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.hentEnheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
         context =
             nyKontekstMedBrukerOgDatabase(
                 user,

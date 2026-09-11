@@ -14,7 +14,12 @@ data class SaksbehandlerMedRoller(
             ?: false
     }
 
+    fun harRolleSaksbehandler() = (harRolle(AzureGroup.SAKSBEHANDLER) || harRolle(AzureGroup.SAKSBEHANDLER_GJENNY))
+
     fun harRolleAttestant() = (harRolle(AzureGroup.ATTESTANT) || harRolle(AzureGroup.ATTESTANT_GJENNY))
+
+    // Ren lesetilgang (0000-GA-GJENNY_LES). Gir kun rett til å se oppgavelisten, ikke til å saksbehandle.
+    fun harRolleLesetilgang() = harRolle(AzureGroup.GJENNY_LES)
 
     fun harRolleStrengtFortrolig() = harRolle(AzureGroup.STRENGT_FORTROLIG)
 

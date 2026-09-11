@@ -106,7 +106,7 @@ internal class VedtaksvurderingRouteTest(
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
-        every { user.enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.hentEnheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
         context =
             nyKontekstMedBrukerOgDatabase(
                 user,

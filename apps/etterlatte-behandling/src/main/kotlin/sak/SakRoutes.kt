@@ -39,6 +39,7 @@ import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSaksbehandlerrolle
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
@@ -451,16 +452,17 @@ internal fun Route.sakWebRoutes(
 
                     requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type")
 
-                    val sak =
-                        inTransaction {
-                            if (opprettHvisIkkeFinnes) {
-                                sakService.finnEllerOpprettSakMedGrunnlag(fnr.value, type)
-                            } else {
-                                sakService.finnSak(fnr.value, type)
-                            }
+                    if (opprettHvisIkkeFinnes) {
+                        // Oppretting av ny sak krever saksbehandler- eller attestantrolle – det finnes ingen
+                        // eksisterende sak/enhet å sjekke skrivetilgang mot før saken faktisk er opprettet.
+                        kunSaksbehandlerMedSaksbehandlerrolle {
+                            val sak = inTransaction { sakService.finnEllerOpprettSakMedGrunnlag(fnr.value, type) }
+                            call.respond(sak)
                         }
-
-                    call.respond(sak ?: HttpStatusCode.NoContent)
+                    } else {
+                        val sak = inTransaction { sakService.finnSak(fnr.value, type) }
+                        call.respond(sak ?: HttpStatusCode.NoContent)
+                    }
                 }
             }
 

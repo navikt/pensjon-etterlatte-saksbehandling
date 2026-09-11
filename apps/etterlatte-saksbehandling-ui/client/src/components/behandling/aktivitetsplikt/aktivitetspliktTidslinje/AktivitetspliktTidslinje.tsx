@@ -9,6 +9,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { AktivitetHendelse } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetHendelse'
 import { PlusIcon } from '@navikt/aksel-icons'
 import { AktivitetPeriode } from '~components/behandling/aktivitetsplikt/aktivitetspliktTidslinje/AktivitetPeriode'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export enum AktivitetspliktSkjemaAaVise {
   AKTIVITET_HENDELSE,
@@ -34,6 +35,9 @@ interface Props {
 }
 
 export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props) => {
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const harSkrivetilgang = !!innloggetSaksbehandler.skriveEnheter.length
+
   const [aktivitetHendelser, setAktivitetHendelser] = useState<IAktivitetHendelse[]>([])
   const [aktivitetPerioder, setAktivitetPerioder] = useState<IAktivitetPeriode[]>([])
 
@@ -90,6 +94,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
             variant="secondary"
             icon={<PlusIcon aria-hidden />}
             iconPosition="right"
+            disabled={!harSkrivetilgang}
             onClick={() => {
               setAktivitetspliktRedigeringModus({
                 aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.AKTIVITET_PERIODE,
@@ -105,6 +110,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
             variant="secondary"
             icon={<PlusIcon aria-hidden />}
             iconPosition="right"
+            disabled={!harSkrivetilgang}
             onClick={() => {
               setAktivitetspliktRedigeringModus({
                 aktivitetspliktSkjemaAaVise: AktivitetspliktSkjemaAaVise.AKTIVITET_HENDELSE,

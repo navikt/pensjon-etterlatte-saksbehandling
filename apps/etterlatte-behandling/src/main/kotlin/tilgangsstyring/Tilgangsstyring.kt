@@ -308,6 +308,34 @@ inline fun RoutingContext.kunSkrivetilgang(
     }
 }
 
+/**
+ * Sjekker at brukeren har skrivetilgang (saksbehandler- eller attestantrollen i en saksbehandlende enhet). Brukes for
+ * handlinger som ikke er knyttet til en eksisterende sak/enhet, f.eks. opprettelse av en helt ny sak, der det ikke
+ * finnes noen enhet å sjekke skrivetilgang mot ennå.
+ */
+suspend inline fun RoutingContext.kunSaksbehandlerMedSaksbehandlerrolle(onSuccess: (Saksbehandler) -> Unit) {
+    when (val token = brukerTokenInfo) {
+        is Saksbehandler -> {
+            if (Kontekst
+                    .get()
+                    .appUserAsSaksbehandler()
+                    .hentEnheterMedSkrivetilgang()
+                    .isNotEmpty()
+            ) {
+                onSuccess(token)
+            } else {
+                call.application.log.debug("Mangler saksbehandler- eller attestantrolle, avviser forespørselen")
+                throw ManglerTilgang()
+            }
+        }
+
+        else -> {
+            call.application.log.debug("Endepunktet er ikke tilgjengeliggjort for systembruker, avviser forespørselen")
+            call.respond(HttpStatusCode.Forbidden)
+        }
+    }
+}
+
 suspend inline fun RoutingContext.kunSaksbehandlerMedSkrivetilgang(
     sakId: SakId? = null,
     enhetNr: Enhetsnummer? = null,

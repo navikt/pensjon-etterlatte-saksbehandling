@@ -648,6 +648,38 @@ internal class BeregningsGrunnlagServiceTest {
     }
 
     @Test
+    fun `hentEllerKopierBeregningsGrunnlag skal ikke duplisere overstyrt grunnlag`() {
+        val sakId = SakId(1L)
+        val forrigeBehandlingId = randomUUID()
+        val behandlingId = randomUUID()
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                uuid = behandlingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns revurdering
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+            listOf(mockVedtak(forrigeBehandlingId, VedtakType.INNVILGELSE))
+
+        // Nåværende behandling har ikke grunnlag, og forrige behandling var overstyrt (ingen ordinært grunnlag)
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId) } returns null
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeBehandlingId) } returns null
+
+        val grunnlag =
+            runBlocking { beregningsGrunnlagService.hentEllerKopierBeregningsGrunnlag(behandlingId, bruker) }
+
+        grunnlag shouldBe null
+        verify(exactly = 0) {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any())
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any())
+            beregningRepository.hentOverstyrBeregning(any())
+        }
+    }
+
+    @Test
     fun `skal lagre beregningsmetode BP etter reformtidspunkt`() {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
         val slot = slot<BeregningsGrunnlag>()

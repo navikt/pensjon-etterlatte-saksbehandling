@@ -1,5 +1,5 @@
 export interface AvbrytBehandlingRequest {
-  aarsakTilAvbrytelse: AarsakTilAvslutting //TODO
+  aarsakTilAvbrytelse: AarsakTilAvslutting
   kommentar: string
 }
 

@@ -145,22 +145,27 @@ fun Route.etteroppgjoerRoutes(
                             )
                         }
 
-                        val forbehandlinger = forbehandlingService.hentForbehandlinger(sakId)
-                        if (forbehandlinger.isEmpty()) {
-                            throw InternfeilException(
-                                "Kan ikke tilbakestille etteroppgjoer $inntektsaar for sakId=$sakId, fant ingen tidligere forbehandlinger. Ta kontakt for manuell håndtering.",
-                            )
-                        }
-
                         forbehandlingService.sjekkHarAapneBehandlinger(etteroppgjoer.sakId, null)
 
-                        logger.info("Tilbakestiller etteroppgjør $inntektsaar for sakId=${etteroppgjoer.sakId}")
-                        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                            sakId,
-                            etteroppgjoer.inntektsaar,
-                            EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
-                            EtteroppgjoerHendelser.TILBAKESTILT,
-                        )
+                        val harForbehandlingForAar = forbehandlingService.harForbehandlingForAar(sakId, inntektsaar)
+                        if (harForbehandlingForAar) {
+                            logger.info("Tilbakestiller etteroppgjør $inntektsaar for sakId=${etteroppgjoer.sakId}")
+                            etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+                                sakId,
+                                etteroppgjoer.inntektsaar,
+                                EtteroppgjoerStatus.MOTTATT_SKATTEOPPGJOER,
+                                EtteroppgjoerHendelser.TILBAKESTILT,
+                            )
+                        } else {
+                            if (!etteroppgjoer.mottattSkatteoppgjoer()) {
+                                throw InternfeilException(
+                                    "Kan ikke opprette ny forbehandling for etteroppgjør $inntektsaar for sakId=$sakId uten tidligere forbehandling når status er ${etteroppgjoer.status}.",
+                                )
+                            }
+                            logger.info(
+                                "Fant ingen tidligere forbehandling for etteroppgjør $inntektsaar i sakId=$sakId. Oppretter ny oppgave uten tilbakestilling.",
+                            )
+                        }
 
                         forbehandlingService.opprettOppgaveForOpprettForbehandling(
                             sakId = sakId,

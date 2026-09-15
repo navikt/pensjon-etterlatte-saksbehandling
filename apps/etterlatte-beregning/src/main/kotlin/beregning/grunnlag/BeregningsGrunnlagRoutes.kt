@@ -52,8 +52,6 @@ fun Route.beregningsGrunnlag(
             }
         }
 
-        // Dette endepunktet håndterer kun ordinært beregningsgrunnlag. Overstyrt grunnlag
-        // kopieres/hentes via /overstyr-endepunktet (hentEllerKopierOverstyrBeregningGrunnlag).
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter eller kopierer beregningsgrunnlag for behandling $behandlingId")

@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning.grunnlag
 import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -31,6 +32,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -83,6 +85,8 @@ internal class BeregningsGrunnlagServiceTest {
     fun beforeEach() {
         coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
         coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { beregningRepository.hentOverstyrBeregning(any()) } returns null
     }
 
     @Test
@@ -555,6 +559,7 @@ internal class BeregningsGrunnlagServiceTest {
     @Test
     fun `skal lage et kopi av grunnlaget med overstyrt`() {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+        val sakId = behandling.sak
 
         val omregningsId = randomUUID()
         val behandlingsId = randomUUID()
@@ -563,12 +568,16 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+        coEvery { beregningRepository.hentOverstyrBeregning(sakId) } returns overstyrBeregning(sakId)
+
+        beregningRepository.hentOverstyrBeregning(sakId) shouldNotBe null
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every {
-            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
-                any(),
-            )
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(omregningsId)
+        } returns emptyList()
+        every {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingsId)
         } returns listOf(overstyrBeregningGrunnlagDao)
         every { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } just runs
         every { overstyrBeregningGrunnlagDao.copy(any(), any()) } returns overstyrBeregningGrunnlagDao
@@ -589,7 +598,7 @@ internal class BeregningsGrunnlagServiceTest {
         runBlocking {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+            verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             verify(exactly = 1) {
                 beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                     any(),
@@ -639,11 +648,10 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            assertThrows<RuntimeException> {
+            assertThrows<InternfeilException> {
                 beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
-
-                verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             }
+            verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
         }
     }
 

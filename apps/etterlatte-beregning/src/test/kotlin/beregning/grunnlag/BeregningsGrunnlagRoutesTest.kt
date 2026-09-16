@@ -23,6 +23,8 @@ import io.mockk.verify
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.OverstyrBeregning
+import no.nav.etterlatte.beregning.OverstyrBeregningStatus
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -40,9 +42,11 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -86,6 +90,14 @@ internal class BeregningsGrunnlagRoutesTest {
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
+
+        // Antar at alle behandlinger finnes, og er skrivbare og ikke-overstyrte
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk {
+                every { sak } returns SakId(123L)
+            }
+        coEvery { beregningRepository.hentOverstyrBeregning(any()) } returns null
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
     }
 
     @AfterAll
@@ -140,40 +152,11 @@ internal class BeregningsGrunnlagRoutesTest {
         val idRevurdering = randomUUID()
         val idForrigeIverksatt = randomUUID()
         val sakId = randomSakId()
-        val virkRevurdering =
-            Virkningstidspunkt(
-                dato = REFORM_TIDSPUNKT_BP,
-                kilde =
-                    Grunnlagsopplysning.Saksbehandler(
-                        ident = "",
-                        tidspunkt = Tidspunkt.now(),
-                    ),
-                begrunnelse = "",
-            )
+
         coEvery { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns mockk(relaxed = true)
         coEvery { repository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } just Runs
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns
-            DetaljertBehandling(
-                id = randomUUID(),
-                sak = sakId,
-                sakType = SakType.BARNEPENSJON,
-                soeker = "",
-                status = BehandlingStatus.TRYGDETID_OPPDATERT,
-                behandlingType = BehandlingType.REVURDERING,
-                virkningstidspunkt = virkRevurdering,
-                revurderingsaarsak = null,
-                prosesstype = Prosesstype.MANUELL,
-                boddEllerArbeidetUtlandet = null,
-                utlandstilknytning = null,
-                revurderingInfo = null,
-                vedtaksloesning = Vedtaksloesning.GJENNY,
-                sendeBrev = true,
-                opphoerFraOgMed = null,
-                relatertBehandlingId = null,
-                tidligereFamiliepleier = null,
-                opprinnelse = BehandlingOpprinnelse.UKJENT,
-            )
+        coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns barnepensjonRevurdering(sakId)
         coEvery {
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
         } returns listOf(mockVedtak(idForrigeIverksatt, VedtakType.INNVILGELSE))
@@ -654,6 +637,101 @@ internal class BeregningsGrunnlagRoutesTest {
     }
 
     @Test
+    fun `skal kopiere overstyr beregning grunnlag fra forrige behandling naar grunnlag ikke finnes`() {
+        val idRevurdering = randomUUID()
+        val idForrigeIverksatt = randomUUID()
+        val sakId = randomSakId()
+
+        coEvery { beregningRepository.hentOverstyrBeregning(sakId) } returns overstyrBeregning(sakId)
+        coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns barnepensjonRevurdering(sakId)
+        coEvery {
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(idForrigeIverksatt, VedtakType.INNVILGELSE))
+
+        coEvery { behandlingKlient.harTilgangTilBehandling(idRevurdering, any(), any()) } returns true
+
+        every { repository.finnOverstyrBeregningGrunnlagForBehandling(idRevurdering) } returns emptyList()
+        every { repository.finnOverstyrBeregningGrunnlagForBehandling(idForrigeIverksatt) } returns
+            listOf(
+                OverstyrBeregningGrunnlagDao(
+                    id = randomUUID(),
+                    behandlingId = idForrigeIverksatt,
+                    datoFOM = LocalDate.now().minusYears(12L),
+                    datoTOM = LocalDate.now().minusYears(6L),
+                    utbetaltBeloep = 123L,
+                    foreldreloessats = false,
+                    trygdetid = 10L,
+                    trygdetidForIdent = null,
+                    prorataBroekTeller = null,
+                    prorataBroekNevner = null,
+                    sakId = sakId1,
+                    beskrivelse = "test periode 1",
+                    aarsak = "ANNET",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
+                ),
+                OverstyrBeregningGrunnlagDao(
+                    id = randomUUID(),
+                    behandlingId = idForrigeIverksatt,
+                    datoFOM = LocalDate.now().minusYears(6L),
+                    datoTOM = null,
+                    utbetaltBeloep = 456L,
+                    foreldreloessats = false,
+                    trygdetid = 20L,
+                    trygdetidForIdent = null,
+                    prorataBroekTeller = 10,
+                    prorataBroekNevner = 20,
+                    sakId = sakId1,
+                    beskrivelse = "test periode 2",
+                    aarsak = "ANNET",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
+                ),
+            )
+        coEvery { repository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } just runs
+
+        testApplication {
+            val client =
+                runServer(mockOAuth2Server) {
+                    beregningsGrunnlag(service, behandlingKlient)
+                }
+
+            client
+                .get("/api/beregning/beregningsgrunnlag/$idRevurdering/overstyr") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let { response ->
+                    response.status shouldBe HttpStatusCode.OK
+
+                    val grunnlag =
+                        objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlagDTO::class.java)
+
+                    grunnlag.perioder.let { perioder ->
+                        perioder.size shouldBe 2
+                        perioder.minBy { it.fom }.let { periode ->
+                            periode.fom shouldBe LocalDate.now().minusYears(12L)
+                            periode.tom shouldBe LocalDate.now().minusYears(6L)
+                            periode.data.utbetaltBeloep shouldBe 123L
+                            periode.data.trygdetid shouldBe 10L
+                        }
+                        perioder.maxBy { it.fom }.let { periode ->
+                            periode.fom shouldBe LocalDate.now().minusYears(6L)
+                            periode.tom shouldBe null
+                            periode.data.utbetaltBeloep shouldBe 456L
+                            periode.data.trygdetid shouldBe 20L
+                        }
+                    }
+                }
+        }
+    }
+
+    @Test
     fun `skal lagre overstyr beregning grunnlag`() {
         val behandlingId = randomUUID()
         val slot = slot<List<OverstyrBeregningGrunnlagDao>>()
@@ -827,10 +905,41 @@ internal class BeregningsGrunnlagRoutesTest {
         }
     }
 
+    private fun barnepensjonRevurdering(sakId: SakId): DetaljertBehandling =
+        DetaljertBehandling(
+            id = randomUUID(),
+            sak = sakId,
+            sakType = SakType.BARNEPENSJON,
+            soeker = "",
+            status = BehandlingStatus.TRYGDETID_OPPDATERT,
+            behandlingType = BehandlingType.REVURDERING,
+            virkningstidspunkt = mockk(),
+            revurderingsaarsak = null,
+            prosesstype = Prosesstype.MANUELL,
+            boddEllerArbeidetUtlandet = null,
+            utlandstilknytning = null,
+            revurderingInfo = null,
+            vedtaksloesning = Vedtaksloesning.GJENNY,
+            sendeBrev = true,
+            opphoerFraOgMed = null,
+            relatertBehandlingId = null,
+            tidligereFamiliepleier = null,
+            opprinnelse = BehandlingOpprinnelse.UKJENT,
+        )
+
     private fun mockVedtak(
         behandlingId: UUID,
         type: VedtakType,
     ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null, null)
+
+    private fun overstyrBeregning(sakId: SakId): OverstyrBeregning =
+        OverstyrBeregning(
+            sakId = sakId,
+            beskrivelse = "",
+            tidspunkt = Tidspunkt.now(),
+            status = OverstyrBeregningStatus.AKTIV,
+            kategori = OverstyrtBeregningKategori.AVKORTING_UFOERETRYGD,
+        )
 
     private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 

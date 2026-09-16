@@ -54,7 +54,7 @@ fun Route.beregningsGrunnlag(
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter eller kopierer beregningsgrunnlag for behandling $behandlingId")
+                logger.info("Henter eller kopierer ordinært beregningsgrunnlag for behandling $behandlingId")
                 val grunnlag =
                     beregningsGrunnlagService.hentEllerKopierBeregningsGrunnlag(
                         behandlingId,

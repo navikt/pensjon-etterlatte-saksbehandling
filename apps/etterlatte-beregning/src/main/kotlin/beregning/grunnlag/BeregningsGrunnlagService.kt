@@ -256,7 +256,7 @@ class BeregningsGrunnlagService(
         return grunnlag
     }
 
-    /** Henter beregningsgrunnlag. Hvis det ikke finnes så kopieres det fra forrige behandling og lagres.
+    /** Henter ordinært beregningsgrunnlag. Hvis det ikke finnes så kopieres det fra forrige behandling og lagres.
      * Returnerer det lagrede grunnlaget. */
     suspend fun hentEllerKopierBeregningsGrunnlag(
         behandlingId: UUID,
@@ -264,10 +264,9 @@ class BeregningsGrunnlagService(
     ): BeregningsGrunnlag? {
         logger.info("Henter eller kopierer grunnlag $behandlingId")
         val grunnlag = hentBeregningsGrunnlag(behandlingId)
-        if (grunnlag != null) {
-            return grunnlag
-        }
-        if (!kanOppdatereBeregningsGrunnlag(behandlingId, brukerTokenInfo)) {
+        if (grunnlag != null ||
+            !kanOppdatereBeregningsGrunnlag(behandlingId, brukerTokenInfo)
+        ) {
             return grunnlag
         }
 
@@ -284,7 +283,7 @@ class BeregningsGrunnlagService(
         }
     }
 
-    fun dupliserOrdinaertBeregningsGrunnlag(
+    private fun dupliserOrdinaertBeregningsGrunnlag(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -565,7 +564,7 @@ class BeregningsGrunnlagService(
             kilde = overstyrBeregningGrunnlagDaoListe.firstOrNull()?.kilde ?: automatiskSaksbehandler,
         )
 
-    suspend fun hentVedtaksperioderForSak(
+    private suspend fun hentVedtaksperioderForSak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Vedtaksperiode> {

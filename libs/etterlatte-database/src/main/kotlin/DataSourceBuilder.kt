@@ -54,11 +54,14 @@ fun DataSource.migrate(processExiter: () -> Unit = { exitProcess(1) }): MigrateR
             .dataSource(this)
             .apply {
                 val dblocationsMiljoe = mutableListOf("db/migration")
+
+                if (!appIsInGCP()) {
+                    ignoreMigrationPatterns("*:missing")
+                }
                 if (appIsInGCP()) {
                     dblocationsMiljoe.add("db/gcp")
                 }
-                // !appIsInGCP() er for å kunne kjøre lokalt med migreringer i dev.
-                if (!isTestRunner() && (isDev() || !appIsInGCP())) {
+                if (!isTestRunner() && isDev()) {
                     dblocationsMiljoe.add("db/dev")
                 }
                 if (isProd()) {

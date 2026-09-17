@@ -65,29 +65,21 @@ class SaksbehandlerMedEnheterOgRollerTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("oppgavebenkRoller")
-    fun `kanSeOppgaveBenken avgjoeres av rolle, ikke enhet`(
+    fun `kanSeOppgaveBenken avgjoeres av enhet`(
         beskrivelse: String,
-        harRolleLesetilgang: Boolean,
-        harRolleSaksbehandler: Boolean,
-        harRolleAttestant: Boolean,
+        enheterForSaksbehandler: List<SaksbehandlerEnhet>,
         forventetTilgangTilOppgavebenken: Boolean,
     ) {
         val saksbehandlerService = mockk<SaksbehandlerService>()
         val identifiedBy = mockk<TokenValidationContext>()
         mockkStatic(TokenValidationContext::hentTokenClaimsForIssuerName)
         val tokenClaims = mockk<JwtTokenClaims>()
-        val saksbehandlerMedRoller =
-            mockk<SaksbehandlerMedRoller> {
-                every { harRolleLesetilgang() } returns harRolleLesetilgang
-                every { harRolleSaksbehandler() } returns harRolleSaksbehandler
-                every { harRolleAttestant() } returns harRolleAttestant
-            }
+        val saksbehandlerMedRoller = mockk<SaksbehandlerMedRoller>(relaxed = true)
         val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
         every { tokenClaims.getStringClaim(Claims.NAVident.name) } returns "NAVIdent"
         every { identifiedBy.hentTokenClaimsForIssuerName(any()) } returns tokenClaims
-        // Enhetene er uten betydning for kanSeOppgaveBenken() – kun rolle skal avgjøre dette.
-        every { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns emptyList()
+        every { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns enheterForSaksbehandler
 
         val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
 
@@ -166,46 +158,38 @@ class SaksbehandlerMedEnheterOgRollerTest {
         fun oppgavebenkRoller() =
             listOf(
                 oppgavebenkArgumenter(
-                    beskrivelse = "Lesetilgang (GJENNY_LES) gir tilgang til oppgavebenken",
-                    harRolleLesetilgang = true,
-                    harRolleSaksbehandler = false,
-                    harRolleAttestant = false,
+                    beskrivelse = "Saksbehandlende enhet gir tilgang til oppgavebenken",
+                    enheterForSaksbehandler = listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name)),
                     forventetTilgangTilOppgavebenken = true,
                 ),
                 oppgavebenkArgumenter(
-                    beskrivelse = "Saksbehandlerrolle gir tilgang til oppgavebenken",
-                    harRolleLesetilgang = false,
-                    harRolleSaksbehandler = true,
-                    harRolleAttestant = false,
+                    beskrivelse = "Kontaktsenterenhet gir ikke tilgang til oppgavebenken",
+                    enheterForSaksbehandler = listOf(SaksbehandlerEnhet(Enheter.OEST_VIKEN.enhetNr, Enheter.OEST_VIKEN.navn)),
+                    forventetTilgangTilOppgavebenken = false,
+                ),
+                oppgavebenkArgumenter(
+                    beskrivelse = "Minst en enhet med oppgavebenktilgang gir tilgang",
+                    enheterForSaksbehandler =
+                        listOf(
+                            SaksbehandlerEnhet(Enheter.OEST_VIKEN.enhetNr, Enheter.OEST_VIKEN.navn),
+                            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.name),
+                        ),
                     forventetTilgangTilOppgavebenken = true,
                 ),
                 oppgavebenkArgumenter(
-                    beskrivelse = "Attestantrolle gir tilgang til oppgavebenken",
-                    harRolleLesetilgang = false,
-                    harRolleSaksbehandler = false,
-                    harRolleAttestant = true,
-                    forventetTilgangTilOppgavebenken = true,
-                ),
-                oppgavebenkArgumenter(
-                    beskrivelse = "Ingen av rollene gir ikke tilgang til oppgavebenken",
-                    harRolleLesetilgang = false,
-                    harRolleSaksbehandler = false,
-                    harRolleAttestant = false,
+                    beskrivelse = "Ingen enheter gir ikke tilgang til oppgavebenken",
+                    enheterForSaksbehandler = emptyList(),
                     forventetTilgangTilOppgavebenken = false,
                 ),
             )
 
         private fun oppgavebenkArgumenter(
             beskrivelse: String,
-            harRolleLesetilgang: Boolean,
-            harRolleSaksbehandler: Boolean,
-            harRolleAttestant: Boolean,
+            enheterForSaksbehandler: List<SaksbehandlerEnhet>,
             forventetTilgangTilOppgavebenken: Boolean,
         ) = Arguments.of(
             beskrivelse,
-            harRolleLesetilgang,
-            harRolleSaksbehandler,
-            harRolleAttestant,
+            enheterForSaksbehandler,
             forventetTilgangTilOppgavebenken,
         )
 

@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning.grunnlag
 import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,6 +18,7 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.OverstyrBeregning
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -29,6 +31,8 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
+import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -81,6 +85,8 @@ internal class BeregningsGrunnlagServiceTest {
     fun beforeEach() {
         coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
         coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { beregningRepository.hentOverstyrBeregning(any()) } returns null
     }
 
     @Test
@@ -553,6 +559,7 @@ internal class BeregningsGrunnlagServiceTest {
     @Test
     fun `skal lage et kopi av grunnlaget med overstyrt`() {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+        val sakId = behandling.sak
 
         val omregningsId = randomUUID()
         val behandlingsId = randomUUID()
@@ -561,12 +568,16 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+        coEvery { beregningRepository.hentOverstyrBeregning(sakId) } returns overstyrBeregning(sakId)
+
+        beregningRepository.hentOverstyrBeregning(sakId) shouldNotBe null
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every {
-            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
-                any(),
-            )
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(omregningsId)
+        } returns emptyList()
+        every {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingsId)
         } returns listOf(overstyrBeregningGrunnlagDao)
         every { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } just runs
         every { overstyrBeregningGrunnlagDao.copy(any(), any()) } returns overstyrBeregningGrunnlagDao
@@ -587,7 +598,7 @@ internal class BeregningsGrunnlagServiceTest {
         runBlocking {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+            verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             verify(exactly = 1) {
                 beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                     any(),
@@ -637,11 +648,42 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            assertThrows<RuntimeException> {
+            assertThrows<InternfeilException> {
                 beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
-
-                verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             }
+            verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+        }
+    }
+
+    @Test
+    fun `hentEllerKopierBeregningsGrunnlag skal ikke duplisere overstyrt grunnlag`() {
+        val sakId = SakId(1L)
+        val forrigeBehandlingId = randomUUID()
+        val behandlingId = randomUUID()
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                uuid = behandlingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns revurdering
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+            listOf(mockVedtak(forrigeBehandlingId, VedtakType.INNVILGELSE))
+
+        // Nåværende behandling har ikke grunnlag, og forrige behandling var overstyrt (ingen ordinært grunnlag)
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId) } returns null
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeBehandlingId) } returns null
+
+        val grunnlag =
+            runBlocking { beregningsGrunnlagService.hentEllerKopierBeregningsGrunnlag(behandlingId, bruker) }
+
+        grunnlag shouldBe null
+        verify(exactly = 0) {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any())
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any())
+            beregningRepository.hentOverstyrBeregning(any())
         }
     }
 
@@ -808,7 +850,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         val grunnlag =
-            runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandlingId, mockk(relaxed = true)) }
+            runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandlingId) }
 
         grunnlag.perioder.let { perioder ->
             perioder.size shouldBe 2
@@ -1114,7 +1156,7 @@ internal class BeregningsGrunnlagServiceTest {
     }
 
     @Test
-    fun `hentOverstyrtBeregningsgrunnlag skal hente og kopiere forrige behandlings grunnlag hvis nåværende er tom`() {
+    fun `hentEllerKopierOverstyrBeregningGrunnlag skal hente og kopiere forrige behandlings grunnlag hvis nåværende er tom`() {
         val sakId = SakId(1L)
 
         val behandlingId = randomUUID()
@@ -1140,6 +1182,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
         coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        every { beregningRepository.hentOverstyrBeregning(sakId) } returns overstyrBeregning(sakId)
         coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
             listOf(
                 mockVedtak(
@@ -1169,7 +1212,7 @@ internal class BeregningsGrunnlagServiceTest {
         } just Runs
 
         val grunnlag =
-            runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(revurderingId, mockk(relaxed = true)) }
+            runBlocking { beregningsGrunnlagService.hentEllerKopierOverstyrBeregningGrunnlag(revurderingId, mockk(relaxed = true)) }
         assertEquals(1, grunnlag.perioder.size)
 
         val forrigePeriode = overstyrtePerioderForrigeBehandling.single()
@@ -1181,6 +1224,75 @@ internal class BeregningsGrunnlagServiceTest {
             it.prorataBroekTeller shouldBe forrigePeriode.prorataBroekTeller
             it.datoFOM shouldBe forrigePeriode.datoFOM
             it.datoTOM shouldBe forrigePeriode.datoTOM
+        }
+    }
+
+    @Test
+    fun `hentEllerKopierOverstyrBeregningGrunnlag skal ikke kopiere forrige grunnlag hvis overstyrt beregning er deaktivert på saken`() {
+        val sakId = SakId(1L)
+
+        val forrigeBehandlingId = randomUUID()
+        val forrigeBehandling =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = YearMonth.of(2024, 1),
+                uuid = forrigeBehandlingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+
+        val revurderingId = randomUUID()
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = YearMonth.of(2024, 6),
+                uuid = revurderingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingKlient.hentBehandling(forrigeBehandlingId, any()) } returns forrigeBehandling
+        // Overstyrt beregning er deaktivert på saken
+        every { beregningRepository.hentOverstyrBeregning(sakId) } returns null
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+            listOf(mockVedtak(forrigeBehandlingId, VedtakType.INNVILGELSE))
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(revurderingId) } returns emptyList()
+
+        val grunnlag =
+            runBlocking { beregningsGrunnlagService.hentEllerKopierOverstyrBeregningGrunnlag(revurderingId, mockk(relaxed = true)) }
+
+        grunnlag.perioder.shouldBe(emptyList())
+        verify(exactly = 0) {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(forrigeBehandlingId)
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any())
+        }
+    }
+
+    @Test
+    fun `hentEllerKopierOverstyrBeregningGrunnlag skal ikke kopiere til en ferdigstilt behandling`() {
+        val sakId = SakId(1L)
+
+        val revurderingId = randomUUID()
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = YearMonth.of(2024, 6),
+                uuid = revurderingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
+        // Behandlingen er ferdigstilt og kan ikke redigeres
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(revurderingId, any()) } returns false
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(revurderingId) } returns emptyList()
+
+        val grunnlag =
+            runBlocking { beregningsGrunnlagService.hentEllerKopierOverstyrBeregningGrunnlag(revurderingId, mockk(relaxed = true)) }
+
+        grunnlag.perioder.shouldBe(emptyList())
+        coVerify(exactly = 0) { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) }
+        verify(exactly = 0) {
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any())
         }
     }
 
@@ -1598,6 +1710,14 @@ internal class BeregningsGrunnlagServiceTest {
         behandlingId: UUID,
         type: VedtakType,
     ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null, null)
+
+    private fun overstyrBeregning(sakId: SakId) =
+        OverstyrBeregning(
+            sakId,
+            "Test",
+            Tidspunkt.now(),
+            kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
+        )
 
     private fun overstyrtBeregningsgrunnlag(
         behandlingId: UUID = randomUUID(),

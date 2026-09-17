@@ -20,10 +20,6 @@ val azureAdLesetilgangGjennyClaim: String by lazy {
     "609a78e7-e0bd-491c-a63b-96a09ec62b9b"
 }
 
-val azureAdAttestantClaim: String by lazy {
-    "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
-}
-
 val azureAdAttestantGjennyClaim: String by lazy {
     "70cfce24-7865-4676-9fdc-b676e90bfc92"
 }

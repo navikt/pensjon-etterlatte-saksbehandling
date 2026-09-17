@@ -15,7 +15,7 @@ import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.azureAdAttestantClaim
+import no.nav.etterlatte.azureAdAttestantGjennyClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
@@ -89,7 +89,7 @@ internal class OppgaveServiceTest(
     private val azureGroupToGroupIDMap =
         mapOf(
             AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
-            AzureGroup.ATTESTANT to azureAdAttestantClaim,
+            AzureGroup.ATTESTANT_GJENNY to azureAdAttestantGjennyClaim,
             AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim,
         )
 
@@ -208,7 +208,7 @@ internal class OppgaveServiceTest(
 
         val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
         nyKontekstMedBruker(attestantSaksbehandler)
-        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
         mockForSaksbehandlerMedRoller(attestantSaksbehandler, attestantmedRoller)
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, attestantmedRoller.saksbehandler.ident)
@@ -276,7 +276,7 @@ internal class OppgaveServiceTest(
         val saksbehandlerto =
             mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
         nyKontekstMedBruker(saksbehandlerto)
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, saksbehandlerMedRoller.saksbehandler.ident)
@@ -308,7 +308,7 @@ internal class OppgaveServiceTest(
         val saksbehandlerto =
             mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
         nyKontekstMedBruker(saksbehandlerto)
-        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, saksbehandlerMedRoller.saksbehandler.ident)
@@ -1142,12 +1142,12 @@ internal class OppgaveServiceTest(
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { enheter() } returns listOf(Enheter.AALESUND.enhetNr)
                 every { name() } returns "attestant-ident"
-                every { saksbehandlerMedRoller } returns generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+                every { saksbehandlerMedRoller } returns generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
             }
 
         val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
         nyKontekstMedBruker(attestantSaksbehandler)
-        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY)
         mockForSaksbehandlerMedRoller(attestantSaksbehandler, attestantmedRoller)
 
         oppgaveService.tildelSaksbehandler(oppgave.id, attestantmedRoller.saksbehandler.ident)
@@ -1425,7 +1425,7 @@ internal class OppgaveServiceTest(
     private fun opprettAttestantKontekst(ident: String = "ident"): SaksbehandlerMedEnheterOgRoller {
         val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns ident }
         nyKontekstMedBruker(attestantmock)
-        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
+        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT_GJENNY))
         return attestantmock
     }
 

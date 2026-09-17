@@ -165,11 +165,49 @@ class SaksbehandlerMedEnheterOgRollerTest {
         @JvmStatic
         fun oppgavebenkRoller() =
             listOf(
-                Arguments.of("Lesetilgang (GJENNY_LES) gir tilgang til oppgavebenken", true, false, false, true),
-                Arguments.of("Saksbehandlerrolle gir tilgang til oppgavebenken", false, true, false, true),
-                Arguments.of("Attestantrolle gir tilgang til oppgavebenken", false, false, true, true),
-                Arguments.of("Ingen av rollene gir ikke tilgang til oppgavebenken", false, false, false, false),
+                oppgavebenkArgumenter(
+                    beskrivelse = "Lesetilgang (GJENNY_LES) gir tilgang til oppgavebenken",
+                    harRolleLesetilgang = true,
+                    harRolleSaksbehandler = false,
+                    harRolleAttestant = false,
+                    forventetTilgangTilOppgavebenken = true,
+                ),
+                oppgavebenkArgumenter(
+                    beskrivelse = "Saksbehandlerrolle gir tilgang til oppgavebenken",
+                    harRolleLesetilgang = false,
+                    harRolleSaksbehandler = true,
+                    harRolleAttestant = false,
+                    forventetTilgangTilOppgavebenken = true,
+                ),
+                oppgavebenkArgumenter(
+                    beskrivelse = "Attestantrolle gir tilgang til oppgavebenken",
+                    harRolleLesetilgang = false,
+                    harRolleSaksbehandler = false,
+                    harRolleAttestant = true,
+                    forventetTilgangTilOppgavebenken = true,
+                ),
+                oppgavebenkArgumenter(
+                    beskrivelse = "Ingen av rollene gir ikke tilgang til oppgavebenken",
+                    harRolleLesetilgang = false,
+                    harRolleSaksbehandler = false,
+                    harRolleAttestant = false,
+                    forventetTilgangTilOppgavebenken = false,
+                ),
             )
+
+        private fun oppgavebenkArgumenter(
+            beskrivelse: String,
+            harRolleLesetilgang: Boolean,
+            harRolleSaksbehandler: Boolean,
+            harRolleAttestant: Boolean,
+            forventetTilgangTilOppgavebenken: Boolean,
+        ) = Arguments.of(
+            beskrivelse,
+            harRolleLesetilgang,
+            harRolleSaksbehandler,
+            harRolleAttestant,
+            forventetTilgangTilOppgavebenken,
+        )
 
         @JvmStatic
         fun saksbehandlere() =

@@ -11,7 +11,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.azureAdAttestantClaim
+import no.nav.etterlatte.azureAdAttestantGjennyClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.randomSakId
@@ -83,7 +83,7 @@ class GosysOppgaveServiceImplTest {
     val azureGroupToGroupIDMap =
         mapOf(
             AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
-            AzureGroup.ATTESTANT to azureAdAttestantClaim,
+            AzureGroup.ATTESTANT_GJENNY to azureAdAttestantGjennyClaim,
             AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim,
         )
 

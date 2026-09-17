@@ -41,14 +41,20 @@ internal class TrygdetidRoutesTest {
     fun before() {
         server.start()
         every { applicationContext.saksbehandlerGroupIdsByKey } returns
-            mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim)
+            mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim)
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true
             }
         every {
             applicationContext.saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
-        } returns listOf(SaksbehandlerEnhet(enhetsNummer = Enheter.defaultEnhet.enhetNr, navn = Enheter.defaultEnhet.navn))
+        } returns
+            listOf(
+                SaksbehandlerEnhet(
+                    enhetsNummer = Enheter.defaultEnhet.enhetNr,
+                    navn = Enheter.defaultEnhet.navn,
+                ),
+            )
         every {
             applicationContext.sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(any())
         } returns

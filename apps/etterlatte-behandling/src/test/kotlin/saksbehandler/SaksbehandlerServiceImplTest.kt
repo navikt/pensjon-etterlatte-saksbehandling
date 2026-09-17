@@ -69,7 +69,7 @@ class SaksbehandlerServiceImplTest(
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
-                mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
+                mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
@@ -97,7 +97,7 @@ class SaksbehandlerServiceImplTest(
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
-                mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
+                mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)

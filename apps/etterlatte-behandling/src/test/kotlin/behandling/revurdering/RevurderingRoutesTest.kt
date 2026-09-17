@@ -45,7 +45,7 @@ internal class RevurderingRoutesTest {
     fun before() {
         server.start()
         every { applicationContext.saksbehandlerGroupIdsByKey } returns
-            mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim)
+            mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim)
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true

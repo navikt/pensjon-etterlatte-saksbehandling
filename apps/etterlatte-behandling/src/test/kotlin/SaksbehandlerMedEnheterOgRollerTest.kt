@@ -55,7 +55,8 @@ class SaksbehandlerMedEnheterOgRollerTest {
             saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
         } returns enheterForSaksbehandler
 
-        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
+        val saksbehandler =
+            SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
         val skriveEnheter = saksbehandler.hentEnheterMedSkrivetilgang()
         val leseEnheter = saksbehandler.enheterMedLesetilgang(enheterForSaksbehandler.map { it.enhetsNummer }.toSet())
 
@@ -81,7 +82,8 @@ class SaksbehandlerMedEnheterOgRollerTest {
         every { identifiedBy.hentTokenClaimsForIssuerName(any()) } returns tokenClaims
         every { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns enheterForSaksbehandler
 
-        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
+        val saksbehandler =
+            SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
 
         saksbehandler.kanSeOppgaveBenken() shouldBe forventetTilgangTilOppgavebenken
     }
@@ -112,7 +114,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                     mapOf(
                         AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
                         AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerGjennyClaim,
-                        AzureGroup.ATTESTANT to azureAdAttestantClaim,
                         AzureGroup.ATTESTANT_GJENNY to azureAdAttestantGjennyClaim,
                     ),
             )
@@ -159,12 +160,24 @@ class SaksbehandlerMedEnheterOgRollerTest {
             listOf(
                 oppgavebenkArgumenter(
                     beskrivelse = "Saksbehandlende enhet gir tilgang til oppgavebenken",
-                    enheterForSaksbehandler = listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name)),
+                    enheterForSaksbehandler =
+                        listOf(
+                            SaksbehandlerEnhet(
+                                Enheter.PORSGRUNN.enhetNr,
+                                Enheter.PORSGRUNN.name,
+                            ),
+                        ),
                     forventetTilgangTilOppgavebenken = true,
                 ),
                 oppgavebenkArgumenter(
                     beskrivelse = "Kontaktsenterenhet gir ikke tilgang til oppgavebenken",
-                    enheterForSaksbehandler = listOf(SaksbehandlerEnhet(Enheter.OEST_VIKEN.enhetNr, Enheter.OEST_VIKEN.navn)),
+                    enheterForSaksbehandler =
+                        listOf(
+                            SaksbehandlerEnhet(
+                                Enheter.OEST_VIKEN.enhetNr,
+                                Enheter.OEST_VIKEN.navn,
+                            ),
+                        ),
                     forventetTilgangTilOppgavebenken = false,
                 ),
                 oppgavebenkArgumenter(

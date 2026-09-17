@@ -12,10 +12,6 @@ val azureAdSaksbehandlerClaim: String by lazy {
     "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
 }
 
-val azureAdAttestantClaim: String by lazy {
-    "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
-}
-
 val azureAdAttestantGjennyClaim: String by lazy {
     "70cfce24-7865-4676-9fdc-b676e90bfc92"
 }

@@ -123,7 +123,7 @@ internal class BeregningOgAvkortingBrevServiceTest {
                         ),
                     ),
             )
-        coEvery { beregningsGrunnlagService.hentBeregningsGrunnlag(behandlingsId, bruker) } returns
+        coEvery { beregningsGrunnlagService.hentBeregningsGrunnlag(behandlingsId) } returns
             BeregningsGrunnlag(
                 behandlingId = behandlingsId,
                 kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),

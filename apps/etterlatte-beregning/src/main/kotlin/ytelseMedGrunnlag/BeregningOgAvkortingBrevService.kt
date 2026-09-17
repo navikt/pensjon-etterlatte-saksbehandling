@@ -31,7 +31,7 @@ class BeregningOgAvkortingBrevService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val avkorting = avkortingUtenLoependeYtelse.toDto(behandling.virkningstidspunkt().dato)
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
-        val behandlingsGrunnlag = beregningsGrunnlagService.hentBeregningsGrunnlag(behandlingId, brukerTokenInfo)
+        val behandlingsGrunnlag = beregningsGrunnlagService.hentBeregningsGrunnlag(behandlingId)
 
         val avkortinger =
             avkorting.avkortetYtelse.map { avkortetYtelse ->

@@ -13,6 +13,8 @@ package no.nav.etterlatte
     TRUNCATE vilkaarsvurdering CASCADE;
     TRUNCATE vedtak CASCADE;
     TRUNCATE utbetalingsperiode CASCADE;
+    TRUNCATE prosessering_task_hendelse CASCADE;
+    TRUNCATE prosessering_task CASCADE;
     
     ALTER SEQUENCE behandlinghendelse_id_seq RESTART WITH 1;
     ALTER SEQUENCE sak_id_seq RESTART WITH 1;

@@ -3,7 +3,11 @@ package no.nav.etterlatte.prosessering
 import efterlatte.prosessering.Status
 import efterlatte.prosessering.Stoppaarsak
 import efterlatte.prosessering.Task
+import efterlatte.prosessering.TaskLogg
+import efterlatte.prosessering.TaskLoggRepository
+import efterlatte.prosessering.TaskLoggType
 import efterlatte.prosessering.TaskStateMachine
+import efterlatte.prosessering.postgres.PostgresTaskLoggRepository
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import java.sql.Connection
@@ -49,6 +53,7 @@ class UlovligTaskOvergang(
 
 class ProsesseringAdminDao(
     private val dataSource: DataSource,
+    private val taskLoggRepository: TaskLoggRepository = PostgresTaskLoggRepository(dataSource),
 ) {
     private val tabell = "public.prosessering_task"
 
@@ -94,6 +99,24 @@ class ProsesseringAdminDao(
         id: Long,
         forventetVersjon: Long,
     ): Task = utfoer(id = id, forventetVersjon = forventetVersjon, handling = OperatorHandling.AVBRYT)
+
+    fun registrerAvvik(
+        id: Long,
+        forventetVersjon: Long,
+        melding: String,
+        endretAv: String,
+        node: String,
+    ): Task {
+        val oppdatert = utfoer(id = id, forventetVersjon = forventetVersjon, handling = OperatorHandling.AVBRYT)
+        taskLoggRepository.leggTil(
+            taskId = id,
+            type = TaskLoggType.AVVIK,
+            melding = melding,
+            endretAv = endretAv,
+            node = node,
+        )
+        return oppdatert
+    }
 
     private fun utfoer(
         id: Long,
@@ -177,6 +200,29 @@ class ProsesseringAdminDao(
             }
         }
     }
+
+    fun leggTilHendelse(
+        taskId: Long,
+        type: TaskLoggType,
+        melding: String,
+        endretAv: String,
+        node: String,
+    ): TaskLogg {
+        require(type != TaskLoggType.STATUS_ENDRET) {
+            "STATUS_ENDRET skrives av motoren selv, ikke av admin-API-et"
+        }
+        if (finn(taskId) == null) throw TaskIkkeFunnet(taskId)
+
+        return taskLoggRepository.leggTil(
+            taskId = taskId,
+            type = type,
+            melding = melding,
+            endretAv = endretAv,
+            node = node,
+        )
+    }
+
+    fun hentHendelser(taskId: Long): List<TaskLogg> = taskLoggRepository.hent(taskId)
 
     private fun ResultSet.tilTask(): Task =
         Task(

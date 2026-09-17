@@ -14,6 +14,8 @@ import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktSt
 import { AktivitetspliktOppgaveVurderingType, harVurdering } from '~shared/types/Aktivitetsplikt'
 import { ApiError } from '~shared/api/apiClient'
 import { Personopplysning } from '~shared/types/grunnlag'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 export const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
@@ -50,6 +52,8 @@ export const AktivitetspliktSakoversikt = ({
   const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
 
   const [svaropprettOppgave, opprettOppfoelgingsoppgaveReq] = useApiCall(opprettOppfoelgingsoppgave)
+
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
@@ -136,6 +140,7 @@ export const AktivitetspliktSakoversikt = ({
                 <Button
                   variant="secondary"
                   loading={isPending(svaropprettOppgave)}
+                  disabled={!enhetErSkrivbar(sakOgBehandlinger.sak.enhet, innloggetSaksbehandler.skriveEnheter)}
                   onClick={() =>
                     opprettOppfoelgingsoppgaveReq({
                       sakId: sakOgBehandlinger.sak.id,
@@ -150,6 +155,7 @@ export const AktivitetspliktSakoversikt = ({
                 <Button
                   variant="secondary"
                   loading={isPending(svaropprettOppgave)}
+                  disabled={!enhetErSkrivbar(sakOgBehandlinger.sak.enhet, innloggetSaksbehandler.skriveEnheter)}
                   onClick={() =>
                     opprettOppfoelgingsoppgaveReq({
                       sakId: sakOgBehandlinger.sak.id,

@@ -5,7 +5,6 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.Hook
 import io.ktor.server.application.RouteScopedPlugin
-import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
@@ -226,7 +225,7 @@ fun RoutingContext.sjekkSkrivetilgang(
 
             when (enhetNrSomSkalTestes) {
                 null -> false
-                else -> user.enheterMedSkrivetilgang().contains(enhetNrSomSkalTestes)
+                else -> user.hentEnheterMedSkrivetilgang().contains(enhetNrSomSkalTestes)
             }
         }
 
@@ -305,6 +304,34 @@ inline fun RoutingContext.kunSkrivetilgang(
                 code = "MANGLER_SKRIVETILGANG",
                 detail = "Du mangler skrivetilgang til $enhetString og kan dermed ikke utføre handlingen",
             )
+        }
+    }
+}
+
+/**
+ * Sjekker at brukeren har skrivetilgang (saksbehandler- eller attestantrollen i en saksbehandlende enhet). Brukes for
+ * handlinger som ikke er knyttet til en eksisterende sak/enhet, f.eks. opprettelse av en helt ny sak, der det ikke
+ * finnes noen enhet å sjekke skrivetilgang mot ennå.
+ */
+suspend inline fun RoutingContext.kunSaksbehandlerMedSaksbehandlerrolle(onSuccess: (Saksbehandler) -> Unit) {
+    when (val token = brukerTokenInfo) {
+        is Saksbehandler -> {
+            if (Kontekst
+                    .get()
+                    .appUserAsSaksbehandler()
+                    .hentEnheterMedSkrivetilgang()
+                    .isNotEmpty()
+            ) {
+                onSuccess(token)
+            } else {
+                call.application.log.debug("Mangler saksbehandler- eller attestantrolle, avviser forespørselen")
+                throw ManglerTilgang()
+            }
+        }
+
+        else -> {
+            call.application.log.debug("Endepunktet er ikke tilgjengeliggjort for systembruker, avviser forespørselen")
+            call.respond(HttpStatusCode.Forbidden)
         }
     }
 }

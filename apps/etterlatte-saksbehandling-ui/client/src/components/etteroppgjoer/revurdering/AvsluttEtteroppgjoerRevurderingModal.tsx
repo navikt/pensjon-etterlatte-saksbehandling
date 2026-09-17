@@ -2,7 +2,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useEffect, useState } from 'react'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { BodyShort, Button, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
-import { AarsakTilAvsluttingRevurdering } from '~shared/types/AnnullerBehandling'
+import { AarsakTilAvslutting } from '~shared/types/AnnullerBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { avbrytBehandling, hentSak } from '~shared/api/behandling'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -30,7 +30,7 @@ export const AvsluttEtteroppgjoerRevurderingModal = ({
       {
         id: behandling.id,
         avbrytBehandlingRequest: {
-          aarsakTilAvbrytelse: AarsakTilAvsluttingRevurdering.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST,
+          aarsakTilAvbrytelse: AarsakTilAvslutting.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST,
           kommentar: beskrivelseAvUgunst ?? '',
         },
       },

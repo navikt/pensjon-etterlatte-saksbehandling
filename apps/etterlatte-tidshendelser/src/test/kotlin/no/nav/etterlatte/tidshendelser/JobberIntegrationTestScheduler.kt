@@ -2,6 +2,7 @@ package no.nav.etterlatte.tidshendelser
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
+import io.mockk.mockkStatic
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.JobbScheduler.PeriodiskeMaanedligeJobber
 import no.nav.etterlatte.tidshendelser.JobbScheduler.PeriodiskeUkentligeJobber
@@ -44,7 +45,8 @@ class JobberIntegrationTestScheduler(
     @Test
     fun `skal lage jobber om de ikke er laget fra før`() {
         jobbScheduler.scheduleMaanedligeJobber()
-        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeMaanedligeJobber.entries.size
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize
+            PeriodiskeMaanedligeJobber.entries.size - 2 // To som ikke er aktivert i prod
     }
 
     @Test
@@ -56,7 +58,8 @@ class JobberIntegrationTestScheduler(
         )
         jobbScheduler.scheduleMaanedligeJobber()
 
-        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeMaanedligeJobber.entries.size
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize
+            PeriodiskeMaanedligeJobber.entries.size - 2 // To som ikke er aktivert i prod
     }
 
     @Test
@@ -68,7 +71,8 @@ class JobberIntegrationTestScheduler(
         )
         jobbScheduler.scheduleMaanedligeJobber()
 
-        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeMaanedligeJobber.entries.size + 1
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize
+            PeriodiskeMaanedligeJobber.entries.size + 1 - 2 // To som ikke er aktivert i prod
     }
 
     @Test

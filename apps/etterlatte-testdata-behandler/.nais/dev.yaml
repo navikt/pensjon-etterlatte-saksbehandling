@@ -52,16 +52,12 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
     - name: BREV_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-brev-api/.default
-    - name: TRYGDETID_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
     - name: ETTERLATTE_BREV_API_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-brev-api
-    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-trygdetid
   accessPolicy:
     outbound:
       rules:

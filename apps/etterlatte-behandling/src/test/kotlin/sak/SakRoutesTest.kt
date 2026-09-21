@@ -236,7 +236,7 @@ internal class SakRoutesTest {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
-        every { user.enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.hentEnheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
 
         testApplication {
             val client =

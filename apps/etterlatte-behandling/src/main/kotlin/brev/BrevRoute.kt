@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import no.nav.etterlatte.tilgangsstyring.sjekkSkrivetilgang
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
@@ -72,10 +73,8 @@ fun Route.brevRoute(service: BrevService) {
         }
 
         get("pdf") {
-            kunSkrivetilgang {
-                val pdf = genererPdf(logger, service)
-                call.respondBytes(pdf, contentType = ContentType.Application.Pdf)
-            }
+            val pdf = genererPdf(logger, service, harSkrivetilgang = sjekkSkrivetilgang())
+            call.respondBytes(pdf, contentType = ContentType.Application.Pdf)
         }
 
         post("ferdigstill") {
@@ -89,7 +88,7 @@ fun Route.brevRoute(service: BrevService) {
             kunSkrivetilgang {
                 logger.info("Genererer PDF og ferdigstiller brev for behandling (behandlingId=$behandlingId)")
                 measureTimedValue {
-                    genererPdf(logger, service)
+                    genererPdf(logger, service, harSkrivetilgang = true)
                     ferdigstill(logger, service)
                 }.let { (_, varighet) ->
                     logger.info("Generering og ferdigstilling av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
@@ -138,6 +137,7 @@ fun Route.brevRoute(service: BrevService) {
 private fun RoutingContext.genererPdf(
     logger: Logger,
     service: BrevService,
+    harSkrivetilgang: Boolean,
 ): ByteArray {
     val brevId =
         krevIkkeNull(
@@ -152,7 +152,14 @@ private fun RoutingContext.genererPdf(
 
             measureTimedValue {
                 runBlocking {
-                    service.genererPdf(brevId, behandlingId, sakId, brukerTokenInfo).bytes
+                    service
+                        .genererPdf(
+                            brevID = brevId,
+                            behandlingId = behandlingId,
+                            sakId = sakId,
+                            bruker = brukerTokenInfo,
+                            harSkrivetilgang = harSkrivetilgang,
+                        ).bytes
                 }
             }.let { (pdf, varighet) ->
                 logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")

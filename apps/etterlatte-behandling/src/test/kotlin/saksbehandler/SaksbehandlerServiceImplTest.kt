@@ -69,11 +69,11 @@ class SaksbehandlerServiceImplTest(
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
-                mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
+                mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
-        every { user.enheterMedSkrivetilgang() } returns emptyList()
+        every { user.hentEnheterMedSkrivetilgang() } returns emptyList()
         every { user.kanSeOppgaveBenken() } returns true
 
         service.hentKomplettSaksbehandler(nyidentSaksbehandler)
@@ -97,11 +97,11 @@ class SaksbehandlerServiceImplTest(
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
                 simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
-                mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
+                mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
-        every { user.enheterMedSkrivetilgang() } returns emptyList()
+        every { user.hentEnheterMedSkrivetilgang() } returns emptyList()
         every { user.kanSeOppgaveBenken() } returns true
 
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen"))

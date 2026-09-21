@@ -50,7 +50,7 @@ class SaksbehandlerServiceImpl(
             if (!saksbehandlerNavn.isNullOrEmpty()) saksbehandlerNavn else ident,
             innloggetSaksbehandler.enheter(),
             innloggetSaksbehandler.saksbehandlerMedRoller.harRolleAttestant(),
-            skriveEnheter = innloggetSaksbehandler.enheterMedSkrivetilgang(),
+            skriveEnheter = innloggetSaksbehandler.hentEnheterMedSkrivetilgang(),
             kanSeOppgaveliste = innloggetSaksbehandler.kanSeOppgaveBenken(),
         )
     }

@@ -90,7 +90,9 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
       <ReadMore header="Historikk" onClick={() => trackClick(ClickEvent.VIS_SAKSHISTORIKK)}>
         <Sakshistorikk sakId={sak.id} />
       </ReadMore>
-      {opprettAnnenSakEnabled && <OpprettAnnenSakModal sak={sak} />}
+      {opprettAnnenSakEnabled && enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
+        <OpprettAnnenSakModal sak={sak} />
+      )}
       {mapResult(flyktningResult, {
         success: (data) =>
           !!data?.erFlyktning && (

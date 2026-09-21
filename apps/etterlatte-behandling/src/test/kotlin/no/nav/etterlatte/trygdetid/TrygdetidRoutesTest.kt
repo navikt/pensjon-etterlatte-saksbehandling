@@ -12,6 +12,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.common.trygdetid.StatusOppdatertDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.module
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -38,13 +40,21 @@ internal class TrygdetidRoutesTest {
     @BeforeAll
     fun before() {
         server.start()
+        every { applicationContext.saksbehandlerGroupIdsByKey } returns
+            mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim)
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true
             }
         every {
             applicationContext.saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
-        } returns listOf(SaksbehandlerEnhet(enhetsNummer = Enheter.defaultEnhet.enhetNr, navn = Enheter.defaultEnhet.navn))
+        } returns
+            listOf(
+                SaksbehandlerEnhet(
+                    enhetsNummer = Enheter.defaultEnhet.enhetNr,
+                    navn = Enheter.defaultEnhet.navn,
+                ),
+            )
         every {
             applicationContext.sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(any())
         } returns
@@ -156,5 +166,5 @@ internal class TrygdetidRoutesTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken() }
+    private val token: String by lazy { server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
 }

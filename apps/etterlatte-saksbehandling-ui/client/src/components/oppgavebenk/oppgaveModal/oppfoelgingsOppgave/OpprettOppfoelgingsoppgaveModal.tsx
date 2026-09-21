@@ -9,6 +9,7 @@ import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { BodyShort, Box, Button, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { isPending } from '~shared/api/apiUtils'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 interface OppfoelgingsOpppgaveForm {
   merknad: string
@@ -20,6 +21,7 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettel
   const [open, setOpen] = useState(false)
   const [opprettOppgaveStatus, opprettOppgaveApi, resetOpprettOppgaveStatus] = useApiCall(opprettOppgave)
   const saksbehandler = useInnloggetSaksbehandler()
+  const harSkrivetilgang = enhetErSkrivbar(sak.enhet, saksbehandler.skriveEnheter)
 
   const {
     register,
@@ -66,6 +68,7 @@ export function OpprettOppfoelgingsoppgaveModal(props: { sak: ISak; vedOpprettel
           setOpen(true)
         }}
         variant="secondary"
+        disabled={!harSkrivetilgang}
       >
         Opprett oppfølgingsoppgave
       </Button>

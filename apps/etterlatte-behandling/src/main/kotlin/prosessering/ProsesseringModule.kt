@@ -4,35 +4,53 @@ import efterlatte.prosessering.ProcessingEngine
 import efterlatte.prosessering.Reaper
 import efterlatte.prosessering.StandardTaskProdusent
 import efterlatte.prosessering.Status
+import efterlatte.prosessering.Task
+import efterlatte.prosessering.TaskLogg
+import efterlatte.prosessering.TaskLoggType
 import efterlatte.prosessering.TaskProdusent
 import efterlatte.prosessering.ktor.Prosessering
 import efterlatte.prosessering.ktor.taskProdusent
 import efterlatte.prosessering.postgres.PostgresTaskRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.clusterNavn
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import org.slf4j.LoggerFactory
+import java.time.Instant
+import java.util.UUID
 import javax.sql.DataSource
 
 fun Application.installProsessering(dataSource: DataSource) {
     install(Prosessering) {
         repository = PostgresTaskRepository(dataSource)
-        steg = listOf(SoeknadMottakSkyggeTaskStep())
-        node = "etterlatte-behandling"
+        steg = listOfNotNull(SoeknadMottakSkyggeTaskStep(), FeilbarDemoTaskStep().takeIf { erDemomiljoe() })
+        node = PROSESSERING_NODE
         reaperPaa = true
     }
 }
+
+const val PROSESSERING_NODE = "etterlatte-behandling"
+
+private fun erDemomiljoe(): Boolean = !appIsInGCP() || isDev()
 
 data class SoeknadSkyggeRequest(
     val soeknadId: String,
@@ -65,17 +83,13 @@ fun Route.soeknadSkyggeRoute(soeknadSkyggeDao: SoeknadSkyggeDao) {
     }
 }
 
-fun Route.prosesseringLesRoutes(
+fun Route.prosesseringRoutes(
     prosesseringAdminDao: ProsesseringAdminDao,
     saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
 ) {
     route("/api/prosessering/task") {
         get {
-            kunSaksbehandler { saksbehandler ->
-                if (!SaksbehandlerMedRoller(saksbehandler, saksbehandlerGroupIdsByKey).harRolleProsessering()) {
-                    call.respond(HttpStatusCode.Forbidden)
-                    return@kunSaksbehandler
-                }
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) {
                 val status =
                     call.request.queryParameters["status"]?.let {
                         runCatching { Status.valueOf(it) }.getOrNull()
@@ -86,16 +100,8 @@ fun Route.prosesseringLesRoutes(
         }
 
         get("/{id}") {
-            kunSaksbehandler { saksbehandler ->
-                if (!SaksbehandlerMedRoller(saksbehandler, saksbehandlerGroupIdsByKey).harRolleProsessering()) {
-                    call.respond(HttpStatusCode.Forbidden)
-                    return@kunSaksbehandler
-                }
-                val id =
-                    krevIkkeNull(call.parameters["id"]?.toLongOrNull()) {
-                        "id mangler eller er ugyldig"
-                    }
-                val task = prosesseringAdminDao.finn(id)
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) {
+                val task = prosesseringAdminDao.finn(call.taskId())
                 if (task == null) {
                     call.respond(HttpStatusCode.NotFound)
                 } else {
@@ -103,5 +109,264 @@ fun Route.prosesseringLesRoutes(
                 }
             }
         }
+
+        // Stiene er låst av kontrakten efterlatte-verktoy kaller
+        // (.github/verktoy/03-prosessering-kontrakten.md) og er derfor ASCII-formen «rekjor».
+        post("/{id}/rekjor") {
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
+                medBody<TaskHandling> { kropp ->
+                    call.respond(
+                        utfoerOgLogg(
+                            prosesseringAdminDao = prosesseringAdminDao,
+                            saksbehandler = saksbehandler,
+                            id = call.taskId(),
+                            forventetVersjon = kropp.versjon,
+                            handling = OperatorHandling.REKJOER,
+                        ),
+                    )
+                }
+            }
+        }
+
+        post("/{id}/avbryt") {
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
+                medBody<TaskHandling> { kropp ->
+                    call.respond(
+                        utfoerOgLogg(
+                            prosesseringAdminDao = prosesseringAdminDao,
+                            saksbehandler = saksbehandler,
+                            id = call.taskId(),
+                            forventetVersjon = kropp.versjon,
+                            handling = OperatorHandling.AVBRYT,
+                        ),
+                    )
+                }
+            }
+        }
+
+        get("/{id}/logg") {
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) {
+                call.respond(prosesseringAdminDao.hentHendelser(call.taskId()))
+            }
+        }
+
+        post("/{id}/kommentar") {
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
+                medBody<TaskHendelseRequest> { kropp ->
+                    call.respond(
+                        HttpStatusCode.Created,
+                        leggTilHendelseOgLogg(
+                            prosesseringAdminDao = prosesseringAdminDao,
+                            saksbehandler = saksbehandler,
+                            id = call.taskId(),
+                            type = TaskLoggType.KOMMENTAR,
+                            melding = kropp.melding,
+                        ),
+                    )
+                }
+            }
+        }
+
+        post("/{id}/avvik") {
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
+                medBody<RegistrerAvvikRequest> { kropp ->
+                    if (kropp.melding.isBlank()) {
+                        throw UgyldigForespoerselException(
+                            code = "PROSESSERING_AVVIK_UTEN_MELDING",
+                            detail = "melding må være satt for å registrere avvik",
+                        )
+                    }
+                    call.respond(
+                        registrerAvvikOgLogg(
+                            prosesseringAdminDao = prosesseringAdminDao,
+                            saksbehandler = saksbehandler,
+                            id = call.taskId(),
+                            forventetVersjon = kropp.versjon,
+                            melding = kropp.melding,
+                        ),
+                    )
+                }
+            }
+        }
     }
 }
+
+data class TaskHendelseRequest(
+    val melding: String,
+)
+
+/** Kroppen til `POST .../task/{id}/avvik` — samme optimistiske lås som `rekjor`/`avbryt`. */
+data class RegistrerAvvikRequest(
+    val versjon: Long,
+    val melding: String,
+)
+
+data class TaskHandling(
+    val versjon: Long,
+)
+
+data class FeilbarDemoRespons(
+    val taskId: Long,
+    val simulertOppeFra: Instant,
+)
+
+fun Route.feilbarDemoRoute(saksbehandlerGroupIdsByKey: Map<AzureGroup, String>) {
+    route("/api/prosessering/demo/feilbar") {
+        post {
+            if (!erDemomiljoe()) {
+                throw IkkeFunnetException(
+                    code = "DEMO_IKKE_TILGJENGELIG",
+                    detail = "Feilbar demo task finnes bare i dev og lokalt, ikke i ${clusterNavn() ?: "ukjent miljø"}",
+                )
+            }
+            medProsesseringTilgang(saksbehandlerGroupIdsByKey) { saksbehandler ->
+                val vinduSekunder = call.request.queryParameters["vinduSekunder"]?.toLongOrNull() ?: STANDARD_DEMOVINDU
+                if (vinduSekunder !in 0..MAKS_DEMOVINDU) {
+                    throw UgyldigForespoerselException(
+                        code = "UGYLDIG_DEMOVINDU",
+                        detail = "vinduSekunder må være mellom 0 og $MAKS_DEMOVINDU, var $vinduSekunder",
+                    )
+                }
+
+                val simulertOppeFra = Instant.now().plusSeconds(vinduSekunder)
+                val taskId =
+                    call.application.taskProdusent.opprettIEgenTransaksjon(
+                        type = FeilbarDemo,
+                        payload =
+                            FeilbarDemoPayload(
+                                demoId = UUID.randomUUID().toString(),
+                                simulertOppeFra = simulertOppeFra,
+                            ),
+                    )
+                operatorlogg.info(
+                    "{} opprettet feilbar demo-task {} — simulert avhengighet er nede til {}",
+                    saksbehandler.ident(),
+                    taskId.verdi,
+                    simulertOppeFra,
+                )
+                call.respond(
+                    HttpStatusCode.Created,
+                    FeilbarDemoRespons(taskId = taskId.verdi, simulertOppeFra = simulertOppeFra),
+                )
+            }
+        }
+    }
+}
+
+private const val STANDARD_DEMOVINDU = 20L
+private const val MAKS_DEMOVINDU = 3600L
+
+private suspend fun RoutingContext.medProsesseringTilgang(
+    saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
+    haandter: suspend (Saksbehandler) -> Unit,
+) {
+    kunSaksbehandler { saksbehandler ->
+        if (!SaksbehandlerMedRoller(saksbehandler, saksbehandlerGroupIdsByKey).harRolleProsessering()) {
+            call.respond(HttpStatusCode.Forbidden)
+            return@kunSaksbehandler
+        }
+        haandter(saksbehandler)
+    }
+}
+
+private fun ApplicationCall.taskId(): Long =
+    krevIkkeNull(parameters["id"]?.toLongOrNull()) {
+        "id mangler eller er ugyldig"
+    }
+
+private fun utfoerOgLogg(
+    prosesseringAdminDao: ProsesseringAdminDao,
+    saksbehandler: Saksbehandler,
+    id: Long,
+    forventetVersjon: Long,
+    handling: OperatorHandling,
+): Task =
+    try {
+        val task =
+            when (handling) {
+                OperatorHandling.REKJOER -> prosesseringAdminDao.rekjoer(id = id, forventetVersjon = forventetVersjon)
+                OperatorHandling.AVBRYT -> prosesseringAdminDao.avbryt(id = id, forventetVersjon = forventetVersjon)
+            }
+        operatorlogg.info(
+            "{} utførte {} på task {} — ny status {}",
+            saksbehandler.ident(),
+            handling,
+            id,
+            task.status,
+        )
+        task
+    } catch (feil: Throwable) {
+        operatorlogg.warn(
+            "{} fikk avvist {} på task {}: {}",
+            saksbehandler.ident(),
+            handling,
+            id,
+            feil.message,
+        )
+        throw feil
+    }
+
+private fun leggTilHendelseOgLogg(
+    prosesseringAdminDao: ProsesseringAdminDao,
+    saksbehandler: Saksbehandler,
+    id: Long,
+    type: TaskLoggType,
+    melding: String,
+): TaskLogg {
+    val hendelse =
+        prosesseringAdminDao.leggTilHendelse(
+            taskId = id,
+            type = type,
+            melding = melding,
+            endretAv = saksbehandler.ident(),
+            node = PROSESSERING_NODE,
+        )
+    operatorlogg.info(
+        "{} registrerte {} på task {}",
+        saksbehandler.ident(),
+        type,
+        id,
+    )
+    return hendelse
+}
+
+/**
+ * Samme mønster som [utfoerOgLogg]: statusen sier hva som ble avgjort, avslaget sier hvorfor
+ * — men her er det [ProsesseringAdminDao.registrerAvvik] som både gjør overgangen og skriver
+ * `AVVIK`-raden.
+ */
+private fun registrerAvvikOgLogg(
+    prosesseringAdminDao: ProsesseringAdminDao,
+    saksbehandler: Saksbehandler,
+    id: Long,
+    forventetVersjon: Long,
+    melding: String,
+): Task =
+    try {
+        val task =
+            prosesseringAdminDao.registrerAvvik(
+                id = id,
+                forventetVersjon = forventetVersjon,
+                melding = melding,
+                endretAv = saksbehandler.ident(),
+                node = PROSESSERING_NODE,
+            )
+        operatorlogg.info(
+            "{} registrerte avvik på task {} — ny status {}",
+            saksbehandler.ident(),
+            id,
+            task.status,
+        )
+        task
+    } catch (feil: Throwable) {
+        operatorlogg.warn(
+            "{} fikk avvist avvik på task {}: {}",
+            saksbehandler.ident(),
+            id,
+            feil.message,
+        )
+        throw feil
+    }
+
+private val operatorlogg = LoggerFactory.getLogger("prosessering.operator")
+private val logger = LoggerFactory.getLogger("no.nav.etterlatte.prosessering.ProsesseringModule")

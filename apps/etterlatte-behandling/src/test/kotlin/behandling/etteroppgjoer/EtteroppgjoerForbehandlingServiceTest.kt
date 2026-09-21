@@ -292,6 +292,40 @@ class EtteroppgjoerForbehandlingServiceTest {
         assertEquals(exception.code, "FORBEHANDLING_FINNES_ALLEREDE")
     }
 
+    @Test
+    fun `harForbehandlingForAar returnerer false når kun andre år finnes`() {
+        val ctx = TestContext()
+        ctx.returnsForbehandlinger(
+            listOf(
+                EtteroppgjoerForbehandling
+                    .opprett(
+                        sak(),
+                        Periode(YearMonth.now().minusYears(1), null),
+                        ctx.behandling.id,
+                    ).copy(aar = 2023),
+            ),
+        )
+
+        ctx.service.harForbehandlingForAar(sakId1, 2024) shouldBe false
+    }
+
+    @Test
+    fun `harForbehandlingForAar returnerer true når samme år finnes`() {
+        val ctx = TestContext()
+        ctx.returnsForbehandlinger(
+            listOf(
+                EtteroppgjoerForbehandling
+                    .opprett(
+                        sak(),
+                        Periode(YearMonth.now().minusYears(1), null),
+                        ctx.behandling.id,
+                    ).copy(aar = 2024),
+            ),
+        )
+
+        ctx.service.harForbehandlingForAar(sakId1, 2024) shouldBe true
+    }
+
     @ParameterizedTest(name = "skal ikke opprette forbehandling for status={0}")
     @EnumSource(
         value = EtteroppgjoerStatus::class,
@@ -461,7 +495,11 @@ class EtteroppgjoerForbehandlingServiceTest {
 
         val request = ctx.stubLagreOgBeregnFaktiskInntekt(omgjoeringForbehandling, omgjortForbehandling)
 
-        ctx.service.lagreOgBeregnFaktiskInntekt(omgjoeringForbehandling.id, ctx.faktiskInntektRequest(), simpleSaksbehandler())
+        ctx.service.lagreOgBeregnFaktiskInntekt(
+            omgjoeringForbehandling.id,
+            ctx.faktiskInntektRequest(),
+            simpleSaksbehandler(),
+        )
 
         // Baseline = den omgjorte forbehandlingens sisteIverksatteBehandling (ytelsen før det opprinnelige etteroppgjøret)
         request.captured.sammenlignTilOgMedBehandlingId shouldBe baselineBehandlingId

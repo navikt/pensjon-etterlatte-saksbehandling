@@ -114,6 +114,10 @@ spec:
       value: 2e1dc582-f762-4510-a660-88bf68fb7128
     - name: AZUREAD_SAKSBEHANDLER_GROUPID
       value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
+    - name: AZUREAD_SAKSBEHANDLER_GJENNY_GROUPID
+      value: 5b6745de-b65d-40eb-a6f5-860c8b61c27f
+    - name: AZUREAD_GJENNY_LES_GROUPID
+      value: 609a78e7-e0bd-491c-a63b-96a09ec62b9b
     - name: AZUREAD_STRENGT_FORTROLIG_GROUPID
       value: a1b518e2-3947-478d-8929-e5d685c47cac
     - name: AZUREAD_EGEN_ANSATT_GROUPID

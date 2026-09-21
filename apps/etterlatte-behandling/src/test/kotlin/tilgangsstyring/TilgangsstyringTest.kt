@@ -6,7 +6,6 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
@@ -80,7 +79,7 @@ class TilgangsstyringTest {
                     "Sak med tilgang",
                     "/api/sak/1",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -93,7 +92,7 @@ class TilgangsstyringTest {
                     "Sak uten tilgang",
                     "/api/sak/1",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -106,7 +105,7 @@ class TilgangsstyringTest {
                     "Behandling med tilgang",
                     "/api/behandling/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -122,7 +121,7 @@ class TilgangsstyringTest {
                     "Behandling uten tilgang",
                     "/api/behandling/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -138,7 +137,7 @@ class TilgangsstyringTest {
                     "Oppgave med tilgang",
                     "/api/oppgave/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -157,7 +156,7 @@ class TilgangsstyringTest {
                     "Oppgave uten tilgang",
                     "/api/oppgave/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -176,7 +175,7 @@ class TilgangsstyringTest {
                     "Klage med tilgang",
                     "/api/klage/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -198,7 +197,7 @@ class TilgangsstyringTest {
                     "Klage uten tilgang",
                     "/api/klage/${UUID.randomUUID()}",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -220,7 +219,7 @@ class TilgangsstyringTest {
                     "Overstyrt sak med tilgang",
                     "/api/annet/sak",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -233,7 +232,7 @@ class TilgangsstyringTest {
                     "Overstyrt sak uten tilgang",
                     "/api/annet/sak",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao> {
                         every {
@@ -246,7 +245,7 @@ class TilgangsstyringTest {
                     "Overstyrt enhet med tilgang",
                     "/api/annet/enhet",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
                     },
                     mockk<SakTilgangDao>(),
                     200,
@@ -255,7 +254,7 @@ class TilgangsstyringTest {
                     "Overstyrt enhet uten tilgang",
                     "/api/annet/enhet",
                     mockk<SaksbehandlerMedEnheterOgRoller> {
-                        every { enheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
+                        every { hentEnheterMedSkrivetilgang() } returns listOf(Enheter.STEINKJER.enhetNr)
                     },
                     mockk<SakTilgangDao>(),
                     403,

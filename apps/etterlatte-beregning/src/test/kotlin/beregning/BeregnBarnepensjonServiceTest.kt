@@ -106,7 +106,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns
             barnepensjonBeregningsGrunnlag(
@@ -129,7 +128,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
@@ -189,7 +187,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList(), BeregningsMetode.PRORATA)
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
@@ -227,7 +224,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList(), BeregningsMetode.BEST)
@@ -267,7 +263,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
@@ -301,7 +296,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns
@@ -341,7 +335,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
@@ -380,7 +373,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns null
 
@@ -399,7 +391,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
@@ -438,7 +429,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns
@@ -506,7 +496,6 @@ internal class BeregnBarnepensjonServiceTest {
             grunnlagMedEkstraAvdoedForelder(LocalDate.of(2023, 11, 12))
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns
@@ -580,7 +569,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns
             barnepensjonBeregningsGrunnlag(
@@ -646,7 +634,6 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns
@@ -726,7 +713,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery {
@@ -772,7 +758,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns
@@ -836,7 +821,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns
             barnepensjonBeregningsGrunnlag(
@@ -868,7 +852,6 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
-                any(),
             )
         } returns
             barnepensjonBeregningsGrunnlag(
@@ -899,7 +882,6 @@ internal class BeregnBarnepensjonServiceTest {
             ).hentOpplysningsgrunnlag()
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
-                any(),
                 any(),
             )
         } returns
@@ -944,7 +926,7 @@ internal class BeregnBarnepensjonServiceTest {
             coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
             coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
             coEvery {
-                beregningsGrunnlagService.hentBeregningsGrunnlag(any(), any())
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
                 barnepensjonBeregningsGrunnlagMedVedtaksperioder(
                     behandling.id,
@@ -977,7 +959,7 @@ internal class BeregnBarnepensjonServiceTest {
             coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
             coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
             coEvery {
-                beregningsGrunnlagService.hentBeregningsGrunnlag(any(), any())
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
                 barnepensjonBeregningsGrunnlagMedVedtaksperioder(
                     behandling.id,
@@ -1026,7 +1008,7 @@ internal class BeregnBarnepensjonServiceTest {
             coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
             coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
             coEvery {
-                beregningsGrunnlagService.hentBeregningsGrunnlag(any(), any())
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
                 barnepensjonBeregningsGrunnlagMedVedtaksperioder(
                     behandling.id,

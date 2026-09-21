@@ -16,6 +16,7 @@ import { useAppDispatch } from '~store/Store'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
+import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
@@ -158,6 +159,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                   tittel={varselbrev.tittel}
                   kanRedigeres={redigerbar}
                 />
+                <BrevSpraak brev={varselbrev} kanRedigeres={redigerbar} />
                 <br />
 
                 <BrevMottakerWrapper brev={varselbrev} kanRedigeres={redigerbar} />

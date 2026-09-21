@@ -73,8 +73,8 @@ export const InformasjonFraBrukerSkjema = ({
         <ControlledRadioGruppe
           name="harMottattNyInformasjon"
           control={control}
-          legend="Har du fått ny informasjon fra bruker eller oppdaget feil i forbehandlingen?"
-          errorVedTomInput="Du må ta stilling til om bruker har gitt ny informasjon"
+          legend="Er det ny informasjon om inntekten fra bruker eller oppdaget feil av Nav?"
+          errorVedTomInput="Du må ta stilling til spørsmålet om ny informasjon / oppdaget feil"
           readOnly={!erRedigerbar}
           radios={
             <>

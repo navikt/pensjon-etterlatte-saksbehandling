@@ -134,6 +134,7 @@ class BrevService(
         behandlingId: UUID,
         sakId: SakId,
         bruker: BrukerTokenInfo,
+        harSkrivetilgang: Boolean,
     ): Pdf {
         val brev = brevApiKlient.hentBrev(sakId, brevID, bruker)
         if (!brev.kanEndres()) {
@@ -146,7 +147,12 @@ class BrevService(
         val behandlingMedBrevType = behandlingMedBrevService.hentBehandlingMedBrev(behandlingId).type
 
         val skalLagrePdf =
-            if (behandlingMedBrevType.harVedtaksbrev) {
+            if (!harSkrivetilgang) {
+                logger.info(
+                    "Bruker har ikke skrivetilgang. Genererer PDF for visning uten å lagre (behandlingId=$behandlingId)",
+                )
+                false
+            } else if (behandlingMedBrevType.harVedtaksbrev) {
                 val vedtak =
                     vedtakInternalService.hentVedtak(behandlingId, bruker)
                         ?: throw InternfeilException("Mangler vedtak for behandling (id=$behandlingId)")
@@ -314,7 +320,7 @@ class BrevService(
             BehandlingMedBrevType.BEHANDLING -> {
                 if (isRevurderingEtteroppgjoerVedtak(behandlingId)) {
                     etteroppgjoerRevurderingBrevService.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, bruker)
-                } else if (erVedtaksbrevPaaNyBrevflyt(behandlingId, bruker)) {
+                } else if (brevType == Brevtype.VEDTAK && erVedtaksbrevPaaNyBrevflyt(behandlingId, bruker)) {
                     vedtaksbrevService.tilbakestillVedtaksbrev(brevID, behandlingId, bruker)
                 } else {
                     videresendInterneFeil {

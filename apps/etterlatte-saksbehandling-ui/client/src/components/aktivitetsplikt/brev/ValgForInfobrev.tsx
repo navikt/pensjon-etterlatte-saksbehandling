@@ -43,6 +43,7 @@ function mapFromDto(brevdata: IBrevAktivitetspliktDto): Partial<IBrevAktivitetsp
     utbetaling: mapBooleanToJaNei(brevdata.utbetaling),
     redusertEtterInntekt: mapBooleanToJaNei(brevdata.redusertEtterInntekt),
     spraak: brevdata.spraak,
+    begrunnelse: brevdata.begrunnelse,
   }
 }
 
@@ -98,7 +99,7 @@ export const ValgForInfobrev = () => {
     if (redigeres && !!aktivtetspliktbrevdata) {
       reset(mapFromDto(aktivtetspliktbrevdata))
     }
-  }, [redigeres])
+  }, [redigeres, aktivtetspliktbrevdata, reset])
 
   const skalsendebrev = watch('skalSendeBrev')
 

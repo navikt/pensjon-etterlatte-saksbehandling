@@ -246,6 +246,7 @@ data class Avkorting(
         opphoerFom: YearMonth?,
         brukNyeReglerAvkorting: Boolean,
         aldersovergang: YearMonth? = null,
+        tillatEndreInntektEtteroppgjor: Boolean = false,
     ): Avkorting {
         var oppdatertAvkorting = this
         nyttGrunnlag.forEach {
@@ -257,6 +258,7 @@ data class Avkorting(
                     aldersovergang,
                     beregning,
                     brukNyeReglerAvkorting,
+                    tillatEndreInntektEtteroppgjor,
                 )
         }
 
@@ -271,6 +273,11 @@ data class Avkorting(
 
     /**
      * Legger til brukeroppgitt [ForventetInntekt] i [AarsoppgjoerLoepende].
+     *
+     * Hvis året allerede har et [Etteroppgjoer] og [tillatEndreInntektEtteroppgjor] er satt, behandles året
+     * som om det ikke har vært etteroppgjør ennå: eksisterende [Etteroppgjoer] (med faktisk inntekt og beregnet
+     * avkorting/restanse) erstattes med et nytt [AarsoppgjoerLoepende]. Selve etteroppgjøret må da gjøres på
+     * nytt (ny forbehandling) i etterkant.
      */
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
@@ -279,10 +286,27 @@ data class Avkorting(
         aldersovergang: YearMonth? = null,
         beregning: Beregning? = null,
         brukNyeReglerAvkorting: Boolean = false,
+        tillatEndreInntektEtteroppgjor: Boolean = false,
     ): Avkorting {
+        val eksisterendeAarsoppgjoer = hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom)
         val aarsoppgjoer =
-            hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom) as? AarsoppgjoerLoepende
-                ?: throw InternfeilException("Kan ikke oppdatere inntektsgrunnlag for et år som har etteroppgjør")
+            when (eksisterendeAarsoppgjoer) {
+                is AarsoppgjoerLoepende -> {
+                    eksisterendeAarsoppgjoer
+                }
+
+                is Etteroppgjoer -> {
+                    if (!tillatEndreInntektEtteroppgjor) {
+                        throw InternfeilException("Kan ikke oppdatere inntektsgrunnlag for et år som har etteroppgjør")
+                    }
+                    AarsoppgjoerLoepende(
+                        id = UUID.randomUUID(),
+                        aar = eksisterendeAarsoppgjoer.aar,
+                        fom = nyttGrunnlag.fom,
+                        ytelseFoerAvkorting = eksisterendeAarsoppgjoer.ytelseFoerAvkorting,
+                    )
+                }
+            }
 
         val tom = opphoerFom?.let { finnTomForInntekt(opphoerFom, aarsoppgjoer.aar) }
         val aldersovergangIDetteInntektsaaret = aldersovergang?.takeIf { nyttGrunnlag.fom.year == aldersovergang.year }

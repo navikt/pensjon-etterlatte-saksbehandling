@@ -288,6 +288,7 @@ class AvkortingService(
                         BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
                         false,
                     ),
+                tillatEndreInntektEtteroppgjor = skalTillateEndreInntektEtteroppgjor,
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, oppdatert)

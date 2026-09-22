@@ -21,6 +21,7 @@ import no.nav.etterlatte.beregning.regler.etteroppgjoer
 import no.nav.etterlatte.beregning.regler.sanksjon
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -105,6 +106,78 @@ class AvkortingValiderTest {
         assertThrows<InntektForTidligereAar> {
             validerInntekter(
                 behandling(BehandlingType.REVURDERING),
+                beregning(beregningsperiode(datoFOM = fom)),
+                avkorting,
+                listOf(inntektMedFratrekk),
+                emptyList(),
+                true,
+                null,
+                naa = fom,
+            )
+        }
+    }
+
+    @Test
+    fun `endre inntekt for etteroppgjort aar hvis revurderingen er omgjoering etter klage og aaret er paa eller etter nytt virk`() {
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        etteroppgjoer(aar = 2024),
+                    ),
+            )
+
+        val fom = YearMonth.of(2024, 12)
+
+        val inntektMedFratrekk =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 100000,
+                spesifikasjon = "asdf",
+                fom = fom,
+            )
+
+        validerInntekter(
+            // virk (default 2024-04) er samme aar som det etteroppgjorte aaret 2024
+            behandling(BehandlingType.REVURDERING, revurderingsaarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE),
+            beregning(beregningsperiode(datoFOM = fom)),
+            avkorting,
+            listOf(inntektMedFratrekk),
+            emptyList(),
+            true,
+            null,
+            naa = fom,
+        )
+    }
+
+    @Test
+    fun `Skal ikke kunne endre inntekt for etteroppgjort aar som ligger foer nytt virk selv om revurderingen er omgjoering etter klage`() {
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        etteroppgjoer(aar = 2023),
+                    ),
+            )
+
+        val fom = YearMonth.of(2023, 12)
+
+        val inntektMedFratrekk =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 100000,
+                spesifikasjon = "asdf",
+                fom = fom,
+            )
+
+        assertThrows<InntektForTidligereAar> {
+            validerInntekter(
+                // virk (default 2024-04) er etter det etteroppgjorte aaret 2023, som derfor ikke er beroert
+                behandling(BehandlingType.REVURDERING, revurderingsaarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE),
                 beregning(beregningsperiode(datoFOM = fom)),
                 avkorting,
                 listOf(inntektMedFratrekk),
@@ -870,11 +943,13 @@ class AvkortingValiderTest {
         virk: YearMonth? = YearMonth.of(2024, Month.APRIL),
         behandlingId: UUID = UUID.randomUUID(),
         sakId: SakId = SakId(1L),
+        revurderingsaarsak: Revurderingaarsak? = null,
     ): DetaljertBehandling =
         mockk {
             every { behandlingType } returns type
             every { id } returns behandlingId
             every { sak } returns sakId
+            every { this@mockk.revurderingsaarsak } returns revurderingsaarsak
             every { virkningstidspunkt } returns
                 if (virk == null) {
                     null

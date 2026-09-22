@@ -3,6 +3,7 @@ package no.nav.etterlatte.avkorting
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -168,11 +169,21 @@ object AvkortingValider {
             throw HarFratrekkInnAarForFulltAar()
         }
 
+        // En omgjøring etter klage kan flytte virkningstidspunktet tilbake i tid slik at det nå dekker et
+        // allerede etteroppgjort år - da må saksbehandler kunne rette inntekten for nettopp det året i denne
+        // revurderingen. Vi tillater derfor kun endring for etteroppgjorte år som er berørt av det nye
+        // virkningstidspunktet (samme kriterium som brukes for å avgjøre om et etteroppgjør er berørt, se
+        // EtteroppgjoerService.varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt i
+        // etterlatte-behandling) - andre etteroppgjorte år som ikke er del av denne omgjøringen skal fortsatt
+        // gå via en egen etteroppgjørs-revurdering.
+        val erOmgjoeringEtterKlage = behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
         val etteroppgjorteAar =
             eksisterendeAvkorting.aarsoppgjoer
                 .filterIsInstance<Etteroppgjoer>()
                 .map { it.aar }
-        if (nyeGrunnlag.any { it.fom.year in etteroppgjorteAar }) {
+        val etteroppgjorteAarSomIkkeKanEndres =
+            etteroppgjorteAar.filterNot { erOmgjoeringEtterKlage && it >= virk.year }
+        if (nyeGrunnlag.any { it.fom.year in etteroppgjorteAarSomIkkeKanEndres }) {
             throw InntektForTidligereAar()
         }
     }

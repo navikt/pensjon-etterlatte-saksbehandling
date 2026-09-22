@@ -4,6 +4,7 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import org.slf4j.LoggerFactory
@@ -53,6 +54,9 @@ class JobbScheduler(
         PeriodiskeMaanedligeJobber.entries
             // filtrere bort jobber som allerede er planlagt for neste måned
             .filter { periodiskJobb ->
+                periodiskJobb.jobbType !in listOf(JobbType.OMS_DOED_3AAR, JobbType.OMS_DOED_5AAR) ||
+                    isDev()
+            }.filter { periodiskJobb ->
                 planlagteJobberNesteMnd.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
             }
             // opprett jobb for neste måned
@@ -88,6 +92,8 @@ class JobbScheduler(
         // Merk at justering av behandlingMaaned kan medføre uønsket oppførsel (f.eks. har løpende ytelse sjekker feil måned)
         val behandlingMaanedJustering: Long,
     ) {
+        OMS_DOED_3_AAR(JobbType.OMS_DOED_3AAR, 10, 0),
+        OMS_DOED_5_AAR(JobbType.OMS_DOED_5AAR, 10, 0),
         OMS_DOED_4MND(JobbType.OMS_DOED_4MND, 1, 0),
         OMS_DOED_6MND(JobbType.OMS_DOED_6MND, 1, 0),
         OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK(JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK, 8, 0),

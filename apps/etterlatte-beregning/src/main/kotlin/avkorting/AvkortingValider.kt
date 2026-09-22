@@ -62,7 +62,7 @@ object AvkortingValider {
         krevInntektForNesteAar: Boolean,
         eksisterendeOpphoerFom: YearMonth?,
         naa: YearMonth = YearMonth.now(),
-        blokkerInntektForEtteroppgjorteAar: Boolean = true,
+        tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor: Boolean = false,
     ) {
         val inntekterViHar =
             eksisterendeAvkorting.aarsoppgjoer.map { it.aar }.toSet() + nyeGrunnlag.map { it.fom.year }.toSet()
@@ -161,7 +161,7 @@ object AvkortingValider {
             throw HarFratrekkInnAarForFulltAar()
         }
 
-        if (blokkerInntektForEtteroppgjorteAar) {
+        if (!tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor) {
             val etteroppgjorteAar =
                 eksisterendeAvkorting.aarsoppgjoer
                     .filterIsInstance<Etteroppgjoer>()

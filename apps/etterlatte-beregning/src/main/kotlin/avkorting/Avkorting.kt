@@ -62,7 +62,6 @@ data class Avkorting(
                     }
                 }
             }
-
         val avkortetYtelse =
             if (fraVirkningstidspunkt !=
                 null
@@ -246,7 +245,7 @@ data class Avkorting(
         opphoerFom: YearMonth?,
         brukNyeReglerAvkorting: Boolean,
         aldersovergang: YearMonth? = null,
-        tillatEndreInntektEtteroppgjor: Boolean = false,
+        tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor: Boolean = false,
     ): Avkorting {
         var oppdatertAvkorting = this
         nyttGrunnlag.forEach {
@@ -258,7 +257,7 @@ data class Avkorting(
                     aldersovergang,
                     beregning,
                     brukNyeReglerAvkorting,
-                    tillatEndreInntektEtteroppgjor,
+                    tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor,
                 )
         }
 
@@ -307,21 +306,17 @@ data class Avkorting(
                     )
                 }
             }
-
         val tom = opphoerFom?.let { finnTomForInntekt(opphoerFom, aarsoppgjoer.aar) }
         val aldersovergangIDetteInntektsaaret = aldersovergang?.takeIf { nyttGrunnlag.fom.year == aldersovergang.year }
-
         val inntektTom = nyttGrunnlag.inntektTom
         val fratrekkInnAar = nyttGrunnlag.fratrekkInnAar
         val inntektUtlandTom = nyttGrunnlag.inntektUtlandTom
         val fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland
         val kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now())
         val periode = Periode(fom = nyttGrunnlag.fom, tom = tom)
-
         // Ved revurdering tilbake i tid - betyr det at fom i årsoppgjøret også må flyttes til fom i nytt inntektsgrunnlag
         val gjeldendeAaarsoppgjoerFom = if (nyttGrunnlag.fom < aarsoppgjoer.fom) nyttGrunnlag.fom else aarsoppgjoer.fom
         val ytelseFoerAvkorting = ytelseFoerAvkortingForBeregning(aarsoppgjoer, beregning)
-
         val maanederInnvilget =
             finnAntallInnvilgaMaanederForAar(
                 fom = gjeldendeAaarsoppgjoerFom,
@@ -330,7 +325,6 @@ data class Avkorting(
                 ytelse = ytelseFoerAvkorting,
                 brukNyeReglerAvkorting = brukNyeReglerAvkorting,
             )
-
         val forventetInntekt =
             ForventetInntekt(
                 id = nyttGrunnlag.id,
@@ -363,7 +357,6 @@ data class Avkorting(
                 maanederInnvilget = maanederInnvilget.maaneder,
                 maanederInnvilgetRegelResultat = maanederInnvilget.regelResultat,
             )
-
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Kun ta med perioder før nytt virkningstidspunkt - revurdering bakover i tid vil fjerne alt etter
@@ -371,7 +364,6 @@ data class Avkorting(
                 .filter { it.grunnlag.periode.fom < nyttGrunnlag.fom }
                 .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom, tom) }
                 .plus(Inntektsavkorting(grunnlag = forventetInntekt))
-
         val oppdatertAarsoppjoer =
             aarsoppgjoer.copy(
                 inntektsavkorting = oppdatert,
@@ -425,7 +417,6 @@ data class Avkorting(
         brukNyeReglerAvkorting: Boolean,
     ): Avkorting {
         val tidligereAarsoppgjoer = aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == aar }
-
         val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
         val maanederInnvilget =
             finnAntallInnvilgaMaanederForAar(
@@ -462,7 +453,6 @@ data class Avkorting(
                 maanederInnvilget = maanederInnvilget.maaneder,
                 maanederInnvilgetRegelResultat = maanederInnvilget.regelResultat,
             )
-
         val etteroppgjoer =
             Etteroppgjoer(
                 id = UUID.randomUUID(),
@@ -502,7 +492,6 @@ data class Avkorting(
             (aarsoppgjoer)
                 .filter { it.aar <= (opphoerFom?.year ?: it.aar) }
                 .map { aarsoppgjoer ->
-
                     val ytelseFoerAvkorting = ytelseFoerAvkortingForBeregning(aarsoppgjoer, beregning)
 
                     when (aarsoppgjoer) {
@@ -545,7 +534,6 @@ data class Avkorting(
                         fom = aarsoppgjoer.fom,
                         tom = inntektsavkorting.grunnlag.periode.tom,
                     )
-
                 val inntekt =
                     when (inntektsavkorting.grunnlag.inntektInnvilgetPeriode) {
                         is BenyttetInntektInnvilgetPeriode -> {
@@ -573,7 +561,6 @@ data class Avkorting(
                         periode = periode,
                         avkortingGrunnlag = inntekt,
                     )
-
                 val avkortetYtelseForventetInntekt =
                     if (aarsoppgjoer.inntektsavkorting.size > 1) {
                         AvkortingRegelkjoring.beregnAvkortetYtelse(
@@ -596,7 +583,6 @@ data class Avkorting(
                         },
                 )
             }
-
         val avkortetYtelse =
             if (aarsoppgjoer.inntektsavkorting.size > 1) {
                 beregnAvkortetYtelseMedRestanse(
@@ -611,7 +597,6 @@ data class Avkorting(
                 reberegnetInntektsavkorting.first().let {
                     val tomSluttenAvAaret =
                         tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
-
                     val sistePeriode =
                         when (val tomForPeriode = it.grunnlag.periode.tom) {
                             null -> {
@@ -636,7 +621,6 @@ data class Avkorting(
                     )
                 }
             }
-
         val avkortetYtelseJustert =
             aapneSistePeriodeHvisBeregningErAapen(avkortetYtelse, aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
 
@@ -712,7 +696,6 @@ data class Avkorting(
                 .sanksjonerInnenforAarsoppjoer(sanksjoner)
                 .sortedBy { it.fom }
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
-
         val tomSluttenAvAaret = tomSluttenAvAaretForAvkortetYtelse(aarsoppgjoer, ytelseFoerAvkorting, opphoerFom)
 
         reberegnetInntektsavkorting.forEachIndexed { i, inntektsavkorting ->
@@ -724,7 +707,6 @@ data class Avkorting(
                 sorterteSanksjonerInnenforAarsoppgjoer.filter {
                     it.fom < foersteFomDenneInntektsavkortingen
                 }
-
             val restanse =
                 when (i) {
                     0 -> {
@@ -741,7 +723,6 @@ data class Avkorting(
                         )
                     }
                 }
-
             val erSistePeriodeUtenOpphoer =
                 reberegnetInntektsavkorting
                     .maxBy {
@@ -750,7 +731,6 @@ data class Avkorting(
                     .let {
                         it.fom == inntektsavkorting.grunnlag.periode.fom && it.tom == null
                     }
-
             val ytelse =
                 AvkortingRegelkjoring.beregnAvkortetYtelse(
                     periode =
@@ -769,7 +749,6 @@ data class Avkorting(
         val senesteInntektsjusteringFom =
             reberegnetInntektsavkorting.maxOf { inntektsavkorting -> inntektsavkorting.avkortingsperioder.minOf { it.periode.fom } }
         val senesteSanksjonFom = sorterteSanksjonerInnenforAarsoppgjoer.maxOfOrNull { it.fom }
-
         // Hvis vi har sanksjoner som ikke er tatt høyde for i beregningen av ytelse opp mot restanse over, må vi
         // ta høyde for de til slutt
         if (senesteSanksjonFom != null && senesteSanksjonFom >= senesteInntektsjusteringFom) {
@@ -795,7 +774,6 @@ data class Avkorting(
                     sanksjoner = sorterteSanksjonerInnenforAarsoppgjoer,
                     restanse = restanse,
                 )
-
             // Slår sammen ytelsesperiodene før siste beregning med sanksjon med siste beregning av sanksjon
             val perioderSomBeholdes =
                 avkortetYtelseMedAllForventetInntekt.takeWhile { it.periode.fom < tidligsteFomIkkeBeregnetSanksjon }
@@ -873,7 +851,6 @@ data class Avkorting(
                 periode = etteroppgjoer.inntekt.periode,
                 avkortingGrunnlag = etteroppgjoer.inntekt,
             )
-
         val avkortetYtelseFaktiskInntekt =
             AvkortingRegelkjoring.beregnAvkortetYtelse(
                 periode = etteroppgjoer.inntekt.periode,
@@ -989,7 +966,6 @@ data class ForventetInntekt(
  * inntektInnvilgetPeriode beregnes av [loennsinntekt], [naeringsinntekt], [afp] og [utlandsinntekt].
  * Se [AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt].
  */
-
 data class FaktiskInntekt(
     override val id: UUID,
     override val periode: Periode,
@@ -1332,12 +1308,10 @@ fun Beregning.mapTilYtelseFoerAvkorting() =
 internal fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning): List<YtelseFoerAvkorting> {
     val nyYtelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
     val fraOgMedNyYtelse = nyYtelseFoerAvkorting.first().periode.fom
-
     val eksisterendeFremTilNye =
         this
             .filter { it.periode.fom < fraOgMedNyYtelse }
             .filter { beregning.beregningId != it.beregningsreferanse }
-
     val eksisterendeAvrundetPerioder =
         eksisterendeFremTilNye.map { ytelseFoerAvkorting ->
             if (ytelseFoerAvkorting.periode.tom == null ||

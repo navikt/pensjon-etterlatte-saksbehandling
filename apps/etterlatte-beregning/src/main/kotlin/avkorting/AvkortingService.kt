@@ -37,7 +37,7 @@ enum class InntektToggles(
     private val toggle: String,
 ) : FeatureToggle {
     INNTEKT_NESTE_AAR("legge-inn-flere-inntekter"),
-    TILLAT_ENDRE_INNTEKT_ETTEROPPGJOR("PLACEHOLDER-TILLAT-ENDRE-INNTEKT-ETTEROPPGJOR"),
+    TILLAT_REVURDERE_BEHANDLING_I_ET_AR_SOM_ALLEREDE_HAR_ETTEROPPGJOR("revurdere-behandling-i-et-ar-som-allerede-har-et-etteroppgjor"),
     ;
 
     override fun key(): String = toggle
@@ -69,7 +69,6 @@ class AvkortingService(
                 .orEmpty()
                 .map { it.aar }
                 .toSet()
-
         val skalKreveInntektNesteAar =
             featureToggleService.isEnabled(
                 toggleId = InntektToggles.INNTEKT_NESTE_AAR,
@@ -113,7 +112,6 @@ class AvkortingService(
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val eksisterendeAvkorting = hentAvkorting(behandlingId)
-
         val forrigeAvkorting =
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
@@ -131,7 +129,6 @@ class AvkortingService(
         if (eksisterendeAvkorting == null && forrigeAvkorting == null) {
             return null
         }
-
         val manglendeInntektsaar =
             manglendeInntektsaar(
                 behandlingId = behandlingId,
@@ -148,7 +145,6 @@ class AvkortingService(
                 krevIkkeNull(eksisterendeAvkorting ?: forrigeAvkorting) {
                     "Både eksisterende og forrige avkorting er null, men da skulle vi returnert null fra metoden"
                 }
-
             // Selv om vi ikke reberegner avkortingen må vi lagre ned en kopi slik at vi tar med oss det kopierte
             // når vi legger inn grunnlag senere i behandlingen.
             if (eksisterendeAvkorting == null) {
@@ -222,24 +218,19 @@ class AvkortingService(
         }
         // Sjekken over garanterer at vi får en ny tom avkorting kun i førstegangsbehandling
         val avkorting = eksisterendeAvkorting ?: Avkorting()
-
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
-
         val skalKreveInntektNesteAar =
             featureToggleService.isEnabled(
                 toggleId = InntektToggles.INNTEKT_NESTE_AAR,
                 defaultValue = true,
             )
-        val skalTillateEndreInntektEtteroppgjor =
+        val tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor =
             featureToggleService.isEnabled(
-                toggleId = InntektToggles.TILLAT_ENDRE_INNTEKT_ETTEROPPGJOR,
+                toggleId = InntektToggles.TILLAT_REVURDERE_BEHANDLING_I_ET_AR_SOM_ALLEREDE_HAR_ETTEROPPGJOR,
                 defaultValue = false,
             )
-
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
-
         val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(behandling.sak, brukerTokenInfo)
-
         // hent siste periode, hvis den har en slutt (har en tom satt), legg til 1 måned for å få den neste perioden (som da er opphørt)
         val eksisterendeOpphoerFom =
             innvilgedePerioder
@@ -256,7 +247,7 @@ class AvkortingService(
             sanksjoner,
             skalKreveInntektNesteAar,
             eksisterendeOpphoerFom,
-            blokkerInntektForEtteroppgjorteAar = !skalTillateEndreInntektEtteroppgjor,
+            tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor = tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor,
         )
         val aldersovergangMaaned =
             when (behandling.opphoerFraOgMed) {
@@ -288,7 +279,7 @@ class AvkortingService(
                         BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
                         false,
                     ),
-                tillatEndreInntektEtteroppgjor = skalTillateEndreInntektEtteroppgjor,
+                tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor = tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor,
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, oppdatert)
@@ -385,7 +376,6 @@ class AvkortingService(
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
         val sanksjoner = sanksjonService.hentSanksjon(behandling.id)
-
         val avkorting =
             when (behandling.revurderingsaarsak) {
                 Revurderingaarsak.ETTEROPPGJOER -> {
@@ -403,7 +393,6 @@ class AvkortingService(
                     eksisterendeAvkorting
                 }
             }
-
         val beregnetAvkorting =
             avkorting.beregnAvkorting(
                 behandling.virkningstidspunkt().dato,
@@ -444,7 +433,6 @@ class AvkortingService(
             return forrigeAvkorting
         }
         val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(behandling.sak, brukerTokenInfo)
-
         // hent siste periode, hvis den har en slutt (har en tom satt), legg til 1 måned for å få den neste perioden (som da er opphørt)
         val eksisterendeOpphoerFom =
             innvilgedePerioder
@@ -469,7 +457,6 @@ class AvkortingService(
     ): Avkorting {
         val alleVedtak = vedtakKlient.hentIverksatteVedtak(sakId, brukerTokenInfo)
         val avkorting = hentAvkortingNonNull(behandlingId)
-
         val innvilgedePerioder = vedtakKlient.hentInnvilgedePerioder(sakId, brukerTokenInfo)
         return avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
             avkorting = avkorting,
@@ -528,10 +515,8 @@ class AvkortingService(
     ): MaanederMedGammelSanksjonIAvkorting {
         val avkorting =
             avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
-
         val aarsoppgjoerInntektsaarEksisterende =
             avkorting.aarsoppgjoer.singleOrNull { it.aar == inntektsaar }
-
         val aarsoppgjoerInntektsaar =
             if (aarsoppgjoerInntektsaarEksisterende == null) {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
@@ -550,7 +535,6 @@ class AvkortingService(
             } else {
                 aarsoppgjoerInntektsaarEksisterende
             }
-
         val maaneder =
             aarsoppgjoerInntektsaar.avkortetYtelse
                 .filter { it.sanksjon != null && it.ytelseFoerAvkorting > 0 }

@@ -189,38 +189,48 @@ class EtteroppgjoerRevurderingService(
         )
     }
 
+    /**
+     * Setter et ferdigstilt etteroppgjør til status OMGJOERING og returnerer forbehandlingen som skal
+     * brukes som utgangspunkt (kopieres) for omgjøringsrevurderingen. Delt av alle de tre veiene inn i en
+     * omgjøring av et allerede ferdigstilt etteroppgjørsår: på eget initiativ, etter klage på etteroppgjørets
+     * eget vedtak, og etter klage på en annen (tidligere) behandling i saken.
+     */
+    private fun startOmgjoeringAvFerdigstiltEtteroppgjoer(
+        sakId: SakId,
+        inntektsaar: Int,
+    ): UUID {
+        val etteroppgjoer = etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
+
+        if (etteroppgjoer.status != EtteroppgjoerStatus.FERDIGSTILT) {
+            throw IkkeTillattException(
+                "ETTEROPPGJOER_IKKE_IVERKSATT",
+                "Etteroppgjøret for sakId=$sakId og inntektsår=$inntektsaar har status ${etteroppgjoer.status} " +
+                    "og kan ikke omgjøres. Kun ferdigstilte etteroppgjør kan omgjøres.",
+            )
+        }
+
+        val omgjoerForbehandlingId =
+            krevIkkeNull(etteroppgjoer.sisteFerdigstilteForbehandling) {
+                "Fant ingen ferdigstilt forbehandling for etteroppgjøret til sakId=$sakId og inntektsår=$inntektsaar"
+            }
+
+        // TODO finnes det bare ett eo per sak per år?
+        etteroppgjoerService.oppdaterEtteroppgjoerStatus(
+            sakId,
+            inntektsaar,
+            EtteroppgjoerStatus.OMGJOERING,
+            EtteroppgjoerHendelser.OMGJOERING,
+        )
+        return omgjoerForbehandlingId
+    }
+
     fun omgjoerEtteroppgjoerRevurderingEgetInitiativ(
         sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): Revurdering {
         val omgjoerForbehandlingId =
-            inTransaction {
-                val etteroppgjoer =
-                    etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar)
-
-                if (etteroppgjoer.status != EtteroppgjoerStatus.FERDIGSTILT) {
-                    throw IkkeTillattException(
-                        "ETTEROPPGJOER_IKKE_IVERKSATT",
-                        "Etteroppgjøret for sakId=$sakId og inntektsår=$inntektsaar har status ${etteroppgjoer.status} " +
-                            "og kan ikke omgjøres. Kun iverksatte etteroppgjør kan omgjøres på eget initiativ.",
-                    )
-                }
-
-                val omgjoerForbehandlingId =
-                    krevIkkeNull(etteroppgjoer.sisteFerdigstilteForbehandling) {
-                        "Fant ingen ferdigstilt forbehandling for etteroppgjøret til sakId=$sakId og inntektsår=$inntektsaar"
-                    }
-
-                // TODO finnes det bare ett eo per sak per år?
-                etteroppgjoerService.oppdaterEtteroppgjoerStatus(
-                    sakId,
-                    inntektsaar,
-                    EtteroppgjoerStatus.OMGJOERING,
-                    EtteroppgjoerHendelser.OMGJOERING,
-                )
-                omgjoerForbehandlingId
-            }
+            inTransaction { startOmgjoeringAvFerdigstiltEtteroppgjoer(sakId, inntektsaar) }
         val skalOmgjoeres =
             inTransaction {
                 behandlingService
@@ -274,6 +284,36 @@ class EtteroppgjoerRevurderingService(
             opprinnelse = behandling.opprinnelse,
             klageId = klageId,
             omgjoerForbehandlingId = forbehandling.id,
+            brukerTokenInfo = brukerTokenInfo,
+            omgjoeringEgetInitiativ = false,
+        )
+    }
+
+    /**
+     * Omgjør et ferdigstilt etteroppgjørsår som følge av en klage på en *annen* behandling enn etteroppgjørets
+     * eget vedtak - typisk en klage som endrer virkningstidspunktet i saken (f.eks. tilbake i tid) slik at det
+     * påvirker en periode som allerede er gjort opp i et ferdigstilt etteroppgjør.
+     *
+     * I motsetning til [omgjoerEtteroppgjoerRevurderingEtterKlage] krever denne ikke at kildebehandlingen for
+     * klagen er etteroppgjørets egen revurdering - kun at det aktuelle etteroppgjørsåret er FERDIGSTILT. Den
+     * behandlingen klagen faktisk gjelder må være iverksatt med det nye virkningstidspunktet *før* denne kalles,
+     * siden omgjøringen regner seg ut fra sakens til enhver tid gjeldende (nyeste iverksatte) vedtak.
+     */
+    fun omgjoerEtteroppgjoerRevurderingEtterKlagePaaAnnenBehandling(
+        sakId: SakId,
+        inntektsaar: Int,
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Revurdering {
+        val omgjoerForbehandlingId =
+            inTransaction { startOmgjoeringAvFerdigstiltEtteroppgjoer(sakId, inntektsaar) }
+
+        return opprettEtteroppgjoerRevurdering(
+            sakId = sakId,
+            inntektsaar = inntektsaar,
+            opprinnelse = BehandlingOpprinnelse.SAKSBEHANDLER,
+            klageId = klageId,
+            omgjoerForbehandlingId = omgjoerForbehandlingId,
             brukerTokenInfo = brukerTokenInfo,
             omgjoeringEgetInitiativ = false,
         )

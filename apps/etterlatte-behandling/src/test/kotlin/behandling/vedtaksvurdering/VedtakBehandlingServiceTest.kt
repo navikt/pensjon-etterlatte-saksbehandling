@@ -23,6 +23,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
@@ -102,6 +103,7 @@ internal class VedtakBehandlingServiceTest(
     private val samordningsKlientMock = mockk<SamordningsKlient>()
     private val trygdetidKlientMock = mockk<TrygdetidKlient>()
     private val etteroppgjoerRevurderingService = mockk<EtteroppgjoerRevurderingService>()
+    private val etteroppgjoerService = mockk<EtteroppgjoerService>(relaxed = true)
     private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
     private val behandlingStatusService = mockk<BehandlingStatusService>()
     private val behandlingService = mockk<BehandlingService>()
@@ -121,6 +123,7 @@ internal class VedtakBehandlingServiceTest(
                 samordningsKlient = samordningsKlientMock,
                 trygdetidKlient = trygdetidKlientMock,
                 etteroppgjorRevurderingService = etteroppgjoerRevurderingService,
+                etteroppgjoerService = etteroppgjoerService,
                 sakLesDao = sakLesDao,
                 vilkaarsvurderingService = vilkaarsvurderingService,
                 behandlingStatusService = behandlingStatusService,

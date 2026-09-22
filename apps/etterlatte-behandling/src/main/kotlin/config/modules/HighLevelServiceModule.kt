@@ -97,6 +97,7 @@ class HighLevelServiceModule(
             samordningsKlient = klientModule.samordningKlient,
             trygdetidKlient = serviceModule.trygdetidKlient,
             etteroppgjorRevurderingService = etteroppgjoerRevurderingService,
+            etteroppgjoerService = serviceModule.etteroppgjoerService,
             sakLesDao = daoModule.sakLesDao,
         )
     }

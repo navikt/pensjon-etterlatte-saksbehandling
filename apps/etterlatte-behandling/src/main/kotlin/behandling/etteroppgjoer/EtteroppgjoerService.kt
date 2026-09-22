@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SigrunKlient
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerHendelser
@@ -69,6 +70,47 @@ class EtteroppgjoerService(
     ): Etteroppgjoer = dao.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) ?: throw FantIkkeEtteroppgjoer(sakId, inntektsaar)
 
     fun hentEtteroppgjoerForSak(sakId: SakId): List<Etteroppgjoer> = dao.hentEtteroppgjoerForSak(sakId)
+
+    /**
+     * En omgjøring etter klage kan flytte virkningstidspunktet til et tidligere tidspunkt enn det som lå til
+     * grunn da et etteroppgjør ble ferdigstilt. Da blir det ferdigstilte etteroppgjøret feil (det ble gjort opp
+     * mot en kortere/annen innvilget periode enn det brukeren faktisk har rett på), men vi kan ikke bare rette det
+     * automatisk - iverksatte behandlinger skal aldri endres, og saksbehandler skal være i førersetet for
+     * vedtaksdata. Vi varsler derfor med en oppgave, slik at saksbehandler blir tvunget til å vurdere og
+     * eventuelt starte en omgjøring av det berørte etteroppgjørsåret (se [oppgave.EtteroppgjoerOppgaveService]).
+     */
+    fun varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt(
+        sak: Sak,
+        revurderingsaarsak: Revurderingaarsak,
+        nyttVirkningstidspunkt: YearMonth,
+    ) {
+        if (sak.sakType != SakType.OMSTILLINGSSTOENAD) {
+            return
+        }
+        if (revurderingsaarsak != Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+            return
+        }
+
+        val beroerteEtteroppgjoer =
+            hentEtteroppgjoerForSak(sak.id).filter {
+                it.status == FERDIGSTILT && it.inntektsaar >= nyttVirkningstidspunkt.year
+            }
+
+        beroerteEtteroppgjoer.forEach { etteroppgjoer ->
+            logger.info(
+                "Vedtak med nytt virkningstidspunkt=$nyttVirkningstidspunkt i sakId=${sak.id} kan berøre " +
+                    "ferdigstilt etteroppgjør for inntektsår=${etteroppgjoer.inntektsaar}. Oppretter oppgave for " +
+                    "å vurdere om etteroppgjøret må omgjøres.",
+            )
+            etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
+                sakId = sak.id,
+                inntektsAar = etteroppgjoer.inntektsaar,
+                merknad =
+                    "Klage har endret virkningstidspunktet i saken til $nyttVirkningstidspunkt - vurder om " +
+                        "ferdigstilt etteroppgjør ${etteroppgjoer.inntektsaar} må omgjøres",
+            )
+        }
+    }
 
     fun oppdaterEtteroppgjoerStatus(
         sakId: SakId,

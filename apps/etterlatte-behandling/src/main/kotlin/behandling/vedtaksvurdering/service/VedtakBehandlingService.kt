@@ -4,6 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlient
@@ -74,6 +75,7 @@ class VedtakBehandlingService(
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
     private val etteroppgjorRevurderingService: EtteroppgjoerRevurderingService,
+    private val etteroppgjoerService: EtteroppgjoerService,
     private val sakLesDao: SakLesDao,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -142,6 +144,17 @@ class VedtakBehandlingService(
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
+
+        // Ved en omgjøring etter klage kan virkningstidspunktet flytte seg tilbake i tid slik at det
+        // påvirker et etteroppgjørsår som allerede er ferdigstilt. Vi kan ikke rette dette automatisk (saksbehandler
+        // skal være i førersetet for vedtaksdata), så vi varsler med en oppgave saksbehandler må håndtere.
+        behandling.revurderingsaarsak?.let { revurderingsaarsak ->
+            etteroppgjoerService.varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt(
+                sak = sak,
+                revurderingsaarsak = revurderingsaarsak,
+                nyttVirkningstidspunkt = virkningstidspunkt,
+            )
+        }
 
         val tidspunkt = Tidspunkt.now()
         val detaljertBehandling =

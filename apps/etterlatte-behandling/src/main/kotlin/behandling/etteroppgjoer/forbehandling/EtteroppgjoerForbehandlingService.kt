@@ -568,22 +568,41 @@ class EtteroppgjoerForbehandlingService(
     ): EtteroppgjoerForbehandling {
         val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sak.id, brukerTokenInfo)
         val sisteVedtakMedAvkorting = etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe)
-        val vedtakMedGjeldendeOpphoer = etteroppgjoerDataService.vedtakMedGjeldendeOpphoer(vedtakListe)
 
         logger.info(
             "Oppretter forbehandling for ${sak.id} som baserer seg på siste iverksatte behandling med id ${sisteVedtakMedAvkorting.behandlingId}",
         )
 
-        val virkOgOpphoer = runBlocking { vedtakInternalService.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
-        val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
+        val (innvilgetPeriode, harVedtakAvTypeOpphoer) =
+            utledInnvilgetPeriodeOgOpphoerstatus(sak.id, inntektsaar, brukerTokenInfo)
 
         return EtteroppgjoerForbehandling
             .opprett(
                 sak = sak,
                 innvilgetPeriode = innvilgetPeriode,
                 sisteIverksatteBehandling = sisteVedtakMedAvkorting.behandlingId,
-                harVedtakAvTypeOpphoer = vedtakMedGjeldendeOpphoer != null,
+                harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
             ).also { dao.lagreForbehandling(it) }
+    }
+
+    /**
+     * Utleder innvilget periode (og om saken har et vedtak av type opphør) for inntektsåret, basert på
+     * saltens *nåværende* iverksatte vedtak. Denne må alltid kalles på nytt - og ikke gjenbrukes fra en
+     * tidligere forbehandling - fordi en klage kan ha endret virkningstidspunktet i saken etter at et
+     * etteroppgjør for inntektsåret ble ferdigstilt. Se [kopierOgLagreNyForbehandling].
+     */
+    private fun utledInnvilgetPeriodeOgOpphoerstatus(
+        sakId: SakId,
+        inntektsaar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pair<Periode, Boolean> {
+        val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sakId, brukerTokenInfo)
+        val vedtakMedGjeldendeOpphoer = etteroppgjoerDataService.vedtakMedGjeldendeOpphoer(vedtakListe)
+
+        val virkOgOpphoer = runBlocking { vedtakInternalService.hentInnvilgedePerioder(sakId, brukerTokenInfo) }
+        val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
+
+        return innvilgetPeriode to (vedtakMedGjeldendeOpphoer != null)
     }
 
     private fun utledInnvilgetPeriode(
@@ -649,6 +668,13 @@ class EtteroppgjoerForbehandlingService(
 
         val forbehandling = hentForbehandling(forbehandlingId)
 
+        // Perioden kan ha endret seg siden forrige forbehandling ble ferdigstilt - typisk fordi en klage har
+        // endret virkningstidspunktet i saken til før/etter det som lå til grunn da etteroppgjøret opprinnelig
+        // ble behandlet. Vi må derfor utlede innvilget periode på nytt istedenfor å kopiere den gamle verdien,
+        // ellers vil omgjøringen sammenligne mot en periode som ikke lenger stemmer med sakens vedtak.
+        val (innvilgetPeriode, harVedtakAvTypeOpphoer) =
+            utledInnvilgetPeriodeOgOpphoerstatus(sakId, forbehandling.aar, brukerTokenInfo)
+
         val forbehandlingCopy =
             forbehandling.copy(
                 id = UUID.randomUUID(),
@@ -660,6 +686,8 @@ class EtteroppgjoerForbehandlingService(
                 varselbrevSendt = null,
                 klageOmgjoering = klageId,
                 omgjoeringEgetInitiativ = omgjoeringEgetInitiativ,
+                innvilgetPeriode = innvilgetPeriode,
+                harVedtakAvTypeOpphoer = harVedtakAvTypeOpphoer,
             )
 
         dao.lagreForbehandling(forbehandlingCopy)

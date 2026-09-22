@@ -446,6 +446,17 @@ class EtteroppgjoerForbehandlingServiceTest {
                 ),
             )
         every { ctx.behandlingService.hentBehandlingerForSak(any()) } returns listOf(ctx.behandling)
+        coEvery { ctx.vedtakInternalService.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(
+                    periode =
+                        no.nav.etterlatte.libs.common.vedtak.Periode(
+                            fom = forbehandling.innvilgetPeriode.fom,
+                            tom = forbehandling.innvilgetPeriode.tom,
+                        ),
+                    vedtak = emptyList(),
+                ),
+            )
 
         val nyKlageOmgjoering = UUID.randomUUID()
         val kopiertForbehandling =

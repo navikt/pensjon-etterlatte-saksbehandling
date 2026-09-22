@@ -108,15 +108,32 @@ class EtteroppgjoerOppgaveService(
     fun opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
         sakId: SakId,
         inntektsAar: Int,
+        merknad: String? = null,
     ) {
+        // Unngår duplikate oppgaver hvis dette trigges flere ganger for samme sak/år,
+        // f.eks. hvis et vedtak underkjennes og fattes på nytt.
+        val harAapenOppgaveForAaret =
+            oppgaveService
+                .hentOppgaverForSakAvType(sakId, listOf(OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING))
+                .any { it.gjelderAar == inntektsAar && it.erIkkeAvsluttet() }
+        if (harAapenOppgaveForAaret) {
+            logger.info(
+                "Det finnes allerede en åpen oppgave for å vurdere konsekvens av ferdigstilt etteroppgjør " +
+                    "$inntektsAar i sak=$sakId, oppretter ikke en ny",
+            )
+            return
+        }
+
         oppgaveService.opprettOppgave(
             referanse = "",
             sakId = sakId,
             kilde = OppgaveKilde.HENDELSE,
             type = OppgaveType.ETTEROPPGJOER_OPPRETT_REVURDERING,
             merknad =
-                "Nye inntektsopplysninger fra skatt på ferdigstilt etteroppgjør $inntektsAar - vurder " +
-                    "om det har betydning for stønaden",
+                merknad ?: (
+                    "Nye inntektsopplysninger fra skatt på ferdigstilt etteroppgjør $inntektsAar - vurder " +
+                        "om det har betydning for stønaden"
+                ),
             gjelderAar = inntektsAar,
         )
     }

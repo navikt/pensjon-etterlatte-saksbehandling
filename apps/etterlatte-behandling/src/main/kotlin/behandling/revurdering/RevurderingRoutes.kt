@@ -130,6 +130,26 @@ internal fun Route.revurderingRoutes(
                 }
             }
 
+            post("/etteroppgjoer/omgjoering-klage") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<OpprettEtteroppgjoerOmgjoeringEtterKlageRequest> {
+                        logger.info(
+                            "Oppretter omgjøring av ferdigstilt etteroppgjør ${it.inntektsaar} på sakId=$sakId " +
+                                "på grunn av klage med id=${it.klageId}",
+                        )
+                        val revurdering =
+                            etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurderingEtterKlagePaaAnnenBehandling(
+                                sakId = sakId,
+                                inntektsaar = it.inntektsaar,
+                                klageId = it.klageId,
+                                brukerTokenInfo = saksbehandler,
+                            )
+
+                        call.respond(revurdering.id)
+                    }
+                }
+            }
+
             post("manuell-inntektsjustering") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering for årlig manuell inntektsjustering på sak $sakId")
@@ -235,4 +255,9 @@ data class RevurderingInfoDto(
 data class OpprettEtteroppgjoerRevurderingRequest(
     val opprinnelse: BehandlingOpprinnelse,
     val inntektsaar: Int,
+)
+
+data class OpprettEtteroppgjoerOmgjoeringEtterKlageRequest(
+    val inntektsaar: Int,
+    val klageId: UUID,
 )

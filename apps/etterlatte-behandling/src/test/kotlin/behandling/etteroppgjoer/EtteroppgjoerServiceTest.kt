@@ -25,6 +25,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -585,5 +586,77 @@ class EtteroppgjoerServiceTest {
         coVerify(exactly = 1) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 1 }) } // f.eks 2025
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value - 2 }) } // f.eks 2024
         coVerify(exactly = 0) { ctx.dao.lagreEtteroppgjoer(match { it.inntektsaar == Year.now().value }) } // f.eks 2026
+    }
+
+    @Test
+    fun `varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt oppretter oppgave for beroert etteroppgjoer`() {
+        val ctx = TestContext(sakId)
+        val omsSak = sak(sakId = sakId, sakType = SakType.OMSTILLINGSSTOENAD)
+
+        every { ctx.dao.hentEtteroppgjoerForSak(sakId) } returns
+            listOf(
+                Etteroppgjoer(sakId = sakId, inntektsaar = 2024, status = EtteroppgjoerStatus.FERDIGSTILT),
+                Etteroppgjoer(sakId = sakId, inntektsaar = 2025, status = EtteroppgjoerStatus.UNDER_FORBEHANDLING),
+                Etteroppgjoer(sakId = sakId, inntektsaar = 2023, status = EtteroppgjoerStatus.FERDIGSTILT),
+            )
+        every {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any(), any())
+        } just Runs
+
+        ctx.service.varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt(
+            sak = omsSak,
+            revurderingsaarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+            nyttVirkningstidspunkt = YearMonth.of(2024, 1),
+        )
+
+        // 2024 er FERDIGSTILT og >= nytt virk (2024) - skal varsles
+        verify(exactly = 1) {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
+                sakId = sakId,
+                inntektsAar = 2024,
+                merknad = any(),
+            )
+        }
+        // 2025 er ikke FERDIGSTILT - skal ikke varsles. 2023 er FERDIGSTILT men før nytt virk - skal ikke varsles
+        verify(exactly = 0) {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
+                sakId = sakId,
+                inntektsAar = 2025,
+                merknad = any(),
+            )
+        }
+        verify(exactly = 0) {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(
+                sakId = sakId,
+                inntektsAar = 2023,
+                merknad = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt gjor ingenting for BP eller andre revurderingsaarsaker`() {
+        val ctx = TestContext(sakId)
+        val bpSak = sak(sakId = sakId, sakType = SakType.BARNEPENSJON)
+        val omsSak = sak(sakId = sakId, sakType = SakType.OMSTILLINGSSTOENAD)
+
+        // BP - skal aldri varsle, uansett revurderingsaarsak
+        ctx.service.varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt(
+            sak = bpSak,
+            revurderingsaarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+            nyttVirkningstidspunkt = YearMonth.of(2024, 1),
+        )
+
+        // OMS men ikke en klage-omgjøring - skal ikke varsle
+        ctx.service.varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt(
+            sak = omsSak,
+            revurderingsaarsak = Revurderingaarsak.INNTEKTSENDRING,
+            nyttVirkningstidspunkt = YearMonth.of(2024, 1),
+        )
+
+        verify(exactly = 0) { ctx.dao.hentEtteroppgjoerForSak(any()) }
+        verify(exactly = 0) {
+            ctx.etteroppgjoerOppgaveService.opprettVurderKonsekvensOppgaveForFerdigstiltEtteroppgjoer(any(), any(), any())
+        }
     }
 }

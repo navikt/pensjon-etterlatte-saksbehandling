@@ -1,6 +1,7 @@
 package no.nav.etterlatte.avkorting
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.ints.exactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.clearAllMocks
@@ -620,9 +621,11 @@ internal class AvkortingServiceTest {
                 AvkortingMapper.avkortingForFrontend(lagretAvkorting, behandling)
                 vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
             }
+            coVerify(exactly = 2) {
+                avkortingRepository.hentAvkorting(behandlingId)
+            }
             coVerify(exactly = 3) {
                 featureToggleService.isEnabled(any(), any(), any())
-                avkortingRepository.hentAvkorting(behandlingId)
             }
         }
 
@@ -715,10 +718,12 @@ internal class AvkortingServiceTest {
                 AvkortingMapper.avkortingForFrontend(lagretAvkorting, revurdering, forrigeAvkorting)
                 vedtaksvurderingKlient.hentIverksatteVedtak(sakId, bruker)
             }
-            coVerify(exactly = 3) {
-                featureToggleService.isEnabled(any(), any(), any())
+            coVerify(exactly = 2) {
                 avkortingRepository.hentAvkorting(revurderingId)
                 vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
+            }
+            coVerify(exactly = 3) {
+                featureToggleService.isEnabled(any(), any(), any())
             }
         }
 
@@ -815,10 +820,11 @@ internal class AvkortingServiceTest {
                 AvkortingMapper.avkortingForFrontend(lagretAvkorting, behandling)
                 vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
             }
-            coVerify(exactly = 3) {
-                featureToggleService.isEnabled(any(), any(), any())
+            coVerify(exactly = 2) {
                 avkortingRepository.hentAvkorting(behandlingId)
             }
+
+            coVerify(exactly = 3) { featureToggleService.isEnabled(any(), any(), any()) }
         }
     }
 

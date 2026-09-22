@@ -246,6 +246,7 @@ data class Avkorting(
         opphoerFom: YearMonth?,
         brukNyeReglerAvkorting: Boolean,
         aldersovergang: YearMonth? = null,
+        tillatteEtteroppgjorteAar: Set<Int> = emptySet(),
     ): Avkorting {
         var oppdatertAvkorting = this
         nyttGrunnlag.forEach {
@@ -257,6 +258,7 @@ data class Avkorting(
                     aldersovergang,
                     beregning,
                     brukNyeReglerAvkorting,
+                    tillatteEtteroppgjorteAar,
                 )
         }
 
@@ -271,6 +273,10 @@ data class Avkorting(
 
     /**
      * Legger til brukeroppgitt [ForventetInntekt] i [AarsoppgjoerLoepende].
+     *
+     * @param tillatteEtteroppgjorteAar år som allerede er etteroppgjort, men som likevel skal kunne få nytt
+     * inntektsgrunnlag - se [AvkortingValider.etteroppgjorteAarSomKanEndres]. Det gamle [Etteroppgjoer]-årsoppgjøret
+     * erstattes da med et nytt, tomt [AarsoppgjoerLoepende] for året, som deretter fylles med det nye grunnlaget.
      */
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
@@ -279,10 +285,15 @@ data class Avkorting(
         aldersovergang: YearMonth? = null,
         beregning: Beregning? = null,
         brukNyeReglerAvkorting: Boolean = false,
+        tillatteEtteroppgjorteAar: Set<Int> = emptySet(),
     ): Avkorting {
         val aarsoppgjoer =
             hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom) as? AarsoppgjoerLoepende
-                ?: throw InternfeilException("Kan ikke oppdatere inntektsgrunnlag for et år som har etteroppgjør")
+                ?: if (nyttGrunnlag.fom.year in tillatteEtteroppgjorteAar) {
+                    AarsoppgjoerLoepende(id = UUID.randomUUID(), aar = nyttGrunnlag.fom.year, fom = nyttGrunnlag.fom)
+                } else {
+                    throw InternfeilException("Kan ikke oppdatere inntektsgrunnlag for et år som har etteroppgjør")
+                }
 
         val tom = opphoerFom?.let { finnTomForInntekt(opphoerFom, aarsoppgjoer.aar) }
         val aldersovergangIDetteInntektsaaret = aldersovergang?.takeIf { nyttGrunnlag.fom.year == aldersovergang.year }

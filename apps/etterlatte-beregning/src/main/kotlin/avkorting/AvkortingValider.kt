@@ -171,21 +171,39 @@ object AvkortingValider {
 
         // En omgjøring etter klage kan flytte virkningstidspunktet tilbake i tid slik at det nå dekker et
         // allerede etteroppgjort år - da må saksbehandler kunne rette inntekten for nettopp det året i denne
-        // revurderingen. Vi tillater derfor kun endring for etteroppgjorte år som er berørt av det nye
-        // virkningstidspunktet (samme kriterium som brukes for å avgjøre om et etteroppgjør er berørt, se
-        // EtteroppgjoerService.varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt i
-        // etterlatte-behandling) - andre etteroppgjorte år som ikke er del av denne omgjøringen skal fortsatt
-        // gå via en egen etteroppgjørs-revurdering.
-        val erOmgjoeringEtterKlage = behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE
+        // revurderingen. Andre etteroppgjorte år som ikke er del av denne omgjøringen skal fortsatt gå via en
+        // egen etteroppgjørs-revurdering.
         val etteroppgjorteAar =
             eksisterendeAvkorting.aarsoppgjoer
                 .filterIsInstance<Etteroppgjoer>()
                 .map { it.aar }
-        val etteroppgjorteAarSomIkkeKanEndres =
-            etteroppgjorteAar.filterNot { erOmgjoeringEtterKlage && it >= virk.year }
+        val tillatteEtteroppgjorteAar = etteroppgjorteAarSomKanEndres(behandling, eksisterendeAvkorting)
+        val etteroppgjorteAarSomIkkeKanEndres = etteroppgjorteAar - tillatteEtteroppgjorteAar
         if (nyeGrunnlag.any { it.fom.year in etteroppgjorteAarSomIkkeKanEndres }) {
             throw InntektForTidligereAar()
         }
+    }
+
+    /**
+     * Hvilke år som allerede er etteroppgjort, men som likevel kan få oppdatert inntektsgrunnlag - fordi en
+     * omgjøring etter klage har flyttet virkningstidspunktet tilbake i tid slik at det nå dekker året. Samme
+     * kriterium som brukes for å avgjøre om et etteroppgjør er "berørt" av det nye virkningstidspunktet, se
+     * EtteroppgjoerService.varsleOmFerdigstilteEtteroppgjoerBeroertAvEndretVirkningstidspunkt i
+     * etterlatte-behandling.
+     */
+    fun etteroppgjorteAarSomKanEndres(
+        behandling: DetaljertBehandling,
+        eksisterendeAvkorting: Avkorting,
+    ): Set<Int> {
+        if (behandling.revurderingsaarsak != Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+            return emptySet()
+        }
+        val virk = behandling.virkningstidspunkt?.dato ?: return emptySet()
+        return eksisterendeAvkorting.aarsoppgjoer
+            .filterIsInstance<Etteroppgjoer>()
+            .map { it.aar }
+            .filter { it >= virk.year }
+            .toSet()
     }
 
     fun harSanksjonForHeleAaret(

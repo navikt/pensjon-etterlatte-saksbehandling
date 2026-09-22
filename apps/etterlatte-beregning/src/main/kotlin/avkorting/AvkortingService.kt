@@ -281,6 +281,7 @@ class AvkortingService(
                         BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
                         false,
                     ),
+                tillatteEtteroppgjorteAar = AvkortingValider.etteroppgjorteAarSomKanEndres(behandling, avkorting),
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, oppdatert)

@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -974,6 +975,41 @@ internal class AvkortingTest {
                             spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
                         }
                     }
+                }
+            }
+        }
+
+        @Nested
+        inner class EtteroppgjortAar {
+            @Test
+            fun `Kaster feil dersom aaret er etteroppgjort og ikke er blant de tillatte aarene`() {
+                val avkorting = Avkorting(aarsoppgjoer = listOf(etteroppgjoer(aar = 2024)))
+                val nyttGrunnlag = avkortinggrunnlagLagreDto(fom = YearMonth.of(2024, Month.DECEMBER))
+
+                assertThrows<InternfeilException> {
+                    avkorting.oppdaterMedInntektsgrunnlag(
+                        nyttGrunnlag,
+                        bruker,
+                        tillatteEtteroppgjorteAar = emptySet(),
+                    )
+                }
+            }
+
+            @Test
+            fun `Erstatter etteroppgjoeret med et nytt loepende aarsoppgjoer naar aaret er blant de tillatte aarene`() {
+                val avkorting = Avkorting(aarsoppgjoer = listOf(etteroppgjoer(aar = 2024)))
+                val nyttGrunnlag = avkortinggrunnlagLagreDto(fom = YearMonth.of(2024, Month.DECEMBER))
+
+                val oppdatertAvkorting =
+                    avkorting.oppdaterMedInntektsgrunnlag(
+                        nyttGrunnlag,
+                        bruker,
+                        tillatteEtteroppgjorteAar = setOf(2024),
+                    )
+
+                with(oppdatertAvkorting.aarsoppgjoer.single()) {
+                    shouldBeInstanceOf<AarsoppgjoerLoepende>()
+                    inntektsavkorting().single().grunnlag.inntektTom shouldBe nyttGrunnlag.inntektTom
                 }
             }
         }

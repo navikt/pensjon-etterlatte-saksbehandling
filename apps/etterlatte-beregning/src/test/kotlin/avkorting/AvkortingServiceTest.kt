@@ -565,6 +565,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
             mockkObject(AvkortingValider)
             every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any(), any()) } returns Unit
+            every { AvkortingValider.etteroppgjorteAarSomKanEndres(any(), any()) } returns emptySet()
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(1900, 1)
@@ -604,6 +605,7 @@ internal class AvkortingServiceTest {
                     any(),
                     any(),
                 )
+                AvkortingValider.etteroppgjorteAarSomKanEndres(behandling, eksisterendeAvkorting)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
                 grunnlagKlient.aldersovergangMaaned(behandling.sak, SakType.OMSTILLINGSSTOENAD, bruker)
@@ -651,6 +653,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns revurdering
             mockkObject(AvkortingValider)
             every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any(), any()) } returns Unit
+            every { AvkortingValider.etteroppgjorteAarSomKanEndres(any(), any()) } returns emptySet()
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(revurderingId) } returns emptyList()
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(1900, 1)
@@ -693,6 +696,7 @@ internal class AvkortingServiceTest {
                     krevInntektForNesteAar = true,
                     eksisterendeOpphoerFom = null,
                 )
+                AvkortingValider.etteroppgjorteAarSomKanEndres(revurdering, eksisterendeAvkorting)
                 beregningService.hentBeregningNonnull(revurderingId)
                 sanksjonService.hentSanksjon(revurderingId)
                 grunnlagKlient.aldersovergangMaaned(sakId, SakType.OMSTILLINGSSTOENAD, bruker)
@@ -769,6 +773,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
             mockkObject(AvkortingValider)
             every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any(), any()) } returns Unit
+            every { AvkortingValider.etteroppgjorteAarSomKanEndres(any(), any()) } returns emptySet()
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns foedselsdato67aar
@@ -801,6 +806,7 @@ internal class AvkortingServiceTest {
                     krevInntektForNesteAar = true,
                     eksisterendeOpphoerFom = null,
                 )
+                AvkortingValider.etteroppgjorteAarSomKanEndres(behandling, eksisterendeAvkorting)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
                 grunnlagKlient.aldersovergangMaaned(behandling.sak, SakType.OMSTILLINGSSTOENAD, bruker)

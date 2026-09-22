@@ -77,6 +77,17 @@ export const avbrytEtteroppgjoerForbehandling = async (args: {
   })
 }
 
+export const manuellFiksAvEtteroppgjoeret = async (args: {
+  sakId: number
+  inntektsaar: string
+  behandlingerSomSkalHoppesOver: string
+}) => {
+  return apiClient.post(`/etteroppgjoer/${args.sakId}/manuell-omgjoering`, {
+    inntektsaar: args.inntektsaar,
+    behandlingerSomSkalHoppesOver: args.behandlingerSomSkalHoppesOver,
+  })
+}
+
 export const lagreFaktiskInntekt = async (args: {
   forbehandlingId: string
   faktiskInntekt: FaktiskInntekt

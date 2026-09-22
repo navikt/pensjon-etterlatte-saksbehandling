@@ -10,6 +10,7 @@ import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { TilbakestillOgOpprettNyForbehandling } from '~components/person/sakOgBehandling/TilbakestillOgOpprettNyForbehandling'
 import { OpprettEtteroppgjoerIDev } from '~components/etteroppgjoer/components/utils/OpprettEtteroppgjoerIDev'
 import { etteroppgjoerStatusTekst } from '~shared/types/EtteroppgjoerForbehandling'
+import { ManuellFiksAvEtteroppgjoeret } from '../sakOgBehandling/ManuellFiksAvEtteroppgjoeret'
 
 const steg = [
   { status: ['VENTER_PAA_SKATTEOPPGJOER'], text: () => 'Venter på skatteoppgjøret' },
@@ -97,6 +98,11 @@ const EtteroppgjoerSaksoversikt = ({ sakResult }: { sakResult: Result<SakMedBeha
       {tilbakestillEtteroppgjoerEnabled && (
         <Box padding="space-32">
           <TilbakestillOgOpprettNyForbehandling sakId={sakId} />
+        </Box>
+      )}
+      {etteroppgjoerDevKnappEnabled && (
+        <Box padding="space-32">
+          <ManuellFiksAvEtteroppgjoeret sakId={sakId} />
         </Box>
       )}
     </VStack>

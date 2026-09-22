@@ -56,7 +56,6 @@ class AvkortingValiderTest {
                         ),
                     ),
             )
-
         val inntektMedFratrekk =
             AvkortingGrunnlagLagreDto(
                 inntektTom = 100000,
@@ -89,9 +88,7 @@ class AvkortingValiderTest {
                         etteroppgjoer(aar = 2024),
                     ),
             )
-
         val fom = YearMonth.of(2024, 12)
-
         val inntektMedFratrekk =
             AvkortingGrunnlagLagreDto(
                 inntektTom = 100000,
@@ -125,9 +122,7 @@ class AvkortingValiderTest {
                         etteroppgjoer(aar = 2024),
                     ),
             )
-
         val fom = YearMonth.of(2024, 12)
-
         val inntektMedFratrekk =
             AvkortingGrunnlagLagreDto(
                 inntektTom = 100000,
@@ -147,7 +142,7 @@ class AvkortingValiderTest {
             true,
             null,
             naa = fom,
-            blokkerInntektForEtteroppgjorteAar = false,
+            tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor = true,
         )
     }
 
@@ -268,7 +263,6 @@ class AvkortingValiderTest {
                         ),
                     ),
             )
-
         val inntektMedFratrekk =
             AvkortingGrunnlagLagreDto(
                 inntektTom = 100000,
@@ -295,7 +289,6 @@ class AvkortingValiderTest {
         @Test
         fun `Førstegangsbehandling fra januar`() {
             val avkorting = avkorting()
-
             val utenFratrekk =
                 inntektDto(
                     fratrekkInnAar = 0,
@@ -366,7 +359,6 @@ class AvkortingValiderTest {
                             ),
                         ),
                 )
-
             val utenFratrekk =
                 inntektDto(
                     fratrekkInnAar = 0,
@@ -530,7 +522,6 @@ class AvkortingValiderTest {
                         beregningsperiode(datoFOM = YearMonth.of(2026, Month.JANUARY)),
                     ),
             )
-
         val krav =
             AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
                 avkorting,

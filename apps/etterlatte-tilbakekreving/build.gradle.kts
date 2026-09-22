@@ -20,6 +20,10 @@ dependencies {
     implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.mq.jakarta.client)
+    // CVE-2026-8763: com.ibm.mq.jakarta.client pinner bcprov/bcpkix/bcutil til 1.84, som er sårbar. Tving opp til 1.85.
+    implementation(libs.bouncycastle.bcprov)
+    implementation(libs.bouncycastle.bcpkix)
+    implementation(libs.bouncycastle.bcutil)
     implementation(libs.navfelles.tjenestespesifikasjoner.tilbakekreving)
 
     implementation(libs.database.kotliquery)

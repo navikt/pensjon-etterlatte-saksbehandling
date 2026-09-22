@@ -37,6 +37,7 @@ enum class InntektToggles(
     private val toggle: String,
 ) : FeatureToggle {
     INNTEKT_NESTE_AAR("legge-inn-flere-inntekter"),
+    TILLAT_ENDRE_INNTEKT_ETTEROPPGJOR("PLACEHOLDER-TILLAT-ENDRE-INNTEKT-ETTEROPPGJOR"),
     ;
 
     override fun key(): String = toggle
@@ -229,6 +230,11 @@ class AvkortingService(
                 toggleId = InntektToggles.INNTEKT_NESTE_AAR,
                 defaultValue = true,
             )
+        val skalTillateEndreInntektEtteroppgjor =
+            featureToggleService.isEnabled(
+                toggleId = InntektToggles.TILLAT_ENDRE_INNTEKT_ETTEROPPGJOR,
+                defaultValue = false,
+            )
 
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId)
 
@@ -250,6 +256,7 @@ class AvkortingService(
             sanksjoner,
             skalKreveInntektNesteAar,
             eksisterendeOpphoerFom,
+            blokkerInntektForEtteroppgjorteAar = !skalTillateEndreInntektEtteroppgjor,
         )
         val aldersovergangMaaned =
             when (behandling.opphoerFraOgMed) {

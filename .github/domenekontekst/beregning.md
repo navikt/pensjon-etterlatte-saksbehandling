@@ -67,7 +67,7 @@ Den korrekte måten å finne måneder der ytelse er beregnet > 0 er å sjekke `a
 
 To separate sperrer blokkerer inntektsposteringer for år som har `Etteroppgjoer` – disse gjelder **kun den normale `ForventetInntekt`-flyten** (`oppdaterMedInntektsgrunnlag`), ikke etteroppgjørsflyten som bruker `beregnEtteroppgjoer` direkte:
 1. `Avkorting.oppdaterMedInntektsgrunnlag` kaster `InternfeilException` dersom `hentEllerOpprettAarsoppgjoer(fom)` returnerer `Etteroppgjoer`
-2. `AvkortingValider.validerInntekter` kaster `InntektForTidligereAar` dersom `nyeGrunnlag` inneholder et år som allerede er `Etteroppgjoer`
+2. `AvkortingValider.validerInntekter` kaster `InntektForTidligereAar` dersom `nyeGrunnlag` inneholder et år som allerede er `Etteroppgjoer` – styrt av parameteren `blokkerInntektForEtteroppgjorteAar` (default `true`), som i `AvkortingService` settes ut fra Unleash-toggelen `InntektToggles.TILLAT_ENDRE_INNTEKT_ETTEROPPGJOR`
 
 ### Navnekollisjonen `Etteroppgjoer`
 

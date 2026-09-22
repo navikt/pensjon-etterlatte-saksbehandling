@@ -117,6 +117,41 @@ class AvkortingValiderTest {
     }
 
     @Test
+    fun `Skal kunne endre inntekt tidligere aar hvis aarsoppgjoer er etteroppgjoer naar sperren er togglet av`() {
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        etteroppgjoer(aar = 2024),
+                    ),
+            )
+
+        val fom = YearMonth.of(2024, 12)
+
+        val inntektMedFratrekk =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 100000,
+                spesifikasjon = "asdf",
+                fom = fom,
+            )
+
+        validerInntekter(
+            behandling(BehandlingType.REVURDERING),
+            beregning(beregningsperiode(datoFOM = fom)),
+            avkorting,
+            listOf(inntektMedFratrekk),
+            emptyList(),
+            true,
+            null,
+            naa = fom,
+            blokkerInntektForEtteroppgjorteAar = false,
+        )
+    }
+
+    @Test
     fun `Skal kunne endre inntekt tidligere aar hvis det gjenaapnes etter opphoer`() {
         val avkorting =
             Avkorting(

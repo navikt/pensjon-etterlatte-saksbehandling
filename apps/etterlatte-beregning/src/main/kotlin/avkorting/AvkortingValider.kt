@@ -22,12 +22,10 @@ object AvkortingValider {
         naa: YearMonth = YearMonth.now(),
     ): List<Int> {
         val sortertePerioder = beregning.beregningsperioder.sortedBy { it.datoFOM }
-
         val alleAarViHarAvkortingEllerBeregning =
             avkorting.aarsoppgjoer.map { it.aar } + sortertePerioder.map { it.datoFOM.year }
         val foersteAar = alleAarViHarAvkortingEllerBeregning.min()
         val sisteAarFom = alleAarViHarAvkortingEllerBeregning.max()
-
         // Vi trenger inntekter fram til der behandlingen løper, eller i år og potensielt neste i førstegangsbehandlinger
         val sisteAar: Int =
             when (val tilOgMedAarBeregning = sortertePerioder.last().datoTOM?.year) {
@@ -47,7 +45,6 @@ object AvkortingValider {
                     tilOgMedAarBeregning
                 }
             }
-
         val aarViMaaHaInntekterFor =
             (foersteAar..sisteAar)
                 .toList()
@@ -65,6 +62,7 @@ object AvkortingValider {
         krevInntektForNesteAar: Boolean,
         eksisterendeOpphoerFom: YearMonth?,
         naa: YearMonth = YearMonth.now(),
+        blokkerInntektForEtteroppgjorteAar: Boolean = true,
     ) {
         val inntekterViHar =
             eksisterendeAvkorting.aarsoppgjoer.map { it.aar }.toSet() + nyeGrunnlag.map { it.fom.year }.toSet()
@@ -93,9 +91,7 @@ object AvkortingValider {
                 behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING ||
                     (eksisterendeOpphoerFom != null && eksisterendeOpphoerFom < virk)
             }
-
         val tidligsteAarMedEksisterendeInntekt = eksisterendeAvkorting.aarsoppgjoer.minOfOrNull { it.aar }
-
         val nyeAarMedInntekt =
             nyeGrunnlag.map { it.fom.year }.toSet() - eksisterendeAvkorting.aarsoppgjoer.map { it.aar }.toSet()
         val nyeAarFramITid =
@@ -105,7 +101,6 @@ object AvkortingValider {
             }
         val nyeAarFoerFoersteAvkorting =
             nyeAarMedInntekt.filter { tidligsteAarMedEksisterendeInntekt != null && tidligsteAarMedEksisterendeInntekt > it }
-
         val alleNyeAarFramITidHarInntektFraStart =
             nyeAarFramITid.all { aar ->
                 // Start på et år er enten 1. januar eller virk i førstegangsbehandlinger eller virk etter opphør
@@ -131,7 +126,6 @@ object AvkortingValider {
         if (!alleNyeAarFoerFoersteAvkortingStarterRiktig) {
             throw NyeAarMedInntektMaaStarteIJanuar()
         }
-
         val tidligsteFomAarsoppgjoer = eksisterendeAvkorting.aarsoppgjoer.minOfOrNull { it.fom }
         val trengerNyInntektForFoersteAarIAvkorting =
             tidligsteFomAarsoppgjoer != null && tidligsteFomAarsoppgjoer.month != Month.JANUARY && virk < tidligsteFomAarsoppgjoer
@@ -152,7 +146,6 @@ object AvkortingValider {
                 "Kan ikke registrere flere inntekter med samme fra-dato",
             )
         }
-
         val fulleInntektsaarAvkorting =
             eksisterendeAvkorting.aarsoppgjoer
                 .map { it.fom }
@@ -168,12 +161,14 @@ object AvkortingValider {
             throw HarFratrekkInnAarForFulltAar()
         }
 
-        val etteroppgjorteAar =
-            eksisterendeAvkorting.aarsoppgjoer
-                .filterIsInstance<Etteroppgjoer>()
-                .map { it.aar }
-        if (nyeGrunnlag.any { it.fom.year in etteroppgjorteAar }) {
-            throw InntektForTidligereAar()
+        if (blokkerInntektForEtteroppgjorteAar) {
+            val etteroppgjorteAar =
+                eksisterendeAvkorting.aarsoppgjoer
+                    .filterIsInstance<Etteroppgjoer>()
+                    .map { it.aar }
+            if (nyeGrunnlag.any { it.fom.year in etteroppgjorteAar }) {
+                throw InntektForTidligereAar()
+            }
         }
     }
 

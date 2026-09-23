@@ -3,11 +3,11 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.pensjon.brevbaker.api.model.Bruker
-import no.nav.pensjon.brevbaker.api.model.Felles
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import no.nav.pensjon.brevbaker.api.model.NavEnhet
-import no.nav.pensjon.brevbaker.api.model.SignerendeSaksbehandlere
+import no.nav.pensjon.brevbaker.api.model.BrevbakerFelles
+import no.nav.pensjon.brevbaker.api.model.BrevbakerFelles.Bruker
+import no.nav.pensjon.brevbaker.api.model.BrevbakerFelles.NavEnhet
+import no.nav.pensjon.brevbaker.api.model.BrevbakerFelles.SignerendeSaksbehandlere
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Foedselsnummer
 import java.time.LocalDate
 
 object BrevbakerHelpers {
@@ -16,7 +16,7 @@ object BrevbakerHelpers {
         soeker: Soeker,
         avsender: Avsender,
         annenMottakerNavn: String? = null,
-    ) = Felles(
+    ) = BrevbakerFelles(
         dokumentDato = LocalDate.now(),
         saksnummer = sakId.toString(),
         avsenderEnhet =

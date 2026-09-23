@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Foedselsnummer
 import java.time.LocalDate
 
 data class Avdoed(

@@ -115,7 +115,7 @@ class BrevService(
 
             else -> {
                 // revurdering
-                behandling.revurderingsaarsak() == Revurderingaarsak.NY_SOEKNAD ||
+                (behandling.revurderingsaarsak() == Revurderingaarsak.NY_SOEKNAD && vedtak?.type != VedtakType.AVSLAG) ||
                     (
                         omsRevurderingNyBrevflytErAktivert() &&
                             vedtak?.type in listOf(VedtakType.ENDRING, VedtakType.OPPHOER)

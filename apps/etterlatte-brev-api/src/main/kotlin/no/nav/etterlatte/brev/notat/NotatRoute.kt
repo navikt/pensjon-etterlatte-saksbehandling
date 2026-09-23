@@ -115,7 +115,7 @@ fun Route.notatRoute(
 
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
-                withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
+                withSakId(tilgangsSjekk, skrivetilgang = false) { sakId ->
                     val notater = nyNotatService.hentForSak(sakId)
                     call.respond(notater)
                 }

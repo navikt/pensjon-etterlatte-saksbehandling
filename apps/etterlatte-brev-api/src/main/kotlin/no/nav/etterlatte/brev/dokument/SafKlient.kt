@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.dokument
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.get
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -25,6 +24,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 
 /*
 * SAF (Sak- og Arkiv Facade)
@@ -54,11 +54,12 @@ class SafKlient(
         } catch (re: ResponseException) {
             when (re.response.status) {
                 HttpStatusCode.Forbidden -> {
-                    val errorMessage = re.response.body<JsonNode>()["message"]?.asText()
+                    val errorMessage = re.response.body<JsonNode>()["message"]?.asString()
                     logger.error("Deny for henting mot saf se sikkerlogg journalpostId: $journalpostId")
                     sikkerLogg.error("Deny melding fra SAF for journalpostId: $journalpostId. error: $errorMessage")
                     throw IkkeTilgangTilJournalpost("Du mangler tilgang til tema ressursen tilhører eller geografisk område.")
                 }
+
                 HttpStatusCode.NotFound -> {
                     throw IkkeFunnetException(
                         code = "JOURNALPOST_DOKUMENT_IKKE_FUNNET",
@@ -71,6 +72,7 @@ class SafKlient(
                             ),
                     )
                 }
+
                 else -> {
                     logger.error("Ukjent feil i kall mot Saf: ${re.response.bodyAsText()}")
 

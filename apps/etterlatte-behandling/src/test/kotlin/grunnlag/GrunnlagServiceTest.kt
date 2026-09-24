@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -58,6 +57,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -106,35 +106,40 @@ internal class GrunnlagServiceTest {
         ): List<OpplysningDao.GrunnlagHendelse> {
             val persongalleri =
                 when (personRolle) {
-                    PersonRolle.INNSENDER ->
+                    PersonRolle.INNSENDER -> {
                         Persongalleri(
                             soeker = "",
                             innsender = fnr.value,
                         )
+                    }
 
-                    PersonRolle.BARN ->
+                    PersonRolle.BARN -> {
                         Persongalleri(
                             soeker = fnr.value,
                             soesken = listOf(fnr.value),
                         )
+                    }
 
-                    PersonRolle.AVDOED ->
+                    PersonRolle.AVDOED -> {
                         Persongalleri(
                             soeker = "",
                             avdoed = listOf(fnr.value),
                         )
+                    }
 
-                    PersonRolle.GJENLEVENDE ->
+                    PersonRolle.GJENLEVENDE -> {
                         Persongalleri(
                             soeker = "",
                             gjenlevende = listOf(fnr.value),
                         )
+                    }
 
-                    PersonRolle.TILKNYTTET_BARN ->
+                    PersonRolle.TILKNYTTET_BARN -> {
                         Persongalleri(
                             soeker = "",
                             soesken = listOf(fnr.value),
                         )
+                    }
                 }
             return listOf(
                 lagGrunnlagHendelse(

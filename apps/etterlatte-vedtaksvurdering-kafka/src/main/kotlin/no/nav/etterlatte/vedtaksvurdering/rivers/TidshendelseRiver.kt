@@ -57,9 +57,9 @@ class TidshendelseRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val type = packet[TIDSHENDELSE_TYPE_KEY].asText()
-        val step = packet[TIDSHENDELSE_STEG_KEY].asText()
-        val hendelseId = packet[TIDSHENDELSE_ID_KEY].asText()
+        val type = packet[TIDSHENDELSE_TYPE_KEY].asString()
+        val step = packet[TIDSHENDELSE_STEG_KEY].asString()
+        val hendelseId = packet[TIDSHENDELSE_ID_KEY].asString()
         val sakId = packet.sakId
         val dryrun = packet[DRYRUN].asBoolean()
 

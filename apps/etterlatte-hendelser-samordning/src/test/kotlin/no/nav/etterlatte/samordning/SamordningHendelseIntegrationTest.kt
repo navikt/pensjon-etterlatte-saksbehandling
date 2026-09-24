@@ -1,6 +1,5 @@
 package no.nav.etterlatte.samordning
 
-import com.fasterxml.jackson.core.JsonProcessingException
 import io.ktor.server.application.Application
 import io.mockk.spyk
 import io.mockk.verify
@@ -16,6 +15,7 @@ import org.apache.kafka.common.serialization.Serializer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
+import tools.jackson.core.JacksonException
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -84,7 +84,7 @@ class SamJsonSerializer : Serializer<SamordningVedtakHendelse> {
     ): ByteArray {
         try {
             return objectMapper.writeValueAsBytes(data)
-        } catch (e: JsonProcessingException) {
+        } catch (e: JacksonException) {
             throw SerializationException("Error serializing JSON message", e)
         }
     }

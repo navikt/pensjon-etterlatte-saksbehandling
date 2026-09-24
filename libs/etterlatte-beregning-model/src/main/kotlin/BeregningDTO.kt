@@ -2,7 +2,6 @@ package no.nav.etterlatte.libs.common.beregning
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Regelverk
@@ -12,6 +11,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
+import tools.jackson.databind.JsonNode
 import java.time.YearMonth
 import java.util.UUID
 

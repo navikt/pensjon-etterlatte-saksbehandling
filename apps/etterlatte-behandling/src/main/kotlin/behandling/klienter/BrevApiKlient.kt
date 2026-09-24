@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.klienter
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
@@ -32,6 +31,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import tools.jackson.module.kotlin.readValue
 import java.time.Duration
 import java.util.UUID
 

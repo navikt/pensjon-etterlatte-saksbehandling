@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import java.util.UUID
 
 enum class EtteroppgjoerToggles(
     private val toggle: String,
@@ -187,6 +188,30 @@ fun Route.etteroppgjoerRoutes(
                             forbehandlingService.opprettEtteroppgjoerForbehandling(sakId, inntektsaar, oppgaveId, brukerTokenInfo)
                         }
                     call.respond(forbehandling)
+                }
+            }
+
+            // Midlertidig endepunkt: enkelte iverksatte etteroppgjør-revurderinger kan ha feil beregningsgrunnlag.
+            // Lar saksbehandler omgjøre på eget initiativ og oppgi hvilke behandlinger som skal hoppes over
+            // som grunnlag for revurderingen.
+            post("manuell-omgjoering") {
+                sjekkEtteroppgjoerEnabled(featureToggleService)
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    val request = call.receive<OmgjoerEtteroppgjoerManuellFiksRequest>()
+                    logger.info(
+                        "Omgjør etteroppgjør på eget initiativ med manuell overstyring av iverksatt vedtak for " +
+                            "sakId=$sakId og inntektsår=${request.inntektsaar}, " +
+                            "behandlingerSomSkalHoppesOver=${request.behandlingerSomSkalHoppesOver}",
+                    )
+                    val revurdering =
+                        etteroppgjoerRevurderingService.omgjoerEtteroppgjoerRevurderingEgetInitiativ(
+                            sakId = sakId,
+                            inntektsaar = request.inntektsaar,
+                            brukerTokenInfo = saksbehandler,
+                            behandlingerSomSkalHoppesOver = request.behandlingerSomSkalHoppesOver,
+                        )
+
+                    call.respond(revurdering.id)
                 }
             }
         }
@@ -402,4 +427,9 @@ private fun sjekkEtteroppgjoerKanTilbakestillesEnabled(featureToggleService: Fea
 
 data class OpprettEtteroppgjoerForbehandlingRequest(
     val inntektsaar: Int,
+)
+
+data class OmgjoerEtteroppgjoerManuellFiksRequest(
+    val inntektsaar: Int,
+    val behandlingerSomSkalHoppesOver: List<UUID> = emptyList(),
 )

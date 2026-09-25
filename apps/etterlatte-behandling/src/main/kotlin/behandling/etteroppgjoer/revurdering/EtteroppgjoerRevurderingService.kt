@@ -61,6 +61,7 @@ class EtteroppgjoerRevurderingService(
         omgjoerForbehandlingId: UUID? = null,
         brukerTokenInfo: BrukerTokenInfo,
         omgjoeringEgetInitiativ: Boolean,
+        behandlingerSomSkalHoppesOver: List<UUID> = emptyList(),
     ): Revurdering {
         val etteroppgjoer =
             inTransaction { etteroppgjoerService.hentEtteroppgjoerForInntektsaar(sakId, inntektsaar) }
@@ -77,7 +78,12 @@ class EtteroppgjoerRevurderingService(
 
                 sjekkKanOppretteEtteroppgjoerRevurdering(etteroppgjoer, kildeForbehandlingId, erOmgjoering = omgjoerForbehandlingId != null)
 
-                val vedtakListe = etteroppgjoerDataService.hentIverksatteVedtak(sakId, brukerTokenInfo)
+                // Midlertidig: behandlingene i behandlingerSomSkalHoppesOver kan ha feil beregningsgrunnlag, og
+                // ekskluderes derfor som kandidat for "siste iverksatte behandling" som revurderingen baseres på.
+                val vedtakListe =
+                    etteroppgjoerDataService
+                        .hentIverksatteVedtak(sakId, brukerTokenInfo)
+                        .filterNot { it.behandlingId in behandlingerSomSkalHoppesOver }
                 val sisteIverksatteBehandlingMedAvkorting =
                     hentBehandling(etteroppgjoerDataService.sisteVedtakMedAvkorting(vedtakListe).behandlingId)
                 val vedtakMedGjeldendeOpphoer = etteroppgjoerDataService.vedtakMedGjeldendeOpphoer(vedtakListe)
@@ -193,6 +199,7 @@ class EtteroppgjoerRevurderingService(
         sakId: SakId,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
+        behandlingerSomSkalHoppesOver: List<UUID> = emptyList(),
     ): Revurdering {
         val omgjoerForbehandlingId =
             inTransaction {
@@ -237,6 +244,7 @@ class EtteroppgjoerRevurderingService(
             omgjoerForbehandlingId = omgjoerForbehandlingId,
             brukerTokenInfo = brukerTokenInfo,
             omgjoeringEgetInitiativ = true,
+            behandlingerSomSkalHoppesOver = behandlingerSomSkalHoppesOver,
         )
     }
 

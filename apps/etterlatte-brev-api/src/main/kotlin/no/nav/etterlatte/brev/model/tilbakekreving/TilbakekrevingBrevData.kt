@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
 import no.nav.etterlatte.libs.common.tilbakekreving.kunYtelse
-import no.nav.pensjon.brevbaker.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Kroner
 import java.time.LocalDate
 
 data class TilbakekrevingBrevDTOData(
@@ -44,38 +44,39 @@ data class TilbakekrevingBrevDTO(
 
             return TilbakekrevingBrevDTO(
                 innhold = redigerbart,
-                data = TilbakekrevingBrevDTOData(
-                    sakType = sakType,
-                    bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
-                    brukerNavn = soekerNavn,
-                    doedsbo = tilbakekreving.vurdering?.doedsbosak == JaNei.JA,
-                    varsel = tilbakekreving.vurdering?.forhaandsvarsel ?: throw TilbakeKrevingManglerVarsel(),
-                    datoVarselEllerVedtak =
-                        tilbakekreving.vurdering?.forhaandsvarselDato
-                            ?: throw TilbakeKrevingManglerForhaandsvarselDatoException(),
-                    datoTilsvarBruker = tilbakekreving.vurdering?.tilsvar?.dato,
-                    tilbakekreving =
-                        TilbakekrevingData(
-                            fraOgMed = perioderSortert.first().maaned.atDay(1),
-                            tilOgMed = perioderSortert.last().maaned.atEndOfMonth(),
-                            skalTilbakekreve =
-                                tilbakekreving.perioder.any {
-                                    it.tilbakekrevingsbeloep.kunYtelse().any { beloep ->
-                                        beloep.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV ||
-                                            beloep.resultat == TilbakekrevingResultat.DELVIS_TILBAKEKREV
-                                    }
-                                },
-                            helTilbakekreving =
-                                tilbakekreving.perioder.all {
-                                    it.tilbakekrevingsbeloep.kunYtelse().any { beloep ->
-                                        beloep.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV
-                                    }
-                                },
-                            perioder = tilbakekrevingsPerioder(tilbakekreving),
-                            harRenteTillegg = sjekkOmHarRenter(tilbakekreving),
-                            summer = perioderSummert(tilbakekreving),
-                        ),
-                ),
+                data =
+                    TilbakekrevingBrevDTOData(
+                        sakType = sakType,
+                        bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                        brukerNavn = soekerNavn,
+                        doedsbo = tilbakekreving.vurdering?.doedsbosak == JaNei.JA,
+                        varsel = tilbakekreving.vurdering?.forhaandsvarsel ?: throw TilbakeKrevingManglerVarsel(),
+                        datoVarselEllerVedtak =
+                            tilbakekreving.vurdering?.forhaandsvarselDato
+                                ?: throw TilbakeKrevingManglerForhaandsvarselDatoException(),
+                        datoTilsvarBruker = tilbakekreving.vurdering?.tilsvar?.dato,
+                        tilbakekreving =
+                            TilbakekrevingData(
+                                fraOgMed = perioderSortert.first().maaned.atDay(1),
+                                tilOgMed = perioderSortert.last().maaned.atEndOfMonth(),
+                                skalTilbakekreve =
+                                    tilbakekreving.perioder.any {
+                                        it.tilbakekrevingsbeloep.kunYtelse().any { beloep ->
+                                            beloep.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV ||
+                                                beloep.resultat == TilbakekrevingResultat.DELVIS_TILBAKEKREV
+                                        }
+                                    },
+                                helTilbakekreving =
+                                    tilbakekreving.perioder.all {
+                                        it.tilbakekrevingsbeloep.kunYtelse().any { beloep ->
+                                            beloep.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV
+                                        }
+                                    },
+                                perioder = tilbakekrevingsPerioder(tilbakekreving),
+                                harRenteTillegg = sjekkOmHarRenter(tilbakekreving),
+                                summer = perioderSummert(tilbakekreving),
+                            ),
+                    ),
             )
         }
 

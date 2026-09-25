@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.pensjon.brevbaker.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Kroner
 
 data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfallData(
     val utbetaltFoerReform: Kroner,
@@ -53,10 +53,11 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                     )
                 }
                 return BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
-                    data = defaultBrevdataOmregning.copy(
-                        utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
-                        erBosattUtlandet = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
-                    ),
+                    data =
+                        defaultBrevdataOmregning.copy(
+                            utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
+                            erBosattUtlandet = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                        ),
                 )
             }
 
@@ -97,23 +98,24 @@ data class BarnepensjonOmregnetNyttRegelverk(
 
             return BarnepensjonOmregnetNyttRegelverk(
                 innhold = innhold.innhold(),
-                data = BarnepensjonOmregnetNyttRegelverkData(
-                    erUnder18Aar = erUnder18AarNonNull,
-                    beregning =
-                        barnepensjonBeregning(
-                            innhold,
-                            avdoede,
-                            utbetalingsinfo,
-                            grunnbeloep,
-                            trygdetid,
-                            erForeldreloes = false,
-                            landKodeverk,
-                        ),
-                    frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
-                    erBosattUtlandet =
-                        krevIkkeNull(utlandstilknytning) { "Utlandstilknytning mangler" } == UtlandstilknytningType.BOSATT_UTLAND,
-                    erEtterbetaling = etterbetaling != null,
-                ),
+                data =
+                    BarnepensjonOmregnetNyttRegelverkData(
+                        erUnder18Aar = erUnder18AarNonNull,
+                        beregning =
+                            barnepensjonBeregning(
+                                innhold,
+                                avdoede,
+                                utbetalingsinfo,
+                                grunnbeloep,
+                                trygdetid,
+                                erForeldreloes = false,
+                                landKodeverk,
+                            ),
+                        frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
+                        erBosattUtlandet =
+                            krevIkkeNull(utlandstilknytning) { "Utlandstilknytning mangler" } == UtlandstilknytningType.BOSATT_UTLAND,
+                        erEtterbetaling = etterbetaling != null,
+                    ),
             )
         }
     }

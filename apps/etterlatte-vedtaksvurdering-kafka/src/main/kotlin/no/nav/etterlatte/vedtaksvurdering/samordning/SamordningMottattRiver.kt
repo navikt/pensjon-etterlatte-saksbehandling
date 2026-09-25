@@ -24,7 +24,7 @@ internal class SamordningMottattRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val vedtakId = packet["vedtakId"].asText()
+        val vedtakId = packet["vedtakId"].asString()
         logger.info("Behandle mottatt samordning for vedtak [vedtakId=$vedtakId]")
 
         try {

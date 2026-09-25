@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.behandling
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -21,6 +20,7 @@ import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.pensjon.brevbaker.api.model.BrevbakerType
 import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Foedselsnummer
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 
 private val logger = LoggerFactory.getLogger(Grunnlag::class.java)

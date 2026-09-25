@@ -1,9 +1,9 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import tools.jackson.module.kotlin.readValue
 
 internal class UtbetalingsvedtakTest {
     @Test

@@ -21,6 +21,6 @@ class TidshendelsePacket(
     val harMigrertYrkesskadeFordel = packet["yrkesskadefordel_pre_20240101"].asBoolean()
     val harRettUtenTidsbegrensning = packet["oms_rett_uten_tidsbegrensning"].asBoolean()
     val dryrun = packet[DRYRUN].asBoolean()
-    val jobbtype = JobbType.valueOf(packet[TIDSHENDELSE_TYPE_KEY].asText())
-    val hendelseId: String = packet[TIDSHENDELSE_ID_KEY].asText()
+    val jobbtype = JobbType.valueOf(packet[TIDSHENDELSE_TYPE_KEY].asString())
+    val hendelseId: String = packet[TIDSHENDELSE_ID_KEY].asString()
 }

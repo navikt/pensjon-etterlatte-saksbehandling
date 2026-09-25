@@ -1,7 +1,5 @@
 package no.nav.etterlatte.opplysningerfrasoknad.uthenter
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
@@ -27,6 +25,8 @@ import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoeknadstypeOpplysni
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utbetalingsinformasjon
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.UtenlandsadresseBarn
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Verge
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.treeToValue
 import java.time.YearMonth
 import java.util.UUID
 
@@ -63,7 +63,7 @@ internal object BarnepensjonUthenter {
         val utenlandsoppholdAvdød: List<Grunnlagsopplysning<out Any?>> =
             utenlandsopphold?.svar?.verdi?.let { svar ->
                 when (svar) {
-                    JaNeiVetIkke.JA ->
+                    JaNeiVetIkke.JA -> {
                         utenlandsopphold.opplysning?.map {
                             lagOpplysning(
                                 opplysningsType = Opplysningstype.UTENLANDSOPPHOLD,
@@ -88,9 +88,15 @@ internal object BarnepensjonUthenter {
                                     },
                             )
                         }
+                    }
 
-                    JaNeiVetIkke.NEI -> emptyList()
-                    JaNeiVetIkke.VET_IKKE -> emptyList()
+                    JaNeiVetIkke.NEI -> {
+                        emptyList()
+                    }
+
+                    JaNeiVetIkke.VET_IKKE -> {
+                        emptyList()
+                    }
                 }
             } ?: emptyList()
 

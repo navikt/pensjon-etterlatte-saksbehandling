@@ -1,7 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad
 
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -31,6 +29,8 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.sikkerLogg
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.DatabindException
+import tools.jackson.module.kotlin.treeToValue
 
 internal class NySoeknadRiver(
     rapidsConnection: RapidsConnection,
@@ -107,7 +107,7 @@ internal class NySoeknadRiver(
             } else {
                 context.publish(packet.oppdaterMed(sak.id, true, journalpostResponse).toJson())
             }
-        } catch (e: JsonMappingException) {
+        } catch (e: DatabindException) {
             sikkerLogg.error("Feil under deserialisering", e)
             logger.error("Feil under deserialisering av søknad (id=$soeknadId). Se sikkerlogg for detaljer.")
             throw e
@@ -186,9 +186,9 @@ internal class NySoeknadRiver(
     private fun JsonMessage.soeknad() = objectMapper.treeToValue<InnsendtSoeknad>(this[SoeknadInnsendt.skjemaInfoKey])
 
     private fun JsonMessage.soeknadId(): Long {
-        val longValue = get(SoeknadInnsendt.lagretSoeknadIdKey).longValue()
-        return if (longValue != 0L) {
-            longValue
+        val node = get(SoeknadInnsendt.lagretSoeknadIdKey)
+        return if (node.isNumber) {
+            node.longValue()
         } else {
             System.currentTimeMillis() // Slik at det gjøres en ny fordeling for testdata-søknader
         }

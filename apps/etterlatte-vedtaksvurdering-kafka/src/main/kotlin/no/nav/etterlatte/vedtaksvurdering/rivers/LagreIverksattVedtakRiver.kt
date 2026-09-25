@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vedtaksvurdering.rivers
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -13,6 +12,7 @@ import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 internal class LagreIverksattVedtakRiver(
     rapidsConnection: RapidsConnection,

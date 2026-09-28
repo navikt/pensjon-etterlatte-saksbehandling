@@ -13,7 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.azureAdSaksbehandlerClaim
+import no.nav.etterlatte.azureAdSaksbehandlerGjennyClaim
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -60,7 +60,7 @@ internal class BehandlingInfoRoutesTest {
 
         behandlingInfoDao = mockk()
         every { applicationContext.saksbehandlerGroupIdsByKey } returns
-            mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim)
+            mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerGjennyClaim)
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true
@@ -231,5 +231,5 @@ internal class BehandlingInfoRoutesTest {
                 ),
         )
 
-    private val token: String by lazy { server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
+    private val token: String by lazy { server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerGjennyClaim)) }
 }

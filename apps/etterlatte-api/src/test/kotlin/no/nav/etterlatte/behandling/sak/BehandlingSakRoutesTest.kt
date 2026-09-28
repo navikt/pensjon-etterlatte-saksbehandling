@@ -109,67 +109,6 @@ class BehandlingSakRoutesTest {
     }
 
     @Test
-    fun `skal gi 500 når body mangler pensjonSaksbehandler`() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff =
-            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
-        testApplication {
-            runServerWithConfig(applicationConfig = conff) {
-                behandlingSakRoutes(
-                    behandlingService = behandlingService,
-                    config = conff,
-                )
-            }
-
-            val response =
-                client.post("api/oms/person/sak") {
-                    contentType(ContentType.Application.Json)
-                    header(
-                        HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
-                    )
-                }
-            response.status shouldBe HttpStatusCode.InternalServerError
-            coVerify(exactly = 0) { behandlingService.hentSakforPerson(any()) }
-        }
-    }
-
-    @Test
-    fun `pensjonSaksbehandler kan hente saksliste for fnr`() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff =
-            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
-        val requestFnr = FoedselsnummerDTO(fnr)
-        val sakIdListesvar = listOf(sakId1)
-        coEvery { behandlingService.hentSakforPerson(requestFnr) } returns sakIdListesvar
-        testApplication {
-            val client =
-                runServerWithConfig(applicationConfig = conff) {
-                    behandlingSakRoutes(
-                        behandlingService = behandlingService,
-                        config = conff,
-                    )
-                }
-
-            val response =
-                client.post("api/oms/person/sak") {
-                    contentType(ContentType.Application.Json)
-                    setBody(requestFnr.toJson())
-                    header(
-                        HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
-                    )
-                }
-            response.status shouldBe HttpStatusCode.OK
-            val sakliste: List<SakId> = response.body()
-
-            sakliste shouldBe sakIdListesvar
-
-            coVerify(exactly = 1) { behandlingService.hentSakforPerson(requestFnr) }
-        }
-    }
-
-    @Test
     fun `Kan hente sak men sak er null og kaster da exception IkkeFunnetException men logges `() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
         val conff =
@@ -267,7 +206,6 @@ private fun configMedRoller(
                 ),
             "roller" to
                 mapOf(
-                    "pensjon-saksbehandler" to pensjonSaksbehandler,
                     "gjenny-saksbehandler" to gjennySaksbehandler,
                 ),
         ),

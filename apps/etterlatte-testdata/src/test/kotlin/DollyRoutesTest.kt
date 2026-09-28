@@ -264,7 +264,6 @@ class DollyRoutesTest {
                     ),
                 "roller" to
                     mapOf(
-                        "pensjon-saksbehandler" to pensjonSaksbehandler,
                         "gjenny-saksbehandler" to gjennySaksbehandler,
                     ),
             ),

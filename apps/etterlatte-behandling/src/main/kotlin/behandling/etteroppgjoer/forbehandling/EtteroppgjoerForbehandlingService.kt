@@ -77,6 +77,7 @@ class EtteroppgjoerForbehandlingService(
 
         val forbehandling = hentForbehandling(forbehandling.id)
 
+        sjekkAtViBrukerSisteIverksatteBehandling(forbehandling, brukerTokenInfo)
         sjekkAtViBrukerSisteInntekter(forbehandling)
 
         return forbehandling.tilFerdigstilt().also {
@@ -731,7 +732,7 @@ class EtteroppgjoerForbehandlingService(
         // verifisere at vi bruker siste iverksatte behandling
         if (sisteVedtakMedAvkorting.behandlingId != forbehandling.sisteIverksatteBehandlingId) {
             throw InternfeilException(
-                "Forbehandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteVedtakMedAvkorting.behandlingId}",
+                "Behandling med id=${forbehandling.id} er ikke oppdatert med siste iverksatte behandling=${sisteVedtakMedAvkorting.behandlingId}",
             )
         }
     }

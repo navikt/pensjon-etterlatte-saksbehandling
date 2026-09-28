@@ -1,5 +1,6 @@
 import com.github.jk1.license.render.InventoryReportRenderer
 import com.github.jk1.license.render.JsonReportRenderer
+import com.github.jk1.license.render.ReportRenderer
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 setupRepositories()
@@ -18,7 +19,7 @@ plugins {
 }
 
 licenseReport {
-    renderers = arrayOf(JsonReportRenderer(), InventoryReportRenderer())
+    renderers = arrayOf<ReportRenderer>(JsonReportRenderer(), InventoryReportRenderer())
     allowedLicensesFile = File("$projectDir/buildSrc/akseptable-lisenser.json")
 }
 

@@ -27,7 +27,7 @@ fun Project.setupRepositories() {
         sub.repositories {
             mavenCentral()
             maven {
-                url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
+                url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-felles")
                 credentials {
                     username = "token"
                     password = System.getenv("GITHUB_TOKEN")

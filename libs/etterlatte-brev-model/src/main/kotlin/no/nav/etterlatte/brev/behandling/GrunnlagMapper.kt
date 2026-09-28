@@ -17,7 +17,8 @@ import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.ForelderVerge
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Foedselsnummer
 import org.slf4j.LoggerFactory
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate

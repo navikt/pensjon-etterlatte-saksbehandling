@@ -56,7 +56,6 @@ class AvkortingValiderTest {
                         ),
                     ),
             )
-
         val inntektMedFratrekk =
             AvkortingGrunnlagLagreDto(
                 inntektTom = 100000,
@@ -89,9 +88,7 @@ class AvkortingValiderTest {
                         etteroppgjoer(aar = 2024),
                     ),
             )
-
         val fom = YearMonth.of(2024, 12)
-
         val inntektMedFratrekk =
             AvkortingGrunnlagLagreDto(
                 inntektTom = 100000,
@@ -114,6 +111,39 @@ class AvkortingValiderTest {
                 naa = fom,
             )
         }
+    }
+
+    @Test
+    fun `Skal kunne endre inntekt tidligere aar hvis aarsoppgjoer er etteroppgjoer naar sperren er togglet av`() {
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        etteroppgjoer(aar = 2024),
+                    ),
+            )
+        val fom = YearMonth.of(2024, 12)
+        val inntektMedFratrekk =
+            AvkortingGrunnlagLagreDto(
+                inntektTom = 100000,
+                fratrekkInnAar = 0,
+                fratrekkInnAarUtland = 0,
+                inntektUtlandTom = 100000,
+                spesifikasjon = "asdf",
+                fom = fom,
+            )
+
+        validerInntekter(
+            behandling(BehandlingType.REVURDERING),
+            beregning(beregningsperiode(datoFOM = fom)),
+            avkorting,
+            listOf(inntektMedFratrekk),
+            emptyList(),
+            true,
+            null,
+            naa = fom,
+            tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor = true,
+        )
     }
 
     @Test
@@ -233,7 +263,6 @@ class AvkortingValiderTest {
                         ),
                     ),
             )
-
         val inntektMedFratrekk =
             AvkortingGrunnlagLagreDto(
                 inntektTom = 100000,
@@ -260,7 +289,6 @@ class AvkortingValiderTest {
         @Test
         fun `Førstegangsbehandling fra januar`() {
             val avkorting = avkorting()
-
             val utenFratrekk =
                 inntektDto(
                     fratrekkInnAar = 0,
@@ -331,7 +359,6 @@ class AvkortingValiderTest {
                             ),
                         ),
                 )
-
             val utenFratrekk =
                 inntektDto(
                     fratrekkInnAar = 0,
@@ -495,7 +522,6 @@ class AvkortingValiderTest {
                         beregningsperiode(datoFOM = YearMonth.of(2026, Month.JANUARY)),
                     ),
             )
-
         val krav =
             AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
                 avkorting,

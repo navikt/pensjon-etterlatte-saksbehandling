@@ -1,4 +1,3 @@
--- Tilbakestiller to vedtak fra SAMORDNET til RETURNERT for å rette saksbehandlerfeil.
 UPDATE behandling SET status = 'RETURNERT', sist_endret = NOW() WHERE id = in(
                                                                               'e639e274-3f62-4dee-9719-0599b453d6a7',
                                                                               'e7b26469-a32c-40e5-a919-a4704b15071e',

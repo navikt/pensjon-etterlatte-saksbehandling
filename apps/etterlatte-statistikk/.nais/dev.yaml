@@ -16,6 +16,9 @@ spec:
         databases:
           - name: statistikk
             envVarPrefix: DB
+        diskSize: 15
+        highAvailability: false
+        pointInTimeRecovery: false
   liveness:
     initialDelay: 5
     path: /health/isalive
@@ -43,8 +46,8 @@ spec:
     limits:
       memory: 768Mi
   replicas:
-    max: 1
-    min: 1
+    max: 0
+    min: 0
   azure:
     application:
       enabled: true

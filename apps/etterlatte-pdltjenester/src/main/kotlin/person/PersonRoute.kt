@@ -25,7 +25,14 @@ fun Route.personRoute(service: PersonService) {
             val hentPersonRequest = call.receive<HentPersonRequest>()
             logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
 
-            service.hentPerson(hentPersonRequest).let { call.respond(it) }
+            val person =
+                personOppslag(
+                    operasjon = "Henting av person",
+                    folkeregisteridentifikator = hentPersonRequest.foedselsnummer.value,
+                ) {
+                    service.hentPerson(hentPersonRequest)
+                }
+            call.respond(person)
         }
 
         route("/v2") {
@@ -33,13 +40,27 @@ fun Route.personRoute(service: PersonService) {
                 val hentPersonRequest = call.receive<HentPersonRequest>()
                 logger.info("Henter personopplysning med fnr=${hentPersonRequest.foedselsnummer}")
 
-                service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
+                val person =
+                    personOppslag(
+                        operasjon = "Henting av personopplysninger",
+                        folkeregisteridentifikator = hentPersonRequest.foedselsnummer.value,
+                    ) {
+                        service.hentOpplysningsperson(hentPersonRequest)
+                    }
+                call.respond(person)
             }
 
             post("doedshendelse") {
                 val hentPersonRequest = call.receive<HentPersonRequest>()
                 logger.info("Henter personpplysning med fnr=${hentPersonRequest.foedselsnummer}")
-                call.respond(service.hentDoedshendelseOpplysningsperson(hentPersonRequest))
+                val person =
+                    personOppslag(
+                        operasjon = "Henting av personopplysninger for dødshendelse",
+                        folkeregisteridentifikator = hentPersonRequest.foedselsnummer.value,
+                    ) {
+                        service.hentDoedshendelseOpplysningsperson(hentPersonRequest)
+                    }
+                call.respond(person)
             }
         }
 
@@ -47,7 +68,14 @@ fun Route.personRoute(service: PersonService) {
             val request = call.receive<HentAdressebeskyttelseRequest>()
             logger.info("Henter adressebeskyttelse/gradering for fnr=${request.ident}")
 
-            call.respond(service.hentAdressebeskyttelseGradering(request))
+            val adressebeskyttelse =
+                personOppslag(
+                    operasjon = "Henting av adressebeskyttelse",
+                    folkeregisteridentifikator = request.ident.value,
+                ) {
+                    service.hentAdressebeskyttelseGradering(request)
+                }
+            call.respond(adressebeskyttelse)
         }
     }
 
@@ -59,7 +87,17 @@ fun Route.personRoute(service: PersonService) {
                         "til ${hentPersongalleriRequest.mottakerAvYtelsen}",
                 )
 
-                val persongalleri = service.hentPersongalleri(hentPersongalleriRequest)
+                val persongalleri =
+                    personOppslag(
+                        operasjon = "Henting av persongalleri",
+                        folkeregisteridentifikatorer =
+                            listOfNotNull(
+                                hentPersongalleriRequest.mottakerAvYtelsen.value,
+                                hentPersongalleriRequest.innsender?.value,
+                            ),
+                    ) {
+                        service.hentPersongalleri(hentPersongalleriRequest)
+                    }
                 call.respond(persongalleri)
             }
         }
@@ -70,14 +108,27 @@ fun Route.personRoute(service: PersonService) {
             val hentPdlIdentRequest = call.receive<HentPdlIdentRequest>()
             logger.info("Henter identer for ident=${hentPdlIdentRequest.ident}")
 
-            service.hentPdlIdentifikator(hentPdlIdentRequest).let { call.respond(it) }
+            val pdlIdentifikator =
+                personOppslag(
+                    operasjon = "Henting av PDL-identifikator",
+                    folkeregisteridentifikator = hentPdlIdentRequest.ident.value,
+                ) {
+                    service.hentPdlIdentifikator(hentPdlIdentRequest)
+                }
+            call.respond(pdlIdentifikator)
         }
     }
 
     post("folkeregisteridenter") {
         val request = call.receive<HentPdlIdentRequest>()
 
-        val identer = service.hentPdlFolkeregisterIdenter(request)
+        val identer =
+            personOppslag(
+                operasjon = "Henting av folkeregisteridenter",
+                folkeregisteridentifikator = request.ident.value,
+            ) {
+                service.hentPdlFolkeregisterIdenter(request)
+            }
 
         call.respond(identer)
     }
@@ -86,7 +137,13 @@ fun Route.personRoute(service: PersonService) {
         kunSaksbehandler {
             val request = call.receive<HentPdlIdentRequest>()
 
-            val foedselsdato = service.hentFoedselsdato(request.ident.value).foedselsdato
+            val foedselsdato =
+                personOppslag(
+                    operasjon = "Henting av fødselsdato",
+                    folkeregisteridentifikator = request.ident.value,
+                ) {
+                    service.hentFoedselsdato(request.ident.value)
+                }.foedselsdato
 
             if (foedselsdato == null) {
                 sikkerLogg.error("Fant ingen fødselsdato i PDL for ident=${request.ident.value}")
@@ -101,7 +158,13 @@ fun Route.personRoute(service: PersonService) {
         post {
             val ident = call.receive<HentPdlIdentRequest>()
 
-            val aktoerId = service.hentAktoerId(ident)
+            val aktoerId =
+                personOppslag(
+                    operasjon = "Henting av aktør-ID",
+                    folkeregisteridentifikator = ident.ident.value,
+                ) {
+                    service.hentAktoerId(ident)
+                }
 
             call.respond(aktoerId)
         }
@@ -112,7 +175,14 @@ fun Route.personRoute(service: PersonService) {
             val hentGeografiskTilknytningRequest = call.receive<HentGeografiskTilknytningRequest>()
             logger.info("Henter geografisk tilknytning med fnr=${hentGeografiskTilknytningRequest.foedselsnummer}")
 
-            service.hentGeografiskTilknytning(hentGeografiskTilknytningRequest).let { call.respond(it) }
+            val geografiskTilknytning =
+                personOppslag(
+                    operasjon = "Henting av geografisk tilknytning",
+                    folkeregisteridentifikator = hentGeografiskTilknytningRequest.foedselsnummer.value,
+                ) {
+                    service.hentGeografiskTilknytning(hentGeografiskTilknytningRequest)
+                }
+            call.respond(geografiskTilknytning)
         }
     }
 
@@ -120,7 +190,14 @@ fun Route.personRoute(service: PersonService) {
         post {
             val identRequest = call.receive<HentPersonHistorikkForeldreAnsvarRequest>()
             logger.info("Henter historikk for foreldreansvar for person med fnr=${identRequest.foedselsnummer}")
-            service.hentHistorikkForeldreansvar(identRequest).let { call.respond(it) }
+            val foreldreansvar =
+                personOppslag(
+                    operasjon = "Henting av historikk for foreldreansvar",
+                    folkeregisteridentifikator = identRequest.foedselsnummer.value,
+                ) {
+                    service.hentHistorikkForeldreansvar(identRequest)
+                }
+            call.respond(foreldreansvar)
         }
     }
 }

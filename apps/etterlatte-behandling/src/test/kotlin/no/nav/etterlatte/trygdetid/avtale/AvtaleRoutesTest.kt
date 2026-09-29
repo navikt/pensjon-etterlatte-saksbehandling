@@ -14,7 +14,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.etterlatte.azureAdSaksbehandlerClaim
+import no.nav.etterlatte.azureAdSaksbehandlerGjennyClaim
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
@@ -42,7 +42,7 @@ internal class AvtaleRoutesTest {
     fun before() {
         server.start()
         every { applicationContext.saksbehandlerGroupIdsByKey } returns
-            mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim)
+            mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerGjennyClaim)
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true
@@ -220,5 +220,5 @@ internal class AvtaleRoutesTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
+    private val token: String by lazy { server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerGjennyClaim)) }
 }

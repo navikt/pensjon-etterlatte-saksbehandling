@@ -8,10 +8,6 @@ val azureAdFortroligClaim: String by lazy {
     "2e1dc582-f762-4510-a660-88bf68fb7128"
 }
 
-val azureAdSaksbehandlerClaim: String by lazy {
-    "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
-}
-
 val azureAdSaksbehandlerGjennyClaim: String by lazy {
     "5b6745de-b65d-40eb-a6f5-860c8b61c27f"
 }

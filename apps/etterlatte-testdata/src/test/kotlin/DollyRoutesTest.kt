@@ -90,12 +90,12 @@ class DollyRoutesTest {
 
     @Test
     fun `skal gi 400 naar body mangler `() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val gjennySaksbehandler = UUID.randomUUID().toString()
         val conff =
             configMedRoller(
                 mockOAuth2Server.config.httpServer.port(),
                 Issuer.AZURE.issuerName,
-                pensjonSaksbehandler = pensjonSaksbehandler,
+                gjennySaksbehandler = gjennySaksbehandler,
             )
         testApplication {
             runServerWithConfig(
@@ -108,7 +108,7 @@ class DollyRoutesTest {
                     contentType(ContentType.Application.Json)
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(gjennySaksbehandler))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.BadRequest
@@ -117,12 +117,12 @@ class DollyRoutesTest {
 
     @Test
     fun `kan opprette soeknad`() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val gjennySaksbehandler = UUID.randomUUID().toString()
         val conff =
             configMedRoller(
                 mockOAuth2Server.config.httpServer.port(),
                 Issuer.AZURE.issuerName,
-                pensjonSaksbehandler = pensjonSaksbehandler,
+                gjennySaksbehandler = gjennySaksbehandler,
             )
         val request =
             NySoeknadRequest(
@@ -150,7 +150,7 @@ class DollyRoutesTest {
                     setBody(request.toJson())
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(gjennySaksbehandler))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.Created
@@ -161,12 +161,12 @@ class DollyRoutesTest {
 
     @Test
     fun `kan hente vedtak`() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val gjennySaksbehandler = UUID.randomUUID().toString()
         val conff =
             configMedRoller(
                 mockOAuth2Server.config.httpServer.port(),
                 Issuer.AZURE.issuerName,
-                pensjonSaksbehandler = pensjonSaksbehandler,
+                gjennySaksbehandler = gjennySaksbehandler,
             )
         val request = FoedselsnummerDTO("09437432993")
         val forventetRetur =
@@ -205,7 +205,7 @@ class DollyRoutesTest {
                     setBody(request.toJson())
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(gjennySaksbehandler))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.OK
@@ -216,12 +216,12 @@ class DollyRoutesTest {
 
     @Test
     fun `kan ikke hente vedtak uten gyldig fnr`() {
-        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val gjennySaksbehandler = UUID.randomUUID().toString()
         val conff =
             configMedRoller(
                 mockOAuth2Server.config.httpServer.port(),
                 Issuer.AZURE.issuerName,
-                pensjonSaksbehandler = pensjonSaksbehandler,
+                gjennySaksbehandler = gjennySaksbehandler,
             )
         val request = FoedselsnummerDTO("09512453653")
 
@@ -238,7 +238,7 @@ class DollyRoutesTest {
                     setBody(request.toJson())
                     header(
                         HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(pensjonSaksbehandler))}",
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(gjennySaksbehandler))}",
                     )
                 }
             response.status shouldBe HttpStatusCode.BadRequest
@@ -248,7 +248,6 @@ class DollyRoutesTest {
     private fun configMedRoller(
         port: Int,
         issuerId: String,
-        pensjonSaksbehandler: String? = UUID.randomUUID().toString(),
         gjennySaksbehandler: String? = UUID.randomUUID().toString(),
     ): Config =
         ConfigFactory.parseMap(

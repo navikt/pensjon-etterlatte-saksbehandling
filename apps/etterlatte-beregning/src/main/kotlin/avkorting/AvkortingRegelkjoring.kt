@@ -579,28 +579,10 @@ fun finnHullIYtelse(ytelseFoerAvkorting: List<YtelseFoerAvkorting>): List<Period
     }
 }
 
-fun Periode.utenHullIYtelse(ytelseFoerAvkorting: List<YtelseFoerAvkorting>): List<Periode> {
-    val sisteTom =
-        if (ytelseFoerAvkorting.isEmpty() || ytelseFoerAvkorting.any { it.periode.tom == null }) {
-            null
-        } else {
-            ytelseFoerAvkorting.maxOf { it.periode.tom!! }
-        }
-    val etterSisteYtelse =
-        sisteTom?.let { tom ->
-            val periodeTom = this.tom
-            if (periodeTom == null ||
-                periodeTom > tom
-            ) {
-                Periode(fom = tom.plusMonths(1), tom = periodeTom ?: YearMonth.of(9999, 12))
-            } else {
-                null
-            }
-        }
-    return (finnHullIYtelse(ytelseFoerAvkorting) + listOfNotNull(etterSisteYtelse)).fold(listOf(this)) { perioder, hull ->
+fun Periode.utenHullIYtelse(ytelseFoerAvkorting: List<YtelseFoerAvkorting>): List<Periode> =
+    finnHullIYtelse(ytelseFoerAvkorting).fold(listOf(this)) { perioder, hull ->
         perioder.flatMap { it.utenom(hull) }
     }
-}
 
 private fun Periode.utenom(hull: Periode): List<Periode> {
     val hullTom = requireNotNull(hull.tom)

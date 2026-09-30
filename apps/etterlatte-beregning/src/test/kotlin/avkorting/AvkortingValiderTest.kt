@@ -11,6 +11,7 @@ import no.nav.etterlatte.avkorting.HarFratrekkInnAarForFulltAar
 import no.nav.etterlatte.avkorting.InntektForTidligereAar
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.NyeAarMedInntektMaaStarteIJanuar
+import no.nav.etterlatte.avkorting.aarMedGjenopptattYtelseEtterAvsluttetInntekt
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkorting
@@ -949,7 +950,7 @@ class AvkortingValiderTest {
 
         @Test
         fun `finner aar der ytelse gjenopptas etter at inntekten er avsluttet`() {
-            AvkortingValider.aarMedGjenopptattYtelseEtterAvsluttetInntekt(
+            aarMedGjenopptattYtelseEtterAvsluttetInntekt(
                 avkortingOpphoerMars2025,
                 beregningMedHull,
             ) shouldContainExactly listOf(2025)
@@ -957,7 +958,7 @@ class AvkortingValiderTest {
 
         @Test
         fun `finner ikke aar naar ytelse ikke gjenopptas i samme aar`() {
-            AvkortingValider.aarMedGjenopptattYtelseEtterAvsluttetInntekt(
+            aarMedGjenopptattYtelseEtterAvsluttetInntekt(
                 avkortingOpphoerMars2025,
                 beregning(
                     beregninger =

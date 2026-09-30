@@ -12,6 +12,32 @@ import java.time.YearMonth
 
 val MAANED_FOR_INNTEKT_NESTE_AAR = Month.OCTOBER
 
+/**
+ * År der siste inntekt er avsluttet (typisk pga. tidligere opphør), men beregningen har ytelse
+ * senere i samme år (gjenopptak etter hull). Inntekten for året må da legges inn på nytt.
+ */
+fun aarMedGjenopptattYtelseEtterAvsluttetInntekt(
+    avkorting: Avkorting,
+    beregning: Beregning,
+): List<Int> =
+    avkorting.aarsoppgjoer
+        .filterIsInstance<AarsoppgjoerLoepende>()
+        .filter { aarsoppgjoer ->
+            val inntektTom =
+                aarsoppgjoer.inntektsavkorting
+                    .maxByOrNull { it.grunnlag.periode.fom }
+                    ?.grunnlag
+                    ?.periode
+                    ?.tom
+                    ?: return@filter false
+            val sluttPaaAaret = YearMonth.of(aarsoppgjoer.aar, Month.DECEMBER)
+            inntektTom < sluttPaaAaret &&
+                beregning.beregningsperioder.any {
+                    val datoTOM = it.datoTOM
+                    it.datoFOM <= sluttPaaAaret && (datoTOM == null || datoTOM > inntektTom)
+                }
+        }.map { it.aar }
+
 object AvkortingValider {
     fun paakrevdeInntekterForBeregningAvAvkorting(
         avkorting: Avkorting,
@@ -52,27 +78,6 @@ object AvkortingValider {
 
         return aarViMaaHaInntekterFor
     }
-
-    fun aarMedGjenopptattYtelseEtterAvsluttetInntekt(
-        avkorting: Avkorting,
-        beregning: Beregning,
-    ): List<Int> =
-        avkorting.aarsoppgjoer
-            .filterIsInstance<AarsoppgjoerLoepende>()
-            .filter { aarsoppgjoer ->
-                val inntektTom =
-                    aarsoppgjoer.inntektsavkorting
-                        .maxByOrNull { it.grunnlag.periode.fom }
-                        ?.grunnlag
-                        ?.periode
-                        ?.tom
-                        ?: return@filter false
-                val sluttPaaAaret = YearMonth.of(aarsoppgjoer.aar, Month.DECEMBER)
-                inntektTom < sluttPaaAaret &&
-                    beregning.beregningsperioder.any {
-                        it.datoFOM <= sluttPaaAaret && (it.datoTOM == null || it.datoTOM > inntektTom)
-                    }
-            }.map { it.aar }
 
     fun validerInntekter(
         behandling: DetaljertBehandling,

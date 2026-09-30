@@ -53,6 +53,27 @@ object AvkortingValider {
         return aarViMaaHaInntekterFor
     }
 
+    fun aarMedGjenopptattYtelseEtterAvsluttetInntekt(
+        avkorting: Avkorting,
+        beregning: Beregning,
+    ): List<Int> =
+        avkorting.aarsoppgjoer
+            .filterIsInstance<AarsoppgjoerLoepende>()
+            .filter { aarsoppgjoer ->
+                val inntektTom =
+                    aarsoppgjoer.inntektsavkorting
+                        .maxByOrNull { it.grunnlag.periode.fom }
+                        ?.grunnlag
+                        ?.periode
+                        ?.tom
+                        ?: return@filter false
+                val sluttPaaAaret = YearMonth.of(aarsoppgjoer.aar, Month.DECEMBER)
+                inntektTom < sluttPaaAaret &&
+                    beregning.beregningsperioder.any {
+                        it.datoFOM <= sluttPaaAaret && (it.datoTOM == null || it.datoTOM > inntektTom)
+                    }
+            }.map { it.aar }
+
     fun validerInntekter(
         behandling: DetaljertBehandling,
         beregning: Beregning,
@@ -79,6 +100,16 @@ object AvkortingValider {
             throw UgyldigForespoerselException(
                 "MANGLER_INNTEKTER_FOR_AVKORTING",
                 "Mangler inntektsgrunnlag for år(ene) ${inntekterViTrenger - inntekterViHar}",
+            )
+        }
+        val aarSomMaaHaNyInntekt =
+            aarMedGjenopptattYtelseEtterAvsluttetInntekt(eksisterendeAvkorting, beregning).toSet() -
+                nyeGrunnlag.map { it.fom.year }.toSet()
+        if (aarSomMaaHaNyInntekt.isNotEmpty()) {
+            throw UgyldigForespoerselException(
+                "MANGLER_NY_INNTEKT_GJENOPPTATT_YTELSE",
+                "Ytelsen er gjenopptatt etter opphør i år(ene) $aarSomMaaHaNyInntekt. " +
+                    "Inntekten for disse årene må legges inn på nytt.",
             )
         }
         val virk =

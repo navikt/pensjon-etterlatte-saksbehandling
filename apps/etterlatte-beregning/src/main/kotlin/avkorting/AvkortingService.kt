@@ -101,8 +101,10 @@ class AvkortingService(
                 null
             }
         val manglendeAar = paakrevdeAar - aarMedAvkorting
-        val alleAarMedBehovForNyInntekt = manglendeAar.toList() + ekstraAar
-        return alleAarMedBehovForNyInntekt.filterNotNull().sorted()
+        val aarMedGjenopptattYtelse =
+            avkorting?.let { AvkortingValider.aarMedGjenopptattYtelseEtterAvsluttetInntekt(it, beregning) }.orEmpty()
+        val alleAarMedBehovForNyInntekt = manglendeAar.toList() + ekstraAar + aarMedGjenopptattYtelse
+        return alleAarMedBehovForNyInntekt.filterNotNull().distinct().sorted()
     }
 
     suspend fun hentOpprettEllerReberegnAvkorting(

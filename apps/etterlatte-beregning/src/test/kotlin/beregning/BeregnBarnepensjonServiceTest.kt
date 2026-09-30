@@ -1031,6 +1031,105 @@ internal class BeregnBarnepensjonServiceTest {
                 }
             }
         }
+
+        private val periodeMedHull =
+            listOf(
+                Vedtaksperiode(fraOgMed = YearMonth.of(2024, 1), tilOgMed = YearMonth.of(2024, 6)),
+                Vedtaksperiode(fraOgMed = YearMonth.of(2024, 10), tilOgMed = null),
+            )
+
+        private fun beregnRevurdering(
+            virk: YearMonth,
+            vedtaksperioder: List<Vedtaksperiode>,
+            toggle: Boolean = true,
+            tilDato: LocalDate? = null,
+        ): Beregning {
+            val behandling = mockBehandling(BehandlingType.REVURDERING, virk = virk)
+            every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns toggle
+            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+            coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
+                mockk { every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT }
+            coEvery { beregningsGrunnlagService.hentBeregningsGrunnlag(any()) } returns
+                barnepensjonBeregningsGrunnlagMedVedtaksperioder(behandling.id, vedtaksperioder = vedtaksperioder)
+            return runBlocking { beregnBarnepensjonService().beregn(behandling, bruker, tilDato) }
+        }
+
+        private fun Beregning.perioderSomOverlapper(
+            fom: YearMonth,
+            tom: YearMonth,
+        ) = beregningsperioder.filter { it.datoFOM <= tom && (it.datoTOM ?: YearMonth.of(9999, 12)) >= fom }
+
+        @Test
+        fun `regulering med én åpen vedtaksperiode gir samme resultat som uten toggle`() {
+            val virk = YearMonth.of(2025, 5)
+            val perioder = listOf(Vedtaksperiode(fraOgMed = YearMonth.of(2024, 1), tilOgMed = null))
+
+            val medToggle = beregnRevurdering(virk, perioder, toggle = true)
+            val utenToggle = beregnRevurdering(virk, perioder, toggle = false)
+
+            medToggle.beregningsperioder.map { Triple(it.datoFOM, it.datoTOM, it.utbetaltBeloep) } shouldBe
+                utenToggle.beregningsperioder.map { Triple(it.datoFOM, it.datoTOM, it.utbetaltBeloep) }
+        }
+
+        @Test
+        fun `regulering etter hull beregner kun fra reguleringsmaaned og ut`() {
+            val virk = YearMonth.of(2025, 5)
+
+            val beregning = beregnRevurdering(virk, periodeMedHull)
+
+            beregning.beregningsperioder.first().datoFOM shouldBe virk
+            beregning.beregningsperioder.last().datoTOM shouldBe null
+            beregning.beregningsperioder.zipWithNext().forEach { (a, b) -> b.datoFOM shouldBe a.datoTOM!!.plusMonths(1) }
+        }
+
+        @Test
+        fun `regulering med virk foer hull skal ikke gi ytelse i hullet`() {
+            val virk = YearMonth.of(2024, 5)
+
+            val beregning = beregnRevurdering(virk, periodeMedHull)
+
+            beregning.perioderSomOverlapper(YearMonth.of(2024, 7), YearMonth.of(2024, 9)) shouldBe emptyList()
+            beregning.beregningsperioder.first().datoFOM shouldBe virk
+            beregning.beregningsperioder.last().datoTOM shouldBe null
+            beregning.perioderSomOverlapper(YearMonth.of(2024, 5), YearMonth.of(2024, 6)).forEach {
+                it.grunnbelop shouldBe GrunnbeloepRepository.hentGjeldendeGrunnbeloep(YearMonth.of(2024, 5)).grunnbeloep
+            }
+        }
+
+        @Test
+        fun `beregningsperioder skal ikke overlappe og skal vaere sortert`() {
+            val beregning = beregnRevurdering(YearMonth.of(2024, 3), periodeMedHull)
+
+            beregning.beregningsperioder.zipWithNext().forEach { (a, b) ->
+                a.datoTOM shouldNotBe null
+                (b.datoFOM > a.datoTOM!!) shouldBe true
+            }
+        }
+
+        @Test
+        fun `skal respektere tilDato fra opphoer som ligger foer slutten av vedtaksperiodene`() {
+            val tilDato = LocalDate.of(2024, 4, 30)
+
+            val beregning = beregnRevurdering(YearMonth.of(2024, 3), periodeMedHull, tilDato = tilDato)
+
+            beregning.perioderSomOverlapper(YearMonth.of(2024, 5), YearMonth.of(9999, 12)) shouldBe emptyList()
+            beregning.beregningsperioder.last().datoTOM shouldBe YearMonth.of(2024, 4)
+        }
+
+        @Test
+        fun `skal respektere tilDato naar siste vedtaksperiode er lukket etter opphoer`() {
+            val perioder =
+                listOf(
+                    Vedtaksperiode(fraOgMed = YearMonth.of(2024, 1), tilOgMed = YearMonth.of(2024, 6)),
+                    Vedtaksperiode(fraOgMed = YearMonth.of(2024, 10), tilOgMed = YearMonth.of(2025, 3)),
+                )
+            val tilDato = LocalDate.of(2024, 11, 30)
+
+            val beregning = beregnRevurdering(YearMonth.of(2024, 3), perioder, tilDato = tilDato)
+
+            beregning.beregningsperioder.last().datoTOM shouldBe YearMonth.of(2024, 11)
+        }
     }
 
     private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {

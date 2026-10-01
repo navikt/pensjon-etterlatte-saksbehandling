@@ -55,7 +55,7 @@ class JobbScheduler(
             // filtrere bort jobber som allerede er planlagt for neste måned
             .filter { periodiskJobb ->
                 periodiskJobb.jobbType !in listOf(JobbType.OMS_DOED_3AAR, JobbType.OMS_DOED_5AAR) ||
-                    isDev()
+                    isDev() // TODO: Fjern denne når vi skal i prod
             }.filter { periodiskJobb ->
                 planlagteJobberNesteMnd.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
             }

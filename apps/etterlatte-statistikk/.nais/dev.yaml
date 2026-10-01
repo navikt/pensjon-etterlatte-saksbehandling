@@ -46,8 +46,8 @@ spec:
     limits:
       memory: 768Mi
   replicas:
-    max: 0
-    min: 0
+    max: 1
+    min: 1
   azure:
     application:
       enabled: true

@@ -104,7 +104,8 @@ class BeregnBarnepensjonService(
 
         val relevantePerioderForBeregning =
             vedtaksperioder.filter {
-                (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
+                (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt &&
+                    (tilDato == null || it.fraOgMed <= YearMonth.from(tilDato))
             }
         val alleBeregninger =
             relevantePerioderForBeregning.map { periode ->
@@ -121,7 +122,7 @@ class BeregnBarnepensjonService(
                     trygdetider = trygdetider,
                     virkningstidspunkt = virkForBeregningIPeriode,
                     kunGammeltRegelverk = kunGammeltRegelverk,
-                    tilDato = periode.tilOgMed?.atEndOfMonth() ?: tilDato,
+                    tilDato = listOfNotNull(periode.tilOgMed?.atEndOfMonth(), tilDato).minOrNull(),
                 )
             }
         val allePerioder = alleBeregninger.flatMap { it.beregningsperioder }

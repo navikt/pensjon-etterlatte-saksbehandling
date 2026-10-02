@@ -720,6 +720,7 @@ data class Avkorting(
                             avkortetYtelseMedAllForventetInntekt,
                             kjenteSanksjonerForInntektsavkorting,
                             brukNyeReglerAvkorting,
+                            finnHullIYtelse(ytelseFoerAvkorting),
                         )
                     }
                 }
@@ -759,6 +760,7 @@ data class Avkorting(
                     avkortetYtelseMedAllForventetInntekt,
                     sorterteSanksjonerInnenforAarsoppgjoer,
                     brukNyeReglerAvkorting,
+                    finnHullIYtelse(ytelseFoerAvkorting),
                 )
             // Ytelse etter avkorting må reberegnes fra første sanksjon som ikke er "sett" i tidlegere beregninger
             val tidligsteFomIkkeBeregnetSanksjon =
@@ -1351,12 +1353,14 @@ fun finnAntallInnvilgaMaanederForAar(
         }
     val tomMaaned = tom ?: aldersovergangIInntektsaaret?.minusMonths(1)
     if (ytelse.isEmpty() || !brukNyeReglerAvkorting) {
+        val hullIYtelse = finnHullIYtelse(ytelse)
         return MaanederInnvilgetResultat(
             maaneder =
                 (fom.month.value..(tomMaaned?.month?.value ?: 12)).map {
+                    val maaned = YearMonth.of(fom.year, it)
                     MaanedInnvilget(
-                        maaned = YearMonth.of(fom.year, it),
-                        innvilget = true,
+                        maaned = maaned,
+                        innvilget = hullIYtelse.none { hull -> maaned >= hull.fom && maaned <= hull.tom!! },
                     )
                 },
             regelResultat = null,

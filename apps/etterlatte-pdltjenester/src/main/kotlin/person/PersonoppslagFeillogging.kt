@@ -21,6 +21,6 @@ internal suspend fun <T> personOppslag(
                 .takeIf { it.isNotEmpty() }
                 ?.joinToString(prefix = " for folkeregisteridentifikator=", separator = ",")
                 .orEmpty()
-        sikkerLogg.error("$operasjon feilet. $identifikatorer", e)
+        sikkerLogg.error("$operasjon feilet $identifikatorer", e)
         throw e
     }

@@ -81,7 +81,7 @@ enum class Revurderingaarsak(
 
     AVKORTING_MOT_UFOERETRYGD(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
 
-    OPPHOER_3_AAR_ETTER_DOEDSFALL(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
+    OPPHOER_3_AAR_ETTER_DOEDSFALL(SAKTYPE_OMS, DevOgProd, skalSendeBrev = false),
     SOEKNAD_OM_GJENOPPTAK(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
 
     OMGJOERING_ETTER_ANKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),

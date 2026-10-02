@@ -34,20 +34,27 @@ suspend fun <T> retry(
     block: suspend () -> T,
 ) = retryInner(times, vent, emptyList(), block)
 
+suspend fun <T> retryHvis(
+    skalProeveIgjen: (Exception) -> Boolean,
+    times: Int = 2,
+    block: suspend () -> T,
+) = retryInner(times, {}, emptyList(), block, skalProeveIgjen)
+
 private suspend fun <T> retryInner(
     times: Int,
     vent: (timesLeft: Int) -> Unit,
     exceptions: List<Exception>,
     block: suspend () -> T,
+    skalProeveIgjen: (Exception) -> Boolean = { true },
 ): RetryResult<T> =
     try {
         Success(block(), exceptions)
     } catch (ex: Exception) {
-        if (times < 1) {
+        if (times < 1 || !skalProeveIgjen(ex)) {
             Failure(exceptions + ex)
         } else {
             val timesLeft = times - 1
             vent(timesLeft)
-            retryInner(times - 1, vent, exceptions + ex, block)
+            retryInner(times - 1, vent, exceptions + ex, block, skalProeveIgjen)
         }
     }

@@ -63,6 +63,40 @@ Det opprettes **ikke** automatisk en revurdering – det er saksbehandleroppgave
 
 **Rolle:** Delt infrastruktur, felles Kafka-topics, tjenestespesifikasjoner og verktøy for Team Etterlatte.
 
+### Gradvis migrering fra pdfgen til pdfgenrs
+
+`etterlatte-brev-api` og `etterlatte-behandling-kafka` har to PDF-endepunkter:
+`PDFGEN_URL` for `ey-pdfgen` og `PDFGENRS_URL` for `ey-pdfgenrs`. Begge URL-ene
+inkluderer `/api/v1/genpdf`. JSON-kontrakter og malstier er uendret.
+
+Unleash-bryterne under velger generator per mal. Standard er **av**, som beholder
+`ey-pdfgen`. Ukjente maler bruker alltid gammel generator.
+
+| Unleash-bryter | Konsument |
+|---------------|-----------|
+| `pdfgenrs-barnepensjon_v2` | `etterlatte-behandling-kafka` |
+| `pdfgenrs-omstillingsstoenad_v1` | `etterlatte-behandling-kafka` |
+| `pdfgenrs-oms_meldt_inn_endring_v1` | `etterlatte-behandling-kafka` |
+| `pdfgenrs-tom_mal` | `etterlatte-brev-api` |
+| `pdfgenrs-klage_oversendelse_blankett` | `etterlatte-brev-api` |
+
+Opprett bryterne i Unleash, og aktiver dem i dev én mal om gangen etter at
+generator og konsument er deployet. Deaktivering ruter nye forespørsler tilbake til
+gammel generator uten redeploy. Allerede lagrede PDF-er endres ikke.
+Det er ingen automatisk fallback ved genereringsfeil.
+
+For lokal kjøring brukes `PDFGEN_URL=http://localhost:8081/api/v1/genpdf` og
+`PDFGENRS_URL=http://localhost:8082/api/v1/genpdf`.
+
+Begge klientene krever en vellykket HTTP-respons med `application/pdf` og
+PDF-signatur før innholdet brukes. Kafka-flytene gjentar ikke permanente
+PDF-feil (blant annet 400 og 413) i den lokale retry-løkken; 408, 429,
+5xx og transportfeil beholder retries. Dette endrer ikke eventuell
+gjenlevering av hendelser fra Kafka.
+
+Produksjonskonfigurasjonen for konsumentene er klargjort, men `ey-pdfgenrs` må
+ha en produksjonsdeployment med inbound-tilgang før bryterne aktiveres der.
+
 ### Apper
 
 | App | Beskrivelse |

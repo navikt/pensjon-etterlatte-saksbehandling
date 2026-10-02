@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.pdfgen
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -12,6 +11,8 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.krevPdfSuksess
+import no.nav.etterlatte.libs.ktor.pdfBytes
 import org.slf4j.LoggerFactory
 import tools.jackson.databind.JsonNode
 
@@ -27,6 +28,8 @@ import tools.jackson.databind.JsonNode
 class PdfGeneratorKlient(
     private val klient: HttpClient,
     private val apiUrl: String,
+    private val pdfgenrsUrl: String = apiUrl,
+    private val brukPdfgenrs: (String) -> Boolean = { false },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -41,14 +44,17 @@ class PdfGeneratorKlient(
         sti: String,
         mal: String,
     ): ByteArray {
-        logger.info("Genererer PDF med ey-pdfgen (mal=$mal)")
+        val pdfgenrs = brukPdfgenrs(mal)
+        val url = if (pdfgenrs) pdfgenrsUrl else apiUrl
+        logger.info("Genererer PDF med ${if (pdfgenrs) "ey-pdfgenrs" else "ey-pdfgen"} (mal=$mal)")
 
         return klient
-            .post("$apiUrl/$sti") {
+            .post("$url/$sti") {
+                krevPdfSuksess()
                 header(CORRELATION_ID, getCorrelationId())
                 contentType(ContentType.Application.Json)
                 setBody(body)
-            }.body()
+            }.pdfBytes()
     }
 }
 

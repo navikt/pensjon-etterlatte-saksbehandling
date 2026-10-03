@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.pdl.SoekPerson
-import no.nav.etterlatte.person.personOppslag
 
 fun Route.personWebRoute(
     service: PersonWebService,
@@ -22,13 +21,7 @@ fun Route.personWebRoute(
             kunSaksbehandler {
                 val request = call.receive<HentPersonDetaljerIdentRequest>()
 
-                val person =
-                    personOppslag(
-                        operasjon = "Henting av navn og fødsel",
-                        folkeregisteridentifikator = request.ident,
-                    ) {
-                        service.hentPersonNavnOgFoedsel(request.ident, brukerTokenInfo)
-                    }
+                val person = service.hentPersonNavnOgFoedsel(request.ident, brukerTokenInfo)
 
                 sporing.loggFnrAudit(brukerTokenInfo, person.foedselsnummer, call.request.path(), "Hentet navn på person")
 
@@ -49,13 +42,7 @@ fun Route.personWebRoute(
             kunSaksbehandler {
                 val request = call.receive<HentFamilieOpplysningerRequest>()
 
-                val personopplysninger =
-                    personOppslag(
-                        operasjon = "Henting av familieopplysninger",
-                        folkeregisteridentifikator = request.ident,
-                    ) {
-                        service.hentFamilieOpplysninger(request.ident, request.sakType, brukerTokenInfo)
-                    }
+                val personopplysninger = service.hentFamilieOpplysninger(request.ident, request.sakType, brukerTokenInfo)
 
                 sporing.loggFnrAudit(
                     brukerTokenInfo,

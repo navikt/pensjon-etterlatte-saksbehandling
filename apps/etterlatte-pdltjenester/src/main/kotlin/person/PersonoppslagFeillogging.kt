@@ -1,26 +1,34 @@
 package no.nav.etterlatte.person
 
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.sikkerLogg
 
-internal suspend fun <T> personOppslag(
+internal fun sikkerloggOgKast(
     operasjon: String,
-    folkeregisteridentifikator: String,
-    block: suspend () -> T,
-): T = personOppslag(operasjon, listOf(folkeregisteridentifikator), block)
+    folkeregisteridentifikator: Folkeregisteridentifikator,
+    e: Exception,
+): Nothing = sikkerloggOgKast(operasjon, listOf(PersonIdent(folkeregisteridentifikator.value)), e)
 
-internal suspend fun <T> personOppslag(
+internal fun sikkerloggOgKast(
     operasjon: String,
-    folkeregisteridentifikatorer: List<String> = emptyList(),
-    block: suspend () -> T,
-): T =
-    try {
-        block()
-    } catch (e: Exception) {
-        val identifikatorer =
-            folkeregisteridentifikatorer
-                .takeIf { it.isNotEmpty() }
-                ?.joinToString(prefix = " for folkeregisteridentifikator=", separator = ",")
-                .orEmpty()
-        sikkerLogg.error("$operasjon feilet $identifikatorer", e)
-        throw e
-    }
+    personIdent: PersonIdent,
+    e: Exception,
+): Nothing {
+    sikkerloggOgKast(operasjon, listOf(personIdent), e)
+}
+
+internal fun sikkerloggOgKast(
+    operasjon: String,
+    folkeregisteridentifikatorer: List<PersonIdent> = emptyList(),
+    e: Exception,
+): Nothing {
+    val identifikatorerUmaskert =
+        folkeregisteridentifikatorer
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(prefix = " for folkeregisteridentifikator=", separator = ",") { it.value }
+            .orEmpty()
+
+    sikkerLogg.error("$operasjon feilet$identifikatorerUmaskert", e)
+    throw e
+}

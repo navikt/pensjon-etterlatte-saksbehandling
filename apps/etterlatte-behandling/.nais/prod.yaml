@@ -221,7 +221,6 @@ spec:
         - application: etterlatte-hendelser-ufoere
         - application: etterlatte-statistikk
         - application: etterlatte-tidshendelser
-        - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-tilbakekreving
         - application: etterlatte-klage

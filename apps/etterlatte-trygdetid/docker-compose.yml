@@ -1,9 +1,0 @@
-services:
-  postgres:
-    restart: always
-    container_name: trygdetid-postgres
-    image: postgres
-    ports:
-      - '5434:5432'
-    environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust

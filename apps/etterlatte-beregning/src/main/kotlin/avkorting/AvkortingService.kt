@@ -198,6 +198,17 @@ class AvkortingService(
         val avkorting =
             avkortingRepository.hentAvkorting(behandlingId)
                 ?: throw AvkortingFinnesIkkeException(behandlingId)
+        if (behandling.status in BehandlingStatus.underBehandling()) {
+            val beregning = beregningService.hentBeregningNonnull(behandlingId)
+            val aarMedGjenopptattYtelse = aarMedGjenopptattYtelseEtterAvsluttetInntekt(avkorting, beregning)
+            if (aarMedGjenopptattYtelse.isNotEmpty()) {
+                throw UgyldigForespoerselException(
+                    "MANGLER_NY_INNTEKT_GJENOPPTATT_YTELSE",
+                    "Ytelsen er gjenopptatt etter opphør i år(ene) $aarMedGjenopptattYtelse. " +
+                        "Inntekten for disse årene må legges inn på nytt før vedtak kan opprettes eller fattes.",
+                )
+            }
+        }
         return avkorting.toDto(behandling.virkningstidspunkt().dato)
     }
 

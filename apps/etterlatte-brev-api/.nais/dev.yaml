@@ -108,10 +108,6 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
-    - name: ETTERLATTE_TRYGDETID_URL
-      value: http://etterlatte-trygdetid
-    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-trygdetid
     - name: ETTERLATTE_PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
     - name: ETTERLATTE_PDLTJENESTER_CLIENT_ID
@@ -125,7 +121,6 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
-        - application: etterlatte-trygdetid
         - application: ey-pdfgen
         - application: ey-pdfgenrs
         - application: clamav

@@ -1,1 +1,0 @@
-UPDATE trygdetid SET ident = 'UKJENT_AVDOED' WHERE id = '1fbc7a78-4fdd-41b9-9f78-0966b914072c';

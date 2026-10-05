@@ -1,1 +1,0 @@
-alter table trygdetid add column ident text;

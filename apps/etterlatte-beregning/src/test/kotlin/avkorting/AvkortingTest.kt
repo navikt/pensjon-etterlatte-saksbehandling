@@ -72,6 +72,31 @@ internal class AvkortingTest {
     }
 
     @Test
+    fun `ny inntekt avgrenser overlappende inntektsperioder uten aa forlenge avsluttede perioder`() {
+        val nyInntektFom = YearMonth.of(2024, 7)
+        listOf(
+            null to YearMonth.of(2024, 6),
+            YearMonth.of(2024, 12) to YearMonth.of(2024, 6),
+            YearMonth.of(2024, 7) to YearMonth.of(2024, 6),
+            YearMonth.of(2024, 6) to YearMonth.of(2024, 6),
+            YearMonth.of(2024, 3) to YearMonth.of(2024, 3),
+        ).forEach { (opprinneligTom, forventetTom) ->
+            val opprinnelig =
+                Inntektsavkorting(
+                    avkortinggrunnlag(
+                        periode = Periode(YearMonth.of(2024, 1), opprinneligTom),
+                    ),
+                )
+
+            val oppdatert = opprinnelig.lukkSisteInntektsperiode(nyInntektFom)
+
+            oppdatert.grunnlag.periode shouldBe Periode(YearMonth.of(2024, 1), forventetTom)
+            oppdatert.grunnlag.shouldBeEqualToIgnoringFields(opprinnelig.grunnlag, ForventetInntekt::periode)
+            opprinnelig.grunnlag.periode.tom shouldBe opprinneligTom
+        }
+    }
+
+    @Test
     fun `skal haandtere gammelt grunnlag uten maanederInnvilget naar ny inntekt legges inn`() {
         // Simulerer prod-scenario: to gamle inntektsgrunnlag (maanederInnvilget=null) fra forrige behandling,
         // og saksbehandler legger inn ny inntekt fra april i en ny revurdering.
@@ -874,8 +899,13 @@ internal class AvkortingTest {
                 )
                 with(oppdatertAvkorting.aarsoppgjoer.single().inntektsavkorting()) {
                     size shouldBe 2
-                    get(0).grunnlag shouldBe foersteInntekt
+                    get(0).grunnlag shouldBe
+                        foersteInntekt.copy(
+                            periode = Periode(YearMonth.of(2024, Month.JANUARY), YearMonth.of(2024, Month.FEBRUARY)),
+                        )
                     with(get(1).grunnlag) {
+                        id shouldBe andreInntekt.id
+                        periode shouldBe Periode(YearMonth.of(2024, Month.MARCH), null)
                         inntektTom shouldBe endretInntekt.inntektTom
                         fratrekkInnAar shouldBe endretInntekt.fratrekkInnAar
                         inntektUtlandTom shouldBe endretInntekt.inntektUtlandTom

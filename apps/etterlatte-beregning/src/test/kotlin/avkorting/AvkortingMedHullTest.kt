@@ -28,6 +28,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -169,6 +170,86 @@ class AvkortingMedHullTest {
         aarsoppgjoer.avkortetYtelse
             .last()
             .periode.tom shouldBe null
+    }
+
+    @ParameterizedTest(name = "nye regler: {0}, ny inntekt fra maaned: {1}")
+    @CsvSource("true, 2", "false, 2", "true, 3", "false, 3", "true, 7", "false, 7")
+    fun `revurdering etter opphoer med ny inntekt beholder historikk uten overlapp eller ytelse i hullet`(
+        brukNyeRegler: Boolean,
+        maaned: Int,
+    ) {
+        val januar = YearMonth.of(2024, 1)
+        val mars = YearMonth.of(2024, 3)
+        val juli = YearMonth.of(2024, 7)
+        val nyInntektFom = YearMonth.of(2024, maaned)
+        val foerstegangsbehandling =
+            beregnFoerstegangsbehandling(
+                beregninger =
+                    listOf(
+                        beregningsperiode(datoFOM = januar, datoTOM = mars, utbetaltBeloep = 16_000),
+                    ),
+                inntektFom = listOf(januar),
+                brukNyeRegler = brukNyeRegler,
+                opphoerFom = YearMonth.of(2024, 4),
+            )
+        val nyeBeregninger =
+            listOfNotNull(
+                if (nyInntektFom <= mars) {
+                    beregningsperiode(datoFOM = nyInntektFom, datoTOM = mars, utbetaltBeloep = 16_000)
+                } else {
+                    null
+                },
+                beregningsperiode(datoFOM = juli, utbetaltBeloep = 16_000),
+            )
+
+        val revurdering =
+            foerstegangsbehandling.kopierAvkorting().beregnAvkortingMedNyeGrunnlag(
+                nyttGrunnlag =
+                    listOf(
+                        avkortinggrunnlagLagreDto(aarsinntekt = 100_000, fratrekkInnAar = 0, fom = nyInntektFom),
+                    ),
+                bruker = bruker,
+                beregning = beregning(beregninger = nyeBeregninger),
+                sanksjoner = emptyList(),
+                opphoerFom = null,
+                brukNyeReglerAvkorting = brukNyeRegler,
+            )
+
+        val aarsoppgjoer = revurdering.aarsoppgjoer.single().shouldBeInstanceOf<AarsoppgjoerLoepende>()
+        val sisteHistoriskeMaaned = minOf(mars, nyInntektFom.minusMonths(1))
+        aarsoppgjoer.inntektsavkorting.map { it.grunnlag.periode } shouldBe
+            listOf(
+                Periode(januar, sisteHistoriskeMaaned),
+                Periode(nyInntektFom, null),
+            )
+        aarsoppgjoer.inntektsavkorting
+            .last()
+            .grunnlag.innvilgaMaaneder shouldBe 9
+
+        val foer = foerstegangsbehandling.aarsoppgjoer.single().avkortetYtelse
+        val etter = aarsoppgjoer.avkortetYtelse
+        (1..sisteHistoriskeMaaned.monthValue).forEach {
+            etter.ytelseI(YearMonth.of(2024, it)) shouldBe foer.ytelseI(YearMonth.of(2024, it))
+        }
+        etter.somOverlapper(YearMonth.of(2024, 4), YearMonth.of(2024, 6)) shouldBe emptyList()
+        (listOf(1, 2, 3) + (7..12)).forEach { maanedMedYtelse ->
+            etter.count {
+                val dato = YearMonth.of(2024, maanedMedYtelse)
+                it.periode.fom <= dato && (it.periode.tom ?: dato) >= dato
+            } shouldBe 1
+        }
+        etter.zipWithNext().all { (forrige, neste) ->
+            forrige.periode.fom < neste.periode.fom &&
+                requireNotNull(forrige.periode.tom) < neste.periode.fom
+        } shouldBe true
+        etter.last().periode.tom shouldBe null
+
+        foerstegangsbehandling.aarsoppgjoer
+            .single()
+            .shouldBeInstanceOf<AarsoppgjoerLoepende>()
+            .inntektsavkorting
+            .single()
+            .grunnlag.periode shouldBe Periode(januar, mars)
     }
 
     @Test

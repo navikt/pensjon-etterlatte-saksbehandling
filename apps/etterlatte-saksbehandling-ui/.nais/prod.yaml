@@ -75,8 +75,6 @@ spec:
       value: http://etterlatte-behandling
     - name: BEREGNING_API_URL
       value: http://etterlatte-beregning
-    - name: TRYGDETID_API_URL
-      value: http://etterlatte-trygdetid
     - name: PDLTJENESTER_API_URL
       value: http://etterlatte-pdltjenester
     - name: UTBETALING_API_URL
@@ -87,8 +85,6 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEREGNING_API_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-beregning/.default
-    - name: TRYGDETID_API_SCOPE
-      value: api://prod-gcp.etterlatte.etterlatte-trygdetid/.default
     - name: PDLTJENESTER_API_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: UTBETALING_API_SCOPE
@@ -120,6 +116,5 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-behandling
         - application: etterlatte-beregning
-        - application: etterlatte-trygdetid
         - application: etterlatte-pdltjenester
         - application: etterlatte-utbetaling

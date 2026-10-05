@@ -21,7 +21,6 @@ include(
     "apps:etterlatte-hendelser-ufoere",
     "apps:etterlatte-statistikk",
     "apps:etterlatte-tidshendelser",
-    "apps:etterlatte-trygdetid",
     "apps:etterlatte-trygdetid-kafka",
     "apps:etterlatte-api",
     "libs:saksbehandling-common",

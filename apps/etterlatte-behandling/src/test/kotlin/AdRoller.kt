@@ -27,11 +27,3 @@ val azureAdEgenAnsattClaim: String by lazy {
 val azureAdProsesseringRolleClaim: String by lazy {
     "928636f4-fd0d-4149-978e-a6fb68bb19de"
 }
-
-val azureAdNasjonUtenLoggClaim: String by lazy {
-    "ea7411eb-8b48-41a0-bc56-7b521fbf0c25"
-}
-
-val azureAdNasjonMedLoggClaim: String by lazy {
-    "753805ea-65a7-4855-bdc3-e6130348df9f"
-}

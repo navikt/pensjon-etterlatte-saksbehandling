@@ -509,6 +509,7 @@ class AvkortingValiderTest {
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 emptyList(),
                 true,
+                naa = YearMonth.of(2025, Month.NOVEMBER),
             )
         krav shouldContainExactly listOf(2024, 2025, 2026)
     }
@@ -555,6 +556,7 @@ class AvkortingValiderTest {
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 listOf(sanksjon(fom = YearMonth.of(2026, Month.JANUARY), tom = YearMonth.of(2026, Month.DECEMBER))),
                 true,
+                naa = YearMonth.of(2025, Month.NOVEMBER),
             )
         krav shouldContainExactly listOf(2024, 2025)
     }

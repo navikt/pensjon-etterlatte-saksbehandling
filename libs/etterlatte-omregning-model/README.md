@@ -26,8 +26,6 @@ flowchart
     subgraph etterlatte-trygdetid-kafka
         KopierTrygdetidRiver
     end
-    subgraph etterlatte-trygdetid
-    end
     subgraph etterlatte-beregning-kafka
         OmregningHendelserBeregningRiver
     end
@@ -55,7 +53,7 @@ flowchart
     VilkaarsvurderingRiver --> etterlatte-vilkaarsvurdering
     VilkaarsvurderingRiver --> OMREGNING:VILKAARSVURDERT
     OMREGNING:VILKAARSVURDERT --> KopierTrygdetidRiver
-    KopierTrygdetidRiver --> etterlatte-trygdetid
+    KopierTrygdetidRiver --> etterlatte-behandling
     KopierTrygdetidRiver --> OMREGNING:TRYGDETID_KOPIERT
     OMREGNING:TRYGDETID_KOPIERT --> OmregningHendelserBeregningRiver
     OmregningHendelserBeregningRiver --> beregning

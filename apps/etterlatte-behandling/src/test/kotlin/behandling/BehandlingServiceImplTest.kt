@@ -541,7 +541,7 @@ internal class BehandlingServiceImplTest {
         )
 
         verify(exactly = 1) {
-            behandlingDaoMock.avbrytBehandling(revurdering.id, AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST, "kommentar")
+            behandlingDaoMock.avbrytBehandling(revurdering.id, AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST, "kom men tar")
             etteroppgjoerForbehandlingDao.lagreForbehandling(avbruttForbehandling)
             etteroppgjoerDao.lagreEtteroppgjoer(
                 etteroppgjoer.tilbakestill(erEndringTilUgunst = true, erOmgjoering = false),

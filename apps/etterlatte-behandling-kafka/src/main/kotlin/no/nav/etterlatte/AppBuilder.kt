@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.BEHANDLING_AZURE_SCOPE
 import no.nav.etterlatte.EnvKey.DOKARKIV_URL
+import no.nav.etterlatte.EnvKey.PDFGENRS_URL
 import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
@@ -15,6 +16,7 @@ import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.JournalfoerSoeknadS
 import no.nav.etterlatte.brukerdialog.soeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.PdfgenrsFeatureToggle
 import no.nav.etterlatte.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
@@ -66,7 +68,12 @@ class AppBuilder(
                 httpClient(EnvKey.DOKARKIV_SCOPE),
                 props.requireEnvValue(DOKARKIV_URL),
             ),
-            PdfGeneratorKlient(httpClient(), "${props.requireEnvValue(PDFGEN_URL)}/eypdfgen"),
+            PdfGeneratorKlient(
+                httpClient(),
+                "${props.requireEnvValue(PDFGEN_URL)}/eypdfgen",
+                "${props.requireEnvValue(PDFGENRS_URL)}/eypdfgen",
+                { PdfgenrsFeatureToggle.brukPdfgenrs(it, featureToggleService) },
+            ),
         )
     }
 
@@ -76,7 +83,12 @@ class AppBuilder(
                 httpClient(EnvKey.DOKARKIV_SCOPE),
                 props.requireEnvValue(DOKARKIV_URL),
             ),
-            PdfGeneratorKlient(httpClient(), "${props.requireEnvValue(PDFGEN_URL)}/omsendringer"),
+            PdfGeneratorKlient(
+                httpClient(),
+                "${props.requireEnvValue(PDFGEN_URL)}/omsendringer",
+                "${props.requireEnvValue(PDFGENRS_URL)}/omsendringer",
+                { PdfgenrsFeatureToggle.brukPdfgenrs(it, featureToggleService) },
+            ),
         )
     }
 

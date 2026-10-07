@@ -72,6 +72,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
@@ -542,7 +543,9 @@ internal class BehandlingServiceImplTest {
         verify(exactly = 1) {
             behandlingDaoMock.avbrytBehandling(revurdering.id, AarsakTilAvbrytelse.ETTEROPPGJOER_ENDRING_ER_TIL_UGUNST, "kom men tar")
             etteroppgjoerForbehandlingDao.lagreForbehandling(avbruttForbehandling)
-            etteroppgjoerDao.lagreEtteroppgjoer(etteroppgjoer.tilbakestill(true))
+            etteroppgjoerDao.lagreEtteroppgjoer(
+                etteroppgjoer.tilbakestill(erEndringTilUgunst = true, erOmgjoering = false),
+            )
 
             etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(
                 revurdering.sak.id,
@@ -550,6 +553,68 @@ internal class BehandlingServiceImplTest {
                 any(),
             )
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "true, false, FERDIGSTILT",
+        "false, true, FERDIGSTILT",
+        "false, false, VENTER_PAA_SVAR",
+    )
+    fun `avbryt revurdering for etteroppgjoer setter etteroppgjoeret tilbake til riktig status`(
+        erOmgjoeringPaaEgetInitiativ: Boolean,
+        erOmgjoeringEtterKlage: Boolean,
+        forventetStatus: EtteroppgjoerStatus,
+    ) {
+        nyKontekstMedBruker(mockSaksbehandler())
+
+        val forbehandlingId = UUID.randomUUID()
+        val revurdering =
+            revurdering(
+                sakId = randomSakId(),
+                revurderingAarsak = Revurderingaarsak.ETTEROPPGJOER,
+                relatertBehandlingId = forbehandlingId,
+            )
+
+        val avbruttForbehandling = mockk<EtteroppgjoerForbehandling>(relaxed = true)
+        val forbehandling =
+            mockk<EtteroppgjoerForbehandling>(relaxed = true) {
+                every { aar } returns 2024
+                every { sak } returns revurdering.sak
+                every { omgjoeringEgetInitiativ } returns erOmgjoeringPaaEgetInitiativ
+                every { klageOmgjoering } returns if (erOmgjoeringEtterKlage) UUID.randomUUID() else null
+                every { kanAvbrytesVedTilbakestilling() } returns true
+                every { tilAvbrutt(any(), any()) } returns avbruttForbehandling
+            }
+
+        val etteroppgjoer =
+            Etteroppgjoer(
+                sakId = revurdering.sak.id,
+                inntektsaar = 2024,
+                status = EtteroppgjoerStatus.UNDER_REVURDERING,
+                sisteFerdigstilteForbehandling = UUID.randomUUID(),
+            )
+        val lagretEtteroppgjoer = slot<Etteroppgjoer>()
+
+        every { behandlingDaoMock.hentBehandlingerForSak(revurdering.sak.id) } returns listOf(revurdering)
+        every { behandlingDaoMock.hentBehandling(revurdering.id) } returns revurdering
+        every { behandlingDaoMock.avbrytBehandling(revurdering.id, any(), any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        coEvery { grunnlagService.hentPersongalleri(any<UUID>()) } returns mockPersongalleri()
+        every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any(), any()) } just runs
+        every { etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId) } returns forbehandling
+        every { etteroppgjoerDao.hentEtteroppgjoerForInntektsaar(revurdering.sak.id, 2024) } returns etteroppgjoer
+        every { etteroppgjoerForbehandlingDao.lagreForbehandling(any()) } returns 1
+        every { etteroppgjoerDao.lagreEtteroppgjoer(capture(lagretEtteroppgjoer)) } returns 1
+        every { etteroppgjoerForbehandlingHendelseService.registrerOgSendHendelse(any(), any(), any(), any(), any()) } just runs
+
+        behandlingService.avbrytBehandling(revurdering.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "kommentar")
+
+        lagretEtteroppgjoer.captured shouldBe etteroppgjoer.copy(status = forventetStatus)
+        verify(exactly = 0) { etteroppgjoerOppgaveService.opprettOppgaveForOpprettForbehandling(any(), any(), any()) }
     }
 
     @ParameterizedTest

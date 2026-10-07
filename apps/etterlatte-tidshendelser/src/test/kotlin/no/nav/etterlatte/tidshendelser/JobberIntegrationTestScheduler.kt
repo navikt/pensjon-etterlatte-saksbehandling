@@ -46,7 +46,7 @@ class JobberIntegrationTestScheduler(
     fun `skal lage jobber om de ikke er laget fra før`() {
         jobbScheduler.scheduleMaanedligeJobber()
         hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize
-            PeriodiskeMaanedligeJobber.entries.size - 2 // To som ikke er aktivert i prod
+            PeriodiskeMaanedligeJobber.entries.size
     }
 
     @Test
@@ -59,7 +59,7 @@ class JobberIntegrationTestScheduler(
         jobbScheduler.scheduleMaanedligeJobber()
 
         hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize
-            PeriodiskeMaanedligeJobber.entries.size - 2 // To som ikke er aktivert i prod
+            PeriodiskeMaanedligeJobber.entries.size
     }
 
     @Test
@@ -72,7 +72,7 @@ class JobberIntegrationTestScheduler(
         jobbScheduler.scheduleMaanedligeJobber()
 
         hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize
-            PeriodiskeMaanedligeJobber.entries.size + 1 - 2 // To som ikke er aktivert i prod
+            PeriodiskeMaanedligeJobber.entries.size + 1
     }
 
     @Test

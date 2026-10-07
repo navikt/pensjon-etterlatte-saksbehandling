@@ -220,6 +220,7 @@ class ServiceModule(
             vedtakInternalService = vedtakInternalService,
             etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
             etteroppgjoerDataService = etteroppgjoerDataService,
+            featureToggleService = featureToggleService,
         )
     }
 

@@ -148,6 +148,12 @@ class BeregningsGrunnlagService(
                                 beregningsGrunnlag.beregningsMetodeFlereAvdoede
                                     ?: emptyList(),
                             kunEnJuridiskForelder = beregningsGrunnlag.kunEnJuridiskForelder,
+                            vedtaksperioder =
+                                if (behandling.behandlingType == BehandlingType.REVURDERING) {
+                                    hentVedtaksperioderForSak(behandling.sak, brukerTokenInfo)
+                                } else {
+                                    null
+                                },
                         ),
                     )
 

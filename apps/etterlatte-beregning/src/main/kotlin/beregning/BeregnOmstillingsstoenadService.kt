@@ -132,6 +132,7 @@ class BeregnOmstillingsstoenadService(
                         }
                     }
                 } else {
+                    beregningsgrunnlag.vedtaksperioder?.validerKunEnVedtaksperiode()
                     beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
                 }
             }
@@ -172,6 +173,7 @@ class BeregnOmstillingsstoenadService(
                                 }
                             }
                         } else {
+                            beregningsgrunnlag.vedtaksperioder?.validerKunEnVedtaksperiode()
                             beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
                         }
                     }
@@ -214,7 +216,8 @@ class BeregnOmstillingsstoenadService(
 
         val relevantePerioderForBeregning =
             vedtaksperioder.filter {
-                (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
+                (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt &&
+                    (tilDato == null || it.fraOgMed <= YearMonth.from(tilDato))
             }
         val alleBeregninger =
             relevantePerioderForBeregning.map { periode ->
@@ -229,7 +232,7 @@ class BeregnOmstillingsstoenadService(
                     grunnlag = grunnlag,
                     beregningsgrunnlag = beregningsgrunnlag,
                     virkningstidspunkt = virkForBeregningIPeriode,
-                    tilDato = periode.tilOgMed?.atEndOfMonth() ?: tilDato,
+                    tilDato = listOfNotNull(periode.tilOgMed?.atEndOfMonth(), tilDato).minOrNull(),
                 )
             }
         val allePerioder = alleBeregninger.flatMap { it.beregningsperioder }

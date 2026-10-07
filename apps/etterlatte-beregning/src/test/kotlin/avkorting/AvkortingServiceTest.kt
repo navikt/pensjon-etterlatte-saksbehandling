@@ -18,8 +18,11 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
+import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.behandling
+import no.nav.etterlatte.beregning.regler.beregning
+import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -30,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
@@ -44,6 +48,7 @@ import java.time.Month
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.etterlatte.libs.common.periode.Periode as AvkortingPeriode
 
 internal class AvkortingServiceTest {
     private val behandlingKlient: BehandlingKlient = mockk()
@@ -86,6 +91,135 @@ internal class AvkortingServiceTest {
         confirmVerified()
         clearAllMocks()
         unmockkObject(AvkortingMapper, AvkortingValider)
+    }
+
+    @Nested
+    inner class HentFullfoertAvkorting {
+        private val behandlingId = UUID.randomUUID()
+        private val virk = YearMonth.of(2025, 1)
+        private val avkortingFoerGjenopptak =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        aarsoppgjoer(
+                            aar = 2025,
+                            inntektsavkorting =
+                                listOf(
+                                    Inntektsavkorting(
+                                        avkortinggrunnlag(
+                                            periode =
+                                                AvkortingPeriode(
+                                                    virk,
+                                                    YearMonth.of(2025, 3),
+                                                ),
+                                            innvilgaMaaneder = 3,
+                                        ),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        private val beregningMedHull =
+            beregning(
+                beregninger =
+                    listOf(
+                        beregningsperiode(datoFOM = virk, datoTOM = YearMonth.of(2025, 3)),
+                        beregningsperiode(datoFOM = YearMonth.of(2025, 7)),
+                    ),
+            )
+
+        @Test
+        fun `blokkerer vedtaksgrunnlag med gammel inntekt etter gjenopptak`() =
+            runBlocking {
+                every { avkortingRepository.hentAvkorting(behandlingId) } returns avkortingFoerGjenopptak
+                every { beregningService.hentBeregningNonnull(behandlingId) } returns beregningMedHull
+                listOf(
+                    BehandlingStatus.BEREGNET,
+                    BehandlingStatus.AVKORTET,
+                    BehandlingStatus.RETURNERT,
+                    BehandlingStatus.FATTET_VEDTAK,
+                ).forEach { status ->
+                    coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns
+                        behandling(
+                            id = behandlingId,
+                            behandlingType = BehandlingType.REVURDERING,
+                            status = status,
+                            virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virk),
+                        )
+
+                    val feil =
+                        assertThrows<UgyldigForespoerselException> {
+                            service.hentFullfoertAvkorting(behandlingId, bruker)
+                        }
+                    feil.code shouldBe "MANGLER_NY_INNTEKT_GJENOPPTATT_YTELSE"
+                }
+                coVerify(exactly = 4) {
+                    behandlingKlient.hentBehandling(behandlingId, bruker)
+                    avkortingRepository.hentAvkorting(behandlingId)
+                    beregningService.hentBeregningNonnull(behandlingId)
+                }
+            }
+
+        @Test
+        fun `leverer vedtaksgrunnlag etter at inntekten er oppdatert`() =
+            runBlocking {
+                val oppdatertAvkorting =
+                    Avkorting(
+                        aarsoppgjoer =
+                            listOf(
+                                aarsoppgjoer(
+                                    aar = 2025,
+                                    inntektsavkorting =
+                                        listOf(
+                                            Inntektsavkorting(
+                                                avkortinggrunnlag(
+                                                    periode = AvkortingPeriode(virk, null),
+                                                    innvilgaMaaneder = 9,
+                                                ),
+                                            ),
+                                        ),
+                                ),
+                            ),
+                    )
+                coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns
+                    behandling(
+                        id = behandlingId,
+                        status = BehandlingStatus.AVKORTET,
+                        virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virk),
+                    )
+                every { avkortingRepository.hentAvkorting(behandlingId) } returns oppdatertAvkorting
+                every { beregningService.hentBeregningNonnull(behandlingId) } returns beregningMedHull
+
+                service.hentFullfoertAvkorting(behandlingId, bruker) shouldBe oppdatertAvkorting.toDto(virk)
+
+                coVerify {
+                    behandlingKlient.hentBehandling(behandlingId, bruker)
+                    avkortingRepository.hentAvkorting(behandlingId)
+                    beregningService.hentBeregningNonnull(behandlingId)
+                }
+            }
+
+        @Test
+        fun `historiske vedtak hentes uten ny inntektskontroll`() =
+            runBlocking {
+                every { avkortingRepository.hentAvkorting(behandlingId) } returns avkortingFoerGjenopptak
+                listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.IVERKSATT)
+                    .forEach { status ->
+                        coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns
+                            behandling(
+                                id = behandlingId,
+                                status = status,
+                                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virk),
+                            )
+
+                        service.hentFullfoertAvkorting(behandlingId, bruker) shouldBe avkortingFoerGjenopptak.toDto(virk)
+                    }
+                coVerify(exactly = 2) {
+                    behandlingKlient.hentBehandling(behandlingId, bruker)
+                    avkortingRepository.hentAvkorting(behandlingId)
+                }
+                verify(exactly = 0) { beregningService.hentBeregningNonnull(any()) }
+            }
     }
 
     @Nested

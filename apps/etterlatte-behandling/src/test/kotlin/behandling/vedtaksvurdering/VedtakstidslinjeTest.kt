@@ -903,6 +903,15 @@ internal class VedtakstidslinjeTest {
                     vedtakFattetDato = Tidspunkt.now(),
                     datoAttestert = Tidspunkt.now(),
                     vedtakStatus = VedtakStatus.IVERKSATT,
+                    utbetalingsperioder =
+                        listOf(
+                            Utbetalingsperiode(
+                                periode = Periode(YearMonth.of(2024, Month.MAY), null),
+                                beloep = BigDecimal.ZERO,
+                                type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
+                            ),
+                        ),
                 )
 
             val tidslinje =
@@ -1067,6 +1076,151 @@ internal class VedtakstidslinjeTest {
         fun `innvilgedePerioder returnerer tom liste når ingen attesterte vedtak finnes`() {
             val tidslinje = Vedtakstidslinje(emptyList())
             tidslinje.innvilgedePerioder() shouldBe emptyList()
+        }
+
+        @Test
+        fun `opphoer og gjenopptak bevares gjennom flere attesterte revurderinger tilbake i tid`() {
+            val januar = YearMonth.of(2025, 1)
+            val februar = YearMonth.of(2025, 2)
+            val mars = YearMonth.of(2025, 3)
+            val juli = YearMonth.of(2025, 7)
+            val foerstegangsbehandling =
+                flerperiodeVedtak(
+                    id = 1,
+                    virk = januar,
+                    perioder = listOf(Periode(januar, mars)),
+                    opphoerFraOgMed = YearMonth.of(2025, 4),
+                )
+            val gjenopptak = flerperiodeVedtak(id = 2, virk = juli, perioder = listOf(Periode(juli, null)))
+            val februarRevurdering =
+                flerperiodeVedtak(
+                    id = 3,
+                    virk = februar,
+                    perioder = listOf(Periode(februar, mars), Periode(juli, null)),
+                )
+            val januarRevurdering =
+                flerperiodeVedtak(
+                    id = 4,
+                    virk = januar,
+                    perioder = listOf(Periode(januar, mars), Periode(juli, null)),
+                )
+            val vedtak = listOf(foerstegangsbehandling, gjenopptak, februarRevurdering, januarRevurdering)
+
+            (2..4).forEach { antallVedtak ->
+                Vedtakstidslinje(vedtak.take(antallVedtak))
+                    .innvilgedePerioder()
+                    .map { it.periode } shouldBe listOf(Periode(januar, mars), Periode(juli, null))
+            }
+            val etterFebruarRevurdering = Vedtakstidslinje(vedtak.take(3)).innvilgedePerioder()
+            etterFebruarRevurdering[0].vedtak.map { it.id } shouldBe listOf(1L, 3L)
+            etterFebruarRevurdering[1].vedtak.map { it.id } shouldBe listOf(3L)
+            foerstegangsbehandling.utbetalingsperioder.single().periode shouldBe Periode(januar, mars)
+            februarRevurdering.utbetalingsperioder.map { it.periode } shouldBe
+                listOf(Periode(februar, mars), Periode(juli, null))
+        }
+
+        @Test
+        fun `ett vedtak kan inneholde flere innvilgede perioder og opphoer`() {
+            val januar = YearMonth.of(2025, 1)
+            val mars = YearMonth.of(2025, 3)
+            val juli = YearMonth.of(2025, 7)
+            val vedtak =
+                flerperiodeVedtak(
+                    id = 1,
+                    virk = januar,
+                    perioder = listOf(Periode(januar, mars), Periode(juli, null)),
+                    opphoerFraOgMed = YearMonth.of(2025, 12),
+                )
+
+            Vedtakstidslinje(listOf(vedtak)).innvilgedePerioder().map { it.periode } shouldBe
+                listOf(Periode(januar, mars), Periode(juli, YearMonth.of(2025, 11)))
+        }
+
+        @Test
+        fun `senere vedtak avgrenser gamle perioder og kan erstatte et tidligere hull`() {
+            val januar = YearMonth.of(2025, 1)
+            val mars = YearMonth.of(2025, 3)
+            val mai = YearMonth.of(2025, 5)
+            val juli = YearMonth.of(2025, 7)
+            val medHull =
+                flerperiodeVedtak(
+                    id = 1,
+                    virk = januar,
+                    perioder = listOf(Periode(januar, mars), Periode(juli, null)),
+                )
+            val nyttVedtak = flerperiodeVedtak(id = 2, virk = mai, perioder = listOf(Periode(mai, null)))
+
+            Vedtakstidslinje(listOf(medHull, nyttVedtak)).innvilgedePerioder().map { it.periode } shouldBe
+                listOf(Periode(januar, mars), Periode(mai, null))
+        }
+
+        @Test
+        fun `tilstoetende innvilgede perioder slaas sammen selv om beloepet er null kroner`() {
+            val januar = YearMonth.of(2025, 1)
+            val februar = YearMonth.of(2025, 2)
+            val mars = YearMonth.of(2025, 3)
+            val vedtak =
+                flerperiodeVedtak(
+                    id = 1,
+                    virk = januar,
+                    perioder = listOf(Periode(januar, februar), Periode(mars, null)),
+                )
+
+            val innvilget = Vedtakstidslinje(listOf(vedtak)).innvilgedePerioder().single()
+            innvilget.periode shouldBe Periode(januar, null)
+            innvilget.vedtak.map { it.id } shouldBe listOf(1L)
+        }
+
+        @Test
+        fun `opphoerslinjer regnes ikke som innvilget periode`() {
+            val januar = YearMonth.of(2025, 1)
+            val februar = YearMonth.of(2025, 2)
+            val mars = YearMonth.of(2025, 3)
+            val innvilget = flerperiodeVedtak(id = 1, virk = januar, perioder = listOf(Periode(januar, februar)))
+            val opphoerslinje =
+                innvilget.utbetalingsperioder.single().copy(
+                    periode = Periode(mars, null),
+                    beloep = null,
+                    type = UtbetalingsperiodeType.OPPHOER,
+                )
+            val vedtak =
+                innvilget.copy(
+                    innhold =
+                        (innvilget.innhold as VedtakInnhold.Behandling).copy(
+                            utbetalingsperioder = innvilget.utbetalingsperioder + opphoerslinje,
+                        ),
+                )
+
+            Vedtakstidslinje(listOf(vedtak)).innvilgedePerioder().map { it.periode } shouldBe
+                listOf(Periode(januar, februar))
+        }
+
+        private fun flerperiodeVedtak(
+            id: Long,
+            virk: YearMonth,
+            perioder: List<Periode>,
+            opphoerFraOgMed: YearMonth? = null,
+        ): Vedtak {
+            val tidspunkt = Tidspunkt.parse("2026-10-01T10:00:00Z").plus(id, DAYS)
+            return lagVedtak(
+                id = id,
+                virkningsDato = virk.atDay(1),
+                behandlingType = BehandlingType.REVURDERING,
+                vedtakType = VedtakType.ENDRING,
+                vedtakStatus = VedtakStatus.IVERKSATT,
+                datoAttestert = tidspunkt,
+                vedtakFattetDato = tidspunkt,
+                opphoerFraOgMed = opphoerFraOgMed,
+                utbetalingsperioder =
+                    perioder.map {
+                        Utbetalingsperiode(
+                            periode = it,
+                            beloep = BigDecimal.ZERO,
+                            type = UtbetalingsperiodeType.UTBETALING,
+                            regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
+                        )
+                    },
+            ).copy(sakType = SakType.OMSTILLINGSSTOENAD)
         }
 
         private val Vedtak.utbetalingsperioder: List<Utbetalingsperiode>

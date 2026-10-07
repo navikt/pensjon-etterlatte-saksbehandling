@@ -45,6 +45,7 @@ enum class EtteroppgjoerToggles(
     private val toggle: String,
 ) : FeatureToggle {
     ETTEROPPGJOER("etteroppgjoer"),
+    BEREGN_OVER_FLERE_PERIODER("beregn_over_flere_perioder"),
     ETTEROPPGJOER_STUB_PGI("etteroppgjoer_stub_pgi"),
     ETTEROPPGJOER_STUB_HENDELSER("etteroppgjoer_stub_hendelser"),
     ETTEROPPGJOER_SKATTEHENDELSES_JOBB("etteroppgjoer_skattehendelses_jobb"),

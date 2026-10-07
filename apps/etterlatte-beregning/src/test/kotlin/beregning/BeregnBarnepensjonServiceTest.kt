@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -1070,6 +1071,16 @@ internal class BeregnBarnepensjonServiceTest {
 
             medToggle.beregningsperioder.map { Triple(it.datoFOM, it.datoTOM, it.utbetaltBeloep) } shouldBe
                 utenToggle.beregningsperioder.map { Triple(it.datoFOM, it.datoTOM, it.utbetaltBeloep) }
+        }
+
+        @Test
+        fun `revurdering over flere vedtaksperioder blokkeres naar toggle er av`() {
+            val feil =
+                assertThrows<UgyldigForespoerselException> {
+                    beregnRevurdering(YearMonth.of(2024, 1), periodeMedHull, toggle = false)
+                }
+
+            feil.code shouldBe "FLERPERIODEBEREGNING_IKKE_AKTIV"
         }
 
         @Test

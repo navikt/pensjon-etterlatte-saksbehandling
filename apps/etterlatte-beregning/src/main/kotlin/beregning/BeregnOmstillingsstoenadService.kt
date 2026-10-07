@@ -132,6 +132,7 @@ class BeregnOmstillingsstoenadService(
                         }
                     }
                 } else {
+                    beregningsgrunnlag.vedtaksperioder?.validerKunEnVedtaksperiode()
                     beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
                 }
             }
@@ -172,6 +173,7 @@ class BeregnOmstillingsstoenadService(
                                 }
                             }
                         } else {
+                            beregningsgrunnlag.vedtaksperioder?.validerKunEnVedtaksperiode()
                             beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
                         }
                     }

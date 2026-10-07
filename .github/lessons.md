@@ -6,9 +6,9 @@
 - Observation: Lessons.md ble ikke oppdatert underveis fordi planmodus absorberte all oppmerksomhet, og meta-oppgaver ble behandlet som cleanup, ikke inline-forpliktelse.
 - Action: Lessons-oppdatering er ikke en post-task jobb – den skal skje i samme svar som kursjusteringen, også under planlegging.
 
-**2026-04-10 / 2026-09-08 — Endring av semantikk i delt kode**
-- Observation: Samme feil i to former. (1) Ved datamodellendring vurderte jeg lag isolert i stedet for som en sammenhengende pipeline, og plasserte data feil. (2) Da `enheterMedSkrivetilgang()` fikk rollekrav, endret betydningen av *alle* `kunSkrivetilgang`-kallsteder seg samtidig — flere lå på rene lese-operasjoner (bl.a. `get("pdf")` for forhåndsvisning) fordi «skrivetilgang» tidligere de facto var enhetstilgang. Regresjonen ble funnet av brukeren i UI.
-- Action: Når semantikken til et delt element (datamodell, tilgangssjekk, felles hjelpefunksjon) endres: list opp alle konsumenter/kallsteder og vurder hver enkelt mot den *nye* betydningen — kallstedene ble skrevet under den gamle. Se særlig etter GET-ruter bak skrive-sperrer. Er en operasjon lese-orientert men har en muterende bieffekt, gate bieffekten på tilgang i stedet for å blokkere hele endepunktet.
+**2026-04-10 / 2026-09-08 / 2026-10-07 — Endring av semantikk i delt kode**
+- Observation: Jeg vurderte delt kode isolert: datamodellendring ga feil lagplassering, og nye rollekrav sperret også GET-ruter som brukte den gamle betydningen av «skrivetilgang». Jeg prioriterte også gjenbruk før policy-eierskap med en toggle-sperre i et modellbibliotek. Ved ny hjelpetekst lot jeg problemtilfellet styre formuleringen og overså at normalen fortsatt er én periode.
+- Action: Vurder policyens eier før jeg plasserer felles kode, og kartlegg alle konsumenter mot den nye semantikken. Vurder normalen like eksplisitt som det nye avviket, også i hjelpetekster. Kontroller toggle-fallback mot allerede opprettede data; gammel logikk er ikke nødvendigvis trygg. Skill lesing fra muterende bieffekter og gate bieffekten, ikke hele leseoperasjonen.
 
 **2026-04-10 — Sparring / løsningsdesign**
 - Observation: Løsninger ble foreslått før eksisterende sperrer/constraints var kartlagt, og scope vokste uten eksplisitt avklaring.
@@ -82,9 +82,9 @@
 - Observation: Jeg valgte neste Flyway-versjonsnummer ved kun å se på `src/main/resources/db/migration/`, og overså at appen også har `db/prod/`, `db/dev/` og `db/gcp/` med egne nummererte filer i samme sekvens. Det ga et versjonskollisjon (`V348` fantes allerede i `prod/`).
 - Action: Før du navngir en ny Flyway-migrasjon: finn høyeste versjonsnummer på tvers av ALLE undermapper under `src/main/resources/db/` for den aktuelle appen (ikke bare `migration/`), og velg neste ledige nummer basert på det.
 
-**2026-07-03 — Testkjøring / miljøfeil**
-- Observation: Jeg itererte to ganger på egen testkode (TestHelper-NPE, mockkStatic) før jeg oppdaget at feilen var Java 25 vs. Byte Buddy – en eksisterende test feilet 22/22 på samme måte, og en Java 21-JDK fantes lokalt.
-- Action: Når en test feiler med infrastruktur-/toolchain-feil (Byte Buddy, class-init, instrumentering), kjør først en eksisterende test for å isolere miljø vs. egen kode, og sjekk tilgjengelige JDK-er før du endrer testkoden.
+**2026-07-03 / 2026-10-07 — Testkjøring / miljøfeil**
+- Observation: Jeg skilte ikke tydelig nok mellom feil i koden og testens kjøretidsoppsett: Byte Buddy-feil skyldtes Java-versjonen, og engelske månedsnavn skyldtes manglende norsk locale. Jeg antok også at en delvis hook-mock beholdt testisolasjonen, men import av originalmodulen trakk inn hele Redux-oppsettet.
+- Action: Isoler testmiljøet før jeg endrer produksjonslogikk: sjekk toolchain og oppsett fra applikasjonens inngangspunkt. Gjenskap nødvendig globalt oppsett lokalt og tilbakestill det etterpå; unngå originalimporter som drar inn irrelevant applikasjonswiring i isolerte komponenttester.
 
 **2026-07-27 — Arkitekturvurdering / klient vs. HTTP**
 - Observation: Jeg påstod at `TrygdetidKlient` gjorde HTTP-kall til en ekstern app. Konvensjonen er riktignok at `*Klient` = nettverkskall-utfører, men under fusjonering får interfacet midlertidig en lokal `*Intern`-impl (her `TrygdetidKlientIntern` → lokal innfusjonert service, ingen `downstreamResourceClient`). Navnet stemmer med intensjonen, men ikke med kjøretidsstien akkurat nå.
@@ -105,3 +105,7 @@
 **2026-09-08 — Relaxed mockk skjuler tilgangskonfigurasjon**
 - Observation: Etter at skrivetilgang begynte å kreve AD-rolle, feilet fire rutetester. Rotårsaken var at `ApplicationContext` er `mockk(relaxed = true)`, og MockK returnerer et **ekte tomt HashMap** (ikke en mock) for `Map`-returtyper. `saksbehandlerGroupIdsByKey` ble dermed tomt, alle `harRolle()` ble false, og skrivetilgang ga 403.
 - Action: Når en ny sperre begynner å lese konfigurasjon fra `ApplicationContext`, sjekk hvilke tester som bruker `mockk(relaxed = true)` på den. Relaxed mocks gir tomme collections i stillhet — sperren slår inn uten synlig årsak. Stub `saksbehandlerGroupIdsByKey` og gi tokenet matchende `groups` (mønster: `BehandlingsstatusRoutesTest`).
+
+**2026-10-06 — Feilsøking av gjentatte behandlinger**
+- Observation: Like beløp i flere revurderinger fikk meg til å behandle skjermbildet og simuleringsloggen som samme behandling. Jeg lot også en godkjenningskvittering støtte en forventning om gjennomført utbetaling, selv om kvitteringen ikke dokumenterer det.
+- Action: Knytt hvert funn til behandling-ID, vedtak-ID og tidspunkt, og skill hva statusen faktisk bekrefter fra det jeg antar. Ikke presenter en mulig feil som påvist før sammenligningsgrunnlaget er kjent.

@@ -21,6 +21,7 @@ export const enum FeatureToggle {
   overstyr_netto_brutto_tilbakekreving = 'overstyr-netto-brutto-tilbakekreving',
   avslutte_omgjoeringsoppgave = 'avslutte-omgjoeringsoppgave',
   beregning_bruk_nye_beregningsregler = 'beregning_bruk_nye_beregningsregler',
+  beregn_over_flere_perioder = 'beregn_over_flere_perioder',
   oppdater_inntekt_forbehandling = 'oppdater-inntekt-forbehandling',
   opprett_annen_sak = 'opprett-annen-sak',
 }
@@ -32,6 +33,11 @@ export interface Toggle {
 
 const beregning_bruk_nye_beregningsregler: Toggle = {
   togglename: FeatureToggle.beregning_bruk_nye_beregningsregler,
+  enabled: false,
+}
+
+const beregn_over_flere_perioder: Toggle = {
+  togglename: FeatureToggle.beregn_over_flere_perioder,
   enabled: false,
 }
 
@@ -99,6 +105,7 @@ const opprett_annen_sak: Toggle = {
 }
 
 export const unleashStartState: Record<string, Toggle> = {
+  [FeatureToggle.beregn_over_flere_perioder]: beregn_over_flere_perioder,
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:

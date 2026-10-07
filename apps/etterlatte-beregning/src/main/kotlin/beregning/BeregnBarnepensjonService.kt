@@ -213,6 +213,7 @@ class BeregnBarnepensjonService(
                         }
                     }
                 } else {
+                    beregningsGrunnlag.vedtaksperioder?.validerKunEnVedtaksperiode()
                     beregnBarnepensjon(
                         behandling.id,
                         grunnlag,
@@ -261,6 +262,7 @@ class BeregnBarnepensjonService(
                                 }
                             }
                         } else {
+                            beregningsGrunnlag.vedtaksperioder?.validerKunEnVedtaksperiode()
                             beregnBarnepensjon(
                                 behandling.id,
                                 grunnlag,

@@ -42,6 +42,10 @@ Forbehandlingen er et *preview* av det endelige vedtaket – den viser saksbehan
 
 Når revurdering opprettes, kopieres den ferdigstilte forbehandlingen (`kopiertFra != null`). Kopien er datakontainer for revurderingen, har ingen oppgave, og ferdigstilles automatisk ved iverksettelse.
 
+**Flere innvilgede perioder:** Ett etteroppgjør dekker ett inntektsår, også når året har opphørsperioder med senere gjenopptak. Forbehandlingens `innvilgetPeriode` er da yttergrensene for oppgjøret, ikke en sammenhengende innvilgelse. De faktiske innvilgede periodene avgrenses til året og sendes til beregning, som kontrollerer dem mot siste årsoppgjørs `ytelseFoerAvkorting`. Avvik blokkerer beregningen; perioder eller inntekt autokorrigeres ikke. Innvilgede måneder og ytelse i hull håndteres av eksisterende avkortingsregler. Frontend viser periodene fra forbehandlingens tidligere avkorting, også ved 0 kr etter inntektsavkorting.
+
+**Feature toggle:** Flerperiodestøtten styres av `beregn_over_flere_perioder`, med standardverdi `false`. Bryteren må være aktiv for behandling, beregning og UI/BFF i miljøet der funksjonen skal brukes. Når den er av, blokkeres opprettelse og ny inntektsberegning av flerperiode-etteroppgjør, også for eksisterende forbehandlinger og eldre beregningskall uten perioder i request. Ordinær BP/OMS-beregning med flere vedtaksperioder blokkeres også, i stedet for å falle tilbake til beregning som kan fylle opphørsgap. Sammenhengende oppgjør fungerer som før, også når G-regulering deler beregningen i flere perioder. Historiske data og korrekthetssperrer beholdes uavhengig av bryteren.
+
 **Endring til ugunst**: Hvis saksbehandler registrerer at brukers svar gir endring til ugunst (`endringErTilUgunstForBruker = JA`) → revurderingen avsluttes og ny forbehandling opprettes fra bunnen. Bruker må få nytt forhåndsvarsel med oppdaterte tall (lovkrav).
 
 **Avbrutt forbehandling**: Tilbakestiller etteroppgjøret til `MOTTATT_SKATTEOPPGJOER`. Kan ikke gjenopptas – saksbehandler må opprette ny.

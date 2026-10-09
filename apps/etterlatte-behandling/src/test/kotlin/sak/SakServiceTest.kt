@@ -132,8 +132,7 @@ internal class SakServiceTest {
     }
 
     private fun saksbehandlerKontekst(
-        nasjonalTilgang: Boolean = false,
-        strentFortrolig: Boolean = false,
+        strengtFortrolig: Boolean = false,
         egenAnsatt: Boolean = false,
     ): Saksbehandler {
         val tokenValidationContext = mockk<TokenValidationContext>()
@@ -141,11 +140,7 @@ internal class SakServiceTest {
         val token = mockk<JwtToken>()
 
         val tilgangsgrupper = mutableSetOf<AzureGroup>()
-        if (nasjonalTilgang) {
-            tilgangsgrupper.add(AzureGroup.NASJONAL_MED_LOGG)
-            tilgangsgrupper.add(AzureGroup.NASJONAL_UTEN_LOGG)
-        }
-        if (strentFortrolig) {
+        if (strengtFortrolig) {
             tilgangsgrupper.add(AzureGroup.STRENGT_FORTROLIG)
         }
         if (egenAnsatt) {
@@ -737,7 +732,7 @@ internal class SakServiceTest {
 
     @Test
     fun `Hent enkeltsak strengt fortrolig - Bruker har sak`() {
-        saksbehandlerKontekst(nasjonalTilgang = false, strentFortrolig = true)
+        saksbehandlerKontekst(strengtFortrolig = true)
 
         val ident = JOVIAL_LAMA.value
 

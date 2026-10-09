@@ -4,31 +4,8 @@ import { SimulertBeregningsperiode } from '~shared/types/Utbetaling'
 import { formaterDato, formaterKanskjeStringDato } from '~utils/formatering/dato'
 import { NOK } from '~utils/formatering/formatering'
 
-export function summerPerioder(perioder: SimulertBeregningsperiode[]) {
+function summerPerioder(perioder: SimulertBeregningsperiode[]) {
   return perioder.map((row) => row.beloep).reduce((sum, current) => sum + current, 0)
-}
-
-export function summerEtterbetaling(perioder: SimulertBeregningsperiode[]) {
-  const brutto = perioder
-    .filter((periode) => periode.klasseType === 'YTEL')
-    .reduce((sum, periode) => sum + periode.beloep, 0)
-  const netto = summerPerioder(perioder)
-  const skatt = netto - brutto
-  return { brutto, skatt, netto }
-}
-
-export function summerFeilutbetaling(
-  etterbetaling: SimulertBeregningsperiode[],
-  tilbakekreving: SimulertBeregningsperiode[]
-) {
-  const netto = summerPerioder(tilbakekreving)
-  const brutto = Math.abs(
-    etterbetaling
-      .filter((periode) => periode.tilbakefoering && periode.klasseType === 'YTEL')
-      .reduce((sum, periode) => sum + periode.beloep, 0)
-  )
-  const skatt = brutto - netto
-  return { brutto, skatt, netto }
 }
 
 export const UtbetalingTable = ({ tittel, perioder }: { tittel: string; perioder: SimulertBeregningsperiode[] }) => {

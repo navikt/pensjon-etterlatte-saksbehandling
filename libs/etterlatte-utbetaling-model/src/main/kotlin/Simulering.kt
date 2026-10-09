@@ -13,6 +13,39 @@ data class SimulertBeregning(
     val kommendeUtbetalinger: List<SimulertBeregningsperiode>,
     val etterbetaling: List<SimulertBeregningsperiode>,
     val tilbakekreving: List<SimulertBeregningsperiode>,
+    val oppsummeringer: SimulertBeregningOppsummeringer? = null,
+)
+
+data class SimulertBeregningOppsummeringer(
+    val perAar: List<SimulertBeregningPerAar>,
+    val forPerioden: SimulertBeregningOppsummering,
+)
+
+data class SimulertBeregningPerAar(
+    val aarstall: Int,
+    val oppsummering: SimulertBeregningOppsummering,
+)
+
+data class SimulertBeregningOppsummering(
+    val etterbetaling: SimulertEtterbetalingOppsummering,
+    val feilutbetaling: SimulertFeilutbetalingOppsummering?,
+)
+
+data class SimulertEtterbetalingOppsummering(
+    val brutto: BigDecimal,
+    val beloepPerKlasseType: List<SimulertKlasseTypeOppsummering>,
+    val netto: BigDecimal,
+)
+
+data class SimulertKlasseTypeOppsummering(
+    val klasseType: KlasseType,
+    val beloep: BigDecimal,
+)
+
+data class SimulertFeilutbetalingOppsummering(
+    val brutto: BigDecimal,
+    val beloepBrukerenSkulleHatt: BigDecimal,
+    val netto: BigDecimal,
 )
 
 data class SimulertBeregningsperiode(

@@ -10,7 +10,6 @@ import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.request.path
 import io.ktor.server.request.receive
-import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingContext
 import no.nav.etterlatte.Kontekst
@@ -75,6 +74,17 @@ private object SpesialtilgangsHook : Hook<suspend (ApplicationCall) -> Unit> {
 
 const val TILGANG_ROUTE_PATH = "tilgang"
 
+fun erTilgangsrute(path: String): Boolean {
+    val pathSegments = path.substringBefore('?').split('/')
+    val firstSegment = pathSegments.firstOrNull { it.isNotEmpty() }
+    val containsTraversal =
+        pathSegments.any { segment ->
+            segment.replace("%2e", ".", ignoreCase = true).let { it == "." || it == ".." }
+        }
+
+    return firstSegment == TILGANG_ROUTE_PATH && !containsTraversal
+}
+
 val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
     createRouteScopedPlugin(
         name = "Adressebeskyttelsesplugin",
@@ -86,7 +96,7 @@ val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
             if (bruker is Systembruker) {
                 return@on
             }
-            if (call.request.uri.contains(TILGANG_ROUTE_PATH)) {
+            if (erTilgangsrute(call.request.path())) {
                 return@on
             }
 

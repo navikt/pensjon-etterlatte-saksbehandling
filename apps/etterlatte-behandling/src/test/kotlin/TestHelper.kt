@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDoedshendelseDto
@@ -593,3 +594,9 @@ fun gyldighetsresultatVurdering() =
         vurderinger = emptyList(),
         vurdertDato = Tidspunkt.now().toLocalDatetimeUTC(),
     )
+
+fun Sak.soeknadType() =
+    when (this.sakType) {
+        SakType.BARNEPENSJON -> SoeknadType.BARNEPENSJON
+        SakType.OMSTILLINGSSTOENAD -> SoeknadType.OMSTILLINGSSTOENAD
+    }

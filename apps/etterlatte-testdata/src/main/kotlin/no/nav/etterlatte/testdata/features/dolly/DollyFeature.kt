@@ -162,6 +162,7 @@ class DollyFeature(
                             when (ytelse) {
                                 SoeknadType.BARNEPENSJON -> barnListe.first()
                                 SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
+                                SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> gjenlevende
                             }
                     }
                     if (soeker == "" || barnListe.isEmpty() || avdoed == "") {

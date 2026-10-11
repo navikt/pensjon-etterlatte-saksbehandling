@@ -21,6 +21,7 @@ import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -92,6 +93,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                                 sak.id,
                                 Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                                SoeknadType.BARNEPENSJON,
                             ),
                         )
                     }.let {
@@ -188,6 +190,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                                 sak.id,
                                 Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                                SoeknadType.BARNEPENSJON,
                             ),
                         )
                     }.let {
@@ -253,6 +256,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                                 sak.id,
                                 Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                                SoeknadType.BARNEPENSJON,
                             ),
                         )
                     }.let {

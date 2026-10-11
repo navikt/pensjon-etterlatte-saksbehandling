@@ -29,6 +29,8 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-regler"))
 
+    implementation(libs.etterlatte.common)
+
     implementation(libs.prosessering.core)
     implementation(libs.prosessering.postgres)
     implementation(libs.prosessering.ktor)

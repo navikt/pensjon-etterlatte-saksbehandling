@@ -44,13 +44,14 @@ internal class OpprettBehandlingRiver(
                 when (soeknad.type) {
                     SoeknadType.OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
                     SoeknadType.BARNEPENSJON -> SakType.BARNEPENSJON
+                    SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
                 }
 
             val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, sakType)
 
             val behandlingId =
                 try {
-                    behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri)
+                    behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri, soeknad.type)
                 } catch (e: FeiletVedOpprettBehandling) {
                     val aapenBehandling =
                         behandlingClient

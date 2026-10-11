@@ -105,3 +105,7 @@
 **2026-09-08 — Relaxed mockk skjuler tilgangskonfigurasjon**
 - Observation: Etter at skrivetilgang begynte å kreve AD-rolle, feilet fire rutetester. Rotårsaken var at `ApplicationContext` er `mockk(relaxed = true)`, og MockK returnerer et **ekte tomt HashMap** (ikke en mock) for `Map`-returtyper. `saksbehandlerGroupIdsByKey` ble dermed tomt, alle `harRolle()` ble false, og skrivetilgang ga 403.
 - Action: Når en ny sperre begynner å lese konfigurasjon fra `ApplicationContext`, sjekk hvilke tester som bruker `mockk(relaxed = true)` på den. Relaxed mocks gir tomme collections i stillhet — sperren slår inn uten synlig årsak. Stub `saksbehandlerGroupIdsByKey` og gi tokenet matchende `groups` (mønster: `BehandlingsstatusRoutesTest`).
+
+**2026-10-09 — Dependency-feilsøking**
+- Observation: Jeg behandlet cache som eneste forklaring på vellykket dependency-oppløsning, selv om et tidligere repository kunne levere samme koordinater. Cache-refresh isolerte dermed ikke autentiseringen jeg ville undersøke.
+- Action: Ved reproduksjon av repository-feil, begrens de aktuelle koordinatene til målrepositoryet før cache-refresh; skill kildevalg fra autentisering.

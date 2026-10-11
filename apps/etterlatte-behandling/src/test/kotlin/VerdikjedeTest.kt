@@ -50,6 +50,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSoekRequest
@@ -154,6 +155,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 sakId1,
                                 Persongalleri(soeker, "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                                SoeknadType.BARNEPENSJON,
                             ),
                         )
                     }.let {
@@ -583,6 +585,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 sakId1,
                                 Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                                SoeknadType.BARNEPENSJON,
                             ),
                         )
                     }.let {

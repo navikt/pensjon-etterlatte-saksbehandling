@@ -17,6 +17,7 @@ import no.nav.etterlatte.brukerdialog.soeknad.PersongalleriMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -38,6 +39,7 @@ internal class BehandlingClientTest {
                 sakId1,
                 soeknad.mottattDato,
                 PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad),
+                SoeknadType.BARNEPENSJON,
             )
 
         assertEquals(behandlingId, hentetSaksid)

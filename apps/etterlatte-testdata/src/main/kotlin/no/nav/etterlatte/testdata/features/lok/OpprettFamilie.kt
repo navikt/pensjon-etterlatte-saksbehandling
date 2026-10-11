@@ -135,6 +135,7 @@ class OpprettFamilie(
                         when (ytelse) {
                             SoeknadType.BARNEPENSJON -> params["barn"]!!
                             SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
+                            SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> gjenlevende
                         }
 
                     val request =

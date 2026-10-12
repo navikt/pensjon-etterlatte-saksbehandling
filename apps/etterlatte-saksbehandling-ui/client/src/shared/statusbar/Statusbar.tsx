@@ -19,6 +19,7 @@ import { ClickEvent } from '~utils/analytics'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 import { AdressebeskyttelseGraderingTag } from '~shared/tags/AdressebeskyttelseGraderingTag'
+import { FalskIdentitetAlert } from '~shared/alerts/FalskIdentitetAlert'
 
 export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
   const dispatch = useAppDispatch()
@@ -78,6 +79,7 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
               </Alert>
             )}
 
+            <FalskIdentitetAlert erFalskIdentitet={person.erFalskIdentitet} />
             <VergemaalTag vergemaal={person.vergemaal} />
             {mapResult(hentSakMedBehandlingerResult, {
               success: (sakMedBehandlinger) =>

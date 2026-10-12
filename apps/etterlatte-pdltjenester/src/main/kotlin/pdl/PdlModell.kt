@@ -199,6 +199,11 @@ data class PdlHentPersonNavnFoedselsdato(
     val foedselsdato: List<PdlFoedselsdato>,
     val doedsfall: List<PdlDoedsfall>,
     val vergemaalEllerFremtidsfullmakt: List<PdlVergemaalEllerFremtidsfullmakt>?,
+    val falskIdentitet: PdlFalskIdentitet? = null,
+)
+
+data class PdlFalskIdentitet(
+    val erFalsk: Boolean,
 )
 
 data class PdlHentFoedselsdato(

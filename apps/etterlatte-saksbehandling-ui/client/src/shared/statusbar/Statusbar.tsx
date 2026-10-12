@@ -62,10 +62,10 @@ export const StatusBar = ({
     <Navbar>
       {mapResult(hentPersonNavnOgFoedselResult, {
         pending: <PersonSkeleton />,
-        error: (error) =>
-          onFalskIdentitet && erFalskIdentitetFeil(error) ? null : (
-            <ApiErrorAlert>{error.detail ?? 'Kunne ikke hente person'}</ApiErrorAlert>
-          ),
+        error: (error) => {
+          if (onFalskIdentitet && erFalskIdentitetFeil(error)) return null
+          return <ApiErrorAlert>{error.detail ?? 'Kunne ikke hente person'}</ApiErrorAlert>
+        },
         success: (person) => (
           <HStack gap="space-8" align="center" justify="start">
             <GenderIcon gender={gender(person.foedselsnummer)} />

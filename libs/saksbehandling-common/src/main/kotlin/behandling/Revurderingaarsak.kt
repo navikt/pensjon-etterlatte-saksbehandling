@@ -95,7 +95,7 @@ enum class Revurderingaarsak(
     // Mangler funksjonalitet
     UTSENDELSE_AV_SED(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
     SANKSJON_PGA_MANGLENDE_OPPLYSNINGER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
-    OPPHOER_AV_2_UTVIDEDE_AAR(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
+    OPPHOER_AV_2_UTVIDEDE_AAR(SAKTYPE_OMS, KunIDev, skalSendeBrev = false),
 
     // Skal ikke kunne opprettes via vanlig flyt
     ETTEROPPGJOER(SAKTYPE_OMS, IngenMiljoe, skalSendeBrev = true),

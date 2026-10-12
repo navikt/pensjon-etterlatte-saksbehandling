@@ -7,7 +7,9 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
 import no.nav.etterlatte.brev.VedtakTilJournalfoering
@@ -88,11 +90,20 @@ class BrevapiKlient(
         try {
             logger.info("Journalfører brev med sakid: $sakId")
             return retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
-                httpClient
-                    .post("$baseUrl/api/brev/behandling/${vedtakjournalfoering.behandlingId}/journalfoer-vedtak") {
-                        contentType(ContentType.Application.Json)
-                        setBody(vedtakjournalfoering.toJson())
-                    }.body<JournalfoerVedtaksbrevResponseOgBrevid?>()
+                val response: HttpResponse =
+                    httpClient
+                        .post("$baseUrl/api/brev/behandling/${vedtakjournalfoering.behandlingId}/journalfoer-vedtak") {
+                            contentType(ContentType.Application.Json)
+                            setBody(vedtakjournalfoering.toJson())
+                        }
+                // 204 No Content har ingen body å deserialisere. Må sjekkes eksplisitt - ktor sin
+                // automatiske null-håndtering for "tom body + nullable type" kan ikke stoles på her,
+                // den har forårsaket NoTransformationFoundException i praksis.
+                if (response.status == HttpStatusCode.NoContent) {
+                    null
+                } else {
+                    response.body<JournalfoerVedtaksbrevResponseOgBrevid>()
+                }
             }
         } catch (e: ResponseException) {
             logger.error("Journalføring for brev med sakid=$sakId feilet", e)

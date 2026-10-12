@@ -58,9 +58,12 @@ class JournalfoerBrevService(
         logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
         val behandlingId = vedtak.behandlingId
 
-        val brev =
-            service.hentVedtaksbrev(behandlingId)
-                ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
+        val brev = service.hentVedtaksbrev(behandlingId)
+        if (brev == null) {
+            // TODO: SKAL IKKE UT I PROD - hack for å rydde opp i brev som ikke finnes i dev. Fjernes når dev er ryddet opp.
+            logger.warn("Fant ikke vedtaksbrev for ${vedtak.vedtakId}")
+            return null
+        }
 
         if (brev.status == Status.JOURNALFOERT) {
             // vi har allerede ønsket status
@@ -171,8 +174,14 @@ class JournalfoerBrevService(
                     id = foedselsnummer?.value ?: orgnummer,
                     idType =
                         when {
-                            foedselsnummer != null -> AvsenderMottakerIdType.FNR
-                            orgnummer != null -> AvsenderMottakerIdType.ORGNR
+                            foedselsnummer != null -> {
+                                AvsenderMottakerIdType.FNR
+                            }
+
+                            orgnummer != null -> {
+                                AvsenderMottakerIdType.ORGNR
+                            }
+
                             else -> {
                                 logger.warn("Kunne ikke utlede type på avsenderMottaker fra brev-mottaker")
                                 null

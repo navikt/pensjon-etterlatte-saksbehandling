@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -187,10 +188,9 @@ internal class JournalfoerBrevServiceTest {
 
         val vedtak = opprettVedtak()
 
-        assertThrows<NoSuchElementException> {
-            runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
-        }
+        val resultat = runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
 
+        assertNull(resultat)
         verify { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
     }
 

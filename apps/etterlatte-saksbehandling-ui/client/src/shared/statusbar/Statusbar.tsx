@@ -4,7 +4,7 @@ import { Alert, BodyShort, HelpText, HStack, Label, Skeleton } from '@navikt/ds-
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { mapResult } from '~shared/api/apiUtils'
 import React, { useEffect } from 'react'
-import { hentPersonNavnOgFoedsel } from '~shared/api/pdltjenester'
+import { hentPersonNavnOgFoedsel, erFalskIdentitetFeil } from '~shared/api/pdltjenester'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
 import { differenceInYears } from 'date-fns'
@@ -20,8 +20,16 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 import { AdressebeskyttelseGraderingTag } from '~shared/tags/AdressebeskyttelseGraderingTag'
 import { FalskIdentitetAlert } from '~shared/alerts/FalskIdentitetAlert'
+import { ApiError } from '~shared/api/apiClient'
 
-export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
+export const StatusBar = ({
+  ident,
+  onFalskIdentitet,
+}: {
+  ident: string | null | undefined
+  // Når denne er satt, viser kalleren feilen om falsk identitet selv
+  onFalskIdentitet?: (error: ApiError) => void
+}) => {
   const dispatch = useAppDispatch()
 
   const [hentPersonNavnOgFoedselResult, hentPersonNavnOgFoedselFetch] = useApiCall(hentPersonNavnOgFoedsel)
@@ -29,10 +37,16 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
 
   useEffect(() => {
     if (ident) {
-      hentPersonNavnOgFoedselFetch(ident, (person) => {
-        dispatch(settPerson(person))
-        hentSakMedBehandlingerFetch(person.foedselsnummer)
-      })
+      hentPersonNavnOgFoedselFetch(
+        ident,
+        (person) => {
+          dispatch(settPerson(person))
+          hentSakMedBehandlingerFetch(person.foedselsnummer)
+        },
+        (error) => {
+          if (erFalskIdentitetFeil(error)) onFalskIdentitet?.(error)
+        }
+      )
     }
   }, [ident])
 
@@ -48,7 +62,10 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
     <Navbar>
       {mapResult(hentPersonNavnOgFoedselResult, {
         pending: <PersonSkeleton />,
-        error: (error) => <ApiErrorAlert>{error.detail ?? 'Kunne ikke hente person'}</ApiErrorAlert>,
+        error: (error) =>
+          onFalskIdentitet && erFalskIdentitetFeil(error) ? null : (
+            <ApiErrorAlert>{error.detail ?? 'Kunne ikke hente person'}</ApiErrorAlert>
+          ),
         success: (person) => (
           <HStack gap="space-8" align="center" justify="start">
             <GenderIcon gender={gender(person.foedselsnummer)} />

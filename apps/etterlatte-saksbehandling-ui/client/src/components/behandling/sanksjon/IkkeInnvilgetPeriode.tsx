@@ -60,7 +60,7 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
   const dispatch = useAppDispatch()
 
   const { redigerbar: behandlingRedigerbar } = useBehandlingRedigerbarhet(behandling)
-  const redigerbar = behandlingRedigerbar && behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER
+  const redigerbar = behandlingRedigerbar && behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER
 
   const {
     register,

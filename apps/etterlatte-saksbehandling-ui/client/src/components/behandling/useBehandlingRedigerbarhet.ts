@@ -10,14 +10,14 @@ export interface Redigerbarhet {
   aarsak: SkrivebeskyttetAarsak | null
 }
 
+type BehandlingForRedigerbarhet = Pick<IDetaljertBehandling, 'status' | 'skrivetilgang'>
+
 /**
  * Én regel for om en behandling kan endres i UI: status må tillate endring (speiler
  * BehandlingStatus.kanEndres() i backend) og saksbehandler må ha skrivetilgang (fra backend).
  * Status sjekkes her, og ikke i backend, fordi status oppdateres lokalt i redux uten ny henting.
  */
-export const vurderRedigerbarhet = (
-  behandling: Pick<IDetaljertBehandling, 'status' | 'skrivetilgang'> | null
-): Redigerbarhet => {
+export const vurderRedigerbarhet = (behandling: BehandlingForRedigerbarhet | null): Redigerbarhet => {
   if (!behandling) {
     return { redigerbar: false, aarsak: null }
   }
@@ -30,6 +30,5 @@ export const vurderRedigerbarhet = (
   return { redigerbar: true, aarsak: null }
 }
 
-export const useBehandlingRedigerbarhet = (
-  behandling: Pick<IDetaljertBehandling, 'status' | 'skrivetilgang'> | null
-): Redigerbarhet => vurderRedigerbarhet(behandling)
+export const useBehandlingRedigerbarhet = (behandling: BehandlingForRedigerbarhet | null): Redigerbarhet =>
+  vurderRedigerbarhet(behandling)

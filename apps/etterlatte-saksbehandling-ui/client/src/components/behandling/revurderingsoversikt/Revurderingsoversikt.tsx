@@ -1,7 +1,8 @@
 import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { erBehandlingRedigerbar, requireNotNull } from '../felles/utils'
+import { requireNotNull } from '../felles/utils'
 import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -38,7 +39,6 @@ import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/s
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { RevurderingKravpakke } from '~components/behandling/revurderingsoversikt/RevurderingKravpakke'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoereOpphoer/ViderefoereOpphoer'
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
@@ -98,12 +98,7 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const revurderingsaarsak = requireNotNull(
     behandling.revurderingsaarsak,
     'Kan ikke starte en revurdering uten en revurderingsårsak'

@@ -1,11 +1,11 @@
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingReducer, oppdaterAvkorting } from '~store/reducers/BehandlingReducer'
-import { erBehandlingRedigerbar, hasValue } from '~components/behandling/felles/utils'
+import { hasValue } from '~components/behandling/felles/utils'
 import { isFailure, isPending, mapResult } from '~shared/api/apiUtils'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Alert, BodyShort, Box, Button, Detail, Heading, HStack, Table, Textarea, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterDato, formaterMaanednavnAar } from '~utils/formatering/dato'
@@ -56,13 +56,11 @@ export const IkkeInnvilgetPeriode = ({ behandling }: { behandling: IBehandlingRe
   const [ikkeInnvilgedePerioder, setIkkeInnvilgedePerioder] = useState<ISanksjon[]>()
   const [visForm, setVisForm] = useState(false)
   const [redigerIkkeInnvilgetPeriode, setRedigerIkkeInnvilgetPeriode] = useState('')
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [avkortingStatus, fetchAvkorting] = useApiCall(hentAvkorting)
   const dispatch = useAppDispatch()
 
-  const redigerbar =
-    erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
-    behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER
+  const { redigerbar: behandlingRedigerbar } = useBehandlingRedigerbarhet(behandling)
+  const redigerbar = behandlingRedigerbar && behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER
 
   const {
     register,

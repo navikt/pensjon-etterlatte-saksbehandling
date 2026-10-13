@@ -1,0 +1,20 @@
+{
+  "beskrivelse": "Felles kontrakt for hvilke behandlingsstatuser som kan endres. Testes mot BehandlingStatus.kanEndres() i libs/etterlatte-behandling-model og statusErRedigerbar() i frontend. Oppdater begge sider hvis listen endres.",
+  "alleStatuser": [
+    "OPPRETTET",
+    "VILKAARSVURDERT",
+    "TRYGDETID_OPPDATERT",
+    "BEREGNET",
+    "AVKORTET",
+    "FATTET_VEDTAK",
+    "ATTESTERT",
+    "AVSLAG",
+    "RETURNERT",
+    "TIL_SAMORDNING",
+    "SAMORDNET",
+    "IVERKSATT",
+    "AVBRUTT",
+    "ATTESTERT_INGEN_ENDRING"
+  ],
+  "kanEndres": ["OPPRETTET", "VILKAARSVURDERT", "TRYGDETID_OPPDATERT", "BEREGNET", "AVKORTET", "RETURNERT"]
+}

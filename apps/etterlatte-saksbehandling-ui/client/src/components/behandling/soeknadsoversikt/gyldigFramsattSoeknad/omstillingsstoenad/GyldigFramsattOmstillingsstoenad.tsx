@@ -1,12 +1,11 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { Box, HStack } from '@navikt/ds-react'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/GyldigFramsattVurdering'
 
@@ -19,12 +18,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
   behandling: IDetaljertBehandling
   innsender?: Personopplysning
 }) => {
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const navn = innsender ? `${innsender.opplysning.fornavn} ${innsender.opplysning.etternavn}` : 'Ukjent'
   const undertekst = formaterGrunnlagKilde(innsender?.kilde)
 

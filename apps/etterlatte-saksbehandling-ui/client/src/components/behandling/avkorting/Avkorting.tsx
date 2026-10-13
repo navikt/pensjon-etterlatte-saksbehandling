@@ -1,3 +1,4 @@
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
 import React, { useEffect } from 'react'
@@ -7,9 +8,7 @@ import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtt
 import { oppdaterAvkorting, oppdaterBehandlingsstatus, resetAvkorting } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { mapResult } from '~shared/api/apiUtils'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
 import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
@@ -28,16 +27,14 @@ export const Avkorting = () => {
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting) as IAvkorting
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [, hentBehandlingstatusRequest] = useApiCall(hentBehandlingstatus)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const brukNyeBeregningsregler = useFeaturetoggle(FeatureToggle.beregning_bruk_nye_beregningsregler)
+  const { redigerbar: behandlingRedigerbar } = useBehandlingRedigerbarhet(behandling)
 
   if (!behandling) {
     return null
   }
 
-  const redigerbar =
-    erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
-    behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER
+  const redigerbar = behandlingRedigerbar && behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER
 
   useEffect(() => {
     if (!avkorting) {

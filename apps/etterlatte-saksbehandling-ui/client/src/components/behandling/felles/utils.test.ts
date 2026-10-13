@@ -191,6 +191,7 @@ const opprettBehandling = (
     tidligereFamiliepleier: null,
     erSluttbehandling: false,
     opprinnelse: Opprinnelse.UKJENT,
+    skrivetilgang: { harSkrivetilgang: true, aarsak: null },
   }
 }
 

@@ -64,10 +64,6 @@ export const statusErRedigerbar = (status: IBehandlingStatus) => {
   )
 }
 
-export const erBehandlingRedigerbar = (status: IBehandlingStatus, enhetId: string, enheter: Array<string>): boolean => {
-  return enhetErSkrivbar(enhetId, enheter) && statusErRedigerbar(status)
-}
-
 export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
   return (
     status === IBehandlingStatus.ATTESTERT ||

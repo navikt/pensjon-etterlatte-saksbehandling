@@ -1,36 +1,25 @@
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import React, { useState } from 'react'
 import { BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
-export default function OppdaterGrunnlagModal({
-  behandlingId,
-  behandlingStatus,
-  enhetId,
-}: {
-  behandlingId: string
-  behandlingStatus: IBehandlingStatus
-  enhetId: string
-}) {
+export default function OppdaterGrunnlagModal({ behandling }: { behandling: IDetaljertBehandling }) {
   const [isOpen, setIsOpen] = useState(false)
-
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const behandles = erBehandlingRedigerbar(behandlingStatus, enhetId, innloggetSaksbehandler.skriveEnheter)
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 
-  if (!behandles) return
+  if (!redigerbar) return
 
   const lagre = () => {
     return apiOppdaterGrunnlag(
       {
-        behandlingId: behandlingId,
+        behandlingId: behandling.id,
       },
       () => {
         window.location.reload()

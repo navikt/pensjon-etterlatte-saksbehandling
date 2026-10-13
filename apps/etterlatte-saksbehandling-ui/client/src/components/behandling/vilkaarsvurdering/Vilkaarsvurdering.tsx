@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { useParams } from 'react-router-dom'
 import { hentVilkaarsvurdering, opprettVilkaarsvurdering, slettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
@@ -11,7 +12,6 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { Alert, BodyLong, Box, Button, Heading, VStack } from '@navikt/ds-react'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
@@ -23,7 +23,6 @@ import {
 
 import { isFailure, isInitial, isPending, mapFailure } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ClickEvent, trackClick } from '~utils/analytics'
 import { KopierVilkaarAvdoed } from '~components/behandling/vilkaarsvurdering/KopierVilkaarAvdoed'
 import { miljoeErDev } from '~utils/miljoe'
@@ -35,12 +34,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const vilkaarsvurdering = behandling.vilkaarsvurdering
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [slettVilkaarsvurderingStatus, slettGammelVilkaarsvurdering] = useApiCall(slettVilkaarsvurdering)
   const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)

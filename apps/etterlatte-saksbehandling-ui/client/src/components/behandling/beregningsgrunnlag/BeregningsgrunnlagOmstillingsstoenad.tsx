@@ -1,7 +1,7 @@
 import { Box, Button, Heading } from '@navikt/ds-react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
-import { erBehandlingRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
@@ -25,7 +25,6 @@ import Spinner from '~shared/Spinner'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeBrukt'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
@@ -44,7 +43,6 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
   const personopplysninger = usePersonopplysninger()
   const { next } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [visManglendeBeregningsgrunnlag, setVisManglendeBeregningsgrunnlag] = useState(false)
   const brukNyeBeregningsregler = useFeaturetoggle(FeatureToggle.beregning_bruk_nye_beregningsregler)
 
@@ -54,11 +52,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
 
   if (!behandling) return <ApiErrorAlert>Fant ikke behandling</ApiErrorAlert>
 
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
 
   const onSubmit = () => {
     if (!behandling.beregningsGrunnlag?.beregningsMetode) {

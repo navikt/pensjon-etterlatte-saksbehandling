@@ -1,4 +1,5 @@
 import { Box, Heading, VStack } from '@navikt/ds-react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -9,8 +10,6 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import { hentAktivitspliktVurderingForBehandling } from '~shared/api/aktivitetsplikt'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useDispatch } from 'react-redux'
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -45,13 +44,8 @@ export const AktivitetspliktVurdering = ({
   doedsdato: Date
 }) => {
   const [hentetVurdering, hentVurdering] = useApiCall(hentAktivitspliktVurderingForBehandling)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const dispatch = useDispatch()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const vurdering = useAktivitetspliktBehandlingState()
   useEffect(() => {
     hentVurdering({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {

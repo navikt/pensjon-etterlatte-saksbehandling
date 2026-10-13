@@ -1,4 +1,5 @@
 import { Alert, BodyLong, BodyShort, Box, Button, Detail, Heading, List, ReadMore, VStack } from '@navikt/ds-react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import React, { useContext, useEffect, useState } from 'react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
@@ -17,8 +18,6 @@ import { hentAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { isPending } from '~shared/api/apiUtils'
 import { isBefore, isValid, parse, subMonths } from 'date-fns'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 const isValidDateOfDeath = (date?: Date) => {
   if (date) {
@@ -31,13 +30,7 @@ const isValidDateOfDeath = (date?: Date) => {
 export const Aktivitetsplikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   const { next } = useContext(BehandlingRouteContext)
 
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
 
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const avdoede = usePersonopplysningerOmsAvdoede()

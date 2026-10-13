@@ -32,6 +32,22 @@ export interface IDetaljertBehandling {
   tidligereFamiliepleier: ITidligereFamiliepleier | null
   erSluttbehandling: boolean
   opprinnelse: Opprinnelse
+  skrivetilgang: Skrivetilgang
+}
+
+/**
+ * Om innlogget saksbehandler har skrivetilgang til sakens enhet. Regnes ut av backend med samme
+ * regel som håndhever skrivetilgang. Status på behandlingen inngår ikke.
+ */
+export interface Skrivetilgang {
+  harSkrivetilgang: boolean
+  aarsak: ManglerSkrivetilgangAarsak | null
+}
+
+export enum ManglerSkrivetilgangAarsak {
+  MANGLER_ROLLE = 'MANGLER_ROLLE',
+  ENHET_UTEN_SKRIVETILGANG = 'ENHET_UTEN_SKRIVETILGANG',
+  UKJENT_BRUKER = 'UKJENT_BRUKER',
 }
 
 export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {

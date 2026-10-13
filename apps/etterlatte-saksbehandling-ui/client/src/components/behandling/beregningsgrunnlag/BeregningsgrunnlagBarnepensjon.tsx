@@ -1,7 +1,7 @@
 import { Box, Button, Heading } from '@navikt/ds-react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
-import { erBehandlingRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
@@ -36,7 +36,6 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { hentTrygdetider } from '~shared/api/trygdetid'
 import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeBrukt'
 import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
@@ -50,7 +49,6 @@ import { AnnenForelderVurdering } from '~shared/types/grunnlag'
 const BeregningsgrunnlagBarnepensjon = () => {
   const { next } = useContext(BehandlingRouteContext)
   const personopplysninger = usePersonopplysninger()
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const behandling = useBehandling()
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
@@ -71,11 +69,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
     })
   }, [])
 
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
 
   const kunEnJuridiskForelderPersongalleri =
     personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER

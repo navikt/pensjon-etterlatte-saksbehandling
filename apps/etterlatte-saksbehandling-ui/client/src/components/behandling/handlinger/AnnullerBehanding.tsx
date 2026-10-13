@@ -1,3 +1,4 @@
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import React, { useState } from 'react'
 import {
   BodyLong,
@@ -13,15 +14,13 @@ import {
 } from '@navikt/ds-react'
 import { avbrytBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Controller, useForm } from 'react-hook-form'
 import {
   AarsakTilAvsluttingFoerstegangsbehandling,
@@ -39,13 +38,7 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
   const behandling = useBehandling()
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const behandles = erBehandlingRedigerbar(
-    behandling?.status ?? IBehandlingStatus.IVERKSATT,
-    behandling?.sakEnhetId ?? '',
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
 
   const {
     control,
@@ -56,7 +49,7 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
     defaultValues: { aarsakTilAvbrytelse: AarsakTilAvsluttingFoerstegangsbehandling.ANNET, kommentar: '' },
   })
 
-  if (!behandles) {
+  if (!redigerbar) {
     return null
   }
 

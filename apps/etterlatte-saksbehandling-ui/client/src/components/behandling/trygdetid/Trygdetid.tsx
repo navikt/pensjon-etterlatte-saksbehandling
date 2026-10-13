@@ -1,3 +1,4 @@
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentTrygdetider, ITrygdetid, opprettTrygdetider } from '~shared/api/trygdetid'
@@ -9,7 +10,7 @@ import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/B
 import { useAppDispatch } from '~store/Store'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { behandlingErIverksatt, erBehandlingRedigerbar } from '~components/behandling/felles/utils'
+import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
 import { EnkelPersonTrygdetid } from '~components/behandling/trygdetid/EnkelPersonTrygdetid'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
@@ -25,7 +26,6 @@ import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling
 import { EnigUenigTilbakemelding } from '~shared/tilbakemelding/EnigUenigTilbakemelding'
 import { velgTilbakemeldingClickEventForUtlandsbehandling } from '~utils/analytics'
 import { SkalSendeBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 interface Props {
   redigerbar: boolean
@@ -42,7 +42,6 @@ const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[
 
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
@@ -55,11 +54,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
   const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
 
-  const behandlingRedigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar: behandlingRedigerbar } = useBehandlingRedigerbarhet(behandling)
 
   const personopplysninger = usePersonopplysninger()
 
@@ -267,9 +262,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           ),
           success: (erOmgjoeringAvslag) =>
             vedtaksresultat === 'avslag' &&
-            erOmgjoeringAvslag && (
-              <SkalSendeBrev behandling={behandling} behandlingRedigerbart={behandlingRedigerbar} />
-            ),
+            erOmgjoeringAvslag && <SkalSendeBrev behandling={behandling} redigerbar={behandlingRedigerbar} />,
         })}
       </VStack>
     </Box>

@@ -1,7 +1,6 @@
 import { Button, Heading, VStack } from '@navikt/ds-react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { Dispatch, SetStateAction, useState } from 'react'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { InformasjonFraBrukerVisning } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBrukerVisning'
@@ -21,18 +20,12 @@ export const InformasjonFraBruker = ({
   setInformasjonFraBrukerSkjemaErrors,
   setValideringFeilmedling,
 }: Props) => {
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-
   const { forbehandling } = useEtteroppgjoerForbehandling()
 
-  const erRedigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
 
   const [informasjonFraBrukerSkjemaErAapen, setInformasjonFraBrukerSkjemaErAapen] = useState<boolean>(
-    erRedigerbar && !forbehandling.harMottattNyInformasjon
+    redigerbar && !forbehandling.harMottattNyInformasjon
   )
 
   return (
@@ -40,18 +33,18 @@ export const InformasjonFraBruker = ({
       <Heading size="medium" level="2">
         Er det ny informasjon i saken?
       </Heading>
-      {informasjonFraBrukerSkjemaErAapen && erRedigerbar ? (
+      {informasjonFraBrukerSkjemaErAapen && redigerbar ? (
         <InformasjonFraBrukerSkjema
           behandling={behandling}
           setInformasjonFraBrukerSkjemaErAapen={setInformasjonFraBrukerSkjemaErAapen}
-          erRedigerbar={erRedigerbar}
+          erRedigerbar={redigerbar}
           setInformasjonFraBrukerSkjemaErrors={setInformasjonFraBrukerSkjemaErrors}
           setValideringFeilmedling={setValideringFeilmedling}
         />
       ) : (
         <VStack gap="space-16">
           <InformasjonFraBrukerVisning />
-          {erRedigerbar && (
+          {redigerbar && (
             <div>
               <Button
                 size="small"

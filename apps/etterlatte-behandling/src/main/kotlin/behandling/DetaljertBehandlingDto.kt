@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.tilgangsstyring.Skrivetilgang
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -46,4 +47,5 @@ data class DetaljertBehandlingDto(
     val tidligereFamiliepleier: TidligereFamiliepleier?,
     val erSluttbehandling: Boolean,
     val opprinnelse: BehandlingOpprinnelse,
+    val skrivetilgang: Skrivetilgang,
 )

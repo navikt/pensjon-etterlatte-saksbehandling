@@ -1,5 +1,5 @@
-import { erBehandlingRedigerbar } from '../felles/utils'
 import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
 import React, { useContext, useEffect, useState } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
@@ -20,7 +20,6 @@ import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 
 export const BeregneBP = (props: { behandling: IBehandlingReducer }) => {
@@ -30,13 +29,8 @@ export const BeregneBP = (props: { behandling: IBehandlingReducer }) => {
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtakStatus, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const brevutfallOgEtterbetaling = useAppSelector(
     (state) => state.behandlingReducer.behandling?.brevutfallOgEtterbetaling
   )

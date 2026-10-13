@@ -40,13 +40,7 @@ export const Familieforhold = ({ behandling, redigerbar, personopplysninger }: P
         <Heading size="medium" level="2">
           Familieforhold
         </Heading>
-        {redigerbar && (
-          <OppdaterGrunnlagModal
-            behandlingId={behandling.id}
-            behandlingStatus={behandling.status}
-            enhetId={behandling.sakEnhetId}
-          />
-        )}
+        {redigerbar && <OppdaterGrunnlagModal behandling={behandling} />}
         {redigerbar && personopplysninger && (
           <RedigerFamilieforholdModal behandling={behandling} personopplysninger={personopplysninger} />
         )}

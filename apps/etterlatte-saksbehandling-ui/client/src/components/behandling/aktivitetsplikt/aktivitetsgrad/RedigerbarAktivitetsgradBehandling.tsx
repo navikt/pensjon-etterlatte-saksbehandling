@@ -1,3 +1,4 @@
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import {
   AktivitetspliktOppgaveVurderingType,
   IAktivitetspliktAktivitetsgrad,
@@ -9,8 +10,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerAktivitetsgradForBehandling, slettAktivitetsgradForBehandling } from '~shared/api/aktivitetsplikt'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { RedigerbarAktivitsgradKnapper } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivitetsgradOppgave'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { RedigerAktivitetsgrad } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradWrapperOppgave'
 import { setVurderingBehandling } from '~store/reducers/AktivitetspliktBehandlingReducer'
 import { RedigerbarAktivtetsgradForm } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivtetsgradForm'
@@ -28,12 +27,7 @@ export function RedigerbarAktivitetsgradBehandling({
   const dispatch = useDispatch()
 
   const [slettStatus, slettAktivtetsgrad] = useApiCall(slettAktivitetsgradForBehandling)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
 
   function oppdaterTilstandLagretVurdering(data: IAktivitetspliktVurderingNyDto) {
     setRedigerer(false)

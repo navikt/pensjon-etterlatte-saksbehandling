@@ -1,7 +1,8 @@
 import { Box, Heading, VStack } from '@navikt/ds-react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { erBehandlingRedigerbar, soeknadsoversiktErFerdigUtfylt } from '../felles/utils'
+import { soeknadsoversiktErFerdigUtfylt } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
@@ -18,7 +19,6 @@ import {
 import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/GrunnlagForVirkningstidspunkt'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoereOpphoer/ViderefoereOpphoer'
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import SluttBehandlingOmgjoering from '~components/behandling/soeknadsoversikt/SluttbehandlingOmgjoering'
@@ -28,12 +28,7 @@ import { miljoeErDev } from '~utils/miljoe'
 import { FyllUtSoeknadsoversiktIDev } from '~components/behandling/soeknadsoversikt/FyllUtSoeknadsoversiktIDev'
 
 export const Soeknadsoversikt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const personopplysninger = usePersonopplysninger()
   const erBosattUtland = behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND

@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { Alert, BodyShort, Box, Heading, HStack, InfoCard, Label, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/SendTilAttesteringModal'
-import {
-  erBehandlingRedigerbar,
-  sisteBehandlingHendelse,
-  statusErRedigerbar,
-} from '~components/behandling/felles/utils'
+import { sisteBehandlingHendelse, statusErRedigerbar } from '~components/behandling/felles/utils'
 import { IBehandlingStatus, IDetaljertBehandling, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
@@ -31,7 +28,6 @@ import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import BrevutfallModal from '~components/behandling/brevutfall/BrevutfallModal'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
@@ -43,13 +39,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const { sakId, soeknadMottattDato } = props.behandling
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const redigerbar = erBehandlingRedigerbar(
-    props.behandling.status,
-    props.behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(props.behandling)
 
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev>()
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)

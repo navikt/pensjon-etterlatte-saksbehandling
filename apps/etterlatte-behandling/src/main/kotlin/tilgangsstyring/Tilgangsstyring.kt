@@ -225,7 +225,7 @@ fun RoutingContext.sjekkSkrivetilgang(
 
             when (enhetNrSomSkalTestes) {
                 null -> false
-                else -> user.hentEnheterMedSkrivetilgang().contains(enhetNrSomSkalTestes)
+                else -> user.harSkrivetilgangTilEnhet(enhetNrSomSkalTestes)
             }
         }
 

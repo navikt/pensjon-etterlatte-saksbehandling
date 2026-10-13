@@ -54,9 +54,9 @@
 - Observation: Jeg gjorde om på flere tester sitt testoppsett som endring av felles mock og util-metoder, ved skriving av enhetstester til ny funksjonalitet uten å spørre.
 - Action: Når det skal skrives tester til ny funksjonalitet, ikke gjør om eksisterende mocking, testoppsett og util-metoder samtidig, med mindre det er helt nødvendig. Spør om testoppsett skal skrives om først ved tvil.
 
-**2026-06-12 — Bulk Python-erstatning**
-- Observation: Python regex-basert bulk-erstatning av `coEvery`-blokker med parens som inneholdt `any()` stoppa regex-matching tidlig (`[^)]+` stoppet ved første `)` inne i `any()`), og etterlot halvferdige linjer i koden.
-- Action: Regex-basert bulk-erstatning av Kotlin multi-arg kall er risikabelt når argumentene selv inneholder parens (som `any()`). Valider alltid output: kjør kompilering umiddelbart etter slike erstatninger – forvent og se etter syntaxfeil og linjefragmenter.
+**2026-06-12 / 2026-10-13 — Bulk-erstatning med skript**
+- Observation: Regex-erstatninger treffer mer enn tenkt. (1) `[^)]+` stoppet ved første `)` inne i `any()` og etterlot halve linjer. (2) Omdøping av en lokal variabel med `\bnavn\b` omdøpte også JSX-prop-nøkler med samme navn (`erRedigerbar={erRedigerbar}`), og «sett inn etter første import-linje» havnet inne i en flerlinjers import.
+- Action: Et ord er ikke et symbol. Ved skriptbasert omdøping/innsetting: skill variabel fra prop-nøkkel/parameter, sjekk flerlinjers konstruksjoner, og kjør kompilator/typesjekk umiddelbart etterpå.
 
 **2026-06-12 — Implementasjon vs. test-kontrakten**
 - Observation: Ny implementasjon konsoliderte to `hentGrunnlag`-kall til ett, men testene forventet `exactly = 2`. Dette var en korrekt forbedring, men det krevde oppdatering av testpåstander som ikke var åpenbare i forkant.

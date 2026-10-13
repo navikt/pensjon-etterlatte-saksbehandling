@@ -1,11 +1,11 @@
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { erBehandlingRedigerbar, hasValue } from '~components/behandling/felles/utils'
+import { hasValue } from '~components/behandling/felles/utils'
 import { isFailure, isPending, mapResult } from '~shared/api/apiUtils'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import {
   Alert,
   BodyShort,
@@ -80,11 +80,9 @@ export const Sanksjon = ({
   const [sanksjoner, setSanksjoner] = useState<ISanksjon[]>()
   const [visForm, setVisForm] = useState(false)
   const [redigerSanksjonId, setRedigerSanksjonId] = useState('')
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const redigerbar =
-    erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
-    behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER
+  const { redigerbar: behandlingRedigerbar } = useBehandlingRedigerbarhet(behandling)
+  const redigerbar = behandlingRedigerbar && behandling.revurderingsaarsak != Revurderingaarsak.ETTEROPPGJOER
 
   const {
     register,

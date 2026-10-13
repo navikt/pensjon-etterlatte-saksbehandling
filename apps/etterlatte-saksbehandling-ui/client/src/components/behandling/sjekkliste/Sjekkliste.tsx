@@ -1,3 +1,4 @@
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import styled from 'styled-components'
 import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
@@ -18,7 +19,6 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { ConfigContext } from '~clientConfig'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { ISjekklisteItem } from '~shared/types/Sjekkliste'
 import debounce from 'lodash/debounce'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
@@ -35,6 +35,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const { redigerbar: behandlingRedigerbar } = useBehandlingRedigerbarhet(behandling)
   const [redigerbar, setRedigerbar] = useState<boolean>(false)
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
   const oppgave = useSelectorOppgaveUnderBehandling()
@@ -63,10 +64,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
   useEffect(() => {
     const erSammeIdent = oppgave?.saksbehandler?.ident === innloggetSaksbehandler.ident
     setOppgaveErTildeltInnloggetBruker(erSammeIdent)
-    setRedigerbar(
-      erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
-        erSammeIdent
-    )
+    setRedigerbar(behandlingRedigerbar && erSammeIdent)
   }, [])
 
   const erBarnepensjon = behandling.sakType == SakType.BARNEPENSJON

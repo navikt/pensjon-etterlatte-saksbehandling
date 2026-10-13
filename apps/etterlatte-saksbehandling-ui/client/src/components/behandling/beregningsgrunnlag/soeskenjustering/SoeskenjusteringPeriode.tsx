@@ -1,5 +1,5 @@
 import { Control, Controller, useFieldArray, UseFormWatch } from 'react-hook-form'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import PeriodeAccordion from '~components/behandling/beregningsgrunnlag/PeriodeAccordion'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { BodyShort, Button, HStack, Label, Radio, RadioGroup } from '@navikt/ds-react'
@@ -14,7 +14,6 @@ import {
   UstiletListe,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import styled from 'styled-components'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { formaterMaanednavnAar } from '~utils/formatering/dato'
 
 type SoeskenjusteringPeriodeProps = {
@@ -36,12 +35,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
     name: `soeskenMedIBeregning.${index}.data`,
     control,
   })
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const behandles = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
 
   const grunnlag = watch(`soeskenMedIBeregning.${index}`)
   const mineFeil = [...feil.filter(([feilIndex]) => feilIndex === index).flatMap((a) => a[1])]
@@ -64,7 +58,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
           <div>
             <Controller
               render={(fom) =>
-                expanded && behandles ? (
+                expanded && redigerbar ? (
                   <MaanedVelger
                     label="Fra og med"
                     value={fom.field.value}
@@ -84,7 +78,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
           <div>
             <Controller
               render={(tom) =>
-                expanded && behandles ? (
+                expanded && redigerbar ? (
                   <MaanedvelgerMedUtnulling>
                     <MaanedVelger
                       onChange={(val) => tom.field.onChange(val)}
@@ -113,7 +107,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
             {antallSoeskenIkkeValgt ? <span>({antallSoeskenIkkeValgt} ikke valgt)</span> : null}
             {mineFeil.length > 0 && visFeil ? <FeilForPeriode feil={mineFeil} /> : null}
           </VertikalMidtstiltBodyShort>
-          {canRemove && behandles ? <FjernKnapp onClick={remove}>Slett</FjernKnapp> : null}
+          {canRemove && redigerbar ? <FjernKnapp onClick={remove}>Slett</FjernKnapp> : null}
         </PeriodeInfo>
       )}
     >
@@ -129,7 +123,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                     name={`soeskenMedIBeregning.${index}.data.${k}`}
                     control={control}
                     render={(soesken) =>
-                      behandles ? (
+                      redigerbar ? (
                         <RadioGroup
                           legend="Oppdras sammen"
                           value={soesken.field.value?.skalBrukes ?? null}

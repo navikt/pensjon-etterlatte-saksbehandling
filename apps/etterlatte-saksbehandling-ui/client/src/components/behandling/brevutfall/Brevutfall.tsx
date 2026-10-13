@@ -1,9 +1,9 @@
 import styled from 'styled-components'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { Alert, BodyLong, Box, Heading } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevutfallOgEtterbetalingApi } from '~shared/api/behandling'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
 import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallVisning'
 import Spinner from '~shared/Spinner'
@@ -12,7 +12,6 @@ import { SakType } from '~shared/types/sak'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingReducer, updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SkalSendeBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
@@ -76,13 +75,8 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType, behandlingId: string
 export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutfallvalidering: () => void }) => {
   const behandling = props.behandling
   const behandlingErOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const dispatch = useAppDispatch()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
     initialBrevutfallOgEtterbetaling(behandling.sakType, behandling.id)
   )
@@ -111,7 +105,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
 
   return behandling.sendeBrev ? (
     <BrevutfallContent id="brevutfall">
-      {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />}
+      {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} redigerbar={redigerbar} />}
       <Box background="neutral-soft" borderRadius="12" padding="space-16">
         <Heading level="2" size="medium" spacing>
           Valg av utfall i brev
@@ -151,7 +145,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
     </BrevutfallContent>
   ) : (
     <>
-      {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />}
+      {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} redigerbar={redigerbar} />}
       <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
     </>
   )

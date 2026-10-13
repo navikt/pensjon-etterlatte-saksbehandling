@@ -1,6 +1,6 @@
 import { Beregning, OverstyrBeregning } from '~shared/types/Beregning'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { erBehandlingRedigerbar } from '../../felles/utils'
 import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import { PlusIcon } from '@navikt/aksel-icons'
 import {
@@ -18,7 +18,6 @@ import { BehandlingRouteContext } from '../../BehandlingRoutes'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useInnloggetSaksbehandler } from '../../useInnloggetSaksbehandler'
 import { BeregningErOverstyrtAlert } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/BeregningErOverstyrtAlert'
 import { SkruAvOverstyrtBeregningModal } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/SkruAvOverstyrtBeregningModal'
 import { OverstyrtBeregningsgrunnlagTable } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/OverstyrtBeregningsgrunnlagTable'
@@ -31,13 +30,8 @@ const OverstyrBeregningGrunnlag = (props: {
   setOverstyrt: Dispatch<SetStateAction<OverstyrBeregning | undefined>>
 }) => {
   const { behandling, setOverstyrt } = props
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const [visOverstyrBeregningPeriodeSkjema, setVisOverstyrBeregningPeriodeSkjema] = useState<boolean>(false)
 
   const [overstyrBeregningGrunnlagResult, overstyrBeregningGrunnlagRequest] = useApiCall(hentOverstyrBeregningGrunnlag)

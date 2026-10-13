@@ -73,6 +73,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.PersonManglerSak
+import no.nav.etterlatte.tilgangsstyring.vurderSkrivetilgang
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -852,6 +853,7 @@ class BehandlingServiceImpl(
             tidligereFamiliepleier = behandling.tidligereFamiliepleier,
             erSluttbehandling = behandling.erSluttbehandling(),
             opprinnelse = behandling.opprinnelse,
+            skrivetilgang = vurderSkrivetilgang(Kontekst.get().AppUser, behandling.sak.enhet),
         )
     }
 

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { Alert, BodyShort, Box, Button, ErrorSummary, Heading, HStack, VStack } from '@navikt/ds-react'
@@ -14,11 +15,9 @@ import {
   PeriodisertBeregningsgrunnlag,
   PeriodisertBeregningsgrunnlagDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { Success600 } from '@navikt/ds-tokens/js'
 
 type SoeskenKanskjeMedIBeregning = {
@@ -89,12 +88,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     control,
   })
 
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
   const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
   const [visOkLagret, setVisOkLagret] = useState(false)
@@ -120,12 +114,10 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         ...periode,
         data: [
           ...periode.data,
-          ...manglendeSoeskenForPeriode.map(
-            (soesken): SoeskenMedIBeregning => ({
-              foedselsnummer: soesken.foedselsnummer,
-              skalBrukes: false,
-            })
-          ),
+          ...manglendeSoeskenForPeriode.map((soesken): SoeskenMedIBeregning => ({
+            foedselsnummer: soesken.foedselsnummer,
+            skalBrukes: false,
+          })),
         ],
       }
     })

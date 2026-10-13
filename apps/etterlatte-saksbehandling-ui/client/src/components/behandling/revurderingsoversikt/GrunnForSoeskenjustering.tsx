@@ -1,4 +1,5 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import {
   BarnepensjonSoeskenjusteringGrunn,
   hentUndertypeFraBehandling,
@@ -9,7 +10,6 @@ import {
 } from '~shared/types/RevurderingInfo'
 import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, Select } from '@navikt/ds-react'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -20,7 +20,6 @@ import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsover
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -32,12 +31,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const harEndretInfo =
     soeskenjusteringInfo?.grunnForSoeskenjustering !== null &&
     valgtSoeskenjustering !== soeskenjusteringInfo?.grunnForSoeskenjustering

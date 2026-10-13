@@ -1,4 +1,5 @@
 import { useAppDispatch } from '~store/Store'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import React, { useContext, useEffect } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
 import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
@@ -17,8 +18,6 @@ import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { EtteroppgjoerResultatType } from '~shared/types/EtteroppgjoerForbehandling'
@@ -29,12 +28,7 @@ export const BeregneEtteroppgjoerOMS = () => {
     return
   }
   const { next } = useContext(BehandlingRouteContext)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
 
   const dispatch = useAppDispatch()
   const [beregningResult, hentBeregningRequest] = useApiCall(hentBeregning)

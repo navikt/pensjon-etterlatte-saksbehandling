@@ -1,4 +1,5 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import {
   hentUndertypeFraBehandling,
   RevurderingAarsakAnnen,
@@ -7,7 +8,6 @@ import {
 } from '~shared/types/RevurderingInfo'
 import { FormEvent, useState } from 'react'
 import { BodyLong, BodyShort, Box, Button, Heading, Textarea, TextField, VStack } from '@navikt/ds-react'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
@@ -15,7 +15,6 @@ import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { useAppDispatch } from '~store/Store'
 import { Toast } from '~shared/alerts/Toast'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; behandling: IDetaljertBehandling }) => {
@@ -29,12 +28,7 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [feilmelding, setFeilmelding] = useState<string | null>(null)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
 
   const handlesubmit = (e: FormEvent) => {
     e.stopPropagation()

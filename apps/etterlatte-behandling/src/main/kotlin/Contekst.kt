@@ -80,12 +80,14 @@ class SaksbehandlerMedEnheterOgRoller(
         // Enhetsmedlemskap alene gir ikke skrivetilgang. Brukeren må i tillegg ha saksbehandler- eller
         // attestantrollen i Azure AD. Uten denne sjekken ville en bruker med kun lesetilgang
         // (0000-GA-GJENNY_LES) fått skrivetilgang så lenge hen tilhørte en saksbehandlende enhet.
-        if (saksbehandlerMedRoller.harRolleSaksbehandler() || saksbehandlerMedRoller.harRolleAttestant()) {
+        if (harSkriverolle()) {
             return enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter())
         } else {
             return emptyList()
         }
     }
+
+    fun harSkriverolle(): Boolean = saksbehandlerMedRoller.harRolleSaksbehandler() || saksbehandlerMedRoller.harRolleAttestant()
 
     private fun enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter: Set<Enhetsnummer>) =
         saksbehandlersEnheter.filter { Enheter.saksbehandlendeEnheter().contains(it) }

@@ -1,9 +1,9 @@
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { SoeknadVurdering } from '~components/behandling/soeknadsoversikt/SoeknadVurdering'
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -11,7 +11,6 @@ import { getPersongalleriFraSoeknad } from '~shared/api/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
 import { isSuccess } from '~shared/api/apiUtils'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { Box, HStack } from '@navikt/ds-react'
 import {
   finnVurdering,
@@ -29,12 +28,7 @@ export const GyldigFramsattBarnepensjon = ({
   gyldigFramsatt: IGyldighetResultat | undefined
   gyldigFremsattTilStatusIcon: StatusIconProps
 }) => {
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const [personGalleriSoeknad, getPersonGalleriSoeknad] = useApiCall(getPersongalleriFraSoeknad)
   useEffect(() => {
     getPersonGalleriSoeknad({ behandlingId: behandling.id })

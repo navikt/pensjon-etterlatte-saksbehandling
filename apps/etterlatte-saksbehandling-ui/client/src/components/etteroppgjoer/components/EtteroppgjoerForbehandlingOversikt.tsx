@@ -20,7 +20,8 @@ import { JaNei } from '~shared/types/ISvar'
 import { FieldErrors } from 'react-hook-form'
 import { FastsettFaktiskInntektSkjema } from '~components/etteroppgjoer/components/fastsettFaktiskInntekt/FaktiskInntektSkjema'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { enhetErSkrivbar, erBehandlingRedigerbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { enhetErSkrivbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { vurderRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { FerdigstillEtteroppgjoerForbehandlingUtenBrev } from '~components/etteroppgjoer/components/FerdigstillEtteroppgjoerForbehandlingUtenBrev'
 import { useNavigate } from 'react-router-dom'
@@ -53,7 +54,7 @@ function erRedigerbart(
   skriveEnheter: string[]
 ): boolean {
   if (kontekst.type === EtteroppgjoerKontekstType.REVURDERING) {
-    return erBehandlingRedigerbar(kontekst.behandling.status, kontekst.behandling.sakEnhetId, skriveEnheter)
+    return vurderRedigerbarhet(kontekst.behandling).redigerbar
   }
   return erForbehandlingRedigerbar(forbehandling.status) && enhetErSkrivbar(forbehandling.sak.enhet, skriveEnheter)
 }

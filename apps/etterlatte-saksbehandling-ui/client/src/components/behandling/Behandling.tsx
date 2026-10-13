@@ -21,8 +21,8 @@ import { Box, HStack, Modal } from '@navikt/ds-react'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
+import { SkrivebeskyttetVarsel } from '~components/behandling/felles/SkrivebeskyttetVarsel'
 import { addDetaljertEtteroppgjoerForbehandling, resetEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 import { hentEtteroppgjoerForbehandling } from '~shared/api/etteroppgjoer'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
@@ -39,7 +39,7 @@ export const Behandling = () => {
   const [, fetchForbehandling] = useApiCall(hentEtteroppgjoerForbehandling)
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const person = usePerson()
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const { redigerbar } = useBehandlingRedigerbarhet(behandlingFraRedux)
 
   useEffect(() => {
     if (!behandlingIdFraURL) {
@@ -87,17 +87,17 @@ export const Behandling = () => {
     success: () => {
       if (behandlingFraRedux) {
         const behandling = behandlingFraRedux as IBehandlingReducer
-        const redigerbar = erBehandlingRedigerbar(
-          behandling.status,
-          behandling.sakEnhetId,
-          innloggetSaksbehandler.skriveEnheter
-        )
         return (
           <BehandlingRouteContext.Provider value={routedata}>
             <StickyToppMeny>
               <StatusBar ident={soeker?.foedselsnummer} />
               <StegMeny behandling={behandling} />
             </StickyToppMeny>
+            {!redigerbar && (
+              <Box paddingInline="space-16" paddingBlock="space-8 space-0">
+                <SkrivebeskyttetVarsel behandling={behandling} />
+              </Box>
+            )}
             {redigerbar && soeker && (
               <Modal
                 header={{

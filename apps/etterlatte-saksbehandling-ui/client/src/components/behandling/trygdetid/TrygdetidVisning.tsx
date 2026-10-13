@@ -1,10 +1,10 @@
 import { Box, Button, Heading } from '@navikt/ds-react'
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import { formaterDato } from '~utils/formatering/dato'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useContext, useState } from 'react'
@@ -17,21 +17,15 @@ import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { fattVedtak } from '~shared/api/vedtaksvurdering'
 
 const TrygdetidVisning = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const dispatch = useAppDispatch()
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [visAttesteringsmodalOpen, setVisAttesteringsmodalOpen] = useState(false)
 
-  const redigerbar = erBehandlingRedigerbar(
-    behandling.status,
-    behandling.sakEnhetId,
-    innloggetSaksbehandler.skriveEnheter
-  )
+  const { redigerbar } = useBehandlingRedigerbarhet(behandling)
   const { next } = useContext(BehandlingRouteContext)
 
   const vedtaksresultat = useVedtaksResultat()

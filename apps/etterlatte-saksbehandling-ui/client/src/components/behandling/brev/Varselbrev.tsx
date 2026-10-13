@@ -1,10 +1,10 @@
+import { useBehandlingRedigerbarhet } from '~components/behandling/useBehandlingRedigerbarhet'
 import React, { useContext, useEffect, useState } from 'react'
 import { Alert, BodyShort, Box, Button, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import Spinner from '~shared/Spinner'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
@@ -21,7 +21,6 @@ import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import { hentAttesterbarBehandlingOppgaveForReferanse, settOppgavePaaVentApi } from '~shared/api/oppgaver'
-import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 import { formaterDato } from '~utils/formatering/dato'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
@@ -32,11 +31,9 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const { sakId, revurderingsaarsak } = props.behandling
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const [redigerbar, setKanRedigeres] = useState(
-    erBehandlingRedigerbar(props.behandling.status, props.behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
-  )
+  const { redigerbar: behandlingRedigerbar } = useBehandlingRedigerbarhet(props.behandling)
+  const [redigerbar, setRedigerbar] = useState(behandlingRedigerbar)
 
   const [varselbrev, setVarselbrev] = useState<IBrev>()
   const { next, currentRouteErGyldig } = useContext(BehandlingRouteContext)
@@ -83,7 +80,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
         () => dispatch(resetBehandling())
       )
       if ([BrevStatus.DISTRIBUERT, BrevStatus.JOURNALFOERT, BrevStatus.FERDIGSTILT].includes(varselbrev.status)) {
-        setKanRedigeres(false)
+        setRedigerbar(false)
       }
     }
   }, [varselbrev])
@@ -192,7 +189,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
             {varselbrev && (
               <NyttBrevHandlingerPanel
                 brev={varselbrev}
-                setKanRedigeres={setKanRedigeres}
+                setKanRedigeres={setRedigerbar}
                 callback={settPaaVent}
                 erAktivitetspliktVarsel={revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT}
               />

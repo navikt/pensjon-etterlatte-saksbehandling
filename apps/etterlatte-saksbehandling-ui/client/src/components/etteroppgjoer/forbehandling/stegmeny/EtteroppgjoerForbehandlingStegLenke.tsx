@@ -1,7 +1,7 @@
 import { useMatch } from 'react-router'
 import { DisabledLabel } from '~components/behandling/stegmeny/StegMeny'
 import { Label } from '@navikt/ds-react'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 import { ChevronRightIcon } from '@navikt/aksel-icons'
 import React from 'react'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'

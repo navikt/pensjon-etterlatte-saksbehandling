@@ -1,6 +1,6 @@
 import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import React, { useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useKlage } from '~components/klage/useKlage'
 import Spinner from '~shared/Spinner'
 import { forrigeSteg, kanSeOppsummering } from '~components/klage/stegmeny/KlageStegmeny'

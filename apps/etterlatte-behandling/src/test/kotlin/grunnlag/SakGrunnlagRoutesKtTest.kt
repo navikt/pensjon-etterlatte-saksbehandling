@@ -4,9 +4,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
@@ -21,6 +24,9 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.sak.TilgangServiceSjekker
@@ -111,6 +117,46 @@ internal class SakGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlagForSak(sakId) }
+    }
+
+    @Test
+    fun `oppdater-grunnlag avviser sakId i body som ikke samsvarer med path`() {
+        val sakIdPath = randomSakId()
+        val annenSakId = SakId(sakIdPath.sakId + 1)
+
+        testApplication {
+            val response =
+                createHttpClient().post("api/grunnlag/sak/${sakIdPath.sakId}/oppdater-grunnlag") {
+                    contentType(ContentType.Application.Json)
+                    setBody(OppdaterGrunnlagRequest(annenSakId, SakType.BARNEPENSJON))
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    }
+                }
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+        }
+    }
+
+    @Test
+    fun `systemruter for sak-grunnlag avviser saksbehandler`() {
+        val sakId = randomSakId()
+
+        testApplication {
+            val client = createHttpClient()
+            listOf("opprett-grunnlag", "nye-opplysninger").forEach { endepunkt ->
+                val response =
+                    client.post("api/grunnlag/sak/${sakId.sakId}/$endepunkt") {
+                        contentType(ContentType.Application.Json)
+                        setBody("{}")
+                        headers {
+                            append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                        }
+                    }
+
+                assertEquals(HttpStatusCode.NotFound, response.status, endepunkt)
+            }
+        }
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient =

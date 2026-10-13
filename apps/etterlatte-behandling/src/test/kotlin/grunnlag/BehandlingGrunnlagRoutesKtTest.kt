@@ -47,6 +47,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.ValueSource
 import tools.jackson.databind.JsonNode
 import java.util.UUID
 
@@ -218,7 +219,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                     contentType(ContentType.Application.Json)
                     setBody(NyeSaksopplysninger(sakId, opplysninger))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSystembrukerToken()}")
                     }
                 }
 
@@ -306,6 +307,25 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 sakId,
                 SakType.BARNEPENSJON,
             )
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["nye-opplysninger", "laas", "opprett-grunnlag", "oppdater-grunnlag"])
+    fun `systemruter for grunnlag avviser saksbehandler`(endepunkt: String) {
+        val behandlingId = UUID.randomUUID()
+
+        testApplication {
+            val response =
+                createHttpClient().post("api/grunnlag/behandling/$behandlingId/$endepunkt") {
+                    contentType(ContentType.Application.Json)
+                    setBody("{}")
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    }
+                }
+
+            assertEquals(HttpStatusCode.NotFound, response.status)
         }
     }
 

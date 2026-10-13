@@ -15,6 +15,7 @@ import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
@@ -225,7 +226,32 @@ class PersonRouteTest {
         }
     }
 
-    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+    private val token: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
+
+    @Test
+    fun `systemruter avviser saksbehandler`() {
+        testApplication {
+            val client =
+                runServer(mockOAuth2Server) {
+                    personRoute(personService)
+                }
+
+            val response =
+                client.post(PERSON_ENDEPUNKT) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    setBody(
+                        HentPersonRequest(
+                            foedselsnummer = TRIVIELL_MIDTPUNKT,
+                            rolle = PersonRolle.BARN,
+                            saktyper = listOf(SakType.BARNEPENSJON),
+                        ).toJson(),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.NotFound, response.status)
+        }
+    }
 
     private companion object {
         const val PERSON_ENDEPUNKT = "/person"

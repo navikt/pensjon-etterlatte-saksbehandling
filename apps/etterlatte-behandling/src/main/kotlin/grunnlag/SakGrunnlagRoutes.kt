@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -9,10 +8,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 
 fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
@@ -38,24 +39,35 @@ fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
         }
 
         post("opprett-grunnlag") {
-            val opplysningsbehov = call.receive<Opplysningsbehov>()
-            grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                val opplysningsbehov = call.receive<Opplysningsbehov>()
+                grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/oppdater-grunnlag") {
             val request = call.receive<OppdaterGrunnlagRequest>()
+            // Tilgangssjekken gjøres på sakId i path, så sakId i body må være den samme
+            if (request.sakId != sakId) {
+                throw UgyldigForespoerselException("SAKID_MISMATCH", "SakId i body samsvarer ikke med sakId i path")
+            }
             grunnlagService.oppdaterGrunnlagForSak(request)
             call.respond(HttpStatusCode.OK)
         }
 
         post("/nye-opplysninger") {
-            val opplysningsbehov = call.receive<NyeSaksopplysninger>()
-            grunnlagService.lagreNyeSaksopplysningerBareSak(
-                opplysningsbehov.sakId,
-                opplysningsbehov.opplysninger,
-            )
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                val opplysningsbehov = call.receive<NyeSaksopplysninger>()
+                if (opplysningsbehov.sakId != sakId) {
+                    throw UgyldigForespoerselException("SAKID_MISMATCH", "SakId i body samsvarer ikke med sakId i path")
+                }
+                grunnlagService.lagreNyeSaksopplysningerBareSak(
+                    opplysningsbehov.sakId,
+                    opplysningsbehov.opplysninger,
+                )
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarReq
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
@@ -20,67 +21,83 @@ import org.slf4j.LoggerFactory
 private val logger = LoggerFactory.getLogger("PersonRoute")
 
 fun Route.personRoute(service: PersonService) {
+    // Rutene under er kun for maskin-til-maskin-kall og har ingen egen tilgangssjekk eller sporingslogg.
+    // Oppslag fra saksbehandlere skal gå via personWebRoute.
     route("person") {
         post {
-            val hentPersonRequest = call.receive<HentPersonRequest>()
-            logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
+            kunSystembruker {
+                val hentPersonRequest = call.receive<HentPersonRequest>()
+                logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
 
-            call.respond(service.hentPerson(hentPersonRequest))
+                call.respond(service.hentPerson(hentPersonRequest))
+            }
         }
 
         route("/v2") {
             post {
-                val hentPersonRequest = call.receive<HentPersonRequest>()
-                logger.info("Henter personopplysning med fnr=${hentPersonRequest.foedselsnummer}")
+                kunSystembruker {
+                    val hentPersonRequest = call.receive<HentPersonRequest>()
+                    logger.info("Henter personopplysning med fnr=${hentPersonRequest.foedselsnummer}")
 
-                call.respond(service.hentOpplysningsperson(hentPersonRequest))
+                    call.respond(service.hentOpplysningsperson(hentPersonRequest))
+                }
             }
 
             post("doedshendelse") {
-                val hentPersonRequest = call.receive<HentPersonRequest>()
-                logger.info("Henter personpplysning med fnr=${hentPersonRequest.foedselsnummer}")
-                call.respond(service.hentDoedshendelseOpplysningsperson(hentPersonRequest))
+                kunSystembruker {
+                    val hentPersonRequest = call.receive<HentPersonRequest>()
+                    logger.info("Henter personpplysning med fnr=${hentPersonRequest.foedselsnummer}")
+                    call.respond(service.hentDoedshendelseOpplysningsperson(hentPersonRequest))
+                }
             }
         }
 
         post("/adressebeskyttelse") {
-            val request = call.receive<HentAdressebeskyttelseRequest>()
-            logger.info("Henter adressebeskyttelse/gradering for fnr=${request.ident}")
+            kunSystembruker {
+                val request = call.receive<HentAdressebeskyttelseRequest>()
+                logger.info("Henter adressebeskyttelse/gradering for fnr=${request.ident}")
 
-            call.respond(service.hentAdressebeskyttelseGradering(request))
+                call.respond(service.hentAdressebeskyttelseGradering(request))
+            }
         }
     }
 
     route("galleri") {
         post {
-            medBody<HentPersongalleriRequest> { hentPersongalleriRequest ->
-                logger.info(
-                    "Henter persongalleri for ${hentPersongalleriRequest.saktype}-saken " +
-                        "til ${hentPersongalleriRequest.mottakerAvYtelsen}",
-                )
+            kunSystembruker {
+                medBody<HentPersongalleriRequest> { hentPersongalleriRequest ->
+                    logger.info(
+                        "Henter persongalleri for ${hentPersongalleriRequest.saktype}-saken " +
+                            "til ${hentPersongalleriRequest.mottakerAvYtelsen}",
+                    )
 
-                call.respond(service.hentPersongalleri(hentPersongalleriRequest))
+                    call.respond(service.hentPersongalleri(hentPersongalleriRequest))
+                }
             }
         }
     }
 
     route("pdlident") {
         post {
-            val hentPdlIdentRequest = call.receive<HentPdlIdentRequest>()
-            logger.info("Henter identer for ident=${hentPdlIdentRequest.ident}")
+            kunSystembruker {
+                val hentPdlIdentRequest = call.receive<HentPdlIdentRequest>()
+                logger.info("Henter identer for ident=${hentPdlIdentRequest.ident}")
 
-            val pdlIdentifikator = service.hentPdlIdentifikator(hentPdlIdentRequest)
+                val pdlIdentifikator = service.hentPdlIdentifikator(hentPdlIdentRequest)
 
-            call.respond(pdlIdentifikator)
+                call.respond(pdlIdentifikator)
+            }
         }
     }
 
     post("folkeregisteridenter") {
-        val request = call.receive<HentPdlIdentRequest>()
+        kunSystembruker {
+            val request = call.receive<HentPdlIdentRequest>()
 
-        val identer = service.hentPdlFolkeregisterIdenter(request)
+            val identer = service.hentPdlFolkeregisterIdenter(request)
 
-        call.respond(identer)
+            call.respond(identer)
+        }
     }
 
     post("foedselsdato") {
@@ -100,27 +117,33 @@ fun Route.personRoute(service: PersonService) {
 
     route("aktoerid") {
         post {
-            val ident = call.receive<HentPdlIdentRequest>()
+            kunSystembruker {
+                val ident = call.receive<HentPdlIdentRequest>()
 
-            call.respond(service.hentAktoerId(ident))
+                call.respond(service.hentAktoerId(ident))
+            }
         }
     }
 
     route("geografisktilknytning") {
         post {
-            val hentGeografiskTilknytningRequest = call.receive<HentGeografiskTilknytningRequest>()
-            logger.info("Henter geografisk tilknytning med fnr=${hentGeografiskTilknytningRequest.foedselsnummer}")
+            kunSystembruker {
+                val hentGeografiskTilknytningRequest = call.receive<HentGeografiskTilknytningRequest>()
+                logger.info("Henter geografisk tilknytning med fnr=${hentGeografiskTilknytningRequest.foedselsnummer}")
 
-            call.respond(service.hentGeografiskTilknytning(hentGeografiskTilknytningRequest))
+                call.respond(service.hentGeografiskTilknytning(hentGeografiskTilknytningRequest))
+            }
         }
     }
 
     route("foreldreansvar") {
         post {
-            val identRequest = call.receive<HentPersonHistorikkForeldreAnsvarRequest>()
-            logger.info("Henter historikk for foreldreansvar for person med fnr=${identRequest.foedselsnummer}")
+            kunSystembruker {
+                val identRequest = call.receive<HentPersonHistorikkForeldreAnsvarRequest>()
+                logger.info("Henter historikk for foreldreansvar for person med fnr=${identRequest.foedselsnummer}")
 
-            call.respond(service.hentHistorikkForeldreansvar(identRequest))
+                call.respond(service.hentHistorikkForeldreansvar(identRequest))
+            }
         }
     }
 }

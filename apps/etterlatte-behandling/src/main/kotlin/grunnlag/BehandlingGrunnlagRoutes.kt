@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import java.util.UUID
 
 fun Route.behandlingGrunnlagRoute(grunnlagService: GrunnlagService) {
@@ -48,39 +48,49 @@ fun Route.behandlingGrunnlagRoute(grunnlagService: GrunnlagService) {
         }
 
         post("/nye-opplysninger") {
-            val opplysningsbehov = call.receive<NyeSaksopplysninger>()
-            grunnlagService.lagreNyeSaksopplysninger(
-                opplysningsbehov.sakId,
-                behandlingId,
-                opplysningsbehov.opplysninger,
-            )
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                val opplysningsbehov = call.receive<NyeSaksopplysninger>()
+                grunnlagService.lagreNyeSaksopplysninger(
+                    opplysningsbehov.sakId,
+                    behandlingId,
+                    opplysningsbehov.opplysninger,
+                )
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/laas") {
-            grunnlagService.laasVersjonForBehandling(behandlingId)
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                grunnlagService.laasVersjonForBehandling(behandlingId)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/laas-til-behandling/{behandlingIdLaasesTil}") {
-            val idSomLaasesTil = UUID.fromString(call.parameters["behandlingIdLaasesTil"].toString())
-            grunnlagService.laasTilVersjonForBehandling(
-                skalLaasesId = behandlingId,
-                idLaasesTil = idSomLaasesTil,
-            )
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                val idSomLaasesTil = UUID.fromString(call.parameters["behandlingIdLaasesTil"].toString())
+                grunnlagService.laasTilVersjonForBehandling(
+                    skalLaasesId = behandlingId,
+                    idLaasesTil = idSomLaasesTil,
+                )
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/opprett-grunnlag") {
-            val opplysningsbehov = call.receive<Opplysningsbehov>()
-            grunnlagService.opprettGrunnlag(behandlingId, opplysningsbehov)
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                val opplysningsbehov = call.receive<Opplysningsbehov>()
+                grunnlagService.opprettGrunnlag(behandlingId, opplysningsbehov)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("oppdater-grunnlag") {
-            val request = call.receive<OppdaterGrunnlagRequest>()
-            grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
-            call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                val request = call.receive<OppdaterGrunnlagRequest>()
+                grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         get("opplysning/persongalleri-samsvar") {

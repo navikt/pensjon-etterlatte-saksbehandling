@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
@@ -317,10 +318,13 @@ class StatistikkService(
             type = "ETTEROPPGJOER_FORBEHANDLING",
             status = etteroppgjoerRad.hendelse.name,
             resultat =
-                when (etteroppgjoerRad.hendelse) {
-                    EtteroppgjoerForbehandlingHendelser.AVBRUTT -> "AVBRUTT"
-                    else -> etteroppgjoerRad.resultatType?.name ?: sisteResultat?.name
-                },
+                utledEtteroppgjoerForbehandlingResultat(
+                    hendelse = etteroppgjoerRad.hendelse,
+                    resultatType = etteroppgjoerRad.resultatType,
+                    sisteResultat = sisteResultat,
+                    opphoerSkyldesDoedsfallIEtteroppgjoersaar =
+                        statistikkDto.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
+                ),
             resultatBegrunnelse =
                 if (statistikkDto.forbehandling.klageOmgjoering != null) Revurderingaarsak.OMGJOERING_ETTER_KLAGE.name else null,
             behandlingMetode = BehandlingMetode.MANUELL, // hvis vi setter på automatisering her må vi skille her
@@ -818,6 +822,27 @@ class StatistikkService(
         }
     }
 }
+
+internal fun utledEtteroppgjoerForbehandlingResultat(
+    hendelse: EtteroppgjoerForbehandlingHendelser,
+    resultatType: EtteroppgjoerResultatType?,
+    sisteResultat: EtteroppgjoerResultatType?,
+    opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
+): String? =
+    when {
+        hendelse == EtteroppgjoerForbehandlingHendelser.AVBRUTT -> {
+            BehandlingResultat.AVBRUTT.name
+        }
+
+        hendelse == EtteroppgjoerForbehandlingHendelser.FERDIGSTILT &&
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA -> {
+            BehandlingResultat.ETTEROPPGJOER_AVSLUTTET_DOEDSFALL.name
+        }
+
+        else -> {
+            resultatType?.name ?: sisteResultat?.name
+        }
+    }
 
 internal fun hentSakYtelsesgruppe(
     sakType: SakType,

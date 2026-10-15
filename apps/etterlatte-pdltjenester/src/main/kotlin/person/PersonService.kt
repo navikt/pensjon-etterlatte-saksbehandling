@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
@@ -28,6 +29,7 @@ import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.pdl.PdlFoedselsdato
 import no.nav.etterlatte.pdl.PdlFolkeregisterIdentResult
+import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.ForeldreansvarHistorikkMapper
@@ -49,208 +51,165 @@ class PersonService(
     suspend fun hentOpplysningsperson(request: HentPersonRequest): PersonDTO {
         logger.info("Henter opplysninger for person med fnr=${request.foedselsnummer} fra PDL")
 
-        return pdlKlient.hentPerson(request).let {
-            if (it.data?.hentPerson == null) {
-                val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.harAdressebeskyttelse() == true) {
-                    throw pdlForesporselFeiletForAdressebeskyttelse()
-                } else if (it.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
-                } else {
-                    throw PdlForesporselFeilet(
-                        "Kunne ikke hente opplysninger for ${request.foedselsnummer} fra PDL: $pdlFeil",
-                    )
-                }
-            } else {
-                parallelleSannheterService.mapOpplysningsperson(
-                    request = request,
-                    hentPerson = it.data.hentPerson,
-                )
-            }
+        return try {
+            parallelleSannheterService.mapOpplysningsperson(
+                request = request,
+                hentPerson = hentPdlPerson(request),
+            )
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av opplysningsperson", request.foedselsnummer, e)
         }
     }
 
     suspend fun hentDoedshendelseOpplysningsperson(hentPersonRequest: HentPersonRequest): PersonDoedshendelseDto {
         logger.info("Henter dødshendelse-opplysninger for person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")
 
-        return pdlKlient.hentPerson(hentPersonRequest).let {
-            if (it.data?.hentPerson == null) {
-                val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.harAdressebeskyttelse() == true) {
-                    throw pdlForesporselFeiletForAdressebeskyttelse()
-                } else if (it.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke personen ${hentPersonRequest.foedselsnummer}")
-                } else {
-                    throw PdlForesporselFeilet(
-                        "Kunne ikke hente opplysninger for ${hentPersonRequest.foedselsnummer} fra PDL: $pdlFeil",
-                    )
-                }
-            } else {
-                parallelleSannheterService.mapDoedshendelsePerson(
-                    request = hentPersonRequest,
-                    hentPerson = it.data.hentPerson,
-                )
-            }
+        return try {
+            parallelleSannheterService.mapDoedshendelsePerson(
+                request = hentPersonRequest,
+                hentPerson = hentPdlPerson(hentPersonRequest),
+            )
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av dødshendelseopplysninger", hentPersonRequest.foedselsnummer, e)
         }
     }
 
     suspend fun hentPerson(request: HentPersonRequest): Person {
         logger.info("Henter person med fnr=${request.foedselsnummer} fra PDL")
 
-        return pdlKlient.hentPerson(request).let {
-            if (it.data?.hentPerson == null) {
-                val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.harAdressebeskyttelse() == true) {
-                    throw pdlForesporselFeiletForAdressebeskyttelse()
-                } else if (it.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
-                } else {
-                    throw PdlForesporselFeilet(
-                        "Kunne ikke hente person med fnr=${request.foedselsnummer} fra PDL: $pdlFeil",
-                    )
-                }
-            } else {
-                // TODO: bruke mapOpplysningsperson også PersonDTO toPerson?
-                parallelleSannheterService.mapPerson(
-                    oppslagFnr = request.foedselsnummer,
-                    personRolle = request.rolle,
-                    hentPerson = it.data.hentPerson,
-                    saktyper = request.saktyper,
-                )
-            }
+        // TODO: bruke mapOpplysningsperson også PersonDTO toPerson?
+        return try {
+            parallelleSannheterService.mapPerson(
+                oppslagFnr = request.foedselsnummer,
+                personRolle = request.rolle,
+                hentPerson = hentPdlPerson(request),
+                saktyper = request.saktyper,
+            )
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av person", request.foedselsnummer, e)
         }
     }
 
     suspend fun hentFoedselsdato(ident: String): PdlFoedselsdato {
         logger.info("Henter navn, fødselsdato og fødselsnummer for ident=${ident.maskerFnr()} fra PDL")
 
-        return pdlKlient.hentFoedselsdato(ident).let {
-            if (it.data?.hentPerson == null) {
-                val pdlFeil = it.errors?.joinToString()
-
-                if (it.errors?.harAdressebeskyttelse() == true) {
-                    throw pdlForesporselFeiletForAdressebeskyttelse()
-                } else if (it.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke person i PDL")
+        return try {
+            pdlKlient.hentFoedselsdato(ident).let {
+                if (it.data?.hentPerson == null) {
+                    haandterPdlFeil(it.errors, ident, "foedselsdato")
                 } else {
-                    sikkerLogg.warn("Kunne ikke hente person med fnr=$ident fra PDL: $pdlFeil")
-                    throw no.nav.etterlatte.personweb.PdlForesporselFeilet(
-                        "Kunne ikke hente person med ident=${ident.maskerFnr()} se sikkerlogg for pdlfeil",
-                    )
+                    parallelleSannheterService.mapFoedselsdato(it.data.hentPerson)
                 }
-            } else {
-                parallelleSannheterService.mapFoedselsdato(it.data.hentPerson)
             }
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av foedselsdato", PersonIdent(ident), e)
         }
     }
 
     suspend fun hentAdressebeskyttelseGradering(request: HentAdressebeskyttelseRequest): AdressebeskyttelseGradering {
         logger.info("Henter adressebeskyttelse for person med fnr=${request.ident} fra PDL")
 
-        return pdlKlient.hentAdressebeskyttelse(request).let {
-            if (it.data?.hentPerson == null) {
-                val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.harAdressebeskyttelse() == true) {
-                    throw pdlForesporselFeiletForAdressebeskyttelse()
-                } else if (it.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke personen ${request.ident}")
-                } else {
-                    throw PdlForesporselFeilet(
-                        "Kunne ikke hente person med fnr=${request.ident} fra PDL: $pdlFeil",
-                    )
-                }
-            } else {
-                it.data.hentPerson.adressebeskyttelse
-                    .mapNotNull { adr -> adr.gradering }
-                    .map { pdlGradering -> AdressebeskyttelseGradering.valueOf(pdlGradering.name) }
-                    .hentPrioritertGradering()
-            }
-        }
-    }
-
-    suspend fun hentHistorikkForeldreansvar(hentPersonRequest: HentPersonHistorikkForeldreAnsvarRequest): HistorikkForeldreansvar {
-        if (hentPersonRequest.saktype != SakType.BARNEPENSJON) {
-            throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barnepensjonssaker")
-        }
-        if (hentPersonRequest.rolle != PersonRolle.BARN) {
-            throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barn")
-        }
-        val fnr = hentPersonRequest.foedselsnummer
-
-        return pdlKlient
-            .hentPersonHistorikkForeldreansvar(fnr)
-            .let {
+        return try {
+            pdlKlient.hentAdressebeskyttelse(request).let {
                 if (it.data?.hentPerson == null) {
-                    val pdlFeil = it.errors?.asFormatertFeil()
-                    if (it.errors?.harAdressebeskyttelse() == true) {
-                        throw pdlForesporselFeiletForAdressebeskyttelse()
-                    } else if (it.errors?.personIkkeFunnet() == true) {
-                        throw FantIkkePersonException("Fant ikke personen $fnr")
-                    } else {
-                        throw PdlForesporselFeilet(
-                            "Kunne ikke hente person med fnr=$fnr fra PDL: $pdlFeil",
-                        )
-                    }
+                    haandterPdlFeil(
+                        errors = it.errors,
+                        fnr = request.ident.value,
+                        feltnavn = "adressebeskyttelse",
+                    )
                 } else {
-                    ForeldreansvarHistorikkMapper.mapForeldreAnsvar(it.data.hentPerson)
+                    it.data.hentPerson.adressebeskyttelse
+                        .mapNotNull { adr -> adr.gradering }
+                        .map { pdlGradering -> AdressebeskyttelseGradering.valueOf(pdlGradering.name) }
+                        .hentPrioritertGradering()
                 }
             }
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av adressebeskyttelse", request.ident, e)
+        }
     }
+
+    suspend fun hentHistorikkForeldreansvar(hentPersonRequest: HentPersonHistorikkForeldreAnsvarRequest): HistorikkForeldreansvar =
+        try {
+            if (hentPersonRequest.saktype != SakType.BARNEPENSJON) {
+                throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barnepensjonssaker")
+            }
+            if (hentPersonRequest.rolle != PersonRolle.BARN) {
+                throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barn")
+            }
+            val fnr = hentPersonRequest.foedselsnummer
+
+            pdlKlient
+                .hentPersonHistorikkForeldreansvar(fnr)
+                .let {
+                    if (it.data?.hentPerson == null) {
+                        haandterPdlFeil(
+                            errors = it.errors,
+                            fnr = fnr.value,
+                            feltnavn = "historikkForeldreansvar",
+                        )
+                    } else {
+                        ForeldreansvarHistorikkMapper.mapForeldreAnsvar(it.data.hentPerson)
+                    }
+                }
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av historikk i foreldreansvar", hentPersonRequest.foedselsnummer, e)
+        }
 
     suspend fun hentPdlIdentifikator(request: HentPdlIdentRequest): PdlIdentifikator {
         logger.info("Henter pdlidentifikator for ident=${request.ident} fra PDL")
 
-        val identResult: PdlFolkeregisterIdentResult = hentPdlIdentifikatorer(request)
+        return try {
+            val identResult: PdlFolkeregisterIdentResult = hentPdlIdentifikatorer(request)
 
-        try {
-            return identResult.gjeldendeFolkeregisterIdent()
-                ?: identResult.gjeldendeNpidIdent()
-                ?: throw FantIkkePersonException("Fant ikke gjeldende ident for personen ${request.ident}")
-        } catch (e: ForespoerselException) {
-            if (isDev() && e is InvalidFoedselsnummerException) {
-                logger.error("Ident fra PDL for ${request.ident} har ugyldig format. Se sikkerlogg", e)
-                sikkerLogg.error("Ident fra PDL for ${request.ident.value} har ugyldig format", e)
-                throw FantIkkePersonException("Ident fra PDL for ${request.ident} har ugyldig format", e)
+            try {
+                identResult.gjeldendeFolkeregisterIdent()
+                    ?: identResult.gjeldendeNpidIdent()
+                    ?: throw FantIkkePersonException("Fant ikke gjeldende ident for personen ${request.ident}")
+            } catch (e: ForespoerselException) {
+                if (isDev() && e is InvalidFoedselsnummerException) {
+                    throw FantIkkePersonException("Ident fra PDL for ${request.ident} har ugyldig format", e)
+                }
+                throw e
+            } catch (e: Exception) {
+                throw e as? PdlForesporselFeilet
+                    ?: PdlForesporselFeilet(
+                        "Fant ingen pdlidentifikator for ${request.ident} fra PDL",
+                    )
             }
-            throw e
         } catch (e: Exception) {
-            sikkerLogg.error(
-                """
-                Fant ingen gyldig pdlidentifikator for ${request.ident.value} fra PDL. 
-                Identer fra PDL: ${identResult.identer}
-                """.trimIndent(),
-                e,
-            )
-            throw e as? PdlForesporselFeilet
-                ?: PdlForesporselFeilet(
-                    "Fant ingen pdlidentifikator for ${request.ident} fra PDL",
-                )
+            sikkerloggOgKast("Henting av PDL-identifikator", request.ident, e)
         }
     }
 
     suspend fun hentPdlFolkeregisterIdenter(request: HentPdlIdentRequest): PdlFolkeregisterIdentListe {
         logger.info("Henter alle folkeregisteridenter for ident=${request.ident} fra PDL, inkl. historiske")
 
-        val identer =
-            hentPdlIdentifikatorer(request, listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT))
-                .identer
+        return try {
+            val identer =
+                hentPdlIdentifikatorer(request, listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT))
+                    .identer
 
-        try {
-            return identer
-                .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
-                .map {
-                    PdlIdentifikator.FolkeregisterIdent(
-                        Folkeregisteridentifikator.of(it.ident),
-                        it.historisk,
-                    )
-                }.let(::PdlFolkeregisterIdentListe)
-        } catch (e: InvalidFoedselsnummerException) {
-            if (isDev()) {
-                logger.error("Ident fra PDL for ${request.ident} har ugyldig format", e)
-                sikkerLogg.error("Ident fra PDL for ${request.ident.value} har ugyldig format", e)
-                return PdlFolkeregisterIdentListe(emptyList())
+            try {
+                identer
+                    .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
+                    .map {
+                        PdlIdentifikator.FolkeregisterIdent(
+                            Folkeregisteridentifikator.of(it.ident),
+                            it.historisk,
+                        )
+                    }.let(::PdlFolkeregisterIdentListe)
+            } catch (e: InvalidFoedselsnummerException) {
+                if (isDev()) {
+                    logger.error("Ident fra PDL for ${request.ident} har ugyldig format", e)
+                    sikkerLogg.error("Ident fra PDL for ${request.ident.value} har ugyldig format", e)
+                    PdlFolkeregisterIdentListe(emptyList())
+                } else {
+                    throw e
+                }
             }
-            throw e
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av folkeregisteridenter", request.ident, e)
         }
     }
 
@@ -282,24 +241,26 @@ class PersonService(
         }
     }
 
-    suspend fun hentPersongalleri(hentPersongalleriRequest: HentPersongalleriRequest): Persongalleri {
-        val persongalleri =
+    suspend fun hentPersongalleri(hentPersongalleriRequest: HentPersongalleriRequest): Persongalleri =
+        try {
             when (hentPersongalleriRequest.saktype) {
-                SakType.BARNEPENSJON ->
+                SakType.BARNEPENSJON -> {
                     hentPersongalleriForBarnepensjon(
                         hentPersongalleriRequest.mottakerAvYtelsen,
                         hentPersongalleriRequest.innsender,
                     )
+                }
 
-                SakType.OMSTILLINGSSTOENAD ->
+                SakType.OMSTILLINGSSTOENAD -> {
                     hentPersongalleriForOmstillingsstoenad(
                         hentPersongalleriRequest.mottakerAvYtelsen,
                         hentPersongalleriRequest.innsender,
                     )
+                }
             }
-
-        return persongalleri
-    }
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av persongalleri", hentPersongalleriRequest.mottakerAvYtelsen, e)
+        }
 
     private suspend fun hentPersongalleriForBarnepensjon(
         mottakerAvYtelsen: Folkeregisteridentifikator,
@@ -408,51 +369,68 @@ class PersonService(
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): GeografiskTilknytning {
         logger.info("Henter geografisk tilknytning med fnr=${request.foedselsnummer} fra PDL")
 
-        return pdlKlient.hentGeografiskTilknytning(request).let {
-            val geografiskTilknytning = it.data?.hentGeografiskTilknytning
+        return try {
+            pdlKlient.hentGeografiskTilknytning(request).let {
+                val geografiskTilknytning = it.data?.hentGeografiskTilknytning
 
-            if (geografiskTilknytning == null) {
-                if (it.errors == null) {
-                    logger.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer})")
-                    sikkerLogg.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer.value})")
+                if (geografiskTilknytning == null) {
+                    if (it.errors == null) {
+                        logger.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer})")
+                        sikkerLogg.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer.value})")
 
-                    GeografiskTilknytning(ukjent = true)
-                } else if (it.errors?.harAdressebeskyttelse() == true) {
-                    throw pdlForesporselFeiletForAdressebeskyttelse()
-                } else if (it.errors.personIkkeFunnet()) {
-                    throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
+                        GeografiskTilknytning(ukjent = true)
+                    } else if (it.errors?.harAdressebeskyttelse() == true) {
+                        throw pdlForesporselFeiletForAdressebeskyttelse()
+                    } else if (it.errors.personIkkeFunnet()) {
+                        throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
+                    } else {
+                        val pdlFeil = it.errors.asFormatertFeil()
+                        throw PdlForesporselFeilet(
+                            "Kunne ikke hente fnr=${request.foedselsnummer} fra PDL: $pdlFeil",
+                        )
+                    }
                 } else {
-                    val pdlFeil = it.errors.asFormatertFeil()
-                    throw PdlForesporselFeilet(
-                        "Kunne ikke hente fnr=${request.foedselsnummer} fra PDL: $pdlFeil",
-                    )
+                    logger.info("Fant geografisk tilknytning: $geografiskTilknytning")
+                    GeografiskTilknytningMapper.mapGeografiskTilknytning(geografiskTilknytning)
                 }
-            } else {
-                logger.info("Fant geografisk tilknytning: $geografiskTilknytning")
-                GeografiskTilknytningMapper.mapGeografiskTilknytning(geografiskTilknytning)
             }
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av geografisk tilknytning", request.foedselsnummer, e)
         }
     }
 
     suspend fun hentAktoerId(request: HentPdlIdentRequest): PdlIdentifikator.AktoerId =
-        pdlKlient.hentAktoerId(request).let { res ->
-            if (res.data?.hentIdenter?.identer == null) {
-                val pdlFeil = res.errors?.asFormatertFeil()
-                if (res.errors?.harAdressebeskyttelse() == true) {
-                    throw pdlForesporselFeiletForAdressebeskyttelse()
-                } else if (res.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke personen ${request.ident}")
-                } else {
-                    throw PdlForesporselFeilet(
-                        "Kunne ikke hente aktørid for ${request.ident} fra PDL: $pdlFeil",
+        try {
+            pdlKlient.hentAktoerId(request).let { res ->
+                if (res.data?.hentIdenter?.identer == null) {
+                    haandterPdlFeil(
+                        errors = res.errors,
+                        fnr = request.ident.value,
+                        feltnavn = "aktoerId",
                     )
+                } else {
+                    res.data.hentIdenter.identer
+                        .first { it.gruppe == PDLIdentGruppeTyper.AKTORID.navn && !it.historisk }
+                        .let { PdlIdentifikator.AktoerId(it.ident) }
                 }
-            } else {
-                res.data.hentIdenter.identer
-                    .first { it.gruppe == PDLIdentGruppeTyper.AKTORID.navn && !it.historisk }
-                    .let { PdlIdentifikator.AktoerId(it.ident) }
             }
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av aktør-ID", request.ident, e)
         }
+
+    private fun haandterPdlFeil(
+        errors: List<PdlResponseError>?,
+        fnr: String,
+        feltnavn: String,
+    ): Nothing {
+        if (errors?.harAdressebeskyttelse() == true) {
+            pdlForesporselFeiletForAdressebeskyttelse()
+        } else if (errors?.personIkkeFunnet() == true) {
+            throw FantIkkePersonException("Fant ikke personen med fnr=${fnr.maskerFnr()}")
+        } else {
+            throw PdlForesporselFeilet("Kunne ikke hente $feltnavn med fnr=${fnr.maskerFnr()} fra PDL: ${errors?.asFormatertFeil()}")
+        }
+    }
 
     fun List<PdlResponseError>.asFormatertFeil() = this.joinToString(", ")
 
@@ -470,8 +448,18 @@ class PersonService(
                     } == true
         }
 
-    private fun pdlForesporselFeiletForAdressebeskyttelse(): Throwable =
+    private fun pdlForesporselFeiletForAdressebeskyttelse(): Nothing =
         throw no.nav.etterlatte.personweb.PdlForesporselFeilet(
             "Denne personen har adressebeskyttelse. Behandlingen skal derfor sendes til enhet Vikafossen som vil behandle saken videre.",
         )
+
+    private suspend fun hentPdlPerson(request: HentPersonRequest): PdlHentPerson {
+        val response = pdlKlient.hentPerson(request)
+        return response.data?.hentPerson
+            ?: haandterPdlFeil(
+                errors = response.errors,
+                fnr = request.foedselsnummer.value,
+                feltnavn = "person",
+            )
+    }
 }

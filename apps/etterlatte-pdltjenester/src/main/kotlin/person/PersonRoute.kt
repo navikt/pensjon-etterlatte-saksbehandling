@@ -25,7 +25,7 @@ fun Route.personRoute(service: PersonService) {
             val hentPersonRequest = call.receive<HentPersonRequest>()
             logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
 
-            service.hentPerson(hentPersonRequest).let { call.respond(it) }
+            call.respond(service.hentPerson(hentPersonRequest))
         }
 
         route("/v2") {
@@ -33,7 +33,7 @@ fun Route.personRoute(service: PersonService) {
                 val hentPersonRequest = call.receive<HentPersonRequest>()
                 logger.info("Henter personopplysning med fnr=${hentPersonRequest.foedselsnummer}")
 
-                service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
+                call.respond(service.hentOpplysningsperson(hentPersonRequest))
             }
 
             post("doedshendelse") {
@@ -59,8 +59,7 @@ fun Route.personRoute(service: PersonService) {
                         "til ${hentPersongalleriRequest.mottakerAvYtelsen}",
                 )
 
-                val persongalleri = service.hentPersongalleri(hentPersongalleriRequest)
-                call.respond(persongalleri)
+                call.respond(service.hentPersongalleri(hentPersongalleriRequest))
             }
         }
     }
@@ -70,7 +69,9 @@ fun Route.personRoute(service: PersonService) {
             val hentPdlIdentRequest = call.receive<HentPdlIdentRequest>()
             logger.info("Henter identer for ident=${hentPdlIdentRequest.ident}")
 
-            service.hentPdlIdentifikator(hentPdlIdentRequest).let { call.respond(it) }
+            val pdlIdentifikator = service.hentPdlIdentifikator(hentPdlIdentRequest)
+
+            call.respond(pdlIdentifikator)
         }
     }
 
@@ -101,9 +102,7 @@ fun Route.personRoute(service: PersonService) {
         post {
             val ident = call.receive<HentPdlIdentRequest>()
 
-            val aktoerId = service.hentAktoerId(ident)
-
-            call.respond(aktoerId)
+            call.respond(service.hentAktoerId(ident))
         }
     }
 
@@ -112,7 +111,7 @@ fun Route.personRoute(service: PersonService) {
             val hentGeografiskTilknytningRequest = call.receive<HentGeografiskTilknytningRequest>()
             logger.info("Henter geografisk tilknytning med fnr=${hentGeografiskTilknytningRequest.foedselsnummer}")
 
-            service.hentGeografiskTilknytning(hentGeografiskTilknytningRequest).let { call.respond(it) }
+            call.respond(service.hentGeografiskTilknytning(hentGeografiskTilknytningRequest))
         }
     }
 
@@ -120,7 +119,8 @@ fun Route.personRoute(service: PersonService) {
         post {
             val identRequest = call.receive<HentPersonHistorikkForeldreAnsvarRequest>()
             logger.info("Henter historikk for foreldreansvar for person med fnr=${identRequest.foedselsnummer}")
-            service.hentHistorikkForeldreansvar(identRequest).let { call.respond(it) }
+
+            call.respond(service.hentHistorikkForeldreansvar(identRequest))
         }
     }
 }

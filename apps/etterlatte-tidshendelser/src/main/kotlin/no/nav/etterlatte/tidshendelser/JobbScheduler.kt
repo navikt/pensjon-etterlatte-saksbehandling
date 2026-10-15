@@ -4,7 +4,6 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
-import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import org.slf4j.LoggerFactory
@@ -54,9 +53,6 @@ class JobbScheduler(
         PeriodiskeMaanedligeJobber.entries
             // filtrere bort jobber som allerede er planlagt for neste måned
             .filter { periodiskJobb ->
-                periodiskJobb.jobbType !in listOf(JobbType.OMS_DOED_3AAR, JobbType.OMS_DOED_5AAR) ||
-                    isDev() // TODO: Fjern denne når vi skal i prod
-            }.filter { periodiskJobb ->
                 planlagteJobberNesteMnd.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
             }
             // opprett jobb for neste måned

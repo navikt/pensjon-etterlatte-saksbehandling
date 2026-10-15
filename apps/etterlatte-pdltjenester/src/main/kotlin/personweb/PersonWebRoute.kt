@@ -1,6 +1,5 @@
 package no.nav.etterlatte.personweb
 
-import io.ktor.server.application.call
 import io.ktor.server.request.path
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond

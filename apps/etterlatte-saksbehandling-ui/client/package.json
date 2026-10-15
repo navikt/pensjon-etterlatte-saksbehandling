@@ -38,7 +38,6 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^7.0.1",
-    "@testing-library/react": "^16.3.2",
     "@types/is-hotkey": "^0.1.10",
     "@types/lodash": "^4.17.25",
     "@types/node": "^26.2.0",

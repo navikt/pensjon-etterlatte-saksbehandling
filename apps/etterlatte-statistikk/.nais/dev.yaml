@@ -19,6 +19,15 @@ spec:
         diskSize: 15
         highAvailability: false
         pointInTimeRecovery: false
+        flags:
+          - name: "cloudsql.enable_pgaudit"
+            value: "on"
+          - name: "pgaudit.log"
+            value: "write,ddl,role"
+          - name: "pgaudit.log_parameter"
+            value: "on"
+          - name: "pgaudit.log_relation"
+            value: "on"
   liveness:
     initialDelay: 5
     path: /health/isalive
@@ -46,8 +55,8 @@ spec:
     limits:
       memory: 768Mi
   replicas:
-    max: 0
-    min: 0
+    max: 1
+    min: 1
   azure:
     application:
       enabled: true

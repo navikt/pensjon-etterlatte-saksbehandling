@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 import { PersonOversiktFane } from '~components/person/Person'
 import { lagrePersonLocationState } from '~components/person/lenker/usePersonLocationState'
 import { Link, LinkProps } from '@navikt/ds-react'

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { BodyShort, Search as SearchField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { InformationSquareIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { fnrErGyldig } from '~utils/fnr'

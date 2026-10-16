@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useApiCall } from '~shared/hooks/useApiCall'

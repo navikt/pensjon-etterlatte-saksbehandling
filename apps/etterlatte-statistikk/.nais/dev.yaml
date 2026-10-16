@@ -11,14 +11,24 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14
-        name: etterlatte-statistikk
+        name: etterlatte-statistikk-backup
+        cascadingDelete: false
         tier: db-g1-small
         databases:
-          - name: statistikk
+          - name: etterlatte-statistikk-backup
             envVarPrefix: DB
         diskSize: 15
         highAvailability: false
         pointInTimeRecovery: false
+        flags:
+          - name: "cloudsql.enable_pgaudit"
+            value: "on"
+          - name: "pgaudit.log"
+            value: "write,ddl,role"
+          - name: "pgaudit.log_parameter"
+            value: "on"
+          - name: "pgaudit.log_relation"
+            value: "on"
   liveness:
     initialDelay: 5
     path: /health/isalive

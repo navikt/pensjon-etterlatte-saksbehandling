@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: etterlatte-statistikk-backup
+  name: etterlatte-statistikk
   namespace: etterlatte
   labels:
     team: etterlatte
@@ -15,7 +15,7 @@ spec:
         cascadingDelete: false
         tier: db-g1-small
         databases:
-          - name: statistikk
+          - name: etterlatte-statistikk-backup
             envVarPrefix: DB
         diskSize: 15
         highAvailability: false

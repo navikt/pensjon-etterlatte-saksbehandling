@@ -10,8 +10,9 @@ spec:
   port: 8080
   gcp:
     sqlInstances:
-      - type: POSTGRES_18
-        name: etterlatte-statistikk
+      - type: POSTGRES_14
+        name: etterlatte-statistikk-backup
+        cascadingDelete: false
         tier: db-g1-small
         databases:
           - name: statistikk
@@ -55,8 +56,8 @@ spec:
     limits:
       memory: 768Mi
   replicas:
-    max: 1
-    min: 1
+    max: 0
+    min: 0
   azure:
     application:
       enabled: true

@@ -62,6 +62,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
@@ -78,6 +79,7 @@ import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -1544,6 +1546,156 @@ internal class VedtakBehandlingServiceTest(
             innhold.utbetalingsperioder[1].beloep shouldBe null
             innhold.utbetalingsperioder[1].periode.fom shouldBe opphoer
             innhold.utbetalingsperioder[1].periode.tom shouldBe null
+        }
+    }
+
+    @Nested
+    inner class UtbetalingsperioderMedHull {
+        private val foersteFom = YearMonth.of(2024, 1)
+        private val foersteTom = YearMonth.of(2024, 6)
+        private val andreFom = YearMonth.of(2024, 10)
+
+        private fun mockSak(saktype: SakType) {
+            coEvery { sakLesDao.hentSak(any()) } returns
+                Sak(
+                    ident = SAKSBEHANDLER_1,
+                    sakType = saktype,
+                    id = sakId1,
+                    enhet = ENHET_1,
+                    adressebeskyttelse = null,
+                    erSkjermet = null,
+                )
+        }
+
+        private fun opprettVedtak(
+            saktype: SakType,
+            revurderingAarsak: Revurderingaarsak? = null,
+            opphoerFom: YearMonth? = null,
+            beregningsperioder: List<Beregningsperiode>,
+            avkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
+        ): VedtakInnhold.Behandling {
+            val behandlingId = randomUUID()
+            coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
+                mockBehandling(
+                    virk = beregningsperioder.first().datoFOM,
+                    behandlingId = behandlingId,
+                    saktype = saktype,
+                    revurderingAarsak = revurderingAarsak,
+                    opphoerFom = opphoerFom,
+                )
+            coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+            coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns mockVilkaarsvurdering()
+            coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
+                mockBeregning(
+                    virkningstidspunkt = beregningsperioder.first().datoFOM,
+                    behandlingId = behandlingId,
+                    beregningstype = if (saktype == SakType.BARNEPENSJON) Beregningstype.BP else Beregningstype.OMS,
+                    beregningsperioder = beregningsperioder,
+                )
+            coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns
+                mockAvkorting(avkortetYtelse = avkortetYtelse)
+            mockSak(saktype)
+
+            return runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+                .innhold as VedtakInnhold.Behandling
+        }
+
+        private fun VedtakInnhold.Behandling.skalHaGyldigeOgIkkeOverlappendePerioder() {
+            utbetalingsperioder.forEach { p ->
+                p.periode.tom?.let { tom -> (tom >= p.periode.fom) shouldBe true }
+            }
+            utbetalingsperioder.sortedBy { it.periode.fom }.zipWithNext().forEach { (a, b) ->
+                a.periode.tom shouldNotBe null
+                (b.periode.fom > a.periode.tom!!) shouldBe true
+            }
+        }
+
+        @Test
+        fun `BP med hull gir utbetalingsperioder som stopper i hullet`() {
+            val innhold =
+                opprettVedtak(
+                    saktype = SakType.BARNEPENSJON,
+                    beregningsperioder =
+                        listOf(
+                            mockBeregningsperiode(foersteFom, foersteTom),
+                            mockBeregningsperiode(andreFom, null),
+                        ),
+                )
+
+            innhold.skalHaGyldigeOgIkkeOverlappendePerioder()
+            innhold.utbetalingsperioder.map { Triple(it.type, it.periode.fom, it.periode.tom) } shouldBe
+                listOf(
+                    Triple(UtbetalingsperiodeType.UTBETALING, foersteFom, foersteTom),
+                    Triple(UtbetalingsperiodeType.UTBETALING, andreFom, null),
+                )
+        }
+
+        @Test
+        fun `BP med hull og opphoer etter hullet lukker siste periode og legger til opphoer`() {
+            val opphoer = YearMonth.of(2025, 1)
+            val innhold =
+                opprettVedtak(
+                    saktype = SakType.BARNEPENSJON,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                    opphoerFom = opphoer,
+                    beregningsperioder =
+                        listOf(
+                            mockBeregningsperiode(foersteFom, foersteTom),
+                            mockBeregningsperiode(andreFom, null),
+                        ),
+                )
+
+            innhold.skalHaGyldigeOgIkkeOverlappendePerioder()
+            innhold.utbetalingsperioder.map { Triple(it.type, it.periode.fom, it.periode.tom) } shouldBe
+                listOf(
+                    Triple(UtbetalingsperiodeType.UTBETALING, foersteFom, foersteTom),
+                    Triple(UtbetalingsperiodeType.UTBETALING, andreFom, opphoer.minusMonths(1)),
+                    Triple(UtbetalingsperiodeType.OPPHOER, opphoer, null),
+                )
+        }
+
+        @Test
+        fun `OMS med hull gir utbetalingsperioder som stopper i hullet`() {
+            val innhold =
+                opprettVedtak(
+                    saktype = SakType.OMSTILLINGSSTOENAD,
+                    beregningsperioder =
+                        listOf(
+                            mockBeregningsperiode(foersteFom, foersteTom),
+                            mockBeregningsperiode(andreFom, null),
+                        ),
+                    avkortetYtelse =
+                        listOf(
+                            mockAvkortetYtelse(foersteFom, foersteTom),
+                            mockAvkortetYtelse(andreFom, null),
+                        ),
+                )
+
+            innhold.skalHaGyldigeOgIkkeOverlappendePerioder()
+            innhold.utbetalingsperioder.map { Triple(it.type, it.periode.fom, it.periode.tom) } shouldBe
+                listOf(
+                    Triple(UtbetalingsperiodeType.UTBETALING, foersteFom, foersteTom),
+                    Triple(UtbetalingsperiodeType.UTBETALING, andreFom, null),
+                )
+        }
+
+        @Test
+        fun `OMS skal feile hvis avkortet ytelse starter i hullet i beregningen`() {
+            assertThrows<InternfeilException> {
+                opprettVedtak(
+                    saktype = SakType.OMSTILLINGSSTOENAD,
+                    beregningsperioder =
+                        listOf(
+                            mockBeregningsperiode(foersteFom, foersteTom),
+                            mockBeregningsperiode(andreFom, null),
+                        ),
+                    avkortetYtelse =
+                        listOf(
+                            mockAvkortetYtelse(foersteFom, foersteTom),
+                            mockAvkortetYtelse(foersteTom.plusMonths(1), null),
+                        ),
+                )
+            }
         }
     }
 

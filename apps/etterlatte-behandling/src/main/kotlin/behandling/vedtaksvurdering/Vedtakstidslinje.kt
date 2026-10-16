@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
@@ -81,83 +82,44 @@ class Vedtakstidslinje(
         }
         val foersteVirk = attesterteBehandlingVedtak.minOf { it.virkningstidspunkt }
         val sammenstilt = sammenstill(foersteVirk)
-        if (sammenstilt.size == 1) {
-            // Håndter special case
-            val vedtak = sammenstilt.single()
-            if (vedtak.virkningstidspunkt == vedtak.opphoerFraOgMed) {
-                // Vi har ingen innvilget periode, hvis det eneste vedtaket vi har i tidslinjen er opphør fra start
-                return emptyList()
-            }
-            return listOf(
-                InnvilgetPeriode(Periode(vedtak.virkningstidspunkt, vedtak.opphoerFraOgMed?.minusMonths(1)), vedtak = listOf(vedtak)),
-            )
-        }
+        val perioder =
+            sammenstilt
+                .flatMapIndexed { index, vedtak ->
+                    val sisteGjeldendeMaaned =
+                        listOfNotNull(
+                            sammenstilt.getOrNull(index + 1)?.virkningstidspunkt?.minusMonths(1),
+                            vedtak.opphoer()?.minusMonths(1),
+                        ).minOrNull()
+                    (vedtak.innhold as VedtakInnhold.Behandling)
+                        .utbetalingsperioder
+                        // Også 0 kr etter avkorting eller sanksjon er en innvilget periode.
+                        .filter { it.type == UtbetalingsperiodeType.UTBETALING }
+                        .mapNotNull { utbetaling ->
+                            val fom = maxOf(vedtak.virkningstidspunkt, utbetaling.periode.fom)
+                            val tom = listOfNotNull(sisteGjeldendeMaaned, utbetaling.periode.tom).minOrNull()
+                            if (tom != null && tom < fom) {
+                                null
+                            } else {
+                                InnvilgetPeriode(Periode(fom, tom), listOf(vedtak))
+                            }
+                        }
+                }.sortedBy { it.periode.fom }
 
-        // Enhver overgang mellom vedtak betyr at vi kan potensielt hoppe ut av en innvilget periode
         val innvilgedePerioder = mutableListOf<InnvilgetPeriode>()
-        var startPaaEksisterendePeriode: Vedtak? = null
-        val vedtakMedIPerioden = mutableListOf<Vedtak>()
-
-        val naavaerendeOgNesteVedtakListe = sammenstilt.zipWithNext()
-        naavaerendeOgNesteVedtakListe.forEach { (naavaerendeVedtak, nesteVedtak) ->
-            // Hvis vi ikke har en åpen periode, start med nåværende vedtak
-            if (startPaaEksisterendePeriode == null) {
-                startPaaEksisterendePeriode = naavaerendeVedtak
-            }
-
-            // Det kan være en periode uten ytelse mellom nåværende vedtak sin periode, og neste vedtak
-            // Dette skjer når: nåværende vedtak har et opphør / er et opphør og neste vedtak har virk strengt etter opphør fom
-            val naavaerendeVedtakOpphoererDato = naavaerendeVedtak.opphoer()
-            if (naavaerendeVedtakOpphoererDato != null && naavaerendeVedtakOpphoererDato < nesteVedtak.virkningstidspunkt) {
-                // Legg kun til denne perioden hvis den er reell, dvs. perioden ikke har et opphør fra starten
-                if (startPaaEksisterendePeriode.virkningstidspunkt < naavaerendeVedtakOpphoererDato) {
-                    innvilgedePerioder.add(
-                        InnvilgetPeriode(
-                            Periode(
-                                startPaaEksisterendePeriode.virkningstidspunkt,
-                                naavaerendeVedtakOpphoererDato.minusMonths(1),
-                            ),
-                            vedtakMedIPerioden + naavaerendeVedtak,
-                        ),
+        perioder.forEach { periode ->
+            val forrige = innvilgedePerioder.lastOrNull()
+            val forrigeTom = forrige?.periode?.tom
+            if (forrige != null && (forrigeTom == null || periode.periode.fom <= forrigeTom.plusMonths(1))) {
+                val tom = periode.periode.tom
+                innvilgedePerioder[innvilgedePerioder.lastIndex] =
+                    InnvilgetPeriode(
+                        Periode(forrige.periode.fom, if (forrigeTom == null || tom == null) null else maxOf(forrigeTom, tom)),
+                        (forrige.vedtak + periode.vedtak).distinctBy { it.id },
                     )
-                }
-                startPaaEksisterendePeriode = null
-                vedtakMedIPerioden.clear()
             } else {
-                vedtakMedIPerioden.add(naavaerendeVedtak)
+                innvilgedePerioder.add(periode)
             }
         }
-        val opphoerSisteVedtak = sammenstilt.last().opphoer()
-
-        // Håndter siste vedtak - dette er enten en fortsettelse på perioden til forrige vedtak eller en egen periode
-
-        when (val eksisterendePeriode = startPaaEksisterendePeriode) {
-            // vi har ikke en eksisterende periode
-            // Legg kun til perioden hvis den reell, dvs. at vi ikke har et opphør eller opphøret skjer _etter_ første virk
-            null -> {
-                if (opphoerSisteVedtak == null || sammenstilt.last().virkningstidspunkt < opphoerSisteVedtak) {
-                    innvilgedePerioder.add(
-                        InnvilgetPeriode(
-                            Periode(sammenstilt.last().virkningstidspunkt, opphoerSisteVedtak?.minusMonths(1)),
-                            vedtak = listOf(sammenstilt.last()),
-                        ),
-                    )
-                }
-            }
-
-            // Legg kun til perioden hvis den reell, dvs. at vi ikke har et opphør eller opphøret skjer _etter_ første virk
-            else -> {
-                if (opphoerSisteVedtak == null || eksisterendePeriode.virkningstidspunkt < opphoerSisteVedtak) {
-                    innvilgedePerioder.add(
-                        InnvilgetPeriode(
-                            Periode(eksisterendePeriode.virkningstidspunkt, opphoerSisteVedtak?.minusMonths(1)),
-                            vedtak = vedtakMedIPerioden + sammenstilt.last(),
-                        ),
-                    )
-                }
-            }
-        }
-
         return innvilgedePerioder
     }
 

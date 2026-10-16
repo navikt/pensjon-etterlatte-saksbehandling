@@ -240,6 +240,26 @@ object AvkortingRegelkjoring {
             throw InternfeilException("Skal ikke regne med sanksjoner i avkorting av forventet inntekt")
         }
 
+        return periode.utenHullIYtelse(ytelseFoerAvkorting).flatMap { sammenhengendePeriode ->
+            beregnAvkortetYtelseForSammenhengendePeriode(
+                periode = sammenhengendePeriode,
+                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                avkortingsperioder = avkortingsperioder,
+                type = type,
+                sanksjoner = sanksjoner,
+                restanse = restanse,
+            )
+        }
+    }
+
+    private fun beregnAvkortetYtelseForSammenhengendePeriode(
+        periode: Periode,
+        ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
+        avkortingsperioder: List<Avkortingsperiode>,
+        type: AvkortetYtelseType,
+        sanksjoner: List<Sanksjon>,
+        restanse: Restanse?,
+    ): List<AvkortetYtelse> {
         val sanksjonsperioder =
             try {
                 periodiserteSanksjoner(sanksjoner)
@@ -403,6 +423,7 @@ object AvkortingRegelkjoring {
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
         sanksjoner: List<Sanksjon>,
         brukNyeReglerAvkorting: Boolean,
+        hullIYtelse: List<Periode> = emptyList(),
     ): Restanse {
         val oppstartNyInntekt = nyInntektsavkorting.grunnlag.periode.fom
         val maanederMedSanksjonIAar =
@@ -432,7 +453,7 @@ object AvkortingRegelkjoring {
             RestanseGrunnlag(
                 tidligereYtelseEtterAvkorting =
                     FaktumNode(
-                        verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(fraOgMed, oppstartNyInntekt),
+                        verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(fraOgMed, oppstartNyInntekt, hullIYtelse),
                         kilde = tidligereYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
                         beskrivelse = "Ytelse etter avkorting for tidligere oppgitt forventet årsinntekt samme år",
                     ),
@@ -442,6 +463,7 @@ object AvkortingRegelkjoring {
                             nyInntektsavkorting.avkortetYtelseForventetInntekt.spreYtelsePerMaaned(
                                 fraOgMed,
                                 oppstartNyInntekt,
+                                hullIYtelse,
                             ),
                         kilde = nyInntektsavkorting.grunnlag.id,
                         beskrivelse = "Ytelse etter avkorting med ny forventet årsinntekt",
@@ -503,21 +525,34 @@ object AvkortingRegelkjoring {
     private fun List<AvkortetYtelse>.spreYtelsePerMaaned(
         fraOgMed: YearMonth,
         til: YearMonth,
+        hullIYtelse: List<Periode>,
     ): List<Int> {
         val perMaaned = mutableListOf<Int>()
         if (fraOgMed == til) return perMaaned
 
         for (maanednr in fraOgMed.monthValue..til.minusMonths(1).monthValue) {
             val maaned = YearMonth.of(til.year, maanednr)
-            perMaaned.add(avkortetYtelseIMaaned(maaned).ytelseEtterAvkorting)
+            perMaaned.add(avkortetYtelseIMaaned(maaned, hullIYtelse))
         }
         return perMaaned
     }
 
-    private fun List<AvkortetYtelse>.avkortetYtelseIMaaned(maaned: YearMonth) =
-        this.find {
-            maaned >= it.periode.fom && (it.periode.tom == null || maaned <= it.periode.tom)
-        } ?: throw InternfeilException("Maaned finnes ikke i avkortet ytelse sin periode")
+    private fun List<AvkortetYtelse>.avkortetYtelseIMaaned(
+        maaned: YearMonth,
+        hullIYtelse: List<Periode>,
+    ): Int {
+        val funnet =
+            this.find {
+                maaned >= it.periode.fom && (it.periode.tom == null || maaned <= it.periode.tom)
+            }
+        if (funnet != null) {
+            return funnet.ytelseEtterAvkorting
+        }
+        if (hullIYtelse.any { maaned >= it.fom && maaned <= it.tom!! }) {
+            return 0
+        }
+        throw InternfeilException("Maaned finnes ikke i avkortet ytelse sin periode")
+    }
 }
 
 fun Periode.tilRegelPeriode(): RegelPeriode =
@@ -525,3 +560,54 @@ fun Periode.tilRegelPeriode(): RegelPeriode =
         fom.atDay(1),
         tom?.atEndOfMonth(),
     )
+
+fun finnHullIYtelse(ytelseFoerAvkorting: List<YtelseFoerAvkorting>): List<Periode> {
+    val sammenhengende = mutableListOf<Periode>()
+    ytelseFoerAvkorting.map { it.periode }.sortedBy { it.fom }.forEach { periode ->
+        val forrige = sammenhengende.lastOrNull()
+        val forrigeTom = forrige?.tom
+        if (forrige != null && (forrigeTom == null || periode.fom <= forrigeTom.plusMonths(1))) {
+            val periodeTom = periode.tom
+            val tom = if (forrigeTom == null || periodeTom == null) null else maxOf(forrigeTom, periodeTom)
+            sammenhengende[sammenhengende.lastIndex] = forrige.copy(tom = tom)
+        } else {
+            sammenhengende.add(periode)
+        }
+    }
+    return sammenhengende.zipWithNext { foer, etter ->
+        Periode(fom = foer.tom!!.plusMonths(1), tom = etter.fom.minusMonths(1))
+    }
+}
+
+fun Periode.utenHullIYtelse(ytelseFoerAvkorting: List<YtelseFoerAvkorting>): List<Periode> {
+    val sisteTom =
+        if (ytelseFoerAvkorting.isEmpty() || ytelseFoerAvkorting.any { it.periode.tom == null }) {
+            null
+        } else {
+            ytelseFoerAvkorting.maxOf { it.periode.tom!! }
+        }
+    val etterSisteYtelse =
+        sisteTom?.let { tom ->
+            val periodeTom = this.tom
+            if (periodeTom == null ||
+                periodeTom > tom
+            ) {
+                Periode(fom = tom.plusMonths(1), tom = periodeTom ?: YearMonth.of(9999, 12))
+            } else {
+                null
+            }
+        }
+    return (finnHullIYtelse(ytelseFoerAvkorting) + listOfNotNull(etterSisteYtelse)).fold(listOf(this)) { perioder, hull ->
+        perioder.flatMap { it.utenom(hull) }
+    }
+}
+
+private fun Periode.utenom(hull: Periode): List<Periode> {
+    val hullTom = requireNotNull(hull.tom)
+    val tom = this.tom
+    val overlapper = fom <= hullTom && (tom == null || tom >= hull.fom)
+    if (!overlapper) return listOf(this)
+    val foerHull = if (fom < hull.fom) Periode(fom = fom, tom = hull.fom.minusMonths(1)) else null
+    val etterHull = if (tom == null || tom > hullTom) Periode(fom = hullTom.plusMonths(1), tom = tom) else null
+    return listOfNotNull(foerHull, etterHull)
+}

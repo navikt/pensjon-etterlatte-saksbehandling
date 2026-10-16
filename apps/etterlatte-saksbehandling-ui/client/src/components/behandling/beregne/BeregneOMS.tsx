@@ -17,13 +17,15 @@ import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { handlinger } from '~components/behandling/handlinger/typer'
 
-import { isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isPending, mapApiResult, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { hentManglendeInntektsaar } from '~shared/api/avkorting'
+import { ogSeparertListe } from '../felles/utils'
 
 export const BeregneOMS = () => {
   const behandling = useBehandling()
@@ -36,6 +38,7 @@ export const BeregneOMS = () => {
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
 
   const [vedtakStatus, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
+  const [inntektsaarStatus, hentManglendeInntektsaarRequest] = useApiCall(hentManglendeInntektsaar)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -69,6 +72,18 @@ export const BeregneOMS = () => {
   ).includes(behandling.status)
 
   const opprettEllerOppdaterVedtak = () => {
+    if (erOpphoer) {
+      lagreVedtak()
+    } else {
+      hentManglendeInntektsaarRequest(behandling.id, (aar) => {
+        if (aar.length === 0) {
+          lagreVedtak()
+        }
+      })
+    }
+  }
+
+  const lagreVedtak = () => {
     const skalSendeBrev = behandling.sendeBrev
     if (skalSendeBrev && !brevutfallOgEtterbetaling?.brevutfall) {
       setManglerbrevutfall(true)
@@ -125,6 +140,15 @@ export const BeregneOMS = () => {
         errorMessage: 'Vedtaksoppdatering feilet',
         wrapperComponent: { component: HStack, props: { justify: 'center' } },
       })}
+      {mapResult(inntektsaarStatus, {
+        error: (e) => <ApiErrorAlert>Kunne ikke kontrollere påkrevde inntektsår: {e.detail}</ApiErrorAlert>,
+        success: (aar) =>
+          aar.length > 0 && (
+            <Alert variant="error">
+              Du må registrere forventet inntekt for {ogSeparertListe(aar)} og lagre inntekten før du kan gå videre.
+            </Alert>
+          ),
+      })}
       <Box paddingBlock="space-16 space-0" borderWidth="1 0 0 0" borderColor="neutral-subtle">
         {redigerbar ? (
           <BehandlingHandlingKnapper>
@@ -135,7 +159,11 @@ export const BeregneOMS = () => {
                 validerKanSendeTilAttestering={() => true}
               />
             ) : (
-              <Button loading={isPending(vedtakStatus)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
+              <Button
+                loading={isPending(vedtakStatus) || isPending(inntektsaarStatus)}
+                variant="primary"
+                onClick={opprettEllerOppdaterVedtak}
+              >
                 {behandling.sendeBrev ? handlinger.NESTE.navn : handlinger.FATT_VEDTAK.navn}
               </Button>
             )}

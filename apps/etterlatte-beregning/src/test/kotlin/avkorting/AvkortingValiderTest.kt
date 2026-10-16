@@ -11,6 +11,7 @@ import no.nav.etterlatte.avkorting.HarFratrekkInnAarForFulltAar
 import no.nav.etterlatte.avkorting.InntektForTidligereAar
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.avkorting.NyeAarMedInntektMaaStarteIJanuar
+import no.nav.etterlatte.avkorting.aarMedGjenopptattYtelseEtterAvsluttetInntekt
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkorting
@@ -917,4 +918,85 @@ class AvkortingValiderTest {
         mockk {
             every { beregningsperioder } returns listOf(periode)
         }
+
+    @Nested
+    inner class GjenopptattYtelseEtterHull {
+        private val avkortingOpphoerMars2025 =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        aarsoppgjoer(
+                            aar = 2025,
+                            fom = YearMonth.of(2025, 1),
+                            inntektsavkorting =
+                                listOf(
+                                    Inntektsavkorting(
+                                        avkortinggrunnlag(
+                                            innvilgaMaaneder = 3,
+                                            periode = Periode(fom = YearMonth.of(2025, 1), tom = YearMonth.of(2025, 3)),
+                                        ),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        private val beregningMedHull =
+            beregning(
+                beregninger =
+                    listOf(
+                        beregningsperiode(datoFOM = YearMonth.of(2025, 1), datoTOM = YearMonth.of(2025, 3)),
+                        beregningsperiode(datoFOM = YearMonth.of(2025, 7)),
+                    ),
+            )
+
+        @Test
+        fun `finner aar der ytelse gjenopptas etter at inntekten er avsluttet`() {
+            aarMedGjenopptattYtelseEtterAvsluttetInntekt(
+                avkortingOpphoerMars2025,
+                beregningMedHull,
+            ) shouldContainExactly listOf(2025)
+        }
+
+        @Test
+        fun `finner ikke aar naar ytelse ikke gjenopptas i samme aar`() {
+            aarMedGjenopptattYtelseEtterAvsluttetInntekt(
+                avkortingOpphoerMars2025,
+                beregning(
+                    beregninger =
+                        listOf(
+                            beregningsperiode(datoFOM = YearMonth.of(2025, 1), datoTOM = YearMonth.of(2025, 3)),
+                            beregningsperiode(datoFOM = YearMonth.of(2026, 1)),
+                        ),
+                ),
+            ) shouldContainExactly emptyList()
+        }
+
+        @Test
+        fun `validering feiler hvis inntekt for gjenopptatt aar ikke legges inn paa nytt`() {
+            val inntekt2026 =
+                AvkortingGrunnlagLagreDto(
+                    inntektTom = 100000,
+                    fratrekkInnAar = 0,
+                    fratrekkInnAarUtland = 0,
+                    inntektUtlandTom = 0,
+                    spesifikasjon = "",
+                    fom = YearMonth.of(2026, 1),
+                )
+            val feil =
+                assertThrows<UgyldigForespoerselException> {
+                    validerInntekter(
+                        behandling(BehandlingType.REVURDERING, virk = YearMonth.of(2025, 7)),
+                        beregningMedHull,
+                        avkortingOpphoerMars2025,
+                        listOf(inntekt2026),
+                        emptyList(),
+                        false,
+                        YearMonth.of(2025, 4),
+                        naa = YearMonth.of(2026, 1),
+                    )
+                }
+            assertEquals("MANGLER_NY_INNTEKT_GJENOPPTATT_YTELSE", feil.code)
+        }
+    }
 }

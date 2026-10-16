@@ -12,6 +12,32 @@ import java.time.YearMonth
 
 val MAANED_FOR_INNTEKT_NESTE_AAR = Month.OCTOBER
 
+/**
+ * År der siste inntekt er avsluttet (typisk pga. tidligere opphør), men beregningen har ytelse
+ * senere i samme år (gjenopptak etter hull). Inntekten for året må da legges inn på nytt.
+ */
+fun aarMedGjenopptattYtelseEtterAvsluttetInntekt(
+    avkorting: Avkorting,
+    beregning: Beregning,
+): List<Int> =
+    avkorting.aarsoppgjoer
+        .filterIsInstance<AarsoppgjoerLoepende>()
+        .filter { aarsoppgjoer ->
+            val inntektTom =
+                aarsoppgjoer.inntektsavkorting
+                    .maxByOrNull { it.grunnlag.periode.fom }
+                    ?.grunnlag
+                    ?.periode
+                    ?.tom
+                    ?: return@filter false
+            val sluttPaaAaret = YearMonth.of(aarsoppgjoer.aar, Month.DECEMBER)
+            inntektTom < sluttPaaAaret &&
+                beregning.beregningsperioder.any {
+                    val datoTOM = it.datoTOM
+                    it.datoFOM <= sluttPaaAaret && (datoTOM == null || datoTOM > inntektTom)
+                }
+        }.map { it.aar }
+
 object AvkortingValider {
     fun paakrevdeInntekterForBeregningAvAvkorting(
         avkorting: Avkorting,
@@ -79,6 +105,16 @@ object AvkortingValider {
             throw UgyldigForespoerselException(
                 "MANGLER_INNTEKTER_FOR_AVKORTING",
                 "Mangler inntektsgrunnlag for år(ene) ${inntekterViTrenger - inntekterViHar}",
+            )
+        }
+        val aarSomMaaHaNyInntekt =
+            aarMedGjenopptattYtelseEtterAvsluttetInntekt(eksisterendeAvkorting, beregning).toSet() -
+                nyeGrunnlag.map { it.fom.year }.toSet()
+        if (aarSomMaaHaNyInntekt.isNotEmpty()) {
+            throw UgyldigForespoerselException(
+                "MANGLER_NY_INNTEKT_GJENOPPTATT_YTELSE",
+                "Ytelsen er gjenopptatt etter opphør i år(ene) $aarSomMaaHaNyInntekt. " +
+                    "Inntekten for disse årene må legges inn på nytt.",
             )
         }
         val virk =

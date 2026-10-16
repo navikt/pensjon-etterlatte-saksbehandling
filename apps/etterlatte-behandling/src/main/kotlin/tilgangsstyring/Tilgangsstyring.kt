@@ -10,7 +10,6 @@ import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.request.path
 import io.ktor.server.request.receive
-import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingContext
 import no.nav.etterlatte.Kontekst
@@ -37,6 +36,7 @@ import no.nav.etterlatte.sak.TilgangServiceSjekker
 import java.util.UUID
 
 class PluginConfiguration {
+    var tilgangSjekkesBareAvRouten: Boolean = false
     var harTilgangBehandling: (behandlingId: UUID, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var harTilgangTilSak: (sakId: SakId, saksbehandlerMedRoller: SaksbehandlerMedRoller)
@@ -81,12 +81,13 @@ val SpesialTilgangPlugin: RouteScopedPlugin<PluginConfiguration> =
         createConfiguration = ::PluginConfiguration,
     ) {
         on(SpesialtilgangsHook) { call ->
+            if (pluginConfig.tilgangSjekkesBareAvRouten) {
+                return@on
+            }
+
             val bruker = call.brukerTokenInfo
 
             if (bruker is Systembruker) {
-                return@on
-            }
-            if (call.request.uri.contains(TILGANG_ROUTE_PATH)) {
                 return@on
             }
 

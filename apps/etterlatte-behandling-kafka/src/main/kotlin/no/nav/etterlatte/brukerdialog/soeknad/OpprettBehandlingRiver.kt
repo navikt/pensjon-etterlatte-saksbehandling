@@ -21,6 +21,7 @@ internal class OpprettBehandlingRiver(
     private val behandlingClient: BehandlingClient,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val skipSakIdIUtvikling = 1012977L
 
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV) {
@@ -59,6 +60,13 @@ internal class OpprettBehandlingRiver(
                             .find { it.status.aapenBehandling() }
 
                     if (aapenBehandling == null) {
+                        if (sak.id.sakId == skipSakIdIUtvikling) {
+                            logger.warn(
+                                "Quick fix: hopper over kafka-melding for sakId=${sak.id} (soeknadId=$soeknadId) " +
+                                    "etter feil ved opprettelse av behandling.",
+                            )
+                            return
+                        }
                         logger.error(
                             "Opprettelse av behandling feilet, uten at det finnes åpen behandling (soeknadId=$soeknadId)",
                             e,

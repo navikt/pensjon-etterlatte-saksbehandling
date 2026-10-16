@@ -16,9 +16,10 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.omsmeldinnendring.ForventetInntektTilNesteAar
 import no.nav.etterlatte.libs.common.omsmeldinnendring.OmsMeldtInnEndring
-import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.retryHvis
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.ktor.PdfGenereringException
 import org.slf4j.LoggerFactory
 import java.util.Base64
 import java.util.UUID
@@ -87,7 +88,7 @@ class JournalfoerOmsMeldtInnEndringService(
         logger.info("Oppretter arkiv PDF for meldt inn endring for Omstillingstønad med id $sakId")
 
         return runBlocking {
-            retry {
+            retryHvis(skalProeveIgjen = { it !is PdfGenereringException || it.kanProevesIgjen }) {
                 pdfgenKlient.genererPdf(
                     payload =
                         ArkiverOmsMeldtInnEndring(
@@ -102,7 +103,10 @@ class JournalfoerOmsMeldtInnEndringService(
                 )
             }.let {
                 when (it) {
-                    is RetryResult.Success -> DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    is RetryResult.Success -> {
+                        DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    }
+
                     is RetryResult.Failure -> {
                         logger.error("Kunne ikke opprette PDF for meldt inn endring for Omstilingstønad med id $sakId")
                         throw it.samlaExceptions()

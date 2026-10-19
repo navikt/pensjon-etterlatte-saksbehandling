@@ -11,11 +11,11 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14
-        name: etterlatte-statistikk-backup
+        name: etterlatte-statistikk
         cascadingDelete: false
         tier: db-g1-small
         databases:
-          - name: etterlatte-statistikk-backup
+          - name: etterlatte-statistikk
             envVarPrefix: DB
         diskSize: 15
         highAvailability: false
@@ -56,8 +56,8 @@ spec:
     limits:
       memory: 768Mi
   replicas:
-    max: 1
-    min: 1
+    max: 0
+    min: 0
   azure:
     application:
       enabled: true

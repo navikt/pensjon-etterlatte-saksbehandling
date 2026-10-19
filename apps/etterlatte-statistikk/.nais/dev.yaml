@@ -15,7 +15,7 @@ spec:
         cascadingDelete: false
         tier: db-g1-small
         databases:
-          - name: etterlatte-statistikk
+          - name: statistikk
             envVarPrefix: DB
         diskSize: 15
         highAvailability: false

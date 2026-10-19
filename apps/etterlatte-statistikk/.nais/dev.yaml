@@ -10,12 +10,12 @@ spec:
   port: 8080
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
-        name: etterlatte-statistikk-backup
+      - type: POSTGRES_18
+        name: etterlatte-statistikk
         cascadingDelete: false
         tier: db-g1-small
         databases:
-          - name: etterlatte-statistikk-backup
+          - name: etterlatte-statistikk
             envVarPrefix: DB
         diskSize: 15
         highAvailability: false

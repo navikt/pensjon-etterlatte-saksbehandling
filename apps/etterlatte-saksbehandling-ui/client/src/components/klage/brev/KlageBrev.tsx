@@ -1,5 +1,5 @@
 import { useKlage } from '~components/klage/useKlage'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'

@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -49,7 +48,6 @@ class BehandlingClient(
         sakId: SakId,
         mottattDato: LocalDateTime,
         persongalleri: Persongalleri,
-        soeknadType: SoeknadType,
     ): UUID =
         runBlocking {
             val response =
@@ -57,7 +55,7 @@ class BehandlingClient(
                     .post("$url/behandlinger/opprettbehandling") {
                         expectSuccess = false
                         contentType(ContentType.Application.Json)
-                        setBody(BehandlingsBehov(sakId, persongalleri, mottattDato.toString(), SoeknadType.OMSTILLINGSSTOENAD))
+                        setBody(BehandlingsBehov(sakId, persongalleri, mottattDato.toString()))
                     }
             if (!response.status.isSuccess()) {
                 throw FeiletVedOpprettBehandling(sakId)

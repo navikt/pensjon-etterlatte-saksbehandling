@@ -38,7 +38,7 @@ internal class OpprettBehandlingRiverTest {
         every {
             behandlingClientMock.finnEllerOpprettSak(any(), any())
         } returns Sak(soeker, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
-        every { behandlingClientMock.opprettBehandling(any(), any(), any(), any()) } returns behandlingId
+        every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
 
         val inspector =
             testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/omstillingsstoenad.json")) }.inspektør
@@ -53,7 +53,7 @@ internal class OpprettBehandlingRiverTest {
         assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asString())
 
         coVerify(exactly = 1) { behandlingClientMock.finnEllerOpprettSak(soeker, SakType.OMSTILLINGSSTOENAD) }
-        coVerify(exactly = 1) { behandlingClientMock.opprettBehandling(sakId, any(), any(), any()) }
+        coVerify(exactly = 1) { behandlingClientMock.opprettBehandling(sakId, any(), any()) }
     }
 
     @Test
@@ -65,7 +65,7 @@ internal class OpprettBehandlingRiverTest {
         every {
             behandlingClientMock.finnEllerOpprettSak(any(), any())
         } returns Sak(soeker, SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr, null, null)
-        every { behandlingClientMock.opprettBehandling(any(), any(), any(), any()) } returns behandlingId
+        every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
 
         val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/barnepensjon.json")) }.inspektør
         val message = inspector.message(0)
@@ -80,7 +80,7 @@ internal class OpprettBehandlingRiverTest {
         assertEquals(1, inspector.size)
 
         coVerify(exactly = 1) { behandlingClientMock.finnEllerOpprettSak(soeker, SakType.BARNEPENSJON) }
-        coVerify(exactly = 1) { behandlingClientMock.opprettBehandling(sakId, any(), any(), any()) }
+        coVerify(exactly = 1) { behandlingClientMock.opprettBehandling(sakId, any(), any()) }
     }
 
     private fun testRapid() =

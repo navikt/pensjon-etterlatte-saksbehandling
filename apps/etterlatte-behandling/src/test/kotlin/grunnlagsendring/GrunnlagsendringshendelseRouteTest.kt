@@ -44,7 +44,6 @@ import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.module
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.soeker
-import no.nav.etterlatte.soeknadType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -214,7 +213,6 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                 emptyList(),
             ),
             Tidspunkt.now().toLocalDatetimeUTC().toString(),
-            sak.soeknadType(),
         )
 
     private fun withTestApplication(

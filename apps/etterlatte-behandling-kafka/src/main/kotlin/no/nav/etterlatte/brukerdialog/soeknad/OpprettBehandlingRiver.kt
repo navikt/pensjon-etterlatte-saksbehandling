@@ -51,7 +51,7 @@ internal class OpprettBehandlingRiver(
 
             val behandlingId =
                 try {
-                    behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri, soeknad.type)
+                    behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri)
                 } catch (e: FeiletVedOpprettBehandling) {
                     val aapenBehandling =
                         behandlingClient

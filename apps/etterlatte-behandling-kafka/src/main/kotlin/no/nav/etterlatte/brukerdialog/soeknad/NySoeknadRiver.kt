@@ -94,6 +94,18 @@ internal class NySoeknadRiver(
                 return // Avbryt behandling av søknad
             }
 
+            if (soeknad.type == SoeknadType.UTVIDET_OMSTILLINGSSTOENAD) {
+                // Behandlingsløpet for utvidet omstillingsstønad er ikke avklart ennå. Søknaden mangler bl.a. avdød,
+                // så vi kan ikke opprette behandling fra den. Saksbehandler får en oppgave og håndterer den manuelt.
+                opprettOppgaveTilleggsinformasjon(
+                    sakId = sak.id,
+                    journalpostId = journalpostResponse.journalpostId,
+                    merknad = "Søknad om utvidet omstillingsstønad mottatt. Søknaden må behandles manuelt.",
+                )
+                context.publish(packet.oppdaterMed(sak.id, false, journalpostResponse).toJson())
+                return
+            }
+
             val harBehandlingUnderArbeid =
                 behandlingKlient
                     .hentSakMedBehandlinger(sak.id)
@@ -103,7 +115,11 @@ internal class NySoeknadRiver(
             if (harBehandlingUnderArbeid) {
                 // Opprett oppgave for tilleggsinformasjon
                 // Sett fordelt til false slik at det ikke opprettes ny behandling.
-                opprettOppgaveTilleggsinformasjon(sak.id, journalpostResponse.journalpostId)
+                opprettOppgaveTilleggsinformasjon(
+                    sakId = sak.id,
+                    journalpostId = journalpostResponse.journalpostId,
+                    merknad = "Ny søknad mottatt mens førstegangsbehandling pågår. Kontroller innholdet og vurder konsekvens.",
+                )
                 context.publish(packet.oppdaterMed(sak.id, false, journalpostResponse).toJson())
             } else {
                 context.publish(packet.oppdaterMed(sak.id, true, journalpostResponse).toJson())
@@ -119,13 +135,14 @@ internal class NySoeknadRiver(
     }
 
     /**
-     * Oppretter en oppgave i stedet for ny behandling dersom det allerede finnes en pågående behandling.
-     * På denne måten unngår vi duplikate behandlinger i tilfeller der sluttbruker bruker ny søknad for
-     * å sende tilleggsinformasjon.
+     * Oppretter en oppgave i stedet for ny behandling. Brukes når det allerede finnes en pågående behandling,
+     * slik at vi unngår duplikate behandlinger i tilfeller der sluttbruker bruker ny søknad for å sende
+     * tilleggsinformasjon, og for søknadstyper som ikke skal gi automatisk behandling.
      **/
     private fun opprettOppgaveTilleggsinformasjon(
         sakId: SakId,
         journalpostId: String,
+        merknad: String,
     ) {
         val oppgaverForReferanse = behandlingKlient.finnOppgaverForReferanse(journalpostId)
         if (oppgaverForReferanse.isEmpty()) {
@@ -133,7 +150,7 @@ internal class NySoeknadRiver(
                 NyOppgaveDto(
                     oppgaveKilde = OppgaveKilde.BRUKERDIALOG,
                     oppgaveType = OppgaveType.TILLEGGSINFORMASJON,
-                    merknad = "Ny søknad mottatt mens førstegangsbehandling pågår. Kontroller innholdet og vurder konsekvens.",
+                    merknad = merknad,
                     referanse = journalpostId,
                 )
             behandlingKlient

@@ -1,0 +1,68 @@
+{
+  "@event_name": "soeknad_innsendt",
+  "@skjema_info": {
+    "imageTag": "d79803f3acb657cf657ee46af1db293a665eb0d2",
+    "spraak": "nb",
+    "type": "UTVIDET_OMSTILLINGSSTOENAD",
+    "harSamtykket": {
+      "spoersmaal": "Jeg vil svare så godt jeg kan på spørsmålene i søknaden.",
+      "svar": true
+    },
+    "innsender": {
+      "type": "INNSENDER",
+      "fornavn": { "spoersmaal": "Fornavn", "svar": "TRADISJONSBUNDEN" },
+      "etternavn": { "spoersmaal": "Etternavn", "svar": "KØYESENG" },
+      "foedselsnummer": { "spoersmaal": "Fødselsnummer", "svar": "13848599411" }
+    },
+    "soeker": {
+      "type": "GJENLEVENDE_UTVIDET_OMS",
+      "fornavn": { "spoersmaal": "Fornavn", "svar": "TRADISJONSBUNDEN" },
+      "etternavn": { "spoersmaal": "Etternavn", "svar": "KØYESENG" },
+      "foedselsnummer": { "spoersmaal": "Fødselsnummer", "svar": "13848599411" }
+    },
+    "situasjonenDinIDag": {
+      "nySivilstand": {
+        "spoersmaal": "Har du giftet deg på nytt eller fått ny samboer?",
+        "svar": { "verdi": "INGEN_AV_DELENE", "innhold": "Ingen av delene" }
+      }
+    },
+    "utdanningOgTiltak": {
+      "aktivitet": {
+        "spoersmaal": "Hva søker du utvidet omstillingsstønad for?",
+        "svar": { "verdi": "UTDANNING", "innhold": "Utdanning" }
+      },
+      "utdanning": {
+        "studiested": { "spoersmaal": "Studiested", "svar": { "innhold": "Universitetet i Oslo" } },
+        "studie": { "spoersmaal": "Studie", "svar": { "innhold": "Sosialt arbeid" } },
+        "startDato": { "spoersmaal": "Startdato", "svar": { "innhold": "2026-08-15" } },
+        "sluttDato": { "spoersmaal": "Sluttdato", "svar": { "innhold": "2028-06-15" } },
+        "studieform": { "spoersmaal": "Studieform", "svar": { "verdi": "DELTID", "innhold": "Deltid" } },
+        "studieprosent": { "spoersmaal": "Studieprosent", "svar": { "innhold": "50" } }
+      },
+      "aktivitetsplan": {
+        "spoersmaal": "Har du en aktivitetsplan?",
+        "svar": { "verdi": "JA", "innhold": "Ja" }
+      }
+    },
+    "inntekt": {
+      "arbeidsinntekt": { "spoersmaal": "Arbeidsinntekt", "svar": { "innhold": "240000" } }
+    },
+    "utbetalingsInformasjon": {
+      "spoersmaal": "Ønsker du å motta utbetalingen på norsk eller utenlandsk bankkonto?",
+      "svar": { "verdi": "NORSK", "innhold": "Norsk" },
+      "opplysning": {
+        "kontonummer": {
+          "spoersmaal": "Oppgi norsk kontonummer for utbetaling",
+          "svar": { "innhold": "1411.35.13515" }
+        }
+      }
+    },
+    "versjon": "1",
+    "mottattDato": "2026-10-19T10:05:49.337092713"
+  },
+  "@lagret_soeknad_id": 43,
+  "@template": "utvidet_omstillingsstoenad",
+  "@fnr_soeker": "13848599411",
+  "@hendelse_gyldig_til": "2026-10-19T12:17:34.833603804+02:00",
+  "@correlation_id": "b3a8c1f2-0ee4-477d-9cf7-01262c3f263e"
+}

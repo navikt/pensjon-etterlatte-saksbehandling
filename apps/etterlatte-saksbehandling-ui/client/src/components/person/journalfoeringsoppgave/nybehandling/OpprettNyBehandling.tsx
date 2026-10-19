@@ -5,7 +5,7 @@ import PersongalleriOmstillingsstoenad from '~components/person/journalfoeringso
 import { formaterSakstype, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formatering/formatering'
 import { Alert, Box, Button, Heading, HStack, Select, VStack } from '@navikt/ds-react'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import React, { useEffect } from 'react'
 import { Spraak } from '~shared/types/Brev'

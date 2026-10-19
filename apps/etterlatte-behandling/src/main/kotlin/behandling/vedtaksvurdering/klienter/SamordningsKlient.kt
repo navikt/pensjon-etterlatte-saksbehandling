@@ -89,9 +89,12 @@ class SamordningsKlientImpl(
         try {
             val response =
                 httpClient.get("$resourceUrl/api/vedtak") {
-                    header("pid", vedtak.soeker.value) // TODO: må endres til body når samhandlingsløsningen støtter dette
+                    header(
+                        "pid",
+                        vedtak.soeker.value,
+                    ) // TODO: må endres til body når samhandlingsløsningen støtter dette
                     parameter("fagomrade", "EYO")
-                    // parameter("sakId", "${vedtak.sakId}")  // FIXME retting i SAM ble prodsatt 29.05.2024. 6 ukers svarfrist...
+                    parameter("sakId", "${vedtak.sakId}")
                     if (!alleVedtak) {
                         parameter("vedtakId", "${vedtak.id}")
                     }

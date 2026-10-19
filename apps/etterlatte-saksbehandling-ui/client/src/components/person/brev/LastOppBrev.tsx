@@ -2,7 +2,7 @@ import { Alert, Button, Heading, HStack, Link, Modal, VStack } from '@navikt/ds-
 import { useState } from 'react'
 import { DownloadIcon, FileResetIcon, UploadIcon } from '@navikt/aksel-icons'
 import { opprettBrevFraPDF } from '~shared/api/brev'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { DokumentVisningModal, PdfVisning } from '~shared/brev/PdfVisning'
 import { isFailure, isPending } from '~shared/api/apiUtils'

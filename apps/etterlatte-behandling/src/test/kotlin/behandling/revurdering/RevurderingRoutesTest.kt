@@ -15,7 +15,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.azureAdSaksbehandlerClaim
+import no.nav.etterlatte.azureAdSaksbehandlerGjennyClaim
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
@@ -45,7 +45,7 @@ internal class RevurderingRoutesTest {
     fun before() {
         mockOAuth2Server.start()
         every { applicationContext.saksbehandlerGroupIdsByKey } returns
-            mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim)
+            mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerGjennyClaim)
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true
@@ -184,7 +184,7 @@ internal class RevurderingRoutesTest {
         }
     }
 
-    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerGjennyClaim)) }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         testApplication {

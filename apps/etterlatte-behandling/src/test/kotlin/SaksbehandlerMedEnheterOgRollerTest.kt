@@ -112,7 +112,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                 saksbehandler = simpleSaksbehandler(ident = "NAVIdent", claims = mapOf(Claims.groups to adGrupper)),
                 saksbehandlerGroupIdsByKey =
                     mapOf(
-                        AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
                         AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerGjennyClaim,
                         AzureGroup.ATTESTANT_GJENNY to azureAdAttestantGjennyClaim,
                     ),
@@ -141,11 +140,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
                 Arguments.of(
                     "Saksbehandler i Gjenny gir skrivetilgang",
                     listOf(azureAdSaksbehandlerGjennyClaim),
-                    listOf(Enheter.PORSGRUNN.enhetNr),
-                ),
-                Arguments.of(
-                    "Saksbehandler i Pesys gir skrivetilgang",
-                    listOf(azureAdSaksbehandlerClaim),
                     listOf(Enheter.PORSGRUNN.enhetNr),
                 ),
                 Arguments.of(

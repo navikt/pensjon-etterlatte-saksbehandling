@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
@@ -18,6 +17,7 @@ import no.nav.etterlatte.libs.common.trygdetid.FremtidigTrygdetid
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
+import tools.jackson.module.kotlin.readValue
 import java.time.Period
 import java.util.UUID
 import javax.sql.DataSource

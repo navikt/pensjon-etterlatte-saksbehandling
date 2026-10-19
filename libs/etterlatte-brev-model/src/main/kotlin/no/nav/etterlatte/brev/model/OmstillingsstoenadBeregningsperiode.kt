@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.pensjon.brevbaker.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Kroner
 import java.time.LocalDate
 
 data class OmstillingsstoenadBeregningsperiode(

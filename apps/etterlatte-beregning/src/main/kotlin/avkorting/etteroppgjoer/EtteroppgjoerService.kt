@@ -1,6 +1,5 @@
 package no.nav.etterlatte.avkorting.etteroppgjoer
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AarsoppgjoerLoepende
@@ -39,6 +38,7 @@ import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad
 
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
@@ -8,6 +7,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonTypeRef
 
 internal class PersongalleriMapperTest {
     @Test

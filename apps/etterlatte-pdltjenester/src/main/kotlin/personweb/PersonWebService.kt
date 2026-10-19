@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -15,6 +16,7 @@ import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.SoekPerson
 import no.nav.etterlatte.pdl.mapper.ParallelleSannheterService
+import no.nav.etterlatte.person.sikkerloggOgKast
 import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.dto.PersonSoekSvar
 import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
@@ -42,25 +44,29 @@ class PersonWebService(
     ): PersonNavnFoedselsaar {
         logger.info("Henter navn, fødselsdato og fødselsnummer for ident=${ident.maskerFnr()} fra PDL")
 
-        return pdlOboKlient.hentPersonNavnOgFoedsel(ident, bruker).let {
-            if (it.data?.hentPerson == null) {
-                val pdlFeil = it.errors?.joinToString()
+        return try {
+            pdlOboKlient.hentPersonNavnOgFoedsel(ident, bruker).let {
+                if (it.data?.hentPerson == null) {
+                    val pdlFeil = it.errors?.joinToString()
 
-                if (it.errors?.harAdressebeskyttelse() == true) {
-                    throw pdlForesporselFeiletForAdressebeskyttelse()
-                } else if (it.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke person i PDL")
+                    if (it.errors?.harAdressebeskyttelse() == true) {
+                        throw pdlForesporselFeiletForAdressebeskyttelse()
+                    } else if (it.errors?.personIkkeFunnet() == true) {
+                        throw FantIkkePersonException("Fant ikke person i PDL")
+                    } else {
+                        sikkerLogg.warn("Kunne ikke hente person med fnr=$ident fra PDL: $pdlFeil")
+                        throw PdlForesporselFeilet(
+                            "Kunne ikke hente person med ident=${ident.maskerFnr()} se sikkerlogg for pdlfeil",
+                        )
+                    }
                 } else {
-                    sikkerLogg.warn("Kunne ikke hente person med fnr=$ident fra PDL: $pdlFeil")
-                    throw PdlForesporselFeilet(
-                        "Kunne ikke hente person med ident=${ident.maskerFnr()} se sikkerlogg for pdlfeil",
+                    personMappingService.mapPersonNavnFoedsel(
+                        hentPerson = it.data.hentPerson,
                     )
                 }
-            } else {
-                personMappingService.mapPersonNavnFoedsel(
-                    hentPerson = it.data.hentPerson,
-                )
             }
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av navn og fødsel", PersonIdent(ident), e)
         }
     }
 
@@ -111,9 +117,13 @@ class PersonWebService(
     ): FamilieOpplysninger {
         logger.info("Henter persongalleri for ident=${ident.maskerFnr()} fra PDL")
 
-        return when (sakType) {
-            SakType.BARNEPENSJON -> hentFamilieOpplysningerBarnepensjon(ident, bruker)
-            SakType.OMSTILLINGSSTOENAD -> hentFamilieOpplysningerOmstillingsstoenad(ident, bruker)
+        return try {
+            when (sakType) {
+                SakType.BARNEPENSJON -> hentFamilieOpplysningerBarnepensjon(ident, bruker)
+                SakType.OMSTILLINGSSTOENAD -> hentFamilieOpplysningerOmstillingsstoenad(ident, bruker)
+            }
+        } catch (e: Exception) {
+            sikkerloggOgKast("Henting av familieopplysninger", PersonIdent(ident), e)
         }
     }
 

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.joarkhendelser.oppgave
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -14,6 +13,7 @@ import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 
 class OppgaveKlient(

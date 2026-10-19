@@ -1,6 +1,7 @@
 package no.nav.etterlatte.avkorting
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.ints.exactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.clearAllMocks
@@ -52,9 +53,7 @@ internal class AvkortingServiceTest {
     private val grunnlagKlient: GrunnlagKlient = mockk()
     private val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
-
     private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret = mockk()
-
     private val service =
         AvkortingService(
             behandlingKlient,
@@ -538,7 +537,6 @@ internal class AvkortingServiceTest {
         val endretGrunnlag = mockk<AvkortingGrunnlagLagreDto>()
         val beregning = mockk<Beregning>()
         val eksisterendeAvkorting = mockk<Avkorting>(relaxed = true)
-
         val beregnetAvkorting = mockk<Avkorting>(relaxed = true)
         val lagretAvkorting = mockk<Avkorting>(relaxed = true)
         val avkortingFrontend = mockk<AvkortingFrontendDto>()
@@ -624,8 +622,10 @@ internal class AvkortingServiceTest {
                 vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
             }
             coVerify(exactly = 2) {
-                featureToggleService.isEnabled(any(), any(), any())
                 avkortingRepository.hentAvkorting(behandlingId)
+            }
+            coVerify(exactly = 3) {
+                featureToggleService.isEnabled(any(), any(), any())
             }
         }
 
@@ -719,9 +719,11 @@ internal class AvkortingServiceTest {
                 vedtaksvurderingKlient.hentIverksatteVedtak(sakId, bruker)
             }
             coVerify(exactly = 2) {
-                featureToggleService.isEnabled(any(), any(), any())
                 avkortingRepository.hentAvkorting(revurderingId)
                 vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
+            }
+            coVerify(exactly = 3) {
+                featureToggleService.isEnabled(any(), any(), any())
             }
         }
 
@@ -762,7 +764,6 @@ internal class AvkortingServiceTest {
                             ),
                         ),
                 )
-
             val foedselsdato67aar = YearMonth.of(2024, 6)
 
             every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
@@ -820,9 +821,10 @@ internal class AvkortingServiceTest {
                 vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, bruker)
             }
             coVerify(exactly = 2) {
-                featureToggleService.isEnabled(any(), any(), any())
                 avkortingRepository.hentAvkorting(behandlingId)
             }
+
+            coVerify(exactly = 3) { featureToggleService.isEnabled(any(), any(), any()) }
         }
     }
 
@@ -879,7 +881,6 @@ internal class AvkortingServiceTest {
         every {
             avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(any(), any(), any())
         } returns reparertAvkorting
-
         // virk = mars 2026 > desember 2025 (opphoerFom) → skal ikke kaste NyeAarMedInntektMaaStarteIJanuar
         val result =
             runBlocking {
@@ -930,7 +931,6 @@ internal class AvkortingServiceTest {
             every {
                 AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
             } returns emptyList()
-
             val result =
                 runBlocking {
                     service.manglendeInntektsaar(behandlingId, avkorting, bruker)
@@ -977,7 +977,6 @@ internal class AvkortingServiceTest {
             every {
                 AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
             } returns emptyList()
-
             val result =
                 runBlocking {
                     service.manglendeInntektsaar(behandlingId, avkorting, bruker)
@@ -1024,7 +1023,6 @@ internal class AvkortingServiceTest {
             every {
                 AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
             } returns emptyList()
-
             val result =
                 runBlocking {
                     service.manglendeInntektsaar(behandlingId, avkorting, bruker)

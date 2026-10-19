@@ -1,7 +1,7 @@
 import { HandshakeIcon, PencilIcon } from '@navikt/aksel-icons'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import Spinner from '~shared/Spinner'
 import {
   hentAlleTrygdetidAvtaleKriterier,

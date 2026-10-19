@@ -1,7 +1,5 @@
 package no.nav.etterlatte.libs.common.grunnlag
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.ADRESSEBESKYTTELSE
@@ -37,6 +35,8 @@ import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.toJson
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 
 typealias Grunnlagsdata<T> = Map<Opplysningstype, Opplysning<T>>
@@ -90,11 +90,12 @@ inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(opplysning
     val grunnlagsdata = this[opplysningstype] ?: return null
 
     return when (grunnlagsdata) {
-        is Opplysning.Konstant ->
+        is Opplysning.Konstant -> {
             Opplysning.Konstant(
                 grunnlagsdata.id,
                 grunnlagsdata.kilde,
                 objectMapper.readValue(grunnlagsdata.verdi.toJson(), object : TypeReference<T>() {}),
             )
+        }
     }
 }

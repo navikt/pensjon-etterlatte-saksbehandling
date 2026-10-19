@@ -92,8 +92,14 @@ enum class Brevkoder(
     OMS_INFORMASJON_DOEDSFALL(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
-        "Informasjon om omstillingsstønad",
+        "Du kan søke om omstillingsstønad",
         Brevtype.INFORMASJON,
+        titlerPaaSpraak =
+            mapOf(
+                Spraak.NB to "Du kan søke om omstillingsstønad",
+                Spraak.NN to "Du kan søkje om omstillingsstønad",
+                Spraak.EN to "You can apply for adjustment allowance",
+            ),
     ),
     OMS_AVSLAG(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG_UTFALL,

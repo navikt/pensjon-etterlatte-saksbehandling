@@ -21,7 +21,7 @@ dependencies {
     implementation(libs.etterlatte.common)
     implementation(libs.pdf.pdfbox)
 
-    implementation(libs.brevbaker.api.model.common)
+    implementation(libs.brevbaker.api)
 
     implementation(libs.database.kotliquery)
     implementation(libs.cache.caffeine)

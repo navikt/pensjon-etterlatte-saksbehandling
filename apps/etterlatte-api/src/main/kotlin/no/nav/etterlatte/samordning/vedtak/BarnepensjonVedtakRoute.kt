@@ -23,7 +23,7 @@ fun Route.barnepensjonVedtakRoute(
     route("api/barnepensjon/har-loepende-bp") {
         install(AuthorizationPlugin) {
             accessPolicyRolesEllerAdGrupper =
-                setOf("les-bp-vedtak", "les-bp-samordning-vedtak", config.getString("roller.pensjon-saksbehandler"))
+                setOf("les-bp-vedtak", "les-bp-samordning-vedtak")
             issuers = setOf(Issuer.AZURE.issuerName)
         }
 

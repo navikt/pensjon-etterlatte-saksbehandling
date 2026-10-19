@@ -45,9 +45,9 @@ class HendelseRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val type = packet[TIDSHENDELSE_TYPE_KEY].asText()
-        val steg = packet[TIDSHENDELSE_STEG_KEY].asText()
-        val hendelseId = packet[TIDSHENDELSE_ID_KEY].asText()
+        val type = packet[TIDSHENDELSE_TYPE_KEY].asString()
+        val steg = packet[TIDSHENDELSE_STEG_KEY].asString()
+        val hendelseId = packet[TIDSHENDELSE_ID_KEY].asString()
         val hendelseIdUUID = UUID.fromString(hendelseId)
         val sakId = packet.sakId
 

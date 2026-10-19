@@ -13,9 +13,12 @@ import { NyttNotatModal } from '~components/person/notat/NyttNotatModal'
 import { NotatVisningModal } from '~components/person/notat/NotatVisningModal'
 import { SlettNotatModal } from '~components/person/notat/SlettNotatModal'
 import { ApiError } from '~shared/api/apiClient'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedBehandlinger> }) {
   const [notater, setNotater] = useState<Array<Notat>>([])
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [notatStatus, hentNotater] = useApiCall(hentNotaterForSak)
 
@@ -41,6 +44,9 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
   if (isFailure(sakResult)) {
     return <Box padding="space-32">{feilkodehaandtering(sakResult.error)}</Box>
   }
+
+  const harSkrivetilgang =
+    isSuccess(sakResult) && enhetErSkrivbar(sakResult.data.sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   return (
     <Box padding="space-32">
@@ -97,11 +103,15 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
                           </>
                         ) : (
                           <>
-                            <SlettNotatModal
-                              notat={notat}
-                              fjernNotat={(id) => setNotater(notater.filter((notat) => notat.id !== id))}
-                            />
-                            <NotatRedigeringModal notat={notat} />
+                            {harSkrivetilgang && (
+                              <>
+                                <SlettNotatModal
+                                  notat={notat}
+                                  fjernNotat={(id) => setNotater(notater.filter((notat) => notat.id !== id))}
+                                />
+                                <NotatRedigeringModal notat={notat} />
+                              </>
+                            )}
                           </>
                         )}
                       </HStack>
@@ -114,9 +124,10 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
         ),
       })}
       <br />
-      {mapSuccess(sakResult, ({ sak }) => (
-        <NyttNotatModal sakId={sak.id} leggTilNotat={(notat) => setNotater([...notater, notat])} />
-      ))}
+      {harSkrivetilgang &&
+        mapSuccess(sakResult, ({ sak }) => (
+          <NyttNotatModal sakId={sak.id} leggTilNotat={(notat) => setNotater([...notater, notat])} />
+        ))}
     </Box>
   )
 }

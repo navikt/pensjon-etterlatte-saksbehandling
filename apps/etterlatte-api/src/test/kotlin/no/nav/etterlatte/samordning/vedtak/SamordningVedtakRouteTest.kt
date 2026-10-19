@@ -355,9 +355,7 @@ private fun config(
                 ),
             ),
         "roller" to
-            mapOf(
-                "pensjon-saksbehandler" to UUID.randomUUID().toString(),
-            ),
+            emptyMap<String, String>(),
     ),
 )
 

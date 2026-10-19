@@ -1,11 +1,11 @@
 package no.nav.etterlatte.samordning
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.kafka.Avrokonstanter
 import no.nav.etterlatte.kafka.Kafkakonfigurasjon
 import no.nav.etterlatte.samordning.SamordningKey.SAMORDNINGVEDTAK_HENDELSE_GROUP_ID
 import org.apache.kafka.common.serialization.Deserializer
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 class KafkaEnvironment :
     Kafkakonfigurasjon<KafkaEnvironmentJsonDeserializer>(

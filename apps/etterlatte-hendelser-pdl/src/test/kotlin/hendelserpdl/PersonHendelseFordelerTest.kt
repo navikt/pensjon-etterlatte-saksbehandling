@@ -1,6 +1,5 @@
 package no.nav.etterlatte.hendelserpdl
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -40,6 +39,7 @@ import no.nav.person.pdl.leesah.verge.VergeEllerFullmektig
 import no.nav.person.pdl.leesah.verge.VergemaalEllerFremtidsfullmakt
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 internal class PersonHendelseFordelerTest {

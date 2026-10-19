@@ -50,9 +50,9 @@ class VilkaarsvurderingTidshendelseRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val steg = packet[TIDSHENDELSE_STEG_KEY].asText()
-        val type = packet[TIDSHENDELSE_TYPE_KEY].asText()
-        val hendelseId = packet[TIDSHENDELSE_ID_KEY].asText()
+        val steg = packet[TIDSHENDELSE_STEG_KEY].asString()
+        val type = packet[TIDSHENDELSE_TYPE_KEY].asString()
+        val hendelseId = packet[TIDSHENDELSE_ID_KEY].asString()
         val dryrun = packet[DRYRUN].asBoolean()
         val sakId = packet.sakId
 
@@ -86,14 +86,14 @@ class VilkaarsvurderingTidshendelseRiver(
         val hendelseData = packet[HENDELSE_DATA_KEY]
 
         hendelseData["loependeYtelse_januar2024_behandlingId"]?.let {
-            val behandlingId = it.asText()
+            val behandlingId = it.asString()
             val result = vilkaarsvurderingService.harMigrertYrkesskadefordel(behandlingId)
             logger.info("Løpende ytelse: sjekk av yrkesskadefordel før 2024-01-01: $result")
             packet["yrkesskadefordel_pre_20240101"] = result
         }
 
         if (type in arrayOf("OMS_DOED_3AAR", "OMS_DOED_5AAR") && hendelseData["loependeYtelse"]?.asBoolean() == true) {
-            val loependeBehandlingId = hendelseData["loependeYtelse_behandlingId"].asText()
+            val loependeBehandlingId = hendelseData["loependeYtelse_behandlingId"].asString()
             val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(loependeBehandlingId)
             logger.info("OMS: sjekk av rett uten tidsbegrensning: $result")
             packet["oms_rett_uten_tidsbegrensning"] = result

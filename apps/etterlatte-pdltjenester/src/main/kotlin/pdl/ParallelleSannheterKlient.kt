@@ -1,7 +1,5 @@
 package no.nav.etterlatte.pdl
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -21,6 +19,8 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.readValue
 
 class ParallelleSannheterException(
     override val message: String,
@@ -124,8 +124,14 @@ class ParallelleSannheterKlient(
         val listAsJsonNode = objectMapper.readValue(list.toJson(), JsonNode::class.java)
         val nodeWithFieldName: JsonNode = objectMapper.createObjectNode().set(avklaring.feltnavn, listAsJsonNode)
         return when (list.size) {
-            0 -> null
-            1 -> list.first()
+            0 -> {
+                null
+            }
+
+            1 -> {
+                list.first()
+            }
+
             else -> {
                 logger.info("Felt av typen ${avklaring.feltnavn} har ${list.size} elementer, sjekker mot PPS")
                 val responseAsJsonNode =
@@ -149,6 +155,7 @@ class ParallelleSannheterKlient(
                                     )
                                 }
                             }
+
                             is RetryResult.Failure -> {
                                 sikkerlogg.info("Fikk feilmelding. Skulle avklare blant ${list.toJson()}")
                                 throw it.samlaExceptions()

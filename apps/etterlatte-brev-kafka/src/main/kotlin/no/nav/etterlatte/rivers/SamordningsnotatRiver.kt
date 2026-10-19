@@ -35,8 +35,8 @@ class SamordningsnotatRiver(
             val sakId = SakId(packet["sakId"].asLong())
             val vedtakId = packet["vedtakId"].asLong()
             val samordningsmeldingId = packet["samordningsmeldingId"].asLong()
-            val kommentar = packet["kommentar"].asText()
-            val saksbehandlerId = packet["saksbehandlerId"].asText()
+            val kommentar = packet["kommentar"].asString()
+            val saksbehandlerId = packet["saksbehandlerId"].asString()
 
             logger.info("Oppretter notat for sak $sakId, samID $samordningsmeldingId")
 

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.klienter
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
@@ -12,7 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.toJson
@@ -33,7 +32,7 @@ internal class EntraProxyKlientTest {
                 }
                 expectSuccess = true
                 install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+                    jackson { }
                 }
             }
 
@@ -103,9 +102,7 @@ internal class EntraProxyKlientTest {
                 }
                 expectSuccess = true
                 install(ContentNegotiation) {
-                    jackson {
-                        registerModule(JavaTimeModule())
-                    }
+                    jackson { }
                 }
             }
 

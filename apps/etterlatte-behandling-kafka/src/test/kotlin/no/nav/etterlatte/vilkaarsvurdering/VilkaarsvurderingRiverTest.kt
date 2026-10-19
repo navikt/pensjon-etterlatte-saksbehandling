@@ -57,7 +57,7 @@ internal class VilkaarsvurderingRiverTest {
         with(testRapid.inspektør.message(0)) {
             Assertions.assertEquals(
                 OmregningHendelseType.VILKAARSVURDERT.lagEventnameForType(),
-                this[EVENT_NAME_KEY].asText(),
+                this[EVENT_NAME_KEY].asString(),
             )
         }
     }

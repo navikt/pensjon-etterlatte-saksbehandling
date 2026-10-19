@@ -1,10 +1,10 @@
 package no.nav.etterlatte.trygdetid.avtale
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtale
 import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtaleKriteria
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 class AvtaleService(

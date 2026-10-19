@@ -13,8 +13,8 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import no.nav.pensjon.brevbaker.api.model.Telefonnummer
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Telefonnummer
 import org.junit.jupiter.api.Test
 
 class BrevbakerRequestTest {

@@ -21,7 +21,7 @@ import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.sikkerLogg
-import no.nav.pensjon.brevbaker.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Kroner
 import java.util.UUID
 
 internal fun barnepensjonBeregningsperioder(

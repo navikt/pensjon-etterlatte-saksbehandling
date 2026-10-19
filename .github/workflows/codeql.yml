@@ -42,6 +42,7 @@ jobs:
         run: ./gradlew assemble -Dorg.gradle.jvmargs="-Dkotlin.daemon.jvmargs=-Xmx16g" --configuration-cache
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          READER_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # ratchet:github/codeql-action/analyze@v4

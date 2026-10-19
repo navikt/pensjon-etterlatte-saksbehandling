@@ -38,7 +38,7 @@ dependencies {
         exclude("io.ktor", "ktor-server")
     }
 
-    implementation(libs.brevbaker.api.model.common)
+    implementation(libs.brevbaker.api)
 
     implementation(libs.database.kotliquery)
 

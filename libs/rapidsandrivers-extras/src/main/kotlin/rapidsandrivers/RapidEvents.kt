@@ -31,25 +31,25 @@ var JsonMessage.antall: Int
     }
 
 var JsonMessage.kjoering: String
-    get() = this[KJOERING].asText()
+    get() = this[KJOERING].asString()
     set(value) {
         this[KJOERING] = value
     }
 
 var JsonMessage.saker: List<SakId>
-    get() =
-        this[SPESIFIKKE_SAKER]
-            .asText()
-            .tilSeparertListe()
+    get() {
+        val node = this[SPESIFIKKE_SAKER]
+        return if (node.isTextual) node.asString().tilSeparertListe() else emptyList()
+    }
     set(name) {
         this[SPESIFIKKE_SAKER] = name.tilSeparertString()
     }
 
 var JsonMessage.ekskluderteSaker: List<SakId>
-    get() =
-        this[EKSKLUDERTE_SAKER]
-            .asText()
-            .tilSeparertListe()
+    get() {
+        val node = this[EKSKLUDERTE_SAKER]
+        return if (node.isTextual) node.asString().tilSeparertListe() else emptyList()
+    }
     set(name) {
         this[EKSKLUDERTE_SAKER] = name.tilSeparertString()
     }

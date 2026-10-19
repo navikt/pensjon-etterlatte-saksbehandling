@@ -1,6 +1,5 @@
 package no.nav.etterlatte.avkorting
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
+import tools.jackson.module.kotlin.readValue
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.opplysningerfrasoknad
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
 import io.mockk.mockk
@@ -14,6 +12,8 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.treeToValue
 import java.io.FileNotFoundException
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -46,7 +46,7 @@ internal class StartUthentingFraSoeknadRiverTest {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         assertEquals(1, inspector.message(0).get(SAK_ID_KEY).intValue())
-        assertEquals("f525f2f7-e246-43d7-b61a-5f0757472916", inspector.message(0).get(BEHANDLING_ID_KEY).asText())
+        assertEquals("f525f2f7-e246-43d7-b61a-5f0757472916", inspector.message(0).get(BEHANDLING_ID_KEY).asString())
         assertEquals(10, inspector.message(0).get(OPPLYSNING_KEY).size())
     }
 }

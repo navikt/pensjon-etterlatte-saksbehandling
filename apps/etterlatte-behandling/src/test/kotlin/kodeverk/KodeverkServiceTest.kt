@@ -1,6 +1,5 @@
 package no.nav.etterlatte.kodeverk
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -11,6 +10,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 
 internal class KodeverkServiceTest {
     private val mockKlient = mockk<KodeverkKlientImpl>()

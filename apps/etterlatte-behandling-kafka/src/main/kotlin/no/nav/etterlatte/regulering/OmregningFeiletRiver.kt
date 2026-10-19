@@ -42,7 +42,7 @@ internal class OmregningFeiletRiver(
         context: MessageContext,
     ) {
         val omregningData = packet.omregningData
-        val kontekst = packet[KONTEKST_KEY].asText()
+        val kontekst = packet[KONTEKST_KEY].asString()
         logger.error("$kontekst har feilet for sak ${omregningData.sakId}")
         behandlingService.lagreKjoering(
             kjoering = omregningData.kjoering,

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.omregning
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -9,6 +8,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
+import tools.jackson.module.kotlin.treeToValue
 import java.time.LocalDate
 import java.util.UUID
 

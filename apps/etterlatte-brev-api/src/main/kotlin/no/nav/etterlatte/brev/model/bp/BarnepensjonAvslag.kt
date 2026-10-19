@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import java.time.LocalDate
 
 data class BarnepensjonAvslagData(val brukerUnder18Aar: Boolean, val bosattUtland: Boolean)
 
@@ -32,6 +33,7 @@ data class BarnepensjonAvslag(
 data class BarnepensjonAvslagRedigerbartData(
     val erSluttbehandling: Boolean,
     val avdoedNavn: String,
+    val avdoedDoedsdato: LocalDate?,
 )
 
 data class BarnepensjonAvslagRedigerbar(
@@ -41,14 +43,18 @@ data class BarnepensjonAvslagRedigerbar(
         fun fra(
             avdoede: List<Avdoed>,
             erSluttbehandling: Boolean,
-        ): BarnepensjonAvslagRedigerbar =
-            BarnepensjonAvslagRedigerbar(
+        ): BarnepensjonAvslagRedigerbar {
+            val avdoed = avdoede.firstOrNull()
+
+            return BarnepensjonAvslagRedigerbar(
                 data = BarnepensjonAvslagRedigerbartData(
                     erSluttbehandling = erSluttbehandling,
                     avdoedNavn =
-                        avdoede.firstOrNull()?.navn
+                        avdoed?.navn
                             ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
-                ),
+                    avdoedDoedsdato = avdoed?.doedsdato,
+                    ),
             )
+        }
     }
 }

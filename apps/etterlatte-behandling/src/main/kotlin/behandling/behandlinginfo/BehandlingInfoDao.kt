@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.utland.SluttbehandlingBehandlinginfo
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -9,6 +8,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 class BehandlingInfoDao(

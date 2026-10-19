@@ -1,6 +1,5 @@
 package no.nav.etterlatte.joarkhendelser.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import tools.jackson.databind.node.ObjectNode
 import java.util.UUID
 
 class BehandlingKlient(

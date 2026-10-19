@@ -7,7 +7,7 @@ import { isPending, isSuccess, mapFailure, mapResult, Result } from '~shared/api
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { erOppgaveRedigerbar, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ConfigContext } from '~clientConfig'

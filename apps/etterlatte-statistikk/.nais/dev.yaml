@@ -10,12 +10,25 @@ spec:
   port: 8080
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_18
         name: etterlatte-statistikk
+        cascadingDelete: false
         tier: db-g1-small
         databases:
           - name: statistikk
             envVarPrefix: DB
+        diskSize: 15
+        highAvailability: false
+        pointInTimeRecovery: false
+        flags:
+          - name: "cloudsql.enable_pgaudit"
+            value: "on"
+          - name: "pgaudit.log"
+            value: "write,ddl,role"
+          - name: "pgaudit.log_parameter"
+            value: "on"
+          - name: "pgaudit.log_relation"
+            value: "on"
   liveness:
     initialDelay: 5
     path: /health/isalive

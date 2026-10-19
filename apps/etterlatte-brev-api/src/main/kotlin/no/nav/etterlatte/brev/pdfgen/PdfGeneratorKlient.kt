@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.pdfgen
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.header
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 
 /**
  * Klient mot ey-pdfgen

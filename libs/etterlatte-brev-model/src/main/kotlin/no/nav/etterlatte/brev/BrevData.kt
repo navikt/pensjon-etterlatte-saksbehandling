@@ -139,7 +139,7 @@ abstract class BrevRedigerbarInnholdData : BrevDataRedigerbar {
     override val data: Any? = null
 }
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(
         value = EtteroppgjoerBrevData.BeregningsVedleggInnhold::class,

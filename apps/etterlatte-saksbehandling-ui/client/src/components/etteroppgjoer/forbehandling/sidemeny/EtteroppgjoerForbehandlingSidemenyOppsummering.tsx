@@ -11,7 +11,7 @@ export const EtteroppgjoerForbehandlingSidemenyOppsummering = () => {
   const forbehandlingErFerdigstilt = forbehandling.status === EtteroppgjoerForbehandlingStatus.FERDIGSTILT
   const forbehandlingErAvbrutt = forbehandling.status === EtteroppgjoerForbehandlingStatus.AVBRUTT
   const omgjoeringPgaKlage = !!forbehandling.klageOmgjoering
-  const omgjoeringPaaEgetInitiativ = forbehandling.klageOmgjoering
+  const omgjoeringPaaEgetInitiativ = forbehandling.omgjoeringEgetInitiativ
 
   return (
     <SidebarPanel $border>

@@ -1,18 +1,17 @@
 package no.nav.etterlatte.kafka
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.NaisKey
 import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.net.InetAddress
 import java.time.LocalDateTime
 import java.util.UUID
@@ -35,10 +34,10 @@ open class JsonMessage(
 
     companion object {
         private val objectMapper =
-            jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            jacksonMapperBuilder()
+                .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build()
 
         private const val OPPRETTET_KEY = "@opprettet"
         private const val EVENT_NAME_KEY = "@event_name"
@@ -94,7 +93,7 @@ open class JsonMessage(
     init {
         json = objectMapper.readTree(originalMessage)
 
-        id = json.path("@id").takeUnless { it.isMissingOrNull() }?.asText() ?: idGenerator.generateId().also {
+        id = json.path("@id").takeUnless { it.isMissingOrNull() }?.asString() ?: idGenerator.generateId().also {
             set("@id", it)
         }
         val opprettet = Tidspunkt.now().toLocalDatetimeUTC()

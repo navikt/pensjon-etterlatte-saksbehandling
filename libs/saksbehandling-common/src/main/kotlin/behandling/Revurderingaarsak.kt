@@ -81,7 +81,7 @@ enum class Revurderingaarsak(
 
     AVKORTING_MOT_UFOERETRYGD(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
 
-    OPPHOER_3_AAR_ETTER_DOEDSFALL(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
+    OPPHOER_3_AAR_ETTER_DOEDSFALL(SAKTYPE_OMS, DevOgProd, skalSendeBrev = false),
     SOEKNAD_OM_GJENOPPTAK(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
 
     OMGJOERING_ETTER_ANKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
@@ -95,7 +95,7 @@ enum class Revurderingaarsak(
     // Mangler funksjonalitet
     UTSENDELSE_AV_SED(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
     SANKSJON_PGA_MANGLENDE_OPPLYSNINGER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
-    OPPHOER_AV_2_UTVIDEDE_AAR(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
+    OPPHOER_AV_2_UTVIDEDE_AAR(SAKTYPE_OMS, KunIDev, skalSendeBrev = false),
 
     // Skal ikke kunne opprettes via vanlig flyt
     ETTEROPPGJOER(SAKTYPE_OMS, IngenMiljoe, skalSendeBrev = true),

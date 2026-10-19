@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid.klienter
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -21,6 +20,7 @@ import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 class BehandlingKlientException(
@@ -134,7 +134,10 @@ class BehandlingKlient(
                 )
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success -> {
+                    it.content
+                }
+
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente behandling med behandlingId=$behandlingId",

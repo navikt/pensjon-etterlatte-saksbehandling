@@ -9,13 +9,14 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.pensjon.brevbaker.api.model.Felles
+import no.nav.pensjon.brevbaker.api.model.BrevbakerFelles
 
 @ConsistentCopyVisibility
 data class BrevbakerRequest internal constructor(
     val kode: Brevbakerkode,
     val letterData: Any,
-    val felles: Felles,
+    val fagsystemBrevdata: Any,
+    val felles: BrevbakerFelles,
     val language: LanguageCode,
 ) {
     companion object {
@@ -31,6 +32,7 @@ data class BrevbakerRequest internal constructor(
             BrevbakerRequest(
                 kode = brevKode,
                 letterData = brevData,
+                fagsystemBrevdata = brevData,
                 felles =
                     mapFelles(
                         sakId = sakId,

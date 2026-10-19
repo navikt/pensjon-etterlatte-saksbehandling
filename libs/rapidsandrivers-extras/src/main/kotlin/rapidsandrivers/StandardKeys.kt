@@ -28,13 +28,13 @@ fun JsonMessage.setEventNameForHendelseType(eventnameHendelseType: EventnameHend
 fun EventnameHendelseType.lagParMedEventNameKey(): Pair<String, String> = Pair(EVENT_NAME_KEY, this.lagEventnameForType())
 
 var JsonMessage.eventName: String
-    get() = this[EVENT_NAME_KEY].textValue()
+    get() = this[EVENT_NAME_KEY].asString()
     set(name) {
         this[EVENT_NAME_KEY] = name
     }
 
 var JsonMessage.feilendeSteg: String
-    get() = this[FEILENDE_STEG].textValue()
+    get() = this[FEILENDE_STEG].asString()
     set(name) {
         this[FEILENDE_STEG] = name
     }
@@ -50,7 +50,7 @@ fun River.correlationId() {
 }
 
 var JsonMessage.correlationId: String?
-    get() = this[CORRELATION_ID_KEY].textValue()
+    get() = this[CORRELATION_ID_KEY].takeIf { it.isTextual }?.textValue()
     set(name) {
         name?.also { this[CORRELATION_ID_KEY] = it }
             ?: throw IllegalArgumentException("Kan ikke sette correlationId til null")

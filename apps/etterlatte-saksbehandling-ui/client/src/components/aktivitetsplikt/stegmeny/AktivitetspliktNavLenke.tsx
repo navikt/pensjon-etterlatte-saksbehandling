@@ -3,7 +3,7 @@ import { Label } from '@navikt/ds-react'
 import { ChevronRightIcon } from '@navikt/aksel-icons'
 import React from 'react'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { NavLink, useMatch } from 'react-router-dom'
+import { NavLink, useMatch } from 'react-router'
 
 interface Props {
   path: AktivitetspliktSteg

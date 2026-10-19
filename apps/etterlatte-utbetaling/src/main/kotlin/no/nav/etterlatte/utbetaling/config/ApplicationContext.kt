@@ -191,6 +191,7 @@ class ApplicationContext(
  * Kjøreplan får vi en gang i året fra økonomi og brukes for konsistensavstemming
  * av løpende/aktive utbetalinger
  */
+/* Datoer for året før kan fjernes. Ble bare ikke gjort nå fordi det fortsatt var datoer som ikke var kjørt ferdig */
 private fun kjoereplanKonsistensavstemming() =
     setOf(
         7.januar(2026),
@@ -205,4 +206,17 @@ private fun kjoereplanKonsistensavstemming() =
         1.oktober(2026),
         3.november(2026),
         24.november(2026),
+        07.januar.(2027),
+        02.februar.(2027),
+        02.mars.(2027),
+        01.april.(2027),
+        26.april.(2027),
+        28.mai.(2027),
+        01.juli.(2027),
+        03.august.(2027),
+        01.september.(2027),
+        01.oktober.(2027),
+        02.november.(2027),
+        23.november.(2027),
+
     )

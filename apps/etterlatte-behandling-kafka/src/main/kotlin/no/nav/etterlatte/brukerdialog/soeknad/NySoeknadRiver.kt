@@ -68,8 +68,7 @@ internal class NySoeknadRiver(
             val sakType =
                 when (soeknad.type) {
                     SoeknadType.BARNEPENSJON -> SakType.BARNEPENSJON
-                    SoeknadType.OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
-                    SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
+                    SoeknadType.OMSTILLINGSSTOENAD, SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
                 }
 
             if (!Folkeregisteridentifikator.isValid(soekerFnr)) {

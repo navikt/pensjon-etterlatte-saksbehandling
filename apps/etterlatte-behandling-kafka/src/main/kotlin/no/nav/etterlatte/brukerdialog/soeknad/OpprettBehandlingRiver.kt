@@ -42,9 +42,8 @@ internal class OpprettBehandlingRiver(
 
             val sakType =
                 when (soeknad.type) {
-                    SoeknadType.OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
+                    SoeknadType.OMSTILLINGSSTOENAD, SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
                     SoeknadType.BARNEPENSJON -> SakType.BARNEPENSJON
-                    SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
                 }
 
             val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, sakType)

@@ -11,7 +11,7 @@ import {
   Radio,
   VStack,
 } from '@navikt/ds-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import React, { useEffect, useState } from 'react'
 import { harPerioderMedOverstyringAvNettoBrutto, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { TilbakekrevingVurderingOppsummering } from '~components/tilbakekreving/oppsummering/TilbakekrevingVurderingOppsummering'

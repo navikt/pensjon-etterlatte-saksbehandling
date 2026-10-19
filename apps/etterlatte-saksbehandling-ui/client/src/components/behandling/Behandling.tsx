@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router'
 import { hentBehandling } from '~shared/api/behandling'
 import { IBehandlingReducer, resetBehandling, setBehandling } from '~store/reducers/BehandlingReducer'
 import { StatusBar } from '~shared/statusbar/Statusbar'

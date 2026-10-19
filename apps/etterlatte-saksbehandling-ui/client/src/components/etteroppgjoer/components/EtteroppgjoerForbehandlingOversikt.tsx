@@ -23,7 +23,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { enhetErSkrivbar, erBehandlingRedigerbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useEtteroppgjoerForbehandling } from '~store/reducers/EtteroppgjoerReducer'
 import { FerdigstillEtteroppgjoerForbehandlingUtenBrev } from '~components/etteroppgjoer/components/FerdigstillEtteroppgjoerForbehandlingUtenBrev'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { EtteroppjoerForbehandlingSteg } from '~components/etteroppgjoer/forbehandling/stegmeny/EtteroppjoerForbehandlingStegmeny'
 import { IDetaljertBehandling, Opprinnelse } from '~shared/types/IDetaljertBehandling'
 import { InformasjonFraBruker } from '~components/etteroppgjoer/revurdering/informasjonFraBruker/InformasjonFraBruker'

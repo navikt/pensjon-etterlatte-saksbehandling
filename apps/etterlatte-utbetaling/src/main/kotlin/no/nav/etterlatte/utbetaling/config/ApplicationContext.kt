@@ -27,7 +27,9 @@ import no.nav.etterlatte.utbetaling.common.april
 import no.nav.etterlatte.utbetaling.common.august
 import no.nav.etterlatte.utbetaling.common.februar
 import no.nav.etterlatte.utbetaling.common.januar
+import no.nav.etterlatte.utbetaling.common.juli
 import no.nav.etterlatte.utbetaling.common.juni
+import no.nav.etterlatte.utbetaling.common.mai
 import no.nav.etterlatte.utbetaling.common.mars
 import no.nav.etterlatte.utbetaling.common.november
 import no.nav.etterlatte.utbetaling.common.oktober
@@ -190,7 +192,10 @@ class ApplicationContext(
 /**
  * Kjøreplan får vi en gang i året fra økonomi og brukes for konsistensavstemming
  * av løpende/aktive utbetalinger
+ *
+ * Datoer for året før kan fjernes. Ble bare ikke gjort nå fordi det fortsatt var datoer som ikke var kjørt ferdig
  */
+
 private fun kjoereplanKonsistensavstemming() =
     setOf(
         7.januar(2026),
@@ -205,4 +210,16 @@ private fun kjoereplanKonsistensavstemming() =
         1.oktober(2026),
         3.november(2026),
         24.november(2026),
+        7.januar(2027),
+        2.februar(2027),
+        2.mars(2027),
+        1.april(2027),
+        26.april(2027),
+        28.mai(2027),
+        1.juli(2027),
+        3.august(2027),
+        1.september(2027),
+        1.oktober(2027),
+        2.november(2027),
+        23.november(2027),
     )

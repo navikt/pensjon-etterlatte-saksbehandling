@@ -29,6 +29,7 @@ Les disse filene for kontekst når det er relevant:
 - `.github/domenekontekst/utbetaling.md` – utbetalingsdomenet
 - `.github/domenekontekst/brev-api.md` – brevdomenet inkl. gammel vs. ny brevflyt
 - `.github/domenekontekst/eksterne-repos.md` – søknadsdialog, selvbetjening og delt infrastruktur (pensjon-etterlatte og pensjon-etterlatte-felles)
+- `.github/utvidet-oms/` – veikart, beslutninger og spesifikasjon for søknad om utvidet omstillingsstønad (koordineres av agenten `utvidet-oms`)
 
 ---
 

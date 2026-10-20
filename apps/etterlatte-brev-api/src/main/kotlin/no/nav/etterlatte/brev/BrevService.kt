@@ -502,7 +502,8 @@ class BrevService(
         logger.info("Sjekker om brev med id=$id kan slettes")
         val brev = sjekkOmBrevKanSlettes(id)
         sjekk(brev.behandlingId == null) {
-            "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
+            "Brev med id=$id og brevtype=${brev.brevtype} er knyttet til en behandling " +
+                "og kan ikke slettes."
         }
 
         val result = db.settBrevSlettet(id, bruker)

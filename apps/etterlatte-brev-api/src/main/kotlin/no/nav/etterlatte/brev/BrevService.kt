@@ -503,7 +503,7 @@ class BrevService(
         val brev = sjekkOmBrevKanSlettes(id)
         sjekk(brev.behandlingId == null) {
             "Brev med id=$id og brevtype=${brev.brevtype} er knyttet til en behandling " +
-                "og kan ikke slettes."
+                "og kan ikke slettes via dette endepunktet."
         }
 
         val result = db.settBrevSlettet(id, bruker)

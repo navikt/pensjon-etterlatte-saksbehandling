@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
-internal val requestBrukerTokenInfo = ThreadLocal<BrukerTokenInfo?>()
+val requestBrukerTokenInfo = ThreadLocal<BrukerTokenInfo?>()
 
 private object BrukerTokenInfoHook : Hook<(ApplicationCall) -> BrukerTokenInfo> {
     override fun install(
@@ -26,7 +26,7 @@ private object BrukerTokenInfoHook : Hook<(ApplicationCall) -> BrukerTokenInfo> 
     }
 }
 
-internal val BrukerTokenInfoPlugin =
+val BrukerTokenInfoPlugin =
     createRouteScopedPlugin("BrukerTokenInfoPlugin") {
         on(BrukerTokenInfoHook) { call ->
             call.brukerTokenInfo

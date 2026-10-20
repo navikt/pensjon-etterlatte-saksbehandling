@@ -24,11 +24,9 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Controller, useForm } from 'react-hook-form'
 import {
-  AarsakTilAvsluttingFoerstegangsbehandling,
-  AarsakTilAvsluttingRevurdering,
+  AarsakTilAvslutting,
   AvbrytBehandlingRequest,
-  teksterAarsakTilAvsluttingFoerstegangsbehandling,
-  teksterAarsakTilAvsluttingRevurdering,
+  teksterAArsakTilAvslutting,
 } from '~shared/types/AnnullerBehandling'
 
 export default function AnnullerBehandling({ behandlingType }: { behandlingType: IBehandlingsType }) {
@@ -53,7 +51,7 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
     watch,
     formState: { errors },
   } = useForm<AvbrytBehandlingRequest>({
-    defaultValues: { aarsakTilAvbrytelse: AarsakTilAvsluttingFoerstegangsbehandling.ANNET, kommentar: '' },
+    defaultValues: { aarsakTilAvbrytelse: AarsakTilAvslutting.ANNET, kommentar: '' },
   })
 
   if (!behandles) {
@@ -71,19 +69,11 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
   }
 
   const aarsakOptions = () => {
-    if (behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-      return Object.values(AarsakTilAvsluttingFoerstegangsbehandling).map((aarsak) => (
-        <option key={aarsak} value={aarsak}>
-          {teksterAarsakTilAvsluttingFoerstegangsbehandling[aarsak]}
-        </option>
-      ))
-    } else if (behandlingType === IBehandlingsType.REVURDERING) {
-      return Object.values(AarsakTilAvsluttingRevurdering).map((aarsak) => (
-        <option key={aarsak} value={aarsak}>
-          {teksterAarsakTilAvsluttingRevurdering[aarsak]}
-        </option>
-      ))
-    }
+    return Object.values(AarsakTilAvslutting).map((aarsak) => (
+      <option key={aarsak} value={aarsak}>
+        {teksterAArsakTilAvslutting[aarsak]}
+      </option>
+    ))
   }
 
   return (
@@ -93,21 +83,20 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
           <HStack wrap={false} gap="space-16" align="center">
             <ExclamationmarkTriangleFillIcon aria-hidden />
             <div>
-              <ExpansionCard.Title size="small">Annuller behandling</ExpansionCard.Title>
+              <ExpansionCard.Title size="small">Avslutt behandlingen</ExpansionCard.Title>
             </div>
           </HStack>
         </ExpansionCard.Header>
 
         <ExpansionCard.Content>
           <BodyLong>
-            {erFoerstegangsbehandling
-              ? 'Hvis denne behandlingen ikke skal tas videre i Gjenny må du annullere den. Behandlingen får da status avbrutt.'
-              : 'Hvis denne behandlingen er uaktuell, kan du annullere den her.'}
+            Hvis denne behandlingen ikke skal fullføres, så kan du annullere eller avbryte den her. Behandlingen får da
+            status avbrutt.
           </BodyLong>
           <br />
           <div className="flex">
             <Button size="small" variant="danger" onClick={() => setIsOpen(true)} icon={<XMarkIcon aria-hidden />}>
-              Annuller behandling
+              Velg begrunnelse
             </Button>
           </div>
         </ExpansionCard.Content>

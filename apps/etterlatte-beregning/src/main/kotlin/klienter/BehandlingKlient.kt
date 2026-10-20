@@ -30,7 +30,7 @@ import java.util.UUID
 
 interface BehandlingKlient :
     BehandlingTilgangsSjekk,
-    SakTilgangsSjekk {
+    SakTilgangsSjekk { // HEI
     suspend fun hentBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

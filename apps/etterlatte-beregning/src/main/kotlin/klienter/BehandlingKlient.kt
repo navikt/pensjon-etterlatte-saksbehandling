@@ -91,6 +91,7 @@ class BehandlingKlientImpl(
 ) : BehandlingKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+// HEIDU
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 

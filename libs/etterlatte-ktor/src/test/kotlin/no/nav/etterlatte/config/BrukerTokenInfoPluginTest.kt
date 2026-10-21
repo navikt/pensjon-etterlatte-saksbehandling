@@ -1,12 +1,17 @@
 package no.nav.etterlatte.config
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.Hook
+import io.ktor.server.application.call
+import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.intercept
@@ -14,6 +19,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
@@ -22,12 +28,15 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.VanligSystembruker
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class BrukerTokenInfoPluginTest {
     private val oauth = MockOAuth2Server()
@@ -46,14 +55,8 @@ internal class BrukerTokenInfoPluginTest {
     fun `brukerTokenInfo er tilgjengelig etter traadbytte og fjernes etter request`() =
         testApplication {
             runServer(oauth) {
-                intercept(ApplicationCallPipeline.Call) {
-                    requestBrukerTokenInfo.get() shouldBe null
-                    try {
-                        proceed()
-                    } finally {
-                        requestBrukerTokenInfo.get() shouldBe null
-                    }
-                }
+                install(AssertPlugin)
+
                 route("/med-ident") {
                     install(BrukerTokenInfoPlugin)
                     get {
@@ -84,10 +87,11 @@ internal class BrukerTokenInfoPluginTest {
             val foersteRequestStartet = CompletableDeferred<Unit>()
             val andreRequestStartet = CompletableDeferred<Unit>()
             runServer(oauth) {
+                install(AssertPlugin)
                 install(BrukerTokenInfoPlugin)
                 get("/ident") {
                     val ident = requestBrukerTokenInfo.get()?.ident()
-                    withTimeout(10_000) {
+                    withTimeout(10_000.milliseconds) {
                         if (ident == "Z111111") {
                             foersteRequestStartet.complete(Unit)
                             andreRequestStartet.await()
@@ -123,6 +127,7 @@ internal class BrukerTokenInfoPluginTest {
     fun `maskinkall bruker systemnavn og uautentiserte kall avvises`() =
         testApplication {
             runServer(oauth) {
+                install(AssertPlugin)
                 install(BrukerTokenInfoPlugin)
                 get("/ident") {
                     val bruker = requestBrukerTokenInfo.get().shouldBeInstanceOf<VanligSystembruker>()
@@ -137,3 +142,24 @@ internal class BrukerTokenInfoPluginTest {
             requestBrukerTokenInfo.get() shouldBe null
         }
 }
+
+private object AssertHook : Hook<(ApplicationCall) -> Unit> {
+    override fun install(
+        pipeline: ApplicationCallPipeline,
+        handler: (ApplicationCall) -> Unit,
+    ) {
+        pipeline.intercept(ApplicationCallPipeline.Call) {
+            handler(call)
+            proceed()
+            handler(call)
+        }
+    }
+}
+
+/** Sjekker at requestBrukerTokenInfo er null før og etter routen kjøres */
+val AssertPlugin =
+    createRouteScopedPlugin("AssertPlugin") {
+        on(AssertHook) { _ ->
+            requestBrukerTokenInfo.get() shouldBe null
+        }
+    }

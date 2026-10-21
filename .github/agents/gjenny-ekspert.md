@@ -29,7 +29,7 @@ Les disse filene for kontekst når det er relevant:
 - `.github/domenekontekst/utbetaling.md` – utbetalingsdomenet
 - `.github/domenekontekst/brev-api.md` – brevdomenet inkl. gammel vs. ny brevflyt
 - `.github/domenekontekst/eksterne-repos.md` – søknadsdialog, selvbetjening og delt infrastruktur (pensjon-etterlatte og pensjon-etterlatte-felles)
-- `.github/utvidet-oms/` – veikart, beslutninger og spesifikasjon for søknad om utvidet omstillingsstønad (koordineres av agenten `utvidet-oms`)
+- [Utvidet OMS i pensjon-etterlatte](https://github.com/navikt/pensjon-etterlatte/blob/main/.github/utvidet-oms/veikart.md): veikart, beslutninger og spesifikasjon (lokalt: `../pensjon-etterlatte/.github/utvidet-oms/`). Agenten `utvidet-oms` ligger i søknadsrepoet mens søknaden bygges. Agent og dokumentasjon flyttes tilbake hit når arbeidet går over til behandlingsløpet i Gjenny.
 
 ---
 

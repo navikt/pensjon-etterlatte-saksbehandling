@@ -44,7 +44,7 @@ Kontrakt: UtvidetOmstillingsstoenad i pensjon-etterlatte-felles/common
 
 | Repo | Branch | PR | Innhold |
 |------|--------|----|---------|
-| pe | `utvidet-soknad-struktur-ny-app` | – | Skjelett for `apps/utvidet-omstillingsstoenad-ui` |
+| pe | `utvidet-soknad-struktur-ny-app` | – | Skjelett og grunnmur (3.1) for `apps/utvidet-omstillingsstoenad-ui`. Grunnmuren ligger som lokale endringer, ikke committet. |
 | pe | `NAV-31200-sende-inn-utvidet-oms-soeknad` | [#2531](https://github.com/navikt/pensjon-etterlatte/pull/2531) | innsendt-soeknad tar imot den nye søknadstypen |
 | sb | `nav-31200-ta-imot-soknad-utvidet-oms` | [#8971](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/8971) | Mottak i `NySoeknadRiver` og journalføring |
 
@@ -62,7 +62,7 @@ Status: ✅ ferdig · 🚧 pågår · ⏳ ikke startet · ⛔ blokkert (se beslu
 
 | # | Arbeidspakke | Repo | Favro | Status |
 |---|--------------|------|-------|--------|
-| 0.1 | Veikart, beslutninger, spesifikasjon, agent og statusskript | sb | – | 🚧 |
+| 0.1 | Veikart, beslutninger, spesifikasjon, agent og statusskript | sb | – | ✅ [#8974](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/8974) |
 
 ### Fase 1 – Kontrakt og PDF
 
@@ -89,7 +89,7 @@ Status: ✅ ferdig · 🚧 pågår · ⏳ ikke startet · ⛔ blokkert (se beslu
 | # | Arbeidspakke | Favro | Status |
 |---|--------------|-------|--------|
 | 3.0 | Skjelett for appen: forside, kvittering, kladd, i18n, nais dev og workflow | | ✅ på branch |
-| 3.1 | Grunnmur: stegdefinisjon og ruter, fremdrift, Forrige/Neste/Avbryt, react-hook-form per steg, lagring ved stegbytte, frontendmodell og mapping til kontrakten (testet mot eksempel-JSON fra felles) | | ⏳ |
+| 3.1 | Grunnmur: stegdefinisjon og ruter, fremdrift, Forrige/Neste/Avbryt, react-hook-form per steg, lagring ved stegbytte, frontendmodell og mapping til kontrakten (testet mot eksempel-JSON fra felles) | | 🚧 implementert lokalt på eksisterende frontendbranch, klart for review. Favro-kort og PR mangler. |
 | 3.2 | Steg 1 Introside: sjekk av sak, to varianter, samtykke | | ⏳ |
 | 3.3 | Steg 2 Personopplysninger | | ⏳ |
 | 3.4 | Steg 3 Situasjonen din i dag | | ⏳ |
@@ -124,6 +124,7 @@ Status: ✅ ferdig · 🚧 pågår · ⏳ ikke startet · ⛔ blokkert (se beslu
 
 Kort logg over milepæler. Nyeste øverst. Én linje per hendelse, med lenke til PR der det finnes.
 
+- **2026-10-20** – Grunnmur (3.1) implementert lokalt på `utvidet-soknad-struktur-ny-app`: seks stegruter, RHF, fremdrift, navigasjon, kladd og kontraktmapping. Stegene er foreløpig plassholdere uten innsending. Testet mot alle tre eksempel-JSON-ene fra felles. Ingen commit eller PR ennå. Å1, Å2 og Å5 er ikke lukket.
 - **2026-10-20** – Veikart, beslutninger, spesifikasjon og agenten `utvidet-oms` opprettet i saksbehandling.
 - **2026-10** – PR-er åpnet for mottak: pe [#2531](https://github.com/navikt/pensjon-etterlatte/pull/2531) og sb [#8971](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/8971). Skjelett for ny app på branch i pe.
 - **2026-10-09** – Kontrakt v1 merget i felles ([#620](https://github.com/navikt/pensjon-etterlatte-felles/pull/620)).

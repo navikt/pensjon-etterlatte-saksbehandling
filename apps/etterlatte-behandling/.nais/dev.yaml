@@ -12,13 +12,13 @@ spec:
     - "https://etterlatte-behandling.intern.dev.nav.no"
   gcp:
     sqlInstances:
-      - type: POSTGRES_18
+      - type: POSTGRES_14
         tier: db-g1-small
         collation: nb_NO.UTF8
         cascadingDelete: false
-        name: etterlatte-sakogbehandlinger
+        name: etterlatte-sakogbehandlinger-backup
         databases:
-          - name: sakogbehandlinger
+          - name: etterlatte-sakogbehandlinger-backup
             envVarPrefix: DB
         flags:
           - name: max_connections

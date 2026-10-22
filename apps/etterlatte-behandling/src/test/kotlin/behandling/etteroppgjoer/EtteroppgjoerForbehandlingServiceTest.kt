@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -53,6 +54,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -69,6 +71,7 @@ class EtteroppgjoerForbehandlingServiceTest {
         val beregningKlient: BeregningKlient = mockk()
         val behandlingService: BehandlingService = mockk()
         val vedtakInternalService: VedtakInternalService = mockk()
+        val featureToggleService: FeatureToggleService = mockk()
         val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService = EtteroppgjoerOppgaveService(oppgaveService)
         val etteroppgjoerDataService: EtteroppgjoerDataService =
             EtteroppgjoerDataService(behandlingService, vedtakInternalService, beregningKlient)
@@ -87,6 +90,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 vedtakInternalService = vedtakInternalService,
                 etteroppgjoerOppgaveService = etteroppgjoerOppgaveService,
                 etteroppgjoerDataService = etteroppgjoerDataService,
+                featureToggleService = featureToggleService,
             )
 
         val behandling =
@@ -505,9 +509,134 @@ class EtteroppgjoerForbehandlingServiceTest {
         request.captured.sammenlignTilOgMedBehandlingId shouldBe baselineBehandlingId
     }
 
-    @Test
-    fun `uten klage-omgjoering avgrenses ikke sammenligningen til en behandling`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `flerperiode etteroppgjoer krever aktiv toggle foer inntekt beregnes`(toggleAktiv: Boolean) {
         val ctx = TestContext()
+        every {
+            ctx.featureToggleService.isEnabled(EtteroppgjoerToggles.BEREGN_OVER_FLERE_PERIODER, false)
+        } returns toggleAktiv
+        val januar = YearMonth.of(2024, 1)
+        val mars = YearMonth.of(2024, 3)
+        val juli = YearMonth.of(2024, 7)
+        val desember = YearMonth.of(2024, 12)
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                sak = ctx.behandling.sak,
+                innvilgetPeriode = Periode(januar, desember),
+                sisteIverksatteBehandling = ctx.behandling.id,
+            )
+        val request = ctx.stubLagreOgBeregnFaktiskInntekt(forbehandling)
+        coEvery { ctx.vedtakInternalService.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(
+                    no.nav.etterlatte.libs.common.vedtak
+                        .Periode(januar, mars),
+                    emptyList(),
+                ),
+                InnvilgetPeriodeDto(
+                    no.nav.etterlatte.libs.common.vedtak
+                        .Periode(juli, null),
+                    emptyList(),
+                ),
+            )
+
+        if (toggleAktiv) {
+            ctx.service.lagreOgBeregnFaktiskInntekt(forbehandling.id, ctx.faktiskInntektRequest(), simpleSaksbehandler())
+
+            request.captured.innvilgetPeriodeIEtteroppgjoersAar shouldBe Periode(januar, desember)
+            request.captured.innvilgedePerioderIEtteroppgjoersAar shouldBe
+                listOf(Periode(januar, mars), Periode(juli, desember))
+            request.captured.opphoerFom shouldBe null
+        } else {
+            val feil =
+                assertThrows(UgyldigForespoerselException::class.java) {
+                    ctx.service.lagreOgBeregnFaktiskInntekt(forbehandling.id, ctx.faktiskInntektRequest(), simpleSaksbehandler())
+                }
+
+            feil.code shouldBe "FLERPERIODEBEREGNING_IKKE_AKTIV"
+            request.isCaptured shouldBe false
+            verify(exactly = 0) { ctx.dao.lagreForbehandling(any()) }
+        }
+    }
+
+    @Test
+    fun `opprettelse av flerperiode forbehandling blokkeres uten lagring naar toggle er av`() {
+        val ctx = TestContext()
+        ctx.returnsForbehandlinger(emptyList())
+        every {
+            ctx.featureToggleService.isEnabled(EtteroppgjoerToggles.BEREGN_OVER_FLERE_PERIODER, false)
+        } returns false
+        coEvery { ctx.vedtakInternalService.hentIverksatteVedtak(any(), any()) } returns
+            listOf(
+                mockk<VedtakSammendragDto> {
+                    every { vedtakType } returns VedtakType.INNVILGELSE
+                    every { datoAttestert } returns null
+                    every { behandlingId } returns ctx.behandling.id
+                    every { opphoerFraOgMed } returns null
+                },
+            )
+        coEvery { ctx.beregningKlient.harAvkortingMedSanksjonGamleRegler(any(), any(), any()) } returns
+            mockk { every { harGammelBeregningMedSanksjon } returns false }
+        coEvery { ctx.vedtakInternalService.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(
+                    no.nav.etterlatte.libs.common.vedtak
+                        .Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 3)),
+                    emptyList(),
+                ),
+                InnvilgetPeriodeDto(
+                    no.nav.etterlatte.libs.common.vedtak
+                        .Periode(YearMonth.of(2024, 7), null),
+                    emptyList(),
+                ),
+            )
+
+        val feil =
+            assertThrows(UgyldigForespoerselException::class.java) {
+                ctx.service.opprettEtteroppgjoerForbehandling(sakId1, 2024, ctx.oppgaveId, simpleSaksbehandler())
+            }
+
+        feil.code shouldBe "FLERPERIODEBEREGNING_IKKE_AKTIV"
+        verify(exactly = 0) { ctx.dao.lagreForbehandling(any()) }
+        verify(exactly = 0) { ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(any(), any(), any()) }
+    }
+
+    @Test
+    fun `endret oppgjoersperiode blokkerer beregning paa gammel forbehandling`() {
+        val ctx = TestContext()
+        val januar = YearMonth.of(2024, 1)
+        val mars = YearMonth.of(2024, 3)
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                sak = ctx.behandling.sak,
+                innvilgetPeriode = Periode(januar, YearMonth.of(2024, 12)),
+                sisteIverksatteBehandling = ctx.behandling.id,
+            )
+        val request = ctx.stubLagreOgBeregnFaktiskInntekt(forbehandling)
+        coEvery { ctx.vedtakInternalService.hentInnvilgedePerioder(any(), any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(
+                    no.nav.etterlatte.libs.common.vedtak
+                        .Periode(januar, mars),
+                    emptyList(),
+                ),
+            )
+
+        assertThrows(UgyldigForespoerselException::class.java) {
+            ctx.service.lagreOgBeregnFaktiskInntekt(forbehandling.id, ctx.faktiskInntektRequest(), simpleSaksbehandler())
+        }
+
+        request.isCaptured shouldBe false
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `en innvilget periode fungerer med toggle av og paa uten klage-omgjoering`(toggleAktiv: Boolean) {
+        val ctx = TestContext()
+        every {
+            ctx.featureToggleService.isEnabled(EtteroppgjoerToggles.BEREGN_OVER_FLERE_PERIODER, false)
+        } returns toggleAktiv
 
         val forbehandling =
             EtteroppgjoerForbehandling.opprett(

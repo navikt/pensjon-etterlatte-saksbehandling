@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDataService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
@@ -16,6 +17,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -38,15 +40,12 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.Month
-import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerForbehandlingService(
@@ -62,6 +61,7 @@ class EtteroppgjoerForbehandlingService(
     private val vedtakInternalService: VedtakInternalService,
     private val etteroppgjoerOppgaveService: EtteroppgjoerOppgaveService,
     private val etteroppgjoerDataService: EtteroppgjoerDataService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EtteroppgjoerForbehandlingService::class.java)
 
@@ -369,8 +369,19 @@ class EtteroppgjoerForbehandlingService(
             throw ForbehandlingKanIkkeEndres()
         }
 
-        val opphoerFom =
+        val innvilgedePerioder =
             runBlocking { vedtakInternalService.hentInnvilgedePerioder(forbehandling.sak.id, brukerTokenInfo) }
+        val perioderIEtteroppgjoersAar = innvilgedePerioderIEtteroppgjoersAar(innvilgedePerioder, forbehandling.aar)
+        sjekkFlerperiodeEtteroppgjoerAktiv(perioderIEtteroppgjoersAar)
+        if (oppgjoersPeriode(perioderIEtteroppgjoersAar) != forbehandling.innvilgetPeriode) {
+            throw UgyldigForespoerselException(
+                "ETTEROPPGJOER_PERIODER_ENDRET",
+                "Innvilgede perioder er endret siden forbehandlingen ble opprettet. " +
+                    "Avbryt forbehandlingen og opprett en ny før faktisk inntekt fastsettes.",
+            )
+        }
+        val opphoerFom =
+            innvilgedePerioder
                 .maxBy { it.periode.fom }
                 .periode.tom
                 ?.plusMonths(1)
@@ -399,6 +410,7 @@ class EtteroppgjoerForbehandlingService(
                 innvilgetPeriodeIEtteroppgjoersAar = forbehandling.innvilgetPeriode,
                 opphoerFom = opphoerFom,
                 sammenlignTilOgMedBehandlingId = sammenlignTilOgMedBehandlingId,
+                innvilgedePerioderIEtteroppgjoersAar = perioderIEtteroppgjoersAar,
             )
 
         val beregnetEtteroppgjoerResultat =
@@ -575,7 +587,9 @@ class EtteroppgjoerForbehandlingService(
         )
 
         val virkOgOpphoer = runBlocking { vedtakInternalService.hentInnvilgedePerioder(sak.id, brukerTokenInfo) }
-        val innvilgetPeriode = utledInnvilgetPeriode(virkOgOpphoer, inntektsaar)
+        val perioderIEtteroppgjoersAar = innvilgedePerioderIEtteroppgjoersAar(virkOgOpphoer, inntektsaar)
+        sjekkFlerperiodeEtteroppgjoerAktiv(perioderIEtteroppgjoersAar)
+        val innvilgetPeriode = oppgjoersPeriode(perioderIEtteroppgjoersAar)
 
         return EtteroppgjoerForbehandling
             .opprett(
@@ -586,35 +600,15 @@ class EtteroppgjoerForbehandlingService(
             ).also { dao.lagreForbehandling(it) }
     }
 
-    private fun utledInnvilgetPeriode(
-        innvilgedePerioder: List<InnvilgetPeriodeDto>,
-        inntektsaar: Int,
-    ): Periode {
-        if (innvilgedePerioder.isEmpty()) {
+    private fun sjekkFlerperiodeEtteroppgjoerAktiv(perioder: List<Periode>) {
+        if (perioder.size > 1 &&
+            !featureToggleService.isEnabled(EtteroppgjoerToggles.BEREGN_OVER_FLERE_PERIODER, false)
+        ) {
             throw UgyldigForespoerselException(
-                "MANGLER_INNVILGET_PERIODE",
-                "Saken har ingen innvilget periode. Dobbeltsjekk at dette stemmer, hvis saken er opphørt fra første " +
-                    "virkiningstidspunkt er det ikke noe å behandle et etteroppgjør på. Hvis det ikke stemmer " +
-                    "må det meldes feil i porten.",
+                "FLERPERIODEBEREGNING_IKKE_AKTIV",
+                "Etteroppgjør med flere innvilgede perioder er ikke aktivert.",
             )
         }
-        val periode =
-            krevIkkeNull(innvilgedePerioder.singleOrNull()) {
-                "Støtter ikke utledning av innvilget periode med 0 eller mer enn en periode: $innvilgedePerioder"
-            }.periode
-        if (periode.fom > YearMonth.of(inntektsaar, Month.DECEMBER)) {
-            throw InternfeilException(
-                "Sak er ikke innvilget i året $inntektsaar, skal ikke kunne opprette etteroppgjør for året $inntektsaar",
-            )
-        }
-        return Periode(
-            fom = maxOf(periode.fom, YearMonth.of(inntektsaar, Month.JANUARY)),
-            tom =
-                minOf(
-                    periode.tom ?: YearMonth.of(inntektsaar, Month.DECEMBER),
-                    YearMonth.of(inntektsaar, Month.DECEMBER),
-                ),
-        )
     }
 
     fun sjekkHarAapneBehandlinger(

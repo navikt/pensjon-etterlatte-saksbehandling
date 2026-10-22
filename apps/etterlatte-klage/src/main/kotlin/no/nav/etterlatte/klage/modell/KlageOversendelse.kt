@@ -57,6 +57,8 @@ fun SakType.tilYtelse(): Ytelse =
 
 fun KabalHjemmel.tilHjemmel(): Hjemmel =
     when (this) {
+        KabalHjemmel.FVL_33_2 -> Hjemmel.FVL_33
+
         KabalHjemmel.FTRL_22_13_1,
         KabalHjemmel.FTRL_22_13_3,
         KabalHjemmel.FTRL_22_13_4_C,

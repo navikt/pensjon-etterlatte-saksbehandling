@@ -6,9 +6,9 @@
 - Observation: Lessons.md ble ikke oppdatert underveis fordi planmodus absorberte all oppmerksomhet, og meta-oppgaver ble behandlet som cleanup, ikke inline-forpliktelse.
 - Action: Lessons-oppdatering er ikke en post-task jobb – den skal skje i samme svar som kursjusteringen, også under planlegging.
 
-**2026-04-10 / 2026-09-08 — Endring av semantikk i delt kode**
-- Observation: Samme feil i to former. (1) Ved datamodellendring vurderte jeg lag isolert i stedet for som en sammenhengende pipeline, og plasserte data feil. (2) Da `enheterMedSkrivetilgang()` fikk rollekrav, endret betydningen av *alle* `kunSkrivetilgang`-kallsteder seg samtidig — flere lå på rene lese-operasjoner (bl.a. `get("pdf")` for forhåndsvisning) fordi «skrivetilgang» tidligere de facto var enhetstilgang. Regresjonen ble funnet av brukeren i UI.
-- Action: Når semantikken til et delt element (datamodell, tilgangssjekk, felles hjelpefunksjon) endres: list opp alle konsumenter/kallsteder og vurder hver enkelt mot den *nye* betydningen — kallstedene ble skrevet under den gamle. Se særlig etter GET-ruter bak skrive-sperrer. Er en operasjon lese-orientert men har en muterende bieffekt, gate bieffekten på tilgang i stedet for å blokkere hele endepunktet.
+**2026-04-10 / 2026-09-08 / 2026-10-19 — Endring av semantikk i delt kode**
+- Observation: Samme feil i tre former. (1) Ved datamodellendring vurderte jeg lag isolert i stedet for som en sammenhengende pipeline, og plasserte data feil. (2) Da `enheterMedSkrivetilgang()` fikk rollekrav, endret betydningen av *alle* `kunSkrivetilgang`-kallsteder seg samtidig — flere lå på rene lese-operasjoner (bl.a. `get("pdf")` for forhåndsvisning) fordi «skrivetilgang» tidligere de facto var enhetstilgang. Regresjonen ble funnet av brukeren i UI. (3) En ny `SoeknadType`-verdi fra felles så ferdig håndtert ut fordi alt kompilerte, men `else -> throw`-grener og at typen manglet avdød ble ikke fanget av kompilatoren.
+- Action: Når semantikken til et delt element (datamodell, tilgangssjekk, felles hjelpefunksjon) endres: list opp alle konsumenter/kallsteder og vurder hver enkelt mot den *nye* betydningen — kallstedene ble skrevet under den gamle. Se særlig etter GET-ruter bak skrive-sperrer. Er en operasjon lese-orientert men har en muterende bieffekt, gate bieffekten på tilgang i stedet for å blokkere hele endepunktet. Ved nye enum-/sealed-verdier: følg én konkret melding gjennom hele flyten, og let etter `else ->` og typecasts – kompilering er ikke nok.
 
 **2026-04-10 — Sparring / løsningsdesign**
 - Observation: Løsninger ble foreslått før eksisterende sperrer/constraints var kartlagt, og scope vokste uten eksplisitt avklaring.
@@ -105,3 +105,7 @@
 **2026-09-08 — Relaxed mockk skjuler tilgangskonfigurasjon**
 - Observation: Etter at skrivetilgang begynte å kreve AD-rolle, feilet fire rutetester. Rotårsaken var at `ApplicationContext` er `mockk(relaxed = true)`, og MockK returnerer et **ekte tomt HashMap** (ikke en mock) for `Map`-returtyper. `saksbehandlerGroupIdsByKey` ble dermed tomt, alle `harRolle()` ble false, og skrivetilgang ga 403.
 - Action: Når en ny sperre begynner å lese konfigurasjon fra `ApplicationContext`, sjekk hvilke tester som bruker `mockk(relaxed = true)` på den. Relaxed mocks gir tomme collections i stillhet — sperren slår inn uten synlig årsak. Stub `saksbehandlerGroupIdsByKey` og gi tokenet matchende `groups` (mønster: `BehandlingsstatusRoutesTest`).
+
+**2026-10-09 — Dependency-feilsøking**
+- Observation: Jeg behandlet cache som eneste forklaring på vellykket dependency-oppløsning, selv om et tidligere repository kunne levere samme koordinater. Cache-refresh isolerte dermed ikke autentiseringen jeg ville undersøke.
+- Action: Ved reproduksjon av repository-feil, begrens de aktuelle koordinatene til målrepositoryet før cache-refresh; skill kildevalg fra autentisering.

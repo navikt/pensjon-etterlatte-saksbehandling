@@ -18,7 +18,7 @@ spec:
         cascadingDelete: false
         name: etterlatte-sakogbehandlinger-backup
         databases:
-          - name: etterlatte-sakogbehandlinger-backup
+          - name: etterlatte-sakogbehandlinger
             envVarPrefix: DB
         flags:
           - name: max_connections

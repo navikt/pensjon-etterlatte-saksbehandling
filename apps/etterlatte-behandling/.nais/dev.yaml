@@ -16,7 +16,7 @@ spec:
         tier: db-g1-small
         collation: nb_NO.UTF8
         cascadingDelete: false
-        name: etterlatte-sakogbehandlinger
+        name: etterlatte-sakogbehandlinger-backup
         databases:
           - name: sakogbehandlinger
             envVarPrefix: DB

@@ -17,6 +17,9 @@ import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
+private const val NAV_REASON_CODE = "Nav-Reason-Code"
+private const val FALSK_IDENTITET = "falsk_identitet"
+
 class RegoppslagKlient(
     private val client: HttpClient,
     private val url: String,
@@ -60,6 +63,14 @@ class RegoppslagKlient(
                 }
                 HttpStatusCode.Gone -> {
                     logger.warn("Person er død og har ukjent adresse: \n${re.response.bodyAsText()}")
+                    null
+                }
+
+                HttpStatusCode.Conflict if re.response.headers[NAV_REASON_CODE] == FALSK_IDENTITET -> {
+                    logger.warn(
+                        "Regoppslag svarte at identen er registrert som falsk identitet. " +
+                            "Saksbehandler må legge inn mottaker manuelt.",
+                    )
                     null
                 }
 

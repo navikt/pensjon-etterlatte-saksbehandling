@@ -28,6 +28,7 @@ import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlSivilstand
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
 import no.nav.etterlatte.pdl.SoekPersonTreff
+import no.nav.etterlatte.personweb.FalskIdentitetException
 import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.dto.PersonSoekSvar
 import no.nav.etterlatte.personweb.familieOpplysninger.Bostedsadresse
@@ -185,6 +186,18 @@ class ParallelleSannheterService(
 
     fun mapPersonNavnFoedsel(hentPerson: PdlHentPersonNavnFoedselsdato): PersonNavnFoedselsaar =
         runBlocking {
+            val erFalskIdentitet = hentPerson.falskIdentitet?.erFalsk == true
+            // Folkeregisteret annullerer opplysningene på en falsk identitet, så det kan mangle noe å vise
+            if (erFalskIdentitet &&
+                (
+                    hentPerson.navn.isEmpty() ||
+                        hentPerson.foedselsdato.isEmpty() ||
+                        hentPerson.folkeregisteridentifikator.isEmpty()
+                )
+            ) {
+                throw FalskIdentitetException()
+            }
+
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
 
             val fnr =
@@ -211,6 +224,7 @@ class ParallelleSannheterService(
                 doedsdato = doedsfall?.doedsdato,
                 // PPS støtter p.t. ikke verge. Henter derfor ut første fra listen hvis den ikke er null/tom
                 vergemaal = hentPerson.vergemaalEllerFremtidsfullmakt?.firstNotNullOfOrNull { VergeMapper.mapVerge(it) },
+                erFalskIdentitet = erFalskIdentitet,
             )
         }
 

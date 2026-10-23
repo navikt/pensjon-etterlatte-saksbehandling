@@ -64,6 +64,7 @@ export interface IPdlPersonNavnFoedsel {
   foedselsdato: Date | undefined
   doedsdato: Date | undefined
   vergemaal: VergemaalEllerFremtidsfullmakt | undefined
+  erFalskIdentitet?: boolean
 }
 
 export interface Utland {

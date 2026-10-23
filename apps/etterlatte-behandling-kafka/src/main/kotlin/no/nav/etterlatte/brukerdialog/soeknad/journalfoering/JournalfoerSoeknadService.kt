@@ -7,9 +7,10 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
-import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.retryHvis
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.PdfGenereringException
 import org.slf4j.LoggerFactory
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Base64
@@ -128,7 +129,7 @@ class JournalfoerSoeknadService(
         logger.info("Oppretter arkiv PDF for søknad med id $soeknadId")
 
         return runBlocking {
-            retry {
+            retryHvis(skalProeveIgjen = { it !is PdfGenereringException || it.kanProevesIgjen }) {
                 pdfgenKlient.genererPdf(soeknad, template)
             }.let {
                 when (it) {

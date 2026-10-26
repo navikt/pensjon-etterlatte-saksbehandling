@@ -189,17 +189,8 @@ class ParallelleSannheterService(
 
     fun mapPersonNavnFoedsel(hentPerson: PdlHentPersonNavnFoedselsdato): PersonNavnFoedselsaar =
         runBlocking {
-            val erFalskIdentitet =
-                featureToggleService.isEnabled(FellesFeatureToggle.HaandterFalskIdentitet, false) &&
-                    hentPerson.falskIdentitet?.erFalsk == true
-            // Folkeregisteret annullerer opplysningene på en falsk identitet, så det kan mangle noe å vise
-            if (erFalskIdentitet &&
-                (
-                    hentPerson.navn.isEmpty() ||
-                        hentPerson.foedselsdato.isEmpty() ||
-                        hentPerson.folkeregisteridentifikator.isEmpty()
-                )
-            ) {
+            val erFalskIdentitet = erHaandtertFalskIdentitet(hentPerson)
+            if (erFalskIdentitet && hentPerson.manglerOpplysninger()) {
                 throw FalskIdentitetException()
             }
 
@@ -232,6 +223,14 @@ class ParallelleSannheterService(
                 erFalskIdentitet = erFalskIdentitet,
             )
         }
+
+    private fun erHaandtertFalskIdentitet(hentPerson: PdlHentPersonNavnFoedselsdato): Boolean =
+        hentPerson.falskIdentitet?.erFalsk == true &&
+            featureToggleService.isEnabled(FellesFeatureToggle.HaandterFalskIdentitet, false)
+
+    // Folkeregisteret annullerer opplysningene på en falsk identitet, så det kan mangle noe å vise
+    private fun PdlHentPersonNavnFoedselsdato.manglerOpplysninger(): Boolean =
+        navn.isEmpty() || foedselsdato.isEmpty() || folkeregisteridentifikator.isEmpty()
 
     suspend fun mapFoedselsdato(hentFoedselsdato: PdlHentFoedselsdato): PdlFoedselsdato =
         ppsKlient.avklarFoedselsdato(hentFoedselsdato.foedselsdato)

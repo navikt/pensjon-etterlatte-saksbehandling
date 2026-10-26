@@ -7,6 +7,7 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -70,8 +71,7 @@ class RegoppslagKlient(
                     null
                 }
 
-                HttpStatusCode.Conflict if re.response.headers[NAV_REASON_CODE] == FALSK_IDENTITET &&
-                    featureToggleService.isEnabled(FellesFeatureToggle.HaandterFalskIdentitet, false) -> {
+                HttpStatusCode.Conflict if erHaandtertFalskIdentitet(re.response) -> {
                     logger.warn(
                         "Regoppslag svarte at identen er registrert som falsk identitet. " +
                             "Saksbehandler må legge inn mottaker manuelt.",
@@ -90,6 +90,10 @@ class RegoppslagKlient(
                 }
             }
         }
+
+    private fun erHaandtertFalskIdentitet(response: HttpResponse): Boolean =
+        response.headers[NAV_REASON_CODE] == FALSK_IDENTITET &&
+            featureToggleService.isEnabled(FellesFeatureToggle.HaandterFalskIdentitet, false)
 }
 
 data class RegoppslagRequest(

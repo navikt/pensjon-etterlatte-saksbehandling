@@ -47,6 +47,7 @@ export interface GenerellOppgaveDto {
 export interface EndringLinje {
   tittel: string
   beskrivelse?: string
+  aarsakTilAvbrytelse?: string | null
 }
 
 export interface OppgaveSaksbehandler {

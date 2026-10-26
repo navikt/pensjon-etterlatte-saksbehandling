@@ -96,30 +96,33 @@ class DollyService(
                 testnavClient
                     .hentPersonInfo(bestillinger.identer.map { it.ident })
                     .mapNotNull { personResponse ->
-                        val avdoed = personResponse.ident
-                        val iBruk = bestillinger.identer.any { avdoed == it.ident && it.iBruk }
+                        val hovedPerson = personResponse.ident
+                        val iBruk = bestillinger.identer.any { hovedPerson == it.ident && it.iBruk }
 
-                        val gjenlevendeEktefelle =
+                        val ektefelle =
                             personResponse.person.sivilstand
                                 .firstOrNull { it.type == "GIFT" }
                                 ?.relatertVedSivilstand
 
-                        when (gjenlevendeEktefelle) {
-                            null -> {
-                                null
+                        val avdoed =
+                            if (personResponse.person.doedsfall.isEmpty()) {
+                                ektefelle
+                            } else {
+                                hovedPerson
                             }
 
-                            else -> {
-                                ForenkletFamilieModell(
-                                    ibruk = iBruk,
-                                    avdoed = avdoed,
-                                    gjenlevende = gjenlevendeEktefelle,
-                                    barn =
-                                        personResponse.person.forelderBarnRelasjon
-                                            .filter { it.relatertPersonsRolle == "BARN" }
-                                            .map { it.relatertPersonsIdent },
-                                )
-                            }
+                        if (avdoed == null || ektefelle == null) {
+                            null
+                        } else {
+                            ForenkletFamilieModell(
+                                ibruk = iBruk,
+                                avdoed = avdoed,
+                                gjenlevende = ektefelle,
+                                barn =
+                                    personResponse.person.forelderBarnRelasjon
+                                        .filter { it.relatertPersonsRolle == "BARN" }
+                                        .map { it.relatertPersonsIdent },
+                            )
                         }
                     }
             }

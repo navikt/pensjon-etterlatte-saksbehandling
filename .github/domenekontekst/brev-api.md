@@ -16,7 +16,7 @@ Oppretter, redigerer, ferdigstiller og distribuerer brev til brukere. Bruker Bre
 | `Brev` | Hoveddokument med status, mottaker, språk og innhold |
 | `BrevStatus` | `OPPRETTET` → `FERDIGSTILT` → `DISTRIBUERT` (eller `UTGAAR`) |
 | `Brevprosesstype` | Kategori: `VEDTAK`, `VARSELBREV`, `NOTAT`, `TILBAKEKREVING`, osv. |
-| `Mottaker` | Person eller organisasjon som mottar brevet. Adressen hentes fra regoppslag (`RegoppslagKlient`). Ukjent adresse (404), død person (410) og falsk identitet (409 med `Nav-Reason-Code: falsk_identitet`) gir tom mottaker som saksbehandler må fylle ut manuelt |
+| `Mottaker` | Person eller organisasjon som mottar brevet. Adressen hentes fra regoppslag (`RegoppslagKlient`). Ukjent adresse (404) og død person med ukjent adresse (410) gir tom mottaker som saksbehandler må fylle ut manuelt. Det samme gjelder falsk identitet (409 med `Nav-Reason-Code: falsk_identitet`) når `pensjon-etterlatte.haandter-falsk-identitet` er på. Når flagget er av, gir 409 feil som før |
 | `RedigerbartBrev` | Brev med fritekstinnhold som saksbehandler kan endre |
 
 ## Nøkkelklasser

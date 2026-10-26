@@ -11,6 +11,8 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.ktor.behandlingsnummer
@@ -23,6 +25,7 @@ private const val FALSK_IDENTITET = "falsk_identitet"
 class RegoppslagKlient(
     private val client: HttpClient,
     private val url: String,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(RegoppslagKlient::class.java)
 
@@ -61,12 +64,14 @@ class RegoppslagKlient(
                     logger.info("Bruker har ukjent adresse")
                     null
                 }
+
                 HttpStatusCode.Gone -> {
                     logger.warn("Person er død og har ukjent adresse: \n${re.response.bodyAsText()}")
                     null
                 }
 
-                HttpStatusCode.Conflict if re.response.headers[NAV_REASON_CODE] == FALSK_IDENTITET -> {
+                HttpStatusCode.Conflict if re.response.headers[NAV_REASON_CODE] == FALSK_IDENTITET &&
+                    featureToggleService.isEnabled(FellesFeatureToggle.HaandterFalskIdentitet, false) -> {
                     logger.warn(
                         "Regoppslag svarte at identen er registrert som falsk identitet. " +
                             "Saksbehandler må legge inn mottaker manuelt.",

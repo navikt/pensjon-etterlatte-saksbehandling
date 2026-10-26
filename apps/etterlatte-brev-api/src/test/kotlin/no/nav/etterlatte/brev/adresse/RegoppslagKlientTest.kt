@@ -14,6 +14,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson3.jackson
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -22,9 +24,11 @@ import org.junit.jupiter.api.assertThrows
 
 internal class RegoppslagKlientTest {
     private val ident = SOEKER_FOEDSELSNUMMER.value
+    private val featureToggleService = DummyFeatureToggleService()
 
     @Test
     fun `409 med reason code falsk_identitet gir null`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, true)
         val klient =
             klient {
                 respond(
@@ -39,6 +43,7 @@ internal class RegoppslagKlientTest {
 
     @Test
     fun `409 med reason code falsk_identitet caches ikke`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, true)
         var antallKall = 0
         val klient =
             klient {
@@ -56,6 +61,7 @@ internal class RegoppslagKlientTest {
 
     @Test
     fun `409 uten reason code falsk_identitet kaster feil`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, true)
         val klient = klient { respond("", HttpStatusCode.Conflict) }
 
         val feil =
@@ -64,6 +70,27 @@ internal class RegoppslagKlientTest {
             }
 
         feil.code shouldBe "UKJENT_FEIL_REGOPPSLAG"
+    }
+
+    @Test
+    fun `409 med falsk identitet gir eksisterende feil med avslatt eller udefinert toggle`() {
+        val klient =
+            klient {
+                respond("", HttpStatusCode.Conflict, headersOf("Nav-Reason-Code", "falsk_identitet"))
+            }
+
+        fun sjekkEksisterendeFeil() {
+            val feil =
+                assertThrows<ForespoerselException> {
+                    runBlocking { klient.hentMottakerAdresse(SakType.BARNEPENSJON, ident) }
+                }
+            feil.status shouldBe HttpStatusCode.Conflict.value
+            feil.code shouldBe "UKJENT_FEIL_REGOPPSLAG"
+        }
+
+        sjekkEksisterendeFeil()
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, false)
+        sjekkEksisterendeFeil()
     }
 
     @Test
@@ -110,6 +137,6 @@ internal class RegoppslagKlientTest {
                 expectSuccess = true
                 install(ContentNegotiation) { jackson { } }
             }
-        return RegoppslagKlient(httpClient, "http://regoppslag")
+        return RegoppslagKlient(httpClient, "http://regoppslag", featureToggleService)
     }
 }

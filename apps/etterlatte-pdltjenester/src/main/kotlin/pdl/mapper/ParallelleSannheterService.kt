@@ -2,6 +2,8 @@ package no.nav.etterlatte.pdl.mapper
 
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.behandling.RelativPersonrolle
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -43,6 +45,7 @@ class ParallelleSannheterService(
     private val ppsKlient: ParallelleSannheterKlient,
     private val pdlKlient: PdlKlient,
     private val pdlOboKlient: PdlOboKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -186,7 +189,9 @@ class ParallelleSannheterService(
 
     fun mapPersonNavnFoedsel(hentPerson: PdlHentPersonNavnFoedselsdato): PersonNavnFoedselsaar =
         runBlocking {
-            val erFalskIdentitet = hentPerson.falskIdentitet?.erFalsk == true
+            val erFalskIdentitet =
+                featureToggleService.isEnabled(FellesFeatureToggle.HaandterFalskIdentitet, false) &&
+                    hentPerson.falskIdentitet?.erFalsk == true
             // Folkeregisteret annullerer opplysningene på en falsk identitet, så det kan mangle noe å vise
             if (erFalskIdentitet &&
                 (

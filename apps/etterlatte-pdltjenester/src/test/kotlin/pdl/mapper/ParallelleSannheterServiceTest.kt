@@ -3,6 +3,8 @@ package no.nav.etterlatte.pdl.mapper
 import io.ktor.http.HttpStatusCode
 import io.mockk.coEvery
 import io.mockk.mockk
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
@@ -34,7 +36,8 @@ internal class ParallelleSannheterServiceTest {
     private val pdlKlient = mockk<PdlKlient>()
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
 
-    private val parallelleSannheterService = ParallelleSannheterService(ppsKlient, pdlKlient, mockk())
+    private val featureToggleService = DummyFeatureToggleService()
+    private val parallelleSannheterService = ParallelleSannheterService(ppsKlient, pdlKlient, mockk(), featureToggleService)
 
     @Test
     fun `ved feil fra pps avklar statsborgerskap tar vi med pdl-dataene`() {
@@ -182,6 +185,7 @@ internal class ParallelleSannheterServiceTest {
 
     @Test
     fun `navn og foedsel for falsk identitet med annullerte opplysninger gir FalskIdentitetException`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, true)
         val hentPerson =
             pdlHentPersonNavnFoedselsdato(
                 navn = emptyList(),
@@ -196,6 +200,7 @@ internal class ParallelleSannheterServiceTest {
 
     @Test
     fun `navn og foedsel for falsk identitet med opplysninger mappes med erFalskIdentitet`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, true)
         val hentPerson = pdlHentPersonNavnFoedselsdato(falskIdentitet = PdlFalskIdentitet(erFalsk = true))
         hentPerson.setupNavnFoedselMock()
 
@@ -207,12 +212,45 @@ internal class ParallelleSannheterServiceTest {
 
     @Test
     fun `navn og foedsel uten falsk identitet mappes med erFalskIdentitet false`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, true)
         val hentPerson = pdlHentPersonNavnFoedselsdato(falskIdentitet = null)
         hentPerson.setupNavnFoedselMock()
 
         val person = parallelleSannheterService.mapPersonNavnFoedsel(hentPerson)
 
         Assertions.assertFalse(person.erFalskIdentitet)
+    }
+
+    @Test
+    fun `avslatt eller udefinert toggle ignorerer falsk identitet`() {
+        val hentPerson = pdlHentPersonNavnFoedselsdato(falskIdentitet = PdlFalskIdentitet(erFalsk = true))
+        hentPerson.setupNavnFoedselMock()
+
+        Assertions.assertFalse(parallelleSannheterService.mapPersonNavnFoedsel(hentPerson).erFalskIdentitet)
+
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, false)
+
+        Assertions.assertFalse(parallelleSannheterService.mapPersonNavnFoedsel(hentPerson).erFalskIdentitet)
+    }
+
+    @Test
+    fun `avslatt toggle bruker eksisterende avklaring og feil for annullerte opplysninger`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, false)
+        val hentPerson =
+            pdlHentPersonNavnFoedselsdato(
+                navn = emptyList(),
+                foedselsdato = emptyList(),
+                falskIdentitet = PdlFalskIdentitet(erFalsk = true),
+            )
+        val ppsFeil = ParallelleSannheterException("Kunne ikke avklare navn", HttpStatusCode.NotFound)
+        coEvery { ppsKlient.avklarNavn(emptyList()) } throws ppsFeil
+
+        val feil =
+            assertThrows<ParallelleSannheterException> {
+                parallelleSannheterService.mapPersonNavnFoedsel(hentPerson)
+            }
+
+        Assertions.assertSame(ppsFeil, feil)
     }
 
     private fun pdlHentPersonNavnFoedselsdato(

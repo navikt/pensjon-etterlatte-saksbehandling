@@ -66,6 +66,7 @@ import no.nav.etterlatte.brev.vedtaksbrev.StrukturertBrevService
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
+import no.nav.etterlatte.config.requestBrukerTokenInfo
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.PdfgenrsFeatureToggle
@@ -98,6 +99,7 @@ internal class ApplicationContext {
                 host = config.getString("funksjonsbrytere.unleash.host"),
                 apiKey = config.getString("funksjonsbrytere.unleash.token"),
             ),
+            brukerIdent = { requestBrukerTokenInfo.get()?.ident() },
         )
     val regoppslagKlient =
         RegoppslagKlient(httpClient(REGOPPSLAG_SCOPE), env.requireEnvValue(REGOPPSLAG_URL))

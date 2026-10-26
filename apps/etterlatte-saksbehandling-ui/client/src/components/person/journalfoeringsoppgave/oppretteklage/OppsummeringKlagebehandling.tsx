@@ -1,5 +1,5 @@
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router'
 import { Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'

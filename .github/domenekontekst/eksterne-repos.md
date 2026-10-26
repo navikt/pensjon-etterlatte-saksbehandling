@@ -88,12 +88,6 @@ Det er ingen automatisk fallback ved genereringsfeil.
 For lokal kjøring brukes `PDFGEN_URL=http://localhost:8081/api/v1/genpdf` og
 `PDFGENRS_URL=http://localhost:8082/api/v1/genpdf`.
 
-Begge klientene krever en vellykket HTTP-respons med `application/pdf` og
-PDF-signatur før innholdet brukes. Kafka-flytene gjentar ikke permanente
-PDF-feil (blant annet 400 og 413) i den lokale retry-løkken; 408, 429,
-5xx og transportfeil beholder retries. Dette endrer ikke eventuell
-gjenlevering av hendelser fra Kafka.
-
 Produksjonskonfigurasjonen for konsumentene er klargjort, men `ey-pdfgenrs` må
 ha en produksjonsdeployment med inbound-tilgang før bryterne aktiveres der.
 

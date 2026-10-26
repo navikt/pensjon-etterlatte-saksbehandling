@@ -471,19 +471,16 @@ internal class SanksjonServiceTest {
     @Nested
     inner class KopierSanksjon {
         @Test
-        fun `Skal kopiere sanksjoner fra forrige behandling`() {
+        fun `skal kopiere februar-sanksjon fra oppgitt kilde selv om siste iverksatte er opphoer fra mars`() {
             val behandlingId = UUID.randomUUID()
             val forrigeBehandlingId = UUID.randomUUID()
-            val sanksjon = lagreSanksjon()
-            val sanksjoner = mockk<Sanksjon>()
-
-            val forrigeBehandling =
-                behandling(
-                    id = forrigeBehandlingId,
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    status = BehandlingStatus.BEREGNET,
+            val opphoerBehandlingId = UUID.randomUUID()
+            val sanksjon =
+                sanksjon(
+                    behandlingId = forrigeBehandlingId,
+                    fom = YearMonth.of(2026, 2),
+                    tom = YearMonth.of(2026, 2),
                 )
-
             val behandling =
                 behandling(
                     id = behandlingId,
@@ -491,39 +488,27 @@ internal class SanksjonServiceTest {
                     status = BehandlingStatus.BEREGNET,
                 )
 
-            every { sanksjonRepository.hentSanksjon(behandlingId) } returns listOf(sanksjoner)
-            every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns emptyList()
-            every {
-                sanksjonRepository.opprettSanksjon(
-                    forrigeBehandlingId,
-                    sakId,
-                    bruker.ident,
-                    sanksjon,
-                )
-            } returns Unit
-            coEvery { behandlingKlient.kanBeregnes(forrigeBehandlingId, any(), any()) } returns true
+            every { sanksjonRepository.hentSanksjon(behandlingId) } returns emptyList()
+            every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns listOf(sanksjon)
+            every { sanksjonRepository.hentSanksjon(opphoerBehandlingId) } returns emptyList()
+            every { sanksjonRepository.opprettSanksjonFraKopi(behandlingId, sanksjon.sakId, sanksjon) } just runs
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.hentBehandling(forrigeBehandlingId, bruker) } returns forrigeBehandling
             coEvery {
                 behandlingKlient.hentSisteIverksatteBehandling(
                     behandling.sak,
                     bruker,
                 )
-            } returns SisteIverksatteBehandling(forrigeBehandlingId)
+            } returns SisteIverksatteBehandling(opphoerBehandlingId)
 
             runBlocking {
-                service.opprettEllerOppdaterSanksjon(forrigeBehandlingId, sanksjon, bruker)
+                service.kopierSanksjon(behandlingId, forrigeBehandlingId, bruker)
             }
 
-            runBlocking {
-                service.kopierSanksjon(behandlingId, bruker) shouldBe Unit
+            verify(exactly = 1) {
+                sanksjonRepository.opprettSanksjonFraKopi(behandlingId, sanksjon.sakId, sanksjon)
             }
-
-            service.hentSanksjon(behandlingId) shouldBe listOf(sanksjoner)
-
-            coVerify {
-                sanksjonRepository.hentSanksjon(forrigeBehandlingId)
-            }
+            verify(exactly = 0) { sanksjonRepository.hentSanksjon(opphoerBehandlingId) }
+            coVerify(exactly = 0) { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) }
         }
 
         @Test
@@ -542,9 +527,9 @@ internal class SanksjonServiceTest {
 
             every { sanksjonRepository.hentSanksjon(behandlingId) } returns sanksjonerIBehandling
             every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns sanksjonerForrige
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, any()) } returns
-                SisteIverksatteBehandling(forrigeBehandlingId)
+            runBlocking { service.kopierSanksjon(behandlingId, forrigeBehandlingId, bruker) }
 
             // Vi oppretter ingen sanksjoner, siden behandlingen har allerede sanksjoner lagt inn
             verify(exactly = 0) {

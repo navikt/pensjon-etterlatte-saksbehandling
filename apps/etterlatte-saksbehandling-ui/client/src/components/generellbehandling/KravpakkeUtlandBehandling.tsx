@@ -43,7 +43,7 @@ import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
-import { NavigateFunction } from 'react-router-dom'
+import { NavigateFunction } from 'react-router'
 import { Accent600 } from '@navikt/ds-tokens/js'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`

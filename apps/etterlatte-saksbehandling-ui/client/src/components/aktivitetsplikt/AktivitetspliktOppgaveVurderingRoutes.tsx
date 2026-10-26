@@ -1,5 +1,5 @@
 import { StatusBar } from '~shared/statusbar/Statusbar'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router'
 import React, { createContext, useContext } from 'react'
 import { AktivitetspliktSidemeny } from '~components/aktivitetsplikt/sidemeny/AktivitetspliktSidemeny'
 import {

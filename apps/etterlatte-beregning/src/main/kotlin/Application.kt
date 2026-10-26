@@ -4,6 +4,7 @@ import no.nav.etterlatte.avkorting.avkorting
 import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.grunnlag.beregningsGrunnlag
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.config.BrukerTokenInfoPlugin
 import no.nav.etterlatte.grunnbeloep.grunnbeloep
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
@@ -29,6 +30,7 @@ class Server(
                 httpPort = properties.httpPort,
                 applicationConfig = context.config,
             ) {
+                install(BrukerTokenInfoPlugin)
                 beregning(beregningService, behandlingKlient)
                 beregningsGrunnlag(beregningsGrunnlagService, behandlingKlient)
                 avkorting(

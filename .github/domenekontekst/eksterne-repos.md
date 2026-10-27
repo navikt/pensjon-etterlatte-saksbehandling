@@ -38,6 +38,18 @@ Meldingsfelter på Kafka-pakken:
 @event_name, @skjema_info, @lagret_soeknad_id, @template, @fnr_soeker, @hendelse_gyldig_til
 ```
 
+`NySoeknadRiver` svarer med `soeknadFordelt` på pakken. `true` gjør at `innsendt-soeknad` publiserer `trenger_behandling`, slik at det opprettes behandling. `false` betyr at søknaden er journalført, men at Gjenny ikke skal opprette behandling automatisk.
+
+#### Utvidet omstillingsstønad (`SoeknadType.UTVIDET_OMSTILLINGSSTOENAD`)
+
+Søknadstypen er definert i `pensjon-etterlatte-felles/common` (`UtvidetOmstillingsstoenad`). Søknaden har bare søker – ikke avdød eller barn – så den kan ikke brukes til å lage persongalleri eller opplysninger slik vanlige søknader gjør.
+
+Behandlingsløpet er ikke avklart ennå. Inntil videre gjør `NySoeknadRiver` dette:
+1. Finner eller oppretter OMS-sak
+2. Journalfører søknaden på saken med tittel «Søknad om utvidet omstillingsstønad» (PDF-mal `utvidet_omstillingsstoenad_v<versjon>` i ey-pdfgen)
+3. Oppretter en `TILLEGGSINFORMASJON`-oppgave som saksbehandler håndterer manuelt
+4. Svarer med `soeknadFordelt = false`, slik at det **ikke** opprettes behandling
+
 #### Selvbetjening (selvbetjening-backend → Gjenny)
 
 `selvbetjening-backend` kaller `etterlatte-api` (ikke saksbehandlings-BFF-en) for å sjekke sak:

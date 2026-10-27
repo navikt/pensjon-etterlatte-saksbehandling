@@ -656,6 +656,7 @@ enum class KabalHjemmel(
 
     FVL_31(GyldigForYtelse.OmsOgBp, "Fvl. § 31"),
     FVL_32(GyldigForYtelse.OmsOgBp, "Fvl. § 32"),
+    FVL_33(GyldigForYtelse.OmsOgBp, "Fvl. § 33"),
     FVL_33_2(GyldigForYtelse.OmsOgBp, "Fvl. § 33-2"),
     FVL_35_1_C(GyldigForYtelse.OmsOgBp, "Fvl. § 35, 1.ledd c)"),
     FVL_36(GyldigForYtelse.OmsOgBp, "Fvl. § 36"),

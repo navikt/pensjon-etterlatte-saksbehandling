@@ -51,6 +51,7 @@ class ApplicationContext {
     private val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(
             properties = featureToggleProperties(config),
+            brukerIdent = { requestBrukerTokenInfo.get()?.ident() },
         )
 
     val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlientImpl(config, httpClient())

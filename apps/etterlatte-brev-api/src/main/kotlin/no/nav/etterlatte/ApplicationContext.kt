@@ -12,6 +12,7 @@ import no.nav.etterlatte.BrevKey.SAF_BASE_URL
 import no.nav.etterlatte.BrevKey.SAF_SCOPE
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.EnvKey.NORG2_URL
+import no.nav.etterlatte.EnvKey.PDFGENRS_URL
 import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
@@ -68,6 +69,7 @@ import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.config.requestBrukerTokenInfo
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.PdfgenrsFeatureToggle
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -83,10 +85,8 @@ val sikkerLogg: Logger = sikkerlogger()
 
 internal class ApplicationContext {
     val config = ConfigFactory.load()
-
     val env = Miljoevariabler.systemEnv()
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
-
     val brevbaker =
         BrevbakerKlient(
             httpClient(BREVBAKER_SCOPE),
@@ -101,7 +101,6 @@ internal class ApplicationContext {
             ),
             brukerIdent = { requestBrukerTokenInfo.get()?.ident() },
         )
-
     val regoppslagKlient =
         RegoppslagKlient(httpClient(REGOPPSLAG_SCOPE), env.requireEnvValue(REGOPPSLAG_URL), featureToggleService)
     val saksbehandlerKlient = SaksbehandlerKlient(config, httpClient())
@@ -113,41 +112,29 @@ internal class ApplicationContext {
     val trygdetidKlient =
         TrygdetidKlient(config, httpClient())
     val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlient(config, httpClient())
-
     val behandlingService = BehandlingService(behandlingKlient)
     val oppgaveService = OppgaveService(oppgaveKlient)
     val trygdetidService = TrygdetidService(trygdetidKlient)
-
     val beregningService = BeregningService(beregningKlient)
     val norg2Klient = Norg2Klient(env.requireEnvValue(NORG2_URL), httpClient())
     val adresseService = AdresseService(norg2Klient, saksbehandlerKlient, regoppslagKlient, pdltjenesterKlient)
-
     val grunnlagService = GrunnlagService(behandlingKlient)
     val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
     val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingKlient)
-
     val datasource = DataSourceBuilder.createDataSource(env)
-
     val brevdataFacade =
         BrevdataFacade(
             vedtaksvurderingService,
             grunnlagService,
             behandlingService,
         )
-
     val db = BrevRepository(datasource)
-
     val dokarkivKlient = DokarkivKlient(config)
-
     val dokarkivService = DokarkivServiceImpl(dokarkivKlient)
-
     val distribusjonKlient = DistribusjonKlient(config)
     val dokdistKanalKlient = DokDistKanalKlient(config)
-
     val distribusjonService = DistribusjonServiceImpl(distribusjonKlient)
-
     val migreringBrevDataService = MigreringBrevDataService(beregningService)
-
     val brevDataMapperRedigerbartUtfallVedtak =
         BrevDataMapperRedigerbartUtfallVedtak(
             behandlingService,
@@ -155,7 +142,6 @@ internal class ApplicationContext {
             migreringBrevDataService,
             trygdetidService,
         )
-
     val brevDataMapperFerdigstilling =
         BrevDataMapperFerdigstillingVedtak(
             beregningService,
@@ -163,15 +149,10 @@ internal class ApplicationContext {
             behandlingService,
             vilkaarsvurderingService,
         )
-
     val brevKodeMappingVedtak = BrevKodeMapperVedtak()
-
     val brevbakerService = BrevbakerService(brevbaker)
-
     val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
-
     val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
-
     val innholdTilRedigerbartBrevHenter =
         InnholdTilRedigerbartBrevHenter(
             brevdataFacade,
@@ -181,10 +162,8 @@ internal class ApplicationContext {
         )
     val brevoppretter =
         Brevoppretter(adresseService, db, innholdTilRedigerbartBrevHenter)
-
     val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
-
     val vedtaksbrevService =
         VedtaksbrevService(
             db,
@@ -200,7 +179,6 @@ internal class ApplicationContext {
         )
     val brevDataMapperFerdigstillVarsel =
         BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, behandlingService, vilkaarsvurderingService)
-
     val varselbrevService =
         VarselbrevService(
             db,
@@ -210,13 +188,10 @@ internal class ApplicationContext {
             brevDataMapperFerdigstillVarsel,
             behandlingKlient,
         )
-
     val journalfoerBrevService = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
-
     val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue(CLAMAV_ENDPOINT_URL))
     val virusScanService = VirusScanService(clamAvClient)
     val pdfService = PDFService(db, virusScanService, pdfGenerator)
-
     val brevService =
         BrevService(
             db,
@@ -229,12 +204,10 @@ internal class ApplicationContext {
             brevdataFacade,
             adresseService,
         )
-
     val safService =
         SafService(
             SafKlient(httpClient(), env.requireEnvValue(SAF_BASE_URL), env.requireEnvValue(SAF_SCOPE)),
         )
-
     val oversendelseBrevService =
         OversendelseBrevServiceImpl(
             brevRepository = db,
@@ -243,14 +216,19 @@ internal class ApplicationContext {
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
         )
-
     val notatRepository = NotatRepository(datasource)
-    val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue(PDFGEN_URL))
+    val pdfGeneratorKlient =
+        PdfGeneratorKlient(
+            httpClient(),
+            env.requireEnvValue(PDFGEN_URL),
+            env.requireEnvValue(PDFGENRS_URL),
+            {
+                PdfgenrsFeatureToggle.brukPdfgenrs(it, featureToggleService)
+            },
+        )
     val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
     val notatService = NotatService(notatRepository, pdfGeneratorKlient, dokarkivService, grunnlagService)
-
     val tilgangssjekker = Tilgangssjekker(config, httpClient())
-
     val tilbakekrevingBrevService =
         StrukturertBrevService(
             brevbakerService,

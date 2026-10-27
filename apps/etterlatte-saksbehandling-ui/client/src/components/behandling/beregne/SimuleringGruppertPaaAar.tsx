@@ -90,7 +90,7 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
         const tilbakekreving = hentPerioderForAar(aarstall, data.tilbakekreving)
 
         return (
-          <Box key={aarstall} maxWidth="70rem" padding="space-20">
+          <Box key={aarstall} maxWidth="70rem" background="neutral-soft" padding="space-20">
             <Heading level="3" size="small">
               Resultat av simulering i {aarstall}
             </Heading>
@@ -118,7 +118,7 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
         )
       })}
       {data.oppsummeringer.perAar.length > 1 && (
-        <Box maxWidth="70rem" padding="space-20">
+        <Box maxWidth="70rem" background="neutral-soft" padding="space-20">
           <Heading level="3" size="small">
             Etterbetaling for hele perioden
           </Heading>

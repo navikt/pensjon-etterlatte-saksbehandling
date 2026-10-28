@@ -150,4 +150,5 @@ fun KlageinstansUtfall.tilResultat(): BehandlingResultat =
         KlageinstansUtfall.INNSTILLING_STADFESTELSE -> BehandlingResultat.IKKE_MEDHOLD
         KlageinstansUtfall.INNSTILLING_AVVIST -> BehandlingResultat.IKKE_MEDHOLD
         KlageinstansUtfall.MEDHOLD_ETTER_FVL_35 -> BehandlingResultat.MEDHOLD
+        KlageinstansUtfall.INNSTILLING_GJENOPPTAS_IKKE -> BehandlingResultat.IKKE_MEDHOLD
     }

@@ -461,7 +461,7 @@ class EtteroppgjoerForbehandlingDaoTest(
     }
 
     @Test
-    fun `PGI kan bare mangle ved kopiering naar det er tillatt`() {
+    fun `PGI kan bare mangle ved kopiering hvis det er en utenlandssak`() {
         val forbehandlingId = opprettForbehandling(inntektsaar = 2024).id
         val nyForbehandlingId = opprettForbehandling(inntektsaar = 2024).id
 

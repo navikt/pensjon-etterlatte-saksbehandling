@@ -73,6 +73,30 @@ class SimuleringOppsummeringTest {
         }
     }
 
+    @Test
+    fun `avgrenser tilbakefoeringer til feilperioder uten aa telle dem flere ganger`() {
+        val tilbakefoering = periode("2024-04-01", "-150", KlasseType.YTEL, tilbakefoering = true)
+        val etterbetalingPerioder =
+            listOf(
+                tilbakefoering,
+                tilbakefoering.copy(tom = LocalDate.parse("2024-04-15"), beloep = BigDecimal("-100")),
+            )
+        val tilbakekrevingPerioder =
+            listOf(
+                periode("2024-04-01", "30", KlasseType.FEIL),
+                periode("2024-04-01", "20", KlasseType.FEIL),
+            )
+
+        val oppsummeringer = oppsummerSimulering(etterbetalingPerioder, tilbakekrevingPerioder)
+
+        with(requireNotNull(oppsummeringer.forPerioden.feilutbetaling)) {
+            brutto shouldBe BigDecimal("150")
+            beloepBrukerenSkulleHatt shouldBe BigDecimal("100")
+            netto shouldBe BigDecimal("50")
+        }
+        oppsummeringer.perAar.single().oppsummering shouldBe oppsummeringer.forPerioden
+    }
+
     private fun periode(
         fom: String,
         beloep: String,

@@ -1,4 +1,4 @@
-import { Box, Heading, ReadMore, Table, VStack } from '@navikt/ds-react'
+import { Box, Heading, LocalAlert, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { getYear } from 'date-fns'
 import { CSSProperties, ReactNode } from 'react'
 import {
@@ -66,7 +66,7 @@ const FeilutbetalingRader = ({
 }) => (
   <>
     <Table.Row>
-      <Table.DataCell>Brutto feilutbetaling{suffix}</Table.DataCell>
+      <Table.DataCell>Tidligere utbetalt brutto{suffix}</Table.DataCell>
       <Table.DataCell align="right">{NOK(feilutbetaling.brutto)}</Table.DataCell>
     </Table.Row>
     <Table.Row>
@@ -74,7 +74,7 @@ const FeilutbetalingRader = ({
       <Table.DataCell align="right">{NOK(feilutbetaling.beloepBrukerenSkulleHatt)}</Table.DataCell>
     </Table.Row>
     <Table.Row>
-      <Table.DataCell style={utenBunnlinje}>Netto feilutbetaling{suffix}</Table.DataCell>
+      <Table.DataCell style={utenBunnlinje}>Brutto feilutbetaling{suffix}</Table.DataCell>
       <Table.DataCell align="right" style={utenBunnlinje}>
         {NOK(feilutbetaling.netto)}
       </Table.DataCell>
@@ -83,9 +83,28 @@ const FeilutbetalingRader = ({
 )
 
 export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) => {
+  const { oppsummeringer } = data
+
+  if (!oppsummeringer) {
+    return (
+      <VStack gap="space-20">
+        <LocalAlert status="warning">
+          <LocalAlert.Header>
+            <LocalAlert.Title>Oppsummering av simuleringen er ikke tilgjengelig</LocalAlert.Title>
+          </LocalAlert.Header>
+          <LocalAlert.Content>
+            Eventuelle etterbetalinger og tilbakekrevinger vises i detaljtabellene.
+          </LocalAlert.Content>
+        </LocalAlert>
+        {data.etterbetaling.length > 0 && <UtbetalingTable tittel="Etterbetaling" perioder={data.etterbetaling} />}
+        {data.tilbakekreving.length > 0 && <UtbetalingTable tittel="Tilbakekreving" perioder={data.tilbakekreving} />}
+      </VStack>
+    )
+  }
+
   return (
     <>
-      {data.oppsummeringer.perAar.map(({ aarstall, oppsummering }) => {
+      {oppsummeringer.perAar.map(({ aarstall, oppsummering }) => {
         const etterbetaling = hentPerioderForAar(aarstall, data.etterbetaling)
         const tilbakekreving = hentPerioderForAar(aarstall, data.tilbakekreving)
 
@@ -117,7 +136,7 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
           </Box>
         )
       })}
-      {data.oppsummeringer.perAar.length > 1 && (
+      {oppsummeringer.perAar.length > 1 && (
         <Box maxWidth="70rem" background="neutral-soft" padding="space-20">
           <Heading level="3" size="small">
             Etterbetaling for hele perioden
@@ -125,15 +144,12 @@ export const SimuleringGruppertPaaAar = ({ data }: { data: SimulertBeregning }) 
           <Box width="25rem" marginBlock="space-20">
             <VStack gap="space-20">
               <SumTabell>
-                <EtterbetalingRader
-                  etterbetaling={data.oppsummeringer.forPerioden.etterbetaling}
-                  suffix=" for perioden"
-                />
+                <EtterbetalingRader etterbetaling={oppsummeringer.forPerioden.etterbetaling} suffix=" for perioden" />
               </SumTabell>
-              {data.oppsummeringer.forPerioden.feilutbetaling && (
+              {oppsummeringer.forPerioden.feilutbetaling && (
                 <SumTabell>
                   <FeilutbetalingRader
-                    feilutbetaling={data.oppsummeringer.forPerioden.feilutbetaling}
+                    feilutbetaling={oppsummeringer.forPerioden.feilutbetaling}
                     suffix=" for perioden"
                   />
                 </SumTabell>

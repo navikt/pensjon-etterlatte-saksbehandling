@@ -6,7 +6,7 @@ export interface SimulertBeregning {
   kommendeUtbetalinger: SimulertBeregningsperiode[]
   etterbetaling: SimulertBeregningsperiode[]
   tilbakekreving: SimulertBeregningsperiode[]
-  oppsummeringer: SimulertBeregningOppsummeringer
+  oppsummeringer?: SimulertBeregningOppsummeringer | null
 }
 
 export interface SimulertBeregningOppsummeringer {

@@ -22,9 +22,9 @@
 - Observation: Jeg la inn "ikke referert i kodebasen" som plassholder i stedet for å bare spørre. Det er mer respektfullt og presist å stille spørsmålet direkte.
 - Action: Når en verdi ikke kan verifiseres, spør – ikke dokumenter usikkerheten som et faktum.
 
-**2026-04-24 — Refaktorering**
-- Observation: Jeg committet uten å kompilere, og feilen ble oppdaget av bruker i neste melding.
-- Action: Kompiler alltid før commit – ikke anta at koden er riktig fordi den ser logisk ut.
+**2026-04-24 / 2026-10-12 — Kompilering og validering**
+- Observation: Én gang committet jeg uten å kompilere, og brukeren fant feilen. En annen gang manglet `yarn` og `npx`, og jeg var nær ved å hoppe over frontend-sjekken. Da `tsc` endelig ble kjørt via node, fant den en manglende import.
+- Action: Kompiler og typesjekk alltid før jeg melder fra om at noe er ferdig. Mangler standardverktøyet, kjører jeg pakkens JS-entrypoint med `node` (`node_modules/typescript/bin/tsc` osv.). Valideringen skal ikke hoppes over.
 
 **2026-04-30 — OTel / bibliotekbruk**
 - Observation: Jeg antok at en API-verdi kunne settes og tilbakestilles symmetrisk, uten å sjekke hvilke tilstandsoverganger som faktisk er lovlige.
@@ -105,7 +105,3 @@
 **2026-09-08 — Relaxed mockk skjuler tilgangskonfigurasjon**
 - Observation: Etter at skrivetilgang begynte å kreve AD-rolle, feilet fire rutetester. Rotårsaken var at `ApplicationContext` er `mockk(relaxed = true)`, og MockK returnerer et **ekte tomt HashMap** (ikke en mock) for `Map`-returtyper. `saksbehandlerGroupIdsByKey` ble dermed tomt, alle `harRolle()` ble false, og skrivetilgang ga 403.
 - Action: Når en ny sperre begynner å lese konfigurasjon fra `ApplicationContext`, sjekk hvilke tester som bruker `mockk(relaxed = true)` på den. Relaxed mocks gir tomme collections i stillhet — sperren slår inn uten synlig årsak. Stub `saksbehandlerGroupIdsByKey` og gi tokenet matchende `groups` (mønster: `BehandlingsstatusRoutesTest`).
-
-**2026-10-09 — Dependency-feilsøking**
-- Observation: Jeg behandlet cache som eneste forklaring på vellykket dependency-oppløsning, selv om et tidligere repository kunne levere samme koordinater. Cache-refresh isolerte dermed ikke autentiseringen jeg ville undersøke.
-- Action: Ved reproduksjon av repository-feil, begrens de aktuelle koordinatene til målrepositoryet før cache-refresh; skill kildevalg fra autentisering.

@@ -102,7 +102,7 @@ internal class ApplicationContext {
             brukerIdent = { requestBrukerTokenInfo.get()?.ident() },
         )
     val regoppslagKlient =
-        RegoppslagKlient(httpClient(REGOPPSLAG_SCOPE), env.requireEnvValue(REGOPPSLAG_URL))
+        RegoppslagKlient(httpClient(REGOPPSLAG_SCOPE), env.requireEnvValue(REGOPPSLAG_URL), featureToggleService)
     val saksbehandlerKlient = SaksbehandlerKlient(config, httpClient())
     val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     val beregningKlient = BeregningKlient(config, httpClient())

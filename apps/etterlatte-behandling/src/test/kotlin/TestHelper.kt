@@ -222,6 +222,7 @@ fun mockSaksbehandler(
             }
         every { name() } returns ident
         every { enheter() } returns enheter
+        every { hentEnheterMedSkrivetilgang() } returns enheter
         every { brukerTokenInfo } returns mockk(relaxed = true)
     }
 

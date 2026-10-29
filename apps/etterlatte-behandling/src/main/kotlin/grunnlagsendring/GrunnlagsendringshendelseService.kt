@@ -79,6 +79,8 @@ class GrunnlagsendringshendelseService(
             }
     }
 
+    fun hentHendelse(hendelseId: UUID): Grunnlagsendringshendelse? = grunnlagsendringshendelseDao.hentGrunnlagsendringshendelse(hendelseId)
+
     fun arkiverHendelseMedKommentar(
         hendelseId: UUID,
         kommentar: String?,

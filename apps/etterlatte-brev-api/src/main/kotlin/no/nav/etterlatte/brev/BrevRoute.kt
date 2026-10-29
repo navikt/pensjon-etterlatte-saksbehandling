@@ -338,10 +338,18 @@ fun Route.brevRoute(
         }
 
         post("ferdigstill-journalfoer-og-distribuer") {
-            kunSaksbehandler { sb ->
-                val req = call.receive<FerdigstillJournalFoerOgDistribuerOpprettetBrev>()
-                val brevStatusResponse = service.ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(req, sb)
-                call.respond(brevStatusResponse)
+            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
+                kunSaksbehandler { sb ->
+                    val req = call.receive<FerdigstillJournalFoerOgDistribuerOpprettetBrev>()
+                    if (req.sakId != sakId) {
+                        throw UgyldigForespoerselException(
+                            code = "SAKID_MATCHER_IKKE",
+                            detail = "SakId i forespørselen matcher ikke sakId i url",
+                        )
+                    }
+                    val brevStatusResponse = service.ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(req, sb)
+                    call.respond(brevStatusResponse)
+                }
             }
         }
 

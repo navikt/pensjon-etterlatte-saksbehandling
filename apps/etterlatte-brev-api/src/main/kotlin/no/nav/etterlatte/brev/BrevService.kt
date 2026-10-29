@@ -116,6 +116,12 @@ class BrevService(
         val brevId = req.brevId
 
         val hentBrev = db.hentBrev(brevId)
+        if (hentBrev.sakId != req.sakId) {
+            throw UgyldigForespoerselException(
+                code = "BREV_TILHOERER_IKKE_SAK",
+                detail = "Brev med id=$brevId tilhører ikke sak=${req.sakId}",
+            )
+        }
         try {
             val brevStatus = hentBrev.status
             if (brevStatus.ikkeFerdigstilt()) {

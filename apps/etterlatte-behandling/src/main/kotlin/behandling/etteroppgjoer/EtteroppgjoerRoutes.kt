@@ -203,25 +203,27 @@ fun Route.etteroppgjoerRoutes(
                 }
 
                 post("beregn-faktisk-inntekt") {
-                    val request = call.receive<BeregnFaktiskInntektRequest>()
-                    val (etteroppgjoerResultatDto, brevSomskalSlettes) =
-                        inTransaction {
-                            forbehandlingService.lagreOgBeregnFaktiskInntekt(forbehandlingId, request, brukerTokenInfo)
+                    kunSaksbehandlerMedSkrivetilgang {
+                        val request = call.receive<BeregnFaktiskInntektRequest>()
+                        val (etteroppgjoerResultatDto, brevSomskalSlettes) =
+                            inTransaction {
+                                forbehandlingService.lagreOgBeregnFaktiskInntekt(forbehandlingId, request, brukerTokenInfo)
+                            }
+
+                        if (brevSomskalSlettes != null) {
+                            logger.info(
+                                "Sletter brevet koblet til forbehandlingen med brevId=${brevSomskalSlettes.first} " +
+                                    "i sak=${brevSomskalSlettes.second}",
+                            )
+                            forbehandlingBrevService.slettVarselbrev(
+                                brevSomskalSlettes = brevSomskalSlettes.first,
+                                sakId = brevSomskalSlettes.second,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
                         }
 
-                    if (brevSomskalSlettes != null) {
-                        logger.info(
-                            "Sletter brevet koblet til forbehandlingen med brevId=${brevSomskalSlettes.first} " +
-                                "i sak=${brevSomskalSlettes.second}",
-                        )
-                        forbehandlingBrevService.slettVarselbrev(
-                            brevSomskalSlettes = brevSomskalSlettes.first,
-                            sakId = brevSomskalSlettes.second,
-                            brukerTokenInfo = brukerTokenInfo,
-                        )
+                        call.respond(etteroppgjoerResultatDto)
                     }
-
-                    call.respond(etteroppgjoerResultatDto)
                 }
 
                 post("ferdigstill") {

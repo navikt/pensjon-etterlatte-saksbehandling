@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.grunnlag.NyePersonopplysninger
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.sak.TilgangServiceSjekker
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 
 fun Route.personRoute(
@@ -33,16 +34,18 @@ fun Route.personRoute(
         }
 
         post("/behandling/{$BEHANDLINGID_CALL_PARAMETER}/nye-opplysninger") {
-            val nyePersonopplysninger = call.receive<NyePersonopplysninger>()
+            kunSkrivetilgang {
+                val nyePersonopplysninger = call.receive<NyePersonopplysninger>()
 
-            grunnlagService.lagreNyePersonopplysninger(
-                sakId = nyePersonopplysninger.sakId,
-                behandlingId = behandlingId,
-                fnr = nyePersonopplysninger.fnr,
-                nyeOpplysninger = nyePersonopplysninger.opplysninger,
-            )
+                grunnlagService.lagreNyePersonopplysninger(
+                    sakId = nyePersonopplysninger.sakId,
+                    behandlingId = behandlingId,
+                    fnr = nyePersonopplysninger.fnr,
+                    nyeOpplysninger = nyePersonopplysninger.opplysninger,
+                )
 
-            call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

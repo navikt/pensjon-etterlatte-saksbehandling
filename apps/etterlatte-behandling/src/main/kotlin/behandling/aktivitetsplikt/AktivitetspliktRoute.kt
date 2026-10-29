@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -323,35 +324,43 @@ internal fun Route.aktivitetspliktRoutes(
                 call.respond(oppgaveOgVurdering)
             }
             post("/brevdata") {
-                val brevdata = call.receive<AktivitetspliktInformasjonBrevdataRequest>()
-                val oppdaterBrevdata =
-                    inTransaction { aktivitetspliktOppgaveService.lagreBrevdata(oppgaveId, brevdata, brukerTokenInfo) }
-                call.respond(oppdaterBrevdata)
+                kunSaksbehandlerMedSkrivetilgang {
+                    val brevdata = call.receive<AktivitetspliktInformasjonBrevdataRequest>()
+                    val oppdaterBrevdata =
+                        inTransaction { aktivitetspliktOppgaveService.lagreBrevdata(oppgaveId, brevdata, brukerTokenInfo) }
+                    call.respond(oppdaterBrevdata)
+                }
             }
             post("/opprettbrev") {
-                val brevId =
-                    inTransaction {
-                        aktivitetspliktOppgaveService.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
-                            oppgaveId = oppgaveId,
-                            brukerTokenInfo,
-                        )
-                    }
-                call.respond(BrevIdDto(brevId))
+                kunSaksbehandlerMedSkrivetilgang {
+                    val brevId =
+                        inTransaction {
+                            aktivitetspliktOppgaveService.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
+                                oppgaveId = oppgaveId,
+                                brukerTokenInfo,
+                            )
+                        }
+                    call.respond(BrevIdDto(brevId))
+                }
             }
             post("/ferdigstillbrev-og-oppgave") {
-                val oppgave =
-                    inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
-                call.respond(oppgave)
+                kunSaksbehandlerMedSkrivetilgang {
+                    val oppgave =
+                        inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
+                    call.respond(oppgave)
+                }
             }
             post("/ferdigstill-oppgave") {
-                val oppgave =
-                    inTransaction {
-                        aktivitetspliktOppgaveService.ferdigstillOppgaveUtenBrev(
-                            oppgaveId,
-                            brukerTokenInfo,
-                        )
-                    }
-                call.respond(oppgave)
+                kunSaksbehandlerMedSkrivetilgang {
+                    val oppgave =
+                        inTransaction {
+                            aktivitetspliktOppgaveService.ferdigstillOppgaveUtenBrev(
+                                oppgaveId,
+                                brukerTokenInfo,
+                            )
+                        }
+                    call.respond(oppgave)
+                }
             }
         }
     }

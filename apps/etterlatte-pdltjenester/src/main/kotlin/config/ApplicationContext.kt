@@ -34,7 +34,11 @@ class ApplicationContext(
             apiUrl = config.getString("pdl.url"),
         )
 
-    private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
+    private val featureToggleService =
+        FeatureToggleService.initialiser(
+            properties = featureToggleProperties(config),
+            brukerIdent = { requestBrukerTokenInfo.get()?.ident() },
+        )
 
     private val parallelleSannheterKlient =
         ParallelleSannheterKlient(
@@ -48,6 +52,7 @@ class ApplicationContext(
             ppsKlient = parallelleSannheterKlient,
             pdlKlient = pdlKlient,
             pdlOboKlient = pdlOboKlient,
+            featureToggleService = featureToggleService,
         )
 
     val personService = PersonService(pdlKlient, parallelleSannheterService)

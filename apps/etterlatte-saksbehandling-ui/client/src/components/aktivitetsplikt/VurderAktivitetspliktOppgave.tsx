@@ -1,5 +1,5 @@
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { useMatch } from 'react-router-dom'
+import { useMatch } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
 import { isSuccess, mapResult } from '~shared/api/apiUtils'

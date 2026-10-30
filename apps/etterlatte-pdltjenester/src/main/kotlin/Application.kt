@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import io.ktor.server.routing.route
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.config.BrukerTokenInfoPlugin
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -31,6 +32,7 @@ class Server(
             httpPort = applicationContext.httpPort,
             applicationConfig = applicationContext.config,
         ) {
+            install(BrukerTokenInfoPlugin)
             personRoute(applicationContext.personService)
 
             route("/api/pdltjenester") {

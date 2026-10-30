@@ -6,9 +6,9 @@
 - Observation: Lessons.md ble ikke oppdatert underveis fordi planmodus absorberte all oppmerksomhet, og meta-oppgaver ble behandlet som cleanup, ikke inline-forpliktelse.
 - Action: Lessons-oppdatering er ikke en post-task jobb – den skal skje i samme svar som kursjusteringen, også under planlegging.
 
-**2026-04-10 / 2026-09-08 — Endring av semantikk i delt kode**
-- Observation: Samme feil i to former. (1) Ved datamodellendring vurderte jeg lag isolert i stedet for som en sammenhengende pipeline, og plasserte data feil. (2) Da `enheterMedSkrivetilgang()` fikk rollekrav, endret betydningen av *alle* `kunSkrivetilgang`-kallsteder seg samtidig — flere lå på rene lese-operasjoner (bl.a. `get("pdf")` for forhåndsvisning) fordi «skrivetilgang» tidligere de facto var enhetstilgang. Regresjonen ble funnet av brukeren i UI.
-- Action: Når semantikken til et delt element (datamodell, tilgangssjekk, felles hjelpefunksjon) endres: list opp alle konsumenter/kallsteder og vurder hver enkelt mot den *nye* betydningen — kallstedene ble skrevet under den gamle. Se særlig etter GET-ruter bak skrive-sperrer. Er en operasjon lese-orientert men har en muterende bieffekt, gate bieffekten på tilgang i stedet for å blokkere hele endepunktet.
+**2026-04-10 / 2026-09-08 / 2026-10-19 — Endring av semantikk i delt kode**
+- Observation: Samme feil i tre former. (1) Ved datamodellendring vurderte jeg lag isolert i stedet for som en sammenhengende pipeline, og plasserte data feil. (2) Da `enheterMedSkrivetilgang()` fikk rollekrav, endret betydningen av *alle* `kunSkrivetilgang`-kallsteder seg samtidig — flere lå på rene lese-operasjoner (bl.a. `get("pdf")` for forhåndsvisning) fordi «skrivetilgang» tidligere de facto var enhetstilgang. Regresjonen ble funnet av brukeren i UI. (3) En ny `SoeknadType`-verdi fra felles så ferdig håndtert ut fordi alt kompilerte, men `else -> throw`-grener og at typen manglet avdød ble ikke fanget av kompilatoren.
+- Action: Når semantikken til et delt element (datamodell, tilgangssjekk, felles hjelpefunksjon) endres: list opp alle konsumenter/kallsteder og vurder hver enkelt mot den *nye* betydningen — kallstedene ble skrevet under den gamle. Se særlig etter GET-ruter bak skrive-sperrer. Er en operasjon lese-orientert men har en muterende bieffekt, gate bieffekten på tilgang i stedet for å blokkere hele endepunktet. Ved nye enum-/sealed-verdier: følg én konkret melding gjennom hele flyten, og let etter `else ->` og typecasts – kompilering er ikke nok.
 
 **2026-04-10 — Sparring / løsningsdesign**
 - Observation: Løsninger ble foreslått før eksisterende sperrer/constraints var kartlagt, og scope vokste uten eksplisitt avklaring.
@@ -22,9 +22,9 @@
 - Observation: Jeg la inn "ikke referert i kodebasen" som plassholder i stedet for å bare spørre. Det er mer respektfullt og presist å stille spørsmålet direkte.
 - Action: Når en verdi ikke kan verifiseres, spør – ikke dokumenter usikkerheten som et faktum.
 
-**2026-04-24 — Refaktorering**
-- Observation: Jeg committet uten å kompilere, og feilen ble oppdaget av bruker i neste melding.
-- Action: Kompiler alltid før commit – ikke anta at koden er riktig fordi den ser logisk ut.
+**2026-04-24 / 2026-10-12 — Kompilering og validering**
+- Observation: Én gang committet jeg uten å kompilere, og brukeren fant feilen. En annen gang manglet `yarn` og `npx`, og jeg var nær ved å hoppe over frontend-sjekken. Da `tsc` endelig ble kjørt via node, fant den en manglende import.
+- Action: Kompiler og typesjekk alltid før jeg melder fra om at noe er ferdig. Mangler standardverktøyet, kjører jeg pakkens JS-entrypoint med `node` (`node_modules/typescript/bin/tsc` osv.). Valideringen skal ikke hoppes over.
 
 **2026-04-30 — OTel / bibliotekbruk**
 - Observation: Jeg antok at en API-verdi kunne settes og tilbakestilles symmetrisk, uten å sjekke hvilke tilstandsoverganger som faktisk er lovlige.

@@ -1,6 +1,6 @@
 import { ChevronLeftIcon } from '@navikt/aksel-icons'
 import { HStack, Label } from '@navikt/ds-react'
-import { NavLink, NavLinkProps } from 'react-router-dom'
+import { NavLink, NavLinkProps } from 'react-router'
 import { Navbar } from '~shared/header/Navbar'
 
 export default function NavigerTilbakeMeny({ ...props }: NavLinkProps) {

@@ -43,6 +43,14 @@ Publiserer til topic `etterlatte.vedtakshendelser` (deles med andre Nav-systemer
 
 Outbox-mønsteret (database-tabell + `OutboxJob`) brukes for å sikre pålitelig publisering. Dette er spesifikt for vedtak.
 
+## Falsk identitet i personoppslag
+
+Flagget `pensjon-etterlatte.haandter-falsk-identitet` styrer den nye håndteringen i `etterlatte-pdltjenester` og `etterlatte-brev-api`. Standardverdien er `false`. Aktiver flagget i dev og la det være avslått i prod i Unleash.
+
+I pdltjenester gjelder sjekken bare `/person/navn-foedsel`, som brukes av statuslinjen og journalføringen. En falsk identitet med tilgjengelige opplysninger gir `erFalskIdentitet = true` og et varsel i statuslinjen og ved endring av journalpostens bruker. Mangler navn, fødselsopplysninger eller folkeregisteridentifikator, gir oppslaget 409 med kode `FALSK_IDENTITET`. Dette er ikke en kontroll av hele persongalleriet: familieoppslag og innhenting av behandlingsgrunnlag bruker andre oppslag og mapping uten denne sjekken. PR-en legger heller ikke til noen sperre mot å opprette sak eller fatte vedtak.
+
+I brev-api gjelder flagget adresseoppslag for brevmottakere, som også kan være gjenlevende forelder eller innsender. Se [brev-api](brev-api.md).
+
 ## Avhengigheter
 
 Kaller: `etterlatte-beregning`, Pesys samordning (via `SamordningsKlient` – avgjør om OMS-ytelsen skal samordnes med TP-ordninger)  

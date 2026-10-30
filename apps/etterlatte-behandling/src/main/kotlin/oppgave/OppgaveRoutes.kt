@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarService
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSaksbehandlerrolle
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
@@ -121,7 +122,7 @@ internal fun Route.oppgaveRoutes(
 
         route("/bulk") {
             post("/opprett") {
-                kunSaksbehandler { saksbehandler ->
+                kunSaksbehandlerMedSaksbehandlerrolle { saksbehandler ->
                     val oppgaveBulkDto = call.receive<NyOppgaveBulkDto>()
                     inTransaction {
                         service.opprettOppgaveBulk(
@@ -138,7 +139,7 @@ internal fun Route.oppgaveRoutes(
             }
 
             post("/tildel") {
-                kunSaksbehandler { saksbehandler ->
+                kunSaksbehandlerMedSaksbehandlerrolle { saksbehandler ->
                     val request = call.receive<TildelingBulkRequest>()
 
                     inTransaction {
@@ -198,7 +199,7 @@ internal fun Route.oppgaveRoutes(
                 post("/opprett") {
                     val request = call.receive<OppgaveKommentarRequest>()
 
-                    kunSaksbehandler {
+                    kunSaksbehandlerMedSkrivetilgang {
                         inTransaction {
                             kommentarService.opprettKommentar(request, oppgaveId, brukerTokenInfo)
                         }

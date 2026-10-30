@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.Pdf
@@ -29,6 +30,7 @@ import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -203,6 +205,29 @@ internal class BrevServiceTest {
             verify {
                 db.hentBrev(brev.id)
             }
+        }
+    }
+
+    @Nested
+    inner class FerdigstillJournalfoerOgDistribuer {
+        @Test
+        fun `skal avvise ferdigstilling naar brevet tilhoerer en annen sak`() {
+            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
+            every { db.hentBrev(any()) } returns brev
+
+            val request =
+                FerdigstillJournalFoerOgDistribuerOpprettetBrev(
+                    brevId = brev.id,
+                    sakId = randomSakId(),
+                    enhetsnummer = Enhetsnummer("4808"),
+                    avsenderRequest = SaksbehandlerOgAttestant(saksbehandlerIdent = bruker.ident),
+                )
+
+            assertThrows<UgyldigForespoerselException> {
+                runBlocking { brevService.ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(request, bruker) }
+            }
+
+            verify { db.hentBrev(brev.id) }
         }
     }
 

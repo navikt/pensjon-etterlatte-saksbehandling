@@ -22,6 +22,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -38,6 +39,7 @@ import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.mockSaksbehandler
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -241,6 +243,29 @@ internal class BehandlingGrunnlagRoutesKtTest {
     }
 
     @Test
+    fun `skal gi 403 ved lagring av nye saksopplysninger naar saksbehandler mangler skrivetilgang`() {
+        val behandlingId = UUID.randomUUID()
+
+        testApplication {
+            val actualResponse =
+                runServer(mockOAuth2Server, "api/grunnlag") {
+                    attachMockContext(mockSaksbehandler("Leser", enheter = emptyList()))
+                    behandlingGrunnlagRoute(grunnlagService)
+                }.post("api/grunnlag/behandling/$behandlingId/nye-opplysninger") {
+                    contentType(ContentType.Application.Json)
+                    setBody(NyeSaksopplysninger(randomSakId(), emptyList()))
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    }
+                }
+
+            assertEquals(HttpStatusCode.Forbidden, actualResponse.status)
+        }
+
+        coVerify(exactly = 0) { grunnlagService.lagreNyeSaksopplysninger(any(), any(), any()) }
+    }
+
+    @Test
     fun `Teste endepunkt for oppretting av grunnlag`() {
         val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
@@ -311,6 +336,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient =
         runServer(mockOAuth2Server, "api/grunnlag") {
+            attachMockContext(mockSaksbehandler())
             behandlingGrunnlagRoute(grunnlagService)
         }
 }

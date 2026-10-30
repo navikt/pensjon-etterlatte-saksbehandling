@@ -248,6 +248,31 @@ internal class VilkaarsvurderingRoutesTest(
     }*/
 
     @Test
+    fun `skal gi 403 ved opprettelse og endring naar saksbehandler mangler skrivetilgang`() {
+        val saksbehandlerUtenSkrivetilgang = mockSaksbehandler("Leser", enheter = emptyList())
+        testApplication(Kontekst.asContextElement(context)) {
+            runServer(mockOAuth2Server) {
+                attachMockContextWithDb(saksbehandlerUtenSkrivetilgang, ds)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            }
+
+            val opprettResponse =
+                client.post("/api/vilkaarsvurdering/$behandlingId/opprett") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+            assertEquals(HttpStatusCode.Forbidden, opprettResponse.status)
+
+            val slettResponse =
+                client.delete("/api/vilkaarsvurdering/$behandlingId") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+            assertEquals(HttpStatusCode.Forbidden, slettResponse.status)
+        }
+    }
+
+    @Test
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes ved opprettelse`() {
         testApplication(Kontekst.asContextElement(context)) {
             runServer(mockOAuth2Server) {

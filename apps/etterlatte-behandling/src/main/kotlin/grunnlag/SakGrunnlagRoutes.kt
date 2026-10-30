@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
     route("sak/{$SAKID_CALL_PARAMETER}") {
@@ -38,24 +39,30 @@ fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
         }
 
         post("opprett-grunnlag") {
-            val opplysningsbehov = call.receive<Opplysningsbehov>()
-            grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val opplysningsbehov = call.receive<Opplysningsbehov>()
+                grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/oppdater-grunnlag") {
-            val request = call.receive<OppdaterGrunnlagRequest>()
-            grunnlagService.oppdaterGrunnlagForSak(request)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val request = call.receive<OppdaterGrunnlagRequest>()
+                grunnlagService.oppdaterGrunnlagForSak(request)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/nye-opplysninger") {
-            val opplysningsbehov = call.receive<NyeSaksopplysninger>()
-            grunnlagService.lagreNyeSaksopplysningerBareSak(
-                opplysningsbehov.sakId,
-                opplysningsbehov.opplysninger,
-            )
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val opplysningsbehov = call.receive<NyeSaksopplysninger>()
+                grunnlagService.lagreNyeSaksopplysningerBareSak(
+                    opplysningsbehov.sakId,
+                    opplysningsbehov.opplysninger,
+                )
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

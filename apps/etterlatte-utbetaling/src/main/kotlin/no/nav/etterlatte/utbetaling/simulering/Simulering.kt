@@ -131,11 +131,9 @@ private fun summerFeilutbetaling(
     tilbakekreving: List<SimulertBeregningsperiode>,
 ): SimulertFeilutbetalingOppsummering {
     val netto = tilbakekreving.sumOf { it.beloep }
-    val feilutbetalingsperioder = tilbakekreving.map { it.fom to it.tom }.toSet()
     val brutto =
         etterbetaling
             .filter { it.tilbakefoering && it.klasseType == KlasseType.YTEL }
-            .filter { (it.fom to it.tom) in feilutbetalingsperioder }
             .sumOf { it.beloep }
             .abs()
 

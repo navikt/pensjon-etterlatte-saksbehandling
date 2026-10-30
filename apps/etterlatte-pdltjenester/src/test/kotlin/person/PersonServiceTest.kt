@@ -10,6 +10,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
@@ -55,7 +56,7 @@ internal class PersonServiceTest {
     private val pdlKlientMock = mockk<PdlKlient>()
     private val ppsKlientMock = mockk<ParallelleSannheterKlient>()
 
-    private val ppsService = ParallelleSannheterService(ppsKlientMock, pdlKlientMock, mockk())
+    private val ppsService = ParallelleSannheterService(ppsKlientMock, pdlKlientMock, mockk(), DummyFeatureToggleService())
     private val featureToggleService = mockk<FeatureToggleService>()
     private val personService = PersonService(pdlKlientMock, ppsService)
 

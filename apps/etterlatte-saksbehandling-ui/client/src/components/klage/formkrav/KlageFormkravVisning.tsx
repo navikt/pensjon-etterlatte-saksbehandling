@@ -4,7 +4,7 @@ import { formaterVedtakType } from '~utils/formatering/formatering'
 import { formaterDatoMedKlokkeslett, formaterKanskjeStringDato } from '~utils/formatering/dato'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { TekstMedMellomrom } from '~shared/TekstMedMellomrom'
 

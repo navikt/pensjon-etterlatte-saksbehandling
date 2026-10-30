@@ -378,7 +378,6 @@ class StatistikkService(
     ): SakRad? {
         val vedtakInnhold = (vedtak.innhold as? VedtakInnholdDto.VedtakBehandlingDto) ?: return null
         val statistikkBehandling = hentStatistikkBehandling(vedtak.behandlingId)
-        val mottattTid = statistikkBehandling.soeknadMottattDato ?: statistikkBehandling.behandlingOpprettet
         val (beregning, avkorting) =
             when (hendelse) {
                 VedtakKafkaHendelseHendelseType.FATTET,
@@ -409,7 +408,7 @@ class StatistikkService(
             id = -1,
             referanseId = vedtakInnhold.behandling.id,
             sakId = vedtak.sak.id,
-            mottattTidspunkt = mottattTid.toTidspunkt(),
+            mottattTidspunkt = statistikkBehandling.mottattTidspunkt(),
             registrertTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
             ferdigbehandletTidspunkt = vedtak.attestasjon?.tidspunkt,
             vedtakTidspunkt = vedtak.attestasjon?.tidspunkt,
@@ -455,6 +454,8 @@ class StatistikkService(
         runBlocking {
             behandlingKlient.hentStatistikkBehandling(behandlingId)
         }
+
+    private fun StatistikkBehandling.mottattTidspunkt(): Tidspunkt = (soeknadMottattDato ?: behandlingOpprettet).toTidspunkt()
 
     private fun hentPersongalleri(behandlingId: UUID): Persongalleri =
         runBlocking {
@@ -682,7 +683,7 @@ class StatistikkService(
                 id = -1,
                 referanseId = statistikkBehandling.id,
                 sakId = statistikkBehandling.sak.id,
-                mottattTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
+                mottattTidspunkt = statistikkBehandling.mottattTidspunkt(),
                 registrertTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
                 ferdigbehandletTidspunkt = null,
                 vedtakTidspunkt = null,

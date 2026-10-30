@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { SakOversikt } from './sakOgBehandling/SakOversikt'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -32,6 +32,7 @@ import { usePersonLocationState } from '~components/person/lenker/usePersonLocat
 import { AktivitetspliktSakoversikt } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
 import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
 import EtteroppgjoerSaksoversikt from '~components/person/etteroppgjoer/EtteroppgjoerSaksoversikt'
+import { ApiError } from '~shared/api/apiClient'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -58,6 +59,7 @@ export const Person = () => {
   const fnr = fnrFraSak ?? locationState?.fnr
 
   const [foretrukketSak, setForetrukketSak] = useState<number | undefined>()
+  const [falskIdentitetFeil, setFalskIdentitetFeil] = useState<ApiError | undefined>()
 
   const [sakResult, sakFetch, resetSak] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
@@ -83,6 +85,7 @@ export const Person = () => {
   }, [sakId])
 
   useEffect(() => {
+    setFalskIdentitetFeil(undefined)
     if (fnrHarGyldigFormat(fnr)) {
       resetSak()
       sakFetch(fnr!!)
@@ -112,7 +115,7 @@ export const Person = () => {
 
   return (
     <>
-      <StatusBar ident={fnr} />
+      <StatusBar ident={fnr} onFalskIdentitet={setFalskIdentitetFeil} />
 
       <NavigerTilbakeMeny to="/">Tilbake til oppgavebenken</NavigerTilbakeMeny>
 
@@ -137,7 +140,12 @@ export const Person = () => {
         </Tabs.List>
 
         <Tabs.Panel value={PersonOversiktFane.SAKER}>
-          <SakOversikt sakResult={foretrukketSakResult} setForetrukketSak={setForetrukketSak} fnr={fnr} />
+          <SakOversikt
+            sakResult={foretrukketSakResult}
+            setForetrukketSak={setForetrukketSak}
+            fnr={fnr}
+            falskIdentitetFeil={falskIdentitetFeil}
+          />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
           <Personopplysninger sakResult={foretrukketSakResult} fnr={fnr} />

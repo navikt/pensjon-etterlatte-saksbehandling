@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { InputFlexRow } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnOgFoedsel } from '~shared/api/pdltjenester'
+import { FalskIdentitetAlert } from '~shared/alerts/FalskIdentitetAlert'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -100,6 +101,7 @@ export const EndreBruker = ({
                     <Alert variant="info" size="small">
                       {formaterNavn(person)}
                     </Alert>
+                    <FalskIdentitetAlert erFalskIdentitet={person.erFalskIdentitet} />
                     {!!initieltFnr && person.foedselsnummer !== initieltFnr && (
                       <Alert variant="warning" size="small">
                         Du flytter nå journalposten til en annen bruker

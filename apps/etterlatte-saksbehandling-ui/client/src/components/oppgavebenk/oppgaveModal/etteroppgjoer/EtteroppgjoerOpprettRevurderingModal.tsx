@@ -13,7 +13,7 @@ import { opprettRevurderingEtteroppgjoer as opprettRevurderingApi } from '~share
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import { Opprinnelse } from '~shared/types/IDetaljertBehandling'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
 
 type Props = {

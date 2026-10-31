@@ -68,17 +68,12 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-behandling
-    - name: ETTERLATTE_TRYGDETID_URL
-      value: http://etterlatte-trygdetid
-    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-trygdetid
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
-        - application: etterlatte-trygdetid
         - application: logging
           namespace: nais-system
       external:

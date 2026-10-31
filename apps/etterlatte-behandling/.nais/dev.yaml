@@ -206,7 +206,6 @@ spec:
         - application: etterlatte-vedtaksvurdering-kafka
         - application: etterlatte-hendelser-joark
         - application: etterlatte-statistikk
-        - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-klage
         - application: etterlatte-tidshendelser

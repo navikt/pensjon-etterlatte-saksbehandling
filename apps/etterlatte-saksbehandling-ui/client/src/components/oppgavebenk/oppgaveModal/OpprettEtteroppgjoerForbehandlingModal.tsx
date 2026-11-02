@@ -14,6 +14,8 @@ import { opprettEtteroppgjoerForbehandling as opprettForbehandlingApi } from '~s
 import { useNavigate } from 'react-router'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
+import { useAppDispatch } from '~store/Store'
+import { resetEtteroppgjoer } from '~store/reducers/EtteroppgjoerReducer'
 
 type Props = {
   oppgave: OppgaveDTO
@@ -37,6 +39,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
   const kanRedigeres = erOppgaveRedigerbar(oppgave.status)
 
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
 
   const {
     formState: { errors },
@@ -65,6 +68,7 @@ export const OpprettEtteroppgjoerForbehandlingModal = ({ oppgave, oppdaterStatus
       },
       (forbehandling) => {
         lukkModal()
+        dispatch(resetEtteroppgjoer())
         navigate(`/etteroppgjoer/${forbehandling.id}`)
       }
     )

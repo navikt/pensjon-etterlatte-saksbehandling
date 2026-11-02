@@ -32,7 +32,7 @@ spec:
         - id: loki
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_18
         tier: db-g1-small
         diskAutoresize: true
         pointInTimeRecovery: true

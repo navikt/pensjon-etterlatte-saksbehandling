@@ -66,14 +66,6 @@ spec:
         flags:
           - name: max_connections
             value: "100"
-          - name: cloudsql.enable_pgaudit
-            value: "true"
-          - name: pgaudit.log
-            value: 'write,ddl,role'
-          - name: pgaudit.log_parameter
-            value: "on"
-          - name: pgaudit.log_relation
-            value: "on"
   env:
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling

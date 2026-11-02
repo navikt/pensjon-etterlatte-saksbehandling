@@ -57,9 +57,6 @@ spec:
       - type: POSTGRES_18
         name: etterlatte-beregning
         tier: db-g1-small
-        diskAutoresize: true
-        pointInTimeRecovery: true
-        autoBackupHour: 1
         databases:
           - name: beregning
             envVarPrefix: DB

@@ -1,6 +1,6 @@
 import { Alert, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import {
   InnstillingTilKabalUtenBrev,
   Klage,

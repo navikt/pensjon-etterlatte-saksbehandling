@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vedtaksvurdering.samordning
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -15,6 +14,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.vedtaksvurdering.VedtakService
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 internal class TilSamordningRiver(
     rapidsConnection: RapidsConnection,

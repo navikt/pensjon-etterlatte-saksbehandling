@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory
 class PdfGeneratorKlient(
     private val klient: HttpClient,
     private val apiUrl: String,
+    private val pdfgenrsUrl: String = apiUrl,
+    private val brukPdfgenrs: (String) -> Boolean = { false },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -30,10 +32,12 @@ class PdfGeneratorKlient(
         mal: String,
         sti: String,
     ): ByteArray {
-        logger.info("Genererer PDF med ey-pdfgen (mal=$mal)")
+        val pdfgenrs = brukPdfgenrs(mal)
+        val url = if (pdfgenrs) pdfgenrsUrl else apiUrl
+        logger.info("Genererer PDF med ${if (pdfgenrs) "ey-pdfgenrs" else "ey-pdfgen"} (mal=$mal)")
 
         return klient
-            .post("$apiUrl/$sti") {
+            .post("$url/$sti") {
                 header(CORRELATION_ID, getCorrelationId())
                 contentType(ContentType.Application.Json)
                 setBody(body)

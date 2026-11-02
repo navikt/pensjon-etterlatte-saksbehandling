@@ -40,7 +40,12 @@ class TidshendelseRiverTest {
     @Test
     fun `skal lese melding og sjekke loepende ytelse`() {
         every { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) } returns
-            LoependeYtelseDTO(erLoepende = true, underSamordning = false, dato = datoFom, behandlingId = behandlingId)
+            LoependeYtelseDTO(
+                erLoepende = true,
+                underSamordning = false,
+                dato = datoFom,
+                behandlingId = behandlingId,
+            )
         every {
             vedtakService.harLoependeYtelserFra(
                 sakId,
@@ -69,12 +74,15 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
-            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
-            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe "123-123-123"
+            field(0, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asString() shouldBe VURDERT_LOEPENDE_YTELSE.name
+            field(0, TIDSHENDELSE_TYPE_KEY).asString() shouldBe "AO_BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asString() shouldBe "123-123-123"
             field(0, HENDELSE_DATA_KEY)["loependeYtelse"].asBoolean() shouldBe true
-            field(0, HENDELSE_DATA_KEY)["loependeYtelse_januar2024_behandlingId"].asText() shouldBe behandlingId.toString()
+            field(
+                0,
+                HENDELSE_DATA_KEY,
+            )["loependeYtelse_januar2024_behandlingId"].asString() shouldBe behandlingId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
         }
 
@@ -102,10 +110,10 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
-            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
-            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe "432-987-234"
+            field(0, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asString() shouldBe VURDERT_LOEPENDE_YTELSE.name
+            field(0, TIDSHENDELSE_TYPE_KEY).asString() shouldBe "AO_BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asString() shouldBe "432-987-234"
             field(0, HENDELSE_DATA_KEY)["loependeYtelse"].asBoolean() shouldBe false
             field(0, DRYRUN).asBoolean() shouldBe true
         }
@@ -115,7 +123,12 @@ class TidshendelseRiverTest {
 
     @Test
     fun `vilkaarsvurdert skal gaa til fattet og attestert vedtak`() {
-        every { vedtakService.opprettVedtakFattOgAttester(sakId, behandlingId) } returns mockk<VedtakOgRapid>(relaxed = true)
+        every {
+            vedtakService.opprettVedtakFattOgAttester(
+                sakId,
+                behandlingId,
+            )
+        } returns mockk<VedtakOgRapid>(relaxed = true)
 
         val melding =
             JsonMessage.newMessage(
@@ -133,8 +146,8 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 3 // 1 for vedtak fattet, 1 for attestert, 1 for original melding (med nytt steg)
-            field(2, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(2, TIDSHENDELSE_STEG_KEY).asText() shouldBe VedtakAldersovergangStepEvents.VEDTAK_ATTESTERT.name
+            field(2, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(2, TIDSHENDELSE_STEG_KEY).asString() shouldBe VedtakAldersovergangStepEvents.VEDTAK_ATTESTERT.name
         }
 
         verify { vedtakService.opprettVedtakFattOgAttester(sakId, behandlingId) }

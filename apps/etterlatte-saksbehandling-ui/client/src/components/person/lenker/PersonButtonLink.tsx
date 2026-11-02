@@ -2,7 +2,7 @@ import { PersonOversiktFane } from '~components/person/Person'
 import { HTMLAttributeAnchorTarget } from 'react'
 import { Button, ButtonProps } from '@navikt/ds-react'
 import { lagrePersonLocationState } from '~components/person/lenker/usePersonLocationState'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 
 interface PersonButtonLinkProps extends Omit<ButtonProps, 'onClick'> {
   fnr: string

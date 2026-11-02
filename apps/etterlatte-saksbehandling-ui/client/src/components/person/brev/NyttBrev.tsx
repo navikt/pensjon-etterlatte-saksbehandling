@@ -1,6 +1,6 @@
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import { hentBrev } from '~shared/api/brev'
 import React, { useEffect, useState } from 'react'
 import { StatusBar } from '~shared/statusbar/Statusbar'

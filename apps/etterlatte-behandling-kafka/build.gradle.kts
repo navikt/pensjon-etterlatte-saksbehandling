@@ -19,7 +19,7 @@ dependencies {
     implementation(project(":libs:etterlatte-tidshendelser-model"))
     implementation(libs.etterlatte.common)
 
-    implementation(libs.brevbaker.api.model.common)
+    implementation(libs.brevbaker.api)
 
     testImplementation(libs.ktor.clientmock)
     testImplementation(libs.ktor.servertests)

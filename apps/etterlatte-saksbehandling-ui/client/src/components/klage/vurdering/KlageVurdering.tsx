@@ -11,7 +11,7 @@ import { EndeligVurderingVisning } from '~components/klage/vurdering/EndeligVurd
 import { Klage } from '~shared/types/Klage'
 import { forrigeSteg, klageKanSeBrev, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { useNavigate } from 'react-router'
-import { NavigateFunction } from 'react-router-dom'
+import { NavigateFunction } from 'react-router'
 
 export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
   const klage = useKlage()

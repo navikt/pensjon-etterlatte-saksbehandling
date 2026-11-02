@@ -90,10 +90,10 @@ internal class JournalfoerVedtaksbrevRiverTest {
         coVerify { brevApiKlient.journalfoerVedtaksbrev(any()) }
 
         val actualMessage = inspektoer.message(0)
-        assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), actualMessage.get(EVENT_NAME_KEY).asText())
+        assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), actualMessage.get(EVENT_NAME_KEY).asString())
         assertEquals(brev.id, actualMessage.get(BREV_ID_KEY).asLong())
-        assertEquals("journalpostId", actualMessage.get("journalpostId").asText())
-        assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
+        assertEquals("journalpostId", actualMessage.get("journalpostId").asString())
+        assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asString())
     }
 
     @Test

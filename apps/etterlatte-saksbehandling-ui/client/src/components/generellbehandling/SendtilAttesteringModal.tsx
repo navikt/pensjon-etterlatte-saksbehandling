@@ -1,5 +1,5 @@
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import React, { useEffect, useState } from 'react'
 import { Alert, BodyShort, Button, Modal } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'

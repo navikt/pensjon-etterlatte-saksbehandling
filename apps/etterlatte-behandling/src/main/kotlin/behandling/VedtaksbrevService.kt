@@ -143,7 +143,11 @@ class VedtaksbrevService(
                     ?: throw InternfeilException("Fant ikke vedtak for behandlingId=$behandlingId")
 
             if ((behandling.behandlingType == FØRSTEGANGSBEHANDLING && vedtak.type == VedtakType.INNVILGELSE) ||
-                (behandling.behandlingType == REVURDERING && behandling.revurderingsaarsak == NY_SOEKNAD)
+                (
+                    behandling.behandlingType == REVURDERING &&
+                        behandling.revurderingsaarsak == NY_SOEKNAD &&
+                        vedtak.type != VedtakType.AVSLAG
+                )
             ) {
                 utledBrevRequestInnvilgelse(brukerTokenInfo, behandling, vedtak, skalLagres)
             } else if (vedtak.type == VedtakType.OPPHOER) {

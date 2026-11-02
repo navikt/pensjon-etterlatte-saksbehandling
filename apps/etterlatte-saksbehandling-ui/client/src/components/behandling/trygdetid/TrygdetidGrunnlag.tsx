@@ -9,7 +9,7 @@ import {
 } from '~shared/api/trygdetid'
 import React from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'

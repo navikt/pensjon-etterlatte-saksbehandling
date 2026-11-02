@@ -1,5 +1,5 @@
 import { useKlage, useKlageRedigerbar } from '~components/klage/useKlage'
-import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
+import { Navigate, Route, Routes, useMatch } from 'react-router'
 import React, { useEffect, useState } from 'react'
 import { useAppDispatch } from '~store/Store'
 import { addKlage, resetKlage } from '~store/reducers/KlageReducer'

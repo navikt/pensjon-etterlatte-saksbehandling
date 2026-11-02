@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.regler.ANTALL_DESIMALER_INNTENKT
 import no.nav.etterlatte.regler.roundingModeInntekt
-import no.nav.pensjon.brevbaker.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Kroner
 import java.math.BigDecimal
 import java.time.LocalDate
 

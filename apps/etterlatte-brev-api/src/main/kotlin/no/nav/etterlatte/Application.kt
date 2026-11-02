@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrev.strukturertBrevRoute
 import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
+import no.nav.etterlatte.config.BrukerTokenInfoPlugin
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
@@ -29,6 +30,7 @@ private class Server(
             httpPort = context.httpPort,
             applicationConfig = context.config,
         ) {
+            install(BrukerTokenInfoPlugin)
             brevRoute(
                 context.brevService,
                 context.pdfService,

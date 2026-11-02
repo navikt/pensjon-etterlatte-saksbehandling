@@ -234,7 +234,6 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         automatiskRevurderingService = applicationContext.automatiskRevurderingService,
         aarligInntektsjusteringJobbService = applicationContext.aarligInntektsjusteringJobbService,
         etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
-        featureToggleService = applicationContext.featureToggleService,
         sakService = applicationContext.sakService,
     )
     omregningRoutes(omregningService = applicationContext.omregningService)

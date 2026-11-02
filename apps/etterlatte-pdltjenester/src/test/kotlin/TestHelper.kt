@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -24,6 +23,7 @@ import no.nav.etterlatte.pdl.PdlMetadata
 import no.nav.etterlatte.pdl.PdlNavn
 import no.nav.etterlatte.pdl.PdlSivilstand
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
+import tools.jackson.module.kotlin.jacksonTypeRef
 import java.time.LocalDate
 import java.util.UUID
 

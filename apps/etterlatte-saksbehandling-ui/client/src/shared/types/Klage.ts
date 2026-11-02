@@ -274,7 +274,8 @@ export const TEKSTER_AARSAK_OMGJOERING: Record<AarsakOmgjoering, string> = {
   ANNET: 'Annet',
 } as const
 
-export type LovhjemmelFelles = (typeof LOVHJEMLER_FELLES)[number]
+type HistoriskLovhjemmel = 'FVL_33_2'
+export type LovhjemmelFelles = (typeof LOVHJEMLER_FELLES)[number] | HistoriskLovhjemmel
 export type LovhjemmelKunBp = (typeof LOVHJEMLER_KUN_BP)[number]
 export type LovhjemmelKunOms = (typeof LOVHJEMLER_KUN_OMS)[number]
 export type LovhjemmelBp = LovhjemmelFelles | LovhjemmelKunBp
@@ -355,6 +356,7 @@ export const TEKSTER_LOVHJEMLER: Record<AlleHjemler, string> = {
   FVL_31: 'Fvl. § 31',
   FVL_32: 'Fvl. § 32',
   FVL_33_2: 'Fvl. § 33, 2. ledd',
+  FVL_33: 'Fvl. § 33',
   FVL_35_1_C: 'Fvl. § 35, 1. ledd c)',
   FVL_36: 'Fvl. § 36',
 }
@@ -394,7 +396,7 @@ const LOVHJEMLER_FELLES = [
 
   'FVL_31',
   'FVL_32',
-  'FVL_33_2',
+  'FVL_33',
   'FVL_35_1_C',
   'FVL_36',
 

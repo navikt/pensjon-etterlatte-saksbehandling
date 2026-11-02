@@ -10,7 +10,7 @@ import no.nav.etterlatte.brev.Vedlegg
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
-import no.nav.pensjon.brevbaker.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Kroner
 import java.time.LocalDate
 
 object OmstillingsstoenadInnvilgelseVedtakBrevData {

@@ -524,7 +524,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { sanksjonService.kopierSanksjon(any(), any()) } just Runs
+        coEvery { sanksjonService.kopierSanksjon(any(), any(), any()) } just Runs
         coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
@@ -552,7 +552,7 @@ internal class BeregningsGrunnlagServiceTest {
                     any(),
                 )
             }
-            coVerify(exactly = 1) { sanksjonService.kopierSanksjon(any(), any()) }
+            coVerify(exactly = 1) { sanksjonService.kopierSanksjon(omregningsId, behandlingsId, bruker) }
         }
     }
 

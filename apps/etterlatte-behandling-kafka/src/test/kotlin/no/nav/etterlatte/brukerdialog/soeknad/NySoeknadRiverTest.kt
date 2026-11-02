@@ -84,7 +84,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertTrue(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
@@ -126,7 +126,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertTrue(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
@@ -177,7 +177,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Ny søknad skal IKKE fordeles")
@@ -210,6 +210,59 @@ internal class NySoeknadRiverTest {
             assertEquals(AvsenderMottaker("25478323363"), this.avsenderMottaker)
             assertEquals(Bruker("25478323363"), this.bruker)
             assertEquals("etterlatte:barnepensjon:621", this.eksternReferanseId)
+            assertEquals(JournalpostSak(sak.id.toString()), this.sak)
+        }
+    }
+
+    @Test
+    fun `UTVIDET_OMSTILLINGSSTOENAD - Skal journalføre søknad og opprette oppgave uten å fordele til behandling`() {
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr, null, null)
+        val journalpostId = "123"
+
+        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
+        coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
+        coEvery { dokarkivKlientMock.opprettJournalpost(any()) } returns OpprettJournalpostResponse(journalpostId, true)
+        coEvery { behandlingKlientMock.finnOppgaverForReferanse(journalpostId) } returns emptyList()
+        coEvery { behandlingKlientMock.opprettOppgave(any(), any()) } returns UUID.randomUUID()
+
+        val inspector =
+            testRapid {
+                sendTestMessage(UTVIDET_OMSTILLINGSSTOENAD_SOEKNAD)
+            }
+
+        val melding = inspector.message(0)
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+            melding.get(EVENT_NAME_KEY).asString(),
+        )
+        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
+        assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Utvidet OMS skal IKKE fordeles")
+
+        val request = slot<OpprettJournalpostRequest>()
+
+        coVerify(exactly = 1) {
+            behandlingKlientMock.finnEllerOpprettSak("13848599411", SakType.OMSTILLINGSSTOENAD)
+            pdfgenKlient.genererPdf(any(), "utvidet_omstillingsstoenad_v1")
+            dokarkivKlientMock.opprettJournalpost(capture(request))
+            behandlingKlientMock.finnOppgaverForReferanse(journalpostId)
+            behandlingKlientMock.opprettOppgave(
+                sak.id,
+                NyOppgaveDto(
+                    OppgaveKilde.BRUKERDIALOG,
+                    OppgaveType.TILLEGGSINFORMASJON,
+                    "Søknad om utvidet omstillingsstønad mottatt. Søknaden må behandles manuelt.",
+                    journalpostId,
+                    null,
+                    null,
+                ),
+            )
+        }
+
+        with(request.captured) {
+            assertEquals("Søknad om utvidet omstillingsstønad", this.tittel)
+            assertEquals(sak.sakType.tema, this.tema)
+            assertEquals(Bruker("13848599411"), this.bruker)
+            assertEquals("etterlatte:omstillingsstoenad:43", this.eksternReferanseId)
             assertEquals(JournalpostSak(sak.id.toString()), this.sak)
         }
     }
@@ -262,7 +315,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Ny søknad skal IKKE fordeles")
@@ -318,7 +371,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean(), "Ny søknad skal IKKE fordeles")
@@ -450,7 +503,7 @@ internal class NySoeknadRiverTest {
         val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            melding.get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asString(),
         )
         assertNull(melding.get(GyldigSoeknadVurdert.sakIdKey))
         assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
@@ -475,6 +528,7 @@ internal class NySoeknadRiverTest {
     companion object {
         val BARNEPENSJON_SOEKNAD = readFile("/innsendtsoeknad/barnepensjon.json")
         val OMSTILLINGSSTOENAD_SOEKNAD = readFile("/innsendtsoeknad/omstillingsstoenad.json")
+        val UTVIDET_OMSTILLINGSSTOENAD_SOEKNAD = readFile("/innsendtsoeknad/utvidet_omstillingsstoenad.json")
         val UGYLDIG_FNR_SOEKNAD = readFile("/innsendtsoeknad/ugyldig_fnr.json")
 
         private fun readFile(file: String) = NySoeknadRiverTest::class.java.getResource(file)!!.readText()

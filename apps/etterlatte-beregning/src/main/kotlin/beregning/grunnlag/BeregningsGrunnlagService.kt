@@ -315,7 +315,7 @@ class BeregningsGrunnlagService(
         beregningsGrunnlagRepository.lagreBeregningsGrunnlag(nyttGrunnlag)
 
         if (behandling.sakType == SakType.OMSTILLINGSSTOENAD && behandling.behandlingType == BehandlingType.REVURDERING) {
-            runBlocking { sanksjonService.kopierSanksjon(behandlingId, brukerTokenInfo) }
+            runBlocking { sanksjonService.kopierSanksjon(behandlingId, forrigeBehandlingId, brukerTokenInfo) }
         }
         return nyttGrunnlag
     }

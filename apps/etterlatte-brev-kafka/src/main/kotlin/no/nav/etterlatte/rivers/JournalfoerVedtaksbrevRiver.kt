@@ -51,8 +51,8 @@ internal class JournalfoerVedtaksbrevRiver(
                     vedtakId = packet["vedtak.id"].asLong(),
                     sak = deserialize(packet["vedtak.sak"].toJson()),
                     behandlingId = hentBehandlingId(packet),
-                    ansvarligEnhet = Enhetsnummer(packet["vedtak.vedtakFattet.ansvarligEnhet"].asText()),
-                    saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText(),
+                    ansvarligEnhet = Enhetsnummer(packet["vedtak.vedtakFattet.ansvarligEnhet"].asString()),
+                    saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asString(),
                 )
 
             val journalfoervedtaksbrevResponse = runBlocking { brevapiKlient.journalfoerVedtaksbrev(vedtak) }
@@ -70,7 +70,7 @@ internal class JournalfoerVedtaksbrevRiver(
         }
     }
 
-    private fun hentBehandlingId(packet: JsonMessage) = UUID.fromString(packet["vedtak.behandlingId"].asText())
+    private fun hentBehandlingId(packet: JsonMessage) = UUID.fromString(packet["vedtak.behandlingId"].asString())
 
     private fun RapidsConnection.svarSuksess(
         packet: JsonMessage,

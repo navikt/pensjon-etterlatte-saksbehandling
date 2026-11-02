@@ -1,8 +1,8 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 

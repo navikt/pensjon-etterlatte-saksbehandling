@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import Spinner from '~shared/Spinner'
 import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
 

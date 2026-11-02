@@ -47,9 +47,24 @@ class TidshendelseService(
                 opprettOppgaveForBpFylt18Aar(hendelse)
             }
 
-            JobbType.AO_BP20, JobbType.AO_BP21, JobbType.AO_OMS67, JobbType.OMS_DOED_3AAR, JobbType.OMS_DOED_5AAR -> {
+            JobbType.AO_BP20, JobbType.AO_BP21, JobbType.AO_OMS67 -> {
                 opprettAutomatiskRevurdering(
                     hendelse,
+                    Revurderingaarsak.ALDERSOVERGANG,
+                )
+            }
+
+            JobbType.OMS_DOED_3AAR -> {
+                opprettAutomatiskRevurdering(
+                    hendelse,
+                    Revurderingaarsak.OPPHOER_3_AAR_ETTER_DOEDSFALL,
+                )
+            }
+
+            JobbType.OMS_DOED_5AAR -> {
+                opprettAutomatiskRevurdering(
+                    hendelse,
+                    Revurderingaarsak.OPPHOER_AV_2_UTVIDEDE_AAR,
                 )
             }
 
@@ -63,14 +78,20 @@ class TidshendelseService(
         }
     }
 
-    private fun opprettAutomatiskRevurdering(hendelse: TidshendelsePacket): TidshendelseResult {
+    private fun opprettAutomatiskRevurdering(
+        hendelse: TidshendelsePacket,
+        aarsak: Revurderingaarsak,
+    ): TidshendelseResult {
         try {
-            return behandlingService.opprettAutomatiskRevurdering(revurderingRequest(hendelse)).let { response ->
-                TidshendelseResult.OpprettetOmregning(
-                    response.behandlingId,
-                    response.forrigeBehandlingId,
-                )
-            }
+            return behandlingService
+                .opprettAutomatiskRevurdering(
+                    request = revurderingRequest(hendelse = hendelse, aarsak = aarsak),
+                ).let { response ->
+                    TidshendelseResult.OpprettetOmregning(
+                        response.behandlingId,
+                        response.forrigeBehandlingId,
+                    )
+                }
         } catch (e: Exception) {
             logger.error("Kunne ikke opprette omregning [sak=${hendelse.sakId}]", e)
             return opprettOppgaveOpphoerYtelse(hendelse)
@@ -113,13 +134,15 @@ class TidshendelseService(
         return false
     }
 
-    private fun revurderingRequest(hendelse: TidshendelsePacket) =
-        AutomatiskRevurderingRequest(
-            sakId = hendelse.sakId,
-            fraDato = hendelse.behandlingsmaaned.plusMonths(1).atDay(1),
-            revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
-            oppgavefrist = hendelse.behandlingsmaaned.atEndOfMonth(),
-        )
+    private fun revurderingRequest(
+        hendelse: TidshendelsePacket,
+        aarsak: Revurderingaarsak,
+    ) = AutomatiskRevurderingRequest(
+        sakId = hendelse.sakId,
+        fraDato = hendelse.behandlingsmaaned.plusMonths(1).atDay(1),
+        revurderingAarsak = aarsak,
+        oppgavefrist = hendelse.behandlingsmaaned.atEndOfMonth(),
+    )
 
     private fun opprettOppgaveOpphoerYtelse(hendelse: TidshendelsePacket): UUID {
         val oppgaveId =

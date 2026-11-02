@@ -3,7 +3,7 @@ import { logger } from '~utils/logger'
 import ErrorStackParser from 'error-stack-parser'
 import styled from 'styled-components'
 import { Alert } from '@navikt/ds-react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 type Props = {
   children: React.JSX.Element

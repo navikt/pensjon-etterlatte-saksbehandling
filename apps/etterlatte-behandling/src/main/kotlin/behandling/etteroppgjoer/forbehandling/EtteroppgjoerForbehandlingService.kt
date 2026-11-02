@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
-import io.ktor.server.plugins.NotFoundException
+import io.ktor.server.plugins.*
+import io.ktor.utils.io.CancellationException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.etteroppgjoer.Etteroppgjoer
@@ -19,6 +20,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.AarsakTilAvbryteForbehandling
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingHendelser
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
@@ -26,11 +28,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.feilhaandtering.*
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -47,7 +45,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Month
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 class EtteroppgjoerForbehandlingService(
     private val dao: EtteroppgjoerForbehandlingDao,
@@ -664,7 +662,11 @@ class EtteroppgjoerForbehandlingService(
 
         dao.lagreForbehandling(forbehandlingCopy)
         dao.kopierSummerteInntekter(forbehandling.id, forbehandlingCopy.id)
-        dao.kopierPensjonsgivendeInntekt(forbehandling.id, forbehandlingCopy.id)
+        dao.kopierPensjonsgivendeInntekt(
+            forbehandling.id,
+            forbehandlingCopy.id,
+            tillatManglendePgi = manglerSkatteoppgjoerOgErBosattIUtlandet(forbehandling),
+        )
 
         return forbehandlingCopy
     }
@@ -739,6 +741,10 @@ class EtteroppgjoerForbehandlingService(
     private fun hentUtlandstilknytning(ferdigstiltForbehandling: EtteroppgjoerForbehandling): Utlandstilknytning? =
         behandlingService.hentUtlandstilknytningForSak(ferdigstiltForbehandling.sak.id)
 
+    private fun manglerSkatteoppgjoerOgErBosattIUtlandet(forbehandling: EtteroppgjoerForbehandling): Boolean =
+        !forbehandling.mottattSkatteoppgjoer &&
+            hentUtlandstilknytning(forbehandling)?.type == UtlandstilknytningType.BOSATT_UTLAND
+
     private fun haandterDoedsfallEtterEtteroppgjoersAar(forbehandling: EtteroppgjoerForbehandling) {
         val opphoerSkyldesDoedsfall = forbehandling.opphoerSkyldesDoedsfall == JaNei.JA
 
@@ -788,21 +794,29 @@ class EtteroppgjoerForbehandlingService(
     private fun hentPgi(forbehandling: EtteroppgjoerForbehandling): SummertePensjonsgivendeInntekter? {
         val sak = forbehandling.sak
         return try {
-            val pensjonsgivendeInntekter =
-                runBlocking {
-                    pensjonsgivendeInntektService.hentSummerteInntekter(sak.ident, forbehandling.aar)
-                }
-            pensjonsgivendeInntekter
-        } catch (e: Exception) {
-            if (forbehandling.mottattSkatteoppgjoer) {
+            runBlocking { pensjonsgivendeInntektService.hentSummerteInntekter(sak.ident, forbehandling.aar) }
+        } catch (e: NotFoundException) {
+            if (!manglerSkatteoppgjoerOgErBosattIUtlandet(forbehandling)) {
                 throw InternfeilException(
-                    "Kunne ikke hente PGI fra skatt. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
+                    "Fant ikke PGI hos Skatt for sak=${sak.id} og inntektsår=${forbehandling.aar}. " +
+                        "Forbehandlingen kan ikke opprettes. Meld sak hvis det ikke stemmer.",
                     e,
                 )
-            } else {
-                logger.warn("Kunne ikke hente og lagre PGI fra Skatt for forbehandlingen i sakId=${sak.id}", e)
-                null
             }
+            logger.info(
+                "Fant ikke PGI hos Skatt for sak=${sak.id} og inntektsår=${forbehandling.aar} (bosatt i utlandet). " +
+                    "Forbehandlingen opprettes uten PGI.",
+                e,
+            )
+            null
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw InternfeilException(
+                "Kunne ikke hente PGI fra Skatt. Forbehandlingen kunne ikke opprettes. " +
+                    "Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
+                e,
+            )
         }
     }
 

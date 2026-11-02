@@ -4,7 +4,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Oppgavestatus, erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveStatus: Oppgavestatus }) {

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -407,13 +408,21 @@ class StatistikkServiceTest {
     fun `mapper behandlinghendelse riktig`() {
         val behandlingId = UUID.randomUUID()
         val sakId = sakId1
+        val behandlingOpprettet = LocalDateTime.of(2024, 1, 1, 10, 0)
+        val soeknadMottattDato = LocalDateTime.of(2002, 3, 4, 12, 0)
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
 
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
         val registrertStatistikk =
             service.registrerStatistikkForBehandlinghendelse(
-                statistikkBehandling = behandling(id = behandlingId, sakId = sakId, avdoed = listOf("etfnr")),
+                statistikkBehandling =
+                    behandling(
+                        id = behandlingId,
+                        sakId = sakId,
+                        avdoed = listOf("etfnr"),
+                        behandlingOpprettet = behandlingOpprettet,
+                    ).copy(soeknadMottattDato = soeknadMottattDato),
                 hendelse = BehandlingHendelseType.OPPRETTET,
                 tekniskTid = tekniskTidForHendelse,
             ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
@@ -424,10 +433,29 @@ class StatistikkServiceTest {
         assertEquals(registrertStatistikk.referanseId, behandlingId)
         assertEquals(registrertStatistikk.sakYtelsesgruppe, SakYtelsesgruppe.EN_AVDOED_FORELDER)
         assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
+        assertEquals(registrertStatistikk.mottattTidspunkt, soeknadMottattDato.toTidspunkt())
+        assertEquals(registrertStatistikk.registrertTidspunkt, behandlingOpprettet.toTidspunkt())
         assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
         assertNull(registrertStatistikk.ansvarligBeslutter)
         assertEquals(Enheter.PORSGRUNN.enhetNr, registrertStatistikk.ansvarligEnhet)
         assertNull(registrertStatistikk.saksbehandler)
+    }
+
+    @Test
+    fun `bruker behandlingens opprettelsestid dersom soeknadens mottattdato mangler`() {
+        val behandlingOpprettet = LocalDateTime.of(2024, 1, 1, 10, 0)
+        every { sakRepo.lagreRad(any()) } returnsArgument 0
+
+        val registrertStatistikk =
+            service.registrerStatistikkForBehandlinghendelse(
+                statistikkBehandling =
+                    behandling(behandlingOpprettet = behandlingOpprettet)
+                        .copy(soeknadMottattDato = null),
+                hendelse = BehandlingHendelseType.AVBRUTT,
+                tekniskTid = LocalDateTime.of(2024, 1, 2, 10, 0),
+            ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
+
+        assertEquals(registrertStatistikk.mottattTidspunkt, behandlingOpprettet.toTidspunkt())
     }
 
     @ParameterizedTest
@@ -490,6 +518,19 @@ class StatistikkServiceTest {
             EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING to BehandlingResultat.ETTEROPPGJOER_INGEN_ENDRING_MED_UTBETALING,
             EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING to BehandlingResultat.ETTEROPPGJOER_INGEN_ENDRING_UTEN_UTBETALING,
         )
+
+    @Test
+    fun `ferdigstilt etteroppgjoer ved doedsfall faar eget resultat`() {
+        val resultat =
+            utledEtteroppgjoerForbehandlingResultat(
+                hendelse = EtteroppgjoerForbehandlingHendelser.FERDIGSTILT,
+                resultatType = null,
+                sisteResultat = null,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = JaNei.JA,
+            )
+
+        resultat shouldBe BehandlingResultat.ETTEROPPGJOER_AVSLUTTET_DOEDSFALL.name
+    }
 
     @Test
     fun `lagreMaanedligStoenadstatistikk lagrer ting riktig`() {

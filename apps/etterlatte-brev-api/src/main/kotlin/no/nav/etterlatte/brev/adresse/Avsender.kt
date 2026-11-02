@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.adresse
 
-import no.nav.pensjon.brevbaker.api.model.Telefonnummer
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Telefonnummer
 
 data class Avsender(
     val kontor: String,

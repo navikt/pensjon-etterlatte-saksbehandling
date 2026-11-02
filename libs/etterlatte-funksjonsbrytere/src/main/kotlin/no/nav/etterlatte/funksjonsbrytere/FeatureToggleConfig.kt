@@ -10,6 +10,7 @@ enum class FellesFeatureToggle(
     private val key: String,
 ) : FeatureToggle {
     NoOperationToggle("pensjon-etterlatte.no-operation-toggle"),
+    HaandterFalskIdentitet("pensjon-etterlatte.haandter-falsk-identitet"),
     ;
 
     override fun key() = key

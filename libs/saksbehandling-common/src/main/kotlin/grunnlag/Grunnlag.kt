@@ -1,11 +1,11 @@
 package no.nav.etterlatte.libs.common.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
+import tools.jackson.databind.JsonNode
 
 class Grunnlag(
     val soeker: Grunnlagsdata<JsonNode>,

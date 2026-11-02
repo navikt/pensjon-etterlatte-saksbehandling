@@ -21,6 +21,7 @@ data class OppgaveEndring(
 data class EndringLinje(
     val tittel: String,
     val beskrivelse: String? = null,
+    val aarsakTilAvbrytelse: String? = null,
 )
 
 data class GenerellEndringshendelse(

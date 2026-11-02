@@ -1,6 +1,6 @@
 import { Alert, BodyLong, Box, Button, Heading, HStack, Label, Radio, VStack } from '@navikt/ds-react'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { InnstillingTilKabalUtenBrev, Klage, KlageUtfallUtenBrev, Omgjoering, Utfall } from '~shared/types/Klage'
 import { useForm } from 'react-hook-form'
 import { FieldOrNull } from '~shared/types/util'

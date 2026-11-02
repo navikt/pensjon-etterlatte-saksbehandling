@@ -2,6 +2,8 @@ package no.nav.etterlatte.pdl.mapper
 
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.behandling.RelativPersonrolle
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -28,6 +30,7 @@ import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlSivilstand
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
 import no.nav.etterlatte.pdl.SoekPersonTreff
+import no.nav.etterlatte.personweb.FalskIdentitetException
 import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.dto.PersonSoekSvar
 import no.nav.etterlatte.personweb.familieOpplysninger.Bostedsadresse
@@ -42,6 +45,7 @@ class ParallelleSannheterService(
     private val ppsKlient: ParallelleSannheterKlient,
     private val pdlKlient: PdlKlient,
     private val pdlOboKlient: PdlOboKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -185,6 +189,11 @@ class ParallelleSannheterService(
 
     fun mapPersonNavnFoedsel(hentPerson: PdlHentPersonNavnFoedselsdato): PersonNavnFoedselsaar =
         runBlocking {
+            val erFalskIdentitet = erHaandtertFalskIdentitet(hentPerson)
+            if (erFalskIdentitet && hentPerson.manglerOpplysninger()) {
+                throw FalskIdentitetException()
+            }
+
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
 
             val fnr =
@@ -211,8 +220,17 @@ class ParallelleSannheterService(
                 doedsdato = doedsfall?.doedsdato,
                 // PPS støtter p.t. ikke verge. Henter derfor ut første fra listen hvis den ikke er null/tom
                 vergemaal = hentPerson.vergemaalEllerFremtidsfullmakt?.firstNotNullOfOrNull { VergeMapper.mapVerge(it) },
+                erFalskIdentitet = erFalskIdentitet,
             )
         }
+
+    private fun erHaandtertFalskIdentitet(hentPerson: PdlHentPersonNavnFoedselsdato): Boolean =
+        hentPerson.falskIdentitet?.erFalsk == true &&
+            featureToggleService.isEnabled(FellesFeatureToggle.HaandterFalskIdentitet, false)
+
+    // Folkeregisteret annullerer opplysningene på en falsk identitet, så det kan mangle noe å vise
+    private fun PdlHentPersonNavnFoedselsdato.manglerOpplysninger(): Boolean =
+        navn.isEmpty() || foedselsdato.isEmpty() || folkeregisteridentifikator.isEmpty()
 
     suspend fun mapFoedselsdato(hentFoedselsdato: PdlHentFoedselsdato): PdlFoedselsdato =
         ppsKlient.avklarFoedselsdato(hentFoedselsdato.foedselsdato)

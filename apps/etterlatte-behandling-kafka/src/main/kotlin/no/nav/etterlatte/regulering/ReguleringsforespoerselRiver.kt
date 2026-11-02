@@ -1,6 +1,5 @@
 package no.nav.etterlatte.regulering
 
-import com.fasterxml.jackson.databind.node.MissingNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -33,6 +32,7 @@ import no.nav.etterlatte.rapidsandrivers.kjoering
 import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.node.MissingNode
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
@@ -99,7 +99,7 @@ internal class ReguleringsforespoerselRiver(
     private fun JsonMessage.optionalSakType(): SakType? =
         when (val node = this[SAK_TYPE]) {
             is MissingNode -> null
-            else -> SakType.valueOf(node.asText())
+            else -> SakType.valueOf(node.asString())
         }
 
     private fun flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakslisteDTOTilOmregning: SakslisteDTO): SakIDListe =

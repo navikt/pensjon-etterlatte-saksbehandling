@@ -65,9 +65,9 @@ Den korrekte måten å finne måneder der ytelse er beregnet > 0 er å sjekke `a
 
 ### Sperrer mot inntektsendring i etteroppgjørsår
 
-To separate sperrer blokkerer inntektsposteringer for år som har `Etteroppgjoer` – disse gjelder **kun den normale `ForventetInntekt`-flyten** (`oppdaterMedInntektsgrunnlag`), ikke etteroppgjørsflyten som bruker `beregnEtteroppgjoer` direkte:
-1. `Avkorting.oppdaterMedInntektsgrunnlag` kaster `InternfeilException` dersom `hentEllerOpprettAarsoppgjoer(fom)` returnerer `Etteroppgjoer`
-2. `AvkortingValider.validerInntekter` kaster `InntektForTidligereAar` dersom `nyeGrunnlag` inneholder et år som allerede er `Etteroppgjoer`
+To separate sperrer blokkerer inntektsposteringer for år som har `Etteroppgjoer` – disse gjelder **kun den normale `ForventetInntekt`-flyten** (`oppdaterMedInntektsgrunnlag`), ikke etteroppgjørsflyten som bruker `beregnEtteroppgjoer` direkte. Begge sperrene styres av samme Unleash-toggel, `InntektToggles.TILLAT_ENDRE_INNTEKT_ETTEROPPGJOR` (default av), lest i `AvkortingService.beregnAvkortingMedNyeGrunnlag`:
+1. `AvkortingValider.validerInntekter` kaster `InntektForTidligereAar` dersom `nyeGrunnlag` inneholder et år som allerede er `Etteroppgjoer` – styrt av parameteren `blokkerInntektForEtteroppgjorteAar` (default `true`)
+2. `Avkorting.oppdaterMedInntektsgrunnlag` kaster `InternfeilException` dersom `hentEllerOpprettAarsoppgjoer(fom)` returnerer `Etteroppgjoer` – styrt av parameteren `tillatEndreInntektEtteroppgjor` (default `false`). Når toggelen er på, erstattes det eksisterende `Etteroppgjoer` (med faktisk inntekt og beregnet avkorting/restanse) med et nytt, tomt `AarsoppgjoerLoepende` for det året – året behandles altså som om etteroppgjøret ikke har skjedd ennå. Selve etteroppgjøret for året må da gjøres på nytt (ny forbehandling) i etterkant; denne toggelen endrer ikke noe utenfor `Avkorting`-aggregatet (f.eks. status på etteroppgjørsbehandlingen)
 
 ### Navnekollisjonen `Etteroppgjoer`
 

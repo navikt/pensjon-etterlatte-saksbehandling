@@ -85,15 +85,12 @@ abstract class BehandlingIntegrationTest {
             DatabaseConfig.DB_PORT to props.firstMappedPort.toString(),
             DatabaseConfig.DB_DATABASE to props.databaseName,
             AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID to azureAdAttestantGjennyClaim,
-            AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID to azureAdSaksbehandlerClaim,
             AzureKey.AZUREAD_SAKSBEHANDLER_GJENNY_GROUPID to azureAdSaksbehandlerGjennyClaim,
             AzureKey.AZUREAD_GJENNY_LES_GROUPID to azureAdLesetilgangGjennyClaim,
             AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
             AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
             AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,
             AzureKey.AZUREAD_PROSESSERING_ROLLE_GROUPID to azureAdProsesseringRolleClaim,
-            AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID to azureAdNasjonUtenLoggClaim,
-            AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID to azureAdNasjonMedLoggClaim,
             EnvKey.NORG2_URL to "http://localhost",
             EnvKey.NAVANSATT_URL to "http://localhost",
             EnvKey.SKJERMING_URL to "http://localhost",
@@ -180,7 +177,7 @@ abstract class BehandlingIntegrationTest {
         mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = attestantIdent,
-            groups = listOf(azureAdSaksbehandlerClaim, azureAdAttestantGjennyClaim),
+            groups = listOf(azureAdSaksbehandlerGjennyClaim, azureAdAttestantGjennyClaim),
         )
     }
 
@@ -190,7 +187,7 @@ abstract class BehandlingIntegrationTest {
             navIdent = saksbehandlerStrengtFortroligIdent,
             groups =
                 listOf(
-                    azureAdSaksbehandlerClaim,
+                    azureAdSaksbehandlerGjennyClaim,
                     azureAdAttestantGjennyClaim,
                     azureAdStrengtFortroligClaim,
                 ),
@@ -205,7 +202,7 @@ abstract class BehandlingIntegrationTest {
                 listOf(
                     azureAdAttestantGjennyClaim,
                     azureAdEgenAnsattClaim,
-                    azureAdSaksbehandlerClaim,
+                    azureAdSaksbehandlerGjennyClaim,
                 ),
         )
     }

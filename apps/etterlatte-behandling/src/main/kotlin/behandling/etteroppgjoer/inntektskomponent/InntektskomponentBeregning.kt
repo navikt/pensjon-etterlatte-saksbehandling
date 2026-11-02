@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.InntektSummert
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -11,6 +10,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.SubsumsjonsNode
 import no.nav.etterlatte.libs.regler.eksekver
+import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -47,17 +47,20 @@ object InntektskomponentBeregning {
             )
 
         return when (resultat) {
-            is RegelkjoeringResultat.Suksess ->
+            is RegelkjoeringResultat.Suksess -> {
                 resultat.periodiserteResultater.singleOrNull()?.resultat
                     ?: throw InternfeilException(
                         "Fikk 0 eller flere perioder tilbake i summering av inntekter fra" +
                             " inntektskomponenten, som ikke skal være mulig",
                     )
+            }
 
-            else -> throw InternfeilException(
-                "Fikk ugyldig periode når inntekter fra inntektskomponenten" +
-                    " skulle beregnes for år $etteroppgjoersAar",
-            )
+            else -> {
+                throw InternfeilException(
+                    "Fikk ugyldig periode når inntekter fra inntektskomponenten" +
+                        " skulle beregnes for år $etteroppgjoersAar",
+                )
+            }
         }
     }
 }

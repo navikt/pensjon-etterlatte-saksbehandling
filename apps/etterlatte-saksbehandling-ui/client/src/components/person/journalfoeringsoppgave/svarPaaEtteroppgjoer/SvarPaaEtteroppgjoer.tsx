@@ -1,5 +1,5 @@
 import { Alert, BodyShort, Box, Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgaveMedMerknad, hentOppgave } from '~shared/api/oppgaver'

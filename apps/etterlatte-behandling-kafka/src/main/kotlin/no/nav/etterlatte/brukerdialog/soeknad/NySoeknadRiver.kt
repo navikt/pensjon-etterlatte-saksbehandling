@@ -1,7 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad
 
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -31,6 +29,8 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.sikkerLogg
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.DatabindException
+import tools.jackson.module.kotlin.treeToValue
 
 internal class NySoeknadRiver(
     rapidsConnection: RapidsConnection,
@@ -68,7 +68,7 @@ internal class NySoeknadRiver(
             val sakType =
                 when (soeknad.type) {
                     SoeknadType.BARNEPENSJON -> SakType.BARNEPENSJON
-                    SoeknadType.OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
+                    SoeknadType.OMSTILLINGSSTOENAD, SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
                 }
 
             if (!Folkeregisteridentifikator.isValid(soekerFnr)) {
@@ -93,6 +93,18 @@ internal class NySoeknadRiver(
                 return // Avbryt behandling av søknad
             }
 
+            if (soeknad.type == SoeknadType.UTVIDET_OMSTILLINGSSTOENAD) {
+                // Behandlingsløpet for utvidet omstillingsstønad er ikke avklart ennå. Søknaden mangler bl.a. avdød,
+                // så vi kan ikke opprette behandling fra den. Saksbehandler får en oppgave og håndterer den manuelt.
+                opprettOppgaveTilleggsinformasjon(
+                    sakId = sak.id,
+                    journalpostId = journalpostResponse.journalpostId,
+                    merknad = "Søknad om utvidet omstillingsstønad mottatt. Søknaden må behandles manuelt.",
+                )
+                context.publish(packet.oppdaterMed(sak.id, false, journalpostResponse).toJson())
+                return
+            }
+
             val harBehandlingUnderArbeid =
                 behandlingKlient
                     .hentSakMedBehandlinger(sak.id)
@@ -102,12 +114,16 @@ internal class NySoeknadRiver(
             if (harBehandlingUnderArbeid) {
                 // Opprett oppgave for tilleggsinformasjon
                 // Sett fordelt til false slik at det ikke opprettes ny behandling.
-                opprettOppgaveTilleggsinformasjon(sak.id, journalpostResponse.journalpostId)
+                opprettOppgaveTilleggsinformasjon(
+                    sakId = sak.id,
+                    journalpostId = journalpostResponse.journalpostId,
+                    merknad = "Ny søknad mottatt mens førstegangsbehandling pågår. Kontroller innholdet og vurder konsekvens.",
+                )
                 context.publish(packet.oppdaterMed(sak.id, false, journalpostResponse).toJson())
             } else {
                 context.publish(packet.oppdaterMed(sak.id, true, journalpostResponse).toJson())
             }
-        } catch (e: JsonMappingException) {
+        } catch (e: DatabindException) {
             sikkerLogg.error("Feil under deserialisering", e)
             logger.error("Feil under deserialisering av søknad (id=$soeknadId). Se sikkerlogg for detaljer.")
             throw e
@@ -118,13 +134,14 @@ internal class NySoeknadRiver(
     }
 
     /**
-     * Oppretter en oppgave i stedet for ny behandling dersom det allerede finnes en pågående behandling.
-     * På denne måten unngår vi duplikate behandlinger i tilfeller der sluttbruker bruker ny søknad for
-     * å sende tilleggsinformasjon.
+     * Oppretter en oppgave i stedet for ny behandling. Brukes når det allerede finnes en pågående behandling,
+     * slik at vi unngår duplikate behandlinger i tilfeller der sluttbruker bruker ny søknad for å sende
+     * tilleggsinformasjon, og for søknadstyper som ikke skal gi automatisk behandling.
      **/
     private fun opprettOppgaveTilleggsinformasjon(
         sakId: SakId,
         journalpostId: String,
+        merknad: String,
     ) {
         val oppgaverForReferanse = behandlingKlient.finnOppgaverForReferanse(journalpostId)
         if (oppgaverForReferanse.isEmpty()) {
@@ -132,7 +149,7 @@ internal class NySoeknadRiver(
                 NyOppgaveDto(
                     oppgaveKilde = OppgaveKilde.BRUKERDIALOG,
                     oppgaveType = OppgaveType.TILLEGGSINFORMASJON,
-                    merknad = "Ny søknad mottatt mens førstegangsbehandling pågår. Kontroller innholdet og vurder konsekvens.",
+                    merknad = merknad,
                     referanse = journalpostId,
                 )
             behandlingKlient
@@ -186,9 +203,9 @@ internal class NySoeknadRiver(
     private fun JsonMessage.soeknad() = objectMapper.treeToValue<InnsendtSoeknad>(this[SoeknadInnsendt.skjemaInfoKey])
 
     private fun JsonMessage.soeknadId(): Long {
-        val longValue = get(SoeknadInnsendt.lagretSoeknadIdKey).longValue()
-        return if (longValue != 0L) {
-            longValue
+        val node = get(SoeknadInnsendt.lagretSoeknadIdKey)
+        return if (node.isNumber) {
+            node.longValue()
         } else {
             System.currentTimeMillis() // Slik at det gjøres en ny fordeling for testdata-søknader
         }

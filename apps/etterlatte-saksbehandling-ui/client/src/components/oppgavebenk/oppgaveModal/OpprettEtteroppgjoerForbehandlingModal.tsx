@@ -11,7 +11,7 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterDato } from '~utils/formatering/dato'
 import { useForm } from 'react-hook-form'
 import { opprettEtteroppgjoerForbehandling as opprettForbehandlingApi } from '~shared/api/etteroppgjoer'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
 

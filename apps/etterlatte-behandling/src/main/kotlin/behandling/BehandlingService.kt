@@ -466,6 +466,7 @@ class BehandlingServiceImpl(
         val forbehandling =
             etteroppgjoerForbehandlingDao.hentForbehandling(forbehandlingId)
                 ?: throw FantIkkeForbehandling(forbehandlingId)
+        val erOmgjoering = forbehandling.omgjoeringEgetInitiativ || forbehandling.klageOmgjoering != null
 
         krev(forbehandling.kanAvbrytesVedTilbakestilling()) {
             "Kan ikke tilbakestille etteroppgjør for sakId=${forbehandling.sak.id}: forbehandling kan ikke avbrytes"
@@ -474,7 +475,7 @@ class BehandlingServiceImpl(
         val etteroppgjoer =
             etteroppgjoerDao
                 .hentEtteroppgjoerForInntektsaar(forbehandling.sak.id, forbehandling.aar)
-                ?.tilbakestill(erEndringTilUgunst)
+                ?.tilbakestill(erEndringTilUgunst, erOmgjoering)
                 ?: throw InternfeilException("Fant ikke etteroppgjør for sakId=${forbehandling.sak.id} og inntektsaar=${forbehandling.aar}")
 
         val kommentar = if (erEndringTilUgunst) "Endringen er til ugunst for bruker" else "Revurderingen ble avbrutt"

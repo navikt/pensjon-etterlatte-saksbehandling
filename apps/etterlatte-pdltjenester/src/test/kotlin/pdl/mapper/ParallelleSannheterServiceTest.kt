@@ -3,6 +3,8 @@ package no.nav.etterlatte.pdl.mapper
 import io.ktor.http.HttpStatusCode
 import io.mockk.coEvery
 import io.mockk.mockk
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
@@ -10,16 +12,23 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.pdl.ParallelleSannheterException
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlFalskIdentitet
+import no.nav.etterlatte.pdl.PdlFoedselsdato
 import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.pdl.PdlNavn
 import no.nav.etterlatte.pdl.PdlSivilstand
 import no.nav.etterlatte.pdl.PdlSivilstandstype
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
 import no.nav.etterlatte.pdlFolkeregisteridentifikator
 import no.nav.etterlatte.pdlHentPerson
 import no.nav.etterlatte.pdlMetadata
+import no.nav.etterlatte.pdlNavn
+import no.nav.etterlatte.personweb.FalskIdentitetException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.Month
 
@@ -27,7 +36,8 @@ internal class ParallelleSannheterServiceTest {
     private val pdlKlient = mockk<PdlKlient>()
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
 
-    private val parallelleSannheterService = ParallelleSannheterService(ppsKlient, pdlKlient, mockk())
+    private val featureToggleService = DummyFeatureToggleService()
+    private val parallelleSannheterService = ParallelleSannheterService(ppsKlient, pdlKlient, mockk(), featureToggleService)
 
     @Test
     fun `ved feil fra pps avklar statsborgerskap tar vi med pdl-dataene`() {
@@ -171,6 +181,98 @@ internal class ParallelleSannheterServiceTest {
             )
         Assertions.assertNull(person.pdlStatsborgerskap)
         Assertions.assertNull(person.statsborgerskap)
+    }
+
+    @Test
+    fun `navn og foedsel for falsk identitet med annullerte opplysninger gir FalskIdentitetException`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, true)
+        val hentPerson =
+            pdlHentPersonNavnFoedselsdato(
+                navn = emptyList(),
+                foedselsdato = emptyList(),
+                falskIdentitet = PdlFalskIdentitet(erFalsk = true),
+            )
+
+        assertThrows<FalskIdentitetException> {
+            parallelleSannheterService.mapPersonNavnFoedsel(hentPerson)
+        }
+    }
+
+    @Test
+    fun `navn og foedsel for falsk identitet med opplysninger mappes med erFalskIdentitet`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, true)
+        val hentPerson = pdlHentPersonNavnFoedselsdato(falskIdentitet = PdlFalskIdentitet(erFalsk = true))
+        hentPerson.setupNavnFoedselMock()
+
+        val person = parallelleSannheterService.mapPersonNavnFoedsel(hentPerson)
+
+        Assertions.assertTrue(person.erFalskIdentitet)
+        Assertions.assertEquals(SOEKER_FOEDSELSNUMMER, person.foedselsnummer)
+    }
+
+    @Test
+    fun `navn og foedsel uten falsk identitet mappes med erFalskIdentitet false`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, true)
+        val hentPerson = pdlHentPersonNavnFoedselsdato(falskIdentitet = null)
+        hentPerson.setupNavnFoedselMock()
+
+        val person = parallelleSannheterService.mapPersonNavnFoedsel(hentPerson)
+
+        Assertions.assertFalse(person.erFalskIdentitet)
+    }
+
+    @Test
+    fun `avslatt eller udefinert toggle ignorerer falsk identitet`() {
+        val hentPerson = pdlHentPersonNavnFoedselsdato(falskIdentitet = PdlFalskIdentitet(erFalsk = true))
+        hentPerson.setupNavnFoedselMock()
+
+        Assertions.assertFalse(parallelleSannheterService.mapPersonNavnFoedsel(hentPerson).erFalskIdentitet)
+
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, false)
+
+        Assertions.assertFalse(parallelleSannheterService.mapPersonNavnFoedsel(hentPerson).erFalskIdentitet)
+    }
+
+    @Test
+    fun `avslatt toggle bruker eksisterende avklaring og feil for annullerte opplysninger`() {
+        featureToggleService.settBryter(FellesFeatureToggle.HaandterFalskIdentitet, false)
+        val hentPerson =
+            pdlHentPersonNavnFoedselsdato(
+                navn = emptyList(),
+                foedselsdato = emptyList(),
+                falskIdentitet = PdlFalskIdentitet(erFalsk = true),
+            )
+        val ppsFeil = ParallelleSannheterException("Kunne ikke avklare navn", HttpStatusCode.NotFound)
+        coEvery { ppsKlient.avklarNavn(emptyList()) } throws ppsFeil
+
+        val feil =
+            assertThrows<ParallelleSannheterException> {
+                parallelleSannheterService.mapPersonNavnFoedsel(hentPerson)
+            }
+
+        Assertions.assertSame(ppsFeil, feil)
+    }
+
+    private fun pdlHentPersonNavnFoedselsdato(
+        navn: List<PdlNavn> = listOf(pdlNavn()),
+        foedselsdato: List<PdlFoedselsdato> =
+            listOf(PdlFoedselsdato(LocalDate.of(2010, 1, 1), 2010, metadata = pdlMetadata())),
+        falskIdentitet: PdlFalskIdentitet?,
+    ) = PdlHentPersonNavnFoedselsdato(
+        folkeregisteridentifikator = listOf(pdlFolkeregisteridentifikator(SOEKER_FOEDSELSNUMMER.value)),
+        navn = navn,
+        foedselsdato = foedselsdato,
+        doedsfall = emptyList(),
+        vergemaalEllerFremtidsfullmakt = null,
+        falskIdentitet = falskIdentitet,
+    )
+
+    private fun PdlHentPersonNavnFoedselsdato.setupNavnFoedselMock() {
+        coEvery { ppsKlient.avklarNavn(navn) } returns navn.first()
+        coEvery { ppsKlient.avklarFolkeregisteridentifikator(folkeregisteridentifikator) } returns
+            folkeregisteridentifikator.first()
+        coEvery { ppsKlient.avklarFoedselsdato(foedselsdato) } returns foedselsdato.first()
+        coEvery { ppsKlient.avklarDoedsfall(doedsfall) } returns null
     }
 }
 

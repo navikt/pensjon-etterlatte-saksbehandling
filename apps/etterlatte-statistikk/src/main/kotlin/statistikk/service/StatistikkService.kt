@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
@@ -317,10 +318,13 @@ class StatistikkService(
             type = "ETTEROPPGJOER_FORBEHANDLING",
             status = etteroppgjoerRad.hendelse.name,
             resultat =
-                when (etteroppgjoerRad.hendelse) {
-                    EtteroppgjoerForbehandlingHendelser.AVBRUTT -> "AVBRUTT"
-                    else -> etteroppgjoerRad.resultatType?.name ?: sisteResultat?.name
-                },
+                utledEtteroppgjoerForbehandlingResultat(
+                    hendelse = etteroppgjoerRad.hendelse,
+                    resultatType = etteroppgjoerRad.resultatType,
+                    sisteResultat = sisteResultat,
+                    opphoerSkyldesDoedsfallIEtteroppgjoersaar =
+                        statistikkDto.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
+                ),
             resultatBegrunnelse =
                 if (statistikkDto.forbehandling.klageOmgjoering != null) Revurderingaarsak.OMGJOERING_ETTER_KLAGE.name else null,
             behandlingMetode = BehandlingMetode.MANUELL, // hvis vi setter på automatisering her må vi skille her
@@ -378,7 +382,6 @@ class StatistikkService(
     ): SakRad? {
         val vedtakInnhold = (vedtak.innhold as? VedtakInnholdDto.VedtakBehandlingDto) ?: return null
         val statistikkBehandling = hentStatistikkBehandling(vedtak.behandlingId)
-        val mottattTid = statistikkBehandling.soeknadMottattDato ?: statistikkBehandling.behandlingOpprettet
         val (beregning, avkorting) =
             when (hendelse) {
                 VedtakKafkaHendelseHendelseType.FATTET,
@@ -409,7 +412,7 @@ class StatistikkService(
             id = -1,
             referanseId = vedtakInnhold.behandling.id,
             sakId = vedtak.sak.id,
-            mottattTidspunkt = mottattTid.toTidspunkt(),
+            mottattTidspunkt = statistikkBehandling.mottattTidspunkt(),
             registrertTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
             ferdigbehandletTidspunkt = vedtak.attestasjon?.tidspunkt,
             vedtakTidspunkt = vedtak.attestasjon?.tidspunkt,
@@ -455,6 +458,8 @@ class StatistikkService(
         runBlocking {
             behandlingKlient.hentStatistikkBehandling(behandlingId)
         }
+
+    private fun StatistikkBehandling.mottattTidspunkt(): Tidspunkt = (soeknadMottattDato ?: behandlingOpprettet).toTidspunkt()
 
     private fun hentPersongalleri(behandlingId: UUID): Persongalleri =
         runBlocking {
@@ -682,7 +687,7 @@ class StatistikkService(
                 id = -1,
                 referanseId = statistikkBehandling.id,
                 sakId = statistikkBehandling.sak.id,
-                mottattTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
+                mottattTidspunkt = statistikkBehandling.mottattTidspunkt(),
                 registrertTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
                 ferdigbehandletTidspunkt = null,
                 vedtakTidspunkt = null,
@@ -818,6 +823,27 @@ class StatistikkService(
         }
     }
 }
+
+internal fun utledEtteroppgjoerForbehandlingResultat(
+    hendelse: EtteroppgjoerForbehandlingHendelser,
+    resultatType: EtteroppgjoerResultatType?,
+    sisteResultat: EtteroppgjoerResultatType?,
+    opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei?,
+): String? =
+    when {
+        hendelse == EtteroppgjoerForbehandlingHendelser.AVBRUTT -> {
+            BehandlingResultat.AVBRUTT.name
+        }
+
+        hendelse == EtteroppgjoerForbehandlingHendelser.FERDIGSTILT &&
+            opphoerSkyldesDoedsfallIEtteroppgjoersaar == JaNei.JA -> {
+            BehandlingResultat.ETTEROPPGJOER_AVSLUTTET_DOEDSFALL.name
+        }
+
+        else -> {
+            resultatType?.name ?: sisteResultat?.name
+        }
+    }
 
 internal fun hentSakYtelsesgruppe(
     sakType: SakType,

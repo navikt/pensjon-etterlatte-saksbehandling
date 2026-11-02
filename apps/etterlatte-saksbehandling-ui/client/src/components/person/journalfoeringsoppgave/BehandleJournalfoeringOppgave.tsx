@@ -1,6 +1,6 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
-import { Route, Routes, useParams } from 'react-router-dom'
+import { Route, Routes, useParams } from 'react-router'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'

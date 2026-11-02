@@ -19,8 +19,8 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import no.nav.pensjon.brevbaker.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Kroner
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -57,13 +57,14 @@ class TilbakekrevingInnholdDTOTest {
             )
 
         val data =
-            TilbakekrevingBrevDTO.fra(
-                emptyList(),
-                brevData.forenkletVedtak?.tilbakekreving,
-                brevData.sak.sakType,
-                brevData.utlandstilknytning?.type,
-                brevData.personerISak.soeker.formaterNavn(),
-            ).data
+            TilbakekrevingBrevDTO
+                .fra(
+                    emptyList(),
+                    brevData.forenkletVedtak?.tilbakekreving,
+                    brevData.sak.sakType,
+                    brevData.utlandstilknytning?.type,
+                    brevData.personerISak.soeker.formaterNavn(),
+                ).data
 
         data.tilbakekreving.perioder.size shouldBe 1
         with(data.tilbakekreving.perioder[0]) {

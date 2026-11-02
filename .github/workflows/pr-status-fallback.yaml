@@ -7,9 +7,10 @@ name: pr-status-fallback
 # request" i branch protection for "main branch"-ruleset blir da stående som
 # "Expected"/gul for alltid, siden ingen workflow noensinne rapporterer status.
 #
-# Denne workflowen dekker akkurat det motsatte stimønsteret (paths-ignore) og
-# rapporterer umiddelbart samme sjekknavn ("test / Verify pull request") som bestått
-# når ingen app-relevante stier er endret. Den maskerer aldri en reell testfeil:
+# Denne workflowen dekker det motsatte stimønsteret og inkluderer .nais eksplisitt,
+# siden app-workflowene ikke tester rene manifestendringer. Den rapporterer
+# umiddelbart samme sjekknavn ("test / Verify pull request") som bestått når ingen
+# app-relevante stier er endret. Den maskerer aldri en reell testfeil:
 # GitHub krever at ALLE sjekker med samme navn for en commit er success/skipped for
 # at en required check skal telle som bestått, så hvis denne workflowen skulle
 # trigges samtidig med en ekte app-workflow (blandet PR), og den ekte testen feiler,
@@ -18,12 +19,14 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - apps/**
-      - libs/**
-      - docker/**
-      - gradle/libs.versions.toml
-      - settings.gradle.kts
+    paths:
+      - "**"
+      - "!apps/**"
+      - "apps/**/.nais/**"
+      - "!libs/**"
+      - "!docker/**"
+      - "!gradle/libs.versions.toml"
+      - "!settings.gradle.kts"
 
 permissions:
   contents: read

@@ -7,9 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
@@ -33,7 +31,6 @@ import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 import java.util.UUID
-import kotlin.collections.filterNot as exclude
 
 internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService,
@@ -43,18 +40,10 @@ internal fun Route.revurderingRoutes(
     aarligInntektsjusteringJobbService: AarligInntektsjusteringJobbService,
     etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
     sakService: SakService,
-    featureToggleService: FeatureToggleService,
 ) {
     val logger = LoggerFactory.getLogger("RevurderingRoute")
 
-    fun omgjoeringEtteroppgjoerEgetInitiativAktivert(): Boolean =
-        featureToggleService.isEnabled(EtteroppgjoerToggles.OMGJOER_ETTEROPPGJOER_EGET_INITIATIV, false)
-
-    fun stoettedeRevurderingsaarsaker(sakType: SakType): List<Revurderingaarsak> =
-        hentRevurderingaarsaker(sakType)
-            .exclude {
-                it == OMGJOERING_AV_ETTEROPPGJOER_EGET_INITIATIV && !omgjoeringEtteroppgjoerEgetInitiativAktivert()
-            }
+    fun stoettedeRevurderingsaarsaker(sakType: SakType): List<Revurderingaarsak> = hentRevurderingaarsaker(sakType)
 
     fun sjekkStoettetRevurderingsaarsak(
         sakId: SakId,

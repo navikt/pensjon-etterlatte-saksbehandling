@@ -6,7 +6,7 @@ import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { Folkeregisteridentifikatorsamsvar, Grunnlagsendringshendelse } from '~components/person/typer'
 import { ISakMedUtlandstilknytning } from '~shared/types/sak'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { usePerson } from '~shared/statusbar/usePerson'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.behandling.etteroppgjoer.PensjonsgivendeInntektSummert
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.PensjonsgivendeInntektAarResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -11,6 +10,7 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.SubsumsjonsNode
 import no.nav.etterlatte.libs.regler.eksekver
+import tools.jackson.databind.JsonNode
 import java.time.YearMonth
 
 object PensjonsgivendeInntektBeregning {
@@ -47,16 +47,20 @@ object PensjonsgivendeInntektBeregning {
             )
 
         return when (resultat) {
-            is RegelkjoeringResultat.Suksess ->
+            is RegelkjoeringResultat.Suksess -> {
                 resultat.periodiserteResultater.singleOrNull()?.resultat
                     ?: throw InternfeilException(
                         "Fikk 0 eller flere perioder tilbake i summering av inntekter fra" +
                             " Skatteetaten, som ikke skal være mulig",
                     )
-            else -> throw InternfeilException(
-                "Fikk ugyldig periode når inntekter fra Skatteetaten" +
-                    " skulle beregnes for år $etteroppgjoersAar",
-            )
+            }
+
+            else -> {
+                throw InternfeilException(
+                    "Fikk ugyldig periode når inntekter fra Skatteetaten" +
+                        " skulle beregnes for år $etteroppgjoersAar",
+                )
+            }
         }
     }
 }

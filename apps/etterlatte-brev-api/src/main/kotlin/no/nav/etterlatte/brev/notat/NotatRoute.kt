@@ -59,8 +59,11 @@ fun Route.notatRoute(
     route("/notat") {
         route("/{$NOTAT_ID_CALL_PARAMETER}") {
             delete {
-                nyNotatService.slett(notatId)
-                call.respond(HttpStatusCode.OK)
+                val sakId = nyNotatService.hent(notatId).sakId
+                withSakId(sakId, tilgangsSjekk, skrivetilgang = true) {
+                    nyNotatService.slett(notatId)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
 
             get("/payload") {
@@ -70,10 +73,12 @@ fun Route.notatRoute(
 
             post("/payload") {
                 val payload = call.receive<Slate>()
+                val sakId = nyNotatService.hent(notatId).sakId
 
-                nyNotatService.oppdaterPayload(notatId, payload, brukerTokenInfo)
-
-                call.respond(HttpStatusCode.OK)
+                withSakId(sakId, tilgangsSjekk, skrivetilgang = true) {
+                    nyNotatService.oppdaterPayload(notatId, payload, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
 
             post("/tittel") {
@@ -85,8 +90,11 @@ fun Route.notatRoute(
                         detail = "Kan ikke oppdatere tittel når den er tom eller mangler!",
                     )
                 } else {
-                    nyNotatService.oppdaterTittel(notatId, tittel, brukerTokenInfo)
-                    call.respond(HttpStatusCode.OK)
+                    val sakId = nyNotatService.hent(notatId).sakId
+                    withSakId(sakId, tilgangsSjekk, skrivetilgang = true) {
+                        nyNotatService.oppdaterTittel(notatId, tittel, brukerTokenInfo)
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
             }
 
@@ -96,8 +104,11 @@ fun Route.notatRoute(
             }
 
             post("/journalfoer") {
-                nyNotatService.journalfoer(notatId, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+                val sakId = nyNotatService.hent(notatId).sakId
+                withSakId(sakId, tilgangsSjekk, skrivetilgang = true) {
+                    nyNotatService.journalfoer(notatId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
 
@@ -115,7 +126,7 @@ fun Route.notatRoute(
 
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
-                withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
+                withSakId(tilgangsSjekk, skrivetilgang = false) { sakId ->
                     val notater = nyNotatService.hentForSak(sakId)
                     call.respond(notater)
                 }

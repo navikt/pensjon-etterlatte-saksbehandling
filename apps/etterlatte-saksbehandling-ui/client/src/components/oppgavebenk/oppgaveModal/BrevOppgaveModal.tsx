@@ -12,7 +12,7 @@ import { formaterDato, formaterDatoMedKlokkeslett } from '~utils/formatering/dat
 import { hentBrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 import { BrevStatus } from '~shared/types/Brev'
 
 export const BrevOppgaveModal = ({

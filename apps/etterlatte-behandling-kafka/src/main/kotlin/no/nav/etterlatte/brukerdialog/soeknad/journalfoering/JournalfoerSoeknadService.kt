@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brukerdialog.soeknad.journalfoering
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brukerdialog.soeknad.pdf.PdfGeneratorKlient
@@ -8,10 +7,12 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Base64
 
 class JournalfoerSoeknadService(
@@ -28,7 +29,7 @@ class JournalfoerSoeknadService(
         soeknad: InnsendtSoeknad,
     ): OpprettJournalpostResponse? {
         return try {
-            val tittel = opprettTittel(sak.sakType)
+            val tittel = opprettTittel(soeknad.type)
             val dokument = opprettDokument(soeknadId, tittel, soeknad, soeknad.template())
 
             val request =
@@ -56,7 +57,7 @@ class JournalfoerSoeknadService(
         soeknad: InnsendtSoeknad,
     ): OpprettJournalpostResponse? =
         try {
-            val tittel = opprettTittel(sakType)
+            val tittel = opprettTittel(soeknad.type)
             val dokument = opprettDokument(soeknadId, tittel, soeknad, soeknad.template())
 
             val request =
@@ -77,10 +78,11 @@ class JournalfoerSoeknadService(
             null
         }
 
-    private fun opprettTittel(sakType: SakType) =
-        when (sakType) {
-            SakType.BARNEPENSJON -> "Søknad om barnepensjon"
-            SakType.OMSTILLINGSSTOENAD -> "Søknad om omstillingsstønad"
+    private fun opprettTittel(soeknadType: SoeknadType) =
+        when (soeknadType) {
+            SoeknadType.BARNEPENSJON -> "Søknad om barnepensjon"
+            SoeknadType.OMSTILLINGSSTOENAD -> "Søknad om omstillingsstønad"
+            SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> "Søknad om utvidet omstillingsstønad"
         }
 
     private fun opprettEksternReferanseId(
@@ -132,7 +134,10 @@ class JournalfoerSoeknadService(
                 pdfgenKlient.genererPdf(soeknad, template)
             }.let {
                 when (it) {
-                    is RetryResult.Success -> DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    is RetryResult.Success -> {
+                        DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    }
+
                     is RetryResult.Failure -> {
                         logger.error("Kunne ikke opprette PDF for søknad med id=$soeknadId")
                         throw it.samlaExceptions()

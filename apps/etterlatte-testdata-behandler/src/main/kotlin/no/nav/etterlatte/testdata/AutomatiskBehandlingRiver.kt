@@ -30,7 +30,7 @@ class AutomatiskBehandlingRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val behandlingssteg = Behandlingssteg.valueOf(packet[Behandlingssteg.KEY].asText())
+        val behandlingssteg = Behandlingssteg.valueOf(packet[Behandlingssteg.KEY].asString())
         runBlocking {
             behandler.behandle(
                 packet.sakId,

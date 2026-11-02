@@ -10,7 +10,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.azureAdSaksbehandlerClaim
+import no.nav.etterlatte.azureAdSaksbehandlerGjennyClaim
 import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
@@ -68,8 +68,8 @@ class SaksbehandlerServiceImplTest(
 
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
-                mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerGjennyClaim)),
+                mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerGjennyClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
@@ -96,8 +96,8 @@ class SaksbehandlerServiceImplTest(
 
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
-                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerClaim)),
-                mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerClaim),
+                simpleSaksbehandler(claims = mapOf(Claims.groups to azureAdSaksbehandlerGjennyClaim)),
+                mapOf(AzureGroup.SAKSBEHANDLER_GJENNY to azureAdSaksbehandlerGjennyClaim),
             )
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)

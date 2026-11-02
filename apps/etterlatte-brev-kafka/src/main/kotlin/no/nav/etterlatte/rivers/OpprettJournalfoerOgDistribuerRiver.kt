@@ -66,7 +66,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         context: MessageContext,
     ) {
         runBlocking {
-            val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
+            val brevkode = packet[BREVMAL_RIVER_KEY].asString().let { Brevkoder.valueOf(it) }
             val sakForPakke = behandlingKlient.hentSak(packet.sakId)
             if (sakForPakke == null) {
                 logger.info(

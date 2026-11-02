@@ -48,10 +48,10 @@ class VilkaarsvurderingTidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
-            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "BP20"
-            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asString() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
+            field(0, TIDSHENDELSE_TYPE_KEY).asString() shouldBe "BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asString() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 1
             field(0, "yrkesskadefordel_pre_20240101").asBoolean() shouldBe true
@@ -70,10 +70,10 @@ class VilkaarsvurderingTidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
-            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "BP20"
-            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asString() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
+            field(0, TIDSHENDELSE_TYPE_KEY).asString() shouldBe "BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asString() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
             assertThrows<IllegalArgumentException> { field(0, "yrkesskadefordel_pre_20240101") }
@@ -105,10 +105,10 @@ class VilkaarsvurderingTidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
-            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "OMS_DOED_3AAR"
-            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asString() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
+            field(0, TIDSHENDELSE_TYPE_KEY).asString() shouldBe "OMS_DOED_3AAR"
+            field(0, TIDSHENDELSE_ID_KEY).asString() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 2
             field(0, "oms_rett_uten_tidsbegrensning").asBoolean() shouldBe true
@@ -135,14 +135,19 @@ class VilkaarsvurderingTidshendelseRiverTest {
                 it[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingIdLoepende
             }
 
-        every { vilkaarsvurderingService.opphoerAldersovergang(behandlingId, behandlingIdLoepende) } returns mockk<HttpResponse>()
+        every {
+            vilkaarsvurderingService.opphoerAldersovergang(
+                behandlingId,
+                behandlingIdLoepende,
+            )
+        } returns mockk<HttpResponse>()
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
-            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VILKAARSVURDERT"
-            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "BP20"
-            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, EVENT_NAME_KEY).asString() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asString() shouldBe "VILKAARSVURDERT"
+            field(0, TIDSHENDELSE_TYPE_KEY).asString() shouldBe "BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asString() shouldBe hendelseId.toString()
         }
 
         verify { vilkaarsvurderingService.opphoerAldersovergang(behandlingId, behandlingIdLoepende) }

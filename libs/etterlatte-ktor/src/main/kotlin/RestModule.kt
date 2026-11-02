@@ -1,9 +1,8 @@
 package no.nav.etterlatte.libs.ktor
 
-import com.fasterxml.jackson.core.JacksonException
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
@@ -34,6 +33,7 @@ import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.v3.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
+import tools.jackson.core.JacksonException
 import java.util.UUID
 
 fun Application.restModule(

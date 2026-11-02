@@ -12,7 +12,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { useKlage } from '~components/klage/useKlage'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterFormkravIKlage } from '~shared/api/klage'
 import { JaNei } from '~shared/types/ISvar'

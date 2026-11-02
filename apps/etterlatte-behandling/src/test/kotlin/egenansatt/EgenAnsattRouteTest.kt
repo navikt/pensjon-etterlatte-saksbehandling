@@ -302,14 +302,22 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 inTransaction {
                     val dontCareEnhet = Enheter.defaultEnhet.enhetNr
                     listOf(
-                        sakSkrivDao.opprettSak("1349", SakType.BARNEPENSJON, dontCareEnhet).id
+                        sakSkrivDao
+                            .opprettSak("1349", SakType.BARNEPENSJON, dontCareEnhet)
+                            .id
                             .also { sakSkrivDao.oppdaterSkjerming(it, true) },
-                        sakSkrivDao.opprettSak("1814", SakType.BARNEPENSJON, dontCareEnhet).id
+                        sakSkrivDao
+                            .opprettSak("1814", SakType.BARNEPENSJON, dontCareEnhet)
+                            .id
                             .also { sakSkrivDao.oppdaterSkjerming(it, false) },
-                        sakSkrivDao.opprettSak("1940", SakType.OMSTILLINGSSTOENAD, dontCareEnhet).id
+                        sakSkrivDao
+                            .opprettSak("1940", SakType.OMSTILLINGSSTOENAD, dontCareEnhet)
+                            .id
                             .also { sakSkrivDao.oppdaterSkjerming(it, true) },
-                        sakSkrivDao.opprettSak("1945", SakType.BARNEPENSJON, dontCareEnhet).id
-                            .also { sakSkrivDao.oppdaterSkjerming(it, true) }
+                        sakSkrivDao
+                            .opprettSak("1945", SakType.BARNEPENSJON, dontCareEnhet)
+                            .id
+                            .also { sakSkrivDao.oppdaterSkjerming(it, true) },
                     )
                 }
 
@@ -318,12 +326,14 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     module(applicationContext)
                 }
 
-            val result: List<SakId> = client.get("egenansatt/saker/${SakType.BARNEPENSJON.name}") {
-                addAuthToken(this@EgenAnsattRouteTest.systemBruker)
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body()
-            }
+            val result: List<SakId> =
+                client
+                    .get("egenansatt/saker/${SakType.BARNEPENSJON.name}") {
+                        addAuthToken(this@EgenAnsattRouteTest.systemBruker)
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        it.body()
+                    }
             result shouldContainExactlyInAnyOrder listOf(sak1, sak4)
         }
     }

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering.klienter
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -26,6 +25,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 interface SamordningsKlient {
@@ -89,9 +89,12 @@ class SamordningsKlientImpl(
         try {
             val response =
                 httpClient.get("$resourceUrl/api/vedtak") {
-                    header("pid", vedtak.soeker.value) // TODO: må endres til body når samhandlingsløsningen støtter dette
+                    header(
+                        "pid",
+                        vedtak.soeker.value,
+                    ) // TODO: må endres til body når samhandlingsløsningen støtter dette
                     parameter("fagomrade", "EYO")
-                    // parameter("sakId", "${vedtak.sakId}")  // FIXME retting i SAM ble prodsatt 29.05.2024. 6 ukers svarfrist...
+                    parameter("sakId", "${vedtak.sakId}")
                     if (!alleVedtak) {
                         parameter("vedtakId", "${vedtak.id}")
                     }

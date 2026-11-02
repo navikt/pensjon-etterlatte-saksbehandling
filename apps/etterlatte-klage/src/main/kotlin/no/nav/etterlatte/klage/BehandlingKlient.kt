@@ -1,6 +1,5 @@
 package no.nav.etterlatte.klage
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.request.patch
 import io.ktor.client.request.setBody
@@ -18,6 +17,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.klage.kodeverk.Fagsystem
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 
 class BehandlingKlient(
     private val behandlingHttpClient: HttpClient,
@@ -150,4 +150,5 @@ fun KlageinstansUtfall.tilResultat(): BehandlingResultat =
         KlageinstansUtfall.INNSTILLING_STADFESTELSE -> BehandlingResultat.IKKE_MEDHOLD
         KlageinstansUtfall.INNSTILLING_AVVIST -> BehandlingResultat.IKKE_MEDHOLD
         KlageinstansUtfall.MEDHOLD_ETTER_FVL_35 -> BehandlingResultat.MEDHOLD
+        KlageinstansUtfall.INNSTILLING_GJENOPPTAS_IKKE -> BehandlingResultat.IKKE_MEDHOLD
     }

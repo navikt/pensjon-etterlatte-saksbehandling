@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 import java.net.SocketTimeoutException
 import java.time.Duration
 import kotlin.time.DurationUnit

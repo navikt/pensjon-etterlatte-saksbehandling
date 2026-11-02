@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import '@navikt/ds-css'
 import { Behandling } from '~components/behandling/Behandling'
 import { HeaderBanner } from '~shared/header/HeaderBanner'

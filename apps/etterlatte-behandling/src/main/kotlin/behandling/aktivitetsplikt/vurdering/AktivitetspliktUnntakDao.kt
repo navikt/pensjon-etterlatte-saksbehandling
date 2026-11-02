@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt.vurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktVurderingOpprettetDato
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
@@ -15,6 +14,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import tools.jackson.module.kotlin.readValue
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -251,26 +251,33 @@ data class AktivitetspliktUnntak(
         UnntakFraAktivitetDto(
             unntak =
                 when (this.unntak) {
-                    AktivitetspliktUnntakType.OMSORG_BARN_UNDER_ETT_AAR ->
+                    AktivitetspliktUnntakType.OMSORG_BARN_UNDER_ETT_AAR -> {
                         UnntakFraAktivitetsplikt.OMSORG_BARN_UNDER_ETT_AAR
+                    }
 
-                    AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM ->
+                    AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM -> {
                         UnntakFraAktivitetsplikt.OMSORG_BARN_SYKDOM
+                    }
 
-                    AktivitetspliktUnntakType.MANGLENDE_TILSYNSORDNING_SYKDOM ->
+                    AktivitetspliktUnntakType.MANGLENDE_TILSYNSORDNING_SYKDOM -> {
                         UnntakFraAktivitetsplikt.MANGLENDE_TILSYNSORDNING_SYKDOM
+                    }
 
-                    AktivitetspliktUnntakType.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE ->
+                    AktivitetspliktUnntakType.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE -> {
                         UnntakFraAktivitetsplikt.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE
+                    }
 
-                    AktivitetspliktUnntakType.GRADERT_UFOERETRYGD ->
+                    AktivitetspliktUnntakType.GRADERT_UFOERETRYGD -> {
                         UnntakFraAktivitetsplikt.GRADERT_UFOERETRYGD
+                    }
 
-                    AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM ->
+                    AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM -> {
                         UnntakFraAktivitetsplikt.MIDLERTIDIG_SYKDOM
+                    }
 
-                    AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT ->
+                    AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT -> {
                         UnntakFraAktivitetsplikt.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                    }
                 },
             fom = fom,
             tom = tom,

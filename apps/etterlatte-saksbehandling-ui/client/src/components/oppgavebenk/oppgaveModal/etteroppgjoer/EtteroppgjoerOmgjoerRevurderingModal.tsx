@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { gjennopprettAvbruttEtteroppgjoerRevurdering as gjennopprettRevurdering } from '~shared/api/etteroppgjoer'
 
 type Props = {

@@ -119,7 +119,7 @@ internal class VedtakAttestertRiver(
     private fun bigDecimal(
         packet: JsonMessage,
         noekkel: String,
-    ): BigDecimal? = packet[noekkel].asText().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) }
+    ): BigDecimal? = packet[noekkel].asString().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) }
 
     private fun skalStoppeEtterFattet(revurderingaarsak: Revurderingaarsak): Boolean {
         if (featureToggleService.isEnabled(ReguleringFeatureToggle.SKAL_STOPPE_ETTER_FATTET_VEDTAK, false)) {

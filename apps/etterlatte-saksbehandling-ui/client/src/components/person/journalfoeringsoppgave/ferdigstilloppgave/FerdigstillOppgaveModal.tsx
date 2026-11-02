@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Alert, BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'

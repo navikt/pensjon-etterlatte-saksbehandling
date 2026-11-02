@@ -8,7 +8,7 @@ dependencies {
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-beregning-model"))
     implementation(project(":libs:etterlatte-trygdetid-model"))
-    implementation(libs.brevbaker.api.model.common)
+    implementation(libs.brevbaker.api)
 
     testImplementation(libs.test.jupiter.api)
     testRuntimeOnly(libs.test.jupiter.engine)

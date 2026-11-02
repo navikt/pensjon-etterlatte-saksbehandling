@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Legger automatisk til en lenke til Favro-kortet i commit-meldingen,
+# basert på sakstall (f.eks. NAV-30700) funnet i branch-navnet.
+#
+# Aktiveres ikke automatisk - se README-notat i .githooks/README.md
+# (kjør `git config core.hooksPath .githooks` for å ta den i bruk).
+
+set -e
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+# Ikke rør meldingen ved merge, squash, amend eller commit -m med mal fra commit-verktøy
+if [ -n "$COMMIT_SOURCE" ] && [ "$COMMIT_SOURCE" != "message" ] && [ "$COMMIT_SOURCE" != "template" ]; then
+  exit 0
+fi
+
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || true)
+TICKET=$(echo "$BRANCH" | grep -oE '[Nn][Aa][Vv]-[0-9]+' | head -n1)
+
+if [ -z "$TICKET" ]; then
+  exit 0
+fi
+
+FAVRO_URL="https://favro.com/organization/98c34fb974ce445eac854de0/a64c6aad9b0d61ef6c0290bd?card=${TICKET}"
+FAVRO_LINE="${TICKET}: ${FAVRO_URL}"
+
+# Ikke legg til lenken flere ganger (f.eks. ved `git commit --amend`)
+if grep -qF "$FAVRO_URL" "$COMMIT_MSG_FILE"; then
+  exit 0
+fi
+
+printf '\n%s\n' "$FAVRO_LINE" >> "$COMMIT_MSG_FILE"

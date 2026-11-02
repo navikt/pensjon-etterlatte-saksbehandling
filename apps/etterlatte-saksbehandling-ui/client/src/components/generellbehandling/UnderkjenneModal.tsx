@@ -3,7 +3,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useState } from 'react'
 import { underkjennGenerellbehandling } from '~shared/api/generellbehandling'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
 
 import { isSuccess, mapResult } from '~shared/api/apiUtils'

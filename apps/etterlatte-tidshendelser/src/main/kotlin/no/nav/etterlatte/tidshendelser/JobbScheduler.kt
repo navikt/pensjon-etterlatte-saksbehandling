@@ -88,6 +88,8 @@ class JobbScheduler(
         // Merk at justering av behandlingMaaned kan medføre uønsket oppførsel (f.eks. har løpende ytelse sjekker feil måned)
         val behandlingMaanedJustering: Long,
     ) {
+        OMS_DOED_3_AAR(JobbType.OMS_DOED_3AAR, 10, 0),
+        OMS_DOED_5_AAR(JobbType.OMS_DOED_5AAR, 10, 0),
         OMS_DOED_4MND(JobbType.OMS_DOED_4MND, 1, 0),
         OMS_DOED_6MND(JobbType.OMS_DOED_6MND, 1, 0),
         OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK(JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK, 8, 0),

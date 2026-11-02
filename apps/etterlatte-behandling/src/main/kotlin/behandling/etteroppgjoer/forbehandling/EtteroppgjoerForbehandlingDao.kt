@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.SummerteInntekterAOrdningen
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.SummertePensjonsgivendeInntekter
 import no.nav.etterlatte.behandling.hendelse.getLongOrNull
@@ -29,6 +28,7 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.readValue
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.YearMonth
@@ -145,6 +145,7 @@ class EtteroppgjoerForbehandlingDao(
     fun kopierPensjonsgivendeInntekt(
         forbehandlingId: UUID,
         nyForbehandlingId: UUID,
+        tillatManglendePgi: Boolean = false,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement =
@@ -162,7 +163,7 @@ class EtteroppgjoerForbehandlingDao(
             statement.setObject(2, forbehandlingId)
 
             statement.executeUpdate().also { count ->
-                krev(count == 1) {
+                krev(count == 1 || (tillatManglendePgi && count == 0)) {
                     "Kunne ikke kopiere pensjonsgivende inntekter fra behandling=$forbehandlingId til $nyForbehandlingId"
                 }
             }

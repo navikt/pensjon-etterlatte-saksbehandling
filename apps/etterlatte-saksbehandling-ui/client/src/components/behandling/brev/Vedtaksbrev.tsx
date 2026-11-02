@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, BodyShort, Box, Heading, HStack, InfoCard, Label, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentBrevTilBehandling, opprettBrevTilBehandling } from '~shared/api/brev'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/SendTilAttesteringModal'
 import {

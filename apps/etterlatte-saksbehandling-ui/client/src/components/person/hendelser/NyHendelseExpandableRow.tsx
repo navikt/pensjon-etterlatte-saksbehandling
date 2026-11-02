@@ -13,7 +13,7 @@ import {
 import { formaterDato } from '~utils/formatering/dato'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ArkiverHendelseModal } from '~components/person/hendelser/ArkiverHendelseModal'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 

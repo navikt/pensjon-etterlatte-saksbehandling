@@ -4,7 +4,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettOmgjoeringFoerstegangsbehandling } from '~shared/api/revurdering'
 import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 export function OmgjoerAvslagModal(props: { sakId: number; harAapenBehandling: boolean }) {
   const { sakId, harAapenBehandling } = props

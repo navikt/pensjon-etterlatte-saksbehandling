@@ -13,7 +13,7 @@ import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk
 import { BrevOppgaveModal } from '~components/oppgavebenk/oppgaveModal/BrevOppgaveModal'
 import { TilleggsinformasjonOppgaveModal } from '~components/oppgavebenk/oppgaveModal/TilleggsinformasjonOppgaveModal'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi } from '~shared/api/revurdering'
 import Spinner from '~shared/Spinner'

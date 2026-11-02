@@ -7,7 +7,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Toast } from '~shared/alerts/Toast'
 
 interface ModalProps {

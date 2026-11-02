@@ -3,8 +3,7 @@ plugins {
 }
 
 dependencies {
-    api(libs.jackson.datatypejsr310)
-    api(libs.jackson.modulekotlin)
+    api(libs.bundles.jackson)
 
     implementation(project(":libs:saksbehandling-common"))
     testImplementation(libs.test.jupiter.api)

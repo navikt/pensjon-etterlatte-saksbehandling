@@ -4,7 +4,7 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 import React from 'react'
 import { Aktivitetspliktbrev } from '~components/aktivitetsplikt/brev/AktivitetspliktBrev'
 import { UtenBrevVisning } from '~components/aktivitetsplikt/brev/UtenBrevVisning'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { handlinger } from '~components/behandling/handlinger/typer'
 

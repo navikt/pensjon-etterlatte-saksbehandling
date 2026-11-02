@@ -1,6 +1,5 @@
 package no.nav.etterlatte.statistikk.database
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -16,6 +15,7 @@ import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import org.postgresql.util.PGobject
+import tools.jackson.module.kotlin.readValue
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet

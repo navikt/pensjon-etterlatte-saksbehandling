@@ -28,4 +28,5 @@ enum class KlageinstansUtfall(
     INNSTILLING_AVVIST("Innstilling om avist til trygderetten fra KA"),
     MEDHOLD_ETTER_FVL_35("Medhold Etter Fvl 35"),
     HENLAGT("Henlagt KA"),
+    INNSTILLING_GJENOPPTAS_IKKE("Innstilling om at kjennelsen ikke gjenopptas"),
 }

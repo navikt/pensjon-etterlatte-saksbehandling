@@ -34,21 +34,9 @@ spec:
     sqlInstances:
       - type: POSTGRES_18
         tier: db-g1-small
-        diskAutoresize: true
-        pointInTimeRecovery: true
-        autoBackupHour: 1
         databases:
           - name: etterlatte-brev
             envVarPrefix: DB
-        flags:
-          - name: cloudsql.enable_pgaudit
-            value: "true"
-          - name: pgaudit.log
-            value: 'write,ddl,role'
-          - name: pgaudit.log_parameter
-            value: "on"
-          - name: pgaudit.log_relation
-            value: "on"
   azure:
     application:
       enabled: true

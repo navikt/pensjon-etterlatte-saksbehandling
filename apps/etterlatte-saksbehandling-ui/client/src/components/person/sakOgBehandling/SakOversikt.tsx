@@ -27,6 +27,7 @@ import { ClickEvent, trackClick } from '~utils/analytics'
 import { SakType } from '~shared/types/sak'
 import { EtteroppgjoerForbehandlingTabell } from '~components/person/sakOgBehandling/EtteroppgjoerForbehandlingTabell'
 import { OpprettEtteroppgjoerForbehandlingIDev } from '~components/etteroppgjoer/components/utils/OpprettEtteroppgjoerForbehandlingIDev'
+import { ApiError } from '~shared/api/apiClient'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -52,10 +53,12 @@ export const SakOversikt = ({
   sakResult,
   fnr,
   setForetrukketSak,
+  falskIdentitetFeil,
 }: {
   sakResult: Result<SakMedBehandlingerOgKanskjeAnnenSak>
   fnr: string
   setForetrukketSak: (sakId: number) => void
+  falskIdentitetFeil?: ApiError
 }) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -88,7 +91,7 @@ export const SakOversikt = ({
     <>
       {mapResult(sakResult, {
         pending: <Spinner label="Henter sak og behandlinger" />,
-        error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
+        error: (error) => <SakIkkeFunnet error={error} fnr={fnr} falskIdentitetFeil={falskIdentitetFeil} />,
         success: ({ sak, behandlinger, ekstraSak }) => (
           <HStack gap="space-16" wrap={false}>
             <Box padding="space-32" minWidth="25rem" borderWidth="0 1 0 0" borderColor="neutral-subtle">
@@ -103,6 +106,11 @@ export const SakOversikt = ({
               )}
             </Box>
             <VStack gap="space-32">
+              {falskIdentitetFeil && (
+                <Box paddingBlock="space-32 space-0">
+                  <ApiErrorAlert>{falskIdentitetFeil.detail}</ApiErrorAlert>
+                </Box>
+              )}
               {harEndretFnr() && (
                 <Box paddingBlock="space-32 space-0">
                   <Alert variant="info">

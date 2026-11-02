@@ -32,6 +32,15 @@ class PdlForesporselFeilet(
         detail = message,
     )
 
+class FalskIdentitetException :
+    ForespoerselException(
+        status = 409,
+        code = "FALSK_IDENTITET",
+        detail =
+            "Identen er registrert som falsk identitet i Folkeregisteret, og personopplysningene er annullert. " +
+                "Personen kan ikke vises.",
+    )
+
 class PersonWebService(
     private val pdlOboKlient: PdlOboKlient,
     private val personMappingService: ParallelleSannheterService,

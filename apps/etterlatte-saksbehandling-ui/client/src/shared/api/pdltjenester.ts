@@ -1,4 +1,4 @@
-import { apiClient, ApiResponse } from '~shared/api/apiClient'
+import { apiClient, ApiError, ApiResponse } from '~shared/api/apiClient'
 import { IPdlPersonNavnFoedsel, IPdlPersonSoekResponse } from '~shared/types/Person'
 import { SakType } from '~shared/types/sak'
 import { FamilieOpplysninger } from '~shared/types/familieOpplysninger'
@@ -14,6 +14,8 @@ import { PersonSoekCriteria } from '~components/person/journalfoeringsoppgave/jo
 
 export const hentPersonNavnOgFoedsel = async (ident: string): Promise<ApiResponse<IPdlPersonNavnFoedsel>> =>
   apiClient.post(`/pdltjenester/person/navn-foedsel`, { ident })
+
+export const erFalskIdentitetFeil = (error: ApiError): boolean => error.code === 'FALSK_IDENTITET'
 
 export const soekPerson = async (soekPerson: PersonSoekCriteria): Promise<ApiResponse<IPdlPersonSoekResponse[]>> =>
   apiClient.post('/pdltjenester/person/soek', { ...soekPerson })

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -517,6 +518,19 @@ class StatistikkServiceTest {
             EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING to BehandlingResultat.ETTEROPPGJOER_INGEN_ENDRING_MED_UTBETALING,
             EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING to BehandlingResultat.ETTEROPPGJOER_INGEN_ENDRING_UTEN_UTBETALING,
         )
+
+    @Test
+    fun `ferdigstilt etteroppgjoer ved doedsfall faar eget resultat`() {
+        val resultat =
+            utledEtteroppgjoerForbehandlingResultat(
+                hendelse = EtteroppgjoerForbehandlingHendelser.FERDIGSTILT,
+                resultatType = null,
+                sisteResultat = null,
+                opphoerSkyldesDoedsfallIEtteroppgjoersaar = JaNei.JA,
+            )
+
+        resultat shouldBe BehandlingResultat.ETTEROPPGJOER_AVSLUTTET_DOEDSFALL.name
+    }
 
     @Test
     fun `lagreMaanedligStoenadstatistikk lagrer ting riktig`() {

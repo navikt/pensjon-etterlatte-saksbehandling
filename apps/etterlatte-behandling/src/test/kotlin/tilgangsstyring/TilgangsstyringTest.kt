@@ -3,19 +3,25 @@ package tilgangsstyring
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.server.application.install
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContextWithDbAndSakdao
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -25,18 +31,100 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.sak.TilgangServiceSjekker
+import no.nav.etterlatte.tilgangsstyring.SpesialTilgangPlugin
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.util.UUID
 
 class TilgangsstyringTest {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `tilgangsendepunkter bruker egne lesetilgangssjekker`(harTilgang: Boolean) {
+        val tilgangService = mockk<TilgangServiceSjekker>()
+        every { tilgangService.harTilgangTilBehandling(any(), any()) } returns harTilgang
+        every { tilgangService.harTilgangTilSak(any(), any()) } returns harTilgang
+        every { tilgangService.harTilgangTilPerson(any(), any()) } returns harTilgang
+
+        withSpesialTilgangPlugin(tilgangService) { client ->
+            listOf(
+                "/api/tilgang/behandling/${UUID.randomUUID()}",
+                "/api/tilgang/sak/1",
+            ).forEach { path ->
+                val response =
+                    client.get("$path?skrivetilgang=false") {
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                Assertions.assertEquals(200, response.status.value)
+                Assertions.assertEquals(harTilgang.toString(), response.bodyAsText())
+            }
+            val response =
+                client.post("/api/tilgang/person") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Text.Plain)
+                    setBody("11057523044")
+                }
+            Assertions.assertEquals(200, response.status.value)
+            Assertions.assertEquals(harTilgang.toString(), response.bodyAsText())
+        }
+        verify(exactly = 1) { tilgangService.harTilgangTilBehandling(any(), any()) }
+        verify(exactly = 1) { tilgangService.harTilgangTilSak(any(), any()) }
+        verify(exactly = 1) { tilgangService.harTilgangTilPerson(any(), any()) }
+    }
+
+    @Test
+    fun `manglende skrivetilgang avslutter tilgangssjekken med false`() {
+        val tilgangService = mockk<TilgangServiceSjekker>()
+        val sakTilgangDao =
+            mockk<SakTilgangDao> {
+                every { hentSakMedGraderingOgSkjerming(any()) } returns
+                    SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.STEINKJER.enhetNr)
+                every { hentSakMedGraderingOgSkjermingPaaBehandling(any()) } returns
+                    SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.STEINKJER.enhetNr)
+            }
+
+        withSpesialTilgangPlugin(tilgangService, sakTilgangDao) { client ->
+            listOf(
+                "/api/tilgang/behandling/${UUID.randomUUID()}",
+                "/api/tilgang/sak/1",
+            ).forEach { path ->
+                val response =
+                    client.get("$path?skrivetilgang=true") {
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                Assertions.assertEquals(200, response.status.value)
+                Assertions.assertEquals("false", response.bodyAsText())
+            }
+        }
+        verify(exactly = 0) { tilgangService.harTilgangTilBehandling(any(), any()) }
+        verify(exactly = 0) { tilgangService.harTilgangTilSak(any(), any()) }
+    }
+
+    @Test
+    fun `andre ruter beholder spesialtilgangssjekken selv med tilgang i URL`() {
+        withSpesialTilgangPlugin(mockk()) { client ->
+            listOf("/api/sak/1?tilgang=true", "/api/tilgangsak/1").forEach { path ->
+                val response =
+                    client.get(path) {
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                Assertions.assertEquals(403, response.status.value)
+            }
+            val response = client.get("/api/tilgang/sak/1?skrivetilgang=false")
+            Assertions.assertEquals(401, response.status.value)
+        }
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("testdata")
     fun `sjekk for skrivetilgang`(
@@ -324,6 +412,36 @@ class TilgangsstyringTest {
                     }
                 }
 
+            block(client)
+        }
+    }
+
+    private fun withSpesialTilgangPlugin(
+        tilgangService: TilgangServiceSjekker,
+        sakTilgangDao: SakTilgangDao = mockk(),
+        block: suspend (HttpClient) -> Unit,
+    ) {
+        testApplication {
+            val client =
+                runServer(mockOAuth2Server, routePrefix = "/api") {
+                    attachMockContextWithDbAndSakdao(
+                        mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)).also {
+                            every { it.hentEnheterMedSkrivetilgang() } returns listOf(Enheter.PORSGRUNN.enhetNr)
+                        },
+                        sakTilgangDao,
+                    )
+                    install(SpesialTilgangPlugin) {
+                        harTilgangTilSak = { _, _ -> false }
+                        harTilgangBehandling = { _, _ -> false }
+                    }
+                    tilgangRoutes(tilgangService)
+                    get("/sak/{$SAKID_CALL_PARAMETER}") {
+                        call.respond("OK")
+                    }
+                    get("/tilgangsak/{$SAKID_CALL_PARAMETER}") {
+                        call.respond("OK")
+                    }
+                }
             block(client)
         }
     }

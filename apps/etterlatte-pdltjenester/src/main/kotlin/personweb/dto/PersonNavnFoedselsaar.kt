@@ -15,6 +15,7 @@ data class PersonNavnFoedselsaar(
     val foedselsdato: LocalDate? = null,
     val doedsdato: LocalDate? = null,
     val vergemaal: VergemaalEllerFremtidsfullmakt? = null,
+    val erFalskIdentitet: Boolean = false,
 )
 
 data class PersonSoekSvar(

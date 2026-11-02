@@ -145,6 +145,7 @@ class EtteroppgjoerForbehandlingDao(
     fun kopierPensjonsgivendeInntekt(
         forbehandlingId: UUID,
         nyForbehandlingId: UUID,
+        tillatManglendePgi: Boolean = false,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
             val statement =
@@ -162,7 +163,7 @@ class EtteroppgjoerForbehandlingDao(
             statement.setObject(2, forbehandlingId)
 
             statement.executeUpdate().also { count ->
-                krev(count == 1) {
+                krev(count == 1 || (tillatManglendePgi && count == 0)) {
                     "Kunne ikke kopiere pensjonsgivende inntekter fra behandling=$forbehandlingId til $nyForbehandlingId"
                 }
             }

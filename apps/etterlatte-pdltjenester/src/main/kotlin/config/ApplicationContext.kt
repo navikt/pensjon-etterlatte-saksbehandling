@@ -52,6 +52,7 @@ class ApplicationContext(
             ppsKlient = parallelleSannheterKlient,
             pdlKlient = pdlKlient,
             pdlOboKlient = pdlOboKlient,
+            featureToggleService = featureToggleService,
         )
 
     val personService = PersonService(pdlKlient, parallelleSannheterService)

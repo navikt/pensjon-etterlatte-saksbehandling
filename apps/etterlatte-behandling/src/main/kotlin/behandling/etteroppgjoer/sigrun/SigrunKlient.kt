@@ -2,12 +2,17 @@ package no.nav.etterlatte.behandling.etteroppgjoer.sigrun
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.expectSuccess
+import io.ktor.client.plugins.retry
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelserSekvensnummerFraSkatt
 import no.nav.etterlatte.behandling.etteroppgjoer.HendelseslisteFraSkatt
@@ -22,6 +27,7 @@ import no.nav.etterlatte.libs.ktor.navConsumerId
 import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.CancellationException
 
 enum class SigrunRettighetspakke(
     val rettighetspakke: String,
@@ -63,29 +69,32 @@ class SigrunKlientImpl(
             return PensjonsgivendeInntektAarResponse.stub(ident, inntektsaar)
         }
 
-        return retry {
-            httpClient.post("$url/api/v1/pensjonsgivendeinntektforfolketrygden") {
-                navConsumerId("etterlatte-behandling")
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    PensjonsgivendeInntektRequest(
-                        inntektsaar = inntektsaar,
-                        personident = ident,
-                    ),
-                )
-            }
-        }.let {
-            when (it) {
-                is RetryResult.Success -> {
-                    it.content.body<PensjonsgivendeInntektAarResponse>()
+        return try {
+            val response =
+                httpClient.post("$url/api/v1/pensjonsgivendeinntektforfolketrygden") {
+                    expectSuccess = false
+                    retry {
+                        retryOnServerErrors(maxRetries = 2)
+                        retryOnExceptionIf { _, cause -> cause !is ResponseException && cause !is CancellationException }
+                    }
+                    navConsumerId("etterlatte-behandling")
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(PensjonsgivendeInntektRequest(inntektsaar, ident))
                 }
 
-                is RetryResult.Failure -> {
-                    sikkerlogg.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet for ident=$ident", it.samlaExceptions())
-                    throw InternfeilException("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet. Se sikkerlogg")
-                }
+            when (response.status) {
+                HttpStatusCode.OK -> response.body<PensjonsgivendeInntektAarResponse>()
+                HttpStatusCode.NotFound -> throw NotFoundException("Fant ikke PGI hos Skatt for inntektsår=$inntektsaar")
+                else -> throw IllegalStateException("Sigrun svarte med status ${response.status.value}")
             }
+        } catch (e: NotFoundException) {
+            throw e
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            sikkerlogg.error("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet for ident=$ident", e)
+            throw InternfeilException("Kall mot Sigrun for henting av PensjonsgivendeInntekt feilet. Se sikkerlogg", e)
         }
     }
 

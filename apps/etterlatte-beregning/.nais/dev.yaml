@@ -37,8 +37,8 @@ spec:
     scalingStrategy:
       cpu:
         thresholdPercentage: 90
-    max: 0
-    min: 0
+    max: 2
+    min: 1
   azure:
     application:
       enabled: true

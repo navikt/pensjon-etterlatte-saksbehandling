@@ -76,7 +76,7 @@ logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logba
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.17.0" }
 
-opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version = "1.64.0" }
+opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version = "1.67.0" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 

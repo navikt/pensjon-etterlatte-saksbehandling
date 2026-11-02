@@ -6,8 +6,11 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import java.time.LocalDate
 
-data class OmstillingsstoenadAvslagData(val bosattUtland: Boolean)
+data class OmstillingsstoenadAvslagData(
+    val bosattUtland: Boolean,
+)
 
 data class OmstillingsstoenadAvslag(
     override val innhold: List<Slate.Element>,
@@ -20,9 +23,10 @@ data class OmstillingsstoenadAvslag(
         ): OmstillingsstoenadAvslag =
             OmstillingsstoenadAvslag(
                 innhold = innhold,
-                data = OmstillingsstoenadAvslagData(
-                    bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
-                ),
+                data =
+                    OmstillingsstoenadAvslagData(
+                        bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
+                    ),
             )
     }
 }
@@ -31,6 +35,7 @@ data class OmstillingsstoenadAvslagRedigerbartUtfallData(
     val avdoedNavn: String,
     val erSluttbehandling: Boolean,
     val tidligereFamiliepleier: Boolean,
+    val avdoedDoedsdato: LocalDate?,
 )
 
 data class OmstillingsstoenadAvslagRedigerbartUtfall(
@@ -42,13 +47,15 @@ data class OmstillingsstoenadAvslagRedigerbartUtfall(
             erSluttbehandling: Boolean,
             tidligereFamiliepleier: TidligereFamiliepleier?,
         ) = OmstillingsstoenadAvslagRedigerbartUtfall(
-            data = OmstillingsstoenadAvslagRedigerbartUtfallData(
-                avdoedNavn =
-                    avdoede.firstOrNull()?.navn
-                        ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
-                erSluttbehandling = erSluttbehandling,
-                tidligereFamiliepleier = tidligereFamiliepleier?.svar ?: false,
-            ),
+            data =
+                OmstillingsstoenadAvslagRedigerbartUtfallData(
+                    avdoedNavn =
+                        avdoede.firstOrNull()?.navn
+                            ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
+                    erSluttbehandling = erSluttbehandling,
+                    tidligereFamiliepleier = tidligereFamiliepleier?.svar ?: false,
+                    avdoedDoedsdato = avdoede.firstOrNull()?.doedsdato,
+                ),
         )
     }
 }

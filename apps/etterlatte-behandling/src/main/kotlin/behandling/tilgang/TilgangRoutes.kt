@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.tilgang
 
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -9,7 +7,6 @@ import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -20,6 +17,7 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangServiceSjekker
+import no.nav.etterlatte.tilgangsstyring.SpesialTilgangPlugin
 import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.tilgangsstyring.sjekkSkrivetilgang
 
@@ -32,6 +30,11 @@ inline val RoutingContext.berOmSkrivetilgang: Boolean
 
 internal fun Route.tilgangRoutes(tilgangService: TilgangServiceSjekker) {
     route("/$TILGANG_ROUTE_PATH") {
+        // Tilgangsendepunktene svarer selv med false i stedet for at pluginen avviser med 403.
+        install(SpesialTilgangPlugin) {
+            tilgangSjekkesBareAvRouten = true
+        }
+
         post("/person") {
             val fnr = call.receive<String>()
             val harTilgang =
@@ -47,6 +50,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangServiceSjekker) {
         get("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
             if (berOmSkrivetilgang && !sjekkSkrivetilgang()) {
                 call.respond(false)
+                return@get
             }
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
@@ -62,6 +66,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangServiceSjekker) {
         get("/sak/{$SAKID_CALL_PARAMETER}") {
             if (berOmSkrivetilgang && !sjekkSkrivetilgang()) {
                 call.respond(false)
+                return@get
             }
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
@@ -83,5 +88,8 @@ fun harTilgangBrukertypeSjekk(
         is Saksbehandler -> {
             harTilgang(brukerTokenInfo)
         }
-        is Systembruker -> true
+
+        is Systembruker -> {
+            true
+        }
     }

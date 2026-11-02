@@ -57,12 +57,23 @@ spec:
       - type: POSTGRES_14
         name: etterlatte-beregning
         tier: db-g1-small
+        diskAutoresize: true
+        pointInTimeRecovery: true
+        autoBackupHour: 1
         databases:
           - name: beregning
             envVarPrefix: DB
         flags:
           - name: max_connections
             value: "100"
+          - name: cloudsql.enable_pgaudit
+            value: "true"
+          - name: pgaudit.log
+            value: 'write,ddl,role'
+          - name: pgaudit.log_parameter
+            value: "on"
+          - name: pgaudit.log_relation
+            value: "on"
   env:
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling

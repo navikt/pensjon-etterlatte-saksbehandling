@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -41,6 +42,40 @@ class SaksbehandlerInfoDao(
                         """.trimIndent(),
                     )
                 statement.setString(1, enhet.enhetNr)
+                statement.executeQuery().toList {
+                    SaksbehandlerInfo(
+                        getString("id"),
+                        getString("navn"),
+                    )
+                }
+            }
+        }
+
+    fun hentSaksbehandlereMedAapneOppgaver(enheter: List<Enhetsnummer>): List<SaksbehandlerInfo> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT DISTINCT o.saksbehandler AS id, COALESCE(si.navn, o.saksbehandler) AS navn
+                        FROM oppgave o
+                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                        WHERE o.saksbehandler IS NOT NULL
+                        AND o.enhet = ANY(?)
+                        AND o.status = ANY(?)
+                        """.trimIndent(),
+                    )
+                statement.setArray(1, createArrayOf("text", enheter.map { enhet -> enhet.enhetNr }.toTypedArray()))
+                statement.setArray(
+                    2,
+                    createArrayOf(
+                        "text",
+                        Status.entries
+                            .filterNot { status -> status.erAvsluttet() }
+                            .map { status -> status.name }
+                            .toTypedArray(),
+                    ),
+                )
                 statement.executeQuery().toList {
                     SaksbehandlerInfo(
                         getString("id"),

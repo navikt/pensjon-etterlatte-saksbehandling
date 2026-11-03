@@ -2,11 +2,19 @@ package no.nav.etterlatte.saksbehandler
 
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.oppgave.OppgaveDaoImpl
+import no.nav.etterlatte.oppgave.lagNyOppgave
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -87,6 +95,44 @@ internal class SaksbehandlerInfoDaoTest(
 
         val ingenSteinkjerSaksbehandlere = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enheter.STEINKJER.enhetNr)
         Assertions.assertEquals(0, ingenSteinkjerSaksbehandlere.size)
+    }
+
+    @Test
+    fun `Finner saksbehandlere med aapne oppgaver i enhetene, uavhengig av lagrede enheter`() {
+        val oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+        val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val sakPorsgrunn = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        // Saksbehandler i permisjon: navn er lagret, men Entra-proxy har gitt tom enhetsliste
+        val iPermisjon = SaksbehandlerInfo("identporsgrunn", "navn")
+        saksbehandlerInfoDao.upsertSaksbehandlerNavn(iPermisjon)
+        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(iPermisjon.ident to emptyList())
+
+        fun opprettOppgave(
+            sak: Sak,
+            saksbehandler: String,
+            status: Status,
+        ) {
+            val oppgave = lagNyOppgave(sak)
+            oppgaveDao.opprettOppgave(oppgave)
+            oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandler)
+            oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, "", status)
+        }
+
+        opprettOppgave(sakAalesund, iPermisjon.ident, Status.UNDER_BEHANDLING)
+        opprettOppgave(sakAalesund, iPermisjon.ident, Status.PAA_VENT)
+        opprettOppgave(sakAalesund, "utennavn", Status.NY)
+        opprettOppgave(sakAalesund, "ferdigstilt", Status.FERDIGSTILT)
+        opprettOppgave(sakPorsgrunn, "annenenhet", Status.NY)
+
+        val saksbehandlere = saksbehandlerInfoDao.hentSaksbehandlereMedAapneOppgaver(listOf(Enheter.AALESUND.enhetNr))
+
+        saksbehandlere shouldContainExactlyInAnyOrder
+            listOf(
+                iPermisjon,
+                SaksbehandlerInfo("utennavn", "utennavn"),
+            )
     }
 
     @Test

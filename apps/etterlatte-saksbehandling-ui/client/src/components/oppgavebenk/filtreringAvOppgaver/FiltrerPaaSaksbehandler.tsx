@@ -4,25 +4,25 @@ import { Saksbehandler } from '~shared/types/saksbehandler'
 import { Filter, SAKSBEHANDLERFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 
 interface Props {
-  saksbehandlereIEnhet: Array<Saksbehandler>
+  saksbehandlere: Array<Saksbehandler>
   filter: Filter
   setFilter: (filer: Filter) => void
 }
 
-export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhet }: Props) => {
+export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlere }: Props) => {
   const saksbehandlerFilterValues: string[] = Object.entries(SAKSBEHANDLERFILTER).map(([, beskrivelse]) => beskrivelse)
-  const options = [...saksbehandlerFilterValues, ...saksbehandlereIEnhet.map((behandler) => behandler.navn)]
+  const options = [...saksbehandlerFilterValues, ...saksbehandlere.map((behandler) => behandler.navn)]
 
   /*
    * Først sjekkke om valgt saksbehandler finnes i SAKSBEHANDLERFILTER.
    * Hvis ikke sjekk om den finnes i lista over saksbehandlere i enhetene til
-   * den innloggede saksbehandleren
+   * den innloggede saksbehandleren, eller som har åpne oppgaver der
    */
   const valgtSaksbehandler = (sb: string): string[] => {
     if (saksbehandlerFilterValues.find((val) => val === sb)) {
       return [sb]
     } else {
-      const selectedSaksbehandlerNavn = saksbehandlereIEnhet.find((behandler) => behandler.ident === sb)?.navn || ''
+      const selectedSaksbehandlerNavn = saksbehandlere.find((behandler) => behandler.ident === sb)?.navn || ''
       return [selectedSaksbehandlerNavn]
     }
   }
@@ -30,15 +30,14 @@ export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhe
   /*
    * Samme her. Først sjekkke om valgt saksbehandler finnes i SAKSBEHANDLERFILTER.
    * Hvis ikke sjekk om den finnes i lista over saksbehandlere i enhetene til
-   * den innloggede saksbehandleren
+   * den innloggede saksbehandleren, eller som har åpne oppgaver der
    */
   const onVelgSaksbehandler = (option: string, isSelected: boolean) => {
     if (isSelected) {
       if (saksbehandlerFilterValues.find((val) => val === option)) {
         setFilter({ ...filter, saksbehandlerFilter: option })
       } else {
-        const selectedSaksbehandlerIdent =
-          saksbehandlereIEnhet.find((behandler) => behandler.navn === option)?.ident || ''
+        const selectedSaksbehandlerIdent = saksbehandlere.find((behandler) => behandler.navn === option)?.ident || ''
         setFilter({ ...filter, saksbehandlerFilter: selectedSaksbehandlerIdent })
       }
     } else {

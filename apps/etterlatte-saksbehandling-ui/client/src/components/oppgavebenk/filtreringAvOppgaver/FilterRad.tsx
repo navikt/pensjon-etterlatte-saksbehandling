@@ -25,7 +25,7 @@ interface Props {
   hentAlleOppgaver: (oppgavestatusFilter?: Array<string>) => void
   filter: Filter
   setFilter: (filter: Filter) => void
-  saksbehandlereIEnhet: Array<Saksbehandler>
+  saksbehandlereIFilter?: Array<Saksbehandler>
   oppgavelisteValg?: OppgavelisteValg
   children?: ReactNode
 }
@@ -34,7 +34,7 @@ export const FilterRad = ({
   hentAlleOppgaver,
   filter,
   setFilter,
-  saksbehandlereIEnhet,
+  saksbehandlereIFilter = [],
   oppgavelisteValg,
   children,
 }: Props): ReactNode => {
@@ -81,7 +81,7 @@ export const FilterRad = ({
             ))}
         </Select>
         {oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA && (
-          <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
+          <FiltrerPaaSaksbehandler saksbehandlere={saksbehandlereIFilter} filter={filter} setFilter={setFilter} />
         )}
         {oppgavelisteValg !== OppgavelisteValg.MIN_OPPGAVELISTE && (
           <Select

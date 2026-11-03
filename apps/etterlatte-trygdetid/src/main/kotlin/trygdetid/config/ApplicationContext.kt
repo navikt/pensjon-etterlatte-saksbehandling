@@ -2,6 +2,7 @@ package no.nav.etterlatte.trygdetid.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.config.requestBrukerTokenInfo
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
@@ -36,7 +37,11 @@ class ApplicationContext {
 
     val vedtaksvurderingKlient = VedtaksvurderingBehandlingKlient(config, httpClient())
 
-    val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
+    val featureToggleService =
+        FeatureToggleService.initialiser(
+            properties = featureToggleProperties(config),
+            brukerIdent = { requestBrukerTokenInfo.get()?.ident() },
+        )
     val trygdetidRepository = TrygdetidRepository(dataSource)
 
     val trygdetidService =

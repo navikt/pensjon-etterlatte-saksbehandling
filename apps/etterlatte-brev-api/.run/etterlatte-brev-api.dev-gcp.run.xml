@@ -37,6 +37,7 @@
       <env name="BREVBAKER_URL" value="https://pensjon-brevbaker.intern.dev.nav.no" />
       <env name="BREVBAKER_SCOPE" value="api://dev-gcp.pensjonsbrev.pensjon-brevbaker/.default" />
       <env name="PDFGEN_URL" value="https://etterlatte-pdfgen.intern.dev.nav.no/api/v1/genpdf" />
+      <env name="PDFGENRS_URL" value="https://etterlatte-pdfgenrs.intern.dev.nav.no/api/v1/genpdf" />
       <env name="DB_DATABASE" value="postgres" />
       <env name="DB_HOST" value="host.docker.internal" />
       <env name="DB_PASSWORD" value="postgres" />

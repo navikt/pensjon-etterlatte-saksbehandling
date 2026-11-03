@@ -432,7 +432,7 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(nye) } returns null
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
-        coEvery { sanksjonService.kopierSanksjon(any(), any()) } just Runs
+        coEvery { sanksjonService.kopierSanksjon(any(), any(), any()) } just Runs
 
         testApplication {
             runServer(mockOAuth2Server) {
@@ -469,7 +469,7 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(nye) } returns null
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
-        coEvery { sanksjonService.kopierSanksjon(any(), any()) } just Runs
+        coEvery { sanksjonService.kopierSanksjon(any(), any(), any()) } just Runs
 
         testApplication {
             runServer(mockOAuth2Server) {

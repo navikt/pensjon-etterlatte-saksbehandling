@@ -7,6 +7,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -28,7 +29,7 @@ class JournalfoerSoeknadService(
         soeknad: InnsendtSoeknad,
     ): OpprettJournalpostResponse? {
         return try {
-            val tittel = opprettTittel(sak.sakType)
+            val tittel = opprettTittel(soeknad.type)
             val dokument = opprettDokument(soeknadId, tittel, soeknad, soeknad.template())
 
             val request =
@@ -56,7 +57,7 @@ class JournalfoerSoeknadService(
         soeknad: InnsendtSoeknad,
     ): OpprettJournalpostResponse? =
         try {
-            val tittel = opprettTittel(sakType)
+            val tittel = opprettTittel(soeknad.type)
             val dokument = opprettDokument(soeknadId, tittel, soeknad, soeknad.template())
 
             val request =
@@ -77,10 +78,11 @@ class JournalfoerSoeknadService(
             null
         }
 
-    private fun opprettTittel(sakType: SakType) =
-        when (sakType) {
-            SakType.BARNEPENSJON -> "Søknad om barnepensjon"
-            SakType.OMSTILLINGSSTOENAD -> "Søknad om omstillingsstønad"
+    private fun opprettTittel(soeknadType: SoeknadType) =
+        when (soeknadType) {
+            SoeknadType.BARNEPENSJON -> "Søknad om barnepensjon"
+            SoeknadType.OMSTILLINGSSTOENAD -> "Søknad om omstillingsstønad"
+            SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> "Søknad om utvidet omstillingsstønad"
         }
 
     private fun opprettEksternReferanseId(

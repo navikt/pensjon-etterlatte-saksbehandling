@@ -457,6 +457,8 @@ class OppgaveService(
                                     EndringLinje(
                                         hendelse,
                                         it.kommentar?.let { kommentar -> "Kommentar: $kommentar" },
+                                        aarsakTilAvbrytelse =
+                                            if (it.hendelse == "BEHANDLING:AVBRUTT") it.valgtBegrunnelse else null,
                                     ),
                                 ),
                         )

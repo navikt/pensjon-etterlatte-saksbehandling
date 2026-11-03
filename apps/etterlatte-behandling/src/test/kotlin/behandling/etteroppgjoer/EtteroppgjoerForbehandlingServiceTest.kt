@@ -1,8 +1,8 @@
 package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.kotest.matchers.equals.shouldNotEqual
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.ktor.server.plugins.NotFoundException
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -27,11 +27,15 @@ import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.beregning.MaanederMedGammelSanksjonIAvkorting
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -48,13 +52,12 @@ import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak
 import no.nav.etterlatte.sak.SakLesDao
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
+import java.net.SocketTimeoutException
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -125,6 +128,7 @@ class EtteroppgjoerForbehandlingServiceTest {
             coEvery { sakDao.hentSak(any()) } returns sak(sakId = sakId1, sakType = SakType.OMSTILLINGSSTOENAD)
             coEvery { oppgaveService.hentOppgave(any()) } returns
                 mockk {
+                    every { id } returns oppgaveId
                     every { sakId } returns sakId1
                     every { erAvsluttet() } returns false
                     every { type } returns OppgaveType.ETTEROPPGJOER
@@ -134,7 +138,61 @@ class EtteroppgjoerForbehandlingServiceTest {
 
             every { dao.lagreForbehandling(any()) } returns 1
             every { dao.kopierSummerteInntekter(any(), any()) } returns 1
-            every { dao.kopierPensjonsgivendeInntekt(any(), any()) } returns 1
+            every { dao.kopierPensjonsgivendeInntekt(any(), any(), any()) } returns 1
+            every { behandlingService.hentUtlandstilknytningForSak(any()) } returns null
+        }
+
+        fun stubbUtlandstilknytning(tilknytningstype: UtlandstilknytningType?) {
+            val tilknytning =
+                tilknytningstype?.let { type ->
+                    mockk<Utlandstilknytning> {
+                        every { this@mockk.type } returns type
+                    }
+                }
+            every { behandlingService.hentUtlandstilknytningForSak(any()) } returns tilknytning
+        }
+
+        fun forberedVedtak() {
+            coEvery { vedtakInternalService.hentIverksatteVedtak(sakId1, any()) } returns
+                listOf(
+                    VedtakSammendragDto(
+                        id = "1",
+                        behandlingId = behandling.id,
+                        vedtakType = VedtakType.INNVILGELSE,
+                        behandlendeSaksbehandler = "saksbehandler",
+                        datoFattet = Tidspunkt.now().toNorskTid(),
+                        attesterendeSaksbehandler = "attestant",
+                        datoAttestert = Tidspunkt.now().toNorskTid(),
+                        virkningstidspunkt = behandling.virkningstidspunkt?.dato!!,
+                        opphoerFraOgMed = null,
+                        iverksettelsesTidspunkt = Tidspunkt.now(),
+                    ),
+                )
+            every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling)
+        }
+
+        fun forberedOpprettelse() {
+            forberedVedtak()
+            returnsForbehandlinger(emptyList())
+            coEvery { beregningKlient.harAvkortingMedSanksjonGamleRegler(any(), any(), any()) } returns
+                MaanederMedGammelSanksjonIAvkorting(false, emptyList())
+            coEvery { vedtakInternalService.hentInnvilgedePerioder(sakId1, any()) } returns
+                listOf(
+                    InnvilgetPeriodeDto(
+                        periode =
+                            no.nav.etterlatte.libs.common.vedtak.Periode(
+                                fom = YearMonth.of(2024, 1),
+                                tom = YearMonth.of(2024, 12),
+                            ),
+                        vedtak = emptyList(),
+                    ),
+                )
+            var lagretForbehandling: EtteroppgjoerForbehandling? = null
+            every { dao.lagreForbehandling(any()) } answers {
+                lagretForbehandling = firstArg()
+                1
+            }
+            every { dao.hentForbehandling(any()) } answers { lagretForbehandling }
         }
 
         fun returnsForbehandling(forbehandling: EtteroppgjoerForbehandling) {
@@ -417,6 +475,86 @@ class EtteroppgjoerForbehandlingServiceTest {
     }
 
     @Test
+    fun `teknisk feil ved PGI stopper opprettelse og statusendring`() {
+        listOf(null, UtlandstilknytningType.BOSATT_UTLAND).forEach { type ->
+            listOf(SocketTimeoutException("timeout"), InternfeilException("Sigrun svarte med 500")).forEach { feil ->
+                val ctx = TestContext()
+                ctx.forberedOpprettelse()
+                ctx.stubbUtlandstilknytning(type)
+                coEvery { ctx.pensjonsgivendeInntektService.hentSummerteInntekter(any(), any()) } throws feil
+
+                val exception =
+                    assertThrows(InternfeilException::class.java) {
+                        ctx.service.opprettEtteroppgjoerForbehandling(sakId1, 2024, ctx.oppgaveId, mockk())
+                    }
+
+                exception.detail.contains("Forbehandlingen kunne ikke opprettes") shouldBe true
+                exception.cause shouldBe feil
+                verify(exactly = 0) {
+                    ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(any(), any(), any())
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `404 stopper opprettelse naar saken ikke er bosatt i utlandet`() {
+        listOf(null, UtlandstilknytningType.NASJONAL, UtlandstilknytningType.UTLANDSTILSNITT).forEach { type ->
+            val ctx = TestContext()
+            ctx.forberedOpprettelse()
+            ctx.stubbUtlandstilknytning(type)
+            coEvery { ctx.pensjonsgivendeInntektService.hentSummerteInntekter(any(), any()) } throws NotFoundException()
+
+            val exception =
+                assertThrows(InternfeilException::class.java) {
+                    ctx.service.opprettEtteroppgjoerForbehandling(sakId1, 2024, ctx.oppgaveId, mockk())
+                }
+
+            exception.detail.contains("Fant ikke PGI") shouldBe true
+            assertEquals(NotFoundException::class.java, exception.cause?.javaClass)
+            verify(exactly = 0) {
+                ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(any(), any(), any())
+            }
+        }
+    }
+
+    @Test
+    fun `404 tillater opprettelse uten PGI naar saken er bosatt i utlandet`() {
+        val ctx = TestContext()
+        ctx.forberedOpprettelse()
+        ctx.stubbUtlandstilknytning(UtlandstilknytningType.BOSATT_UTLAND)
+        coEvery { ctx.pensjonsgivendeInntektService.hentSummerteInntekter(any(), any()) } throws NotFoundException()
+        coEvery { ctx.inntektskomponentService.hentSummerteInntekter(any(), any()) } returns mockk()
+        every { ctx.dao.lagreSummerteInntekter(any(), any()) } returns Unit
+        every { ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(any(), any(), any()) } returns Unit
+        every { ctx.hendelserService.registrerOgSendHendelse(any(), any(), any(), any(), any()) } returns Unit
+        every { ctx.oppgaveService.endreTilKildeBehandlingOgOppdaterReferanseOgMerknad(any(), any(), any()) } returns mockk()
+
+        val forbehandling = ctx.service.opprettEtteroppgjoerForbehandling(sakId1, 2024, ctx.oppgaveId, simpleSaksbehandler())
+
+        forbehandling.mottattSkatteoppgjoer shouldBe false
+        verify(exactly = 0) { ctx.dao.lagrePensjonsgivendeInntekt(any(), any()) }
+        verify { ctx.etteroppgjoerService.oppdaterEtteroppgjoerStatus(sakId1, 2024, EtteroppgjoerStatus.UNDER_FORBEHANDLING) }
+    }
+
+    @Test
+    fun `404 stopper oppdatering naar PGI tidligere er hentet for bosatt utland`() {
+        val ctx = TestContext()
+        val forbehandling =
+            EtteroppgjoerForbehandling
+                .opprett(ctx.behandling.sak, Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)), ctx.behandling.id)
+                .copy(mottattSkatteoppgjoer = true)
+        ctx.returnsForbehandling(forbehandling)
+        ctx.stubbUtlandstilknytning(UtlandstilknytningType.BOSATT_UTLAND)
+        coEvery { ctx.pensjonsgivendeInntektService.hentSummerteInntekter(any(), any()) } throws NotFoundException()
+
+        assertThrows(InternfeilException::class.java) {
+            ctx.service.oppdaterSisteInntekter(forbehandling.id, mockk())
+        }
+        verify(exactly = 0) { ctx.dao.lagrePensjonsgivendeInntekt(any(), any()) }
+    }
+
+    @Test
     fun `skal kopiere forbehandling, summerteInntekter og pensjonsgivendeInntekt ved kopierOgLagreNyForbehandling`() {
         val ctx = TestContext()
         val uuid = UUID.randomUUID()
@@ -434,22 +572,7 @@ class EtteroppgjoerForbehandlingServiceTest {
                 )
 
         ctx.returnsForbehandling(forbehandling)
-        coEvery { ctx.vedtakInternalService.hentIverksatteVedtak(sakId1, any()) } returns
-            listOf(
-                VedtakSammendragDto(
-                    id = "1",
-                    behandlingId = ctx.behandling.id,
-                    vedtakType = VedtakType.INNVILGELSE,
-                    behandlendeSaksbehandler = "saksbehandler",
-                    datoFattet = Tidspunkt.now().toNorskTid(),
-                    attesterendeSaksbehandler = "attestant",
-                    datoAttestert = Tidspunkt.now().toNorskTid(),
-                    virkningstidspunkt = ctx.behandling.virkningstidspunkt?.dato!!,
-                    opphoerFraOgMed = null,
-                    iverksettelsesTidspunkt = Tidspunkt.now(),
-                ),
-            )
-        every { ctx.behandlingService.hentBehandlingerForSak(any()) } returns listOf(ctx.behandling)
+        ctx.forberedVedtak()
 
         val nyKlageOmgjoering = UUID.randomUUID()
         val kopiertForbehandling =
@@ -473,8 +596,60 @@ class EtteroppgjoerForbehandlingServiceTest {
         verify {
             ctx.dao.lagreForbehandling(kopiertForbehandling)
             ctx.dao.kopierSummerteInntekter(forbehandling.id, kopiertForbehandling.id)
-            ctx.dao.kopierPensjonsgivendeInntekt(forbehandling.id, kopiertForbehandling.id)
+            ctx.dao.kopierPensjonsgivendeInntekt(forbehandling.id, kopiertForbehandling.id, false)
         }
+    }
+
+    @Test
+    fun `kopiering for bosatt utland tillater manglende PGI foer PGI er hentet`() {
+        val ctx = TestContext()
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                ctx.behandling.sak,
+                Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                ctx.behandling.id,
+            )
+        ctx.returnsForbehandling(forbehandling)
+        ctx.forberedVedtak()
+        ctx.stubbUtlandstilknytning(UtlandstilknytningType.BOSATT_UTLAND)
+        every { ctx.dao.kopierPensjonsgivendeInntekt(any(), any(), true) } returns 0
+
+        val kopi =
+            ctx.service.kopierOgLagreNyForbehandling(
+                forbehandling.id,
+                sakId1,
+                mockk(),
+                klageId = null,
+                omgjoeringEgetInitiativ = false,
+            )
+
+        verify { ctx.dao.kopierPensjonsgivendeInntekt(forbehandling.id, kopi.id, true) }
+    }
+
+    @Test
+    fun `kopiering for bosatt utland krever PGI naar PGI tidligere er hentet`() {
+        val ctx = TestContext()
+        val forbehandling =
+            EtteroppgjoerForbehandling
+                .opprett(
+                    ctx.behandling.sak,
+                    Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                    ctx.behandling.id,
+                ).copy(mottattSkatteoppgjoer = true)
+        ctx.returnsForbehandling(forbehandling)
+        ctx.forberedVedtak()
+        ctx.stubbUtlandstilknytning(UtlandstilknytningType.BOSATT_UTLAND)
+
+        val kopi =
+            ctx.service.kopierOgLagreNyForbehandling(
+                forbehandling.id,
+                sakId1,
+                mockk(),
+                klageId = null,
+                omgjoeringEgetInitiativ = false,
+            )
+
+        verify { ctx.dao.kopierPensjonsgivendeInntekt(forbehandling.id, kopi.id, false) }
     }
 
     @Test

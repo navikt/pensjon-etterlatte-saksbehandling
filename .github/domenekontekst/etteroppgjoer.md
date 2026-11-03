@@ -32,6 +32,8 @@ Data hentes fra to kilder, men begge er referansepunkter – **ingen er fasit**.
 
 **PGI (Sigrun)** – aggregerte årsbeløp per inntektstype etter skatteloven. Eneste juridisk korrekte grunnlag for beregningen.
 
+Ved opprettelse av forbehandling stopper tekniske feil fra Sigrun opprettelsen. Manglende PGI (404) godtas bare når saken er `BOSATT_UTLAND` og PGI ikke er hentet tidligere. Slike forbehandlinger kan kopieres til revurdering uten PGI-rad; det settes ikke inn en anslått verdi.
+
 **A-ordningen** – detaljerte enkeltutbetalinger med dato, arbeidsgiver og metadata. Bredere inntektsbegrep, inkl. ikke-pensjonsgivende poster. Kun visning for saksbehandler.
 
 Disse kildene er ikke direkte sammenlignbare – PGI er pensjonsgivende inntekt per skatteloven, A-inntekt dekker et videre spekter av utbetalinger.

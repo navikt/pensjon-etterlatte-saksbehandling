@@ -97,6 +97,8 @@ class EtteroppgjoerForbehandlingHendelseService(
                                 )
                             },
                         tilknyttetRevurdering = etteroppgjoerForbehandling.erRevurdering(),
+                        opphoerSkyldesDoedsfallIEtteroppgjoersaar =
+                            etteroppgjoerForbehandling.opphoerSkyldesDoedsfallIEtteroppgjoersaar,
                     ),
             )
         val meldingMap =

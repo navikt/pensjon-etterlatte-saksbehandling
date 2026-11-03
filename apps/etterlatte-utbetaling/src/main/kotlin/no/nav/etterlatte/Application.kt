@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.config.HoconApplicationConfig
+import no.nav.etterlatte.config.BrukerTokenInfoPlugin
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
@@ -22,6 +23,7 @@ fun main() {
             applikasjonsnavn = "utbetaling",
             restModule = {
                 restModule(sikkerLogg, config = HoconApplicationConfig(it.config)) {
+                    install(BrukerTokenInfoPlugin)
                     utbetalingRoutes(it.simuleringOsService, it.behandlingKlient)
                 }
             },

@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.config.BrukerTokenInfoPlugin
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
@@ -26,6 +27,7 @@ class Server(
                 httpPort = properties.httpPort,
                 applicationConfig = context.config,
             ) {
+                install(BrukerTokenInfoPlugin)
                 trygdetid(trygdetidService, behandlingKlient)
                 avtale(avtaleService, behandlingKlient)
                 trygdetidCrudRoute(trygdetidRepository, avtaleRepository)

@@ -6,9 +6,9 @@
 - Observation: Lessons.md ble ikke oppdatert underveis fordi planmodus absorberte all oppmerksomhet, og meta-oppgaver ble behandlet som cleanup, ikke inline-forpliktelse.
 - Action: Lessons-oppdatering er ikke en post-task jobb – den skal skje i samme svar som kursjusteringen, også under planlegging.
 
-**2026-04-10 / 2026-09-08 / 2026-10-07 — Endring av semantikk i delt kode**
-- Observation: Jeg vurderte delt kode isolert: datamodellendring ga feil lagplassering, og nye rollekrav sperret også GET-ruter som brukte den gamle betydningen av «skrivetilgang». Jeg prioriterte også gjenbruk før policy-eierskap med en toggle-sperre i et modellbibliotek. Ved ny hjelpetekst lot jeg problemtilfellet styre formuleringen og overså at normalen fortsatt er én periode.
-- Action: Vurder policyens eier før jeg plasserer felles kode, og kartlegg alle konsumenter mot den nye semantikken. Vurder normalen like eksplisitt som det nye avviket, også i hjelpetekster. Kontroller toggle-fallback mot allerede opprettede data; gammel logikk er ikke nødvendigvis trygg. Skill lesing fra muterende bieffekter og gate bieffekten, ikke hele leseoperasjonen.
+**2026-04-10 / 2026-09-08 / 2026-10-07 / 2026-10-19 — Endring av semantikk i delt kode**
+- Observation: Jeg vurderte delt kode isolert: datamodellendring ga feil lagplassering, rollekrav sperret GET-ruter som brukte den gamle betydningen av «skrivetilgang», og jeg prioriterte gjenbruk før policy-eierskap med en toggle-sperre i et modellbibliotek. Ved ny hjelpetekst overså jeg normalen med én periode. En ny `SoeknadType` så ferdig håndtert ut fordi alt kompilerte, men `else -> throw` og manglende avdød ble ikke fanget av kompilatoren.
+- Action: Vurder policyens eier og alle konsumenter mot den nye semantikken. Vurder normalen like eksplisitt som avviket, og kontroller toggle-fallback mot eksisterende data. Skill lesing fra muterende bieffekter og gate bieffekten, ikke leseoperasjonen. Ved nye enum-/sealed-verdier: følg én konkret melding gjennom hele flyten, og se etter `else ->` og typecasts; kompilering er ikke nok.
 
 **2026-04-10 — Sparring / løsningsdesign**
 - Observation: Løsninger ble foreslått før eksisterende sperrer/constraints var kartlagt, og scope vokste uten eksplisitt avklaring.
@@ -22,9 +22,9 @@
 - Observation: Jeg la inn "ikke referert i kodebasen" som plassholder i stedet for å bare spørre. Det er mer respektfullt og presist å stille spørsmålet direkte.
 - Action: Når en verdi ikke kan verifiseres, spør – ikke dokumenter usikkerheten som et faktum.
 
-**2026-04-24 — Refaktorering**
-- Observation: Jeg committet uten å kompilere, og feilen ble oppdaget av bruker i neste melding.
-- Action: Kompiler alltid før commit – ikke anta at koden er riktig fordi den ser logisk ut.
+**2026-04-24 / 2026-10-12 / 2026-11-03 — Kompilering og validering**
+- Observation: Én gang committet jeg uten å kompilere, og brukeren fant feilen. En annen gang manglet `yarn` og `npx`, og jeg var nær ved å hoppe over frontend-sjekken. Da `tsc` endelig ble kjørt via node, fant den en manglende import. Ved merge lot jeg en blokkert Gradle-kjøring avslutte valideringen og overså at automatisk flettede importer fortsatt kunne sjekkes med eksisterende ktlint.
+- Action: Kompiler og typesjekk før jeg melder fra om at noe er ferdig; oppgi miljøblokkeringer eksplisitt, men kjør uavhengige sjekker som fortsatt er tilgjengelige. Mangler standardverktøyet, kjører jeg pakkens JS-entrypoint med `node` (`node_modules/typescript/bin/tsc` osv.).
 
 **2026-04-30 — OTel / bibliotekbruk**
 - Observation: Jeg antok at en API-verdi kunne settes og tilbakestilles symmetrisk, uten å sjekke hvilke tilstandsoverganger som faktisk er lovlige.

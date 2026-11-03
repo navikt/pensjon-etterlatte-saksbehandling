@@ -29,11 +29,11 @@ class SanksjonService(
     }
 
     /**
-     * Kopierer inn sanksjoner fra forrige iverksatte behandling til denne hvis:
+     * Kopierer inn sanksjoner fra samme kildebehandling som beregningsgrunnlaget hvis:
      *
      *  1. denne behandlingen er en revurdering
      *  2. denne behandlingen har ingen sanksjoner knyttet til seg allerede
-     *  3. den forrige iverksatte behandlingen i saken har sanksjoner
+     *  3. kildebehandlingen har sanksjoner
      *
      *  Dette fungerer bra nok til at denne metoden kan kjøres "ofte" -- som i dag
      *  er hver gang vi beregner.
@@ -44,14 +44,13 @@ class SanksjonService(
      */
     suspend fun kopierSanksjon(
         behandlingId: UUID,
+        forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         if (behandling.behandlingType != BehandlingType.REVURDERING) {
             return
         }
-
-        val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
 
         val sanksjonerIDenneBehandlingen = sanksjonRepository.hentSanksjon(behandlingId)
         val sanksjonerIForrigeBehandling = sanksjonRepository.hentSanksjon(forrigeBehandlingId)

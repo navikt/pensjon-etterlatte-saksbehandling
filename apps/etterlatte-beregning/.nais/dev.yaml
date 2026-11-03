@@ -54,7 +54,7 @@ spec:
           - id: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d # 0000-GA-Egne_ansatte
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_18
         name: etterlatte-beregning
         tier: db-g1-small
         databases:

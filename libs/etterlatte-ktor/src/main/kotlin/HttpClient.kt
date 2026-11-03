@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.engine.okhttp.OkHttpConfig
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -55,6 +56,9 @@ fun httpClient(
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
     install(ClientCallLogging)
+    install(HttpRequestRetry) {
+        noRetry()
+    }
     install(HttpTimeout)
 
     auth.invoke(this)

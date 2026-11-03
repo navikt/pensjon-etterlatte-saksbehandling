@@ -12,7 +12,7 @@ spec:
     - "https://etterlatte-behandling.intern.dev.nav.no"
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_18
         tier: db-g1-small
         collation: nb_NO.UTF8
         cascadingDelete: false

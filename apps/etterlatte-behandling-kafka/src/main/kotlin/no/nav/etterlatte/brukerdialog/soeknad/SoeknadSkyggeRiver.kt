@@ -62,7 +62,7 @@ internal class SoeknadSkyggeRiver(
             val sakType =
                 when (soeknad.type) {
                     SoeknadType.BARNEPENSJON -> SakType.BARNEPENSJON
-                    SoeknadType.OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
+                    SoeknadType.OMSTILLINGSSTOENAD, SoeknadType.UTVIDET_OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
                 }
 
             behandlingKlient.opprettSoeknadSkyggeTask(

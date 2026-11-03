@@ -72,6 +72,7 @@ data class EtteroppgjoerForbehandlingStatistikkDto(
     val pensjonsgivendeInntekt: SummertePensjonsgivendeInntekterStatistikkDto? = null,
     val saksbehandler: String?,
     val tilknyttetRevurdering: Boolean?,
+    val opphoerSkyldesDoedsfallIEtteroppgjoersaar: JaNei? = null,
 )
 
 data class SummerteInntekterAOrdningenStatistikkDto(

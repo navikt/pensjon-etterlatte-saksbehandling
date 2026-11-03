@@ -102,7 +102,10 @@ class JournalfoerOmsMeldtInnEndringService(
                 )
             }.let {
                 when (it) {
-                    is RetryResult.Success -> DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    is RetryResult.Success -> {
+                        DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
+                    }
+
                     is RetryResult.Failure -> {
                         logger.error("Kunne ikke opprette PDF for meldt inn endring for Omstilingstønad med id $sakId")
                         throw it.samlaExceptions()

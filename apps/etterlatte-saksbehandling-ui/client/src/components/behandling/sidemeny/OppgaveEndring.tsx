@@ -6,6 +6,7 @@ import { hentEndringer } from '~shared/api/oppgaver'
 import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { BodyShort, Box, Detail } from '@navikt/ds-react'
 import styled from 'styled-components'
+import { teksterAArsakTilAvslutting } from '~shared/types/AnnullerBehandling'
 
 export const OppgaveEndring = ({ oppgaveResult }: { oppgaveResult: Result<OppgaveDTO> }) => {
   const [endringerResult, hentOppgaveEndringer] = useApiCall(hentEndringer)
@@ -27,16 +28,23 @@ export const OppgaveEndring = ({ oppgaveResult }: { oppgaveResult: Result<Oppgav
   ))
 }
 
-const EndringLinje = ({ endring }: { endring: GenerellEndringshendelse }) => {
+export const EndringLinje = ({ endring }: { endring: GenerellEndringshendelse }) => {
   const { tidspunkt, saksbehandler, endringer } = endring
 
   return (
     <EndringElement>
-      {endringer.map(({ tittel, beskrivelse }, index) => (
+      {endringer.map(({ tittel, beskrivelse, aarsakTilAvbrytelse }, index) => (
         <div key={`endring-element-${index}`}>
           <BodyShort size="small">
             <strong>{tittel}</strong>
           </BodyShort>
+          {!!aarsakTilAvbrytelse && (
+            <BodyShort size="small">
+              Årsak:{' '}
+              {Object.entries(teksterAArsakTilAvslutting).find(([aarsak]) => aarsak === aarsakTilAvbrytelse)?.[1] ??
+                aarsakTilAvbrytelse}
+            </BodyShort>
+          )}
           {!!beskrivelse && <BodyShort size="small">{beskrivelse}</BodyShort>}
         </div>
       ))}

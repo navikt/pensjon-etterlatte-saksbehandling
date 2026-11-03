@@ -6,6 +6,37 @@ export interface SimulertBeregning {
   kommendeUtbetalinger: SimulertBeregningsperiode[]
   etterbetaling: SimulertBeregningsperiode[]
   tilbakekreving: SimulertBeregningsperiode[]
+  oppsummeringer?: SimulertBeregningOppsummeringer | null
+}
+
+export interface SimulertBeregningOppsummeringer {
+  perAar: SimulertBeregningPerAar[]
+  forPerioden: SimulertBeregningOppsummering
+}
+
+export interface SimulertBeregningPerAar {
+  aarstall: number
+  oppsummering: SimulertBeregningOppsummering
+}
+
+export interface SimulertBeregningOppsummering {
+  etterbetaling: SimulertEtterbetalingOppsummering
+  feilutbetaling: SimulertFeilutbetalingOppsummering | null
+}
+
+export interface SimulertEtterbetalingOppsummering {
+  brutto: number
+  skatt: number
+  andreTrekk: number
+  netto: number
+}
+
+export type SimulertKlasseType = 'YTEL' | 'SKAT' | 'FEIL' | 'MOTP' | 'JUST' | 'TREK'
+
+export interface SimulertFeilutbetalingOppsummering {
+  brutto: number
+  beloepBrukerenSkulleHatt: number
+  netto: number
 }
 
 export interface SimulertBeregningsperiode {
@@ -22,5 +53,5 @@ export interface SimulertBeregningsperiode {
   tilbakefoering: boolean
   klassekode: string
   klassekodeBeskrivelse: string
-  klasseType: string
+  klasseType: SimulertKlasseType
 }

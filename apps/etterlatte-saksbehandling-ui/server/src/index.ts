@@ -100,7 +100,7 @@ app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiC
 
 app.use('/api/vedtak', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
 
-app.use('/api/trygdetid', tokenMiddleware(ApiConfig.trygdetid.scope), proxy(ApiConfig.trygdetid.url))
+app.use('/api/trygdetid', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
 
 app.use('/api/trygdetid_v2', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
 

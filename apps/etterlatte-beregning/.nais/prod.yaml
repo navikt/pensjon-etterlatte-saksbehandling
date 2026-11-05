@@ -52,7 +52,7 @@ spec:
           - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_18
         tier: db-custom-1-3840
         collation: nb_NO.UTF8
         cascadingDelete: false

@@ -79,8 +79,8 @@ spec:
     scalingStrategy:
       cpu:
         thresholdPercentage: 90
-    max: 0 #4
-    min: 0 #2
+    max: 4
+    min: 2
   env:
     - name: JAVA_TOOL_OPTIONS
       value: "-XX:MaxRAMPercentage=50"

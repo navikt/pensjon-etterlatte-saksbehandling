@@ -37,8 +37,7 @@ spec:
           - name: pgaudit.log_relation
             value: "on"
   liveness:
-    initialDelay: 5
-    timeout: 600
+    initialDelay: 800
     path: /health/isalive
   readiness:
     initialDelay: 5

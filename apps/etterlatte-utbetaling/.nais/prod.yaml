@@ -79,8 +79,8 @@ spec:
     limits:
       memory: 1280Mi
   replicas:
-    max: 1
-    min: 1
+    max: 0 #1
+    min: 0 #1
   env:
     - name: JAVA_TOOL_OPTIONS
       value: "-XX:MaxRAMPercentage=50"

@@ -1,13 +1,13 @@
 package no.nav.etterlatte.grunnlag
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.generellbehandling.SakParameterStemmerIkkeException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
@@ -57,6 +57,9 @@ fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
         post("/nye-opplysninger") {
             kunSkrivetilgang {
                 val opplysningsbehov = call.receive<NyeSaksopplysninger>()
+                if (sakId != opplysningsbehov.sakId) {
+                    throw SakParameterStemmerIkkeException("Innsendt request har sak-id=${opplysningsbehov.sakId}, men sak i url er $sakId")
+                }
                 grunnlagService.lagreNyeSaksopplysningerBareSak(
                     opplysningsbehov.sakId,
                     opplysningsbehov.opplysninger,

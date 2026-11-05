@@ -38,6 +38,7 @@ spec:
             value: "on"
   liveness:
     initialDelay: 5
+    timeout: 600
     path: /health/isalive
   readiness:
     initialDelay: 5
@@ -71,7 +72,7 @@ spec:
     pool: nav-prod
   resources:
     requests:
-      cpu: 360m
+      cpu: 800m
       memory: 3072Mi
     limits:
       memory: 3072Mi

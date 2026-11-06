@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning.grunnlag
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -9,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.route.uuid
@@ -90,7 +92,22 @@ fun Route.beregningsGrunnlag(
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Lagrer overstyrt beregningsgrunnlag for behandling $behandlingId")
 
-                val body = call.receive<OverstyrBeregningGrunnlagDTO>()
+                val body =
+                    try {
+                        call.receive<OverstyrBeregningGrunnlagDTO>()
+                    } catch (e: BadRequestException) {
+                        val ugyldigPeriode =
+                            generateSequence<Throwable>(e) { it.cause }
+                                .filterIsInstance<UgyldigPeriodeForGrunnlag>()
+                                .firstOrNull()
+                                ?: throw e
+
+                        logger.warn("Avviser overstyrt beregningsgrunnlag med ugyldig periode: ${ugyldigPeriode.message}")
+                        throw UgyldigForespoerselException(
+                            code = "UGYLDIG_PERIODE_FOR_GRUNNLAG",
+                            detail = "Til og med må være lik eller etter Fra og med.",
+                        )
+                    }
 
                 val grunnlag =
                     beregningsGrunnlagService.lagreOverstyrBeregningGrunnlag(

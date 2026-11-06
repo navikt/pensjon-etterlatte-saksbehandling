@@ -10,6 +10,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -19,21 +20,23 @@ fun Route.aldersovergang(aldersovergangService: AldersovergangService) {
         val logger = LoggerFactory.getLogger("AldersovergangRoute")
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            val loependeBehandlingId =
-                call.request.queryParameters["fra"]?.let { UUID.fromString(it) }
-                    ?: throw IllegalArgumentException("Mangler query parameter 'fra'")
+            kunSkrivetilgang {
+                val loependeBehandlingId =
+                    call.request.queryParameters["fra"]?.let { UUID.fromString(it) }
+                        ?: throw IllegalArgumentException("Mangler query parameter 'fra'")
 
-            logger.info("Behandler aldersovergang [behandlingId=$behandlingId, løpende behandlingId=$loependeBehandlingId]")
-            val vilkaarsvurdering =
-                inTransaction {
-                    aldersovergangService.behandleOpphoerAldersovergang(
-                        behandlingId = behandlingId,
-                        loependeBehandlingId = loependeBehandlingId,
-                        brukerTokenInfo = call.brukerTokenInfo,
-                    )
-                }
+                logger.info("Behandler aldersovergang [behandlingId=$behandlingId, løpende behandlingId=$loependeBehandlingId]")
+                val vilkaarsvurdering =
+                    inTransaction {
+                        aldersovergangService.behandleOpphoerAldersovergang(
+                            behandlingId = behandlingId,
+                            loependeBehandlingId = loependeBehandlingId,
+                            brukerTokenInfo = call.brukerTokenInfo,
+                        )
+                    }
 
-            call.respond(HttpStatusCode.OK, mapOf("vilkaarsvurderingid" to vilkaarsvurdering.id))
+                call.respond(HttpStatusCode.OK, mapOf("vilkaarsvurderingid" to vilkaarsvurdering.id))
+            }
         }
     }
 }

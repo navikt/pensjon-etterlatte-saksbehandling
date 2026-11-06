@@ -95,7 +95,7 @@ For revurderinger med årsak `ETTEROPPGJOER` brukes `avkortingMedOppdatertAarsop
 
 ## Avhengigheter
 
-Kaller: `etterlatte-behandling` (behandlingskontekst, tilgangskontroll og grunnlag), `etterlatte-trygdetid` (trygdetidsgrunnlag), vilkårsvurdering (via behandling)
+Kaller `etterlatte-behandling` for behandlingskontekst, tilgangskontroll, grunnlag, vilkårsvurdering og trygdetidsgrunnlag. Trygdetid hentes via `/api/trygdetid_v2/{behandlingId}`.
 
 ## Regelendringer – prosess og versjonering
 

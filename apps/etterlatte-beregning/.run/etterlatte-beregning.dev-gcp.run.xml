@@ -8,8 +8,6 @@
       <env name="DB_USERNAME" value="postgres" />
       <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
       <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
-      <env name="ETTERLATTE_TRYGDETID_CLIENT_ID" value="8385435e-f3d7-45ec-be59-ebd1c71df735" />
-      <env name="ETTERLATTE_TRYGDETID_URL" value="https://etterlatte-trygdetid.intern.dev.nav.no" />
       <env name="NAIS_APP_NAME" value="etterlatte-beregning" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />

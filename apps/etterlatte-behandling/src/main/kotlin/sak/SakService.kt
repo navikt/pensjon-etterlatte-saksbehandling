@@ -156,9 +156,6 @@ class SakServiceImpl(
         sak: SakMedEnhet,
         kommentar: String?,
     ) {
-        if (Enheter.erSpesialTilgangsEnheter(sak.enhet)) {
-            throw KanIkkEndreSpesialenhet("Kan ikke endre til spesial enhet")
-        }
         skrivDao.oppdaterEnhet(sak, kommentar)
     }
 

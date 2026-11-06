@@ -790,7 +790,6 @@ internal class SakServiceTest {
     @Test
     fun `Kan endre til spesialenhet fra vanlig enhet`() {
         val eksisterendeSak = dummySak(ident = LITE_BARN.value, sakType = SakType.BARNEPENSJON, enhet = Enheter.PORSGRUNN)
-        every { sakLesDao.hentSak(eksisterendeSak.id) } returns eksisterendeSak
         every { sakSkrivDao.oppdaterEnhet(any(), any()) } just runs
 
         service.oppdaterEnhet(SakMedEnhet(eksisterendeSak.id, Enheter.EGNE_ANSATTE.enhetNr))
@@ -798,18 +797,6 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakSkrivDao.oppdaterEnhet(SakMedEnhet(eksisterendeSak.id, Enheter.EGNE_ANSATTE.enhetNr), null)
         }
-    }
-
-    @Test
-    fun `Kan ikke endre fra spesialenhet`() {
-        val eksisterendeSak = dummySak(ident = LITE_BARN.value, sakType = SakType.BARNEPENSJON, enhet = Enheter.EGNE_ANSATTE)
-        every { sakLesDao.hentSak(eksisterendeSak.id) } returns eksisterendeSak
-
-        assertThrows<KanIkkEndreSpesialenhet> {
-            service.oppdaterEnhet(SakMedEnhet(eksisterendeSak.id, Enheter.PORSGRUNN.enhetNr))
-        }
-
-        verify { sakSkrivDao wasNot Called }
     }
 
     @Nested

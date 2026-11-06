@@ -4,6 +4,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -27,10 +28,10 @@ class HengendeBehandlingJobService(
             val hengendeBehandlinger =
                 inTransaction { dao.hentBehandlingerHengendeIStatus(status, sistEndretFoer) }
 
-            if (hengendeBehandlinger.isNotEmpty()) {
+            if (isProd() && hengendeBehandlinger.isNotEmpty()) {
                 logger.error(
                     "Fant ${hengendeBehandlinger.size} behandling(er) som har stått fast i status $status i mer enn " +
-                        "$grenseForHengende dager uten endring, dette kan tyde på at iverksettingen har stanset opp: " +
+                        "${grenseForHengende.toDays()} dager uten endring, dette kan tyde på at iverksettingen har stanset opp: " +
                         hengendeBehandlinger.joinToString(", ") {
                             "behandlingId=${it.behandlingId} sakId=${it.sakId.sakId} sistEndret=${it.sistEndret}"
                         },

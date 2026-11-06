@@ -35,6 +35,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -784,6 +785,18 @@ internal class SakServiceTest {
 
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(ident) }
         verify { sakLesDao.finnSaker(ident) }
+    }
+
+    @Test
+    fun `Kan endre til spesialenhet fra vanlig enhet`() {
+        val eksisterendeSak = dummySak(ident = LITE_BARN.value, sakType = SakType.BARNEPENSJON, enhet = Enheter.PORSGRUNN)
+        every { sakSkrivDao.oppdaterEnhet(any(), any()) } just runs
+
+        service.oppdaterEnhet(SakMedEnhet(eksisterendeSak.id, Enheter.EGNE_ANSATTE.enhetNr))
+
+        verify(exactly = 1) {
+            sakSkrivDao.oppdaterEnhet(SakMedEnhet(eksisterendeSak.id, Enheter.EGNE_ANSATTE.enhetNr), null)
+        }
     }
 
     @Nested

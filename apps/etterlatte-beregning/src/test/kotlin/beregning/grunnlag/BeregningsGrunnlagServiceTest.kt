@@ -87,6 +87,7 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { beregningRepository.hentOverstyrBeregning(any()) } returns null
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
     }
 
     @Test
@@ -1553,6 +1554,83 @@ internal class BeregningsGrunnlagServiceTest {
                 mockk(relaxed = true),
             )
         }
+    }
+
+    @Test
+    fun `vedtaksperioder oppdateres ikke naar behandlingen ikke tillater lagring av grunnlag`() {
+        val behandlingId = randomUUID()
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(behandlingId, any()) } returns false
+
+        runBlocking {
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(
+                behandlingId = behandlingId,
+                beregningsGrunnlag = LagreBeregningsGrunnlag(soeskenMedIBeregning = emptyList()),
+                brukerTokenInfo = bruker,
+            ) shouldBe null
+        }
+
+        coVerify(exactly = 0) { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) }
+        verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+    }
+
+    @Test
+    fun `lagring av grunnlag i aapen revurdering erstatter utdaterte vedtaksperioder med gjeldende perioder`() {
+        val januar = YearMonth.of(2025, 1)
+        val mars = YearMonth.of(2025, 3)
+        val juli = YearMonth.of(2025, 7)
+        val sakId = randomSakId()
+        val forrigeId = randomUUID()
+        val revurdering =
+            mockBehandling(
+                type = SakType.OMSTILLINGSSTOENAD,
+                uuid = randomUUID(),
+                behandlingstype = BehandlingType.REVURDERING,
+                virkningstidspunktdato = januar,
+                sakId = sakId,
+            )
+        val forrigeGrunnlag =
+            beregningsgrunnlag(
+                behandlingId = forrigeId,
+                soeskenMedIBeregning = emptyList(),
+            )
+        val utdatertGrunnlag =
+            forrigeGrunnlag.copy(
+                behandlingId = revurdering.id,
+                vedtaksperioder = listOf(Vedtaksperiode(januar, null)),
+            )
+        val lagretGrunnlag = slot<BeregningsGrunnlag>()
+
+        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+        coEvery { grunnlagKlient.hentGrunnlag(revurdering.id, any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+            listOf(mockVedtak(forrigeId, VedtakType.ENDRING))
+        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(sakId, any()) } returns
+            listOf(
+                InnvilgetPeriodeDto(Periode(januar, mars), emptyList()),
+                InnvilgetPeriodeDto(Periode(juli, null), emptyList()),
+            )
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeId) } returns forrigeGrunnlag
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(revurdering.id) } answers {
+            if (lagretGrunnlag.isCaptured) lagretGrunnlag.captured else utdatertGrunnlag
+        }
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(lagretGrunnlag)) } returns true
+
+        val resultat =
+            runBlocking {
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
+                    behandlingId = revurdering.id,
+                    beregningsGrunnlag =
+                        LagreBeregningsGrunnlag(
+                            soeskenMedIBeregning = emptyList(),
+                            institusjonsopphold = forrigeGrunnlag.institusjonsopphold,
+                        ),
+                    brukerTokenInfo = bruker,
+                )
+            }
+
+        resultat?.vedtaksperioder shouldBe listOf(Vedtaksperiode(januar, mars), Vedtaksperiode(juli, null))
+        forrigeGrunnlag.vedtaksperioder shouldBe null
+        verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(match { it.behandlingId == forrigeId }) }
     }
 
     @Test

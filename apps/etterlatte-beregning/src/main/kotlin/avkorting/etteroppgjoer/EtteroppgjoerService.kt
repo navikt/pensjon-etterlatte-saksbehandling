@@ -8,6 +8,7 @@ import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.Etteroppgjoer
+import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.beregneEtteroppgjoerRegelMedDoedsfall
@@ -23,8 +24,10 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -40,6 +43,7 @@ import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class EtteroppgjoerService(
@@ -120,6 +124,21 @@ class EtteroppgjoerService(
                 it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
             }
 
+        request.innvilgedePerioderIEtteroppgjoersAar?.let {
+            validerInnvilgedePerioder(request, it, tidligereAarsoppgjoer.ytelseFoerAvkorting)
+        }
+
+        val maanederMedYtelse = maanederMedYtelseFoerAvkorting(request.aar, tidligereAarsoppgjoer.ytelseFoerAvkorting)
+        val harHull = maanederMedYtelse.zipWithNext().any { (forrige, neste) -> forrige.plusMonths(1) != neste }
+        if ((request.innvilgedePerioderIEtteroppgjoersAar.orEmpty().size > 1 || harHull) &&
+            !featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, false)
+        ) {
+            throw UgyldigForespoerselException(
+                "FLERPERIODEBEREGNING_IKKE_AKTIV",
+                "Etteroppgjør med flere innvilgede perioder er ikke aktivert.",
+            )
+        }
+
         val avkorting =
             with(request) {
                 Avkorting(
@@ -142,6 +161,50 @@ class EtteroppgjoerService(
 
         avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
+
+    private fun validerInnvilgedePerioder(
+        request: EtteroppgjoerBeregnFaktiskInntektRequest,
+        innvilgedePerioder: List<Periode>,
+        ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
+    ) {
+        val maaneder = (1..12).map { YearMonth.of(request.aar, it) }
+        val ugyldigePerioder =
+            innvilgedePerioder.any {
+                val tom = it.tom
+                it.fom.year != request.aar || tom == null || tom.year != request.aar || tom < it.fom
+            }
+        val forventedeMaaneder =
+            maaneder.filter { maaned ->
+                innvilgedePerioder.any {
+                    val tom = it.tom
+                    maaned >= it.fom && tom != null && maaned <= tom
+                }
+            }
+        val maanederIBeregningsgrunnlaget = maanederMedYtelseFoerAvkorting(request.aar, ytelseFoerAvkorting)
+        if (ugyldigePerioder ||
+            forventedeMaaneder.isEmpty() ||
+            forventedeMaaneder != maanederIBeregningsgrunnlaget ||
+            forventedeMaaneder.first() != request.innvilgetPeriodeIEtteroppgjoersAar.fom ||
+            forventedeMaaneder.last() != request.innvilgetPeriodeIEtteroppgjoersAar.tom
+        ) {
+            throw UgyldigForespoerselException(
+                "ETTEROPPGJOER_PERIODER_AVVIKER",
+                "Beregningsgrunnlaget stemmer ikke med innvilgede perioder i etteroppgjørsåret. " +
+                    "Periodene må korrigeres før etteroppgjøret kan beregnes.",
+            )
+        }
+    }
+
+    private fun maanederMedYtelseFoerAvkorting(
+        aar: Int,
+        ytelser: List<YtelseFoerAvkorting>,
+    ): List<YearMonth> =
+        (1..12).map { YearMonth.of(aar, it) }.filter { maaned ->
+            ytelser.any {
+                val tom = it.periode.tom
+                maaned >= it.periode.fom && (tom == null || maaned <= tom)
+            }
+        }
 
     private suspend fun beregnEtteroppgjoerResultat(
         etteroppgjoersAar: Int,

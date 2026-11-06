@@ -31,3 +31,9 @@ dependencies {
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }
+
+tasks.test {
+    // Regler med grunnbeløp (f.eks. InntektAvkorting) er toppnivå-vals som leses én gang per JVM.
+    // Testklassene mocker ulike G-verdier, så hver klasse må kjøre i egen JVM for å unngå rekkefølgeavhengighet.
+    forkEvery = 1
+}

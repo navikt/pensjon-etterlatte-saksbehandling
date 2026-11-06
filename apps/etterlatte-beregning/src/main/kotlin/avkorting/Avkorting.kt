@@ -362,7 +362,7 @@ data class Avkorting(
                 // Kun ta med perioder før nytt virkningstidspunkt - revurdering bakover i tid vil fjerne alt etter
                 // Dette vil også gjelde ved redigering
                 .filter { it.grunnlag.periode.fom < nyttGrunnlag.fom }
-                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom, tom) }
+                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom) }
                 .plus(Inntektsavkorting(grunnlag = forventetInntekt))
         val oppdatertAarsoppjoer =
             aarsoppgjoer.copy(
@@ -720,6 +720,7 @@ data class Avkorting(
                             avkortetYtelseMedAllForventetInntekt,
                             kjenteSanksjonerForInntektsavkorting,
                             brukNyeReglerAvkorting,
+                            finnHullIYtelse(ytelseFoerAvkorting),
                         )
                     }
                 }
@@ -759,6 +760,7 @@ data class Avkorting(
                     avkortetYtelseMedAllForventetInntekt,
                     sorterteSanksjonerInnenforAarsoppgjoer,
                     brukNyeReglerAvkorting,
+                    finnHullIYtelse(ytelseFoerAvkorting),
                 )
             // Ytelse etter avkorting må reberegnes fra første sanksjon som ikke er "sett" i tidlegere beregninger
             val tidligsteFomIkkeBeregnetSanksjon =
@@ -1186,22 +1188,22 @@ data class Inntektsavkorting(
         }
     }
 
-    fun lukkSisteInntektsperiode(
-        virkningstidspunkt: YearMonth,
-        tom: YearMonth?,
-    ) = if (grunnlag.periode.tom == null || grunnlag.periode.tom == tom) {
-        copy(
-            grunnlag =
-                grunnlag.copy(
-                    periode =
-                        Periode(
-                            fom = grunnlag.periode.fom,
-                            tom = virkningstidspunkt.minusMonths(1),
-                        ),
-                ),
-        )
-    } else {
-        this
+    fun lukkSisteInntektsperiode(virkningstidspunkt: YearMonth): Inntektsavkorting {
+        val eksisterendeTom = grunnlag.periode.tom
+        return if (eksisterendeTom == null || eksisterendeTom >= virkningstidspunkt) {
+            copy(
+                grunnlag =
+                    grunnlag.copy(
+                        periode =
+                            Periode(
+                                fom = grunnlag.periode.fom,
+                                tom = virkningstidspunkt.minusMonths(1),
+                            ),
+                    ),
+            )
+        } else {
+            this
+        }
     }
 }
 
@@ -1351,12 +1353,14 @@ fun finnAntallInnvilgaMaanederForAar(
         }
     val tomMaaned = tom ?: aldersovergangIInntektsaaret?.minusMonths(1)
     if (ytelse.isEmpty() || !brukNyeReglerAvkorting) {
+        val hullIYtelse = finnHullIYtelse(ytelse)
         return MaanederInnvilgetResultat(
             maaneder =
                 (fom.month.value..(tomMaaned?.month?.value ?: 12)).map {
+                    val maaned = YearMonth.of(fom.year, it)
                     MaanedInnvilget(
-                        maaned = YearMonth.of(fom.year, it),
-                        innvilget = true,
+                        maaned = maaned,
+                        innvilget = hullIYtelse.none { hull -> maaned >= hull.fom && maaned <= hull.tom!! },
                     )
                 },
             regelResultat = null,

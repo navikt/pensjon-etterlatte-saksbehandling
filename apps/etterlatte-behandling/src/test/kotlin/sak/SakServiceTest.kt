@@ -35,6 +35,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.krr.KrrKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler

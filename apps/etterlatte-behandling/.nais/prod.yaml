@@ -37,7 +37,7 @@ spec:
           - name: pgaudit.log_relation
             value: "on"
   liveness:
-    initialDelay: 800
+    initialDelay: 5
     path: /health/isalive
   readiness:
     initialDelay: 5
@@ -71,7 +71,7 @@ spec:
     pool: nav-prod
   resources:
     requests:
-      cpu: 800m
+      cpu: 360m
       memory: 3072Mi
     limits:
       memory: 3072Mi
@@ -221,7 +221,6 @@ spec:
         - application: etterlatte-hendelser-ufoere
         - application: etterlatte-statistikk
         - application: etterlatte-tidshendelser
-        - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-tilbakekreving
         - application: etterlatte-klage

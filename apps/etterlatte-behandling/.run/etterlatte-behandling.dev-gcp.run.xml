@@ -29,8 +29,6 @@
       <env name="ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE" value="api://dev-fss.teampensjon.navansatt/.default" />
       <env name="ETTERLATTE_PDLTJENESTER_URL" value="https://etterlatte-pdltjenester.intern.dev.nav.no" />
       <env name="ETTERLATTE_TILBAKEKREVING_URL" value="https://etterlatte-tilbakekreving.intern.dev.nav.no" />
-      <env name="ETTERLATTE_TRYGDETID_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-trygdetid" />
-      <env name="ETTERLATTE_TRYGDETID_URL" value="https://etterlatte-trygdetid.intern.dev.nav.no" />
       <env name="HTTP_PORT" value="8090" />
       <env name="INNTEKTSKOMPONENT_OUTBOUND_SCOPE" value="api://dev-fss.team-inntekt.inntektskomponenten/.default" />
       <env name="INNTEKTSKOMPONENT_URL" value="https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q2" />

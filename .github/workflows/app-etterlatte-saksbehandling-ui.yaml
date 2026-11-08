@@ -66,7 +66,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Build and publish Docker image
-        uses: nais/docker-build-push@dd7421d5068057a020ca46ead966c26190c516b1 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@d3a1f7e259ecc381a50435e1d4add9059429ebd7 # ratchet:nais/docker-build-push@v0
         id: docker-build-push
         with:
           team: etterlatte
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
-      - uses: nais/deploy/actions/deploy@3944168fd20b7eea3818e97de3810f74b54c78ff # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@7b60caaded00332e9aa117a8342daa0876851dfe # ratchet:nais/deploy/actions/deploy@v2
         env:
           TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           CLUSTER: dev-gcp
@@ -100,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
-      - uses: nais/deploy/actions/deploy@3944168fd20b7eea3818e97de3810f74b54c78ff # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@7b60caaded00332e9aa117a8342daa0876851dfe # ratchet:nais/deploy/actions/deploy@v2
         env:
           TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           CLUSTER: prod-gcp

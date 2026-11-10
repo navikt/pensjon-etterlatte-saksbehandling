@@ -30,7 +30,7 @@ spec:
         - id: loki
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_18
         tier: db-custom-1-3840
         collation: nb_NO.UTF8
         cascadingDelete: false
@@ -117,10 +117,6 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
-    - name: ETTERLATTE_TRYGDETID_URL
-      value: http://etterlatte-trygdetid
-    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
-      value: prod-gcp.etterlatte.etterlatte-trygdetid
     - name: ETTERLATTE_PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
     - name: ETTERLATTE_PDLTJENESTER_CLIENT_ID
@@ -133,7 +129,6 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
-        - application: etterlatte-trygdetid
         - application: ey-pdfgen
         - application: ey-pdfgenrs
         - application: clamav

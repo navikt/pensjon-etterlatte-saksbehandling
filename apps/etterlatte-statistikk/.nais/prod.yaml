@@ -10,7 +10,7 @@ spec:
   port: 8080
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_18
         tier: db-custom-1-3840
         collation: nb_NO.UTF8
         cascadingDelete: false

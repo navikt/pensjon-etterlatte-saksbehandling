@@ -76,10 +76,6 @@ class SaksbehandlerServiceImpl(
     override fun hentSaksbehandlereForEnhet(enhet: List<Enhetsnummer>): Set<SaksbehandlerInfo> =
         enhet.flatMap { dao.hentSaksbehandlereForEnhet(it) }.toSet()
 
-    /**
-     * Uavhengig av enhetene fra Entra-proxy, som filtrerer bort blant annet ansatte i permisjon.
-     * Brukes for å finne eksisterende oppgaver, ikke for å velge hvem som kan få nye.
-     */
     override fun hentSaksbehandlereMedAapneOppgaver(enheter: List<Enhetsnummer>): Set<SaksbehandlerInfo> =
         dao
             .hentSaksbehandlereMedAapneOppgaver(enheter)

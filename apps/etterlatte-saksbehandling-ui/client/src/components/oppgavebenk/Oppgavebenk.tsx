@@ -1,4 +1,5 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
+import { uniqBy } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -50,17 +51,7 @@ export const Oppgavebenk = () => {
     hentSaksbehandlereMedAapneOppgaverFetch(undefined, setSaksbehandlereMedAapneOppgaver)
   }, [])
 
-  // Filteret skal også vise saksbehandlere som har oppgaver, men ikke kan få nye (f.eks. i permisjon).
-  // Tildeling bruker fortsatt kun saksbehandlereIEnheter.
-  const saksbehandlereIFilter = useMemo(
-    () => [
-      ...saksbehandlereIEnheter,
-      ...saksbehandlereMedAapneOppgaver.filter(
-        (medOppgaver) => !saksbehandlereIEnheter.some((iEnhet) => iEnhet.ident === medOppgaver.ident)
-      ),
-    ],
-    [saksbehandlereIEnheter, saksbehandlereMedAapneOppgaver]
-  )
+  const saksbehandlereIFilter = uniqBy([...saksbehandlereIEnheter, ...saksbehandlereMedAapneOppgaver], 'ident')
 
   // Sett tab i URL ved mount hvis den mangler.
   // Vi leser window.location.search direkte fordi barnekomponenter (useFilterMedUrl) kan ha

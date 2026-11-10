@@ -66,16 +66,8 @@ class SaksbehandlerInfoDao(
                         """.trimIndent(),
                     )
                 statement.setArray(1, createArrayOf("text", enheter.map { enhet -> enhet.enhetNr }.toTypedArray()))
-                statement.setArray(
-                    2,
-                    createArrayOf(
-                        "text",
-                        Status.entries
-                            .filterNot { status -> status.erAvsluttet() }
-                            .map { status -> status.name }
-                            .toTypedArray(),
-                    ),
-                )
+                val aapneStatuser = Status.entries.filter { status -> status.erIkkeAvsluttet() }.map { status -> status.name }
+                statement.setArray(2, createArrayOf("text", aapneStatuser.toTypedArray()))
                 statement.executeQuery().toList {
                     SaksbehandlerInfo(
                         getString("id"),

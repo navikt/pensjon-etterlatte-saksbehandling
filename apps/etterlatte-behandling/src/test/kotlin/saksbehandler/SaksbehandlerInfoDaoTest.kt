@@ -104,7 +104,6 @@ internal class SaksbehandlerInfoDaoTest(
         val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val sakPorsgrunn = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-        // Saksbehandler i permisjon: navn er lagret, men Entra-proxy har gitt tom enhetsliste
         val iPermisjon = SaksbehandlerInfo("identporsgrunn", "navn")
         saksbehandlerInfoDao.upsertSaksbehandlerNavn(iPermisjon)
         saksbehandlerInfoDao.upsertSaksbehandlerEnheter(iPermisjon.ident to emptyList())

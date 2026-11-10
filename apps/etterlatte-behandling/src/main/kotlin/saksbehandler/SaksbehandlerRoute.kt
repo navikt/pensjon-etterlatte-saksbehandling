@@ -9,8 +9,10 @@ import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -34,6 +36,17 @@ internal fun Route.saksbehandlerRoutes(saksbehandlerService: SaksbehandlerServic
 
             logger.info("Henter saksbehandlere ${saksbehandlere.size} for $enheter")
             call.respond(saksbehandlere)
+        }
+
+        get("/saksbehandlere/med-aapne-oppgaver") {
+            kunSaksbehandler {
+                val enheter = Kontekst.get().appUserAsSaksbehandler().enheter()
+                val saksbehandlere =
+                    inTransaction {
+                        saksbehandlerService.hentSaksbehandlereMedAapneOppgaver(enheter)
+                    }
+                call.respond(saksbehandlere)
+            }
         }
 
         get("/saksbehandlere/innlogget") {

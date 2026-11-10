@@ -1,8 +1,9 @@
 import React, { ReactNode, useEffect, useState } from 'react'
+import { uniqBy } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
+import { saksbehandlereIEnhetApi, saksbehandlereMedAapneOppgaverApi } from '~shared/api/oppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import {
   hentValgFraLocalStorage,
@@ -38,6 +39,8 @@ export const Oppgavebenk = () => {
 
   const [, hentSaksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
+  const [, hentSaksbehandlereMedAapneOppgaverFetch] = useApiCall(saksbehandlereMedAapneOppgaverApi)
+  const [saksbehandlereMedAapneOppgaver, setSaksbehandlereMedAapneOppgaver] = useState<Array<Saksbehandler>>([])
 
   useEffect(() => {
     if (!!innloggetSaksbehandler.enheter.length) {
@@ -45,7 +48,10 @@ export const Oppgavebenk = () => {
         setSaksbehandlereIEnheter(saksbehandlere)
       })
     }
+    hentSaksbehandlereMedAapneOppgaverFetch(undefined, setSaksbehandlereMedAapneOppgaver)
   }, [])
+
+  const saksbehandlereIFilter = uniqBy([...saksbehandlereIEnheter, ...saksbehandlereMedAapneOppgaver], 'ident')
 
   // Sett tab i URL ved mount hvis den mangler.
   // Vi leser window.location.search direkte fordi barnekomponenter (useFilterMedUrl) kan ha
@@ -72,7 +78,13 @@ export const Oppgavebenk = () => {
   const rendreValgtOppgaveliste = (): ReactNode => {
     switch (oppgavelisteValg) {
       case OppgavelisteValg.OPPGAVELISTA:
-        return <Oppgavelista key={OppgavelisteValg.OPPGAVELISTA} saksbehandlereIEnhet={saksbehandlereIEnheter} />
+        return (
+          <Oppgavelista
+            key={OppgavelisteValg.OPPGAVELISTA}
+            saksbehandlereIEnhet={saksbehandlereIEnheter}
+            saksbehandlereIFilter={saksbehandlereIFilter}
+          />
+        )
       case OppgavelisteValg.MIN_OPPGAVELISTE:
         return <MinOppgaveliste key={OppgavelisteValg.MIN_OPPGAVELISTE} saksbehandlereIEnhet={saksbehandlereIEnheter} />
       case OppgavelisteValg.GOSYS_OPPGAVER:

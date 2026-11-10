@@ -1,4 +1,8 @@
-import { Avkorting, SummerteInntekterAOrdningen } from '~shared/types/EtteroppgjoerForbehandling'
+import {
+  Avkorting,
+  EtteroppgjoerForbehandling,
+  SummerteInntekterAOrdningen,
+} from '~shared/types/EtteroppgjoerForbehandling'
 import { BodyShort, Heading, HelpText, HStack, Label, Table, VStack } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 import React from 'react'
@@ -8,9 +12,11 @@ import { LenkeTilInntektOversikt } from '~components/etteroppgjoer/components/in
 export function OpplysningerFraAInntektSummert({
   inntekter,
   avkorting,
+  innvilgetPeriode,
 }: {
   inntekter: SummerteInntekterAOrdningen
   avkorting?: Avkorting
+  innvilgetPeriode: EtteroppgjoerForbehandling['innvilgetPeriode']
 }) {
   return (
     <VStack gap="space-16">
@@ -72,7 +78,11 @@ export function OpplysningerFraAInntektSummert({
                   (avkortetYtelse) =>
                     avkortetYtelse.fom <= maaned.maaned && (!avkortetYtelse.tom || avkortetYtelse.tom >= maaned.maaned)
                 )
-                const harYtelseIMaaned = avkortingForMaaned && avkortingForMaaned.ytelseFoerAvkorting > 0
+                const harYtelseIMaaned =
+                  maaned.maaned >= innvilgetPeriode.fom &&
+                  maaned.maaned <= innvilgetPeriode.tom &&
+                  avkortingForMaaned &&
+                  avkortingForMaaned.ytelseFoerAvkorting > 0
 
                 return (
                   <Table.DataCell key={maaned.maaned} align="right">

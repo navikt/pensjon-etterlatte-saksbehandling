@@ -1,0 +1,388 @@
+package no.nav.etterlatte.modules.beregning.grunnlag
+
+import kotliquery.Row
+import kotliquery.Session
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
+import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.transaction
+import org.postgresql.util.PGobject
+import tools.jackson.module.kotlin.readValue
+import java.time.YearMonth
+import java.util.UUID
+import javax.sql.DataSource
+
+class BeregningsGrunnlagRepository(
+    private val dataSource: DataSource,
+) {
+    fun finnBeregningsGrunnlag(id: UUID): BeregningsGrunnlag? =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    statement = finnBeregningsGrunnlag,
+                    paramMap = mapOf("behandlings_id" to id),
+                ).map { it.asBeregningsGrunnlag(finnVedtaksperioder(id, session)) }.asSingle,
+            )
+        }
+
+    private fun finnVedtaksperioder(
+        behandlingId: UUID,
+        session: Session,
+    ): List<Vedtaksperiode> =
+        session.run(
+            queryOf(
+                statement = finnVedtaksperioderQuery,
+                paramMap = mapOf("behandling_id" to behandlingId),
+            ).map { it.asVedtaksperiode() }.asList,
+        )
+
+    fun lagreBeregningsGrunnlag(beregningsGrunnlag: BeregningsGrunnlag): Boolean {
+        val query =
+            if (finnBeregningsGrunnlag(beregningsGrunnlag.behandlingId) == null) {
+                lagreGrunnlagQuery
+            } else {
+                oppdaterGrunnlagQuery
+            }
+
+        if (beregningsGrunnlag.vedtaksperioder != null) {
+            lagreVedtaksperioder(beregningsGrunnlag, beregningsGrunnlag.vedtaksperioder)
+        }
+
+        val count =
+            using(sessionOf(dataSource)) { session ->
+                session.run(
+                    queryOf(
+                        statement = query,
+                        paramMap =
+                            mapOf<String, Any?>(
+                                "behandlings_id" to beregningsGrunnlag.behandlingId,
+                                "soesken_med_i_beregning" to beregningsGrunnlag.soeskenMedIBeregning.somJsonb(),
+                                "institusjonsopphold" to
+                                    objectMapper.writeValueAsString(
+                                        beregningsGrunnlag.institusjonsopphold,
+                                    ),
+                                "beregningsmetode" to
+                                    objectMapper.writeValueAsString(
+                                        beregningsGrunnlag.beregningsMetode,
+                                    ),
+                                "kilde" to beregningsGrunnlag.kilde.toJson(),
+                                "beregnings_metode_flere_avdoede" to
+                                    beregningsGrunnlag.beregningsMetodeFlereAvdoede
+                                        .takeIf { it.isNotEmpty() }
+                                        ?.somJsonb(),
+                                "kun_en_juridisk_forelder" to
+                                    beregningsGrunnlag.kunEnJuridiskForelder?.somJsonb(),
+                            ),
+                    ).asUpdate,
+                )
+            }
+
+        return count > 0
+    }
+
+    private fun lagreVedtaksperioder(
+        beregningsGrunnlag: BeregningsGrunnlag,
+        vedtaksperioder: List<Vedtaksperiode>?,
+    ) {
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    statement = slettVedtaksperioderQuery,
+                    paramMap =
+                        mapOf<String, Any?>(
+                            "behandling_id" to beregningsGrunnlag.behandlingId,
+                        ),
+                ).asUpdate,
+            )
+            vedtaksperioder!!.forEach { periode ->
+                session.run(
+                    queryOf(
+                        statement = lagreVedtaksperioderQuery,
+                        paramMap =
+                            mapOf<String, Any?>(
+                                "behandling_id" to beregningsGrunnlag.behandlingId,
+                                "fra_og_med" to periode.fraOgMed.toString(),
+                                "til_og_med" to periode.tilOgMed?.toString(),
+                            ),
+                    ).asUpdate,
+                )
+            }
+        }
+    }
+
+    fun finnOverstyrBeregningGrunnlagForBehandling(id: UUID): List<OverstyrBeregningGrunnlagDao> =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    statement = finnOverstyrBeregningGrunnlagForBehandling,
+                    paramMap = mapOf("behandlings_id" to id),
+                ).map { it.asOverstyrBeregningGrunnlag() }.asList,
+            )
+        }
+
+    fun lagreOverstyrBeregningGrunnlagForBehandling(
+        behandlingId: UUID,
+        data: List<OverstyrBeregningGrunnlagDao>,
+    ) {
+        dataSource.transaction { tx ->
+            tx.run(
+                queryOf(
+                    statement = slettOverstyrBeregningGrunnlagForBehandling,
+                    paramMap = mapOf("behandlings_id" to behandlingId),
+                ).asUpdate,
+            )
+
+            data.forEach { grunnlag ->
+                tx.run(
+                    queryOf(
+                        statement = lagreOverstyrBeregningGrunnlagForBehandling,
+                        paramMap =
+                            mapOf(
+                                "id" to grunnlag.id,
+                                "behandlings_id" to behandlingId,
+                                "dato_fom" to grunnlag.datoFOM,
+                                "dato_tom" to grunnlag.datoTOM,
+                                "utbetalt_beloep" to grunnlag.utbetaltBeloep,
+                                "har_foreldreloessats" to grunnlag.foreldreloessats,
+                                "trygdetid" to grunnlag.trygdetid,
+                                "trygdetid_for_ident" to grunnlag.trygdetidForIdent,
+                                "prorata_broek_teller" to grunnlag.prorataBroekTeller,
+                                "prorata_broek_nevner" to grunnlag.prorataBroekNevner,
+                                "sak_id" to grunnlag.sakId.sakId,
+                                "beskrivelse" to grunnlag.beskrivelse,
+                                "aarsak" to grunnlag.aarsak,
+                                "kilde" to grunnlag.kilde.toJson(),
+                                "regulering_regelresultat" to grunnlag.reguleringRegelresultat?.toJson(),
+                            ),
+                    ).asUpdate,
+                )
+            }
+        }
+    }
+
+    companion object {
+        val lagreGrunnlagQuery =
+            """
+            INSERT INTO beregningsgrunnlag (
+                behandlings_id,
+                soesken_med_i_beregning_perioder,
+                institusjonsopphold,
+                beregningsmetode,
+                kilde,
+                beregnings_metode_flere_avdoede,
+                kun_en_juridisk_forelder
+            )
+            VALUES (
+                :behandlings_id,
+                :soesken_med_i_beregning,
+                :institusjonsopphold,
+                :beregningsmetode,
+                :kilde,
+                :beregnings_metode_flere_avdoede,
+                :kun_en_juridisk_forelder
+            )
+            """.trimMargin()
+
+        val oppdaterGrunnlagQuery =
+            """
+            UPDATE beregningsgrunnlag
+            SET
+                soesken_med_i_beregning_perioder = :soesken_med_i_beregning,
+                institusjonsopphold = :institusjonsopphold,
+                beregningsmetode = :beregningsmetode,
+                kilde = :kilde,
+                beregnings_metode_flere_avdoede = :beregnings_metode_flere_avdoede,
+                kun_en_juridisk_forelder = :kun_en_juridisk_forelder
+            WHERE behandlings_id = :behandlings_id
+            """.trimMargin()
+
+        val lagreVedtaksperioderQuery =
+            """
+                INSERT INTO vedtaksperioder(
+                behandling_id,
+                fra_og_med,
+                til_og_med
+            )
+            VALUES (
+                :behandling_id,
+                :fra_og_med,
+                :til_og_med
+            )    
+            """.trimIndent()
+
+        val slettVedtaksperioderQuery =
+            """
+            DELETE FROM vedtaksperioder
+            WHERE behandling_id = :behandling_id
+            """.trimIndent()
+
+        val finnBeregningsGrunnlag =
+            """
+            SELECT
+                behandlings_id,
+                soesken_med_i_beregning_perioder,
+                institusjonsopphold,
+                beregningsmetode,
+                kilde,
+                beregnings_metode_flere_avdoede,
+                kun_en_juridisk_forelder
+            FROM beregningsgrunnlag
+            WHERE behandlings_id = :behandlings_id
+            """.trimIndent()
+
+        val finnVedtaksperioderQuery =
+            """
+            SELECT
+                id,
+                behandling_id,
+                fra_og_med,
+                til_og_med
+            FROM vedtaksperioder
+            WHERE behandling_id = :behandling_id
+            """.trimIndent()
+
+        val finnOverstyrBeregningGrunnlagForBehandling =
+            """
+            SELECT
+                id,
+                behandlings_id,
+                dato_fra_og_med,
+                dato_til_og_med,
+                utbetalt_beloep,
+                har_foreldreloessats,
+                trygdetid,
+                trygdetid_for_ident,
+                prorata_broek_teller,
+                prorata_broek_nevner,
+                sak_id,
+                beskrivelse,
+                aarsak,
+                kilde,
+                regulering_regelresultat 
+            FROM overstyr_beregningsgrunnlag
+            WHERE behandlings_id = :behandlings_id
+            """.trimIndent()
+
+        val slettOverstyrBeregningGrunnlagForBehandling =
+            """
+            DELETE FROM overstyr_beregningsgrunnlag
+            WHERE behandlings_id = :behandlings_id
+            """.trimIndent()
+
+        val lagreOverstyrBeregningGrunnlagForBehandling =
+            """
+            INSERT INTO overstyr_beregningsgrunnlag (
+                id,
+                behandlings_id,
+                dato_fra_og_med,
+                dato_til_og_med,
+                utbetalt_beloep,
+                har_foreldreloessats,
+                trygdetid,
+                trygdetid_for_ident,
+                prorata_broek_teller,
+                prorata_broek_nevner,
+                sak_id,
+                beskrivelse,
+                aarsak,
+                kilde,
+                regulering_regelresultat 
+            )                
+            VALUES (
+                :id,
+                :behandlings_id,
+                :dato_fom,
+                :dato_tom,
+                :utbetalt_beloep,
+                :har_foreldreloessats,
+                :trygdetid,
+                :trygdetid_for_ident,
+                :prorata_broek_teller,
+                :prorata_broek_nevner,
+                :sak_id,
+                :beskrivelse,
+                :aarsak,
+                :kilde,
+                :regulering_regelresultat 
+            )
+            """.trimMargin()
+    }
+}
+
+inline fun <reified T> T.somJsonb(): PGobject {
+    val that = this
+    val jsonObject =
+        PGobject().apply {
+            type = "json"
+            value = objectMapper.writeValueAsString(that)
+        }
+    return jsonObject
+}
+
+private fun Row.asBeregningsGrunnlag(vedtaksperioder: List<Vedtaksperiode>): BeregningsGrunnlag =
+    BeregningsGrunnlag(
+        behandlingId = this.uuid("behandlings_id"),
+        soeskenMedIBeregning =
+            this.stringOrNull("soesken_med_i_beregning_perioder")?.let {
+                objectMapper.readValue(it)
+            } ?: emptyList(),
+        institusjonsopphold =
+            this.stringOrNull("institusjonsopphold")?.let {
+                objectMapper.readValue(
+                    it,
+                )
+            } ?: emptyList(),
+        beregningsMetode =
+            this.string("beregningsmetode").let {
+                objectMapper.readValue(
+                    it,
+                )
+            },
+        kilde = objectMapper.readValue(this.string("kilde")),
+        beregningsMetodeFlereAvdoede =
+            this.stringOrNull("beregnings_metode_flere_avdoede")?.let {
+                objectMapper.readValue(it)
+            } ?: emptyList(),
+        kunEnJuridiskForelder =
+            this.stringOrNull("kun_en_juridisk_forelder")?.let {
+                objectMapper.readValue(it)
+            },
+        vedtaksperioder = vedtaksperioder.takeIf { it.isNotEmpty() },
+    )
+
+private fun Row.asVedtaksperiode(): Vedtaksperiode =
+    Vedtaksperiode(
+        fraOgMed =
+            this.string("fra_og_med").let {
+                YearMonth.parse(it)
+            },
+        tilOgMed =
+            this.stringOrNull("til_og_med")?.let {
+                YearMonth.parse(it)
+            },
+    )
+
+private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao =
+    OverstyrBeregningGrunnlagDao(
+        id = this.uuid("id"),
+        behandlingId = this.uuid("behandlings_id"),
+        datoFOM = this.sqlDate("dato_fra_og_med").toLocalDate(),
+        datoTOM = this.sqlDateOrNull("dato_til_og_med")?.toLocalDate(),
+        utbetaltBeloep = this.longOrNull("utbetalt_beloep") ?: 0L,
+        foreldreloessats = this.anyOrNull("har_foreldreloessats")?.let { boolean("har_foreldreloessats") },
+        trygdetid = this.longOrNull("trygdetid") ?: 0,
+        trygdetidForIdent = stringOrNull("trygdetid_for_ident"),
+        prorataBroekTeller = this.longOrNull("prorata_broek_teller"),
+        prorataBroekNevner = this.longOrNull("prorata_broek_nevner"),
+        sakId = SakId(this.long("sak_id")),
+        beskrivelse = this.string("beskrivelse"),
+        aarsak = this.stringOrNull("aarsak"),
+        kilde = objectMapper.readValue(this.string("kilde")),
+        reguleringRegelresultat = this.stringOrNull("regulering_regelresultat")?.let { objectMapper.readValue(it) },
+    )

@@ -49,6 +49,7 @@ export const Inntektsopplysninger = ({ forbehandling, erRedigerbar }: Props) => 
             <OpplysningerFraAInntektSummert
               inntekter={opplysninger.summertAInntekt}
               avkorting={opplysninger.tidligereAvkorting}
+              innvilgetPeriode={forbehandling.innvilgetPeriode}
             />
           )}
 

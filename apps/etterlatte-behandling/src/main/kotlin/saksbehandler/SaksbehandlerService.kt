@@ -2,6 +2,7 @@ package no.nav.etterlatte.saksbehandler
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.jobs.saksbehandler.SAKSBEHANDLERPATTERN
 import no.nav.etterlatte.behandling.klienter.EntraProxyKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
@@ -26,6 +27,8 @@ interface SaksbehandlerService {
     fun hentKomplettSaksbehandler(ident: String): Saksbehandler
 
     fun hentSaksbehandlereForEnhet(enhet: List<Enhetsnummer>): Set<SaksbehandlerInfo>
+
+    fun hentSaksbehandlereMedAapneOppgaver(enheter: List<Enhetsnummer>): Set<SaksbehandlerInfo>
 
     fun hentEnheterForSaksbehandlerIdentWrapper(ident: String): List<SaksbehandlerEnhet>
 
@@ -72,6 +75,12 @@ class SaksbehandlerServiceImpl(
 
     override fun hentSaksbehandlereForEnhet(enhet: List<Enhetsnummer>): Set<SaksbehandlerInfo> =
         enhet.flatMap { dao.hentSaksbehandlereForEnhet(it) }.toSet()
+
+    override fun hentSaksbehandlereMedAapneOppgaver(enheter: List<Enhetsnummer>): Set<SaksbehandlerInfo> =
+        dao
+            .hentSaksbehandlereMedAapneOppgaver(enheter)
+            .filter { SAKSBEHANDLERPATTERN.matches(it.ident) }
+            .toSet()
 
     override fun hentEnheterForSaksbehandlerIdentWrapper(ident: String): List<SaksbehandlerEnhet> {
         val harIntransaction = Kontekst.get().databasecontxt.harIntransaction()

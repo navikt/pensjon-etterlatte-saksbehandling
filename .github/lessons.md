@@ -10,9 +10,9 @@
 - Observation: Samme feil i tre former. (1) Ved datamodellendring vurderte jeg lag isolert i stedet for som en sammenhengende pipeline, og plasserte data feil. (2) Da `enheterMedSkrivetilgang()` fikk rollekrav, endret betydningen av *alle* `kunSkrivetilgang`-kallsteder seg samtidig — flere lå på rene lese-operasjoner (bl.a. `get("pdf")` for forhåndsvisning) fordi «skrivetilgang» tidligere de facto var enhetstilgang. Regresjonen ble funnet av brukeren i UI. (3) En ny `SoeknadType`-verdi fra felles så ferdig håndtert ut fordi alt kompilerte, men `else -> throw`-grener og at typen manglet avdød ble ikke fanget av kompilatoren.
 - Action: Når semantikken til et delt element (datamodell, tilgangssjekk, felles hjelpefunksjon) endres: list opp alle konsumenter/kallsteder og vurder hver enkelt mot den *nye* betydningen — kallstedene ble skrevet under den gamle. Se særlig etter GET-ruter bak skrive-sperrer. Er en operasjon lese-orientert men har en muterende bieffekt, gate bieffekten på tilgang i stedet for å blokkere hele endepunktet. Ved nye enum-/sealed-verdier: følg én konkret melding gjennom hele flyten, og let etter `else ->` og typecasts – kompilering er ikke nok.
 
-**2026-04-10 — Sparring / løsningsdesign**
-- Observation: Løsninger ble foreslått før eksisterende sperrer/constraints var kartlagt, og scope vokste uten eksplisitt avklaring.
-- Action: Før første løsningsskisse – les koden, kartlegg constraints, avklar om systemet eller saksbehandler skal eie løsningen, og spør om scope.
+**2026-04-10 / 2026-11-03 — Sparring / løsningsdesign**
+- Observation: Løsninger ble foreslått før eksisterende sperrer/constraints var kartlagt, og scope vokste uten eksplisitt avklaring. Når jeg sporet hele kjeden først (saksbehandlerfilter → oppgavesøk), viste det seg at søket allerede støttet behovet – bare datakilden for valgene var feil.
+- Action: Før første løsningsskisse – les koden, kartlegg constraints, avklar om systemet eller saksbehandler skal eie løsningen, og spør om scope. Sjekk hva nedstrøms allerede støtter før du bygger nytt; løs det på det smaleste punktet.
 
 **2026-04-10 — Redigering**
 - Observation: Edits fjerner viktig innhold – enten ved å ikke se nøye på `old_str`, eller ved å bruke et for lite ankerpunkt slik at resten av signaturen forsvinner.
@@ -105,3 +105,7 @@
 **2026-09-08 — Relaxed mockk skjuler tilgangskonfigurasjon**
 - Observation: Etter at skrivetilgang begynte å kreve AD-rolle, feilet fire rutetester. Rotårsaken var at `ApplicationContext` er `mockk(relaxed = true)`, og MockK returnerer et **ekte tomt HashMap** (ikke en mock) for `Map`-returtyper. `saksbehandlerGroupIdsByKey` ble dermed tomt, alle `harRolle()` ble false, og skrivetilgang ga 403.
 - Action: Når en ny sperre begynner å lese konfigurasjon fra `ApplicationContext`, sjekk hvilke tester som bruker `mockk(relaxed = true)` på den. Relaxed mocks gir tomme collections i stillhet — sperren slår inn uten synlig årsak. Stub `saksbehandlerGroupIdsByKey` og gi tokenet matchende `groups` (mønster: `BehandlingsstatusRoutesTest`).
+
+**2026-11-02 — Feilsøking av synkroniserte data**
+- Observation: En ekstern kilde som forklaring er ikke nok når vår klient oversetter «ikke funnet» til gyldige, tomme data som deretter erstatter lagret tilstand.
+- Action: Spor forskjellen mellom tomt svar og exception helt frem til lagring og visning før ansvaret plasseres utenfor systemet.

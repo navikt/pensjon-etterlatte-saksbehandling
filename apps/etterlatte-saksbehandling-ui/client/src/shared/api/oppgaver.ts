@@ -66,6 +66,10 @@ export const saksbehandlereIEnhetApi = async (args: {
   return apiClient.get(`/saksbehandlere?enheter=${args.enheter}`)
 }
 
+export const saksbehandlereMedAapneOppgaverApi = async (): Promise<ApiResponse<Array<Saksbehandler>>> => {
+  return apiClient.get('/saksbehandlere/med-aapne-oppgaver')
+}
+
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
   saksbehandlerIdent: string

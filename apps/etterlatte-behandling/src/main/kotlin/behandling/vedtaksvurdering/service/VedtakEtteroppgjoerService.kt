@@ -1,12 +1,14 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
+import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 import java.util.UUID
 
@@ -18,32 +20,44 @@ class VedtakEtteroppgjoerService(
         sakId: SakId,
         etteroppgjoersAar: Int,
         tilOgMedBehandlingId: UUID? = null,
-    ): List<VedtakEtteroppgjoerDto> {
-        val vedtak = repository.hentVedtakForSak(sakId).firstOrNull()
-        krevIkkeNull(vedtak) { "Fant ingen vedtak for sakId=$sakId" }
+    ): List<VedtakEtteroppgjoerDto> =
+        hentVedtakForSak(sakId)
+            .retainIverksatteOgAttesterteAvslag()
+            .tidslinjejustert(tilOgMedBehandlingId, etteroppgjoersAar)
+            .map { vedtakSamordningDto ->
+                VedtakEtteroppgjoerDto(
+                    vedtakId = vedtakSamordningDto.vedtakId,
+                    perioder =
+                        vedtakSamordningDto.perioder.map { periode ->
+                            VedtakEtteroppgjoerPeriode(
+                                fom = periode.fom,
+                                tom = periode.tom,
+                                ytelseEtterAvkorting = periode.ytelseEtterAvkorting,
+                            )
+                        },
+                )
+            }
 
-        val fnr = Folkeregisteridentifikator.Companion.of(vedtak.soeker.value)
-
-        val vedtaksliste =
-            vedtakSamordningService.hentVedtaksliste(
-                fnr,
-                SakType.OMSTILLINGSSTOENAD,
-                LocalDate.of(etteroppgjoersAar, 1, 1),
-                tilOgMedBehandlingId,
+    private fun List<Vedtak>.tidslinjejustert(
+        tilOgMedBehandlingId: UUID?,
+        etteroppgjoersAar: Int,
+    ): List<VedtakSamordningDto> =
+        vedtakSamordningService
+            .tidslinjejustertVedtaksliste(
+                vedtakListe = this,
+                tilOgMedBehandlingId = tilOgMedBehandlingId,
+                fomDato = LocalDate.of(etteroppgjoersAar, 1, 1),
             )
 
-        return vedtaksliste.map { vedtak ->
-            VedtakEtteroppgjoerDto(
-                vedtakId = vedtak.vedtakId,
-                perioder =
-                    vedtak.perioder.map { periode ->
-                        VedtakEtteroppgjoerPeriode(
-                            fom = periode.fom,
-                            tom = periode.tom,
-                            ytelseEtterAvkorting = periode.ytelseEtterAvkorting,
-                        )
-                    },
-            )
+    private fun List<Vedtak>.retainIverksatteOgAttesterteAvslag(): List<Vedtak> =
+        filter {
+            it.status == VedtakStatus.IVERKSATT ||
+                (it.type == VedtakType.AVSLAG && it.status == VedtakStatus.ATTESTERT)
         }
+
+    private fun hentVedtakForSak(sakId: SakId): List<Vedtak> {
+        val vedtak = repository.hentVedtakForSak(sakId)
+        krev(vedtak.isNotEmpty()) { "Fant ingen vedtak for sakId=$sakId" }
+        return vedtak
     }
 }

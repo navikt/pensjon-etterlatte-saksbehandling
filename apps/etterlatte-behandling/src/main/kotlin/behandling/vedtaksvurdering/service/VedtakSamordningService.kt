@@ -38,13 +38,23 @@ class VedtakSamordningService(
         tilOgMedBehandlingId: UUID? = null,
     ): List<VedtakSamordningDto> {
         logger.debug("Henter og sammenstiller vedtaksliste")
-        val vedtaksliste =
+        val ferdigstilteVedtak =
             repository
                 .hentFerdigstilteVedtak(fnr, sakType)
-                .begrensTilOgMedBehandling(tilOgMedBehandlingId)
+
+        return tidslinjejustertVedtaksliste(ferdigstilteVedtak, tilOgMedBehandlingId, fomDato)
+    }
+
+    fun tidslinjejustertVedtaksliste(
+        vedtakListe: List<Vedtak>,
+        tilOgMedBehandlingId: UUID?,
+        fomDato: LocalDate,
+    ): List<VedtakSamordningDto> {
         val tidslinjeJustert =
-            Vedtakstidslinje(vedtaksliste)
-                .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
+            Vedtakstidslinje(
+                vedtakListe
+                    .begrensTilOgMedBehandling(tilOgMedBehandlingId),
+            ).sammenstill(YearMonth.of(fomDato.year, fomDato.month))
 
         val avkortetYtelsePerioderByVedtak =
             repository

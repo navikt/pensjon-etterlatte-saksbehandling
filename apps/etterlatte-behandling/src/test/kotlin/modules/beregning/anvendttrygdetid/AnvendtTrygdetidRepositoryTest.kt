@@ -4,12 +4,9 @@ import io.kotest.matchers.shouldBe
 import kotliquery.queryOf
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.common.ConnectionAutoclosingImpl
-import no.nav.etterlatte.config.modules.DaoModule
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.PeriodisertResultat
@@ -29,8 +26,7 @@ import javax.sql.DataSource
 internal class AnvendtTrygdetidRepositoryTest(
     private val dataSource: DataSource,
 ) {
-    private val repository =
-        DaoModule(ConnectionAutoclosingImpl(dataSource), dataSource).anvendtTrygdetidRepository
+    private val repository = AnvendtTrygdetidRepository(dataSource)
 
     @Test
     fun `lagrer utregningen og kombinerte perioder som JSON`() {

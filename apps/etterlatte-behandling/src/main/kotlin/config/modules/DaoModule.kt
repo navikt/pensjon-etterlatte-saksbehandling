@@ -33,12 +33,6 @@ import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
 import no.nav.etterlatte.metrics.GjenopprettingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
-import no.nav.etterlatte.modules.beregning.BeregningRepository
-import no.nav.etterlatte.modules.beregning.anvendttrygdetid.AnvendtTrygdetidRepository
-import no.nav.etterlatte.modules.beregning.avkorting.AvkortingRepository
-import no.nav.etterlatte.modules.beregning.etteroppgjoer.EtteroppgjoerRepository
-import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagRepository
-import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonRepository
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.kommentar.OppgaveKommentarDaoImpl
@@ -122,11 +116,4 @@ class DaoModule(
 
     val trygdetidRepository by lazy { TrygdetidRepository(dataSource) }
     val avtaleRepository by lazy { AvtaleRepository(dataSource) }
-
-    val beregningRepository by lazy { BeregningRepository(dataSource) }
-    val beregningsGrunnlagRepository by lazy { BeregningsGrunnlagRepository(dataSource) }
-    val anvendtTrygdetidRepository by lazy { AnvendtTrygdetidRepository(dataSource) }
-    val avkortingRepository by lazy { AvkortingRepository(dataSource) }
-    val etteroppgjoerRepository by lazy { EtteroppgjoerRepository(dataSource) }
-    val sanksjonRepository by lazy { SanksjonRepository(dataSource) }
 }

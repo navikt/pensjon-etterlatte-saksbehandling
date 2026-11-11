@@ -65,13 +65,14 @@ class ApplicationContext {
         TrygdetidKlient(config, httpClient())
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
 
+    val sanksjonRepository = SanksjonRepository(dataSource)
     val sanksjonService =
         SanksjonService(
-            sanksjonRepository = SanksjonRepository(dataSource),
+            sanksjonRepository = sanksjonRepository,
             behandlingKlient = behandlingKlient,
             featureToggleService = featureToggleService,
         )
-    private val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
+    val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
     val beregningRepository = BeregningRepository(dataSource)
     val anvendtTrygdetidRepository = AnvendtTrygdetidRepository(dataSource)
     val beregningsGrunnlagService =

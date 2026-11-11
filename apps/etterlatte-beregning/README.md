@@ -7,6 +7,53 @@ Det som støttes
 - Hente en beregning
 - Slette beregninger tilknyttet en sak ved kafka meldinger fra vedlikeholdsriveren
 
+## Interne repository-operasjoner
+
+`/api/beregning/intern` eksponerer de eksisterende repository-operasjonene mens behandling
+kjører forretningslogikken og dataene fortsatt ligger i beregning sin database.
+Rutene kaller bare repositories, ikke tjenester eller regelmotoren. Bare systemtoken fra
+`etterlatte-behandling` har tilgang. Inbound for behandling finnes allerede i både dev og prod.
+
+Alle stiene under er relative til `/api/beregning/intern`.
+
+| Metode | Sti | Operasjon |
+| --- | --- | --- |
+| GET | `/beregning/{behandlingId}` | Hent beregning |
+| PUT | `/beregning` | Lagre eller oppdater `Beregning` |
+| DELETE | `/beregning/{behandlingId}/overstyrt-grunnlag` | Slett overstyrt beregningsgrunnlag |
+| GET | `/beregning/overstyring/{sakId}` | Hent aktiv overstyring |
+| PUT | `/beregning/overstyring` | Lagre `OverstyrBeregning` |
+| DELETE | `/beregning/overstyring/{sakId}` | Deaktiver overstyring |
+| GET | `/beregningsgrunnlag/{behandlingId}` | Hent beregningsgrunnlag |
+| PUT | `/beregningsgrunnlag` | Lagre `BeregningsGrunnlag`, returner lagringsresultat som boolean |
+| GET | `/beregningsgrunnlag/{behandlingId}/overstyrt` | Hent overstyrte grunnlag |
+| PUT | `/beregningsgrunnlag/{behandlingId}/overstyrt` | Erstatt overstyrte grunnlag med en liste av `OverstyrBeregningGrunnlagDao` |
+| POST | `/anvendt-trygdetid/{behandlingId}` | Lagre anvendt trygdetid, returner antall lagrede rader |
+| GET | `/avkorting/{behandlingId}` | Hent full avkorting med historikk |
+| PUT | `/avkorting/{behandlingId}` | Lagre avkorting |
+| DELETE | `/avkorting/{behandlingId}` | Slett avkorting |
+| GET | `/avkorting/faktisk-inntekt/{aarsoppgjoerId}` | Hent faktisk inntekt |
+| GET | `/avkorting/sak/{sakId}/aarsoppgjoer` | Hent årsoppgjør for sak |
+| GET | `/avkorting/sak/{sakId}/behandlinger` | Hent behandlings-ID-er med årsoppgjør |
+| POST | `/avkorting/aarsoppgjoer` | Hent årsoppgjør for en liste av behandlings-ID-er |
+| POST | `/avkorting/inntekt-for-aar` | Sjekk inntekt med `InntektsjusteringAvkortingInfoRequest` |
+| GET | `/etteroppgjoer/resultat/{forbehandlingId}/{aar}/{sisteIverksatteBehandlingId}` | Hent beregnet etteroppgjørsresultat |
+| PUT | `/etteroppgjoer/resultat` | Lagre `BeregnetEtteroppgjoerResultat` |
+| GET | `/sanksjon/behandling/{behandlingId}` | Hent sanksjoner for behandling |
+| POST | `/sanksjon/behandling/{behandlingId}` | Opprett sanksjon |
+| POST | `/sanksjon/behandling/{behandlingId}/kopi` | Opprett sanksjon fra kopi |
+| PUT | `/sanksjon` | Oppdater sanksjon |
+| GET | `/sanksjon/{sanksjonId}` | Hent sanksjon |
+| DELETE | `/sanksjon/{sanksjonId}` | Slett sanksjon, returner antall slettede rader |
+
+Forespørsler med flere argumenter bruker dataklassene i `intern/BeregningCrudRequests.kt`.
+Anvendt trygdetid bruker konkrete typer for `anvendt`, perioder og regelversjon, med samme
+JSON-struktur som `AnvendtTrygdetidPeriodeUtrekning`. Bare regeltrærne i `utrekning[].resultat`
+bruker `JsonNode` og lagres uendret uten å rekonstruere kjørbare regler.
+Avkorting bruker hele repository-modellen, ikke den flate `AvkortingDto`.
+
+Manglende enkeltressurser gir 404. Lister kan være tomme. Oppretting gir 201, skriving uten
+returverdi gir 204, og øvrige vellykkede kall gir 200. Lagring av en inaktiv overstyring gir 204.
 
 ## Kom i gang
 Applikasjonen tilbyr et REST-api. I bakkant ligger en PostgreSQL-database som lager, oppdaterer, henter og sletter 

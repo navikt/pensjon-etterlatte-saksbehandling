@@ -10,6 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.Called
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -110,6 +111,53 @@ internal class BeregningsGrunnlagRoutesTest {
     @AfterAll
     fun after() {
         mockOAuth2Server.shutdown()
+    }
+
+    @Test
+    fun `ugyldig overstyrt periode gir forstaaelig feil uten aa lagre`() {
+        val behandlingId = randomUUID()
+        coEvery { behandlingKlient.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
+
+        testApplication {
+            val client =
+                runServer(mockOAuth2Server) {
+                    beregningsGrunnlag(service, behandlingKlient)
+                }
+
+            val response =
+                client.post("/api/beregning/beregningsgrunnlag/$behandlingId/overstyr") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    setBody(
+                        """
+                        {
+                          "perioder": [{
+                            "data": {
+                              "utbetaltBeloep": "11379",
+                              "foreldreloessats": false,
+                              "trygdetid": 40,
+                              "trygdetidForIdent": null,
+                              "prorataBroekTeller": null,
+                              "prorataBroekNevner": null,
+                              "beskrivelse": "",
+                              "aarsak": "AVKORTET_UFOERETRYGD"
+                            },
+                            "fom": "2026-05-01",
+                            "tom": "2026-01-31"
+                          }]
+                        }
+                        """.trimIndent(),
+                    )
+                }
+
+            response.status shouldBe HttpStatusCode.BadRequest
+            val feil = objectMapper.readTree(response.bodyAsText())
+            feil["code"].asString() shouldBe "UGYLDIG_PERIODE_FOR_GRUNNLAG"
+            feil["detail"].asString() shouldBe "Til og med må være lik eller etter Fra og med."
+        }
+
+        verify { repository wasNot Called }
+        coVerify(exactly = 0) { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) }
     }
 
     @Test

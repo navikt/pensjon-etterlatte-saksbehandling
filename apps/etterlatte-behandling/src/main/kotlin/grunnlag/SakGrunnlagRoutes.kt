@@ -41,6 +41,10 @@ fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
         post("opprett-grunnlag") {
             kunSkrivetilgang {
                 val opplysningsbehov = call.receive<Opplysningsbehov>()
+                if (opplysningsbehov.sakId != sakId) {
+                    throw SakParameterStemmerIkkeException("Innsendt request har sak-id=${opplysningsbehov.sakId}, men sak i url er $sakId")
+                }
+
                 grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
                 call.respond(HttpStatusCode.OK)
             }

@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -129,11 +130,17 @@ class VilkaarsvurderingService(
         vilkaarId: UUID,
     ): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val vilkaarsvurdering = repository.hent(behandlingId)
-            if (vilkaarsvurdering?.resultat != null) {
+            val vilkaarsvurdering = krevIkkeNull(repository.hent(behandlingId)) { "Vilkårsvurderingen finnes ikke" }
+            if (vilkaarsvurdering.resultat != null) {
                 throw VilkaarsvurderingTilstandException(
                     "Kan ikke slette et vilkår ($vilkaarId) på en vilkårsvurdering som har et resultat. ",
                     vilkaarsvurdering,
+                )
+            }
+            if ((vilkaarsvurdering.vilkaar).none { it.id == vilkaarId }) {
+                throw UgyldigForespoerselException(
+                    "VILKAAR_FINNES_IKKE_PAA_BEHANDLING",
+                    "Vilkåret som skal slettes ($vilkaarId) tilhører ikke denne vilkårsvurderingen",
                 )
             }
 

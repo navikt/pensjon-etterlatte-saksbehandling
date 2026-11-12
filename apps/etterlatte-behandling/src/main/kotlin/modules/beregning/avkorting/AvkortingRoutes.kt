@@ -8,6 +8,8 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFlereInntekterDto
@@ -23,6 +25,7 @@ import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigR
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
@@ -50,9 +53,17 @@ fun Route.avkorting(
         (beregning av avkorting, behandlingsstatus, etc).
          */
         get {
-            withBehandlingId(behandlingTilgangsSjekk) {
-                logger.info("Henter avkorting med behandlingId=$it")
-                when (val avkorting = avkortingService.hentOpprettEllerReberegnAvkorting(it, brukerTokenInfo)) {
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
+                logger.info("Henter avkorting med behandlingId=$behandlingId")
+                val avkorting =
+                    try {
+                        avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, brukerTokenInfo)
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        throw AvkortingBehandlingFeilStatus(behandlingId, e)
+                    } catch (e: BehandlingStoetterIkkeStatusEndringException) {
+                        throw AvkortingBehandlingFeilStatus(behandlingId, e)
+                    }
+                when (avkorting) {
                     null -> call.response.status(HttpStatusCode.NoContent)
                     else -> call.respond(avkorting)
                 }
@@ -102,30 +113,45 @@ fun Route.avkorting(
                 medBody<AvkortingGrunnlagFlereInntekterDto> { avkortingGrunnlag ->
                     logger.info("Lagrer nytt avkortingsgrunnlag med lister for behandlingId=$behandlingId")
                     val avkorting =
-                        avkortingService.beregnAvkortingMedNyeGrunnlag(
-                            behandlingId = behandlingId,
-                            nyeGrunnlag = avkortingGrunnlag.inntekter,
-                            brukerTokenInfo = brukerTokenInfo,
-                        )
+                        try {
+                            avkortingService.beregnAvkortingMedNyeGrunnlag(
+                                behandlingId = behandlingId,
+                                nyeGrunnlag = avkortingGrunnlag.inntekter,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        } catch (e: TilstandException.UgyldigTilstand) {
+                            throw AvkortingBehandlingFeilStatus(behandlingId, e)
+                        } catch (e: BehandlingStoetterIkkeStatusEndringException) {
+                            throw AvkortingBehandlingFeilStatus(behandlingId, e)
+                        }
                     call.respond(avkorting)
                 }
             }
         }
 
         post("/med/{forrigeBehandlingId}") {
-            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) {
-                logger.info("Kopierer avkorting for behandlingId=$it")
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
+                logger.info("Kopierer avkorting for behandlingId=$behandlingId")
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
-                val avkorting = avkortingService.kopierAvkorting(it, forrigeBehandlingId, brukerTokenInfo)
+                val avkorting =
+                    try {
+                        avkortingService.kopierAvkorting(behandlingId, forrigeBehandlingId, brukerTokenInfo)
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        throw AvkortingBehandlingFeilStatus(behandlingId, e)
+                    } catch (e: BehandlingStoetterIkkeStatusEndringException) {
+                        throw AvkortingBehandlingFeilStatus(behandlingId, e)
+                    }
                 call.respond(avkorting.toDto())
             }
         }
 
         post("/haandter-tidlig-alderspensjon") {
-            withBehandlingId(behandlingTilgangsSjekk) {
-                logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
-                tidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                withBehandlingId(behandlingTilgangsSjekk) {
+                    logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
+                    tidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
 
@@ -147,24 +173,40 @@ fun Route.avkorting(
         }
 
         post("aarlig-inntektsjustering") {
-            val request = call.receive<AarligInntektsjusteringAvkortingRequest>()
-            logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")
-            val respons =
-                aarligInntektsjusteringService.kopierAarligInntektsjustering(
-                    aar = request.aar,
-                    behandlingId = request.nyBehandling,
-                    forrigeBehandlingId = request.forrigeBehandling,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-            call.respond(respons.toDto())
+            kunSystembruker {
+                val request = call.receive<AarligInntektsjusteringAvkortingRequest>()
+                logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")
+                val respons =
+                    try {
+                        aarligInntektsjusteringService.kopierAarligInntektsjustering(
+                            aar = request.aar,
+                            behandlingId = request.nyBehandling,
+                            forrigeBehandlingId = request.forrigeBehandling,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        throw AvkortingBehandlingFeilStatus(request.nyBehandling, e)
+                    } catch (e: BehandlingStoetterIkkeStatusEndringException) {
+                        throw AvkortingBehandlingFeilStatus(request.nyBehandling, e)
+                    }
+                call.respond(respons.toDto())
+            }
         }
 
         post("mottatt-inntektsjustering") {
-            val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
-            logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
-            val respons =
-                mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
-            call.respond(respons.toDto())
+            kunSystembruker {
+                val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
+                logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
+                val respons =
+                    try {
+                        mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        throw AvkortingBehandlingFeilStatus(request.behandlingId, e)
+                    } catch (e: BehandlingStoetterIkkeStatusEndringException) {
+                        throw AvkortingBehandlingFeilStatus(request.behandlingId, e)
+                    }
+                call.respond(respons.toDto())
+            }
         }
 
         route("etteroppgjoer") {

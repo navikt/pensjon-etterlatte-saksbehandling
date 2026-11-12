@@ -100,7 +100,9 @@ class BeregningService(
             validerFoersteVirke(behandling)
         }
 
-        inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true) }
+        inTransactionIfNeeded {
+            behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true)
+        }
         return hentOverstyrBeregning(behandling).takeIf { it != null } ?: run {
             val opprettetOverstyrtBeregning =
                 beregningRepository.opprettOverstyrBeregning(
@@ -111,7 +113,9 @@ class BeregningService(
                         kategori = overstyrBeregning.kategori,
                     ),
                 )
-            inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
+            inTransactionIfNeeded {
+                behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+            }
             opprettetOverstyrtBeregning
         }
     }
@@ -120,7 +124,9 @@ class BeregningService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true) }
+        inTransactionIfNeeded {
+            behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true)
+        }
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
                 ?: throw GenerellIkkeFunnetException()
@@ -131,7 +137,9 @@ class BeregningService(
 
         beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
         beregningRepository.slettOverstyrtBeregningsgrunnlag(behandling.id)
-        inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
+        inTransactionIfNeeded {
+            behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+        }
     }
 
     private fun hentBeregning(behandlingId: UUID): Beregning? {
@@ -156,6 +164,16 @@ class KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato :
     UgyldigForespoerselException(
         code = "UGYLDIG_FOERSTE_VIRKNINGSTIDSPUNKT",
         detail = "For å legge til eller fjerne overstyre beregning må behandlingen revurderes fra sakens første virkningstidspunkt",
+    )
+
+class KanIkkeEndreOverstyrtBeregningGrunnetStatus(
+    behandlingId: UUID,
+    cause: Throwable,
+) : UgyldigForespoerselException(
+        code = "UGYLDIG_STATUS_BEHANDLING",
+        detail = "Behandlingen kan ikke endre overstyrt beregning da den har feil status",
+        meta = mapOf("behandlingId" to behandlingId),
+        cause = cause,
     )
 
 class TrygdetidMangler(

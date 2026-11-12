@@ -9,6 +9,8 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -48,7 +50,13 @@ fun Route.sanksjon(
             withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) {
                 logger.info("Oppdaterer eller oppretter sanksjon for behandlingId=$it")
                 val sanksjon = call.receive<LagreSanksjon>()
-                sanksjonService.opprettEllerOppdaterSanksjon(it, sanksjon, brukerTokenInfo)
+                try {
+                    sanksjonService.opprettEllerOppdaterSanksjon(it, sanksjon, brukerTokenInfo)
+                } catch (e: TilstandException.UgyldigTilstand) {
+                    throw BehandlingKanIkkeEndres(e)
+                } catch (e: BehandlingStoetterIkkeStatusEndringException) {
+                    throw BehandlingKanIkkeEndres(e)
+                }
 
                 call.respond(HttpStatusCode.OK)
             }
@@ -58,7 +66,13 @@ fun Route.sanksjon(
             delete {
                 withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) {
                     logger.info("Sletter sanksjon for behandlingId=$it med sanksjonId=$sanksjonId")
-                    sanksjonService.slettSanksjon(behandlingId, sanksjonId, brukerTokenInfo)
+                    try {
+                        sanksjonService.slettSanksjon(behandlingId, sanksjonId, brukerTokenInfo)
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        throw BehandlingKanIkkeEndres(e)
+                    } catch (e: BehandlingStoetterIkkeStatusEndringException) {
+                        throw BehandlingKanIkkeEndres(e)
+                    }
                     call.respond(HttpStatusCode.OK)
                 }
             }

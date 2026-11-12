@@ -743,7 +743,7 @@ internal class AvkortingServiceTest {
                 TilstandException.UgyldigTilstand("Ugyldig status")
 
             runBlocking {
-                assertThrows<Exception> {
+                assertThrows<TilstandException.UgyldigTilstand> {
                     service.beregnAvkortingMedNyeGrunnlag(
                         behandlingId,
                         listOf(avkortinggrunnlagLagreDto(fom = YearMonth.of(2024, 1))),

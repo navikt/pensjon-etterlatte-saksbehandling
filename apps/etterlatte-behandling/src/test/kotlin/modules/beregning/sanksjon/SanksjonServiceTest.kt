@@ -1,6 +1,7 @@
 package no.nav.etterlatte.modules.beregning.sanksjon
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -12,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -35,6 +37,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -57,6 +61,30 @@ internal class SanksjonServiceTest {
             behandlingStatusService = behandlingStatusService,
         )
     private val sakId = STANDARDSAK
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal viderefoere statusfeilen for sanksjoner uten aa lagre`(brukNyeRegler: Boolean) =
+        runBlocking<Unit> {
+            val behandlingId = UUID.randomUUID()
+            val feil = TilstandException.UgyldigTilstand("Ugyldig status")
+            every { featureToggleService.isEnabled(any(), any(), any()) } returns brukNyeRegler
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns
+                behandling(id = behandlingId, status = BehandlingStatus.BEREGNET)
+            every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, bruker, false) } throws feil
+            every { behandlingStatusService.settBeregnet(behandlingId, bruker, false) } throws feil
+
+            val resultat =
+                assertThrows<TilstandException.UgyldigTilstand> {
+                    service.opprettEllerOppdaterSanksjon(behandlingId, lagreSanksjon(), bruker)
+                }
+
+            resultat shouldBeSameInstanceAs feil
+            verify(exactly = 0) {
+                sanksjonRepository.opprettSanksjon(any(), any(), any(), any())
+                sanksjonRepository.oppdaterSanksjon(any(), any())
+            }
+        }
 
     @Nested
     inner class HentSanksjon {

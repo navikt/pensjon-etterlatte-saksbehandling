@@ -9,6 +9,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.BehandlingKanIkkeBytteStatusException
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.beregning.grunnlag.LagreBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
 import no.nav.etterlatte.beregning.grunnlag.UgyldigPeriodeForGrunnlag
@@ -42,12 +45,17 @@ fun Route.beregningsGrunnlag(
                 val body = call.receive<LagreBeregningsGrunnlag>()
 
                 val lagretBeregningsGrunnlag =
-                    beregningsGrunnlagService
-                        .lagreBeregningsGrunnlag(
+                    try {
+                        beregningsGrunnlagService.lagreBeregningsGrunnlag(
                             behandlingId,
                             body,
                             brukerTokenInfo,
                         )
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        throw BehandlingKanIkkeBytteStatusException(e)
+                    } catch (e: BehandlingStoetterIkkeStatusEndringException) {
+                        throw BehandlingKanIkkeBytteStatusException(e)
+                    }
 
                 if (lagretBeregningsGrunnlag != null) {
                     call.respond(HttpStatusCode.OK, lagretBeregningsGrunnlag)

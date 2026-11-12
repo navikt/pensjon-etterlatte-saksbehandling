@@ -3,24 +3,31 @@ package no.nav.etterlatte.modules.beregning
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -39,9 +46,15 @@ import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
+import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -71,7 +84,19 @@ internal class BeregningRoutesTest {
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
+    }
 
+    @BeforeEach
+    fun beforeEach() {
+        clearMocks(
+            behandlingStatusService,
+            behandlingTilgangsSjekk,
+            beregningRepository,
+            behandlingService,
+            beregnBarnepensjonService,
+            beregnOmstillingsstoenadService,
+            beregnOverstyrBeregningService,
+        )
         coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
@@ -247,6 +272,129 @@ internal class BeregningRoutesTest {
 
             response.status shouldBe HttpStatusCode.NoContent
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("statusfeil")
+    fun `skal returnere klientfeil for kjente statusfeil uten aa lagre`(
+        feil: Exception,
+        forventetStatus: HttpStatusCode,
+        forventetKode: String,
+    ) {
+        val behandlingId = randomUUID()
+        every { behandlingStatusService.settBeregnet(behandlingId, any(), true) } throws feil
+
+        testApplication {
+            runServer(mockOAuth2Server) {
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                client.post("/api/beregning/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            response.status shouldBe forventetStatus
+            val respons = objectMapper.readTree(response.bodyAsText())
+            respons["code"].asString() shouldBe forventetKode
+            if (forventetStatus == HttpStatusCode.Conflict) {
+                respons["detail"].asString() shouldBe "Behandlingen kan ikke bytte til ønsket status"
+            }
+        }
+
+        verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
+        verify(exactly = 0) { behandlingStatusService.settBeregnet(any(), any(), false) }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal beholde statusfeilen for endring av overstyrt beregning`(opprett: Boolean) {
+        val behandlingId = randomUUID()
+        every { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns mockBehandling()
+        every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, any(), true) } throws
+            TilstandException.UgyldigTilstand("Ugyldig status")
+
+        testApplication {
+            runServer(mockOAuth2Server) {
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                if (opprett) {
+                    client.post("/api/beregning/$behandlingId/overstyrt") {
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody("""{"beskrivelse":"Test","kategori":"UKJENT_KATEGORI"}""")
+                    }
+                } else {
+                    client.delete("/api/beregning/$behandlingId/overstyrt") {
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                }
+
+            response.status shouldBe HttpStatusCode.BadRequest
+            val respons = objectMapper.readTree(response.bodyAsText())
+            respons["code"].asString() shouldBe "UGYLDIG_STATUS_BEHANDLING"
+            respons["meta"]["behandlingId"].asString() shouldBe behandlingId.toString()
+        }
+
+        verify(exactly = 0) {
+            beregningRepository.opprettOverstyrBeregning(any())
+            beregningRepository.deaktiverOverstyrtBeregning(any())
+            beregningRepository.slettOverstyrtBeregningsgrunnlag(any())
+        }
+    }
+
+    @Test
+    fun `skal fortsatt returnere serverfeil ved teknisk feil i statussjekken`() {
+        val behandlingId = randomUUID()
+        every { behandlingStatusService.settBeregnet(behandlingId, any(), true) } throws
+            IllegalStateException("Databasen er utilgjengelig")
+
+        testApplication {
+            runServer(mockOAuth2Server) {
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                client.post("/api/beregning/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            response.status shouldBe HttpStatusCode.InternalServerError
+        }
+
+        verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
+    }
+
+    companion object {
+        @JvmStatic
+        fun statusfeil(): List<Arguments> =
+            listOf(
+                arguments(
+                    TilstandException.UgyldigTilstand("Ugyldig status"),
+                    HttpStatusCode.Conflict,
+                    "BEHANDLING_HAR_UGYLDIG_STATUS",
+                ),
+                arguments(
+                    TilstandException.IkkeFyltUt("Behandlingen er ikke fylt ut"),
+                    HttpStatusCode.BadRequest,
+                    "BEHANDLING_ER_IKKE_FYLT_UT",
+                ),
+                arguments(
+                    TilstandException.KanIkkeRedigere("Behandlingen kan ikke redigeres"),
+                    HttpStatusCode.BadRequest,
+                    "BEHANDLING_KAN_IKKE_REDIGERES",
+                ),
+                arguments(
+                    BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.BEREGNET),
+                    HttpStatusCode.Conflict,
+                    "BEHANDLING_HAR_UGYLDIG_STATUS",
+                ),
+            )
     }
 
     private fun beregning(

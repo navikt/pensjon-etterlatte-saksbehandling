@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.MaanederMedGammelSanksjonIAvkorting
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -316,7 +317,9 @@ class AvkortingService(
                 )
             }
 
-        inTransactionIfNeeded { behandlingStatusService.settAvkortet(behandling.id, brukerTokenInfo, dryRun = false) }
+        inTransactionIfNeeded {
+            behandlingStatusService.settAvkortet(behandling.id, brukerTokenInfo, dryRun = false)
+        }
         return avkortingFrontend
     }
 
@@ -423,7 +426,9 @@ class AvkortingService(
             )
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
-        inTransactionIfNeeded { behandlingStatusService.settAvkortet(behandling.id, brukerTokenInfo, dryRun = false) }
+        inTransactionIfNeeded {
+            behandlingStatusService.settAvkortet(behandling.id, brukerTokenInfo, dryRun = false)
+        }
         return lagretAvkorting
     }
 
@@ -493,7 +498,9 @@ class AvkortingService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) {
-        inTransactionIfNeeded { behandlingStatusService.settAvkortet(behandlingId, bruker, dryRun = true) }
+        inTransactionIfNeeded {
+            behandlingStatusService.settAvkortet(behandlingId, bruker, dryRun = true)
+        }
     }
 
     /**
@@ -591,6 +598,15 @@ class TidligereAvkortingFinnesIkkeException(
 ) : IkkeFunnetException(
         code = "TIDLIGERE_AVKORTING_IKKE_FUNNET",
         detail = "Fant ikke avkorting for tidligere behandling $behandlingId",
+    )
+
+class AvkortingBehandlingFeilStatus(
+    behandlingId: UUID,
+    cause: Throwable,
+) : IkkeTillattException(
+        code = "BEHANDLING_FEIL_STATUS_FOR_AVKORTING",
+        detail = "Kan ikke avkorte da behandling med id=$behandlingId har feil status",
+        cause = cause,
     )
 
 object AvkortingMapper {

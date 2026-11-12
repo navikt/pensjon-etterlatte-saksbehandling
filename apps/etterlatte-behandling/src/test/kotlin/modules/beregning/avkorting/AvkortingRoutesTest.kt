@@ -10,23 +10,36 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.ApplicationTestBuilder
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.token.issueSystembrukerToken
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFlereInntekterDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
+import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.MottattInntektsjusteringService
@@ -35,8 +48,12 @@ import no.nav.etterlatte.modules.beregning.regler.avkortinggrunnlag
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -53,6 +70,18 @@ class AvkortingRoutesTest {
     @BeforeAll
     fun beforeAll() {
         mockOAuth2Server.startRandomPort()
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        clearMocks(
+            behandlingTilgangsSjekk,
+            avkortingService,
+            avkortingTidligAlderspensjonService,
+            aarligInntektsjusteringService,
+            mottattInntektsjusteringService,
+            etteroppgjoerService,
+        )
         coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
@@ -205,9 +234,207 @@ class AvkortingRoutesTest {
         }
     }
 
-    private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
+    @Test
+    fun `skal avvise lesebruker foer avkorting kan endres`() {
+        val behandlingId = UUID.randomUUID()
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, false, any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) } returns false
+
+        testApplication {
+            val response =
+                client.get("/api/beregning/avkorting/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                }
+
+            response.status shouldBe HttpStatusCode.Forbidden
+        }
+
+        coVerify(exactly = 1) { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) }
+        coVerify(exactly = 0) { avkortingService.hentOpprettEllerReberegnAvkorting(any(), any()) }
+    }
+
+    @Test
+    fun `skal fortsatt tillate lesetilgang til manglende inntektsaar`() {
+        val behandlingId = UUID.randomUUID()
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, false, any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) } returns false
+        coEvery { avkortingService.manglendeInntektsaar(behandlingId, any(), any()) } returns emptyList()
+
+        testApplication {
+            val response =
+                client.get("/api/beregning/avkorting/$behandlingId/manglende-inntektsaar") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                }
+
+            response.status shouldBe HttpStatusCode.OK
+        }
+
+        coVerify(exactly = 1) { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, false, any()) }
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = [
+            "/00000000-0000-0000-0000-000000000001/haandter-tidlig-alderspensjon",
+            "/aarlig-inntektsjustering",
+            "/mottatt-inntektsjustering",
+        ],
+    )
+    fun `skal avvise saksbehandler fra systemendepunktene`(sti: String) {
+        testApplication {
+            val response =
+                client.post("/api/beregning/avkorting$sti") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                }
+
+            response.status shouldBe HttpStatusCode.NotFound
+        }
+
+        coVerify(exactly = 0) {
+            avkortingTidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(any(), any())
+            aarligInntektsjusteringService.kopierAarligInntektsjustering(any(), any(), any(), any())
+            mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(any(), any())
+        }
+    }
+
+    @Test
+    fun `skal fortsatt opprette oppgave for systembruker`() {
+        val behandlingId = UUID.randomUUID()
+        coEvery { avkortingTidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(behandlingId, any()) } returns Unit
+
+        testApplication {
+            val response =
+                client.post("/api/beregning/avkorting/$behandlingId/haandter-tidlig-alderspensjon") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSystembrukerToken()}")
+                }
+
+            response.status shouldBe HttpStatusCode.OK
+        }
+
+        coVerify(exactly = 1) { avkortingTidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(behandlingId, any()) }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal returnere opprinnelig statusfeil fra direkte servicekall`(ustoettetStatusendring: Boolean) {
+        val behandlingId = UUID.randomUUID()
+        val behandlingStatusService = mockk<BehandlingStatusService>()
+        val feil =
+            if (ustoettetStatusendring) {
+                BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.AVKORTET)
+            } else {
+                TilstandException.UgyldigTilstand("Ugyldig status")
+            }
+        every { behandlingStatusService.settAvkortet(behandlingId, any(), true) } throws feil
+        val service =
+            AvkortingService(
+                behandlingService = mockk(),
+                avkortingRepository = mockk(),
+                beregningService = mockk(),
+                sanksjonService = mockk(),
+                aldersovergangService = mockk(),
+                vedtaksvurderingService = mockk(),
+                avkortingReparerAarsoppgjoeret = mockk(),
+                featureToggleService = mockk(),
+                behandlingStatusService = behandlingStatusService,
+            )
+
+        testApplication(avkortingService = service) {
+            val response =
+                client.post("/api/beregning/avkorting/$behandlingId/liste") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(AvkortingGrunnlagFlereInntekterDto(emptyList()).toJson())
+                }
+
+            response.status shouldBe HttpStatusCode.Forbidden
+            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "BEHANDLING_FEIL_STATUS_FOR_AVKORTING"
+        }
+
+        verify(exactly = 1) { behandlingStatusService.settAvkortet(behandlingId, any(), true) }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal beholde statusfeilen ved henting og kopiering av avkorting`(kopier: Boolean) {
+        val behandlingId = UUID.randomUUID()
+        val forrigeBehandlingId = UUID.randomUUID()
+        val feil = TilstandException.UgyldigTilstand("Ugyldig status")
+        coEvery { avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, any()) } throws feil
+        coEvery { avkortingService.kopierAvkorting(behandlingId, forrigeBehandlingId, any()) } throws feil
+
+        testApplication {
+            val response =
+                if (kopier) {
+                    client.post("/api/beregning/avkorting/$behandlingId/med/$forrigeBehandlingId") {
+                        header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    }
+                } else {
+                    client.get("/api/beregning/avkorting/$behandlingId") {
+                        header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    }
+                }
+
+            response.status shouldBe HttpStatusCode.Forbidden
+            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "BEHANDLING_FEIL_STATUS_FOR_AVKORTING"
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal beholde statusfeilen ved inntektsjustering for systembruker`(aarlig: Boolean) {
+        val behandlingId = UUID.randomUUID()
+        val feil = TilstandException.UgyldigTilstand("Ugyldig status")
+        coEvery { aarligInntektsjusteringService.kopierAarligInntektsjustering(any(), behandlingId, any(), any()) } throws feil
+        coEvery { mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(any(), any()) } throws feil
+        val request =
+            if (aarlig) {
+                AarligInntektsjusteringAvkortingRequest(
+                    aar = 2026,
+                    forrigeBehandling = UUID.randomUUID(),
+                    nyBehandling = behandlingId,
+                )
+            } else {
+                MottattInntektsjusteringAvkortigRequest(
+                    behandlingId = behandlingId,
+                    virkningstidspunkt = YearMonth.of(2026, 1),
+                    mottattInntektsjustering =
+                        MottattInntektsjustering(
+                            sak = SakId(1),
+                            inntektsjusteringId = UUID.randomUUID(),
+                            journalpostId = "journalpost",
+                            mottattDato = LocalDateTime.of(2026, 1, 1, 0, 0),
+                            inntektsaar = 2026,
+                            arbeidsinntekt = 0,
+                            naeringsinntekt = 0,
+                            afpInntekt = null,
+                            inntektFraUtland = 0,
+                            datoForAaGaaAvMedAlderspensjon = null,
+                        ),
+                )
+            }
+        val sti = if (aarlig) "aarlig-inntektsjustering" else "mottatt-inntektsjustering"
+
+        testApplication {
+            val response =
+                client.post("/api/beregning/avkorting/$sti") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSystembrukerToken()}")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(request.toJson())
+                }
+
+            response.status shouldBe HttpStatusCode.Forbidden
+            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "BEHANDLING_FEIL_STATUS_FOR_AVKORTING"
+        }
+    }
+
+    private fun testApplication(
+        avkortingService: AvkortingService = this.avkortingService,
+        block: suspend ApplicationTestBuilder.() -> Unit,
+    ) {
         io.ktor.server.testing.testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContext()
                 avkorting(
                     avkortingService,
                     behandlingTilgangsSjekk,

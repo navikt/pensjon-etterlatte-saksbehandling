@@ -20,6 +20,7 @@ import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransactionIfNeeded
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -440,37 +441,43 @@ class BeregningsGrunnlagService(
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
                 ?: throw GenerellIkkeFunnetException()
 
-        inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true) }
-        beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
-            behandlingId,
-            data.perioder.map {
-                val gyldigTrygdetid = it.data.trygdetid in 0..40
-                if (!gyldigTrygdetid) {
-                    throw OverstyrtBeregningUgyldigTrygdetid(behandlingId)
-                }
+        return try {
+            inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true) }
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                behandlingId,
+                data.perioder.map {
+                    val gyldigTrygdetid = it.data.trygdetid in 0..40
+                    if (!gyldigTrygdetid) {
+                        throw OverstyrtBeregningUgyldigTrygdetid(behandlingId)
+                    }
 
-                // TODO her burde det sikkert være mer validering av hva saksbehandler kan sende inn
+                    // TODO her burde det sikkert være mer validering av hva saksbehandler kan sende inn
 
-                OverstyrBeregningGrunnlagDao(
-                    id = UUID.randomUUID(),
-                    behandlingId = behandlingId,
-                    datoFOM = it.fom,
-                    datoTOM = it.tom,
-                    utbetaltBeloep = it.data.utbetaltBeloep,
-                    foreldreloessats = it.data.foreldreloessats,
-                    trygdetid = it.data.trygdetid,
-                    trygdetidForIdent = it.data.trygdetidForIdent,
-                    prorataBroekTeller = it.data.prorataBroekTeller,
-                    prorataBroekNevner = it.data.prorataBroekNevner,
-                    sakId = behandling.sak,
-                    beskrivelse = it.data.beskrivelse,
-                    aarsak = it.data.aarsak,
-                    kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
-                )
-            },
-        )
-        inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
-        return hentOverstyrBeregningGrunnlag(behandlingId)
+                    OverstyrBeregningGrunnlagDao(
+                        id = UUID.randomUUID(),
+                        behandlingId = behandlingId,
+                        datoFOM = it.fom,
+                        datoTOM = it.tom,
+                        utbetaltBeloep = it.data.utbetaltBeloep,
+                        foreldreloessats = it.data.foreldreloessats,
+                        trygdetid = it.data.trygdetid,
+                        trygdetidForIdent = it.data.trygdetidForIdent,
+                        prorataBroekTeller = it.data.prorataBroekTeller,
+                        prorataBroekNevner = it.data.prorataBroekNevner,
+                        sakId = behandling.sak,
+                        beskrivelse = it.data.beskrivelse,
+                        aarsak = it.data.aarsak,
+                        kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                    )
+                },
+            )
+            inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
+            hentOverstyrBeregningGrunnlag(behandlingId)
+        } catch (e: TilstandException.UgyldigTilstand) {
+            throw OverstyrtBeregningFeilBehandlingStatusException(behandlingId, behandling.status, e)
+        } catch (e: BehandlingStoetterIkkeStatusEndringException) {
+            throw OverstyrtBeregningFeilBehandlingStatusException(behandlingId, behandling.status, e)
+        }
     }
 
     fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
@@ -624,6 +631,17 @@ class BeregningsGrunnlagService(
         }
     }
 }
+
+class OverstyrtBeregningFeilBehandlingStatusException(
+    behandlingId: UUID,
+    behandlingStatus: BehandlingStatus,
+    cause: Throwable,
+) : UgyldigForespoerselException(
+        code = "OVERSTYRT_BEREGNING_FEIL_BEHANDLINGSSTATUS",
+        detail = "Kunne ikke lagre overstyrt beregningsgrunnlag fordi behandlingen er i feil status",
+        meta = mapOf("behandlingId" to behandlingId, "behandlingStatus" to behandlingStatus),
+        cause = cause,
+    )
 
 class OverstyrtBeregningUgyldigTrygdetid(
     behandlingId: UUID,

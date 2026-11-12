@@ -207,12 +207,14 @@ class SanksjonService(
     ) {
         val brukNyeReglerAvkorting = featureToggleService.isEnabled(BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER, false)
 
-        if (brukNyeReglerAvkorting) {
-            // Setter behandlingen tl status "trygdetid oppdatert", slik at vi fanger opp at beregningen må oppdateres
-            inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
-        } else {
-            // Setter behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
-            inTransactionIfNeeded { behandlingStatusService.settBeregnet(behandlingId, brukerTokenInfo, dryRun = false) }
+        inTransactionIfNeeded {
+            if (brukNyeReglerAvkorting) {
+                // Setter behandlingen tl status "trygdetid oppdatert", slik at vi fanger opp at beregningen må oppdateres
+                behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+            } else {
+                // Setter behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
+                behandlingStatusService.settBeregnet(behandlingId, brukerTokenInfo, dryRun = false)
+            }
         }
     }
 }
@@ -241,10 +243,12 @@ class ManglerVirkningstidspunktException :
         detail = "Behandling mangler virkningstidspunkt",
     )
 
-class BehandlingKanIkkeEndres :
-    IkkeTillattException(
+class BehandlingKanIkkeEndres(
+    cause: Throwable? = null,
+) : IkkeTillattException(
         code = "BEHANDLINGEN_KAN_IKKE_ENDRES",
         detail = "Behandlingen kan ikke endres",
+        cause = cause,
     )
 
 class SanksjonEndresFoerVirkException :

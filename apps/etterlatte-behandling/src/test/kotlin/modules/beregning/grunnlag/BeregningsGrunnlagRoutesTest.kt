@@ -24,6 +24,8 @@ import io.mockk.verify
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
@@ -55,6 +57,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -72,6 +75,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -121,6 +126,80 @@ internal class BeregningsGrunnlagRoutesTest {
     @AfterAll
     fun after() {
         mockOAuth2Server.shutdown()
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal returnere konflikt for statusfeil i beregningsgrunnlag uten aa lagre`(ustoettetStatusendring: Boolean) {
+        val behandlingId = randomUUID()
+        val feil =
+            if (ustoettetStatusendring) {
+                BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.TRYGDETID_OPPDATERT)
+            } else {
+                TilstandException.UgyldigTilstand("Ugyldig status")
+            }
+        every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, any(), true) } throws feil
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) } returns true
+
+        testApplication {
+            runServer(mockOAuth2Server) {
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                client.post("/api/beregning/beregningsgrunnlag/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(LagreBeregningsGrunnlag().toJson())
+                }
+
+            response.status shouldBe HttpStatusCode.Conflict
+            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "BEHANDLING_HAR_UGYLDIG_STATUS"
+        }
+
+        verify { repository wasNot Called }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal beholde statusfeilen for overstyrt beregningsgrunnlag uten aa lagre`(ustoettetStatusendring: Boolean) {
+        val behandlingId = randomUUID()
+        val behandling =
+            mockk<DetaljertBehandling> {
+                every { status } returns BehandlingStatus.IVERKSATT
+            }
+        every { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns behandling
+        val feil =
+            if (ustoettetStatusendring) {
+                BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.TRYGDETID_OPPDATERT)
+            } else {
+                TilstandException.UgyldigTilstand("Ugyldig status")
+            }
+        every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, any(), true) } throws feil
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) } returns true
+
+        testApplication {
+            runServer(mockOAuth2Server) {
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                client.post("/api/beregning/beregningsgrunnlag/$behandlingId/overstyr") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody("""{"perioder":[]}""")
+                }
+
+            response.status shouldBe HttpStatusCode.BadRequest
+            val respons = objectMapper.readTree(response.bodyAsText())
+            respons["code"].asString() shouldBe "OVERSTYRT_BEREGNING_FEIL_BEHANDLINGSSTATUS"
+            respons["meta"]["behandlingId"].asString() shouldBe behandlingId.toString()
+            respons["meta"]["behandlingStatus"].asString() shouldBe "IVERKSATT"
+        }
+
+        verify { repository wasNot Called }
     }
 
     @Test

@@ -1,5 +1,8 @@
 package no.nav.etterlatte.avkorting
 
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.Nulls
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
@@ -952,6 +955,7 @@ data class ForventetInntekt(
     val overstyrtInnvilgaMaanederBegrunnelse: String? = null,
     override val inntektInnvilgetPeriode: InntektInnvilgetPeriode,
     override val maanederInnvilget: List<MaanedInnvilget>?,
+    @field:JsonSetter(nulls = Nulls.SKIP)
     override val maanederInnvilgetRegelResultat: JsonNode?,
 ) : AvkortingGrunnlag()
 
@@ -978,6 +982,7 @@ data class FaktiskInntekt(
     override val kilde: Grunnlagsopplysning.Saksbehandler,
     override val inntektInnvilgetPeriode: BenyttetInntektInnvilgetPeriode,
     override val maanederInnvilget: List<MaanedInnvilget>?,
+    @field:JsonSetter(nulls = Nulls.SKIP)
     override val maanederInnvilgetRegelResultat: JsonNode?,
 ) : AvkortingGrunnlag()
 
@@ -987,6 +992,7 @@ data class FaktiskInntekt(
  * Se [AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeFaktiskInntekt] og
  * [AvkortingRegelkjoring.beregnInntektInnvilgetPeriodeForventetInntekt]
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
 sealed class InntektInnvilgetPeriode
 
 data class BenyttetInntektInnvilgetPeriode(
@@ -1020,6 +1026,7 @@ enum class OverstyrtInnvilgaMaanederAarsak {
  * @property ytelseFoerAvkorting er beregning. Anvendes ulikt. Se doc i [AarsoppgjoerLoepende] og [Etteroppgjoer]
  * @property avkortetYtelse Anvendes ulikt. Se doc i [AarsoppgjoerLoepende] og [Etteroppgjoer]
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
 sealed class Aarsoppgjoer {
     abstract val id: UUID
     abstract val aar: Int
@@ -1245,6 +1252,7 @@ data class Restanse(
     val totalRestanse: Int,
     val fordeltRestanse: Int,
     val tidspunkt: Tidspunkt,
+    @field:JsonSetter(nulls = Nulls.SKIP)
     val regelResultat: JsonNode?,
     val kilde: Grunnlagsopplysning.Kilde,
 )

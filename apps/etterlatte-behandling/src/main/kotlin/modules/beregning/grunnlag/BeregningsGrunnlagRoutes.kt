@@ -1,0 +1,136 @@
+package no.nav.etterlatte.modules.beregning.grunnlag
+
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.BadRequestException
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.put
+import io.ktor.server.routing.route
+import no.nav.etterlatte.beregning.grunnlag.LagreBeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
+import no.nav.etterlatte.beregning.grunnlag.UgyldigPeriodeForGrunnlag
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.logger
+import no.nav.etterlatte.libs.ktor.route.uuid
+import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
+
+fun Route.beregningsGrunnlag(
+    beregningsGrunnlagService: BeregningsGrunnlagService,
+    behandlingKlient: BehandlingKlient,
+) {
+    route("/api/beregning/beregningsgrunnlag") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
+
+                logger.info("Dupliserer beregningsgrunnlag for behandling $behandlingId fra $forrigeBehandlingId")
+                beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, forrigeBehandlingId, brukerTokenInfo)
+
+                call.respond(HttpStatusCode.NoContent)
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                logger.info("Lagrer beregningsgrunnlag for behandling $behandlingId")
+                val body = call.receive<LagreBeregningsGrunnlag>()
+
+                val lagretBeregningsGrunnlag =
+                    beregningsGrunnlagService
+                        .lagreBeregningsGrunnlag(
+                            behandlingId,
+                            body,
+                            brukerTokenInfo,
+                        )
+
+                if (lagretBeregningsGrunnlag != null) {
+                    call.respond(HttpStatusCode.OK, lagretBeregningsGrunnlag)
+                } else {
+                    call.respond(HttpStatusCode.Conflict)
+                }
+            }
+        }
+
+        get("/{$BEHANDLINGID_CALL_PARAMETER}") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter eller kopierer ordinært beregningsgrunnlag for behandling $behandlingId")
+                val grunnlag =
+                    beregningsGrunnlagService.hentEllerKopierBeregningsGrunnlag(
+                        behandlingId,
+                        brukerTokenInfo,
+                    )
+                if (grunnlag != null) {
+                    call.respond(HttpStatusCode.OK, grunnlag)
+                } else {
+                    call.respond(HttpStatusCode.NoContent)
+                }
+            }
+        }
+
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter overstyrt beregningsgrunnlag for behandling $behandlingId")
+
+                val grunnlag =
+                    OverstyrBeregningGrunnlagDTO(
+                        perioder =
+                            beregningsGrunnlagService
+                                .hentEllerKopierOverstyrBeregningGrunnlag(
+                                    behandlingId,
+                                    brukerTokenInfo,
+                                ).perioder,
+                    )
+
+                call.respond(HttpStatusCode.OK, grunnlag)
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                logger.info("Lagrer overstyrt beregningsgrunnlag for behandling $behandlingId")
+
+                val body =
+                    try {
+                        call.receive<OverstyrBeregningGrunnlagDTO>()
+                    } catch (e: BadRequestException) {
+                        val ugyldigPeriode =
+                            generateSequence<Throwable>(e) { it.cause }
+                                .filterIsInstance<UgyldigPeriodeForGrunnlag>()
+                                .firstOrNull()
+                                ?: throw e
+
+                        logger.warn("Avviser overstyrt beregningsgrunnlag med ugyldig periode: ${ugyldigPeriode.message}")
+                        throw UgyldigForespoerselException(
+                            code = "UGYLDIG_PERIODE_FOR_GRUNNLAG",
+                            detail = "Til og med må være lik eller etter Fra og med.",
+                        )
+                    }
+
+                val grunnlag =
+                    beregningsGrunnlagService.lagreOverstyrBeregningGrunnlag(
+                        behandlingId,
+                        body,
+                        brukerTokenInfo,
+                    )
+
+                call.respond(HttpStatusCode.OK, grunnlag)
+            }
+        }
+
+        put("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr/regulering") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                logger.info("Tilpasser overstyrt beregningsgrunnlag til regulering for behandling $behandlingId")
+
+                beregningsGrunnlagService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId, brukerTokenInfo)
+
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }
+}

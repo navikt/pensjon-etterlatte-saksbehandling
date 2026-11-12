@@ -1,0 +1,458 @@
+package no.nav.etterlatte.modules.beregning
+
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
+import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
+import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.beregning.grunnlag.validerVedtaksperioder
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.Regelverk
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.regler.FaktumNode
+import no.nav.etterlatte.libs.regler.KonstantGrunnlag
+import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
+import no.nav.etterlatte.libs.regler.RegelPeriode
+import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
+import no.nav.etterlatte.libs.regler.eksekver
+import no.nav.etterlatte.libs.regler.finnAnvendteRegler
+import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepRepository
+import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlient
+import no.nav.etterlatte.modules.beregning.klienter.TrygdetidKlient
+import no.nav.etterlatte.modules.beregning.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.modules.beregning.regler.finnAnvendtGrunnbeloep
+import no.nav.etterlatte.modules.beregning.regler.finnAnvendtTrygdetid
+import no.nav.etterlatte.modules.beregning.regler.omstillingstoenad.Avdoed
+import no.nav.etterlatte.modules.beregning.regler.omstillingstoenad.PeriodisertOmstillingstoenadGrunnlag
+import no.nav.etterlatte.modules.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegelMedInstitusjon
+import no.nav.etterlatte.modules.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegelMedInstitusjonV2
+import no.nav.etterlatte.modules.beregning.regler.omstillingstoenad.sats.grunnbeloep
+import no.nav.etterlatte.modules.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidBruktRegel
+import no.nav.etterlatte.modules.beregning.regler.toSamlet
+import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
+import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
+import java.util.UUID.randomUUID
+
+enum class BeregningToggles(
+    val value: String,
+) : FeatureToggle {
+    BEREGNING_BRUK_NYE_BEREGNINGSREGLER("beregning_bruk_nye_beregningsregler"),
+    BEREGN_OVER_FLERE_PERIODER("beregn_over_flere_perioder"),
+    ;
+
+    override fun key(): String = this.value
+}
+
+class BeregnOmstillingsstoenadService(
+    private val grunnlagKlient: GrunnlagKlient,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val trygdetidKlient: TrygdetidKlient,
+    private val beregningsGrunnlagService: BeregningsGrunnlagService,
+    private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
+    private val sanksjonService: SanksjonService,
+    private val featureToggleService: FeatureToggleService,
+) {
+    private val logger = LoggerFactory.getLogger(BeregnOmstillingsstoenadService::class.java)
+
+    suspend fun beregn(
+        behandling: DetaljertBehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+        tilDato: LocalDate? = null,
+    ): Beregning {
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
+
+        val trygdetid =
+            try {
+                val trygdetidListe = trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
+
+                when (trygdetidListe.size) {
+                    0 -> throw TrygdetidMangler(behandling.id)
+                    1 -> trygdetidListe.first()
+                    else -> throw ForeldreloesTrygdetid(behandling.id)
+                }
+            } catch (e: Exception) {
+                throw TrygdetidMangler(behandling.id)
+            }
+
+        val sanksjon = sanksjonService.hentSanksjon(behandling.id)
+        val behandlingType = behandling.behandlingType
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val beregningsgrunnlag =
+            beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id)
+                ?: throw BeregningsgrunnlagMangler(behandling.id)
+        if (beregningsgrunnlag.behandlingId != behandling.id) {
+            throw BeregningsgrunnlagMangler(behandling.id)
+        }
+
+        logger.info("Beregner omstillingsstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
+
+        val omstillingstoenadGrunnlag =
+            opprettBeregningsgrunnlag(
+                trygdetid,
+                beregningsgrunnlag,
+                sanksjon,
+            )
+        return when (behandlingType) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                if (featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, false)) {
+                    when (val perioder = beregningsgrunnlag.vedtaksperioder) {
+                        null -> {
+                            beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
+                        }
+
+                        else -> {
+                            beregnOmstillingsstoenadPerioder(
+                                behandling.id,
+                                grunnlag,
+                                omstillingstoenadGrunnlag,
+                                virkningstidspunkt,
+                                tilDato = tilDato,
+                                vedtaksperioder = perioder,
+                            )
+                        }
+                    }
+                } else {
+                    beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
+                }
+            }
+
+            BehandlingType.REVURDERING -> {
+                val vilkaarsvurderingUtfall =
+                    vilkaarsvurderingKlient
+                        .hentVilkaarsvurdering(
+                            behandling.id,
+                            brukerTokenInfo,
+                        ).resultat
+                        ?.utfall
+                        ?: throw Exception("Forventa å ha vilkårsvurderingsresultat for behandlingId=${behandling.id}")
+
+                when (vilkaarsvurderingUtfall) {
+                    VilkaarsvurderingUtfall.OPPFYLT -> {
+                        if (featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, false)) {
+                            when (val perioder = beregningsgrunnlag.vedtaksperioder) {
+                                null -> {
+                                    beregnOmstillingsstoenad(
+                                        behandling.id,
+                                        grunnlag,
+                                        omstillingstoenadGrunnlag,
+                                        virkningstidspunkt,
+                                        tilDato,
+                                    )
+                                }
+
+                                else -> {
+                                    beregnOmstillingsstoenadPerioder(
+                                        behandling.id,
+                                        grunnlag,
+                                        omstillingstoenadGrunnlag,
+                                        virkningstidspunkt,
+                                        tilDato = tilDato,
+                                        vedtaksperioder = perioder,
+                                    )
+                                }
+                            }
+                        } else {
+                            beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
+                        }
+                    }
+
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
+                        opphoer(behandling.id, grunnlag, virkningstidspunkt)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun beregnOmstillingsstoenadPerioder(
+        behandlingId: UUID,
+        grunnlag: Grunnlag,
+        beregningsgrunnlag: PeriodisertOmstillingstoenadGrunnlag,
+        virkningstidspunkt: YearMonth,
+        vedtaksperioder: List<Vedtaksperiode>,
+        tilDato: LocalDate? = null,
+    ): Beregning {
+        vedtaksperioder.validerVedtaksperioder()
+
+        val virkningstidspunktErEtterAlleEksisterendePerioder =
+            vedtaksperioder.all { it.tilOgMed != null && it.tilOgMed!! < virkningstidspunkt }
+
+        if (virkningstidspunktErEtterAlleEksisterendePerioder) {
+            return beregnOmstillingsstoenad(behandlingId, grunnlag, beregningsgrunnlag, virkningstidspunkt, tilDato)
+        }
+
+        if (vedtaksperioder.none {
+                it.fraOgMed <= virkningstidspunkt && (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
+            }
+        ) {
+            throw UgyldigForespoerselException(
+                "VIRK_STARTER_UTENFOR_VEDTAKSPERIODE",
+                "Kan ikke beregne en ytelse med virkningstidspunkt fra $virkningstidspunkt, " +
+                    "siden det er utenfor vedtaksperiodene",
+            )
+        }
+
+        val relevantePerioderForBeregning =
+            vedtaksperioder.filter {
+                (it.tilOgMed ?: virkningstidspunkt) >= virkningstidspunkt
+            }
+        val alleBeregninger =
+            relevantePerioderForBeregning.map { periode ->
+                val virkForBeregningIPeriode =
+                    if (periode.fraOgMed > virkningstidspunkt) {
+                        periode.fraOgMed
+                    } else {
+                        virkningstidspunkt
+                    }
+                beregnOmstillingsstoenad(
+                    behandlingId = behandlingId,
+                    grunnlag = grunnlag,
+                    beregningsgrunnlag = beregningsgrunnlag,
+                    virkningstidspunkt = virkForBeregningIPeriode,
+                    tilDato = periode.tilOgMed?.atEndOfMonth() ?: tilDato,
+                )
+            }
+        val allePerioder = alleBeregninger.flatMap { it.beregningsperioder }
+        return alleBeregninger.first().copy(
+            beregningsperioder = allePerioder,
+        )
+    }
+
+    private fun beregnOmstillingsstoenad(
+        behandlingId: UUID,
+        grunnlag: Grunnlag,
+        beregningsgrunnlag: PeriodisertOmstillingstoenadGrunnlag,
+        virkningstidspunkt: YearMonth,
+        tilDato: LocalDate? = null,
+    ): Beregning {
+        val skalBrukeNyeBeregningsregler = featureToggleService.isEnabled(BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER, false)
+
+        val resultat =
+            if (skalBrukeNyeBeregningsregler) {
+                logger.info("Beregner omstillingsstønad med nye beregningsregler")
+
+                kroneavrundetOmstillingstoenadRegelMedInstitusjonV2.eksekver(
+                    grunnlag = beregningsgrunnlag,
+                    periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
+                )
+            } else {
+                kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
+                    grunnlag = beregningsgrunnlag,
+                    periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
+                )
+            }
+
+        val beregnetDato = Tidspunkt.now()
+        return when (resultat) {
+            is RegelkjoeringResultat.Suksess -> {
+                Beregning(
+                    beregningId = randomUUID(),
+                    behandlingId = behandlingId,
+                    type = Beregningstype.OMS,
+                    beregnetDato = beregnetDato,
+                    grunnlagMetadata = grunnlag.metadata,
+                    beregningsperioder =
+                        resultat.periodiserteResultater.map { periodisertResultat ->
+                            logger.info(
+                                "Beregnet omstillingsstønad for periode fra={} til={} og beløp={} med regler={}",
+                                periodisertResultat.periode.fraDato,
+                                periodisertResultat.periode.tilDato,
+                                periodisertResultat.resultat.verdi,
+                                periodisertResultat.resultat
+                                    .finnAnvendteRegler()
+                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }
+                                    .toSet(),
+                            )
+
+                            val grunnbeloep =
+                                periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)
+                                    ?: throw AnvendtGrunnbeloepIkkeFunnet()
+
+                            val regelverk = Regelverk.REGELVERK_FOM_JAN_2024
+
+                            val trygdetid =
+                                periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)
+                                    ?: throw AnvendtTrygdetidIkkeFunnet(
+                                        periodisertResultat.periode.fraDato,
+                                        periodisertResultat.periode.tilDato,
+                                    )
+
+                            val trygdetidGrunnlagForPeriode =
+                                beregningsgrunnlag.avdoed
+                                    .finnGrunnlagForPeriode(
+                                        periodisertResultat.periode.fraDato,
+                                    ).verdi.trygdetid
+
+                            Beregningsperiode(
+                                datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
+                                datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
+                                utbetaltBeloep = periodisertResultat.resultat.verdi,
+                                institusjonsopphold =
+                                    beregningsgrunnlag.institusjonsopphold
+                                        .finnGrunnlagForPeriode(
+                                            periodisertResultat.periode.fraDato,
+                                        ).verdi,
+                                grunnbelop = grunnbeloep.grunnbeloep,
+                                trygdetid = trygdetid.trygdetid.toInteger(),
+                                beregningsMetode = trygdetid.beregningsMetode,
+                                samletNorskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidNorge?.toInteger(),
+                                samletTeoretiskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidTeoretisk?.toInteger(),
+                                broek = trygdetidGrunnlagForPeriode.prorataBroek,
+                                regelResultat = objectMapper.valueToTree(periodisertResultat),
+                                regelVersjon = periodisertResultat.reglerVersjon,
+                                regelverk = regelverk,
+                                trygdetidForIdent = trygdetidGrunnlagForPeriode.ident,
+                                kilde =
+                                    Grunnlagsopplysning.RegelKilde(
+                                        navn = kroneavrundetOmstillingstoenadRegelMedInstitusjon.regelReferanse.id,
+                                        ts = beregnetDato,
+                                        versjon = periodisertResultat.reglerVersjon,
+                                    ),
+                            )
+                        },
+                    overstyrBeregning = null,
+                )
+            }
+
+            is RegelkjoeringResultat.UgyldigPeriode -> {
+                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+            }
+        }
+    }
+
+    private fun opphoer(
+        behandlingId: UUID,
+        grunnlag: Grunnlag,
+        virkningstidspunkt: YearMonth,
+    ): Beregning {
+        val grunnbeloep = grunnbeloepRepository.hentGjeldendeGrunnbeloep(virkningstidspunkt)
+
+        return Beregning(
+            beregningId = randomUUID(),
+            behandlingId = behandlingId,
+            type = Beregningstype.OMS,
+            beregnetDato = Tidspunkt.now(),
+            grunnlagMetadata = grunnlag.metadata,
+            beregningsperioder =
+                listOf(
+                    Beregningsperiode(
+                        datoFOM = virkningstidspunkt,
+                        datoTOM = null,
+                        utbetaltBeloep = 0,
+                        soeskenFlokk = null,
+                        grunnbelop = grunnbeloep.grunnbeloep,
+                        trygdetid = 0,
+                    ),
+                ),
+            overstyrBeregning = null,
+        )
+    }
+
+    private fun opprettBeregningsgrunnlag(
+        trygdetid: TrygdetidDto,
+        beregningsgrunnlag: BeregningsGrunnlag,
+        sanksjon: List<Sanksjon>,
+    ): PeriodisertOmstillingstoenadGrunnlag {
+        val samletTrygdetid =
+            trygdetid.toSamlet(beregningsgrunnlag.beregningsMetode.beregningsMetode)
+                ?: throw TrygdetidMangler(trygdetid.behandlingId)
+
+        return PeriodisertOmstillingstoenadGrunnlag(
+            avdoed =
+                KonstantGrunnlag(
+                    FaktumNode(
+                        verdi = Avdoed(samletTrygdetid),
+                        kilde =
+                            Grunnlagsopplysning.RegelKilde(
+                                "Trygdetid fastsatt av saksbehandler",
+                                trygdetid.beregnetTrygdetid?.tidspunkt
+                                    ?: throw Exception("Trygdetid mangler tidspunkt på beregnet trygdetid"),
+                                "1",
+                            ),
+                        beskrivelse = "Trygdetid avdød ektefelle",
+                    ),
+                ),
+            institusjonsopphold =
+                PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
+                    beregningsgrunnlag.institusjonsopphold.mapVerdier { institusjonsopphold ->
+                        FaktumNode(
+                            verdi = institusjonsopphold,
+                            kilde = beregningsgrunnlag.kilde,
+                            beskrivelse = "Institusjonsopphold",
+                        )
+                    },
+                ) { _, _, _ -> FaktumNode(null, beregningsgrunnlag.kilde, "Institusjonsopphold") },
+            sanksjon = utledPeriodisertSanksjon(sanksjon),
+        )
+    }
+
+    // Kopiert fra AvkortingRegelkjoring.kt -> periodiserteSanksjoner()
+    private fun utledPeriodisertSanksjon(sanksjon: List<Sanksjon>): PeriodisertGrunnlag<FaktumNode<Sanksjon?>> =
+        try {
+            periodisertSanksjon(sanksjon)
+        } catch (e: PeriodiseringAvGrunnlagFeil) {
+            when (e) {
+                is PeriodiseringAvGrunnlagFeil.PerioderOverlapper -> throw UgyldigForespoerselException(
+                    code = "OVERLAPPENDE_SANKSJONER",
+                    detail =
+                        "Behandlingen har sanksjoner som overlapper med hverandre i perioder. Dobbelt " +
+                            "sanksjon i en måned støttes ikke, og de overlappende sanksjonene må endres / " +
+                            "fjernes for å kunne beregne avkortet ytelse.",
+                    cause = e,
+                )
+
+                else -> throw InternfeilException(
+                    "Kunne ikke sette opp perioder for sanksjon riktig. " +
+                        "Feilen som oppstod var: ${e.code}",
+                    e,
+                )
+            }
+        }
+
+    private fun periodisertSanksjon(sanksjon: List<Sanksjon>): PeriodisertGrunnlag<FaktumNode<Sanksjon?>> {
+        if (sanksjon.isEmpty()) {
+            return KonstantGrunnlag(
+                FaktumNode(
+                    null,
+                    "Ingen sanksjoner innenfor årsoppgjør",
+                    "Ingen sanksjoner innenfor årsoppgjør",
+                ),
+            )
+        }
+
+        return PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
+            sanksjon.map {
+                GrunnlagMedPeriode(
+                    data =
+                        FaktumNode(
+                            verdi = it,
+                            beskrivelse = "Sanksjon: ${it.type}",
+                            kilde = it.id!!,
+                        ),
+                    fom = it.fom.atDay(1),
+                    tom = it.tom?.atEndOfMonth(),
+                )
+            },
+        ) { _, _, _ -> FaktumNode(null, beskrivelse = "Ingen sanksjon i perioden", kilde = "Grunnlag") }
+    }
+}

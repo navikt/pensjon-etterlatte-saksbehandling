@@ -15,7 +15,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.modules.beregning.regler.lagreSanksjon
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import no.nav.etterlatte.modules.beregning.sanksjon.sanksjon
@@ -28,14 +28,14 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SanksjonRoutesTest {
+    private val behandlingTilgangsSjekk = mockk<BehandlingTilgangsSjekk>()
     private val server: MockOAuth2Server = MockOAuth2Server()
-    private val behandlingKlient = mockk<BehandlingKlient>()
     private val sanksjonService = mockk<SanksjonService>()
 
     @BeforeAll
     fun setup() {
         server.start()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
@@ -49,7 +49,7 @@ internal class SanksjonRoutesTest {
 
         testApplication {
             runServer(server) {
-                sanksjon(sanksjonService, behandlingKlient)
+                sanksjon(sanksjonService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -71,7 +71,7 @@ internal class SanksjonRoutesTest {
 
         testApplication {
             runServer(server) {
-                sanksjon(sanksjonService, behandlingKlient)
+                sanksjon(sanksjonService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -91,7 +91,7 @@ internal class SanksjonRoutesTest {
 
         testApplication {
             runServer(server) {
-                sanksjon(sanksjonService, behandlingKlient)
+                sanksjon(sanksjonService, behandlingTilgangsSjekk)
             }
 
             val response =

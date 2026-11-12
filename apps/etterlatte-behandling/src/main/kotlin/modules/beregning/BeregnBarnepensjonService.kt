@@ -7,12 +7,15 @@ import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.grunnlag.validerVedtaksperioder
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder.AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -35,9 +38,6 @@ import no.nav.etterlatte.modules.beregning.anvendttrygdetid.BarnepensjonAnvendtT
 import no.nav.etterlatte.modules.beregning.anvendttrygdetid.BarnepensjonAnvendtTrygdetidPerioder.finnForAvdoed
 import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlient
-import no.nav.etterlatte.modules.beregning.klienter.TrygdetidKlient
-import no.nav.etterlatte.modules.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.modules.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.modules.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
 import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.avdodeForeldre2024
@@ -49,6 +49,9 @@ import no.nav.etterlatte.modules.beregning.regler.finnAnvendtRegelverkBarnepensj
 import no.nav.etterlatte.modules.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.modules.beregning.regler.finnAvdodeForeldre
 import no.nav.etterlatte.modules.beregning.regler.finnHarForeldreloessats
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.trygdetid.toDto
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Month
@@ -56,11 +59,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BeregnBarnepensjonService(
-    private val grunnlagKlient: GrunnlagKlient,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val grunnlagService: GrunnlagService,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
-    private val trygdetidKlient: TrygdetidKlient,
+    private val trygdetidService: TrygdetidService,
     private val anvendtTrygdetidRepository: AnvendtTrygdetidRepository,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -137,7 +140,7 @@ class BeregnBarnepensjonService(
         brukerTokenInfo: BrukerTokenInfo,
         tilDato: LocalDate? = null,
     ): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
+        val grunnlag = grunnlagService.hentOpplysningsgrunnlag(behandling.id) ?: throw GenerellIkkeFunnetException()
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
@@ -152,7 +155,7 @@ class BeregnBarnepensjonService(
 
         val trygdetidListe =
             try {
-                trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
+                trygdetidService.hentTrygdetiderIBehandling(behandling.id, brukerTokenInfo).map { it.toDto() }
             } catch (e: Exception) {
                 logger.warn(
                     "Kunne ikke hente ut trygdetid for behandlingen med id=${behandling.id}. " +
@@ -226,8 +229,11 @@ class BeregnBarnepensjonService(
             }
 
             BehandlingType.REVURDERING -> {
+                val vilkaarsvurdering =
+                    inTransactionIfNeeded { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) }
+                        ?: throw GenerellIkkeFunnetException()
                 val vilkaarsvurderingUtfall =
-                    vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, brukerTokenInfo).resultat?.utfall
+                    vilkaarsvurdering.resultat?.utfall
                         ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {

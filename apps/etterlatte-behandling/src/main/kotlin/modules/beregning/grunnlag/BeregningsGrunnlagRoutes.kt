@@ -14,19 +14,19 @@ import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
 import no.nav.etterlatte.beregning.grunnlag.UgyldigPeriodeForGrunnlag
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
 
 fun Route.beregningsGrunnlag(
     beregningsGrunnlagService: BeregningsGrunnlagService,
-    behandlingKlient: BehandlingKlient,
+    behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
 ) {
     route("/api/beregning/beregningsgrunnlag") {
         post("/{$BEHANDLINGID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
 
                 logger.info("Dupliserer beregningsgrunnlag for behandling $behandlingId fra $forrigeBehandlingId")
@@ -37,7 +37,7 @@ fun Route.beregningsGrunnlag(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
                 logger.info("Lagrer beregningsgrunnlag for behandling $behandlingId")
                 val body = call.receive<LagreBeregningsGrunnlag>()
 
@@ -58,7 +58,7 @@ fun Route.beregningsGrunnlag(
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingTilgangsSjekk) { behandlingId ->
                 logger.info("Henter eller kopierer ordinært beregningsgrunnlag for behandling $behandlingId")
                 val grunnlag =
                     beregningsGrunnlagService.hentEllerKopierBeregningsGrunnlag(
@@ -74,7 +74,7 @@ fun Route.beregningsGrunnlag(
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingTilgangsSjekk) { behandlingId ->
                 logger.info("Henter overstyrt beregningsgrunnlag for behandling $behandlingId")
 
                 val grunnlag =
@@ -92,7 +92,7 @@ fun Route.beregningsGrunnlag(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
                 logger.info("Lagrer overstyrt beregningsgrunnlag for behandling $behandlingId")
 
                 val body =
@@ -124,7 +124,7 @@ fun Route.beregningsGrunnlag(
         }
 
         put("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr/regulering") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
                 logger.info("Tilpasser overstyrt beregningsgrunnlag til regulering for behandling $behandlingId")
 
                 beregningsGrunnlagService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId, brukerTokenInfo)

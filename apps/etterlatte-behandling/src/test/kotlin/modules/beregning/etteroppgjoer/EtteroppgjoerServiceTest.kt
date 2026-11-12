@@ -7,34 +7,37 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.avkorting.Avkorting
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingRepository
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingService
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
-import no.nav.etterlatte.modules.beregning.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.modules.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.modules.beregning.regler.behandling
 import no.nav.etterlatte.modules.beregning.regler.etteroppgjoer
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
 import java.util.UUID
 
+@ExtendWith(BeregningTestKontekst::class)
 internal class EtteroppgjoerServiceTest {
     private val avkortingRepository: AvkortingRepository = mockk()
     private val sanksjonService: SanksjonService = mockk()
     private val etteroppgjoerRepository: EtteroppgjoerRepository = mockk(relaxed = true)
     private val avkortingService: AvkortingService = mockk()
     private val reparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret = mockk()
-    private val vedtakKlient: VedtaksvurderingKlient = mockk()
-    private val behandlingKlient: BehandlingKlient = mockk()
+    private val vedtakEtteroppgjoerService: VedtakEtteroppgjoerService = mockk()
+    private val behandlingService: BehandlingService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
 
     private val service =
@@ -44,8 +47,8 @@ internal class EtteroppgjoerServiceTest {
             etteroppgjoerRepository,
             avkortingService,
             reparerAarsoppgjoeret,
-            vedtakKlient,
-            behandlingKlient,
+            vedtakEtteroppgjoerService,
+            behandlingService,
             featureToggleService,
         )
 
@@ -77,7 +80,7 @@ internal class EtteroppgjoerServiceTest {
     }
 
     private fun mockForbehandlingMedAvkorting() {
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling(sak = sakId)
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling(sak = sakId)
 
         val forbehandlingAvkorting =
             etteroppgjoer(
@@ -97,7 +100,7 @@ internal class EtteroppgjoerServiceTest {
     @Test
     fun `uten omgjoering hentes hele vedtakslisten og det avgrenses ikke til en behandling`() {
         mockForbehandlingMedAvkorting()
-        coEvery { vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(any(), any(), any(), any()) } returns vedtakHeleAaret
+        coEvery { vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(any(), any(), any()) } returns vedtakHeleAaret
 
         val resultat =
             runBlocking {
@@ -114,7 +117,7 @@ internal class EtteroppgjoerServiceTest {
         resultat.utbetaltStoenad shouldBe 12000
         resultat.referanseAvkorting.vedtakReferanse shouldBe listOf(100L, 200L)
         coVerify {
-            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(sakId, aar, any(), null)
+            vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(sakId, aar, null)
         }
     }
 
@@ -124,7 +127,7 @@ internal class EtteroppgjoerServiceTest {
         val sammenlignTilOgMedBehandlingId = UUID.randomUUID()
         // Behandling-id-en vi avgrenser tidslinjen til – returnerer kun vedtaket som gjaldt før det opprinnelige etteroppgjøret
         coEvery {
-            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(any(), any(), any(), sammenlignTilOgMedBehandlingId)
+            vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(any(), any(), sammenlignTilOgMedBehandlingId)
         } returns vedtakHeleAaret.take(1)
 
         val resultat =
@@ -142,7 +145,7 @@ internal class EtteroppgjoerServiceTest {
         resultat.utbetaltStoenad shouldBe 6000
         resultat.referanseAvkorting.vedtakReferanse shouldBe listOf(100L)
         coVerify {
-            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(sakId, aar, any(), sammenlignTilOgMedBehandlingId)
+            vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(sakId, aar, sammenlignTilOgMedBehandlingId)
         }
     }
 }

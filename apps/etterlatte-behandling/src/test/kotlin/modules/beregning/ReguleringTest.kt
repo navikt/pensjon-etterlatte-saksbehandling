@@ -13,6 +13,7 @@ import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -28,24 +29,25 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.modules.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.modules.beregning.BeregnBarnepensjonServiceTest
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.anvendttrygdetid.AnvendtTrygdetidRepository
 import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepRepository.hentGjeldendeGrunnbeloep
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlientImpl
-import no.nav.etterlatte.modules.beregning.klienter.TrygdetidKlient
-import no.nav.etterlatte.modules.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.modules.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.modules.beregning.regler.bruker
 import no.nav.etterlatte.modules.beregning.regler.toGrunnlag
+import no.nav.etterlatte.trygdetid.Trygdetid
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.Month
@@ -53,11 +55,12 @@ import java.time.YearMonth
 import java.util.UUID
 import kotlin.math.abs
 
+@ExtendWith(BeregningTestKontekst::class)
 class ReguleringTest {
-    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
-    private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
+    private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
-    private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val trygdetidService = mockk<TrygdetidService>()
     private val anvendtTrygdetidRepository =
         mockk<AnvendtTrygdetidRepository>().also {
             every { it.lagreAnvendtTrygdetid(any(), any()) } returns 1
@@ -72,17 +75,23 @@ class ReguleringTest {
     fun setup() {
         beregnBarnepensjonService =
             BeregnBarnepensjonService(
-                grunnlagKlient = grunnlagKlient,
-                vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+                grunnlagService = grunnlagService,
+                vilkaarsvurderingService = vilkaarsvurderingService,
                 beregningsGrunnlagService = beregningsGrunnlagService,
-                trygdetidKlient = trygdetidKlient,
+                trygdetidService = trygdetidService,
                 anvendtTrygdetidRepository = anvendtTrygdetidRepository,
                 featureToggleService = featureToggleService,
             )
     }
 
-    private fun mockTrygdetid(behandlingId_: UUID): TrygdetidDto =
-        mockk<TrygdetidDto>().apply {
+    private fun mockTrygdetid(behandlingId_: UUID): Trygdetid =
+        mockk<Trygdetid>().apply {
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
+            every { trygdetidGrunnlag } returns emptyList()
+            every { opplysninger } returns emptyList()
+            every { overstyrtNorskPoengaar } returns null
+            every { opplysningerDifferanse } returns mockk()
+            every { begrunnelse } returns null
             every { id } returns UUID.randomUUID()
             every { behandlingId } returns behandlingId_
             every { ident } returns AVDOED_FOEDSELSNUMMER.value
@@ -106,7 +115,7 @@ class ReguleringTest {
             GrunnlagTestData(opplysningsmapAvdoedOverrides = avdoedOverrides(virk.atDay(1).minusDays(20)))
                 .hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -117,7 +126,7 @@ class ReguleringTest {
                 emptyList(),
                 BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_2023.minusYears(1),
             )
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
         runBlocking {
             val beregning22 = beregnBarnepensjonService.beregn(behandling, bruker)

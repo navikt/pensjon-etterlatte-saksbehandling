@@ -1,17 +1,19 @@
 package no.nav.etterlatte.modules.beregning.ytelseMedGrunnlag
 
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.modules.beregning.BeregningRepository
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingService
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
 import java.util.UUID
 
 /**
@@ -21,14 +23,16 @@ class BeregningOgAvkortingBrevService(
     private val beregningRepository: BeregningRepository,
     private val avkortingService: AvkortingService,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
-    private val behandlingKlient: BehandlingKlient,
+    private val behandlingService: BehandlingService,
 ) {
     suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningOgAvkortingDto? {
         val avkortingUtenLoependeYtelse = avkortingService.hentAvkorting(behandlingId) ?: return null
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val behandling =
+            inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
+                ?: throw GenerellIkkeFunnetException()
         val avkorting = avkortingUtenLoependeYtelse.toDto(behandling.virkningstidspunkt().dato)
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
         val behandlingsGrunnlag = beregningsGrunnlagService.hentBeregningsGrunnlag(behandlingId)

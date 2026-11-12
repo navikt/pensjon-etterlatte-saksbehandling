@@ -21,8 +21,13 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.vedtak
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.LagreBeregningsGrunnlag
@@ -30,6 +35,7 @@ import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -49,16 +55,14 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.modules.beregning.BeregningRepository
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.OverstyrBeregning
 import no.nav.etterlatte.modules.beregning.OverstyrBeregningStatus
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
-import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlient
-import no.nav.etterlatte.modules.beregning.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.modules.beregning.regler.toGrunnlag
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -67,27 +71,33 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(BeregningTestKontekst::class)
 internal class BeregningsGrunnlagRoutesTest {
+    private val behandlingStatusService = mockk<BehandlingStatusService>()
+    private val behandlingTilgangsSjekk = mockk<BehandlingTilgangsSjekk>()
     private val mockOAuth2Server = MockOAuth2Server()
-    private val behandlingKlient = mockk<BehandlingKlient>()
-    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val repository = mockk<BeregningsGrunnlagRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
-    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val sanksjonService = mockk<SanksjonService>()
     private val service =
         BeregningsGrunnlagService(
             repository,
             beregningRepository,
-            behandlingKlient,
-            vedtaksvurderingKlient,
-            grunnlagKlient,
+            behandlingService,
+            vedtaksvurderingService,
+            grunnlagService,
             sanksjonService,
+            behandlingStatusService = behandlingStatusService,
+            behandlingTilgangsSjekk = behandlingTilgangsSjekk,
         )
 
     @BeforeAll
@@ -100,12 +110,12 @@ internal class BeregningsGrunnlagRoutesTest {
         clearAllMocks()
 
         // Antar at alle behandlinger finnes, og er skrivbare og ikke-overstyrte
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
             mockk {
                 every { sak } returns SakId(123L)
             }
         coEvery { beregningRepository.hentOverstyrBeregning(any()) } returns null
-        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), true) } returns Unit
     }
 
     @AfterAll
@@ -116,12 +126,13 @@ internal class BeregningsGrunnlagRoutesTest {
     @Test
     fun `ugyldig overstyrt periode gir forstaaelig feil uten aa lagre`() {
         val behandlingId = randomUUID()
-        coEvery { behandlingKlient.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
 
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {
-                    beregningsGrunnlag(service, behandlingKlient)
+                    attachMockContext()
+                    beregningsGrunnlag(service, behandlingTilgangsSjekk)
                 }
 
             val response =
@@ -157,13 +168,13 @@ internal class BeregningsGrunnlagRoutesTest {
         }
 
         verify { repository wasNot Called }
-        coVerify(exactly = 0) { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) }
+        coVerify(exactly = 0) { behandlingStatusService.settTrygdetidOppdatert(any(), any(), any()) }
     }
 
     @Test
     fun `skal returnere 204 naar beregnings ikke finnes`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
                 sak = randomSakId(),
@@ -189,7 +200,8 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregningsGrunnlag(service, behandlingKlient)
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -210,12 +222,12 @@ internal class BeregningsGrunnlagRoutesTest {
 
         coEvery { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns mockk(relaxed = true)
         coEvery { repository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } just Runs
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns barnepensjonRevurdering(sakId)
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(idRevurdering, any()) } returns barnepensjonRevurdering(sakId)
         coEvery {
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+            vedtaksvurderingService.hentIverksatteVedtakISak(sakId)
         } returns listOf(mockVedtak(idForrigeIverksatt, VedtakType.INNVILGELSE))
-        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+        coEvery { vedtaksvurderingService.hentInnvilgedePerioder(any<SakId>()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(idRevurdering) } returns null
         every { repository.finnBeregningsGrunnlag(idForrigeIverksatt) } returns
             BeregningsGrunnlag(
@@ -233,7 +245,8 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregningsGrunnlag(service, behandlingKlient)
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -246,7 +259,7 @@ internal class BeregningsGrunnlagRoutesTest {
         }
 
         coVerify(exactly = 1) {
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+            vedtaksvurderingService.hentIverksatteVedtakISak(sakId)
             repository.finnBeregningsGrunnlag(idForrigeIverksatt)
             repository.lagreBeregningsGrunnlag(any())
         }
@@ -257,7 +270,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal hente beregning`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         val id = randomUUID()
 
@@ -272,7 +285,8 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregningsGrunnlag(service, behandlingKlient)
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -289,11 +303,12 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal returnere forbidden naar saksbehandler ikke har tilgang til behandling`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregningsGrunnlag(service, behandlingKlient)
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
             }
 
             client
@@ -308,12 +323,13 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal returnere forbidden naar saksbehandler ikke har tilgang til behandling ved opprettelse`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {
-                    beregningsGrunnlag(service, behandlingKlient)
+                    attachMockContext()
+                    beregningsGrunnlag(service, behandlingTilgangsSjekk)
                 }
 
             client
@@ -334,14 +350,14 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal opprettere`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), true) } returns Unit
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), any()) } returns Unit
         every { repository.finnBeregningsGrunnlag(any()) } returns mockk(relaxed = true)
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
                 sak = randomSakId(),
@@ -375,7 +391,8 @@ internal class BeregningsGrunnlagRoutesTest {
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {
-                    beregningsGrunnlag(service, behandlingKlient)
+                    attachMockContext()
+                    beregningsGrunnlag(service, behandlingTilgangsSjekk)
                 }
 
             client
@@ -396,14 +413,14 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal returnere conflict fra opprettelse `() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), true) } returns Unit
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), any()) } returns Unit
         every { repository.finnBeregningsGrunnlag(any()) } returns null
         every { repository.lagreBeregningsGrunnlag(any()) } returns false
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
                 sak = randomSakId(),
@@ -437,7 +454,8 @@ internal class BeregningsGrunnlagRoutesTest {
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {
-                    beregningsGrunnlag(service, behandlingKlient)
+                    attachMockContext()
+                    beregningsGrunnlag(service, behandlingTilgangsSjekk)
                 }
 
             val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
@@ -472,10 +490,10 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk(relaxed = true)
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns mockk(relaxed = true)
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settBeregnet(any(), any(), any()) } returns Unit
+        coEvery { vedtaksvurderingService.hentInnvilgedePerioder(any<SakId>()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,
@@ -491,7 +509,8 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregningsGrunnlag(service, behandlingKlient)
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
             }
 
             client
@@ -509,10 +528,10 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockk(relaxed = true)
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns mockk(relaxed = true)
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settBeregnet(any(), any(), any()) } returns Unit
+        coEvery { vedtaksvurderingService.hentInnvilgedePerioder(any<SakId>()) } returns emptyList()
         every { repository.finnBeregningsGrunnlag(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,
@@ -528,7 +547,8 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregningsGrunnlag(service, behandlingKlient)
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
             }
 
             client
@@ -546,14 +566,15 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settBeregnet(any(), any(), any()) } returns Unit
         every { repository.finnBeregningsGrunnlag(forrige) } returns null
         every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregningsGrunnlag(service, behandlingKlient)
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
             }
 
             client
@@ -571,8 +592,8 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settBeregnet(any(), any(), any()) } returns Unit
         every { repository.finnBeregningsGrunnlag(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,
@@ -593,7 +614,8 @@ internal class BeregningsGrunnlagRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregningsGrunnlag(service, behandlingKlient)
+                attachMockContext()
+                beregningsGrunnlag(service, behandlingTilgangsSjekk)
             }
 
             client
@@ -610,7 +632,7 @@ internal class BeregningsGrunnlagRoutesTest {
     fun `skal hente overstyr beregning grunnlag`() {
         val behandlingId = randomUUID()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
 
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(
@@ -659,7 +681,8 @@ internal class BeregningsGrunnlagRoutesTest {
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {
-                    beregningsGrunnlag(service, behandlingKlient)
+                    attachMockContext()
+                    beregningsGrunnlag(service, behandlingTilgangsSjekk)
                 }
 
             client
@@ -698,12 +721,12 @@ internal class BeregningsGrunnlagRoutesTest {
         val sakId = randomSakId()
 
         coEvery { beregningRepository.hentOverstyrBeregning(sakId) } returns overstyrBeregning(sakId)
-        coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns barnepensjonRevurdering(sakId)
+        coEvery { behandlingService.hentDetaljertBehandling(idRevurdering, any()) } returns barnepensjonRevurdering(sakId)
         coEvery {
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+            vedtaksvurderingService.hentIverksatteVedtakISak(sakId)
         } returns listOf(mockVedtak(idForrigeIverksatt, VedtakType.INNVILGELSE))
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(idRevurdering, any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(idRevurdering, any(), any()) } returns true
 
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(idRevurdering) } returns emptyList()
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(idForrigeIverksatt) } returns
@@ -754,7 +777,8 @@ internal class BeregningsGrunnlagRoutesTest {
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {
-                    beregningsGrunnlag(service, behandlingKlient)
+                    attachMockContext()
+                    beregningsGrunnlag(service, behandlingTilgangsSjekk)
                 }
 
             client
@@ -792,9 +816,9 @@ internal class BeregningsGrunnlagRoutesTest {
         val slot = slot<List<OverstyrBeregningGrunnlagDao>>()
         val randomSakId = randomSakId()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
                 sak = randomSakId,
@@ -818,8 +842,8 @@ internal class BeregningsGrunnlagRoutesTest {
 
         every { repository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, capture(slot)) } just runs
 
-        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), true) } returns Unit
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), any()) } returns Unit
 
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(
@@ -868,7 +892,8 @@ internal class BeregningsGrunnlagRoutesTest {
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {
-                    beregningsGrunnlag(service, behandlingKlient)
+                    attachMockContext()
+                    beregningsGrunnlag(service, behandlingTilgangsSjekk)
                 }
 
             client
@@ -985,7 +1010,7 @@ internal class BeregningsGrunnlagRoutesTest {
     private fun mockVedtak(
         behandlingId: UUID,
         type: VedtakType,
-    ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null, null)
+    ) = vedtak(behandlingId = behandlingId, type = type)
 
     private fun overstyrBeregning(sakId: SakId): OverstyrBeregning =
         OverstyrBeregning(

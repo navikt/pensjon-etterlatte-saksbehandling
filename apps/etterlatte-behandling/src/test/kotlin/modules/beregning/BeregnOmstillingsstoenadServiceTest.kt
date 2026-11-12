@@ -16,6 +16,7 @@ import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -27,25 +28,26 @@ import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlientImpl
-import no.nav.etterlatte.modules.beregning.klienter.TrygdetidKlient
-import no.nav.etterlatte.modules.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.modules.beregning.regler.STANDARDSAK
 import no.nav.etterlatte.modules.beregning.regler.bruker
 import no.nav.etterlatte.modules.beregning.regler.toGrunnlag
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
+import no.nav.etterlatte.trygdetid.Trygdetid
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
@@ -53,10 +55,11 @@ import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
 
+@ExtendWith(BeregningTestKontekst::class)
 internal class BeregnOmstillingsstoenadServiceTest {
-    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
-    private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
-    private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
+    private val grunnlagService = mockk<GrunnlagService>()
+    private val trygdetidService = mockk<TrygdetidService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val sanksjonService = mockk<SanksjonService>()
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -68,9 +71,9 @@ internal class BeregnOmstillingsstoenadServiceTest {
     fun setup() {
         beregnOmstillingsstoenadService =
             BeregnOmstillingsstoenadService(
-                grunnlagKlient = grunnlagKlient,
-                vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-                trygdetidKlient = trygdetidKlient,
+                grunnlagService = grunnlagService,
+                vilkaarsvurderingService = vilkaarsvurderingService,
+                trygdetidService = trygdetidService,
                 beregningsGrunnlagService = beregningsGrunnlagService,
                 featureToggleService = featureToggleService,
                 sanksjonService = sanksjonService,
@@ -111,8 +114,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -134,8 +137,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -176,8 +179,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { sanksjonService.hentSanksjon(any()) } returns listOf(sanksjon)
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -234,8 +237,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -271,8 +274,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -308,12 +311,12 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
             }
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
 
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
@@ -347,12 +350,12 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
             }
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -385,8 +388,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetidUtenBeregnetTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -405,8 +408,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns emptyList()
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns emptyList()
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -431,8 +434,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
             val trygdetid = mockTrygdetid(behandling.id)
 
             every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
-            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
             coEvery {
                 beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
@@ -468,8 +471,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
             val trygdetid = mockTrygdetid(behandling.id)
 
             every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
-            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
             coEvery {
                 beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
@@ -518,8 +521,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
             val trygdetid = mockTrygdetid(behandling.id)
 
             every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
-            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
             coEvery {
                 beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
@@ -557,8 +560,14 @@ internal class BeregnOmstillingsstoenadServiceTest {
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         }
 
-    private fun mockTrygdetid(behandlingId_: UUID): TrygdetidDto =
-        mockk<TrygdetidDto>().apply {
+    private fun mockTrygdetid(behandlingId_: UUID): Trygdetid =
+        mockk<Trygdetid>().apply {
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
+            every { trygdetidGrunnlag } returns emptyList()
+            every { opplysninger } returns emptyList()
+            every { overstyrtNorskPoengaar } returns null
+            every { opplysningerDifferanse } returns mockk()
+            every { begrunnelse } returns null
             every { id } returns randomUUID()
             every { behandlingId } returns behandlingId_
             every { beregnetTrygdetid } returns
@@ -574,8 +583,14 @@ internal class BeregnOmstillingsstoenadServiceTest {
             every { ident } returns AVDOED_FOEDSELSNUMMER.value
         }
 
-    private fun mockTrygdetidUtenBeregnetTrygdetid(behandlingId_: UUID): TrygdetidDto =
-        mockk<TrygdetidDto>().apply {
+    private fun mockTrygdetidUtenBeregnetTrygdetid(behandlingId_: UUID): Trygdetid =
+        mockk<Trygdetid>().apply {
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
+            every { trygdetidGrunnlag } returns emptyList()
+            every { opplysninger } returns emptyList()
+            every { overstyrtNorskPoengaar } returns null
+            every { opplysningerDifferanse } returns mockk()
+            every { begrunnelse } returns null
             every { id } returns randomUUID()
             every { behandlingId } returns behandlingId_
             every { beregnetTrygdetid } returns null

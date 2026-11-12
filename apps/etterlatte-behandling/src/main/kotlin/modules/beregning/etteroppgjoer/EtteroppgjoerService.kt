@@ -1,7 +1,10 @@
 package no.nav.etterlatte.modules.beregning.etteroppgjoer
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
@@ -30,8 +33,6 @@ import no.nav.etterlatte.modules.beregning.avkorting.Etteroppgjoer
 import no.nav.etterlatte.modules.beregning.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.modules.beregning.avkorting.regler.beregneEtteroppgjoerRegelMedDoedsfall
 import no.nav.etterlatte.modules.beregning.avkorting.toDto
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
-import no.nav.etterlatte.modules.beregning.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -43,8 +44,8 @@ class EtteroppgjoerService(
     private val etteroppgjoerRepository: EtteroppgjoerRepository,
     private val avkortingService: AvkortingService,
     private val reparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
-    private val vedtakKlient: VedtaksvurderingKlient,
-    private val behandlingKlient: BehandlingKlient,
+    private val vedtakEtteroppgjoerService: VedtakEtteroppgjoerService,
+    private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerService::class.java)
@@ -150,7 +151,11 @@ class EtteroppgjoerService(
         val fomTom = LocalDate.of(etteroppgjoersAar, 12, 31)
         val regelPeriode = RegelPeriode(fomTom, fomTom)
 
-        val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
+        val sakId =
+            inTransactionIfNeeded {
+                behandlingService.hentDetaljertBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer)
+                    ?: throw GenerellIkkeFunnetException()
+            }.sak
 
         val (vedtakReferanse, vedtakPerioder) =
             hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, sammenlignTilOgMedBehandlingId)
@@ -219,12 +224,13 @@ class EtteroppgjoerService(
         tilOgMedBehandlingId: UUID?,
     ): Pair<List<Long>, List<VedtakEtteroppgjoerPeriode>> {
         val vedtaksliste =
-            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(
-                sakId,
-                etteroppgjoersAar,
-                HardkodaSystembruker.etteroppgjoer,
-                tilOgMedBehandlingId,
-            )
+            inTransactionIfNeeded {
+                vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
+                    sakId,
+                    etteroppgjoersAar,
+                    tilOgMedBehandlingId,
+                )
+            }
 
         val vedtakReferanse = vedtaksliste.map { it.vedtakId }
         val vedtakPerioder =

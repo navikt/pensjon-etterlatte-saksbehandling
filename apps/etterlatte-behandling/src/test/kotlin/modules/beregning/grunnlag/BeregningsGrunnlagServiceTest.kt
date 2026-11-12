@@ -14,9 +14,15 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId3
+import no.nav.etterlatte.behandling.vedtaksvurdering.InnvilgetPeriode
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.vedtak
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
@@ -25,6 +31,7 @@ import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -39,20 +46,17 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.modules.beregning.BeregningRepository
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.OverstyrBeregning
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlientImpl
-import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlient
-import no.nav.etterlatte.modules.beregning.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.modules.beregning.regler.toGrunnlag
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -61,6 +65,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.Month.APRIL
 import java.time.Month.JANUARY
@@ -72,28 +77,33 @@ import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
 
+@ExtendWith(BeregningTestKontekst::class)
 internal class BeregningsGrunnlagServiceTest {
-    private val behandlingKlient = mockk<BehandlingKlientImpl>()
-    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlientImpl>()
+    private val behandlingStatusService = mockk<BehandlingStatusService>()
+    private val behandlingTilgangsSjekk = mockk<BehandlingTilgangsSjekk>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val beregningsGrunnlagRepository = mockk<BeregningsGrunnlagRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
-    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val sanksjonService = mockk<SanksjonService>()
     private val beregningsGrunnlagService: BeregningsGrunnlagService =
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository,
             beregningRepository,
-            behandlingKlient,
-            vedtaksvurderingKlient,
-            grunnlagKlient,
+            behandlingService,
+            vedtaksvurderingService,
+            grunnlagService,
             sanksjonService,
+            behandlingStatusService = behandlingStatusService,
+            behandlingTilgangsSjekk = behandlingTilgangsSjekk,
         )
 
     @BeforeEach
     fun beforeEach() {
-        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), true) } returns Unit
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), any()) } returns Unit
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { beregningRepository.hentOverstyrBeregning(any()) } returns null
     }
 
@@ -111,7 +121,7 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
             mockk {
                 coEvery { sakType } returns SakType.BARNEPENSJON
                 coEvery { virkningstidspunkt } returns
@@ -123,7 +133,7 @@ internal class BeregningsGrunnlagServiceTest {
         val brukertokeninfo = simpleSaksbehandler()
 
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(behandlingId) } returns hentOpplysningsgrunnlag
         assertThrows<BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException> {
             runBlocking {
                 beregningsGrunnlagService.lagreBeregningsGrunnlag(
@@ -149,7 +159,7 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
             mockk {
                 coEvery { sakType } returns SakType.BARNEPENSJON
                 coEvery { virkningstidspunkt } returns
@@ -162,7 +172,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentGrunnlagMedEgneAvdoedesBarn()
 
-        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(behandlingId) } returns hentOpplysningsgrunnlag
         assertThrows<BPBeregningsgrunnlagSoeskenMarkertDoedException> {
             runBlocking {
                 beregningsGrunnlagService.lagreBeregningsGrunnlag(
@@ -198,12 +208,12 @@ internal class BeregningsGrunnlagServiceTest {
 
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
@@ -259,12 +269,12 @@ internal class BeregningsGrunnlagServiceTest {
                 soeskenMedIBeregning = listOf(periode1.copy(tom = periode2.fom.minusDays(1)), periode2),
             )
 
-        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(revurdering.id, any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(revurdering.id, any(), any()) } returns Unit
         coEvery {
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+            vedtaksvurderingService.hentIverksatteVedtakISak(sakId)
         } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
-        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(revurdering.id, any()) } returns revurdering
 
         every {
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
@@ -273,7 +283,7 @@ internal class BeregningsGrunnlagServiceTest {
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(revurdering.id)
         } returns grunnlagEndring
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             assertThrows<UgyldigBeregningsgrunnlag> {
                 beregningsGrunnlagService.lagreBeregningsGrunnlag(
@@ -310,12 +320,12 @@ internal class BeregningsGrunnlagServiceTest {
                 soeskenMedIBeregning = emptyList(),
             )
 
-        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
-        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingStatusService.settBeregnet(revurdering.id, any(), any()) } returns Unit
         coEvery {
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+            vedtaksvurderingService.hentIverksatteVedtakISak(sakId)
         } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
-        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(revurdering.id, any()) } returns revurdering
 
         every {
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
@@ -330,7 +340,7 @@ internal class BeregningsGrunnlagServiceTest {
         } returns grunnlagEndring
 
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
 
         runBlocking {
             assertThrows<ManglerForrigeGrunnlag> {
@@ -368,12 +378,12 @@ internal class BeregningsGrunnlagServiceTest {
                 soeskenMedIBeregning = emptyList(),
             )
 
-        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
-        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingStatusService.settBeregnet(revurdering.id, any(), any()) } returns Unit
         coEvery {
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+            vedtaksvurderingService.hentIverksatteVedtakISak(sakId)
         } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
-        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(revurdering.id, any()) } returns revurdering
 
         every {
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
@@ -389,7 +399,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
 
         runBlocking {
             val lagret =
@@ -450,12 +460,12 @@ internal class BeregningsGrunnlagServiceTest {
                 soeskenMedIBeregning = listOf(periode1.copy(tom = periode2.fom.minusDays(1)), periode2),
             )
 
-        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
-        coEvery { behandlingKlient.statusTrygdetidOppdatert(revurdering.id, any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(revurdering.id, any(), any()) } returns Unit
         coEvery {
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+            vedtaksvurderingService.hentIverksatteVedtakISak(sakId)
         } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
-        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(revurdering.id, any()) } returns revurdering
 
         every {
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
@@ -465,7 +475,7 @@ internal class BeregningsGrunnlagServiceTest {
         } returns grunnlagEndring
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             val beregningsGrunnlag =
                 beregningsGrunnlagService.lagreBeregningsGrunnlag(
@@ -492,8 +502,8 @@ internal class BeregningsGrunnlagServiceTest {
         val omregningsId = randomUUID()
         val behandlingsId = randomUUID()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingService.hentInnvilgedePerioder(any<SakId>()) } returns emptyList()
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
@@ -510,7 +520,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
@@ -531,9 +541,9 @@ internal class BeregningsGrunnlagServiceTest {
         val omregningsId = randomUUID()
         val behandlingsId = randomUUID()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
         coEvery { sanksjonService.kopierSanksjon(any(), any(), any()) } just Runs
-        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+        coEvery { vedtaksvurderingService.hentInnvilgedePerioder(any<SakId>()) } returns emptyList()
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every {
@@ -549,7 +559,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
@@ -574,8 +584,8 @@ internal class BeregningsGrunnlagServiceTest {
 
         val overstyrBeregningGrunnlagDao = mockk<OverstyrBeregningGrunnlagDao>()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingService.hentInnvilgedePerioder(any<SakId>()) } returns emptyList()
         coEvery { beregningRepository.hentOverstyrBeregning(sakId) } returns overstyrBeregning(sakId)
 
         beregningRepository.hentOverstyrBeregning(sakId) shouldNotBe null
@@ -602,7 +612,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
@@ -622,11 +632,11 @@ internal class BeregningsGrunnlagServiceTest {
 
         val behandlingsId = randomUUID()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId) } returns null
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             assertThrows<RuntimeException> {
                 beregningsGrunnlagService.dupliserBeregningsGrunnlag(randomUUID(), behandlingsId, bruker)
@@ -643,7 +653,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
         val omregningsId = randomUUID()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns
             BeregningsGrunnlag(
@@ -654,7 +664,7 @@ internal class BeregningsGrunnlagServiceTest {
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             assertThrows<InternfeilException> {
                 beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
@@ -676,8 +686,8 @@ internal class BeregningsGrunnlagServiceTest {
                 sakId = sakId,
             )
 
-        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns revurdering
-        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns revurdering
+        coEvery { vedtaksvurderingService.hentIverksatteVedtakISak(sakId) } returns
             listOf(mockVedtak(forrigeBehandlingId, VedtakType.INNVILGELSE))
 
         // Nåværende behandling har ikke grunnlag, og forrige behandling var overstyrt (ingen ordinært grunnlag)
@@ -700,12 +710,12 @@ internal class BeregningsGrunnlagServiceTest {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
         val slot = slot<BeregningsGrunnlag>()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
@@ -731,12 +741,12 @@ internal class BeregningsGrunnlagServiceTest {
             mockBehandling(SakType.BARNEPENSJON, randomUUID(), virkningstidspunktdato = YearMonth.of(2023, 11))
         val slot = slot<BeregningsGrunnlag>()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
 
         val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
             listOf(
@@ -775,12 +785,12 @@ internal class BeregningsGrunnlagServiceTest {
             mockBehandling(SakType.BARNEPENSJON, randomUUID(), virkningstidspunktdato = YearMonth.of(2023, 11))
         val slot = slot<BeregningsGrunnlag>()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns hentOpplysningsgrunnlag
 
         runBlocking {
             beregningsGrunnlagService.lagreBeregningsGrunnlag(
@@ -891,7 +901,7 @@ internal class BeregningsGrunnlagServiceTest {
         val tom = LocalDate.now().minusYears(6)
 
         coEvery {
-            behandlingKlient.hentBehandling(any(), any())
+            behandlingService.hentDetaljertBehandling(any(), any())
         } returns mockBehandling(SakType.BARNEPENSJON, randomUUID(), BehandlingType.FØRSTEGANGSBEHANDLING, sakId3)
 
         every {
@@ -965,7 +975,7 @@ internal class BeregningsGrunnlagServiceTest {
                     utbetaltBeloep = 2000,
                 ),
             )
-        coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
         every { behandling.virkningstidspunkt() } returns
             Virkningstidspunkt(
                 dato = YearMonth.of(2023, MAY),
@@ -1039,7 +1049,7 @@ internal class BeregningsGrunnlagServiceTest {
                     beskrivelse = "gammel beskrivelse",
                 ),
             )
-        coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
         every { behandling.virkningstidspunkt() } returns
             Virkningstidspunkt(
                 dato = YearMonth.of(2023, JUNE),
@@ -1097,7 +1107,7 @@ internal class BeregningsGrunnlagServiceTest {
                     beskrivelse = "gammel beskrivelse",
                 ),
             )
-        coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
         every { behandling.virkningstidspunkt() } returns
             Virkningstidspunkt(
                 dato = YearMonth.of(2023, APRIL),
@@ -1188,10 +1198,10 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingstype = BehandlingType.REVURDERING,
                 sakId = sakId,
             )
-        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
-        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { behandlingService.hentDetaljertBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns foerstegangsbehandling
         every { beregningRepository.hentOverstyrBeregning(sakId) } returns overstyrBeregning(sakId)
-        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+        coEvery { vedtaksvurderingService.hentIverksatteVedtakISak(sakId) } returns
             listOf(
                 mockVedtak(
                     behandlingId,
@@ -1258,11 +1268,11 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingstype = BehandlingType.REVURDERING,
                 sakId = sakId,
             )
-        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
-        coEvery { behandlingKlient.hentBehandling(forrigeBehandlingId, any()) } returns forrigeBehandling
+        coEvery { behandlingService.hentDetaljertBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(forrigeBehandlingId, any()) } returns forrigeBehandling
         // Overstyrt beregning er deaktivert på saken
         every { beregningRepository.hentOverstyrBeregning(sakId) } returns null
-        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+        coEvery { vedtaksvurderingService.hentIverksatteVedtakISak(sakId) } returns
             listOf(mockVedtak(forrigeBehandlingId, VedtakType.INNVILGELSE))
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(revurderingId) } returns emptyList()
 
@@ -1289,16 +1299,17 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingstype = BehandlingType.REVURDERING,
                 sakId = sakId,
             )
-        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(revurderingId, any()) } returns revurdering
         // Behandlingen er ferdigstilt og kan ikke redigeres
-        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(revurderingId, any()) } returns false
+        coEvery { behandlingStatusService.settTrygdetidOppdatert(revurderingId, any(), true) } throws
+            TilstandException.UgyldigTilstand("Ugyldig status")
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(revurderingId) } returns emptyList()
 
         val grunnlag =
             runBlocking { beregningsGrunnlagService.hentEllerKopierOverstyrBeregningGrunnlag(revurderingId, mockk(relaxed = true)) }
 
         grunnlag.perioder.shouldBe(emptyList())
-        coVerify(exactly = 0) { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) }
+        coVerify(exactly = 0) { vedtaksvurderingService.hentIverksatteVedtakISak(any()) }
         verify(exactly = 0) {
             beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any())
         }
@@ -1329,9 +1340,9 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingstype = BehandlingType.REVURDERING,
                 sakId = sakId,
             )
-        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
-        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
-        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { vedtaksvurderingService.hentIverksatteVedtakISak(sakId) } returns
             listOf(
                 mockVedtak(
                     behandlingId,
@@ -1370,8 +1381,8 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
                 sakId = sakId,
             )
-        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
-        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns emptyList()
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns behandling
+        coEvery { vedtaksvurderingService.hentIverksatteVedtakISak(sakId) } returns emptyList()
         assertDoesNotThrow {
             beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(behandlingId, virk, mockk(relaxed = true))
         }
@@ -1402,9 +1413,9 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingstype = BehandlingType.REVURDERING,
                 sakId = sakId,
             )
-        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
-        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
-        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { vedtaksvurderingService.hentIverksatteVedtakISak(sakId) } returns
             listOf(
                 mockVedtak(
                     behandlingId,
@@ -1468,9 +1479,9 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingstype = BehandlingType.REVURDERING,
                 sakId = sakId,
             )
-        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
-        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
-        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { vedtaksvurderingService.hentIverksatteVedtakISak(sakId) } returns
             listOf(
                 mockVedtak(
                     behandlingId,
@@ -1528,9 +1539,9 @@ internal class BeregningsGrunnlagServiceTest {
                 behandlingstype = BehandlingType.REVURDERING,
                 sakId = sakId,
             )
-        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
-        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
-        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { vedtaksvurderingService.hentIverksatteVedtakISak(sakId) } returns
             listOf(
                 mockVedtak(
                     behandlingId,
@@ -1570,14 +1581,14 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
         val slot = slot<BeregningsGrunnlag>()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingService.hentInnvilgedePerioder(any<SakId>()) } returns
             listOf(
-                InnvilgetPeriodeDto(
+                InnvilgetPeriode(
                     periode = Periode(YearMonth.of(2023, 1), YearMonth.of(2023, 6)),
                     vedtak = emptyList(),
                 ),
-                InnvilgetPeriodeDto(
+                InnvilgetPeriode(
                     periode = Periode(YearMonth.of(2023, 9), null),
                     vedtak = emptyList(),
                 ),
@@ -1595,7 +1606,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
 
         runBlocking {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
@@ -1618,8 +1629,8 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
         val slot = slot<BeregningsGrunnlag>()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns emptyList()
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingService.hentInnvilgedePerioder(any<SakId>()) } returns emptyList()
 
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
@@ -1633,7 +1644,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
 
         runBlocking {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
@@ -1649,10 +1660,10 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
         val slot = slot<BeregningsGrunnlag>()
 
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { vedtaksvurderingKlient.hentInnvilgedePerioder(any(), any()) } returns
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
+        coEvery { vedtaksvurderingService.hentInnvilgedePerioder(any<SakId>()) } returns
             listOf(
-                InnvilgetPeriodeDto(
+                InnvilgetPeriode(
                     periode = Periode(YearMonth.of(2023, 1), null),
                     vedtak = emptyList(),
                 ),
@@ -1670,7 +1681,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
 
         runBlocking {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
@@ -1717,7 +1728,7 @@ internal class BeregningsGrunnlagServiceTest {
     private fun mockVedtak(
         behandlingId: UUID,
         type: VedtakType,
-    ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null, null)
+    ) = vedtak(behandlingId = behandlingId, type = type)
 
     private fun overstyrBeregning(sakId: SakId) =
         OverstyrBeregning(

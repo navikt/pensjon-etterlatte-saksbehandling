@@ -5,6 +5,8 @@ import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -14,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -27,21 +30,20 @@ import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlient
-import no.nav.etterlatte.modules.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.modules.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.modules.beregning.regler.overstyr.PeriodisertOverstyrGrunnlag
 import no.nav.etterlatte.modules.beregning.regler.overstyr.beregnOverstyrRegel
 import no.nav.etterlatte.modules.beregning.regler.overstyr.grunnbeloep
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
 class BeregnOverstyrBeregningService(
-    private val grunnlagKlient: GrunnlagKlient,
+    private val grunnlagService: GrunnlagService,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnOverstyrBeregningService::class.java)
 
@@ -50,7 +52,7 @@ class BeregnOverstyrBeregningService(
         overstyrBeregning: OverstyrBeregning,
         brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
+        val grunnlag = grunnlagService.hentOpplysningsgrunnlag(behandling.id) ?: throw GenerellIkkeFunnetException()
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
@@ -92,8 +94,11 @@ class BeregnOverstyrBeregningService(
             }
 
             BehandlingType.REVURDERING -> {
+                val vilkaarsvurdering =
+                    inTransactionIfNeeded { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) }
+                        ?: throw GenerellIkkeFunnetException()
                 val vilkaarsvurderingUtfall =
-                    vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, brukerTokenInfo).resultat?.utfall
+                    vilkaarsvurdering.resultat?.utfall
                         ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {

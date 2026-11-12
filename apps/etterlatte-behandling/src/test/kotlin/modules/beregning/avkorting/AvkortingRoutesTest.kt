@@ -27,10 +27,10 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.MottattInntektsjusteringService
 import no.nav.etterlatte.modules.beregning.etteroppgjoer.EtteroppgjoerService
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.modules.beregning.regler.avkortinggrunnlag
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -43,7 +43,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AvkortingRoutesTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val behandlingTilgangsSjekk = mockk<BehandlingTilgangsSjekk>()
     private val avkortingService = mockk<AvkortingService>()
     private val avkortingTidligAlderspensjonService = mockk<AvkortingTidligAlderspensjonService>()
     private val aarligInntektsjusteringService = mockk<AarligInntektsjusteringService>()
@@ -53,7 +53,7 @@ class AvkortingRoutesTest {
     @BeforeAll
     fun beforeAll() {
         mockOAuth2Server.startRandomPort()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
@@ -210,7 +210,7 @@ class AvkortingRoutesTest {
             runServer(mockOAuth2Server) {
                 avkorting(
                     avkortingService,
-                    behandlingKlient,
+                    behandlingTilgangsSjekk,
                     avkortingTidligAlderspensjonService,
                     aarligInntektsjusteringService,
                     mottattInntektsjusteringService,

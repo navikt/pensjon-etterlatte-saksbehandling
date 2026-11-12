@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -26,32 +27,34 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.modules.beregning.grunnlag.OverstyrtBeregningsgrunnlagEndresFoerVirkException
-import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlientImpl
-import no.nav.etterlatte.modules.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.modules.beregning.regler.bruker
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
+@ExtendWith(BeregningTestKontekst::class)
 internal class BeregnOverstyrServiceTest {
-    private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
-    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
+    private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
     private lateinit var beregnOverstyrBeregningService: BeregnOverstyrBeregningService
 
     @BeforeEach
     fun setup() {
         beregnOverstyrBeregningService =
             BeregnOverstyrBeregningService(
-                grunnlagKlient = grunnlagKlient,
+                grunnlagService = grunnlagService,
                 beregningsGrunnlagService = beregningsGrunnlagService,
-                vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+                vilkaarsvurderingService = vilkaarsvurderingService,
             )
     }
 
@@ -60,7 +63,7 @@ internal class BeregnOverstyrServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, YearMonth.of(2019, 11))
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
@@ -154,7 +157,7 @@ internal class BeregnOverstyrServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, YearMonth.of(2019, 11))
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
@@ -250,8 +253,8 @@ internal class BeregnOverstyrServiceTest {
 
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns vilkaarsvurderingDto
         every { vilkaarsvurderingDto.resultat } returns
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.OPPFYLT
@@ -351,8 +354,8 @@ internal class BeregnOverstyrServiceTest {
 
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns vilkaarsvurderingDto
         every { vilkaarsvurderingDto.resultat } returns
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
@@ -452,8 +455,8 @@ internal class BeregnOverstyrServiceTest {
 
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns vilkaarsvurderingDto
         every { vilkaarsvurderingDto.resultat } returns
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT

@@ -1,25 +1,29 @@
 package no.nav.etterlatte.modules.beregning.sanksjon
 
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.modules.beregning.BeregningToggles
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
 class SanksjonService(
-    private val behandlingKlient: BehandlingKlient,
+    private val behandlingService: BehandlingService,
     private val sanksjonRepository: SanksjonRepository,
     private val featureToggleService: FeatureToggleService,
+    private val behandlingStatusService: BehandlingStatusService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -47,7 +51,9 @@ class SanksjonService(
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val behandling =
+            inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
+                ?: throw GenerellIkkeFunnetException()
         if (behandling.behandlingType != BehandlingType.REVURDERING) {
             return
         }
@@ -75,7 +81,9 @@ class SanksjonService(
         sanksjon: LagreSanksjon,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val behandling =
+            inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
+                ?: throw GenerellIkkeFunnetException()
 
         if (!behandling.status.kanEndres()) throw BehandlingKanIkkeEndres()
 
@@ -118,7 +126,7 @@ class SanksjonService(
             return true
         }
         val forrigeIverksatteBehandling =
-            behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+            inTransactionIfNeeded { behandlingService.hentSisteIverksatteBehandling(behandling.sak) } ?: throw GenerellIkkeFunnetException()
         val sanksjonerIForrigeBehandling =
             sanksjonRepository.hentSanksjon(forrigeIverksatteBehandling.id)
         val sanksjonerIBehandling = sanksjonRepository.hentSanksjon(behandling.id)
@@ -163,7 +171,9 @@ class SanksjonService(
         sanksjonId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val behandling =
+            inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
+                ?: throw GenerellIkkeFunnetException()
         if (!behandling.status.kanEndres()) {
             throw BehandlingKanIkkeEndres()
         }
@@ -199,14 +209,10 @@ class SanksjonService(
 
         if (brukNyeReglerAvkorting) {
             // Setter behandlingen tl status "trygdetid oppdatert", slik at vi fanger opp at beregningen må oppdateres
-            if (!behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, true)) {
-                throw BehandlingKanIkkeEndres()
-            }
+            inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
         } else {
             // Setter behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
-            if (!behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)) {
-                throw BehandlingKanIkkeEndres()
-            }
+            inTransactionIfNeeded { behandlingStatusService.settBeregnet(behandlingId, brukerTokenInfo, dryRun = false) }
         }
     }
 }

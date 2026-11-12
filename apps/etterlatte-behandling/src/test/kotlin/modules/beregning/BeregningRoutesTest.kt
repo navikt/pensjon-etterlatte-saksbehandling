@@ -14,6 +14,9 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -29,23 +32,28 @@ import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(BeregningTestKontekst::class)
 internal class BeregningRoutesTest {
+    private val behandlingStatusService = mockk<BehandlingStatusService>()
+    private val behandlingTilgangsSjekk = mockk<BehandlingTilgangsSjekk>()
     private val mockOAuth2Server = MockOAuth2Server()
     private val beregningRepository = mockk<BeregningRepository>()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val behandlingService = mockk<BehandlingService>()
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
     private val beregnOverstyrBeregningService = mockk<BeregnOverstyrBeregningService>()
@@ -53,17 +61,18 @@ internal class BeregningRoutesTest {
     private val beregningService =
         BeregningService(
             beregningRepository = beregningRepository,
-            behandlingKlient = behandlingKlient,
+            behandlingService = behandlingService,
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
             beregnOverstyrBeregningService = beregnOverstyrBeregningService,
+            behandlingStatusService = behandlingStatusService,
         )
 
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
@@ -77,7 +86,8 @@ internal class BeregningRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -95,15 +105,16 @@ internal class BeregningRoutesTest {
         val beregning = beregning()
         val behandling = mockk<DetaljertBehandling>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns sakId1
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -123,11 +134,12 @@ internal class BeregningRoutesTest {
         val beregning = beregning()
 
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             client
@@ -145,16 +157,17 @@ internal class BeregningRoutesTest {
         val behandling = mockBehandling()
         val beregning = beregning()
 
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settBeregnet(any(), any(), any()) } returns Unit
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns mockBehandling()
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -179,8 +192,8 @@ internal class BeregningRoutesTest {
     fun `skal hente overstyrBeregning`() {
         val behandling = mockk<DetaljertBehandling>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns sakId1
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns
             OverstyrBeregning(
@@ -192,7 +205,8 @@ internal class BeregningRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -214,14 +228,15 @@ internal class BeregningRoutesTest {
     fun `skal ikke hente overstyrBeregning hvis den ikke finnes`() {
         val behandling = mockk<DetaljertBehandling>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns sakId1
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =

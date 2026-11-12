@@ -9,6 +9,8 @@ import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.grunnlag.validerVedtaksperioder
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -16,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -34,9 +37,6 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlient
-import no.nav.etterlatte.modules.beregning.klienter.TrygdetidKlient
-import no.nav.etterlatte.modules.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.modules.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.modules.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.modules.beregning.regler.omstillingstoenad.Avdoed
@@ -47,6 +47,9 @@ import no.nav.etterlatte.modules.beregning.regler.omstillingstoenad.sats.grunnbe
 import no.nav.etterlatte.modules.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.modules.beregning.regler.toSamlet
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.trygdetid.toDto
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -64,9 +67,9 @@ enum class BeregningToggles(
 }
 
 class BeregnOmstillingsstoenadService(
-    private val grunnlagKlient: GrunnlagKlient,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
-    private val trygdetidKlient: TrygdetidKlient,
+    private val grunnlagService: GrunnlagService,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
+    private val trygdetidService: TrygdetidService,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val sanksjonService: SanksjonService,
@@ -79,11 +82,11 @@ class BeregnOmstillingsstoenadService(
         brukerTokenInfo: BrukerTokenInfo,
         tilDato: LocalDate? = null,
     ): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
+        val grunnlag = grunnlagService.hentOpplysningsgrunnlag(behandling.id) ?: throw GenerellIkkeFunnetException()
 
         val trygdetid =
             try {
-                val trygdetidListe = trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
+                val trygdetidListe = trygdetidService.hentTrygdetiderIBehandling(behandling.id, brukerTokenInfo).map { it.toDto() }
 
                 when (trygdetidListe.size) {
                     0 -> throw TrygdetidMangler(behandling.id)
@@ -137,13 +140,11 @@ class BeregnOmstillingsstoenadService(
             }
 
             BehandlingType.REVURDERING -> {
+                val vilkaarsvurdering =
+                    inTransactionIfNeeded { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) }
+                        ?: throw GenerellIkkeFunnetException()
                 val vilkaarsvurderingUtfall =
-                    vilkaarsvurderingKlient
-                        .hentVilkaarsvurdering(
-                            behandling.id,
-                            brukerTokenInfo,
-                        ).resultat
-                        ?.utfall
+                    vilkaarsvurdering.resultat?.utfall
                         ?: throw Exception("Forventa å ha vilkårsvurderingsresultat for behandlingId=${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {

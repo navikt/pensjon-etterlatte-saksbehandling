@@ -1,0 +1,193 @@
+package no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats
+
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
+import no.nav.etterlatte.libs.regler.Regel
+import no.nav.etterlatte.libs.regler.RegelMeta
+import no.nav.etterlatte.libs.regler.RegelReferanse
+import no.nav.etterlatte.libs.regler.benytter
+import no.nav.etterlatte.libs.regler.definerKonstant
+import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
+import no.nav.etterlatte.libs.regler.med
+import no.nav.etterlatte.libs.regler.og
+import no.nav.etterlatte.libs.regler.velgNyesteGyldige
+import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepRepository
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.BP_1967_DATO
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.BP_2024_DATO
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.regler.Beregningstall
+
+val historiskeGrunnbeloep =
+    GrunnbeloepRepository.historiskeGrunnbeloep.map { grunnbeloep ->
+        val grunnbeloepGyldigFra = grunnbeloep.dato.atDay(1)
+        definerKonstant<BarnepensjonGrunnlag, Grunnbeloep>(
+            gjelderFra = grunnbeloepGyldigFra,
+            beskrivelse = "Grunnbeløp gyldig fra $grunnbeloepGyldigFra",
+            regelReferanse = RegelReferanse(id = "REGEL-HISTORISKE-GRUNNBELOEP"),
+            verdi = grunnbeloep,
+        )
+    }
+
+val grunnbeloep: Regel<BarnepensjonGrunnlag, Grunnbeloep> =
+    RegelMeta(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Finner grunnbeløp",
+        regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP"),
+    ) velgNyesteGyldige historiskeGrunnbeloep
+
+val soeskenIKullet1967: Regel<BarnepensjonGrunnlag, List<Folkeregisteridentifikator>> =
+    finnFaktumIGrunnlag(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Søskenkull fra grunnlaget",
+        finnFaktum = BarnepensjonGrunnlag::soeskenKull,
+        finnFelt = { it },
+    )
+
+val antallSoeskenIKullet1967 =
+    RegelMeta(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Finner antall søsken i kullet",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ANTALL-SOESKEN"),
+    ) benytter soeskenIKullet1967 med { soesken -> soesken.size }
+
+val avdodeForeldre2024: Regel<BarnepensjonGrunnlag, List<String?>> =
+    finnFaktumIGrunnlag(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Finner om søker har to avdøde foreldre",
+        finnFaktum = BarnepensjonGrunnlag::avdoedesTrygdetid,
+        finnFelt = { anvendtTrygdetider -> anvendtTrygdetider.map { it.ident } },
+    )
+
+val harToAvdodeForeldre2024 =
+    RegelMeta(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Finner om barnet har to avdøde foreldre",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-HAR-TO-AVDOEDE"),
+    ) benytter avdodeForeldre2024 med { avdoedeForeldre ->
+        avdoedeForeldre.all { it == UKJENT_AVDOED || Folkeregisteridentifikator.isValid(it) } && avdoedeForeldre.size >= 2
+    }
+
+val kunEnJuridiskForelder2024: Regel<BarnepensjonGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Finner om søker har kun en registrert juridisk forelder",
+        finnFaktum = BarnepensjonGrunnlag::kunEnJuridiskForelder,
+        finnFelt = { kunEnRegistrert -> kunEnRegistrert },
+    )
+
+val skalHaForeldreloesSats2024 =
+    RegelMeta(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Finner om barnet skal ha foreldreløssats",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-SKAL-HA-FORELDRELOES-SATS"),
+    ) benytter harToAvdodeForeldre2024 og kunEnJuridiskForelder2024 med { harToAvdodeForeldre, kunEnJuridiskForelder ->
+        harToAvdodeForeldre || kunEnJuridiskForelder
+    }
+
+val prosentsatsFoersteBarnKonstant1967 =
+    definerKonstant<BarnepensjonGrunnlag, Beregningstall>(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Prosentsats benyttet for første barn",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-SATS-ETTBARN"),
+        verdi = Beregningstall(0.40),
+    )
+
+val prosentsatsHvertBarnEnForelderAvdoed2024 =
+    definerKonstant<BarnepensjonGrunnlag, Beregningstall>(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Prosentsats benyttet for hvert barn når en forelder er død",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-SATS-EN-FORELDER-AVDOED"),
+        verdi = Beregningstall(1.00),
+    )
+
+val prosentsatsHvertBarnToForeldreAvdoed2024 =
+    definerKonstant<BarnepensjonGrunnlag, Beregningstall>(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Prosentsats benyttet for hvert barn når to foreldre er døde",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-SATS-TO-FORELDRE-AVDOED"),
+        verdi = Beregningstall(2.25),
+    )
+
+val beloepHvertBarnEnForelderAvdoed2024 =
+    RegelMeta(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Prosentsats benyttet for hvert barn når en forelder er død",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-EN-FORELDER-AVDOED", versjon = "2"),
+    ) benytter prosentsatsHvertBarnEnForelderAvdoed2024 og grunnbeloep med { sats, grunnbeloep ->
+        sats.multiply(grunnbeloep.grunnbeloep).divide(12)
+    }
+
+val beloepHvertBarnToForeldreAvdoed2024 =
+    RegelMeta(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Prosentsats benyttet for hvert barn når to foreldre er døde",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-TO-FORELDRE-AVDOED", versjon = "2"),
+    ) benytter prosentsatsHvertBarnToForeldreAvdoed2024 og grunnbeloep med { sats, grunnbeloep ->
+        sats.multiply(grunnbeloep.grunnbeloep).divide(12)
+    }
+
+val belopForFoersteBarn1967 =
+    RegelMeta(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Satser i kr for første barn",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ETTBARN", versjon = "2"),
+    ) benytter prosentsatsFoersteBarnKonstant1967 og grunnbeloep med { prosentsatsFoersteBarn, grunnbeloep ->
+        prosentsatsFoersteBarn.multiply(grunnbeloep.grunnbeloep).divide(12)
+    }
+
+val prosentsatsEtterfoelgendeBarnKonstant1967 =
+    definerKonstant<BarnepensjonGrunnlag, Beregningstall>(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Prosentsats benyttet for etterfølgende barn",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-SATS-FLERBARN"),
+        verdi = Beregningstall(0.25),
+    )
+
+val belopForEtterfoelgendeBarn1967 =
+    RegelMeta(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Satser i kr for etterfølgende barn",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-FLERBARN", versjon = "2"),
+    ) benytter prosentsatsEtterfoelgendeBarnKonstant1967 og grunnbeloep med { prosentsatsEtterfoelgendeBarn, grunnbeloep ->
+        prosentsatsEtterfoelgendeBarn.multiply(grunnbeloep.grunnbeloep).divide(12)
+    }
+
+val barnepensjonSatsRegel1967 =
+    RegelMeta(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET"),
+    ) benytter belopForFoersteBarn1967 og belopForEtterfoelgendeBarn1967 og antallSoeskenIKullet1967 med {
+        foerstebarnSats,
+        etterfoelgendeBarnSats,
+        antallSoesken,
+        ->
+        foerstebarnSats
+            .plus(etterfoelgendeBarnSats.multiply(antallSoesken))
+            .divide(antallSoesken.plus(1))
+    }
+
+val barnepensjonSatsRegel2024 =
+    RegelMeta(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Beregn barnepensjon etter 2024-regelverk",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET", versjon = "2"),
+    ) benytter skalHaForeldreloesSats2024 og beloepHvertBarnEnForelderAvdoed2024 og beloepHvertBarnToForeldreAvdoed2024 med {
+        skalHaForeldreloesSats,
+        beloepEnAvdoedForelder,
+        beloepToAvdoedeForeldre,
+        ->
+        if (skalHaForeldreloesSats) {
+            beloepToAvdoedeForeldre
+        } else {
+            beloepEnAvdoedForelder
+        }
+    }
+
+val barnepensjonSatsRegel =
+    RegelMeta(
+        gjelderFra = BP_1967_DATO,
+        beskrivelse = "Velger nyeste tilgjengelig beregningsregel",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-UAVKORTET"),
+    ) velgNyesteGyldige listOf(barnepensjonSatsRegel1967, barnepensjonSatsRegel2024)

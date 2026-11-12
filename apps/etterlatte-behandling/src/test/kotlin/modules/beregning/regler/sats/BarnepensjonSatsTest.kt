@@ -1,0 +1,177 @@
+package no.nav.etterlatte.modules.beregning.regler.sats
+
+import io.kotest.matchers.collections.shouldBeIn
+import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.regler.RegelPeriode
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN3_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.modules.beregning.regler.REGEL_PERIODE
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.antallSoeskenIKullet1967
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.belopForEtterfoelgendeBarn1967
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.belopForFoersteBarn1967
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.grunnbeloep
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.historiskeGrunnbeloep
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.prosentsatsEtterfoelgendeBarnKonstant1967
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.prosentsatsFoersteBarnKonstant1967
+import no.nav.etterlatte.modules.beregning.regler.barnepensjon.sats.soeskenIKullet1967
+import no.nav.etterlatte.modules.beregning.regler.barnepensjonGrunnlag
+import no.nav.etterlatte.modules.beregning.regler.toBeregningstall
+import no.nav.etterlatte.regler.Beregningstall
+import no.nav.etterlatte.regler.Beregningstall.Companion.DESIMALER_DELBEREGNING
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.YearMonth
+
+internal class BarnepensjonSatsTest {
+    @Test
+    fun `historiskeGrunnbeloep skal hente alle historiske grunnbeloep`() {
+        historiskeGrunnbeloep.size shouldBeGreaterThanOrEqual 70
+    }
+
+    @Test
+    fun `grunnbeloep skal returnere korrekt grunnbeloep for mai 2022`() {
+        val resultat = grunnbeloep.anvend(barnepensjonGrunnlag(), RegelPeriode(LocalDate.of(2022, 5, 1)))
+        with(resultat.verdi) {
+            dato shouldBe YearMonth.of(2022, 5)
+            grunnbeloep shouldBeExactly 111477
+        }
+    }
+
+    @Test
+    fun `grunnbeloep skal returnere korrekt grunnbeloep for april 2022`() {
+        val resultat = grunnbeloep.anvend(barnepensjonGrunnlag(), RegelPeriode(LocalDate.of(2022, 4, 1)))
+        with(resultat.verdi) {
+            dato shouldBe YearMonth.of(2021, 5)
+            grunnbeloep shouldBeExactly 106399
+        }
+    }
+
+    @Test
+    fun `soeskenIKullet skal returnere liste med soesken`() {
+        val resultat =
+            soeskenIKullet1967.anvend(
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi.size shouldBeExactly 2
+        resultat.verdi.forEach { it shouldBeIn listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER) }
+    }
+
+    @Test
+    fun `antallSoeskenIKullet skal returnere antall soesken i kullet`() {
+        val resultat =
+            antallSoeskenIKullet1967.anvend(
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi shouldBeExactly 2
+    }
+
+    @Test
+    fun `prosentSatsFoersteBarn skal returnere 40 prosent`() {
+        val resultat =
+            prosentsatsFoersteBarnKonstant1967.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi shouldBe Beregningstall(0.40)
+    }
+
+    @Test
+    fun `prosentSatsEtterfoelgendeBarn skal returnere 25 prosent`() {
+        val resultat =
+            prosentsatsEtterfoelgendeBarnKonstant1967.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi shouldBe Beregningstall(0.25)
+    }
+
+    @Test
+    fun `belopForFoersteBarn skal returnere 3715,90 kroner`() {
+        val resultat =
+            belopForFoersteBarn1967.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi shouldBe 3715.9.toBeregningstall(DESIMALER_DELBEREGNING)
+    }
+
+    @Test
+    fun `belopForEtterfoelgendeBarn skal returnere 2322,44 kroner`() {
+        val resultat =
+            belopForEtterfoelgendeBarn1967.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi shouldBe 2322.4375.toBeregningstall(DESIMALER_DELBEREGNING)
+    }
+
+    @Test
+    fun `barnepensjonSatsRegel skal returnere 3715,90 kroner ved 0 soesken`() {
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi shouldBe 3715.9.toBeregningstall(DESIMALER_DELBEREGNING)
+    }
+
+    @Test
+    fun `barnepensjonSatsRegel skal returnere 3019,17 kroner ved 1 soesken`() {
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER)),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi shouldBe 3019.16875.toBeregningstall(DESIMALER_DELBEREGNING)
+    }
+
+    @Test
+    fun `barnepensjonSatsRegel skal returnere 2786,93 kroner ved 2 soesken`() {
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi shouldBe 2786.925.toBeregningstall(DESIMALER_DELBEREGNING)
+    }
+
+    @Test
+    fun `barnepensjonSatsRegel skal returnere 2670,80 kroner ved 3 soesken`() {
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag =
+                    barnepensjonGrunnlag(
+                        soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER),
+                    ),
+                periode = REGEL_PERIODE,
+            )
+
+        resultat.verdi shouldBe 2670.803125.toBeregningstall(DESIMALER_DELBEREGNING)
+    }
+
+    @Test
+    fun `barnepensjonSatsRegel skal returnere grunnbeloep per maned etter nytt regelverk`() {
+        val resultat =
+            barnepensjonSatsRegel.anvend(
+                grunnlag = barnepensjonGrunnlag(),
+                periode = RegelPeriode(LocalDate.of(2024, 1, 1)),
+            )
+
+        resultat.verdi shouldBe 9885.toBeregningstall(DESIMALER_DELBEREGNING)
+    }
+}

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -31,6 +32,7 @@ import java.util.UUID
 class VedtakEtteroppgjoerServiceTest {
     private val vedtaksvurderingRepository = mockk<VedtaksvurderingRepository>()
     private val vedtakSamordningService = mockk<VedtakSamordningService>()
+
     private val vedtakEtteroppgjoerService =
         VedtakEtteroppgjoerService(
             repository = vedtaksvurderingRepository,
@@ -39,7 +41,8 @@ class VedtakEtteroppgjoerServiceTest {
 
     @AfterEach
     fun tearDown() {
-        confirmVerified()
+        confirmVerified(vedtakSamordningService, vedtakSamordningService)
+        clearAllMocks()
     }
 
     @Test

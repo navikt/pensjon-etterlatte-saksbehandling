@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.isDev
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
@@ -234,10 +235,12 @@ fun Route.etteroppgjoerRoutes(
                     kunSkrivetilgang {
                         inTransaction {
                             runBlocking {
-                                forbehandlingBrevService.ferdigstillForbehandlingMedBrev(
-                                    forbehandlingId,
-                                    brukerTokenInfo,
-                                )
+                                retryOgPakkUt {
+                                    forbehandlingBrevService.ferdigstillForbehandlingMedBrev(
+                                        forbehandlingId,
+                                        brukerTokenInfo,
+                                    )
+                                }
                             }
                         }
                         call.respond(HttpStatusCode.OK)

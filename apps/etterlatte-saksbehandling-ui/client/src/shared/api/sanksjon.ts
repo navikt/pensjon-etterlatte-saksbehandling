@@ -1,8 +1,9 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { ISanksjon, ISanksjonLagre } from '~shared/types/sanksjon'
+import { beregningApiUrl } from '~shared/api/beregning'
 
 export const hentSanksjon = async (behandlingId: string): Promise<ApiResponse<ISanksjon[]>> => {
-  return apiClient.get(`/beregning/sanksjon/${behandlingId}`)
+  return apiClient.get(beregningApiUrl(`/sanksjon/${behandlingId}`))
 }
 
 export const hentSanksjonerForSisteIverksatteBehandling = async (sakId: number): Promise<ApiResponse<ISanksjon[]>> => {
@@ -12,7 +13,8 @@ export const hentSanksjonerForSisteIverksatteBehandling = async (sakId: number):
 export const lagreSanksjon = async (args: {
   behandlingId: string
   sanksjon: ISanksjonLagre
-}): Promise<ApiResponse<void>> => apiClient.post(`/beregning/sanksjon/${args.behandlingId}`, { ...args.sanksjon })
+}): Promise<ApiResponse<void>> =>
+  apiClient.post(beregningApiUrl(`/sanksjon/${args.behandlingId}`), { ...args.sanksjon })
 
 export const slettSanksjon = async (args: { behandlingId: string; sanksjonId: string }): Promise<ApiResponse<void>> =>
-  apiClient.delete(`/beregning/sanksjon/${args.behandlingId}/${args.sanksjonId}`)
+  apiClient.delete(beregningApiUrl(`/sanksjon/${args.behandlingId}/${args.sanksjonId}`))

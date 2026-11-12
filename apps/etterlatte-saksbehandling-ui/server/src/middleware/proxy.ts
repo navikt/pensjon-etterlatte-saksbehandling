@@ -4,9 +4,10 @@ import { NextFunction, Request, Response } from 'express'
 import { logger } from '../monitoring/logger'
 import { randomUUID } from 'crypto'
 
-export const proxy = (host: string) => {
+export const proxy = (host: string, pathRewrite?: Record<string, string>) => {
   const middleware = createProxyMiddleware({
     target: host,
+    pathRewrite,
     changeOrigin: true,
     on: {
       proxyReq: (proxyReq: ClientRequest, req: Request, res: Response) => {

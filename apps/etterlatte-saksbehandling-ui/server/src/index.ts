@@ -98,6 +98,12 @@ app.use('/api/pdltjenester', tokenMiddleware(ApiConfig.pdltjenester.scope), prox
 
 app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url))
 
+app.use(
+  '/api/beregning_v2',
+  tokenMiddleware(ApiConfig.behandling.scope),
+  proxy(ApiConfig.behandling.url, { '^/api/beregning_v2': '/api/beregning' })
+)
+
 app.use('/api/vedtak', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
 
 app.use('/api/trygdetid', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))

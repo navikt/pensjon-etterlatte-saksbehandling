@@ -23,7 +23,7 @@ class VedtakEtteroppgjoerService(
     ): List<VedtakEtteroppgjoerDto> =
         hentVedtakForSak(sakId)
             .retainIverksatteOgAttesterteAvslag()
-            .tidslinjejustert(tilOgMedBehandlingId, etteroppgjoersAar)
+            .sammenstilt(tilOgMedBehandlingId, etteroppgjoersAar)
             .map { vedtakSamordningDto ->
                 VedtakEtteroppgjoerDto(
                     vedtakId = vedtakSamordningDto.vedtakId,
@@ -38,12 +38,12 @@ class VedtakEtteroppgjoerService(
                 )
             }
 
-    private fun List<Vedtak>.tidslinjejustert(
+    private fun List<Vedtak>.sammenstilt(
         tilOgMedBehandlingId: UUID?,
         etteroppgjoersAar: Int,
     ): List<VedtakSamordningDto> =
         vedtakSamordningService
-            .tidslinjejustertVedtaksliste(
+            .sammenstiltVedtaksliste(
                 vedtakListe = this,
                 tilOgMedBehandlingId = tilOgMedBehandlingId,
                 fomDato = LocalDate.of(etteroppgjoersAar, 1, 1),

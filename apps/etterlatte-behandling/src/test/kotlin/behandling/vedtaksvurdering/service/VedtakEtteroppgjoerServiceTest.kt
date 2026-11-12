@@ -98,7 +98,7 @@ class VedtakEtteroppgjoerServiceTest {
         val etteroppgjoersAarDag1 = LocalDate.of(2025, 1, 1)
         val tilOgMedBehandlingId = UUID.randomUUID()
         every {
-            vedtakSamordningService.tidslinjejustertVedtaksliste(any(), tilOgMedBehandlingId, etteroppgjoersAarDag1)
+            vedtakSamordningService.sammenstiltVedtaksliste(any(), tilOgMedBehandlingId, etteroppgjoersAarDag1)
         } returns
             tidslinjeJustertMocked
 
@@ -123,7 +123,7 @@ class VedtakEtteroppgjoerServiceTest {
         // sjekk at vi baserer oss på iverksatte / attesterte avslag
         verify { vedtaksvurderingRepository.hentVedtakForSak(sakId) }
         val slotVedtakliste = slot<List<Vedtak>>()
-        verify { vedtakSamordningService.tidslinjejustertVedtaksliste(capture(slotVedtakliste), any(), any()) }
+        verify { vedtakSamordningService.sammenstiltVedtaksliste(capture(slotVedtakliste), any(), any()) }
         slotVedtakliste.captured.map { it.id } shouldContainExactlyInAnyOrder
             listOf(
                 vedtak1.id,

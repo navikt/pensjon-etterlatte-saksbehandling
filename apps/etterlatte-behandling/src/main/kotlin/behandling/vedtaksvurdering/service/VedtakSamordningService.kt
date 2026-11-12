@@ -42,15 +42,15 @@ class VedtakSamordningService(
             repository
                 .hentFerdigstilteVedtak(fnr, sakType)
 
-        return tidslinjejustertVedtaksliste(ferdigstilteVedtak, tilOgMedBehandlingId, fomDato)
+        return sammenstiltVedtaksliste(ferdigstilteVedtak, tilOgMedBehandlingId, fomDato)
     }
 
-    fun tidslinjejustertVedtaksliste(
+    fun sammenstiltVedtaksliste(
         vedtakListe: List<Vedtak>,
         tilOgMedBehandlingId: UUID?,
         fomDato: LocalDate,
     ): List<VedtakSamordningDto> {
-        val tidslinjeJustert =
+        val sammenstiltVedtaksliste =
             Vedtakstidslinje(
                 vedtakListe
                     .begrensTilOgMedBehandling(tilOgMedBehandlingId),
@@ -58,10 +58,10 @@ class VedtakSamordningService(
 
         val avkortetYtelsePerioderByVedtak =
             repository
-                .hentAvkortetYtelsePerioder(tidslinjeJustert.map { it.id }.toSet())
+                .hentAvkortetYtelsePerioder(sammenstiltVedtaksliste.map { it.id }.toSet())
                 .groupBy { it.vedtakId }
 
-        return tidslinjeJustert.map {
+        return sammenstiltVedtaksliste.map {
             val avkortetYtelsePerioder = avkortetYtelsePerioderByVedtak[it.id] ?: emptyList()
             it.toSamordningsvedtakDto(avkortetYtelsePerioder)
         }

@@ -64,6 +64,8 @@ spec:
           - name: max_connections
             value: "100"
   env:
+    - name: BRUK_INTERN_BEREGNING
+      value: "true"
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID

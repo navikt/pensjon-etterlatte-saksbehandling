@@ -14,6 +14,12 @@ kjører forretningslogikken og dataene fortsatt ligger i beregning sin database.
 Rutene kaller bare repositories, ikke tjenester eller regelmotoren. Bare systemtoken fra
 `etterlatte-behandling` har tilgang. Inbound for behandling finnes allerede i både dev og prod.
 
+Miljøvariabelen `BRUK_INTERN_BEREGNING` styrer om rutene registreres ved oppstart, etter
+samme miljøstyrte toggle-mønster som ved migreringen av trygdetid. CRUD-endepunktene er
+aktivert i dev (`true`) og deaktivert i prod (`false`). Hvis miljøvariabelen ikke er satt,
+er endepunktene deaktivert.
+Når toggelen er av, gir disse endepunktene 404. Eksisterende endepunkter påvirkes ikke.
+
 Alle stiene under er relative til `/api/beregning/intern`.
 
 | Metode | Sti | Operasjon |

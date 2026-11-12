@@ -88,6 +88,7 @@ internal class AnvendtTrygdetidCrudTest(
                     etteroppgjoerRepository = mockk(),
                     sanksjonRepository = mockk(),
                     behandlingApp = behandlingApp,
+                    aktivert = true,
                 )
             }
 

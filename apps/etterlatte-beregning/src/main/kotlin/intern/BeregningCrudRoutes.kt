@@ -44,6 +44,7 @@ fun Route.beregningCrudRoutes(
     etteroppgjoerRepository: EtteroppgjoerRepository,
     sanksjonRepository: SanksjonRepository,
     behandlingApp: String,
+    aktivert: Boolean,
 ) {
     val tilgangPlugin =
         createRouteScopedPlugin("BeregningCrudTilgang") {
@@ -58,14 +59,16 @@ fun Route.beregningCrudRoutes(
             }
         }
 
-    route("/api/beregning/intern") {
-        install(tilgangPlugin)
-        beregningRepositoryRoutes(beregningRepository)
-        beregningsGrunnlagRepositoryRoutes(beregningsGrunnlagRepository)
-        anvendtTrygdetidRepositoryRoutes(anvendtTrygdetidRepository)
-        avkortingRepositoryRoutes(avkortingRepository)
-        etteroppgjoerRepositoryRoutes(etteroppgjoerRepository)
-        sanksjonRepositoryRoutes(sanksjonRepository)
+    if (aktivert) {
+        route("/api/beregning/intern") {
+            install(tilgangPlugin)
+            beregningRepositoryRoutes(beregningRepository)
+            beregningsGrunnlagRepositoryRoutes(beregningsGrunnlagRepository)
+            anvendtTrygdetidRepositoryRoutes(anvendtTrygdetidRepository)
+            avkortingRepositoryRoutes(avkortingRepository)
+            etteroppgjoerRepositoryRoutes(etteroppgjoerRepository)
+            sanksjonRepositoryRoutes(sanksjonRepository)
+        }
     }
 }
 

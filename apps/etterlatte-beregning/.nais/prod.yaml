@@ -81,6 +81,8 @@ spec:
           - name: pgaudit.log_relation
             value: "on"
   env:
+    - name: BRUK_INTERN_BEREGNING
+      value: "false"
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID

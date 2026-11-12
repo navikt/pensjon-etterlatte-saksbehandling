@@ -19,6 +19,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.IngenInntektInnvilgetPeriode
@@ -52,6 +53,7 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
@@ -529,22 +531,53 @@ internal class BeregningCrudRoutesTest {
         }
     }
 
-    private fun medServer(test: suspend (HttpClient) -> Unit) =
-        testApplication {
-            val httpClient =
-                runServer(oauth) {
-                    beregningCrudRoutes(
-                        beregningRepository,
-                        grunnlagRepository,
-                        trygdetidRepository,
-                        avkortingRepository,
-                        etteroppgjoerRepository,
-                        sanksjonRepository,
-                        behandlingApp,
-                    )
-                }
-            test(httpClient)
+    @ParameterizedTest
+    @MethodSource("endepunkter")
+    fun `registrerer ikke CRUD-endepunkter naar toggelen er av`(
+        method: HttpMethod,
+        path: String,
+    ) {
+        medServer(crudAktivert = false) { client ->
+            client.requestCrud(method, path).status shouldBe HttpStatusCode.NotFound
         }
+        verifiserIngenRepositoryKall()
+    }
+
+    @ParameterizedTest
+    @MethodSource("endepunkter")
+    fun `registrerer ikke CRUD-endepunkter naar toggelen mangler`(
+        method: HttpMethod,
+        path: String,
+    ) {
+        medServer(crudAktivert = null) { client ->
+            client.requestCrud(method, path).status shouldBe HttpStatusCode.NotFound
+        }
+        verifiserIngenRepositoryKall()
+    }
+
+    private fun medServer(
+        crudAktivert: Boolean? = true,
+        test: suspend (HttpClient) -> Unit,
+    ) = testApplication {
+        val env =
+            Miljoevariabler.httpClient(
+                crudAktivert?.let { mapOf(BRUK_INTERN_BEREGNING to it.toString()) } ?: emptyMap(),
+            )
+        val httpClient =
+            runServer(oauth) {
+                beregningCrudRoutes(
+                    beregningRepository,
+                    grunnlagRepository,
+                    trygdetidRepository,
+                    avkortingRepository,
+                    etteroppgjoerRepository,
+                    sanksjonRepository,
+                    behandlingApp,
+                    aktivert = env[BRUK_INTERN_BEREGNING] == "true",
+                )
+            }
+        test(httpClient)
+    }
 
     private suspend fun HttpClient.requestCrud(
         method: HttpMethod,

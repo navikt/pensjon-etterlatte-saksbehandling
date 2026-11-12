@@ -40,6 +40,7 @@ class Server(
                     etteroppgjoerRepository = etteroppgjoerRepository,
                     sanksjonRepository = sanksjonRepository,
                     behandlingApp = config.getString("behandling.client.id").replace('.', ':'),
+                    aktivert = beregningCrudAktivert,
                 )
                 beregning(beregningService, behandlingKlient)
                 beregningsGrunnlag(beregningsGrunnlagService, behandlingKlient)

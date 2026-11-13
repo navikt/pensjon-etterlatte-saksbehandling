@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -70,6 +71,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.Month
@@ -102,6 +104,32 @@ internal class BeregnBarnepensjonServiceTest {
             anvendtTrygdetidRepository = anvendtTrygdetidRepository,
             featureToggleService = featureToggleService,
         )
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal gi internfeil naar opplysningsgrunnlag eller vilkaarsvurdering mangler`(manglerGrunnlag: Boolean) =
+        runBlocking<Unit> {
+            val behandling = mockBehandling(BehandlingType.REVURDERING)
+            every { grunnlagService.hentOpplysningsgrunnlag(behandling.id) } returns
+                if (manglerGrunnlag) null else GrunnlagTestData().hentOpplysningsgrunnlag()
+            every { beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id) } returns
+                barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(behandling.id, bruker) } returns listOf(mockTrygdetid(behandling.id))
+            every { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) } returns null
+
+            val feil =
+                assertThrows<InternfeilException> {
+                    beregnBarnepensjonService().beregn(behandling, bruker)
+                }
+
+            feil.somJsonRespons().status shouldBe 500
+            feil.detail shouldBe
+                if (manglerGrunnlag) {
+                    "Mangler opplysningsgrunnlag for behandlingId=${behandling.id}"
+                } else {
+                    "Mangler vilkårsvurdering for behandlingId=${behandling.id}"
+                }
+        }
 
     @Test
     fun `skal kaste feil hvis beregningsgrunnlag hentet er på en annen behandling`() {

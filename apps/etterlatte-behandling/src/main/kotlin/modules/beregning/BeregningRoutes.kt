@@ -9,9 +9,6 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.BehandlingKanIkkeBytteStatusException
-import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
-import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -56,19 +53,13 @@ fun Route.beregning(
                 logger.info("Oppretter overstyrBeregning med behandlingId=$it")
 
                 val overstyrBeregning =
-                    try {
-                        beregningService
-                            .opprettOverstyrBeregning(
-                                behandlingId,
-                                call.receive<OverstyrBeregningDTO>(),
-                                brukerTokenInfo,
-                            )!!
-                            .toDTO()
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        throw KanIkkeEndreOverstyrtBeregningGrunnetStatus(behandlingId, e)
-                    } catch (e: BehandlingStoetterIkkeStatusEndringException) {
-                        throw KanIkkeEndreOverstyrtBeregningGrunnetStatus(behandlingId, e)
-                    }
+                    beregningService
+                        .opprettOverstyrBeregning(
+                            behandlingId,
+                            call.receive<OverstyrBeregningDTO>(),
+                            brukerTokenInfo,
+                        )!!
+                        .toDTO()
 
                 call.respond(overstyrBeregning)
             }
@@ -76,13 +67,7 @@ fun Route.beregning(
 
         delete("/{$BEHANDLINGID_CALL_PARAMETER}/overstyrt") {
             withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) {
-                try {
-                    beregningService.deaktiverOverstyrtberegning(behandlingId, brukerTokenInfo)
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    throw KanIkkeEndreOverstyrtBeregningGrunnetStatus(behandlingId, e)
-                } catch (e: BehandlingStoetterIkkeStatusEndringException) {
-                    throw KanIkkeEndreOverstyrtBeregningGrunnetStatus(behandlingId, e)
-                }
+                beregningService.deaktiverOverstyrtberegning(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -90,14 +75,7 @@ fun Route.beregning(
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
                 logger.info("Oppretter beregning for behandlingId=$behandlingId")
-                val beregning =
-                    try {
-                        beregningService.opprettBeregning(behandlingId, brukerTokenInfo)
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        throw BehandlingKanIkkeBytteStatusException(e)
-                    } catch (e: BehandlingStoetterIkkeStatusEndringException) {
-                        throw BehandlingKanIkkeBytteStatusException(e)
-                    }
+                val beregning = beregningService.opprettBeregning(behandlingId, brukerTokenInfo)
                 call.respond(beregning.toDTO())
             }
         }

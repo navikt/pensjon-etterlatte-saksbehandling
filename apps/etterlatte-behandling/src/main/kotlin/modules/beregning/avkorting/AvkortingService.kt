@@ -2,6 +2,8 @@ package no.nav.etterlatte.modules.beregning.avkorting
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.toVedtakSammendragDto
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -17,16 +19,18 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.MaanederMedGammelSanksjonIAvkorting
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.ManglerTilgang
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.modules.beregning.BeregningService
 import no.nav.etterlatte.modules.beregning.BeregningToggles
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingMapper.avkortingForFrontend
@@ -57,17 +61,18 @@ class AvkortingService(
     private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
     private val featureToggleService: FeatureToggleService,
     private val behandlingStatusService: BehandlingStatusService,
+    private val behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun manglendeInntektsaar(
+    fun manglendeInntektsaar(
         behandlingId: UUID,
         avkortingSomSjekkes: Avkorting? = null,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Int> {
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
         val avkorting = avkortingSomSjekkes ?: hentAvkorting(behandlingId)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val aarMedAvkorting =
@@ -120,7 +125,7 @@ class AvkortingService(
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
         val eksisterendeAvkorting = hentAvkorting(behandlingId)
         val forrigeAvkorting =
             when (behandling.behandlingType) {
@@ -198,13 +203,13 @@ class AvkortingService(
 
     fun hentAvkorting(behandlingId: UUID) = avkortingRepository.hentAvkorting(behandlingId)
 
-    suspend fun hentFullfoertAvkorting(
+    fun hentFullfoertAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AvkortingDto {
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
         val avkorting =
             avkortingRepository.hentAvkorting(behandlingId)
                 ?: throw AvkortingFinnesIkkeException(behandlingId)
@@ -219,7 +224,7 @@ class AvkortingService(
         tilstandssjekk(behandlingId, brukerTokenInfo)
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
         val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandlingId)
 
         if (eksisterendeAvkorting == null && behandling.behandlingType == BehandlingType.REVURDERING) {
@@ -269,7 +274,9 @@ class AvkortingService(
                 null -> {
                     val aldersovergang =
                         aldersovergangService.aldersovergangMaaned(behandling.sak, behandling.sakType)
-                            ?: throw GenerellIkkeFunnetException()
+                            ?: throw InternfeilException(
+                                "Mangler måned for aldersovergang for sakId=${behandling.sak} sakType=${behandling.sakType}",
+                            )
                     when (aldersovergang.year) {
                         in nyeGrunnlag.map { it.fom.year } -> aldersovergang
                         else -> null
@@ -338,7 +345,7 @@ class AvkortingService(
         val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
         val virkIBehandling =
             behandling.virkningstidspunkt?.dato ?: throw UgyldigForespoerselException(
                 "MANGLER_VIRKNINGSTIDSPUNKT",
@@ -436,7 +443,7 @@ class AvkortingService(
         avkortingRepository.hentAvkorting(behandlingId)
             ?: throw AvkortingFinnesIkkeException(behandlingId)
 
-    suspend fun hentAvkortingForrigeBehandling(
+    fun hentAvkortingForrigeBehandling(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         virkningstidspunkt: YearMonth,
@@ -474,7 +481,7 @@ class AvkortingService(
         )
     }
 
-    suspend fun hentAvkortingMedReparertAarsoppgjoer(
+    fun hentAvkortingMedReparertAarsoppgjoer(
         sakId: SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -498,8 +505,23 @@ class AvkortingService(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) {
-        inTransactionIfNeeded {
-            behandlingStatusService.settAvkortet(behandlingId, bruker, dryRun = true)
+        if (bruker is Saksbehandler && !behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)) {
+            throw ManglerTilgang()
+        }
+        try {
+            inTransactionIfNeeded {
+                behandlingStatusService.settAvkortet(behandlingId, bruker, dryRun = true)
+            }
+        } catch (e: Exception) {
+            throw when (e) {
+                is TilstandException.UgyldigTilstand,
+                is TilstandException.IkkeFyltUt,
+                is TilstandException.KanIkkeRedigere,
+                is BehandlingStoetterIkkeStatusEndringException,
+                -> AvkortingBehandlingFeilStatus(behandlingId, e)
+
+                else -> e
+            }
         }
     }
 
@@ -532,7 +554,7 @@ class AvkortingService(
         }
     }
 
-    suspend fun harAvkortingMedSanksjonGamleRegler(
+    fun harAvkortingMedSanksjonGamleRegler(
         behandlingId: UUID,
         inntektsaar: Int,
         brukerTokenInfo: BrukerTokenInfo,
@@ -545,7 +567,7 @@ class AvkortingService(
             if (aarsoppgjoerInntektsaarEksisterende == null) {
                 val behandling =
                     inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                        ?: throw GenerellIkkeFunnetException()
+                        ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
                 val alleVedtak =
                     inTransactionIfNeeded {
                         vedtaksvurderingService

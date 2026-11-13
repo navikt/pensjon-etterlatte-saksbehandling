@@ -64,7 +64,7 @@ internal class SanksjonServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    fun `skal viderefoere statusfeilen for sanksjoner uten aa lagre`(brukNyeRegler: Boolean) =
+    fun `skal beholde statusfeilen for sanksjoner uten aa lagre`(brukNyeRegler: Boolean) =
         runBlocking<Unit> {
             val behandlingId = UUID.randomUUID()
             val feil = TilstandException.UgyldigTilstand("Ugyldig status")
@@ -75,11 +75,30 @@ internal class SanksjonServiceTest {
             every { behandlingStatusService.settBeregnet(behandlingId, bruker, false) } throws feil
 
             val resultat =
-                assertThrows<TilstandException.UgyldigTilstand> {
+                assertThrows<BehandlingKanIkkeEndres> {
                     service.opprettEllerOppdaterSanksjon(behandlingId, lagreSanksjon(), bruker)
                 }
 
-            resultat shouldBeSameInstanceAs feil
+            resultat.cause shouldBeSameInstanceAs feil
+            verify(exactly = 0) {
+                sanksjonRepository.opprettSanksjon(any(), any(), any(), any())
+                sanksjonRepository.oppdaterSanksjon(any(), any())
+            }
+        }
+
+    @Test
+    fun `skal viderefoere tekniske feil uten aa lagre sanksjoner`() =
+        runBlocking<Unit> {
+            val behandlingId = UUID.randomUUID()
+            val feil = IllegalStateException("Databasen er utilgjengelig")
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns
+                behandling(id = behandlingId, status = BehandlingStatus.BEREGNET)
+            every { behandlingStatusService.settBeregnet(behandlingId, bruker, false) } throws feil
+
+            assertThrows<IllegalStateException> {
+                service.opprettEllerOppdaterSanksjon(behandlingId, lagreSanksjon(), bruker)
+            } shouldBeSameInstanceAs feil
+
             verify(exactly = 0) {
                 sanksjonRepository.opprettSanksjon(any(), any(), any(), any())
                 sanksjonRepository.oppdaterSanksjon(any(), any())

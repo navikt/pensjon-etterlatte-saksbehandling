@@ -4,6 +4,7 @@ import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -106,6 +107,73 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { beregningRepository.hentOverstyrBeregning(any()) } returns null
     }
+
+    @Test
+    fun `skal gi internfeil uten aa lagre naar opplysningsgrunnlag mangler`() =
+        runBlocking<Unit> {
+            val behandlingId = randomUUID()
+            val bruker = simpleSaksbehandler()
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns mockk()
+            every { grunnlagService.hentOpplysningsgrunnlag(behandlingId) } returns null
+
+            val feil =
+                assertThrows<InternfeilException> {
+                    beregningsGrunnlagService.lagreBeregningsGrunnlag(
+                        behandlingId,
+                        LagreBeregningsGrunnlag(emptyList(), null),
+                        bruker,
+                    )
+                }
+
+            feil.somJsonRespons().status shouldBe 500
+            feil.detail shouldBe "Mangler opplysningsgrunnlag for behandlingId=$behandlingId"
+            verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+            verify(exactly = 0) { behandlingStatusService.settTrygdetidOppdatert(any(), any(), false) }
+        }
+
+    @Test
+    fun `skal viderefoere feil ved statusoppdatering etter lagring av overstyrt grunnlag`() =
+        runBlocking<Unit> {
+            val behandlingId = randomUUID()
+            val bruker = simpleSaksbehandler()
+            val feil = TilstandException.UgyldigTilstand("Statusendringen feilet")
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns mockk()
+            every { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, emptyList()) } just runs
+            every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, bruker, false) } throws feil
+
+            assertThrows<TilstandException.UgyldigTilstand> {
+                beregningsGrunnlagService.lagreOverstyrBeregningGrunnlag(
+                    behandlingId,
+                    OverstyrBeregningGrunnlagDTO(emptyList()),
+                    bruker,
+                )
+            } shouldBeSameInstanceAs feil
+
+            verify(exactly = 1) {
+                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, emptyList())
+            }
+            verify(exactly = 0) { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) }
+        }
+
+    @Test
+    fun `skal viderefoere tekniske feil ved automatisk kopiering av grunnlag`() =
+        runBlocking<Unit> {
+            val behandlingId = randomUUID()
+            val bruker = simpleSaksbehandler()
+            val feil = IllegalStateException("Databasen er utilgjengelig")
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns
+                mockk {
+                    every { sak } returns sakId1
+                }
+            every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns emptyList()
+            every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, bruker, true) } throws feil
+
+            assertThrows<IllegalStateException> {
+                beregningsGrunnlagService.hentEllerKopierOverstyrBeregningGrunnlag(behandlingId, bruker)
+            } shouldBeSameInstanceAs feil
+
+            verify(exactly = 0) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
+        }
 
     @Test
     fun `alle søsken må være avdødes barn hvis ikke kast BPBeregningsgrunnlagBrukerUgydligFnr`() {

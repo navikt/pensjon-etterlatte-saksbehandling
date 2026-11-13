@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -82,7 +81,9 @@ class BeregnOmstillingsstoenadService(
         brukerTokenInfo: BrukerTokenInfo,
         tilDato: LocalDate? = null,
     ): Beregning {
-        val grunnlag = grunnlagService.hentOpplysningsgrunnlag(behandling.id) ?: throw GenerellIkkeFunnetException()
+        val grunnlag =
+            grunnlagService.hentOpplysningsgrunnlag(behandling.id)
+                ?: throw InternfeilException("Mangler opplysningsgrunnlag for behandlingId=${behandling.id}")
 
         val trygdetid =
             try {
@@ -142,7 +143,7 @@ class BeregnOmstillingsstoenadService(
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurdering =
                     inTransactionIfNeeded { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) }
-                        ?: throw GenerellIkkeFunnetException()
+                        ?: throw InternfeilException("Mangler vilkårsvurdering for behandlingId=${behandling.id}")
                 val vilkaarsvurderingUtfall =
                     vilkaarsvurdering.resultat?.utfall
                         ?: throw Exception("Forventa å ha vilkårsvurderingsresultat for behandlingId=${behandling.id}")

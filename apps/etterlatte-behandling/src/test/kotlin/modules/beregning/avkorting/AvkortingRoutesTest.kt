@@ -235,10 +235,52 @@ class AvkortingRoutesTest {
     }
 
     @Test
-    fun `skal avvise lesebruker foer avkorting kan endres`() {
+    fun `skal beholde lesetilgang ved henting av avkorting`() {
+        val behandlingId = UUID.randomUUID()
+        val avkorting = AvkortingFrontendDto(emptyList(), emptyList(), emptyList(), emptyList())
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, false, any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) } returns false
+        coEvery { avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, any()) } returns avkorting
+
+        testApplication {
+            val response =
+                client.get("/api/beregning/avkorting/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                }
+
+            response.status shouldBe HttpStatusCode.OK
+            objectMapper.readValue(response.bodyAsText(), AvkortingFrontendDto::class.java) shouldBe avkorting
+        }
+
+        coVerify(exactly = 1) { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, false, any()) }
+        coVerify(exactly = 0) { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) }
+        coVerify(exactly = 1) { avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, any()) }
+    }
+
+    @Test
+    fun `skal returnere 204 til lesebruker naar avkorting ikke finnes`() {
         val behandlingId = UUID.randomUUID()
         coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, false, any()) } returns true
         coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) } returns false
+        coEvery { avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, any()) } returns null
+
+        testApplication {
+            val response =
+                client.get("/api/beregning/avkorting/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                }
+
+            response.status shouldBe HttpStatusCode.NoContent
+        }
+
+        coVerify(exactly = 1) { avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, any()) }
+        coVerify(exactly = 0) { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) }
+    }
+
+    @Test
+    fun `skal avvise henting uten lesetilgang`() {
+        val behandlingId = UUID.randomUUID()
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, false, any()) } returns false
 
         testApplication {
             val response =
@@ -249,7 +291,59 @@ class AvkortingRoutesTest {
             response.status shouldBe HttpStatusCode.Forbidden
         }
 
-        coVerify(exactly = 1) { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) }
+        coVerify(exactly = 0) {
+            behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any())
+            avkortingService.hentOpprettEllerReberegnAvkorting(any(), any())
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal hente avkorting for systembruker og saksbehandler`(systembruker: Boolean) {
+        val behandlingId = UUID.randomUUID()
+        val avkorting = AvkortingFrontendDto(emptyList(), emptyList(), emptyList(), emptyList())
+        coEvery { avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, any()) } returns avkorting
+
+        testApplication {
+            val token =
+                if (systembruker) {
+                    mockOAuth2Server.issueSystembrukerToken()
+                } else {
+                    mockOAuth2Server.issueSaksbehandlerToken()
+                }
+            val response =
+                client.get("/api/beregning/avkorting/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            response.status shouldBe HttpStatusCode.OK
+            objectMapper.readValue(response.bodyAsText(), AvkortingFrontendDto::class.java) shouldBe avkorting
+        }
+
+        coVerify(exactly = 1) { avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, any()) }
+        coVerify(exactly = 0) {
+            behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any())
+        }
+    }
+
+    @Test
+    fun `skal fortsatt avvise endring av inntekter uten skrivetilgang`() {
+        val behandlingId = UUID.randomUUID()
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, false, any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) } returns false
+
+        testApplication {
+            val response =
+                client.post("/api/beregning/avkorting/$behandlingId/liste") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(AvkortingGrunnlagFlereInntekterDto(emptyList()).toJson())
+                }
+
+            response.status shouldBe HttpStatusCode.Forbidden
+        }
+
+        coVerify(exactly = 0) { avkortingService.beregnAvkortingMedNyeGrunnlag(any(), any(), any()) }
         coVerify(exactly = 0) { avkortingService.hentOpprettEllerReberegnAvkorting(any(), any()) }
     }
 
@@ -315,15 +409,16 @@ class AvkortingRoutesTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun `skal returnere opprinnelig statusfeil fra direkte servicekall`(ustoettetStatusendring: Boolean) {
+    @ValueSource(ints = [0, 1, 2, 3])
+    fun `skal returnere opprinnelig statusfeil fra direkte servicekall`(feiltype: Int) {
         val behandlingId = UUID.randomUUID()
         val behandlingStatusService = mockk<BehandlingStatusService>()
         val feil =
-            if (ustoettetStatusendring) {
-                BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.AVKORTET)
-            } else {
-                TilstandException.UgyldigTilstand("Ugyldig status")
+            when (feiltype) {
+                0 -> TilstandException.UgyldigTilstand("Ugyldig status")
+                1 -> TilstandException.IkkeFyltUt("Behandlingen er ikke fylt ut")
+                2 -> TilstandException.KanIkkeRedigere("Behandlingen kan ikke redigeres")
+                else -> BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.AVKORTET)
             }
         every { behandlingStatusService.settAvkortet(behandlingId, any(), true) } throws feil
         val service =
@@ -337,6 +432,7 @@ class AvkortingRoutesTest {
                 avkortingReparerAarsoppgjoeret = mockk(),
                 featureToggleService = mockk(),
                 behandlingStatusService = behandlingStatusService,
+                behandlingTilgangsSjekk = behandlingTilgangsSjekk,
             )
 
         testApplication(avkortingService = service) {
@@ -356,7 +452,7 @@ class AvkortingRoutesTest {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    fun `skal beholde statusfeilen ved henting og kopiering av avkorting`(kopier: Boolean) {
+    fun `skal ikke oversette feil fra hele avkortingsoperasjonen`(kopier: Boolean) {
         val behandlingId = UUID.randomUUID()
         val forrigeBehandlingId = UUID.randomUUID()
         val feil = TilstandException.UgyldigTilstand("Ugyldig status")
@@ -375,14 +471,13 @@ class AvkortingRoutesTest {
                     }
                 }
 
-            response.status shouldBe HttpStatusCode.Forbidden
-            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "BEHANDLING_FEIL_STATUS_FOR_AVKORTING"
+            response.status shouldBe HttpStatusCode.InternalServerError
         }
     }
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    fun `skal beholde statusfeilen ved inntektsjustering for systembruker`(aarlig: Boolean) {
+    fun `skal ikke oversette feil fra hele inntektsjusteringen`(aarlig: Boolean) {
         val behandlingId = UUID.randomUUID()
         val feil = TilstandException.UgyldigTilstand("Ugyldig status")
         coEvery { aarligInntektsjusteringService.kopierAarligInntektsjustering(any(), behandlingId, any(), any()) } throws feil
@@ -423,8 +518,7 @@ class AvkortingRoutesTest {
                     setBody(request.toJson())
                 }
 
-            response.status shouldBe HttpStatusCode.Forbidden
-            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "BEHANDLING_FEIL_STATUS_FOR_AVKORTING"
+            response.status shouldBe HttpStatusCode.InternalServerError
         }
     }
 

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.modules.beregning.etteroppgjoer
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -50,7 +49,7 @@ class EtteroppgjoerService(
 ) {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerService::class.java)
 
-    suspend fun beregnOgLagreEtteroppgjoerResultat(
+    fun beregnOgLagreEtteroppgjoerResultat(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
         etteroppgjoersAar: Int,
@@ -83,13 +82,12 @@ class EtteroppgjoerService(
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting {
         val avkortingMedForventaInntekt =
-            runBlocking {
-                avkortingService.hentAvkortingMedReparertAarsoppgjoer(
+            avkortingService
+                .hentAvkortingMedReparertAarsoppgjoer(
                     sakId = sakId,
                     behandlingId = sisteIverksatteBehandlingId,
                     brukerTokenInfo = brukerTokenInfo,
-                )
-            }.toDto()
+                ).toDto()
 
         val avkortingFaktiskInntekt = hentAvkortingForBehandling(forbehandlingId, aar)
 
@@ -106,15 +104,14 @@ class EtteroppgjoerService(
         val sanksjoner = sanksjonService.hentSanksjon(request.sisteIverksatteBehandling)
 
         val tidligereAarsoppgjoer =
-            runBlocking {
-                avkortingService.hentAvkortingMedReparertAarsoppgjoer(
+            avkortingService
+                .hentAvkortingMedReparertAarsoppgjoer(
                     sakId = request.sakId,
                     behandlingId = request.sisteIverksatteBehandling,
                     brukerTokenInfo = brukerTokenInfo,
-                )
-            }.let {
-                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
-            }
+                ).let {
+                    it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
+                }
 
         val avkorting =
             with(request) {
@@ -139,7 +136,7 @@ class EtteroppgjoerService(
         avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
 
-    private suspend fun beregnEtteroppgjoerResultat(
+    private fun beregnEtteroppgjoerResultat(
         etteroppgjoersAar: Int,
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
@@ -154,7 +151,7 @@ class EtteroppgjoerService(
         val sakId =
             inTransactionIfNeeded {
                 behandlingService.hentDetaljertBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer)
-                    ?: throw GenerellIkkeFunnetException()
+                    ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$sisteIverksatteBehandlingId")
             }.sak
 
         val (vedtakReferanse, vedtakPerioder) =
@@ -218,7 +215,7 @@ class EtteroppgjoerService(
         }
     }
 
-    private suspend fun hentVedtakslisteIEtteroppgjoersAar(
+    private fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
         tilOgMedBehandlingId: UUID?,

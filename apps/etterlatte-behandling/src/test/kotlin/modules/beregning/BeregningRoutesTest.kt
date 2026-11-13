@@ -276,11 +276,7 @@ internal class BeregningRoutesTest {
 
     @ParameterizedTest
     @MethodSource("statusfeil")
-    fun `skal returnere klientfeil for kjente statusfeil uten aa lagre`(
-        feil: Exception,
-        forventetStatus: HttpStatusCode,
-        forventetKode: String,
-    ) {
+    fun `skal beholde serverfeil ved avvist beregning uten aa lagre`(feil: Exception) {
         val behandlingId = randomUUID()
         every { behandlingStatusService.settBeregnet(behandlingId, any(), true) } throws feil
 
@@ -295,12 +291,7 @@ internal class BeregningRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            response.status shouldBe forventetStatus
-            val respons = objectMapper.readTree(response.bodyAsText())
-            respons["code"].asString() shouldBe forventetKode
-            if (forventetStatus == HttpStatusCode.Conflict) {
-                respons["detail"].asString() shouldBe "Behandlingen kan ikke bytte til ønsket status"
-            }
+            response.status shouldBe HttpStatusCode.InternalServerError
         }
 
         verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
@@ -376,23 +367,15 @@ internal class BeregningRoutesTest {
             listOf(
                 arguments(
                     TilstandException.UgyldigTilstand("Ugyldig status"),
-                    HttpStatusCode.Conflict,
-                    "BEHANDLING_HAR_UGYLDIG_STATUS",
                 ),
                 arguments(
                     TilstandException.IkkeFyltUt("Behandlingen er ikke fylt ut"),
-                    HttpStatusCode.BadRequest,
-                    "BEHANDLING_ER_IKKE_FYLT_UT",
                 ),
                 arguments(
                     TilstandException.KanIkkeRedigere("Behandlingen kan ikke redigeres"),
-                    HttpStatusCode.BadRequest,
-                    "BEHANDLING_KAN_IKKE_REDIGERES",
                 ),
                 arguments(
                     BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.BEREGNET),
-                    HttpStatusCode.Conflict,
-                    "BEHANDLING_HAR_UGYLDIG_STATUS",
                 ),
             )
     }

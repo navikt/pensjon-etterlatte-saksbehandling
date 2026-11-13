@@ -129,14 +129,15 @@ internal class BeregningsGrunnlagRoutesTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun `skal returnere konflikt for statusfeil i beregningsgrunnlag uten aa lagre`(ustoettetStatusendring: Boolean) {
+    @ValueSource(ints = [0, 1, 2, 3])
+    fun `skal returnere konflikt for statusfeil i beregningsgrunnlag uten aa lagre`(feiltype: Int) {
         val behandlingId = randomUUID()
         val feil =
-            if (ustoettetStatusendring) {
-                BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.TRYGDETID_OPPDATERT)
-            } else {
-                TilstandException.UgyldigTilstand("Ugyldig status")
+            when (feiltype) {
+                0 -> TilstandException.UgyldigTilstand("Ugyldig status")
+                1 -> TilstandException.IkkeFyltUt("Behandlingen er ikke fylt ut")
+                2 -> TilstandException.KanIkkeRedigere("Behandlingen kan ikke redigeres")
+                else -> BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.TRYGDETID_OPPDATERT)
             }
         every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, any(), true) } throws feil
         coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) } returns true
@@ -155,15 +156,15 @@ internal class BeregningsGrunnlagRoutesTest {
                 }
 
             response.status shouldBe HttpStatusCode.Conflict
-            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "BEHANDLING_HAR_UGYLDIG_STATUS"
+            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "UNKNOWN_ERROR"
         }
 
         verify { repository wasNot Called }
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun `skal beholde statusfeilen for overstyrt beregningsgrunnlag uten aa lagre`(ustoettetStatusendring: Boolean) {
+    @ValueSource(ints = [0, 1, 2, 3])
+    fun `skal beholde statusfeilen for overstyrt beregningsgrunnlag uten aa lagre`(feiltype: Int) {
         val behandlingId = randomUUID()
         val behandling =
             mockk<DetaljertBehandling> {
@@ -171,10 +172,11 @@ internal class BeregningsGrunnlagRoutesTest {
             }
         every { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns behandling
         val feil =
-            if (ustoettetStatusendring) {
-                BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.TRYGDETID_OPPDATERT)
-            } else {
-                TilstandException.UgyldigTilstand("Ugyldig status")
+            when (feiltype) {
+                0 -> TilstandException.UgyldigTilstand("Ugyldig status")
+                1 -> TilstandException.IkkeFyltUt("Behandlingen er ikke fylt ut")
+                2 -> TilstandException.KanIkkeRedigere("Behandlingen kan ikke redigeres")
+                else -> BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.TRYGDETID_OPPDATERT)
             }
         every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, any(), true) } throws feil
         coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, any()) } returns true

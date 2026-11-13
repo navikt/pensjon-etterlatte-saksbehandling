@@ -2,12 +2,14 @@ package no.nav.etterlatte.modules.beregning
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -25,7 +27,7 @@ class BeregningService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
-    suspend fun hentBeregning(
+    fun hentBeregning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) = hentBeregning(behandlingId).berikMedOverstyrBeregning(brukerTokenInfo)
@@ -38,10 +40,22 @@ class BeregningService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
         logger.info("Oppretter beregning for behandlingId=$behandlingId")
-        inTransactionIfNeeded { behandlingStatusService.settBeregnet(behandlingId, brukerTokenInfo, dryRun = true) }
+        try {
+            inTransactionIfNeeded { behandlingStatusService.settBeregnet(behandlingId, brukerTokenInfo, dryRun = true) }
+        } catch (e: Exception) {
+            throw when (e) {
+                is TilstandException.UgyldigTilstand,
+                is TilstandException.IkkeFyltUt,
+                is TilstandException.KanIkkeRedigere,
+                is BehandlingStoetterIkkeStatusEndringException,
+                -> IllegalStateException("Kan ikke beregne behandlingId=$behandlingId, behandling er i feil tilstand", e)
+
+                else -> e
+            }
+        }
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
 
         val overstyrBeregning = hentOverstyrBeregning(behandling)
 
@@ -76,33 +90,31 @@ class BeregningService(
     fun hentOverstyrBeregning(behandling: DetaljertBehandling): OverstyrBeregning? =
         beregningRepository.hentOverstyrBeregning(behandling.sak)
 
-    suspend fun hentOverstyrBeregningPaaBehandlingId(
+    fun hentOverstyrBeregningPaaBehandlingId(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregning? {
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
 
         return beregningRepository.hentOverstyrBeregning(behandling.sak)
     }
 
-    suspend fun opprettOverstyrBeregning(
+    fun opprettOverstyrBeregning(
         behandlingId: UUID,
         overstyrBeregning: OverstyrBeregningDTO,
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregning? {
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
 
         if (behandling.behandlingType === BehandlingType.REVURDERING) {
             validerFoersteVirke(behandling)
         }
 
-        inTransactionIfNeeded {
-            behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true)
-        }
+        validerStatusForOverstyrtBeregning(behandlingId, brukerTokenInfo)
         return hentOverstyrBeregning(behandling).takeIf { it != null } ?: run {
             val opprettetOverstyrtBeregning =
                 beregningRepository.opprettOverstyrBeregning(
@@ -120,16 +132,14 @@ class BeregningService(
         }
     }
 
-    suspend fun deaktiverOverstyrtberegning(
+    fun deaktiverOverstyrtberegning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        inTransactionIfNeeded {
-            behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true)
-        }
+        validerStatusForOverstyrtBeregning(behandlingId, brukerTokenInfo)
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
 
         if (behandling.behandlingType === BehandlingType.REVURDERING) {
             validerFoersteVirke(behandling)
@@ -147,13 +157,34 @@ class BeregningService(
         return beregningRepository.hent(behandlingId)
     }
 
-    private suspend fun Beregning?.berikMedOverstyrBeregning(brukerTokenInfo: BrukerTokenInfo) =
+    private fun Beregning?.berikMedOverstyrBeregning(brukerTokenInfo: BrukerTokenInfo) =
         this?.copy(overstyrBeregning = hentOverstyrBeregningPaaBehandlingId(behandlingId, brukerTokenInfo))
+
+    private fun validerStatusForOverstyrtBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        try {
+            inTransactionIfNeeded {
+                behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = true)
+            }
+        } catch (e: Exception) {
+            throw when (e) {
+                is TilstandException.UgyldigTilstand,
+                is TilstandException.IkkeFyltUt,
+                is TilstandException.KanIkkeRedigere,
+                is BehandlingStoetterIkkeStatusEndringException,
+                -> KanIkkeEndreOverstyrtBeregningGrunnetStatus(behandlingId, e)
+
+                else -> e
+            }
+        }
+    }
 
     private fun validerFoersteVirke(behandling: DetaljertBehandling) {
         val foersteVirk =
             inTransactionIfNeeded { behandlingService.hentFoerstegangsbehandling(behandling.sak).virkningstidspunkt?.dato }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente første virkningstidspunkt for sakId=${behandling.sak}")
         if (foersteVirk != behandling.virkningstidspunkt?.dato) {
             throw KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato()
         }

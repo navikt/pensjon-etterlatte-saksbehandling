@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -48,6 +49,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
@@ -107,6 +110,32 @@ internal class BeregnOmstillingsstoenadServiceTest {
     fun `unmock grunnbeloep`() {
         unmockkObject(GrunnbeloepRepository)
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal gi internfeil naar opplysningsgrunnlag eller vilkaarsvurdering mangler`(manglerGrunnlag: Boolean) =
+        runBlocking<Unit> {
+            val behandling = mockBehandling(BehandlingType.REVURDERING)
+            every { grunnlagService.hentOpplysningsgrunnlag(behandling.id) } returns
+                if (manglerGrunnlag) null else GrunnlagTestData().hentOpplysningsgrunnlag()
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(behandling.id, bruker) } returns listOf(mockTrygdetid(behandling.id))
+            every { beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id) } returns
+                omstillingstoenadBeregningsGrunnlag(behandling.id)
+            every { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) } returns null
+
+            val feil =
+                assertThrows<InternfeilException> {
+                    beregnOmstillingsstoenadService.beregn(behandling, bruker)
+                }
+
+            feil.somJsonRespons().status shouldBe 500
+            feil.detail shouldBe
+                if (manglerGrunnlag) {
+                    "Mangler opplysningsgrunnlag for behandlingId=${behandling.id}"
+                } else {
+                    "Mangler vilkårsvurdering for behandlingId=${behandling.id}"
+                }
+        }
 
     @Test
     fun `skal kaste feil hvis beregningsgrunnlag hentet er på en annen behandling`() {

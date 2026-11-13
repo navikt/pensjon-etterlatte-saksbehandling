@@ -113,7 +113,7 @@ internal class SanksjonRoutesTest {
 
     @ParameterizedTest
     @CsvSource("true,true", "true,false", "false,true", "false,false")
-    fun `skal beholde statusfeilen for endring av sanksjoner`(
+    fun `skal ikke oversette feil fra hele sanksjonsoperasjonen`(
         opprett: Boolean,
         ustoettetStatusendring: Boolean,
     ) {
@@ -146,8 +146,7 @@ internal class SanksjonRoutesTest {
                     }
                 }
 
-            response.status shouldBe HttpStatusCode.Forbidden
-            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "BEHANDLINGEN_KAN_IKKE_ENDRES"
+            response.status shouldBe HttpStatusCode.InternalServerError
         }
     }
 }

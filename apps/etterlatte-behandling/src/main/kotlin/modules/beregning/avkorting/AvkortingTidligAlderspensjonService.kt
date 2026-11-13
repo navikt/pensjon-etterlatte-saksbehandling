@@ -4,7 +4,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -29,13 +29,13 @@ class AvkortingTidligAlderspensjonService(
      * Systemet håndterer automatisk overgang ved 67 år, men har ingen informasjon om
      * uttak av tidlig alderspensjon. Saksbehandler må derfor legge inn opphøret manuelt.
      */
-    suspend fun opprettOppgaveHvisTidligAlderspensjon(
+    fun opprettOppgaveHvisTidligAlderspensjon(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
         logger.info("Sjekker om vi skal opprette oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
         val avkorting =
             avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)

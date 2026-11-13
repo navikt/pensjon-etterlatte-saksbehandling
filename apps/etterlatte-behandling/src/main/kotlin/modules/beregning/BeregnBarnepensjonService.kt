@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
@@ -140,7 +139,9 @@ class BeregnBarnepensjonService(
         brukerTokenInfo: BrukerTokenInfo,
         tilDato: LocalDate? = null,
     ): Beregning {
-        val grunnlag = grunnlagService.hentOpplysningsgrunnlag(behandling.id) ?: throw GenerellIkkeFunnetException()
+        val grunnlag =
+            grunnlagService.hentOpplysningsgrunnlag(behandling.id)
+                ?: throw InternfeilException("Mangler opplysningsgrunnlag for behandlingId=${behandling.id}")
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
@@ -231,7 +232,7 @@ class BeregnBarnepensjonService(
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurdering =
                     inTransactionIfNeeded { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) }
-                        ?: throw GenerellIkkeFunnetException()
+                        ?: throw InternfeilException("Mangler vilkårsvurdering for behandlingId=${behandling.id}")
                 val vilkaarsvurderingUtfall =
                     vilkaarsvurdering.resultat?.utfall
                         ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")

@@ -16,15 +16,17 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
@@ -125,7 +127,7 @@ internal class BeregningServiceTest {
         coEvery { behandlingStatusService.settBeregnet(any(), any(), any()) } throws TilstandException.UgyldigTilstand("Ugyldig status")
 
         runBlocking {
-            assertThrows<TilstandException.UgyldigTilstand> {
+            assertThrows<IllegalStateException> {
                 beregningService.opprettBeregning(behandling.id, bruker)
             }
 
@@ -196,7 +198,7 @@ internal class BeregningServiceTest {
         coEvery { behandlingStatusService.settBeregnet(any(), any(), any()) } throws TilstandException.UgyldigTilstand("Ugyldig status")
 
         runBlocking {
-            assertThrows<TilstandException.UgyldigTilstand> {
+            assertThrows<IllegalStateException> {
                 beregningService.opprettBeregning(behandling.id, bruker)
             }
 
@@ -348,6 +350,73 @@ internal class BeregningServiceTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = [0, 1, 2, 3])
+    fun `skal bevare aarsaken naar status hindrer endring av overstyrt beregning`(feiltype: Int) =
+        runBlocking<Unit> {
+            val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
+            val feil =
+                when (feiltype) {
+                    0 -> TilstandException.UgyldigTilstand("Ugyldig status")
+                    1 -> TilstandException.IkkeFyltUt("Behandlingen er ikke fylt ut")
+                    2 -> TilstandException.KanIkkeRedigere("Behandlingen kan ikke redigeres")
+                    else -> BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.TRYGDETID_OPPDATERT)
+                }
+            every { behandlingService.hentDetaljertBehandling(behandling.id, bruker) } returns behandling
+            every { behandlingStatusService.settTrygdetidOppdatert(behandling.id, bruker, true) } throws feil
+
+            val opprettFeil =
+                assertThrows<KanIkkeEndreOverstyrtBeregningGrunnetStatus> {
+                    beregningService.opprettOverstyrBeregning(
+                        behandling.id,
+                        OverstyrBeregningDTO("Test", OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                        bruker,
+                    )
+                }
+            opprettFeil.cause shouldBeSameInstanceAs feil
+            opprettFeil.meta shouldBe mapOf("behandlingId" to behandling.id)
+
+            assertThrows<KanIkkeEndreOverstyrtBeregningGrunnetStatus> {
+                beregningService.deaktiverOverstyrtberegning(behandling.id, bruker)
+            }.cause shouldBeSameInstanceAs feil
+
+            verify(exactly = 0) {
+                beregningRepository.opprettOverstyrBeregning(any())
+                beregningRepository.deaktiverOverstyrtBeregning(any())
+                beregningRepository.slettOverstyrtBeregningsgrunnlag(any())
+                behandlingStatusService.settTrygdetidOppdatert(any(), any(), false)
+            }
+        }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal viderefoere tekniske feil ved statussjekk for overstyrt beregning`(opprett: Boolean) =
+        runBlocking<Unit> {
+            val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
+            val feil = IllegalStateException("Databasen er utilgjengelig")
+            every { behandlingService.hentDetaljertBehandling(behandling.id, bruker) } returns behandling
+            every { behandlingStatusService.settTrygdetidOppdatert(behandling.id, bruker, true) } throws feil
+
+            assertThrows<IllegalStateException> {
+                if (opprett) {
+                    beregningService.opprettOverstyrBeregning(
+                        behandling.id,
+                        OverstyrBeregningDTO("Test", OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                        bruker,
+                    )
+                } else {
+                    beregningService.deaktiverOverstyrtberegning(behandling.id, bruker)
+                }
+            } shouldBeSameInstanceAs feil
+
+            verify(exactly = 0) {
+                beregningRepository.opprettOverstyrBeregning(any())
+                beregningRepository.deaktiverOverstyrtBeregning(any())
+                beregningRepository.slettOverstyrtBeregningsgrunnlag(any())
+                behandlingStatusService.settTrygdetidOppdatert(any(), any(), false)
+            }
+        }
+
     @Test
     fun `skal viderefoere tekniske feil fra statussjekken uten aa lagre`() =
         runBlocking<Unit> {
@@ -370,13 +439,52 @@ internal class BeregningServiceTest {
             every { behandlingStatusService.settBeregnet(behandlingId, bruker, true) } returns Unit
             every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns null
 
-            assertThrows<GenerellIkkeFunnetException> {
+            assertThrows<InternfeilException> {
                 beregningService.opprettBeregning(behandlingId, bruker)
             }
 
             coVerify(exactly = 0) { beregnBarnepensjonService.beregn(any(), any()) }
             verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
             verify(exactly = 0) { behandlingStatusService.settBeregnet(any(), any(), false) }
+        }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal viderefoere feil ved statusoppdatering etter lagring`(overstyrt: Boolean) =
+        runBlocking<Unit> {
+            val behandling = mockBehandling(SakType.BARNEPENSJON)
+            val behandlingId = behandling.id
+            val sakId = behandling.sak
+            val feil = TilstandException.UgyldigTilstand("Statusendringen feilet")
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+            every { beregningRepository.hentOverstyrBeregning(sakId) } returns null
+            every { behandlingStatusService.settBeregnet(behandlingId, bruker, true) } just runs
+            every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, bruker, true) } just runs
+            every { behandlingStatusService.settBeregnet(behandlingId, bruker, false) } throws feil
+            every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, bruker, false) } throws feil
+            every { beregningRepository.opprettOverstyrBeregning(any()) } returnsArgument 0
+            every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
+            coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns mockk()
+
+            assertThrows<TilstandException.UgyldigTilstand> {
+                if (overstyrt) {
+                    beregningService.opprettOverstyrBeregning(
+                        behandlingId,
+                        OverstyrBeregningDTO("Test", OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                        bruker,
+                    )
+                } else {
+                    beregningService.opprettBeregning(behandlingId, bruker)
+                }
+            } shouldBeSameInstanceAs feil
+
+            if (overstyrt) {
+                verify(exactly = 1) { beregningRepository.opprettOverstyrBeregning(any()) }
+                verify(exactly = 1) { behandlingStatusService.settTrygdetidOppdatert(behandlingId, bruker, false) }
+            } else {
+                verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
+                verify(exactly = 1) { behandlingStatusService.settBeregnet(behandlingId, bruker, false) }
+            }
         }
 
     @ParameterizedTest

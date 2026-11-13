@@ -7,6 +7,7 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -29,8 +30,12 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.ManglerTilgang
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.modules.beregning.Beregning
 import no.nav.etterlatte.modules.beregning.BeregningService
@@ -46,6 +51,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
 import java.time.Month
 import java.time.Year
 import java.time.YearMonth
@@ -54,6 +60,7 @@ import java.util.UUID
 @ExtendWith(BeregningTestKontekst::class)
 internal class AvkortingServiceTest {
     private val behandlingStatusService = mockk<BehandlingStatusService>()
+    private val behandlingTilgangsSjekk = mockk<BehandlingTilgangsSjekk>()
     private val behandlingService: BehandlingService = mockk()
     private val avkortingRepository: AvkortingRepository = mockk()
     private val beregningService: BeregningService = mockk()
@@ -73,11 +80,13 @@ internal class AvkortingServiceTest {
             avkortingReparerAarsoppgjoeret,
             featureToggleService,
             behandlingStatusService = behandlingStatusService,
+            behandlingTilgangsSjekk = behandlingTilgangsSjekk,
         )
 
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingStatusService.settAvkortet(any(), any(), any()) } returns Unit
         every { featureToggleService.isEnabled(any(), any(), any()) } returnsArgument 1
         every { sanksjonService.hentSanksjon(any()) } returns emptyList()
@@ -96,6 +105,52 @@ internal class AvkortingServiceTest {
         clearAllMocks()
         unmockkObject(AvkortingMapper, AvkortingValider)
     }
+
+    @Test
+    fun `skal kreve skrivetilgang foer statussjekken ved reberegning`() =
+        runBlocking<Unit> {
+            val behandlingId = UUID.randomUUID()
+            coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker) } returns false
+
+            assertThrows<ManglerTilgang> { service.tilstandssjekk(behandlingId, bruker) }
+
+            verify(exactly = 0) { behandlingStatusService.settAvkortet(any(), any(), any()) }
+            coVerify(exactly = 1) { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker) }
+            verify(exactly = 0) {
+                avkortingRepository.lagreAvkorting(any(), any(), any())
+                behandlingStatusService.settAvkortet(any(), any(), false)
+            }
+        }
+
+    @Test
+    fun `skal tillate statussjekk for systembruker`() =
+        runBlocking<Unit> {
+            val behandlingId = UUID.randomUUID()
+            val systembruker = HardkodaSystembruker.etteroppgjoer
+
+            service.tilstandssjekk(behandlingId, systembruker)
+
+            verify(exactly = 1) { behandlingStatusService.settAvkortet(behandlingId, systembruker, true) }
+            coVerify(exactly = 0) { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) }
+        }
+
+    @Test
+    fun `skal viderefoere tekniske feil fra statussjekken`() =
+        runBlocking<Unit> {
+            val behandlingId = UUID.randomUUID()
+            val feil = IllegalStateException("Databasen er utilgjengelig")
+            every { behandlingStatusService.settAvkortet(behandlingId, bruker, true) } throws feil
+
+            assertThrows<IllegalStateException> {
+                service.tilstandssjekk(behandlingId, bruker)
+            } shouldBeSameInstanceAs feil
+
+            verify(exactly = 1) { behandlingStatusService.settAvkortet(behandlingId, bruker, true) }
+            coVerifyOrder {
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)
+                behandlingStatusService.settAvkortet(behandlingId, bruker, true)
+            }
+        }
 
     @Nested
     inner class HentAvkortingFrontendDto {
@@ -136,6 +191,7 @@ internal class AvkortingServiceTest {
             val beregning = mockk<Beregning>()
 
             coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker) } returns false
             every { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
             every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning
             mockkObject(AvkortingMapper)
@@ -172,6 +228,44 @@ internal class AvkortingServiceTest {
                 featureToggleService.isEnabled(any(), any(), any())
             }
         }
+
+        @Test
+        fun `skal viderefoere feil ved statusoppdatering etter lagring av avkorting`() =
+            runBlocking<Unit> {
+                val behandling = behandling(status = BehandlingStatus.BEREGNET)
+                val behandlingId = behandling.id
+                val avkorting = mockk<Avkorting>(relaxed = true)
+                val beregnetAvkorting = mockk<Avkorting>()
+                val beregning = mockk<Beregning>()
+                val feil = TilstandException.UgyldigTilstand("Statusendringen feilet")
+                every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+                every { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
+                every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning
+                every { avkorting.beregnAvkorting(any(), beregning, any(), any(), any()) } returns beregnetAvkorting
+                every { avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting) } returns Unit
+                every { behandlingStatusService.settAvkortet(behandlingId, bruker, false) } throws feil
+                mockkObject(AvkortingValider)
+                every { AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any()) } returns emptyList()
+
+                assertThrows<TilstandException.UgyldigTilstand> {
+                    service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker)
+                } shouldBeSameInstanceAs feil
+
+                coVerify {
+                    behandlingService.hentDetaljertBehandling(behandlingId, bruker)
+                    avkortingRepository.hentAvkorting(behandlingId)
+                    beregningService.hentBeregningNonnull(behandlingId)
+                    avkorting.aarsoppgjoer
+                    avkorting.beregnAvkorting(any(), beregning, any(), any(), any())
+                    avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)
+                    behandlingStatusService.settAvkortet(behandlingId, bruker, true)
+                    behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)
+                    behandlingStatusService.settAvkortet(behandlingId, bruker, false)
+                    sanksjonService.hentSanksjon(behandlingId)
+                    featureToggleService.isEnabled(any(), any(), any())
+                    AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
+                }
+            }
 
         @Test
         fun `Foerstegangsbehandling skal reberegne avkorting hvis beregning er beregnet paa nytt`() {
@@ -230,6 +324,7 @@ internal class AvkortingServiceTest {
             }
             coVerify(exactly = 1) {
                 behandlingStatusService.settAvkortet(behandlingId, bruker, true)
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)
                 eksisterendeAvkorting.beregnAvkorting(any(), beregning, any(), any(), any())
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, reberegnetAvkorting)
                 behandlingStatusService.settAvkortet(behandlingId, bruker, false)
@@ -403,6 +498,7 @@ internal class AvkortingServiceTest {
 
             coVerify(exactly = 1) {
                 behandlingStatusService.settAvkortet(behandlingId, bruker, true)
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)
                 vedtaksvurderingService.hentIverksatteVedtakISak(behandling.sak)
                 avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
@@ -508,6 +604,7 @@ internal class AvkortingServiceTest {
             }
             coVerify(exactly = 1) {
                 behandlingStatusService.settAvkortet(behandlingId, bruker, true)
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)
                 vedtaksvurderingService.hentIverksatteVedtakISak(behandling.sak)
                 avkortingReparerAarsoppgjoeret.hentAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
@@ -549,6 +646,41 @@ internal class AvkortingServiceTest {
         val beregnetAvkorting = mockk<Avkorting>(relaxed = true)
         val lagretAvkorting = mockk<Avkorting>(relaxed = true)
         val avkortingFrontend = mockk<AvkortingFrontendDto>()
+
+        @Test
+        fun `skal gi internfeil uten aa lagre naar aldersovergang mangler`() =
+            runBlocking<Unit> {
+                val behandling = behandling()
+                val behandlingId = behandling.id
+                every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+                every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting
+                every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning
+                mockkObject(AvkortingValider)
+                every { AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any(), any()) } returns Unit
+                every { aldersovergangService.aldersovergangMaaned(behandling.sak, behandling.sakType) } returns null
+
+                val feil =
+                    assertThrows<InternfeilException> {
+                        service.beregnAvkortingMedNyeGrunnlag(behandlingId, listOf(endretGrunnlag), bruker)
+                    }
+
+                feil.somJsonRespons().status shouldBe 500
+                feil.detail shouldBe "Mangler måned for aldersovergang for sakId=${behandling.sak} sakType=${behandling.sakType}"
+                coVerify {
+                    behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)
+                    behandlingStatusService.settAvkortet(behandlingId, bruker, true)
+                    behandlingService.hentDetaljertBehandling(behandlingId, bruker)
+                    avkortingRepository.hentAvkorting(behandlingId)
+                    beregningService.hentBeregningNonnull(behandlingId)
+                    featureToggleService.isEnabled(any(), any(), any())
+                    sanksjonService.hentSanksjon(behandlingId)
+                    vedtaksvurderingService.hentInnvilgedePerioder(behandling.sak)
+                    AvkortingValider.validerInntekter(any(), any(), any(), any(), any(), any(), any())
+                    aldersovergangService.aldersovergangMaaned(behandling.sak, behandling.sakType)
+                }
+                verify(exactly = 0) { avkortingRepository.lagreAvkorting(any(), any(), any()) }
+                verify(exactly = 0) { behandlingStatusService.settAvkortet(any(), any(), false) }
+            }
 
         @Test
         fun `Skal beregne og lagre avkorting for førstegangsbehandling`() {
@@ -601,6 +733,7 @@ internal class AvkortingServiceTest {
 
             coVerify(exactly = 1) {
                 behandlingStatusService.settAvkortet(behandlingId, bruker, true)
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)
                 behandlingService.hentDetaljertBehandling(behandlingId, bruker)
                 AvkortingValider.validerInntekter(
                     behandling = behandling,
@@ -692,6 +825,7 @@ internal class AvkortingServiceTest {
             verify(atLeast = 1) { forrigeAvkorting.aarsoppgjoer }
             coVerify(exactly = 1) {
                 behandlingStatusService.settAvkortet(revurderingId, bruker, true)
+                behandlingTilgangsSjekk.harTilgangTilBehandling(revurderingId, true, bruker)
                 behandlingService.hentDetaljertBehandling(revurderingId, bruker)
                 AvkortingValider.validerInntekter(
                     behandling = revurdering,
@@ -743,7 +877,7 @@ internal class AvkortingServiceTest {
                 TilstandException.UgyldigTilstand("Ugyldig status")
 
             runBlocking {
-                assertThrows<TilstandException.UgyldigTilstand> {
+                assertThrows<AvkortingBehandlingFeilStatus> {
                     service.beregnAvkortingMedNyeGrunnlag(
                         behandlingId,
                         listOf(avkortinggrunnlagLagreDto(fom = YearMonth.of(2024, 1))),
@@ -753,6 +887,7 @@ internal class AvkortingServiceTest {
             }
 
             coVerify {
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)
                 behandlingStatusService.settAvkortet(behandlingId, bruker, true)
             }
         }
@@ -802,6 +937,7 @@ internal class AvkortingServiceTest {
 
             coVerify(exactly = 1) {
                 behandlingStatusService.settAvkortet(behandlingId, bruker, true)
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, true, bruker)
                 behandlingService.hentDetaljertBehandling(behandlingId, bruker)
                 AvkortingValider.validerInntekter(
                     behandling = behandling,

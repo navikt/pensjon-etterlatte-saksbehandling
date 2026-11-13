@@ -2,6 +2,8 @@ package no.nav.etterlatte.modules.beregning.sanksjon
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -9,8 +11,8 @@ import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -46,14 +48,14 @@ class SanksjonService(
      *  er lagt inn feil (en omgjøring pga klage for eksempel). Da må bruken av denne
      *  funksjonen justeres.
      */
-    suspend fun kopierSanksjon(
+    fun kopierSanksjon(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
         if (behandling.behandlingType != BehandlingType.REVURDERING) {
             return
         }
@@ -76,14 +78,14 @@ class SanksjonService(
         }
     }
 
-    suspend fun opprettEllerOppdaterSanksjon(
+    fun opprettEllerOppdaterSanksjon(
         behandlingId: UUID,
         sanksjon: LagreSanksjon,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
 
         if (!behandling.status.kanEndres()) throw BehandlingKanIkkeEndres()
 
@@ -109,7 +111,7 @@ class SanksjonService(
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
     }
 
-    private suspend fun sanksjonerErLikeFoerVirk(
+    private fun sanksjonerErLikeFoerVirk(
         behandling: DetaljertBehandling,
         sanksjon: LagreSanksjon,
         brukerTokenInfo: BrukerTokenInfo,
@@ -126,7 +128,8 @@ class SanksjonService(
             return true
         }
         val forrigeIverksatteBehandling =
-            inTransactionIfNeeded { behandlingService.hentSisteIverksatteBehandling(behandling.sak) } ?: throw GenerellIkkeFunnetException()
+            inTransactionIfNeeded { behandlingService.hentSisteIverksatteBehandling(behandling.sak) }
+                ?: throw InternfeilException("Klarte ikke hente siste iverksatte behandling på sak med id=${behandling.sak}")
         val sanksjonerIForrigeBehandling =
             sanksjonRepository.hentSanksjon(forrigeIverksatteBehandling.id)
         val sanksjonerIBehandling = sanksjonRepository.hentSanksjon(behandling.id)
@@ -166,14 +169,14 @@ class SanksjonService(
         )
     }
 
-    suspend fun slettSanksjon(
+    fun slettSanksjon(
         behandlingId: UUID,
         sanksjonId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
         if (!behandling.status.kanEndres()) {
             throw BehandlingKanIkkeEndres()
         }
@@ -201,19 +204,31 @@ class SanksjonService(
         sanksjonRepository.slettSanksjon(sanksjonId)
     }
 
-    private suspend fun oppdaterBehandlingstatusEtterOppdateringSanksjon(
+    private fun oppdaterBehandlingstatusEtterOppdateringSanksjon(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val brukNyeReglerAvkorting = featureToggleService.isEnabled(BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER, false)
 
-        inTransactionIfNeeded {
-            if (brukNyeReglerAvkorting) {
-                // Setter behandlingen tl status "trygdetid oppdatert", slik at vi fanger opp at beregningen må oppdateres
-                behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
-            } else {
-                // Setter behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
-                behandlingStatusService.settBeregnet(behandlingId, brukerTokenInfo, dryRun = false)
+        try {
+            inTransactionIfNeeded {
+                if (brukNyeReglerAvkorting) {
+                    // Setter behandlingen tl status "trygdetid oppdatert", slik at vi fanger opp at beregningen må oppdateres
+                    behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+                } else {
+                    // Setter behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
+                    behandlingStatusService.settBeregnet(behandlingId, brukerTokenInfo, dryRun = false)
+                }
+            }
+        } catch (e: Exception) {
+            throw when (e) {
+                is TilstandException.UgyldigTilstand,
+                is TilstandException.IkkeFyltUt,
+                is TilstandException.KanIkkeRedigere,
+                is BehandlingStoetterIkkeStatusEndringException,
+                -> BehandlingKanIkkeEndres(e)
+
+                else -> e
             }
         }
     }

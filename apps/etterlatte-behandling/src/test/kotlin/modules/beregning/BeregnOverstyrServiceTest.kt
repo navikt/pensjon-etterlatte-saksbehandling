@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -36,6 +37,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -57,6 +60,36 @@ internal class BeregnOverstyrServiceTest {
                 vilkaarsvurderingService = vilkaarsvurderingService,
             )
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal gi internfeil naar opplysningsgrunnlag eller vilkaarsvurdering mangler`(manglerGrunnlag: Boolean) =
+        runBlocking<Unit> {
+            val virk = YearMonth.of(2019, 11)
+            val behandling = mockBehandling(BehandlingType.REVURDERING, virk)
+            every { grunnlagService.hentOpplysningsgrunnlag(behandling.id) } returns
+                if (manglerGrunnlag) null else GrunnlagTestData().hentOpplysningsgrunnlag()
+            every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandling.id) } returns
+                OverstyrBeregningGrunnlag(
+                    perioder = listOf(GrunnlagMedPeriode(data = mockk(), fom = virk.atDay(1), tom = null)),
+                    kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                )
+            every { beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(behandling.id, virk, bruker) } just Runs
+            every { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) } returns null
+
+            val feil =
+                assertThrows<InternfeilException> {
+                    beregnOverstyrBeregningService.beregn(behandling, mockk(), bruker)
+                }
+
+            feil.somJsonRespons().status shouldBe 500
+            feil.detail shouldBe
+                if (manglerGrunnlag) {
+                    "Mangler opplysningsgrunnlag for behandlingId=${behandling.id}"
+                } else {
+                    "Mangler vilkårsvurdering for behandlingId=${behandling.id}"
+                }
+        }
 
     @Test
     fun `skal beregne overstyrt foerstegangsbehandling`() {

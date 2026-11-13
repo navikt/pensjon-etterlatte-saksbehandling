@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.modules.beregning.BeregningRepository
@@ -25,14 +25,14 @@ class BeregningOgAvkortingBrevService(
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val behandlingService: BehandlingService,
 ) {
-    suspend fun hentBeregningOgAvkorting(
+    fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningOgAvkortingDto? {
         val avkortingUtenLoependeYtelse = avkortingService.hentAvkorting(behandlingId) ?: return null
         val behandling =
             inTransactionIfNeeded { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
-                ?: throw GenerellIkkeFunnetException()
+                ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$behandlingId")
         val avkorting = avkortingUtenLoependeYtelse.toDto(behandling.virkningstidspunkt().dato)
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
         val behandlingsGrunnlag = beregningsGrunnlagService.hentBeregningsGrunnlag(behandlingId)

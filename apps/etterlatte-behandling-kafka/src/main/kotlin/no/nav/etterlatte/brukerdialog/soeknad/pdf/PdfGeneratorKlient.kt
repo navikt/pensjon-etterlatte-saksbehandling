@@ -2,12 +2,15 @@ package no.nav.etterlatte.brukerdialog.soeknad.pdf
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.content.TextContent
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
@@ -36,11 +39,18 @@ class PdfGeneratorKlient(
         val url = if (pdfgenrs) pdfgenrsUrl else apiUrl
         logger.info("Genererer PDF med ${if (pdfgenrs) "ey-pdfgenrs" else "ey-pdfgen"} (mal=$mal)")
 
-        return klient
-            .post("$url/$sti") {
+        val respons =
+            klient.post("$url/$sti") {
                 header(CORRELATION_ID, getCorrelationId())
                 contentType(ContentType.Application.Json)
                 setBody(body)
-            }.body()
+            }
+
+        // Klienten forventer ikke suksess, så uten denne sjekken blir feilmeldingen fra pdfgen sendt videre som PDF
+        if (!respons.status.isSuccess()) {
+            throw ResponseException(respons, respons.bodyAsText())
+        }
+
+        return respons.body()
     }
 }

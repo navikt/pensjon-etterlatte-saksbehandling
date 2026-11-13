@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express'
 import path from 'path'
 import { ApiConfig, appConf, ClientConfig } from './config/config'
+import { hentBeregningApiConfig } from './config/beregning'
 import { authenticateUser } from './middleware/auth'
 import { logger } from './monitoring/logger'
 import { tokenMiddleware } from './middleware/getOboToken'
@@ -96,7 +97,8 @@ app.use(
 
 app.use('/api/pdltjenester', tokenMiddleware(ApiConfig.pdltjenester.scope), proxy(ApiConfig.pdltjenester.url))
 
-app.use('/api/beregning', tokenMiddleware(ApiConfig.beregning.scope), proxy(ApiConfig.beregning.url))
+const beregningApiConfig = hentBeregningApiConfig(ApiConfig)
+app.use('/api/beregning', tokenMiddleware(beregningApiConfig.scope), proxy(beregningApiConfig.url))
 
 app.use('/api/vedtak', tokenMiddleware(ApiConfig.behandling.scope), proxy(ApiConfig.behandling.url))
 

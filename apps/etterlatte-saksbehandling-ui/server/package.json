@@ -28,6 +28,7 @@
   "scripts": {
     "dev": "ts-node ./src/index.ts",
     "build": "tsc && eslint src",
+    "test": "node --test --require ts-node/register src/middleware/*.test.ts",
     "lint": "eslint src"
   }
 }

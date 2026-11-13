@@ -50,6 +50,14 @@ Når `.env.dev-gcp` er opprettet kan du kjøre opp docker (dev-gcp varianten):
 `--build --force-recreate` i kommandoen over.
 
 
+### Valg av beregningsapp
+
+BFF-en velger backend og token-scope for `/api/beregning` med `beregningConfig.brukBehandling`
+i [beregning.ts](./server/src/config/beregning.ts).
+Standardverdien `false` bruker `etterlatte-beregning`. Sett verdien til `true` for å bruke
+beregningsendepunktene i `etterlatte-behandling`. Valget gjelder også beregningsgrunnlag, avkorting og sanksjoner.
+Frontend bruker samme URL i begge tilfeller. Bygg og start BFF-en på nytt etter at du endrer bryteren.
+
 ### Azuread lokal
 
 For å få tilgang til dev-gcp lokalt bruker vi egne secrets for frontend. Filen sikrer at det gis tilgang til appene 

@@ -24,7 +24,6 @@ import {
   lagreSanksjon,
   slettSanksjon,
 } from '~shared/api/sanksjon'
-import { beregningConfig } from '~clientConfig'
 import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
 import { ISanksjonLagre, SanksjonType } from '~shared/types/sanksjon'
 
@@ -144,8 +143,6 @@ const kall = [
   },
 ]
 
-const standardBrukBehandling = beregningConfig.brukBehandling
-
 describe('ruting av beregningskall', () => {
   const fetchMock = vi.fn<typeof fetch>()
 
@@ -153,56 +150,29 @@ describe('ruting av beregningskall', () => {
     fetchMock.mockReset()
     fetchMock.mockImplementation(async () => Response.json({}))
     vi.stubGlobal('fetch', fetchMock)
-    beregningConfig.brukBehandling = false
   })
 
   afterEach(() => {
-    beregningConfig.brukBehandling = standardBrukBehandling
     vi.unstubAllGlobals()
   })
 
-  it('bruker beregningsappen som standard', () => {
-    expect(standardBrukBehandling).toBe(false)
-  })
+  it.each(kall)('$navn beholder sti, metode og body', async ({ kall, sti, metode, body }) => {
+    const resultat = await kall()
 
-  describe.each([
-    { brukBehandling: false, prefiks: '/api/beregning' },
-    { brukBehandling: true, prefiks: '/api/beregning_v2' },
-  ])('brukBehandling=$brukBehandling', ({ brukBehandling, prefiks }) => {
-    it.each(kall)('$navn beholder sti, metode og body', async ({ kall, sti, metode, body }) => {
-      beregningConfig.brukBehandling = brukBehandling
-      const resultat = await kall()
-
-      expect(resultat.ok).toBe(true)
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(`${prefiks}${sti}`, {
-        method: metode,
-        headers: { 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined,
-      })
-    })
-
-    it('endrer ikke kall som allerede går til behandling', async () => {
-      beregningConfig.brukBehandling = brukBehandling
-      await hentSanksjonerForSisteIverksatteBehandling(123)
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/sak/123/behandlinger/sisteIverksatte/sanksjoner',
-        expect.objectContaining({ method: 'GET' })
-      )
+    expect(resultat.ok).toBe(true)
+    expect(fetchMock).toHaveBeenCalledExactlyOnceWith(`/api/beregning${sti}`, {
+      method: metode,
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
     })
   })
 
-  it('velger backend fra konfigurasjonen ved hvert kall', async () => {
-    await hentBeregning(behandlingId)
-    beregningConfig.brukBehandling = true
-    await hentBeregning(behandlingId)
-    beregningConfig.brukBehandling = false
-    await hentBeregning(behandlingId)
+  it('endrer ikke kall som allerede går til behandling', async () => {
+    await hentSanksjonerForSisteIverksatteBehandling(123)
 
-    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
-      `/api/beregning/${behandlingId}`,
-      `/api/beregning_v2/${behandlingId}`,
-      `/api/beregning/${behandlingId}`,
-    ])
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/sak/123/behandlinger/sisteIverksatte/sanksjoner',
+      expect.objectContaining({ method: 'GET' })
+    )
   })
 })

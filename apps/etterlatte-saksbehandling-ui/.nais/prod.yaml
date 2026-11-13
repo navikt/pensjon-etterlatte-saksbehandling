@@ -85,6 +85,8 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEREGNING_API_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-beregning/.default
+    - name: BRUK_INTERN_BEREGNING
+      value: "false"
     - name: PDLTJENESTER_API_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: UTBETALING_API_SCOPE

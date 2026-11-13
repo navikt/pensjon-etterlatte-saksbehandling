@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
 import { once } from 'node:events'
 import { createServer, Server } from 'node:http'
 import { test, TestContext } from 'node:test'
@@ -21,8 +22,31 @@ const startServer = async (server: Server, context: TestContext): Promise<string
   return `http://127.0.0.1:${address.port}`
 }
 
-test('bruker beregningsappen som standard', () => {
-  assert.equal(beregningConfig.brukBehandling, false)
+test('miljøvariabelen velger backend og scope, med beregningsappen som standard', () => {
+  const apiConfig = {
+    beregning: { url: 'http://etterlatte-beregning', scope: 'beregning-scope' },
+    behandling: { url: 'http://etterlatte-behandling', scope: 'behandling-scope' },
+  }
+  for (const verdi of [undefined, '', 'false', 'true', 'TRUE', 'ugyldig']) {
+    const env = { ...process.env }
+    if (verdi === undefined) {
+      delete env.BRUK_INTERN_BEREGNING
+    } else {
+      env.BRUK_INTERN_BEREGNING = verdi
+    }
+    const resultat = execFileSync(
+      process.execPath,
+      [
+        '--require',
+        'ts-node/register/files',
+        '-e',
+        `const { hentBeregningApiConfig } = require(${JSON.stringify(require.resolve('../config/beregning'))});
+         process.stdout.write(JSON.stringify(hentBeregningApiConfig(${JSON.stringify(apiConfig)})));`,
+      ],
+      { env, encoding: 'utf8' }
+    )
+    assert.deepEqual(JSON.parse(resultat), verdi === 'true' ? apiConfig.behandling : apiConfig.beregning)
+  }
 })
 
 test('proxy velger backend og scope uten å endre sti, metode, body eller query-parametere', async (context) => {

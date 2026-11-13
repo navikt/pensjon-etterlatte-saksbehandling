@@ -1,7 +1,7 @@
 import type { ApiConfig, ApiUrlScope } from './config'
 
 export const beregningConfig = {
-  brukBehandling: false,
+  brukBehandling: process.env.BRUK_INTERN_BEREGNING === 'true',
 }
 
 export const hentBeregningApiConfig = (apiConfig: ApiConfig): ApiUrlScope =>

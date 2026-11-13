@@ -17,9 +17,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
 import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -31,6 +34,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingFrontendDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFlereInntekterDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -45,6 +49,7 @@ import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.AarligInn
 import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.MottattInntektsjusteringService
 import no.nav.etterlatte.modules.beregning.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.modules.beregning.regler.avkortinggrunnlag
+import no.nav.etterlatte.sak
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -522,8 +527,52 @@ class AvkortingRoutesTest {
         }
     }
 
+    @Test
+    fun `skal avvise henting av etteroppgjoer fra en annen sak`() {
+        val forbehandlingId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        val sakId = SakId(1L)
+        val forbehandlingService = mockk<EtteroppgjoerForbehandlingService>()
+        val behandlingService = mockk<BehandlingService>()
+        val avkortingRepository = mockk<AvkortingRepository>()
+        every { forbehandlingService.hentForbehandling(forbehandlingId) } returns
+            mockk { every { sak } returns sak(sakId = sakId) }
+        every { behandlingService.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = SakId(2L))
+        val service =
+            EtteroppgjoerService(
+                avkortingRepository = avkortingRepository,
+                sanksjonService = mockk(),
+                etteroppgjoerRepository = mockk(),
+                avkortingService = avkortingService,
+                reparerAarsoppgjoeret = mockk(),
+                vedtakEtteroppgjoerService = mockk(),
+                behandlingService = behandlingService,
+                featureToggleService = mockk(),
+                forbehandlingService = forbehandlingService,
+            )
+
+        testApplication(etteroppgjoerService = service) {
+            val response =
+                client.post("/api/beregning/avkorting/etteroppgjoer/hent") {
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(EtteroppgjoerBeregnetAvkortingRequest(forbehandlingId, behandlingId, 2024, sakId).toJson())
+                }
+
+            response.status shouldBe HttpStatusCode.BadRequest
+            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "BEHANDLINGER_TILHOERER_IKKE_SAMME_SAK"
+        }
+
+        coVerify(exactly = 1) { behandlingTilgangsSjekk.harTilgangTilBehandling(forbehandlingId, false, any()) }
+        verify(exactly = 0) {
+            avkortingService.hentAvkortingMedReparertAarsoppgjoer(any(), any(), any())
+            avkortingRepository.hentAvkorting(any())
+        }
+    }
+
     private fun testApplication(
         avkortingService: AvkortingService = this.avkortingService,
+        etteroppgjoerService: EtteroppgjoerService = this.etteroppgjoerService,
         block: suspend ApplicationTestBuilder.() -> Unit,
     ) {
         io.ktor.server.testing.testApplication {

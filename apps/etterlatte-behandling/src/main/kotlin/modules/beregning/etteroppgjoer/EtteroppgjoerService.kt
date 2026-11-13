@@ -1,6 +1,7 @@
 package no.nav.etterlatte.modules.beregning.etteroppgjoer
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransactionIfNeeded
@@ -9,13 +10,13 @@ import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntekt
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -37,6 +38,12 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
+class EtteroppgjoerBehandlingerTilhoererIkkeSammeSak :
+    UgyldigForespoerselException(
+        code = "BEHANDLINGER_TILHOERER_IKKE_SAMME_SAK",
+        detail = "Forbehandlingen, siste iverksatte behandling og angitt sak må tilhøre samme sak",
+    )
+
 class EtteroppgjoerService(
     private val avkortingRepository: AvkortingRepository,
     private val sanksjonService: SanksjonService,
@@ -46,6 +53,7 @@ class EtteroppgjoerService(
     private val vedtakEtteroppgjoerService: VedtakEtteroppgjoerService,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
+    private val forbehandlingService: EtteroppgjoerForbehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerService::class.java)
 
@@ -72,7 +80,10 @@ class EtteroppgjoerService(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
         aar: Int,
-    ): BeregnetEtteroppgjoerResultat? = etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
+    ): BeregnetEtteroppgjoerResultat? {
+        validerBehandlingerTilhoererSammeSak(forbehandlingId, sisteIverksatteBehandlingId)
+        return etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
+    }
 
     fun hentBeregnetAvkorting(
         forbehandlingId: UUID,
@@ -81,6 +92,7 @@ class EtteroppgjoerService(
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting {
+        validerBehandlingerTilhoererSammeSak(forbehandlingId, sisteIverksatteBehandlingId, sakId)
         val avkortingMedForventaInntekt =
             avkortingService
                 .hentAvkortingMedReparertAarsoppgjoer(
@@ -101,6 +113,7 @@ class EtteroppgjoerService(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        validerBehandlingerTilhoererSammeSak(request.forbehandlingId, request.sisteIverksatteBehandling, request.sakId)
         val sanksjoner = sanksjonService.hentSanksjon(request.sisteIverksatteBehandling)
 
         val tidligereAarsoppgjoer =
@@ -148,11 +161,7 @@ class EtteroppgjoerService(
         val fomTom = LocalDate.of(etteroppgjoersAar, 12, 31)
         val regelPeriode = RegelPeriode(fomTom, fomTom)
 
-        val sakId =
-            inTransactionIfNeeded {
-                behandlingService.hentDetaljertBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer)
-                    ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$sisteIverksatteBehandlingId")
-            }.sak
+        val sakId = validerBehandlingerTilhoererSammeSak(forbehandlingId, sisteIverksatteBehandlingId)
 
         val (vedtakReferanse, vedtakPerioder) =
             hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, sammenlignTilOgMedBehandlingId)
@@ -214,6 +223,25 @@ class EtteroppgjoerService(
             }
         }
     }
+
+    private fun validerBehandlingerTilhoererSammeSak(
+        forbehandlingId: UUID,
+        sisteIverksatteBehandlingId: UUID,
+        sakId: SakId? = null,
+    ): SakId =
+        inTransactionIfNeeded {
+            val forbehandlingSakId = forbehandlingService.hentForbehandling(forbehandlingId).sak.id
+            if (sakId != null && sakId != forbehandlingSakId) {
+                throw EtteroppgjoerBehandlingerTilhoererIkkeSammeSak()
+            }
+            val behandling =
+                behandlingService.hentBehandling(sisteIverksatteBehandlingId)
+                    ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$sisteIverksatteBehandlingId")
+            if (behandling.sak.id != forbehandlingSakId) {
+                throw EtteroppgjoerBehandlingerTilhoererIkkeSammeSak()
+            }
+            forbehandlingSakId
+        }
 
     private fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,

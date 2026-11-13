@@ -12,7 +12,11 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.ktor.runServer
@@ -21,7 +25,9 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.modules.beregning.regler.behandling
 import no.nav.etterlatte.modules.beregning.regler.lagreSanksjon
+import no.nav.etterlatte.modules.beregning.regler.sanksjon
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import no.nav.etterlatte.modules.beregning.sanksjon.sanksjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -109,6 +115,44 @@ internal class SanksjonRoutesTest {
 
             response.status shouldBe HttpStatusCode.OK
         }
+    }
+
+    @Test
+    fun `skal avvise oppdatering av sanksjon fra en annen behandling`() {
+        val behandlingId = UUID.randomUUID()
+        val sanksjonId = UUID.randomUUID()
+        val behandlingService = mockk<BehandlingService>()
+        val sanksjonRepository = mockk<SanksjonRepository>()
+        every { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns
+            behandling(id = behandlingId, status = BehandlingStatus.BEREGNET)
+        every { sanksjonRepository.hentSanksjonMedId(sanksjonId) } returns
+            sanksjon(id = sanksjonId, behandlingId = UUID.randomUUID())
+        val service =
+            SanksjonService(
+                behandlingService = behandlingService,
+                sanksjonRepository = sanksjonRepository,
+                featureToggleService = mockk(),
+                behandlingStatusService = mockk(),
+            )
+
+        testApplication {
+            runServer(server) {
+                attachMockContext()
+                sanksjon(service, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                client.post("/api/beregning/sanksjon/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(lagreSanksjon(id = sanksjonId).toJson())
+                }
+
+            response.status shouldBe HttpStatusCode.BadRequest
+            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "SANKSJON_TILHOERER_IKKE_BEHANDLING"
+        }
+
+        verify(exactly = 0) { sanksjonRepository.oppdaterSanksjon(any(), any()) }
     }
 
     @ParameterizedTest

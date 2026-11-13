@@ -91,6 +91,9 @@ class SanksjonService(
 
         if (behandling.virkningstidspunkt == null) throw ManglerVirkningstidspunktException()
         if (sanksjon.sakId != behandling.sak) throw SakidTilhoererIkkeBehandlingException()
+        if (sanksjon.id != null && sanksjonRepository.hentSanksjonMedId(sanksjon.id)?.behandlingId != behandling.id) {
+            throw SanksjonTilhoererIkkeBehandlingException()
+        }
 
         val normalisertFom = YearMonth.from(sanksjon.fom)
         val normalisertTom = sanksjon.tom?.let { YearMonth.from(it) }
@@ -183,10 +186,7 @@ class SanksjonService(
 
         val sanksjonSomSkalSlettes = sanksjonRepository.hentSanksjonMedId(sanksjonId) ?: return
         if (sanksjonSomSkalSlettes.behandlingId != behandling.id) {
-            throw UgyldigForespoerselException(
-                "SANKSJON_TILHOERER_IKKE_BEHANDLING",
-                "Den angitte sanksjonsId'en hører ikke til den angitte behandlingId'en",
-            )
+            throw SanksjonTilhoererIkkeBehandlingException()
         }
 
         val virkningstidspunkt =
@@ -250,6 +250,12 @@ class SakidTilhoererIkkeBehandlingException :
     UgyldigForespoerselException(
         code = "SAK_ID_TILHOERER_IKKE_BEHANDLING",
         detail = "Sak id stemmer ikke over ens med behandling",
+    )
+
+class SanksjonTilhoererIkkeBehandlingException :
+    UgyldigForespoerselException(
+        code = "SANKSJON_TILHOERER_IKKE_BEHANDLING",
+        detail = "Den angitte sanksjonsId'en hører ikke til den angitte behandlingId'en",
     )
 
 class ManglerVirkningstidspunktException :

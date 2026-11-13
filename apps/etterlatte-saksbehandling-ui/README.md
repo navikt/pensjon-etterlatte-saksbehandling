@@ -55,7 +55,7 @@ Når `.env.dev-gcp` er opprettet kan du kjøre opp docker (dev-gcp varianten):
 BFF-en velger backend og token-scope for `/api/beregning` med miljøvariabelen `BRUK_INTERN_BEREGNING`.
 Verdien `"true"` bruker beregningsendepunktene i `etterlatte-behandling`.
 Hvis variabelen mangler eller har en annen verdi, bruker BFF-en `etterlatte-beregning`.
-Variabelen er satt til `"true"` i [.nais/dev.yaml](./.nais/dev.yaml) og `"false"` i [.nais/prod.yaml](./.nais/prod.yaml).
+Variabelen er satt til `"false"` i [.nais/dev.yaml](./.nais/dev.yaml) og `"false"` i [.nais/prod.yaml](./.nais/prod.yaml).
 For lokal kjøring kan du sette variabelen i `.env.dev-gcp` og starte BFF-en på nytt.
 Valget gjelder også beregningsgrunnlag, avkorting og sanksjoner. Frontend bruker samme URL i begge tilfeller.
 

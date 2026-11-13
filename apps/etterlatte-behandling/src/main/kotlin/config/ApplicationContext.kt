@@ -150,6 +150,7 @@ internal class ApplicationContext(
     val arbeidOgInntektKlient get() = klientModule.arbeidOgInntektKlient
 
     // Services
+    val journalfoerSoeknadService get() = serviceModule.journalfoerSoeknadService
     val brukerService get() = serviceModule.brukerService
     val saksbehandlerService get() = serviceModule.saksbehandlerService
     val oppgaveService get() = serviceModule.oppgaveService

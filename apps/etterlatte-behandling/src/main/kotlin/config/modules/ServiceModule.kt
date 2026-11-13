@@ -33,6 +33,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakSamordningSer
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakTilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
+import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.JournalfoerSoeknadService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.GrunnlagService
@@ -71,6 +72,13 @@ class ServiceModule(
     grunnlagServiceOverride: GrunnlagService? = null,
     vedtakInternalServiceOverride: VedtakInternalService? = null,
 ) {
+    val journalfoerSoeknadService: JournalfoerSoeknadService by lazy {
+        JournalfoerSoeknadService(
+            dokarkivKlient = klientModule.dokarkivKlient,
+            pdfgenKlient = klientModule.soeknadPdfGeneratorKlient,
+        )
+    }
+
     val brukerService: BrukerService by lazy {
         BrukerServiceImpl(pdltjenesterKlient = klientModule.pdlTjenesterKlient, norg2Klient = klientModule.norg2Klient)
     }

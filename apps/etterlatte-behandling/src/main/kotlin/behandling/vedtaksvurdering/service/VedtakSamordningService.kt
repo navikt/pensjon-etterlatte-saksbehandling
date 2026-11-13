@@ -38,20 +38,30 @@ class VedtakSamordningService(
         tilOgMedBehandlingId: UUID? = null,
     ): List<VedtakSamordningDto> {
         logger.debug("Henter og sammenstiller vedtaksliste")
-        val vedtaksliste =
+        val ferdigstilteVedtak =
             repository
                 .hentFerdigstilteVedtak(fnr, sakType)
-                .begrensTilOgMedBehandling(tilOgMedBehandlingId)
-        val tidslinjeJustert =
-            Vedtakstidslinje(vedtaksliste)
-                .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
+
+        return sammenstiltVedtaksliste(ferdigstilteVedtak, tilOgMedBehandlingId, fomDato)
+    }
+
+    fun sammenstiltVedtaksliste(
+        vedtakListe: List<Vedtak>,
+        tilOgMedBehandlingId: UUID?,
+        fomDato: LocalDate,
+    ): List<VedtakSamordningDto> {
+        val sammenstiltVedtaksliste =
+            Vedtakstidslinje(
+                vedtakListe
+                    .begrensTilOgMedBehandling(tilOgMedBehandlingId),
+            ).sammenstill(YearMonth.of(fomDato.year, fomDato.month))
 
         val avkortetYtelsePerioderByVedtak =
             repository
-                .hentAvkortetYtelsePerioder(tidslinjeJustert.map { it.id }.toSet())
+                .hentAvkortetYtelsePerioder(sammenstiltVedtaksliste.map { it.id }.toSet())
                 .groupBy { it.vedtakId }
 
-        return tidslinjeJustert.map {
+        return sammenstiltVedtaksliste.map {
             val avkortetYtelsePerioder = avkortetYtelsePerioderByVedtak[it.id] ?: emptyList()
             it.toSamordningsvedtakDto(avkortetYtelsePerioder)
         }

@@ -6,17 +6,28 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.modules.beregning.regler.behandling
 import no.nav.etterlatte.modules.beregning.regler.lagreSanksjon
+import no.nav.etterlatte.modules.beregning.regler.sanksjon
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import no.nav.etterlatte.modules.beregning.sanksjon.sanksjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -24,18 +35,20 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SanksjonRoutesTest {
+    private val behandlingTilgangsSjekk = mockk<BehandlingTilgangsSjekk>()
     private val server: MockOAuth2Server = MockOAuth2Server()
-    private val behandlingKlient = mockk<BehandlingKlient>()
     private val sanksjonService = mockk<SanksjonService>()
 
     @BeforeAll
     fun setup() {
         server.start()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
@@ -49,7 +62,7 @@ internal class SanksjonRoutesTest {
 
         testApplication {
             runServer(server) {
-                sanksjon(sanksjonService, behandlingKlient)
+                sanksjon(sanksjonService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -71,7 +84,7 @@ internal class SanksjonRoutesTest {
 
         testApplication {
             runServer(server) {
-                sanksjon(sanksjonService, behandlingKlient)
+                sanksjon(sanksjonService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -91,7 +104,7 @@ internal class SanksjonRoutesTest {
 
         testApplication {
             runServer(server) {
-                sanksjon(sanksjonService, behandlingKlient)
+                sanksjon(sanksjonService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -101,6 +114,83 @@ internal class SanksjonRoutesTest {
                 }
 
             response.status shouldBe HttpStatusCode.OK
+        }
+    }
+
+    @Test
+    fun `skal avvise oppdatering av sanksjon fra en annen behandling`() {
+        val behandlingId = UUID.randomUUID()
+        val sanksjonId = UUID.randomUUID()
+        val behandlingService = mockk<BehandlingService>()
+        val sanksjonRepository = mockk<SanksjonRepository>()
+        every { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns
+            behandling(id = behandlingId, status = BehandlingStatus.BEREGNET)
+        every { sanksjonRepository.hentSanksjonMedId(sanksjonId) } returns
+            sanksjon(id = sanksjonId, behandlingId = UUID.randomUUID())
+        val service =
+            SanksjonService(
+                behandlingService = behandlingService,
+                sanksjonRepository = sanksjonRepository,
+                featureToggleService = mockk(),
+                behandlingStatusService = mockk(),
+            )
+
+        testApplication {
+            runServer(server) {
+                attachMockContext()
+                sanksjon(service, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                client.post("/api/beregning/sanksjon/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(lagreSanksjon(id = sanksjonId).toJson())
+                }
+
+            response.status shouldBe HttpStatusCode.BadRequest
+            objectMapper.readTree(response.bodyAsText())["code"].asString() shouldBe "SANKSJON_TILHOERER_IKKE_BEHANDLING"
+        }
+
+        verify(exactly = 0) { sanksjonRepository.oppdaterSanksjon(any(), any()) }
+    }
+
+    @ParameterizedTest
+    @CsvSource("true,true", "true,false", "false,true", "false,false")
+    fun `skal ikke oversette feil fra hele sanksjonsoperasjonen`(
+        opprett: Boolean,
+        ustoettetStatusendring: Boolean,
+    ) {
+        val behandlingId = UUID.randomUUID()
+        val sanksjonId = UUID.randomUUID()
+        val feil =
+            if (ustoettetStatusendring) {
+                BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.BEREGNET)
+            } else {
+                TilstandException.UgyldigTilstand("Ugyldig status")
+            }
+        coEvery { sanksjonService.opprettEllerOppdaterSanksjon(behandlingId, any(), any()) } throws feil
+        coEvery { sanksjonService.slettSanksjon(behandlingId, sanksjonId, any()) } throws feil
+
+        testApplication {
+            runServer(server) {
+                sanksjon(sanksjonService, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                if (opprett) {
+                    client.post("/api/beregning/sanksjon/$behandlingId") {
+                        header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(lagreSanksjon(sanksjonId).toJson())
+                    }
+                } else {
+                    client.delete("/api/beregning/sanksjon/$behandlingId/$sanksjonId") {
+                        header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                    }
+                }
+
+            response.status shouldBe HttpStatusCode.InternalServerError
         }
     }
 }

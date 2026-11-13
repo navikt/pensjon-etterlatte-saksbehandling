@@ -1,6 +1,7 @@
 package no.nav.etterlatte.modules.beregning.sanksjon
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -9,17 +10,20 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.regler.STANDARDSAK
 import no.nav.etterlatte.modules.beregning.regler.behandling
 import no.nav.etterlatte.modules.beregning.regler.bruker
@@ -32,14 +36,19 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
+@ExtendWith(BeregningTestKontekst::class)
 internal class SanksjonServiceTest {
+    private val behandlingStatusService = mockk<BehandlingStatusService>()
     private val sanksjonRepository: SanksjonRepository = mockk()
-    private val behandlingKlient: BehandlingKlient = mockk()
+    private val behandlingService: BehandlingService = mockk()
     private val featureToggleService: FeatureToggleService =
         mockk {
             every { isEnabled(any(), any(), any()) } returnsArgument 1
@@ -47,10 +56,54 @@ internal class SanksjonServiceTest {
     private val service =
         SanksjonService(
             sanksjonRepository = sanksjonRepository,
-            behandlingKlient = behandlingKlient,
+            behandlingService = behandlingService,
             featureToggleService = featureToggleService,
+            behandlingStatusService = behandlingStatusService,
         )
     private val sakId = STANDARDSAK
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal beholde statusfeilen for sanksjoner uten aa lagre`(brukNyeRegler: Boolean) =
+        runBlocking<Unit> {
+            val behandlingId = UUID.randomUUID()
+            val feil = TilstandException.UgyldigTilstand("Ugyldig status")
+            every { featureToggleService.isEnabled(any(), any(), any()) } returns brukNyeRegler
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns
+                behandling(id = behandlingId, status = BehandlingStatus.BEREGNET)
+            every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, bruker, false) } throws feil
+            every { behandlingStatusService.settBeregnet(behandlingId, bruker, false) } throws feil
+
+            val resultat =
+                assertThrows<BehandlingKanIkkeEndres> {
+                    service.opprettEllerOppdaterSanksjon(behandlingId, lagreSanksjon(), bruker)
+                }
+
+            resultat.cause shouldBeSameInstanceAs feil
+            verify(exactly = 0) {
+                sanksjonRepository.opprettSanksjon(any(), any(), any(), any())
+                sanksjonRepository.oppdaterSanksjon(any(), any())
+            }
+        }
+
+    @Test
+    fun `skal viderefoere tekniske feil uten aa lagre sanksjoner`() =
+        runBlocking<Unit> {
+            val behandlingId = UUID.randomUUID()
+            val feil = IllegalStateException("Databasen er utilgjengelig")
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns
+                behandling(id = behandlingId, status = BehandlingStatus.BEREGNET)
+            every { behandlingStatusService.settBeregnet(behandlingId, bruker, false) } throws feil
+
+            assertThrows<IllegalStateException> {
+                service.opprettEllerOppdaterSanksjon(behandlingId, lagreSanksjon(), bruker)
+            } shouldBeSameInstanceAs feil
+
+            verify(exactly = 0) {
+                sanksjonRepository.opprettSanksjon(any(), any(), any(), any())
+                sanksjonRepository.oppdaterSanksjon(any(), any())
+            }
+        }
 
     @Nested
     inner class HentSanksjon {
@@ -96,8 +149,8 @@ internal class SanksjonServiceTest {
                 )
 
             every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingStatusService.settBeregnet(behandlingId, any(), any()) } returns Unit
 
             runBlocking {
                 service.opprettEllerOppdaterSanksjon(behandlingId, sanksjon, bruker) shouldBe Unit
@@ -121,8 +174,10 @@ internal class SanksjonServiceTest {
                 )
 
             every { sanksjonRepository.oppdaterSanksjon(sanksjon, bruker.ident) } returns Unit
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
+            every { sanksjonRepository.hentSanksjonMedId(sanksjon.id!!) } returns
+                sanksjon(id = sanksjon.id, behandlingId = behandlingId)
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingStatusService.settBeregnet(behandlingId, any(), any()) } returns Unit
 
             runBlocking {
                 service.opprettEllerOppdaterSanksjon(behandlingId, sanksjon, bruker) shouldBe Unit
@@ -130,6 +185,55 @@ internal class SanksjonServiceTest {
 
             coVerify {
                 sanksjonRepository.oppdaterSanksjon(sanksjon, bruker.ident)
+            }
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = [0, 1, 2])
+        fun `skal avvise oppdatering naar sanksjonen ikke tilhoerer behandlingen`(variant: Int) {
+            val behandlingId = UUID.randomUUID()
+            val sanksjonId = UUID.randomUUID()
+            val endring = lagreSanksjon(id = sanksjonId)
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns
+                behandling(id = behandlingId, status = BehandlingStatus.BEREGNET)
+            every { sanksjonRepository.hentSanksjonMedId(sanksjonId) } returns
+                when (variant) {
+                    0 -> null
+                    1 -> sanksjon(id = sanksjonId, behandlingId = UUID.randomUUID())
+                    else -> sanksjon(id = sanksjonId, behandlingId = UUID.randomUUID(), sakId = randomSakId())
+                }
+
+            val feil =
+                assertThrows<SanksjonTilhoererIkkeBehandlingException> {
+                    service.opprettEllerOppdaterSanksjon(behandlingId, endring, bruker)
+                }
+
+            feil.code shouldBe "SANKSJON_TILHOERER_IKKE_BEHANDLING"
+            verify(exactly = 0) {
+                sanksjonRepository.opprettSanksjon(any(), any(), any(), any())
+                sanksjonRepository.oppdaterSanksjon(any(), any())
+                behandlingStatusService.settBeregnet(any(), any(), any())
+                behandlingStatusService.settTrygdetidOppdatert(any(), any(), any())
+            }
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["ATTESTERT", "IVERKSATT"])
+        fun `skal ikke oppdatere sanksjon i attestert eller iverksatt behandling`(status: String) {
+            val behandlingId = UUID.randomUUID()
+            val endring = lagreSanksjon(id = UUID.randomUUID())
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns
+                behandling(id = behandlingId, status = BehandlingStatus.valueOf(status))
+
+            assertThrows<BehandlingKanIkkeEndres> {
+                service.opprettEllerOppdaterSanksjon(behandlingId, endring, bruker)
+            }
+
+            verify(exactly = 0) {
+                sanksjonRepository.hentSanksjonMedId(any())
+                sanksjonRepository.oppdaterSanksjon(any(), any())
+                behandlingStatusService.settBeregnet(any(), any(), any())
+                behandlingStatusService.settTrygdetidOppdatert(any(), any(), any())
             }
         }
 
@@ -146,7 +250,7 @@ internal class SanksjonServiceTest {
                 )
 
             every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
                 assertThrows<Exception> {
@@ -172,7 +276,7 @@ internal class SanksjonServiceTest {
                 )
 
             every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
                 assertThrows<Exception> {
@@ -195,7 +299,7 @@ internal class SanksjonServiceTest {
                 )
 
             every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
                 assertThrows<Exception> {
@@ -224,12 +328,10 @@ internal class SanksjonServiceTest {
                 )
 
             every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, bruker, any()) } returns true
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker) } returns
-                SisteIverksatteBehandling(
-                    forrigeBehandling,
-                )
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingStatusService.settBeregnet(behandlingId, bruker, any()) } returns Unit
+            coEvery { behandlingService.hentSisteIverksatteBehandling(sakId) } returns
+                mockk<Behandling> { every { id } returns forrigeBehandling }
             every { sanksjonRepository.hentSanksjon(behandlingId) } returns emptyList()
             every { sanksjonRepository.hentSanksjon(forrigeBehandling) } returns
                 listOf(
@@ -259,9 +361,7 @@ internal class SanksjonServiceTest {
 
             val forrigeBehandlingId = UUID.randomUUID()
             val forrigeBehandling =
-                SisteIverksatteBehandling(
-                    id = forrigeBehandlingId,
-                )
+                mockk<Behandling> { every { id } returns forrigeBehandlingId }
 
             val tidligereSanksjon =
                 listOf(
@@ -292,11 +392,12 @@ internal class SanksjonServiceTest {
 
             every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns tidligereSanksjon
             every { sanksjonRepository.hentSanksjon(behandlingId) } returns eksisterendeSanksjoner
+            every { sanksjonRepository.hentSanksjonMedId(eksisterendeSanksjoner.first().id!!) } returns eksisterendeSanksjoner.first()
             every { sanksjonRepository.oppdaterSanksjon(any(), any()) } just runs
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(sakId, any()) } returns forrigeBehandling
+            coEvery { behandlingService.hentSisteIverksatteBehandling(sakId) } returns forrigeBehandling
 
-            coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns behandling
+            coEvery { behandlingStatusService.settBeregnet(any(), any(), any()) } returns Unit
 
             assertDoesNotThrow {
                 runBlocking {
@@ -358,7 +459,7 @@ internal class SanksjonServiceTest {
                 )
 
             every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
                 assertThrows<Exception> {
@@ -391,8 +492,8 @@ internal class SanksjonServiceTest {
                     fom = behandling.virkningstidspunkt!!.dato,
                     tom = null,
                 )
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingStatusService.settBeregnet(behandlingId, any(), any()) } returns Unit
 
             runBlocking {
                 service.slettSanksjon(behandlingId, sanksjonId, bruker) shouldBe Unit
@@ -425,8 +526,8 @@ internal class SanksjonServiceTest {
                     tom = null,
                 )
             every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingStatusService.settBeregnet(behandlingId, any(), any()) } returns Unit
 
             assertThrows<SanksjonEndresFoerVirkException> {
                 runBlocking {
@@ -457,8 +558,8 @@ internal class SanksjonServiceTest {
                     tom = null,
                 )
             every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingStatusService.settBeregnet(behandlingId, any(), any()) } returns Unit
 
             assertThrows<UgyldigForespoerselException> {
                 runBlocking {
@@ -492,13 +593,10 @@ internal class SanksjonServiceTest {
             every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns listOf(sanksjon)
             every { sanksjonRepository.hentSanksjon(opphoerBehandlingId) } returns emptyList()
             every { sanksjonRepository.opprettSanksjonFraKopi(behandlingId, sanksjon.sakId, sanksjon) } just runs
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
             coEvery {
-                behandlingKlient.hentSisteIverksatteBehandling(
-                    behandling.sak,
-                    bruker,
-                )
-            } returns SisteIverksatteBehandling(opphoerBehandlingId)
+                behandlingService.hentSisteIverksatteBehandling(behandling.sak)
+            } returns mockk<Behandling> { every { id } returns opphoerBehandlingId }
 
             runBlocking {
                 service.kopierSanksjon(behandlingId, forrigeBehandlingId, bruker)
@@ -508,7 +606,7 @@ internal class SanksjonServiceTest {
                 sanksjonRepository.opprettSanksjonFraKopi(behandlingId, sanksjon.sakId, sanksjon)
             }
             verify(exactly = 0) { sanksjonRepository.hentSanksjon(opphoerBehandlingId) }
-            coVerify(exactly = 0) { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) }
+            coVerify(exactly = 0) { behandlingService.hentSisteIverksatteBehandling(any()) }
         }
 
         @Test
@@ -527,7 +625,7 @@ internal class SanksjonServiceTest {
 
             every { sanksjonRepository.hentSanksjon(behandlingId) } returns sanksjonerIBehandling
             every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns sanksjonerForrige
-            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking { service.kopierSanksjon(behandlingId, forrigeBehandlingId, bruker) }
 

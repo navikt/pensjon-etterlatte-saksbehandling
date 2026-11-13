@@ -16,6 +16,7 @@ import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.grunnlag.TomVerdi
 import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -27,21 +28,21 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle.AVDOED
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
-import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -50,23 +51,27 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.anvendttrygdetid.AnvendtTrygdetidRepository
 import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.modules.beregning.klienter.GrunnlagKlientImpl
-import no.nav.etterlatte.modules.beregning.klienter.TrygdetidKlient
-import no.nav.etterlatte.modules.beregning.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.modules.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.modules.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.modules.beregning.regler.bruker
 import no.nav.etterlatte.modules.beregning.regler.toGrunnlag
+import no.nav.etterlatte.trygdetid.DetaljertBeregnetTrygdetid
+import no.nav.etterlatte.trygdetid.Trygdetid
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.Month
@@ -74,11 +79,12 @@ import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
 
+@ExtendWith(BeregningTestKontekst::class)
 internal class BeregnBarnepensjonServiceTest {
-    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
-    private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
+    private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
+    private val grunnlagService = mockk<GrunnlagService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
-    private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val trygdetidService = mockk<TrygdetidService>()
     private val anvendtTrygdetidRepository =
         mockk<AnvendtTrygdetidRepository>().also {
             every { it.lagreAnvendtTrygdetid(any(), any()) } returns 1
@@ -91,19 +97,45 @@ internal class BeregnBarnepensjonServiceTest {
 
     private fun beregnBarnepensjonService() =
         BeregnBarnepensjonService(
-            grunnlagKlient = grunnlagKlient,
-            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+            grunnlagService = grunnlagService,
+            vilkaarsvurderingService = vilkaarsvurderingService,
             beregningsGrunnlagService = beregningsGrunnlagService,
-            trygdetidKlient = trygdetidKlient,
+            trygdetidService = trygdetidService,
             anvendtTrygdetidRepository = anvendtTrygdetidRepository,
             featureToggleService = featureToggleService,
         )
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal gi internfeil naar opplysningsgrunnlag eller vilkaarsvurdering mangler`(manglerGrunnlag: Boolean) =
+        runBlocking<Unit> {
+            val behandling = mockBehandling(BehandlingType.REVURDERING)
+            every { grunnlagService.hentOpplysningsgrunnlag(behandling.id) } returns
+                if (manglerGrunnlag) null else GrunnlagTestData().hentOpplysningsgrunnlag()
+            every { beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id) } returns
+                barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(behandling.id, bruker) } returns listOf(mockTrygdetid(behandling.id))
+            every { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) } returns null
+
+            val feil =
+                assertThrows<InternfeilException> {
+                    beregnBarnepensjonService().beregn(behandling, bruker)
+                }
+
+            feil.somJsonRespons().status shouldBe 500
+            feil.detail shouldBe
+                if (manglerGrunnlag) {
+                    "Mangler opplysningsgrunnlag for behandlingId=${behandling.id}"
+                } else {
+                    "Mangler vilkårsvurdering for behandlingId=${behandling.id}"
+                }
+        }
 
     @Test
     fun `skal kaste feil hvis beregningsgrunnlag hentet er på en annen behandling`() {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -126,13 +158,13 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -184,13 +216,13 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList(), BeregningsMetode.PRORATA)
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -222,13 +254,13 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList(), BeregningsMetode.BEST)
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -260,13 +292,13 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER))
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -294,7 +326,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -304,7 +336,7 @@ internal class BeregnBarnepensjonServiceTest {
                 behandling.id,
                 listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER),
             )
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -332,17 +364,17 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
             }
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -370,7 +402,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -389,17 +421,17 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
             }
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -427,7 +459,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -442,7 +474,7 @@ internal class BeregnBarnepensjonServiceTest {
                 ),
                 Triple(YearMonth.of(2023, 4), null, listOf(HELSOESKEN_FOEDSELSNUMMER.value)),
             )
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -493,7 +525,7 @@ internal class BeregnBarnepensjonServiceTest {
         forventetUtbetalt: Int,
     ) {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns
             grunnlagMedEkstraAvdoedForelder(LocalDate.of(2023, 11, 12))
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
@@ -533,7 +565,7 @@ internal class BeregnBarnepensjonServiceTest {
                     ),
             )
         coEvery {
-            trygdetidKlient.hentTrygdetid(any(), any())
+            trygdetidService.hentTrygdetiderIBehandling(any(), any())
         } returns listOf(mockTrygdetid(behandling.id), mockTrygdetid(behandling.id, fnr = AVDOED2_FOEDSELSNUMMER.value))
 
         runBlocking {
@@ -565,7 +597,7 @@ internal class BeregnBarnepensjonServiceTest {
     @Test
     fun `beregne foerstegangsbehandling med ukjent avdoed - NYTT REGELVERK`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2024, Month.JANUARY))
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentGrunnlagMedUkjentAvdoed()
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns GrunnlagTestData().hentGrunnlagMedUkjentAvdoed()
 
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
@@ -594,19 +626,22 @@ internal class BeregnBarnepensjonServiceTest {
                     ),
             )
 
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns
             listOf(
-                TrygdetidDto(
+                Trygdetid(
                     randomUUID(),
                     ident = UKJENT_AVDOED,
                     behandlingId = behandling.id,
+                    sakId = behandling.sak,
+                    yrkesskade = false,
                     beregnetTrygdetid =
-                        DetaljertBeregnetTrygdetidDto(
+                        DetaljertBeregnetTrygdetid(
                             resultat = DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidProrata(40, null),
                             tidspunkt = Tidspunkt.now(),
+                            regelResultat = objectMapper.createObjectNode(),
                         ),
                     trygdetidGrunnlag = emptyList(),
-                    opplysninger = GrunnlagOpplysningerDto(null, null, null, null),
+                    opplysninger = emptyList(),
                     overstyrtNorskPoengaar = null,
                     opplysningerDifferanse = OpplysningerDifferanse(false, mockk<GrunnlagOpplysningerDto>()),
                     begrunnelse = null,
@@ -630,7 +665,7 @@ internal class BeregnBarnepensjonServiceTest {
     @Test
     fun `beregne foerstegangsbehandling med to avdoede foreldre, ignorere inst med NEI_KORT_OPPHOLD - NYTT REGELVERK`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2024, Month.JANUARY))
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns
             grunnlagMedEkstraAvdoedForelder(LocalDate.of(2024, 1, 12))
 
         coEvery {
@@ -673,26 +708,29 @@ internal class BeregnBarnepensjonServiceTest {
                     ),
             )
 
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns
             listOf(
-                TrygdetidDto(
+                Trygdetid(
                     randomUUID(),
                     ident = UKJENT_AVDOED,
                     behandlingId = behandling.id,
+                    sakId = behandling.sak,
+                    yrkesskade = false,
                     beregnetTrygdetid =
-                        DetaljertBeregnetTrygdetidDto(
+                        DetaljertBeregnetTrygdetid(
                             resultat = DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidProrata(40, null),
                             tidspunkt = Tidspunkt.now(),
+                            regelResultat = objectMapper.createObjectNode(),
                         ),
                     trygdetidGrunnlag = emptyList(),
-                    opplysninger = GrunnlagOpplysningerDto(null, null, null, null),
+                    opplysninger = emptyList(),
                     overstyrtNorskPoengaar = null,
                     opplysningerDifferanse = OpplysningerDifferanse(false, mockk<GrunnlagOpplysningerDto>()),
                     begrunnelse = null,
                 ),
             )
         coEvery {
-            trygdetidKlient.hentTrygdetid(any(), any())
+            trygdetidService.hentTrygdetiderIBehandling(any(), any())
         } returns listOf(mockTrygdetid(behandling.id), mockTrygdetid(behandling.id, fnr = AVDOED2_FOEDSELSNUMMER.value))
 
         runBlocking {
@@ -710,14 +748,14 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery {
-            trygdetidKlient.hentTrygdetid(
+            trygdetidService.hentTrygdetiderIBehandling(
                 any(),
                 any(),
             )
@@ -756,7 +794,7 @@ internal class BeregnBarnepensjonServiceTest {
             GrunnlagTestData(annenForelder = AnnenForelder(KUN_EN_REGISTRERT_JURIDISK_FORELDER))
                 .hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -768,7 +806,7 @@ internal class BeregnBarnepensjonServiceTest {
                 kunEnJuridiskForelder = GrunnlagMedPeriode(TomVerdi, virk.atDay(1), datoAdopsjon),
             )
         coEvery {
-            trygdetidKlient.hentTrygdetid(
+            trygdetidService.hentTrygdetiderIBehandling(
                 any(),
                 any(),
             )
@@ -818,7 +856,7 @@ internal class BeregnBarnepensjonServiceTest {
         val virk = YearMonth.of(2024, Month.JANUARY)
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virk)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery {
             beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
@@ -846,7 +884,7 @@ internal class BeregnBarnepensjonServiceTest {
         val virk = YearMonth.of(2024, Month.JANUARY)
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virk)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns
             GrunnlagTestData(
                 annenForelder = AnnenForelder(KUN_EN_REGISTRERT_JURIDISK_FORELDER),
             ).hentOpplysningsgrunnlag()
@@ -877,7 +915,7 @@ internal class BeregnBarnepensjonServiceTest {
         val virk = YearMonth.of(2025, Month.MAY)
         val behandling = mockBehandling(BehandlingType.REVURDERING, virk = virk)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns
             GrunnlagTestData(
                 annenForelder = AnnenForelder(KUN_EN_REGISTRERT_JURIDISK_FORELDER),
             ).hentOpplysningsgrunnlag()
@@ -897,12 +935,12 @@ internal class BeregnBarnepensjonServiceTest {
                     ),
             )
         coEvery {
-            trygdetidKlient.hentTrygdetid(
+            trygdetidService.hentTrygdetiderIBehandling(
                 any(),
                 any(),
             )
         } returns listOf(mockTrygdetid(behandling.id))
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
             }
@@ -924,8 +962,8 @@ internal class BeregnBarnepensjonServiceTest {
             val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
             every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
-            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
             coEvery {
                 beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
@@ -957,8 +995,8 @@ internal class BeregnBarnepensjonServiceTest {
             val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
             every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
-            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
             coEvery {
                 beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
@@ -1006,8 +1044,8 @@ internal class BeregnBarnepensjonServiceTest {
             val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
             every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
-            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-            coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
             coEvery {
                 beregningsGrunnlagService.hentBeregningsGrunnlag(any())
             } returns
@@ -1191,8 +1229,14 @@ internal class BeregnBarnepensjonServiceTest {
         behandlingId_: UUID,
         anvendtTrygdetid: Int = TRYGDETID_40_AAR,
         fnr: String = AVDOED_FOEDSELSNUMMER.value,
-    ): TrygdetidDto =
-        mockk<TrygdetidDto>().apply {
+    ): Trygdetid =
+        mockk<Trygdetid>().apply {
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
+            every { trygdetidGrunnlag } returns emptyList()
+            every { opplysninger } returns emptyList()
+            every { overstyrtNorskPoengaar } returns null
+            every { opplysningerDifferanse } returns mockk()
+            every { begrunnelse } returns null
             every { id } returns randomUUID()
             every { behandlingId } returns behandlingId_
             every { ident } returns fnr

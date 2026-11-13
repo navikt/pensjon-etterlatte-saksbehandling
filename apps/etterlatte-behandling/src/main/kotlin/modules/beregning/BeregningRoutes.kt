@@ -12,21 +12,21 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 
 fun Route.beregning(
     beregningService: BeregningService,
-    behandlingKlient: BehandlingKlient,
+    behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
 ) {
     route("/api/beregning") {
         val logger = LoggerFactory.getLogger("BeregningRoute")
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingTilgangsSjekk) {
                 logger.info("Henter beregning med behandlingId=$it")
                 val beregning =
                     beregningService.hentBeregning(it, brukerTokenInfo)
@@ -36,7 +36,7 @@ fun Route.beregning(
         }
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}/overstyrt") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingTilgangsSjekk) {
                 logger.info("Henter overstyrBeregning med behandlingId=$it")
 
                 val overstyrBeregning = beregningService.hentOverstyrBeregningPaaBehandlingId(behandlingId, brukerTokenInfo)?.toDTO()
@@ -49,7 +49,7 @@ fun Route.beregning(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/overstyrt") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) {
                 logger.info("Oppretter overstyrBeregning med behandlingId=$it")
 
                 val overstyrBeregning =
@@ -66,16 +66,16 @@ fun Route.beregning(
         }
 
         delete("/{$BEHANDLINGID_CALL_PARAMETER}/overstyrt") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) {
                 beregningService.deaktiverOverstyrtberegning(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                logger.info("Oppretter beregning for behandlingId=$it")
-                val beregning = beregningService.opprettBeregning(it, brukerTokenInfo)
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
+                logger.info("Oppretter beregning for behandlingId=$behandlingId")
+                val beregning = beregningService.opprettBeregning(behandlingId, brukerTokenInfo)
                 call.respond(beregning.toDTO())
             }
         }

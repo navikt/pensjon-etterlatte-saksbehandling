@@ -9,7 +9,12 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { aarFraDatoString } from '~utils/formatering/dato'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { IAvkorting, IAvkortingGrunnlag, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
-import { IBehandlingStatus, Virkningstidspunkt, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  Virkningstidspunkt,
+  virkningstidspunkt,
+} from '~shared/types/IDetaljertBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentManglendeInntektsaar } from '~shared/api/avkorting'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
@@ -23,6 +28,26 @@ function tomInntektForRedigering(aar: number, virkAar: number, virk: Virkningsti
     spesifikasjon: '',
     fom: aar === virkAar ? virk.dato : `${aar}-01`,
   }
+}
+
+function inntekterForRedigeringMedManglendeAar(
+  redigerbareInntekter: IAvkortingGrunnlag[],
+  paakrevdeAar: number[],
+  virk: Virkningstidspunkt,
+  erFoerstegangsbehandling: boolean
+): IAvkortingGrunnlagLagre[] {
+  const virkAar = aarFraDatoString(virk.dato)
+  const tommeInntekter = paakrevdeAar.map((aar) => tomInntektForRedigering(aar, virkAar, virk))
+
+  if (!erFoerstegangsbehandling || tommeInntekter.length === 0) {
+    return tommeInntekter
+  }
+
+  const lagredeInntekter = redigerbareInntekter.filter(
+    (inntekt) => !paakrevdeAar.includes(aarFraDatoString(inntekt.fom))
+  )
+
+  return [...lagredeInntekter, ...tommeInntekter].sort((a, b) => aarFraDatoString(a.fom!) - aarFraDatoString(b.fom!))
 }
 
 function redigerbareInntekterForAvkorting(avkorting?: IAvkorting): IAvkortingGrunnlag[] {
@@ -50,7 +75,14 @@ export const AvkortingInntekt = ({ redigerbar }: { redigerbar: boolean }) => {
 
   useEffect(() => {
     fetchHentManglendeInntektsaar(behandling.id, (paakrevdeAar) => {
-      setInntekterForRedigering(paakrevdeAar.map((aar) => tomInntektForRedigering(aar, virkAar, virk)))
+      setInntekterForRedigering(
+        inntekterForRedigeringMedManglendeAar(
+          redigerbareInntekterForAvkorting(avkorting),
+          paakrevdeAar,
+          virk,
+          behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+        )
+      )
     })
   }, [avkorting])
 

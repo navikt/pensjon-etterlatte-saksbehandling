@@ -36,4 +36,13 @@ internal class HttpClientFactory(
     fun sigrunKlient(): HttpClient = lagKlient(config.getString("sigrun.scope"))
 
     fun inntektskomponentKlient(): HttpClient = lagKlient(config.getString("inntektskomponenten.scope"))
+
+    fun dokarkivKlient(): HttpClient =
+        httpClientClientCredentials(
+            forventSuksess = false,
+            azureAppClientId = azureAppClientId,
+            azureAppJwk = azureAppJwk,
+            azureAppWellKnownUrl = azureAppWellKnownUrl,
+            azureAppScope = config.getString("dokarkiv.scope"),
+        )
 }

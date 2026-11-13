@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
+    implementation(project(":libs:etterlatte-soeknad-journalfoering"))
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))

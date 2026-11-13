@@ -109,3 +109,7 @@
 **2026-11-02 — Feilsøking av synkroniserte data**
 - Observation: En ekstern kilde som forklaring er ikke nok når vår klient oversetter «ikke funnet» til gyldige, tomme data som deretter erstatter lagret tilstand.
 - Action: Spor forskjellen mellom tomt svar og exception helt frem til lagring og visning før ansvaret plasseres utenfor systemet.
+
+**2026-11-13 — Uttrekk til delt bibliotek**
+- Observation: En klasse så ut til å være selvstendig, men brukte `Enheter` fra behandling-model. Flyttingen avdekket også at en `internal` klientmetode ble brukt fra en tjeneste som skulle bli igjen i appen.
+- Action: Ved moduluttrekk: kartlegg både typeavhengigheter og synlighet over den nye modulgrensen før avhengighetene velges. Behold appens regresjonstester som kontroll av de faktiske konsumentene.

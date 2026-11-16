@@ -60,11 +60,14 @@ jobs:
         run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-      - name: Run tests
+      - name: Run client tests
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+      - name: Run server tests
+        working-directory: apps/${{ env.APP_NAME }}/server
+        run: yarn test
       - name: Build and publish Docker image
         uses: nais/docker-build-push@dd7421d5068057a020ca46ead966c26190c516b1 # ratchet:nais/docker-build-push@v0
         id: docker-build-push

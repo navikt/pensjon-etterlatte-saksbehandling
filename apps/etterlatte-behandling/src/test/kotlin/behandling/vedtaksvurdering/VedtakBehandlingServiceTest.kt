@@ -83,6 +83,8 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
@@ -1675,6 +1677,9 @@ internal class VedtakBehandlingServiceTest(
 
             oppdatertVedtak.vedtak.status shouldBe VedtakStatus.SAMORDNET
 
+            service.samordnetVedtak(behandlingId, attestant) shouldBe null
+
+            verify(exactly = 1) { repository.samordnetVedtak(behandlingId) }
             coVerify(exactly = 1) { behandlingStatusService.settTilSamordnetVedtak(any(), any()) }
             coVerify(exactly = 1) { behandlingStatusService.settSamordnetVedtak(any(), any()) }
             coVerify(exactly = 0) {
@@ -1687,6 +1692,19 @@ internal class VedtakBehandlingServiceTest(
                 }
             }
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = VedtakStatus::class, names = ["SAMORDNET", "IVERKSATT"])
+    fun `skal ikke oppdatere vedtak som allerede er samordnet eller iverksatt`(status: VedtakStatus) {
+        val behandlingId = randomUUID()
+        val vedtak = repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = status))
+
+        service.samordnetVedtak(behandlingId, attestant) shouldBe null
+
+        repository.hentVedtak(behandlingId) shouldBe vedtak
+        verify(exactly = 0) { repository.samordnetVedtak(any()) }
+        coVerify { behandlingStatusService wasNot Called }
     }
 
     @Test

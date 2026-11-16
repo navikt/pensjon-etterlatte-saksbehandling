@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -127,7 +128,7 @@ class RevurderingService(
         }
     }
 
-    private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingId: UUID) {
+    private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingId: UUID): Revurdering {
         val behandling =
             hentBehandling(behandlingId)
         if (behandling?.type != BehandlingType.REVURDERING) {
@@ -136,6 +137,7 @@ class RevurderingService(
         if (!behandling.status.kanEndres()) {
             throw BehandlingKanIkkeEndres()
         }
+        return behandling
     }
 
     fun lagreRevurderingInfo(
@@ -143,7 +145,26 @@ class RevurderingService(
         revurderingInfoMedBegrunnelse: RevurderingInfoMedBegrunnelse,
         navIdent: String,
     ) {
-        behandlingErAvTypenRevurderingOgKanEndres(behandlingId)
+        val behandling = behandlingErAvTypenRevurderingOgKanEndres(behandlingId)
+        if (behandling.revurderingsaarsak == Revurderingaarsak.FORLENGET_OMS) {
+            val periode =
+                revurderingInfoMedBegrunnelse.revurderingInfo as? RevurderingInfo.ForlengetOms
+                    ?: throw UgyldigForespoerselException(
+                        "MANGLER_FORLENGET_OMS_PERIODE",
+                        "Forlenget OMS må ha en fra og med- og til og med-måned.",
+                    )
+            sjekk(behandling.status == BehandlingStatus.OPPRETTET) {
+                "Utfallet må åpnes for redigering før perioden for forlenget OMS kan endres."
+            }
+            sjekk(periode.fom == behandling.virkningstidspunkt?.dato && periode.tom >= periode.fom) {
+                "Perioden må starte på virkningstidspunktet, og til og med må være lik eller etter fra og med."
+            }
+            behandlingDao.lagreOpphoerFom(behandlingId, periode.tom.plusMonths(1))
+        } else {
+            sjekk(revurderingInfoMedBegrunnelse.revurderingInfo !is RevurderingInfo.ForlengetOms) {
+                "Perioden for forlenget OMS kan bare lagres på en revurdering med årsak FORLENGET_OMS."
+            }
+        }
         val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
         revurderingDao.lagreRevurderingInfo(behandlingId, revurderingInfoMedBegrunnelse, kilde)
     }

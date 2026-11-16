@@ -9,6 +9,8 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerStatus
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.behandling.revurdering.ForlengetOmsUnderUtvikling
+import no.nav.etterlatte.behandling.revurdering.validerForlengetOmsPeriode
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -240,6 +242,10 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun behandlingTilFattetVedtak(behandling: Behandling): Behandling {
+        behandling.validerForlengetOmsPeriode()
+        if (behandling.revurderingsaarsak() == Revurderingaarsak.FORLENGET_OMS) {
+            throw ForlengetOmsUnderUtvikling()
+        }
         val vilkaarsvurderingIkkeOppfylt =
             vilkaarsvurderingDao.hent(behandling.id)?.resultat?.utfall == VilkaarsvurderingUtfall.IKKE_OPPFYLT
         return if (vilkaarsvurderingIkkeOppfylt) {

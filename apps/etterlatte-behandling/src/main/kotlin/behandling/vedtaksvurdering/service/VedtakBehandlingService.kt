@@ -586,7 +586,11 @@ class VedtakBehandlingService(
         }
 
         VedtakType.AVSLAG -> {
-            behandling.opphoerFraOgMed
+            if (behandling.revurderingsaarsak == Revurderingaarsak.FORLENGET_OMS) {
+                null
+            } else {
+                behandling.opphoerFraOgMed
+            }
         }
 
         else -> {
@@ -621,7 +625,9 @@ class VedtakBehandlingService(
                             etteroppgjoerResultat?.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_MED_UTBETALING ||
                                 etteroppgjoerResultat?.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
 
-                        if (revurderingaarsak == Revurderingaarsak.ETTEROPPGJOER && resultatIngenEndring) {
+                        if (revurderingaarsak == Revurderingaarsak.FORLENGET_OMS) {
+                            VedtakType.INNVILGELSE
+                        } else if (revurderingaarsak == Revurderingaarsak.ETTEROPPGJOER && resultatIngenEndring) {
                             VedtakType.INGEN_ENDRING
                         } else {
                             VedtakType.ENDRING
@@ -629,7 +635,7 @@ class VedtakBehandlingService(
                     }
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
-                        if (revurderingaarsak == Revurderingaarsak.NY_SOEKNAD) {
+                        if (revurderingaarsak in listOf(Revurderingaarsak.NY_SOEKNAD, Revurderingaarsak.FORLENGET_OMS)) {
                             VedtakType.AVSLAG
                         } else {
                             VedtakType.OPPHOER

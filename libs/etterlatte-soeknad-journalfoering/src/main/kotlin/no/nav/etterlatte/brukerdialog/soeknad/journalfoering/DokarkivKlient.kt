@@ -21,7 +21,7 @@ class DokarkivKlient(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    internal suspend fun opprettJournalpost(
+    suspend fun opprettJournalpost(
         request: OpprettJournalpostRequest,
         forsoekFerdigstill: Boolean = true,
     ): OpprettJournalpostResponse {

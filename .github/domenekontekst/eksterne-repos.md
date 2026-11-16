@@ -46,9 +46,15 @@ Søknadstypen er definert i `pensjon-etterlatte-felles/common` (`UtvidetOmstilli
 
 Behandlingsløpet er ikke avklart ennå. Inntil videre gjør `NySoeknadRiver` dette:
 1. Finner eller oppretter OMS-sak
-2. Journalfører søknaden på saken med tittel «Søknad om utvidet omstillingsstønad» (PDF-mal `utvidet_omstillingsstoenad_v<versjon>` i ey-pdfgen)
+2. Journalfører søknaden på saken med tittel «Søknad om utvidet omstillingsstønad» (PDF-mal `utvidet_omstillingsstoenad_v1` i ey-pdfgenrs, uten toggle)
 3. Oppretter en `TILLEGGSINFORMASJON`-oppgave som saksbehandler håndterer manuelt
 4. Svarer med `soeknadFordelt = false`, slik at det **ikke** opprettes behandling
+
+`JournalfoerSoeknadService`, `DokarkivKlient` og `PdfGeneratorKlient` ligger i
+`libs/etterlatte-soeknad-journalfoering`, som både behandling og Kafka-appen bruker.
+Behandling har lazy klienter og service for den planlagte task-kjeden. Dagens
+mottak går fortsatt gjennom `NySoeknadRiver`. Tilgang til PDF-generatorene og
+dokarkiv er klargjort i dev-manifestene, men må verifiseres etter deployment.
 
 #### Selvbetjening (selvbetjening-backend → Gjenny)
 
@@ -77,12 +83,12 @@ Det opprettes **ikke** automatisk en revurdering – det er saksbehandleroppgave
 
 ### Gradvis migrering fra pdfgen til pdfgenrs
 
-`etterlatte-brev-api` og `etterlatte-behandling-kafka` har to PDF-endepunkter:
+`etterlatte-brev-api`, `etterlatte-behandling-kafka` og (foreløpig bare i dev) `etterlatte-behandling` har to PDF-endepunkter:
 `PDFGEN_URL` for `ey-pdfgen` og `PDFGENRS_URL` for `ey-pdfgenrs`. Begge URL-ene
 inkluderer `/api/v1/genpdf`. JSON-kontrakter og malstier er uendret.
 
 Unleash-bryterne under velger generator per mal. Standard er **av**, som beholder
-`ey-pdfgen`. Ukjente maler bruker alltid gammel generator.
+`ey-pdfgen`. Utvidet OMS bruker alltid `ey-pdfgenrs`, uten toggle. Andre ukjente maler bruker gammel generator.
 
 | Unleash-bryter | Konsument |
 |---------------|-----------|

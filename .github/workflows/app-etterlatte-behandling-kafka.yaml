@@ -9,6 +9,7 @@ on:
       - docker/**
       - apps/etterlatte-behandling-kafka/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-soeknad-journalfoering/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-brev-model/**
       - libs/etterlatte-oppgave-model/**
@@ -32,6 +33,7 @@ on:
       - apps/etterlatte-behandling-kafka/**
       - "!apps/etterlatte-behandling-kafka/.nais/*"
       - libs/saksbehandling-common/**
+      - libs/etterlatte-soeknad-journalfoering/**
       - libs/etterlatte-brev-model/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**

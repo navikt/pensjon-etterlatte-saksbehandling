@@ -29,6 +29,8 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.behandling.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.brev.BrevKlient
 import no.nav.etterlatte.brev.BrevKlientImpl
+import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.DokarkivKlient
+import no.nav.etterlatte.brukerdialog.soeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
@@ -36,6 +38,7 @@ import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.PdfgenrsFeatureToggle
 import no.nav.etterlatte.kodeverk.KodeverkKlient
 import no.nav.etterlatte.kodeverk.KodeverkKlientImpl
 import no.nav.etterlatte.krr.KrrKlient
@@ -78,6 +81,22 @@ class KlientModule(
     private val httpClientFactory by lazy { HttpClientFactory(config) }
     private val standardHttpClient: HttpClient by lazy { httpClient() }
     private val httpClientForventSuksess: HttpClient by lazy { httpClient(forventSuksess = true) }
+
+    val dokarkivKlient: DokarkivKlient by lazy {
+        DokarkivKlient(
+            client = httpClientFactory.dokarkivKlient(),
+            url = config.getString("dokarkiv.url"),
+        )
+    }
+
+    val soeknadPdfGeneratorKlient: PdfGeneratorKlient by lazy {
+        PdfGeneratorKlient(
+            klient = standardHttpClient,
+            apiUrl = "${config.getString("pdfgen.url")}/eypdfgen",
+            pdfgenrsUrl = "${config.getString("pdfgenrs.url")}/eypdfgen",
+            brukPdfgenrs = { PdfgenrsFeatureToggle.brukPdfgenrs(it, featureToggleService) },
+        )
+    }
 
     val navAnsattKlient: NavAnsattKlient by lazy {
         navAnsattKlientOverride ?: NavAnsattKlientImpl(

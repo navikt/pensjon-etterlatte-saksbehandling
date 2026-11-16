@@ -9,6 +9,7 @@ on:
       - docker/**
       - apps/etterlatte-behandling/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-soeknad-journalfoering/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-oppgave-model/**
@@ -40,6 +41,7 @@ on:
       - apps/etterlatte-behandling/**
       - "!apps/etterlatte-behandling/.nais/*"
       - libs/saksbehandling-common/**
+      - libs/etterlatte-soeknad-journalfoering/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-brev-model/**
       - libs/etterlatte-institusjonsopphold-model/**

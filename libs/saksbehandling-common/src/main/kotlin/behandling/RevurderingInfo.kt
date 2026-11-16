@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 enum class BarnepensjonSoeskenjusteringGrunn {
@@ -18,6 +19,12 @@ enum class BarnepensjonSoeskenjusteringGrunn {
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class RevurderingInfo {
+    @JsonTypeName("FORLENGET_OMS")
+    data class ForlengetOms(
+        val fom: YearMonth,
+        val tom: YearMonth,
+    ) : RevurderingInfo()
+
     @JsonTypeName("ANNEN")
     data class RevurderingAarsakAnnen(
         val aarsak: String,

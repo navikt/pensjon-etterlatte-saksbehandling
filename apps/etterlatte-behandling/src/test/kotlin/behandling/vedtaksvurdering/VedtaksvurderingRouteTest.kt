@@ -604,6 +604,32 @@ internal class VedtaksvurderingRouteTest(
     }
 
     @Test
+    fun `skal returnere allerede samordnet vedtak uten aa publisere ny hendelse`() {
+        val samordnetVedtak = vedtak().copy(status = VedtakStatus.SAMORDNET)
+        every { vedtaksvurderingService.hentVedtak(samordnetVedtak.id) } returns samordnetVedtak
+        every { vedtakBehandlingService.samordnetVedtak(samordnetVedtak.behandlingId, any()) } returns null
+
+        withTestApplication(context) { client ->
+            val response =
+                client.post("/vedtak/samordnet/${samordnetVedtak.id}") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                }
+
+            response.status shouldBe HttpStatusCode.OK
+            val vedtakDto = deserialize<VedtakDto>(response.bodyAsText())
+            vedtakDto.id shouldBe samordnetVedtak.id
+            vedtakDto.behandlingId shouldBe samordnetVedtak.behandlingId
+            vedtakDto.status shouldBe VedtakStatus.SAMORDNET
+
+            coVerify(exactly = 1) {
+                vedtaksvurderingService.hentVedtak(samordnetVedtak.id)
+                vedtakBehandlingService.samordnetVedtak(samordnetVedtak.behandlingId, any())
+            }
+            coVerify(exactly = 0) { rapidService.sendToRapid(any()) }
+        }
+    }
+
+    @Test
     fun `skal tilbakestille vedtak`() {
         val tilbakestiltVedtak =
             vedtak().copy(

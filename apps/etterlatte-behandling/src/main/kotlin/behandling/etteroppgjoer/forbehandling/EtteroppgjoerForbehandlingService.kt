@@ -831,6 +831,12 @@ class EtteroppgjoerForbehandlingService(
                     "Kunne ikke hente inntekter fra A-ordningen. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
                     e,
                 )
+            } else if (!manglerSkatteoppgjoerOgErBosattIUtlandet(forbehandling)) {
+                throw InternfeilException(
+                    "Fant ikke A-inntekt for sak=${sak.id} og inntektsår=${forbehandling.aar}. " +
+                        "Forbehandlingen kan ikke opprettes. Meld sak hvis det ikke stemmer.",
+                    e,
+                )
             } else {
                 logger.warn(
                     "Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=${sak.id}",

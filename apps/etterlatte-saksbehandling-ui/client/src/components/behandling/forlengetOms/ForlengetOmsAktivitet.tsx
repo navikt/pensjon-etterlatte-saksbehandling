@@ -1,5 +1,7 @@
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
 import { Alert, BodyShort, Box, Button, Heading, TextField, VStack } from '@navikt/ds-react'
+import { useForm } from 'react-hook-form'
+import { format } from 'date-fns'
 import { IBehandlingReducer, oppdaterRevurderingInfo, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
@@ -13,6 +15,8 @@ import { ForlengetOmsInfo } from '~shared/types/RevurderingInfo'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ForlengetOmsUnderUtvikling } from './ForlengetOmsUnderUtvikling'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
+import { formaterMaanedAar } from '~utils/formatering/dato'
+import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 
 export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
@@ -21,8 +25,10 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
   const info = behandling.revurderinginfo?.revurderingInfo
   const lagretPeriode = info?.type === 'FORLENGET_OMS' ? info : undefined
   const fom = behandling.virkningstidspunkt?.dato.slice(0, 7)
-  const [tom, setTom] = useState(lagretPeriode?.tom ?? '')
-  const [periodeFeil, setPeriodeFeil] = useState<string>()
+  const { control, handleSubmit, watch, setError } = useForm<{ tom: string | null }>({
+    defaultValues: { tom: lagretPeriode?.tom ? `${lagretPeriode.tom}-01` : null },
+  })
+  const tom = watch('tom')?.slice(0, 7) ?? ''
   const [redigerTotalvurdering, setRedigerTotalvurdering] = useState(false)
   const [lagrePeriodeStatus, lagrePeriode] = useApiCall(lagreRevurderingInfo)
   const vilkaarsvurdering = behandling.vilkaarsvurdering
@@ -30,14 +36,12 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
     redigerbar && !vilkaarsvurdering?.resultat && behandling.status === IBehandlingStatus.OPPRETTET
   const periodeErLagret = !!fom && lagretPeriode?.fom === fom && lagretPeriode.tom === tom && lagretPeriode.tom >= fom
 
-  const lagre = (event: FormEvent) => {
-    event.preventDefault()
+  const lagre = () => {
     if (!fom || !tom || tom < fom) {
-      setPeriodeFeil('Velg en til og med-måned som er lik eller etter fra og med-måneden.')
+      setError('tom', { message: 'Velg en til og med-måned som er lik eller etter fra og med-måneden.' })
       return
     }
 
-    setPeriodeFeil(undefined)
     const revurderingInfo: ForlengetOmsInfo = { type: 'FORLENGET_OMS', fom, tom }
     lagrePeriode({ behandlingId: behandling.id, revurderingInfo }, () =>
       dispatch(oppdaterRevurderingInfo({ revurderingInfo, begrunnelse: undefined }))
@@ -57,21 +61,26 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
           Periode for forlenget OMS
         </Heading>
         <BodyShort>Fra og med-måneden settes som virkningstidspunkt i revurderingsoversikten.</BodyShort>
-        <form onSubmit={lagre}>
+        <form onSubmit={handleSubmit(lagre)}>
           <VStack gap="space-16" maxWidth="30rem">
-            <TextField type="month" label="Fra og med" value={fom ?? ''} readOnly />
-            <TextField
-              type="month"
-              label="Til og med"
-              value={tom}
-              min={fom}
-              readOnly={!periodeRedigerbar}
-              onChange={(event) => {
-                setTom(event.target.value)
-                setPeriodeFeil(undefined)
-              }}
-              error={periodeFeil}
-            />
+            <TextField label="Fra og med" value={fom ? formaterMaanedAar(fom) : ''} readOnly />
+            {periodeRedigerbar ? (
+              <ControlledMaanedVelger
+                name="tom"
+                label="Til og med"
+                control={control}
+                fromDate={fom ? new Date(fom) : undefined}
+                required
+                kunViseMaanedOgAar
+                validate={(maaned) => {
+                  if (!fom || !maaned || format(maaned, 'yyyy-MM') < fom) {
+                    return 'Velg en til og med-måned som er lik eller etter fra og med-måneden.'
+                  }
+                }}
+              />
+            ) : (
+              <TextField label="Til og med" value={tom ? formaterMaanedAar(tom) : ''} readOnly />
+            )}
             {periodeRedigerbar && (
               <Button type="submit" loading={isPending(lagrePeriodeStatus)}>
                 Lagre periode

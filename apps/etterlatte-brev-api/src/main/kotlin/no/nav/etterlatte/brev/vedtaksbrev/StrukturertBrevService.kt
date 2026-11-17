@@ -8,7 +8,9 @@ import no.nav.etterlatte.brev.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.BrevPayload
 import no.nav.etterlatte.brev.BrevRequest
 import no.nav.etterlatte.brev.BrevVedleggRedigerbarNy
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -28,6 +30,7 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.pdf.PDFHelper
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -343,7 +346,13 @@ class StrukturertBrevService(
                 spraak = brev.spraak,
                 sakType = brevRequest.sak.sakType,
             )
-        return brevbaker.genererPdf(brev.id, brevbakerRequest)
+        val vedtaksbrevPdf = brevbaker.genererPdf(brev.id, brevbakerRequest)
+
+        return if (brev.brevkoder == Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK) {
+            varselbrevOgVedtaksbrev(brev, brevInnholdData, avsender, brevRequest, vedtaksbrevPdf)
+        } else {
+            vedtaksbrevPdf
+        }
     }
 
     private suspend fun hentInnholdForVedlegg(
@@ -372,4 +381,29 @@ class StrukturertBrevService(
                         ),
                 )
             }.toList()
+
+    // TODO: ikke ideelt, bør finne en bedre måte å kombinere flere brev til en utsending
+    // I forbindelse med årlig inntektsjustering jobb skal det sendes ut varsel og vedtak i samme brev.
+    private suspend fun varselbrevOgVedtaksbrev(
+        brev: Brev,
+        brevInnholdData: BrevData,
+        avsender: Avsender,
+        brevRequest: BrevRequest,
+        vedtaksbrevPdf: Pdf,
+    ): Pdf {
+        val varselbrevPdf =
+            brevbaker.genererPdf(
+                brev.id,
+                BrevbakerRequest.fra(
+                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VARSEL,
+                    brevInnholdData,
+                    avsender,
+                    SoekerOgEventuellVerge(brevRequest.soeker, brevRequest.verge),
+                    brevRequest.sak.id,
+                    brev.spraak,
+                    brevRequest.sak.sakType,
+                ),
+            )
+        return PDFHelper.kombinerPdfListeTilEnPdf(listOf(varselbrevPdf, vedtaksbrevPdf))
+    }
 }

@@ -1,19 +1,22 @@
 package no.nav.etterlatte.modules.beregning.etteroppgjoer
 
-import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakEtteroppgjoerService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -30,12 +33,16 @@ import no.nav.etterlatte.modules.beregning.avkorting.Etteroppgjoer
 import no.nav.etterlatte.modules.beregning.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
 import no.nav.etterlatte.modules.beregning.avkorting.regler.beregneEtteroppgjoerRegelMedDoedsfall
 import no.nav.etterlatte.modules.beregning.avkorting.toDto
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
-import no.nav.etterlatte.modules.beregning.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
+
+class EtteroppgjoerBehandlingerTilhoererIkkeSammeSak :
+    UgyldigForespoerselException(
+        code = "BEHANDLINGER_TILHOERER_IKKE_SAMME_SAK",
+        detail = "Forbehandlingen, siste iverksatte behandling og angitt sak må tilhøre samme sak",
+    )
 
 class EtteroppgjoerService(
     private val avkortingRepository: AvkortingRepository,
@@ -43,13 +50,14 @@ class EtteroppgjoerService(
     private val etteroppgjoerRepository: EtteroppgjoerRepository,
     private val avkortingService: AvkortingService,
     private val reparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
-    private val vedtakKlient: VedtaksvurderingKlient,
-    private val behandlingKlient: BehandlingKlient,
+    private val vedtakEtteroppgjoerService: VedtakEtteroppgjoerService,
+    private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
+    private val forbehandlingService: EtteroppgjoerForbehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerService::class.java)
 
-    suspend fun beregnOgLagreEtteroppgjoerResultat(
+    fun beregnOgLagreEtteroppgjoerResultat(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
         etteroppgjoersAar: Int,
@@ -72,7 +80,10 @@ class EtteroppgjoerService(
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
         aar: Int,
-    ): BeregnetEtteroppgjoerResultat? = etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
+    ): BeregnetEtteroppgjoerResultat? {
+        validerBehandlingerTilhoererSammeSak(forbehandlingId, sisteIverksatteBehandlingId)
+        return etteroppgjoerRepository.hentEtteroppgjoerResultat(aar, forbehandlingId, sisteIverksatteBehandlingId)
+    }
 
     fun hentBeregnetAvkorting(
         forbehandlingId: UUID,
@@ -81,14 +92,14 @@ class EtteroppgjoerService(
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtteroppgjoerBeregnetAvkorting {
+        validerBehandlingerTilhoererSammeSak(forbehandlingId, sisteIverksatteBehandlingId, sakId)
         val avkortingMedForventaInntekt =
-            runBlocking {
-                avkortingService.hentAvkortingMedReparertAarsoppgjoer(
+            avkortingService
+                .hentAvkortingMedReparertAarsoppgjoer(
                     sakId = sakId,
                     behandlingId = sisteIverksatteBehandlingId,
                     brukerTokenInfo = brukerTokenInfo,
-                )
-            }.toDto()
+                ).toDto()
 
         val avkortingFaktiskInntekt = hentAvkortingForBehandling(forbehandlingId, aar)
 
@@ -102,18 +113,18 @@ class EtteroppgjoerService(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        validerBehandlingerTilhoererSammeSak(request.forbehandlingId, request.sisteIverksatteBehandling, request.sakId)
         val sanksjoner = sanksjonService.hentSanksjon(request.sisteIverksatteBehandling)
 
         val tidligereAarsoppgjoer =
-            runBlocking {
-                avkortingService.hentAvkortingMedReparertAarsoppgjoer(
+            avkortingService
+                .hentAvkortingMedReparertAarsoppgjoer(
                     sakId = request.sakId,
                     behandlingId = request.sisteIverksatteBehandling,
                     brukerTokenInfo = brukerTokenInfo,
-                )
-            }.let {
-                it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
-            }
+                ).let {
+                    it.aarsoppgjoer.single { aarsoppgjoer -> aarsoppgjoer.aar == request.aar }
+                }
 
         val avkorting =
             with(request) {
@@ -138,7 +149,7 @@ class EtteroppgjoerService(
         avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
     }
 
-    private suspend fun beregnEtteroppgjoerResultat(
+    private fun beregnEtteroppgjoerResultat(
         etteroppgjoersAar: Int,
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,
@@ -150,7 +161,7 @@ class EtteroppgjoerService(
         val fomTom = LocalDate.of(etteroppgjoersAar, 12, 31)
         val regelPeriode = RegelPeriode(fomTom, fomTom)
 
-        val sakId = behandlingKlient.hentBehandling(sisteIverksatteBehandlingId, HardkodaSystembruker.etteroppgjoer).sak
+        val sakId = validerBehandlingerTilhoererSammeSak(forbehandlingId, sisteIverksatteBehandlingId)
 
         val (vedtakReferanse, vedtakPerioder) =
             hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, sammenlignTilOgMedBehandlingId)
@@ -213,18 +224,38 @@ class EtteroppgjoerService(
         }
     }
 
-    private suspend fun hentVedtakslisteIEtteroppgjoersAar(
+    private fun validerBehandlingerTilhoererSammeSak(
+        forbehandlingId: UUID,
+        sisteIverksatteBehandlingId: UUID,
+        sakId: SakId? = null,
+    ): SakId =
+        inTransactionIfNeeded {
+            val forbehandlingSakId = forbehandlingService.hentForbehandling(forbehandlingId).sak.id
+            if (sakId != null && sakId != forbehandlingSakId) {
+                throw EtteroppgjoerBehandlingerTilhoererIkkeSammeSak()
+            }
+            val behandling =
+                behandlingService.hentBehandling(sisteIverksatteBehandlingId)
+                    ?: throw InternfeilException("Klarte ikke hente behandling med behandlingId=$sisteIverksatteBehandlingId")
+            if (behandling.sak.id != forbehandlingSakId) {
+                throw EtteroppgjoerBehandlingerTilhoererIkkeSammeSak()
+            }
+            forbehandlingSakId
+        }
+
+    private fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
         tilOgMedBehandlingId: UUID?,
     ): Pair<List<Long>, List<VedtakEtteroppgjoerPeriode>> {
         val vedtaksliste =
-            vedtakKlient.hentVedtakslisteIEtteroppgjoersAar(
-                sakId,
-                etteroppgjoersAar,
-                HardkodaSystembruker.etteroppgjoer,
-                tilOgMedBehandlingId,
-            )
+            inTransactionIfNeeded {
+                vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(
+                    sakId,
+                    etteroppgjoersAar,
+                    tilOgMedBehandlingId,
+                )
+            }
 
         val vedtakReferanse = vedtaksliste.map { it.vedtakId }
         val vedtakPerioder =

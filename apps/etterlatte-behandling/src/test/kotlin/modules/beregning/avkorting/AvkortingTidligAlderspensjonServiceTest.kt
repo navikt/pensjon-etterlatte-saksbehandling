@@ -8,6 +8,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -18,37 +19,41 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.avkorting.Avkorting
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingRepository
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingTidligAlderspensjonService
 import no.nav.etterlatte.modules.beregning.avkorting.Inntektsavkorting
 import no.nav.etterlatte.modules.beregning.avkorting.OverstyrtInnvilgaMaanederAarsak
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.modules.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.modules.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.modules.beregning.regler.behandling
+import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
+@ExtendWith(BeregningTestKontekst::class)
 class AvkortingTidligAlderspensjonServiceTest {
-    private val behandlingKlient: BehandlingKlient = mockk()
+    private val oppgaveService = mockk<OppgaveService>()
+    private val behandlingService: BehandlingService = mockk()
     private val avkortingRepository: AvkortingRepository = mockk()
 
     private val service =
         AvkortingTidligAlderspensjonService(
-            behandlingKlient,
+            behandlingService,
             avkortingRepository,
+            oppgaveService = oppgaveService,
         )
 
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
-        coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
     }
 
     @AfterEach
@@ -86,20 +91,19 @@ class AvkortingTidligAlderspensjonServiceTest {
 
         val avkorting = Avkorting(aarsoppgjoer = listOf(aarsoppgjoer))
 
-        coEvery { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) } returns behandling
         coEvery { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
 
         coEvery {
-            behandlingKlient.opprettOppgave(
-                behandling.sak,
-                brukerTokenInfo,
-                OppgaveType.GENERELL_OPPGAVE,
-                any(),
-                any(),
-                any(),
-                any(),
+            oppgaveService.opprettOppgave(
+                sakId = behandling.sak,
+                type = OppgaveType.GENERELL_OPPGAVE,
+                merknad = any(),
+                frist = any(),
+                kilde = any(),
+                referanse = any(),
             )
-        } returns Unit
+        } returns mockk()
 
         runBlocking {
             service.opprettOppgaveHvisTidligAlderspensjon(behandlingId, brukerTokenInfo)
@@ -107,17 +111,16 @@ class AvkortingTidligAlderspensjonServiceTest {
 
         val slotTidspunkt = slot<Tidspunkt>()
         coVerify(exactly = 1) {
-            behandlingKlient.opprettOppgave(
-                behandling.sak,
-                brukerTokenInfo,
-                OppgaveType.GENERELL_OPPGAVE,
-                any(),
-                capture(slotTidspunkt),
-                OppgaveKilde.BEHANDLING,
-                behandlingId.toString(),
+            oppgaveService.opprettOppgave(
+                sakId = behandling.sak,
+                type = OppgaveType.GENERELL_OPPGAVE,
+                merknad = any(),
+                frist = capture(slotTidspunkt),
+                kilde = OppgaveKilde.BEHANDLING,
+                referanse = behandlingId.toString(),
             )
             avkortingRepository.hentAvkorting(behandlingId)
-            behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
         }
 
         val oppgaveFrist = slotTidspunkt.captured.toLocalDate()
@@ -171,20 +174,19 @@ class AvkortingTidligAlderspensjonServiceTest {
 
         val avkorting = Avkorting(aarsoppgjoer = listOf(foesteAarsoppjoer, nesteAarsoppgjoer))
 
-        coEvery { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) } returns behandling
         coEvery { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
 
         coEvery {
-            behandlingKlient.opprettOppgave(
-                behandling.sak,
-                brukerTokenInfo,
-                OppgaveType.GENERELL_OPPGAVE,
-                any(),
-                any(),
-                any(),
-                any(),
+            oppgaveService.opprettOppgave(
+                sakId = behandling.sak,
+                type = OppgaveType.GENERELL_OPPGAVE,
+                merknad = any(),
+                frist = any(),
+                kilde = any(),
+                referanse = any(),
             )
-        } returns Unit
+        } returns mockk()
 
         runBlocking {
             service.opprettOppgaveHvisTidligAlderspensjon(behandlingId, brukerTokenInfo)
@@ -192,17 +194,16 @@ class AvkortingTidligAlderspensjonServiceTest {
 
         val slotTidspunkt = slot<Tidspunkt>()
         coVerify(exactly = 1) {
-            behandlingKlient.opprettOppgave(
-                behandling.sak,
-                brukerTokenInfo,
-                OppgaveType.GENERELL_OPPGAVE,
-                any(),
-                capture(slotTidspunkt),
-                OppgaveKilde.BEHANDLING,
-                behandlingId.toString(),
+            oppgaveService.opprettOppgave(
+                sakId = behandling.sak,
+                type = OppgaveType.GENERELL_OPPGAVE,
+                merknad = any(),
+                frist = capture(slotTidspunkt),
+                kilde = OppgaveKilde.BEHANDLING,
+                referanse = behandlingId.toString(),
             )
             avkortingRepository.hentAvkorting(behandlingId)
-            behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
         }
 
         val oppgaveFrist = slotTidspunkt.captured.toLocalDate()
@@ -239,20 +240,19 @@ class AvkortingTidligAlderspensjonServiceTest {
 
         val avkorting = Avkorting(aarsoppgjoer = listOf(aarsoppgjoer))
 
-        coEvery { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) } returns behandling
         coEvery { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
 
         coEvery {
-            behandlingKlient.opprettOppgave(
-                behandling.sak,
-                brukerTokenInfo,
-                OppgaveType.GENERELL_OPPGAVE,
-                any(),
-                any(),
-                any(),
-                any(),
+            oppgaveService.opprettOppgave(
+                sakId = behandling.sak,
+                type = OppgaveType.GENERELL_OPPGAVE,
+                merknad = any(),
+                frist = any(),
+                kilde = any(),
+                referanse = any(),
             )
-        } returns Unit
+        } returns mockk()
 
         runBlocking {
             service.opprettOppgaveHvisTidligAlderspensjon(behandlingId, brukerTokenInfo)
@@ -260,17 +260,16 @@ class AvkortingTidligAlderspensjonServiceTest {
 
         val slotTidspunkt = slot<Tidspunkt>()
         coVerify(exactly = 1) {
-            behandlingKlient.opprettOppgave(
-                behandling.sak,
-                brukerTokenInfo,
-                OppgaveType.GENERELL_OPPGAVE,
-                any(),
-                capture(slotTidspunkt),
-                OppgaveKilde.BEHANDLING,
-                behandlingId.toString(),
+            oppgaveService.opprettOppgave(
+                sakId = behandling.sak,
+                type = OppgaveType.GENERELL_OPPGAVE,
+                merknad = any(),
+                frist = capture(slotTidspunkt),
+                kilde = OppgaveKilde.BEHANDLING,
+                referanse = behandlingId.toString(),
             )
             avkortingRepository.hentAvkorting(behandlingId)
-            behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)
         }
 
         val oppgaveFrist = slotTidspunkt.captured.toLocalDate()

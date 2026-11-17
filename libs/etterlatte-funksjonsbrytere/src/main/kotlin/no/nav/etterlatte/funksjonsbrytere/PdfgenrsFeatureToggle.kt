@@ -16,6 +16,9 @@ enum class PdfgenrsFeatureToggle(
         fun brukPdfgenrs(
             mal: String,
             featureToggleService: FeatureToggleService,
-        ): Boolean = entries.firstOrNull { it.mal == mal }?.let { featureToggleService.isEnabled(it, false) } ?: false
+        ): Boolean =
+            // Utvidet OMS bruker pdfgenrs uten migreringsbryter.
+            mal == "utvidet_omstillingsstoenad_v1" ||
+                (entries.firstOrNull { it.mal == mal }?.let { featureToggleService.isEnabled(it, false) } ?: false)
     }
 }

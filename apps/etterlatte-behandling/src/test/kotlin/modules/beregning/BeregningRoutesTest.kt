@@ -3,21 +3,31 @@ package no.nav.etterlatte.modules.beregning
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
+import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStatusEndringException
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -29,23 +39,34 @@ import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
+import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(BeregningTestKontekst::class)
 internal class BeregningRoutesTest {
+    private val behandlingStatusService = mockk<BehandlingStatusService>()
+    private val behandlingTilgangsSjekk = mockk<BehandlingTilgangsSjekk>()
     private val mockOAuth2Server = MockOAuth2Server()
     private val beregningRepository = mockk<BeregningRepository>()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val behandlingService = mockk<BehandlingService>()
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
     private val beregnOverstyrBeregningService = mockk<BeregnOverstyrBeregningService>()
@@ -53,17 +74,30 @@ internal class BeregningRoutesTest {
     private val beregningService =
         BeregningService(
             beregningRepository = beregningRepository,
-            behandlingKlient = behandlingKlient,
+            behandlingService = behandlingService,
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
             beregnOverstyrBeregningService = beregnOverstyrBeregningService,
+            behandlingStatusService = behandlingStatusService,
         )
 
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
+    }
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+    @BeforeEach
+    fun beforeEach() {
+        clearMocks(
+            behandlingStatusService,
+            behandlingTilgangsSjekk,
+            beregningRepository,
+            behandlingService,
+            beregnBarnepensjonService,
+            beregnOmstillingsstoenadService,
+            beregnOverstyrBeregningService,
+        )
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
@@ -77,7 +111,8 @@ internal class BeregningRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -95,15 +130,16 @@ internal class BeregningRoutesTest {
         val beregning = beregning()
         val behandling = mockk<DetaljertBehandling>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns sakId1
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -123,11 +159,12 @@ internal class BeregningRoutesTest {
         val beregning = beregning()
 
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             client
@@ -145,16 +182,17 @@ internal class BeregningRoutesTest {
         val behandling = mockBehandling()
         val beregning = beregning()
 
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingStatusService.settBeregnet(any(), any(), any()) } returns Unit
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns mockBehandling()
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -179,8 +217,8 @@ internal class BeregningRoutesTest {
     fun `skal hente overstyrBeregning`() {
         val behandling = mockk<DetaljertBehandling>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns sakId1
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns
             OverstyrBeregning(
@@ -192,7 +230,8 @@ internal class BeregningRoutesTest {
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -214,14 +253,15 @@ internal class BeregningRoutesTest {
     fun `skal ikke hente overstyrBeregning hvis den ikke finnes`() {
         val behandling = mockk<DetaljertBehandling>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns sakId1
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
             runServer(mockOAuth2Server) {
-                beregning(beregningService, behandlingKlient)
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
             }
 
             val response =
@@ -232,6 +272,112 @@ internal class BeregningRoutesTest {
 
             response.status shouldBe HttpStatusCode.NoContent
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("statusfeil")
+    fun `skal beholde serverfeil ved avvist beregning uten aa lagre`(feil: Exception) {
+        val behandlingId = randomUUID()
+        every { behandlingStatusService.settBeregnet(behandlingId, any(), true) } throws feil
+
+        testApplication {
+            runServer(mockOAuth2Server) {
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                client.post("/api/beregning/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            response.status shouldBe HttpStatusCode.InternalServerError
+        }
+
+        verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
+        verify(exactly = 0) { behandlingStatusService.settBeregnet(any(), any(), false) }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal beholde statusfeilen for endring av overstyrt beregning`(opprett: Boolean) {
+        val behandlingId = randomUUID()
+        every { behandlingService.hentDetaljertBehandling(behandlingId, any()) } returns mockBehandling()
+        every { behandlingStatusService.settTrygdetidOppdatert(behandlingId, any(), true) } throws
+            TilstandException.UgyldigTilstand("Ugyldig status")
+
+        testApplication {
+            runServer(mockOAuth2Server) {
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                if (opprett) {
+                    client.post("/api/beregning/$behandlingId/overstyrt") {
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody("""{"beskrivelse":"Test","kategori":"UKJENT_KATEGORI"}""")
+                    }
+                } else {
+                    client.delete("/api/beregning/$behandlingId/overstyrt") {
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                }
+
+            response.status shouldBe HttpStatusCode.BadRequest
+            val respons = objectMapper.readTree(response.bodyAsText())
+            respons["code"].asString() shouldBe "UGYLDIG_STATUS_BEHANDLING"
+            respons["meta"]["behandlingId"].asString() shouldBe behandlingId.toString()
+        }
+
+        verify(exactly = 0) {
+            beregningRepository.opprettOverstyrBeregning(any())
+            beregningRepository.deaktiverOverstyrtBeregning(any())
+            beregningRepository.slettOverstyrtBeregningsgrunnlag(any())
+        }
+    }
+
+    @Test
+    fun `skal fortsatt returnere serverfeil ved teknisk feil i statussjekken`() {
+        val behandlingId = randomUUID()
+        every { behandlingStatusService.settBeregnet(behandlingId, any(), true) } throws
+            IllegalStateException("Databasen er utilgjengelig")
+
+        testApplication {
+            runServer(mockOAuth2Server) {
+                attachMockContext()
+                beregning(beregningService, behandlingTilgangsSjekk)
+            }
+
+            val response =
+                client.post("/api/beregning/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            response.status shouldBe HttpStatusCode.InternalServerError
+        }
+
+        verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
+    }
+
+    companion object {
+        @JvmStatic
+        fun statusfeil(): List<Arguments> =
+            listOf(
+                arguments(
+                    TilstandException.UgyldigTilstand("Ugyldig status"),
+                ),
+                arguments(
+                    TilstandException.IkkeFyltUt("Behandlingen er ikke fylt ut"),
+                ),
+                arguments(
+                    TilstandException.KanIkkeRedigere("Behandlingen kan ikke redigeres"),
+                ),
+                arguments(
+                    BehandlingStoetterIkkeStatusEndringException(BehandlingStatus.BEREGNET),
+                ),
+            )
     }
 
     private fun beregning(

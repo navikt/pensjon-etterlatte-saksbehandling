@@ -71,7 +71,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import tools.jackson.databind.ObjectMapper
 import java.sql.Connection
 import java.time.Instant
@@ -116,7 +115,7 @@ fun lagContext(
         object : DatabaseKontekst {
             override fun activeTx(): Connection = throw IllegalArgumentException()
 
-            override fun harIntransaction(): Boolean = throw NotImplementedException("not implemented")
+            override fun harIntransaction(): Boolean = false
 
             override fun <T> inTransaction(block: () -> T): T = block()
         },

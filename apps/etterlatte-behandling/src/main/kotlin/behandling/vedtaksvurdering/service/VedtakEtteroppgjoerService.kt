@@ -1,8 +1,13 @@
 package no.nav.etterlatte.behandling.vedtaksvurdering.service
 
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakEtteroppgjoerPeriode
@@ -15,13 +20,17 @@ import java.util.UUID
 class VedtakEtteroppgjoerService(
     private val repository: VedtaksvurderingRepository,
     private val vedtakSamordningService: VedtakSamordningService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentVedtakslisteIEtteroppgjoersAar(
         sakId: SakId,
         etteroppgjoersAar: Int,
         tilOgMedBehandlingId: UUID? = null,
-    ): List<VedtakEtteroppgjoerDto> =
-        hentVedtakForSak(sakId)
+    ): List<VedtakEtteroppgjoerDto> {
+        if (!featureToggleService.isEnabled(EtteroppgjoerToggles.VEDTAKSLISTE_HENT_GITT_SAKID, false)) {
+            return hentVedtakslisteIEtteroppgjoersAarOld(sakId, etteroppgjoersAar, tilOgMedBehandlingId)
+        }
+        return hentVedtakForSak(sakId)
             .retainIverksatteOgAttesterteAvslag()
             .sammenstilt(tilOgMedBehandlingId, etteroppgjoersAar)
             .map { vedtakSamordningDto ->
@@ -37,6 +46,40 @@ class VedtakEtteroppgjoerService(
                         },
                 )
             }
+    }
+
+    fun hentVedtakslisteIEtteroppgjoersAarOld(
+        sakId: SakId,
+        etteroppgjoersAar: Int,
+        tilOgMedBehandlingId: UUID? = null,
+    ): List<VedtakEtteroppgjoerDto> {
+        val vedtak = repository.hentVedtakForSak(sakId).firstOrNull()
+        krevIkkeNull(vedtak) { "Fant ingen vedtak for sakId=$sakId" }
+
+        val fnr = Folkeregisteridentifikator.of(vedtak.soeker.value)
+
+        val vedtaksliste =
+            vedtakSamordningService.hentVedtaksliste(
+                fnr,
+                SakType.OMSTILLINGSSTOENAD,
+                LocalDate.of(etteroppgjoersAar, 1, 1),
+                tilOgMedBehandlingId,
+            )
+
+        return vedtaksliste.map { vedtak ->
+            VedtakEtteroppgjoerDto(
+                vedtakId = vedtak.vedtakId,
+                perioder =
+                    vedtak.perioder.map { periode ->
+                        VedtakEtteroppgjoerPeriode(
+                            fom = periode.fom,
+                            tom = periode.tom,
+                            ytelseEtterAvkorting = periode.ytelseEtterAvkorting,
+                        )
+                    },
+            )
+        }
+    }
 
     private fun List<Vedtak>.sammenstilt(
         tilOgMedBehandlingId: UUID?,

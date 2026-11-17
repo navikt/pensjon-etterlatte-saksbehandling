@@ -73,6 +73,10 @@ jobs:
       - name: Run client tests
         working-directory: apps/${{ github.workflow }}/client
         run: CI=true yarn test
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
       - name: Run server tests
         working-directory: apps/${{ github.workflow }}/server
         run: yarn test
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}

@@ -393,16 +393,17 @@ class StrukturertBrevService(
     ): Pdf {
         val varselbrevPdf =
             brevbaker.genererPdf(
-                brev.id,
-                BrevbakerRequest.fra(
-                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VARSEL,
-                    brevInnholdData,
-                    avsender,
-                    SoekerOgEventuellVerge(brevRequest.soeker, brevRequest.verge),
-                    brevRequest.sak.id,
-                    brev.spraak,
-                    brevRequest.sak.sakType,
-                ),
+                brevID = brev.id,
+                brevRequest =
+                    BrevbakerRequest.fra(
+                        brevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VARSEL,
+                        brevData = brevInnholdData,
+                        avsender = avsender,
+                        soekerOgEventuellVerge = SoekerOgEventuellVerge(brevRequest.soeker, brevRequest.verge),
+                        sakId = brevRequest.sak.id,
+                        spraak = brev.spraak,
+                        sakType = brevRequest.sak.sakType,
+                    ),
             )
         return PDFHelper.kombinerPdfListeTilEnPdf(listOf(varselbrevPdf, vedtaksbrevPdf))
     }

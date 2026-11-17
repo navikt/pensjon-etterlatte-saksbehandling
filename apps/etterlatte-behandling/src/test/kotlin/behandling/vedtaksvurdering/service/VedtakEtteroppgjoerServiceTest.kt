@@ -8,10 +8,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerToggles
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.behandling.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.behandling.vedtaksvurdering.vedtak
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -23,6 +25,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.security.SecureRandom
 import java.time.LocalDate
@@ -33,11 +36,19 @@ class VedtakEtteroppgjoerServiceTest {
     private val vedtaksvurderingRepository = mockk<VedtaksvurderingRepository>()
     private val vedtakSamordningService = mockk<VedtakSamordningService>()
 
+    val featureToggleService = DummyFeatureToggleService()
+
     private val vedtakEtteroppgjoerService =
         VedtakEtteroppgjoerService(
             repository = vedtaksvurderingRepository,
             vedtakSamordningService = vedtakSamordningService,
+            featureToggleService = featureToggleService,
         )
+
+    @BeforeEach
+    fun setUp() {
+        featureToggleService.settBryter(EtteroppgjoerToggles.VEDTAKSLISTE_HENT_GITT_SAKID, true)
+    }
 
     @AfterEach
     fun tearDown() {

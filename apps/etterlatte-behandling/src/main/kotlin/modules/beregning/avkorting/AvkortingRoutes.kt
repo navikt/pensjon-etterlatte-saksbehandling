@@ -22,6 +22,8 @@ import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoReq
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
@@ -29,14 +31,13 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.MottattInntektsjusteringService
 import no.nav.etterlatte.modules.beregning.etteroppgjoer.EtteroppgjoerService
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.time.Month
 import java.time.YearMonth
 
 fun Route.avkorting(
     avkortingService: AvkortingService,
-    behandlingKlient: BehandlingKlient,
+    behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     tidligAlderspensjonService: AvkortingTidligAlderspensjonService,
     aarligInntektsjusteringService: AarligInntektsjusteringService,
     mottattInntektsjusteringService: MottattInntektsjusteringService,
@@ -46,11 +47,11 @@ fun Route.avkorting(
 
     route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
         /*
-        Tiltenkt frontend. Henting vil utføre endringer på avkorting og behandling
+        Tiltenkt frontend. Kan potensielt utføre endringer på avkorting og behandling
         (beregning av avkorting, behandlingsstatus, etc).
          */
         get {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingTilgangsSjekk) {
                 logger.info("Henter avkorting med behandlingId=$it")
                 when (val avkorting = avkortingService.hentOpprettEllerReberegnAvkorting(it, brukerTokenInfo)) {
                     null -> call.response.status(HttpStatusCode.NoContent)
@@ -60,7 +61,7 @@ fun Route.avkorting(
         }
 
         get("manglende-inntektsaar") {
-            withBehandlingId(behandlingKlient, skrivetilgang = false) { behandlingId ->
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = false) { behandlingId ->
                 logger.info("Henter manglende påkrevde inntektsår for behandling=$behandlingId")
                 val paakrevdeInntekter =
                     avkortingService.manglendeInntektsaar(
@@ -76,7 +77,7 @@ fun Route.avkorting(
         endringer på behandlingstatus.
          */
         get("ferdig") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingTilgangsSjekk) {
                 logger.info("Henter ferdig avkorting med behandlingId=$it")
                 call.respond(avkortingService.hentFullfoertAvkorting(it, brukerTokenInfo))
             }
@@ -86,7 +87,7 @@ fun Route.avkorting(
          * ser om det er avkortet med sanksjon og gamle regler for beregning av sanksjon i den aktuelle behandlingen
          */
         get("har-sanksjon-gamle-regler") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingTilgangsSjekk) { behandlingId ->
                 logger.info("Henter komplett historisk avkorting med behandlingId=$behandlingId")
                 val inntektsaar =
                     call.parameters["inntektsaar"]?.toInt() ?: throw UgyldigForespoerselException(
@@ -98,7 +99,7 @@ fun Route.avkorting(
         }
 
         post("liste") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
                 medBody<AvkortingGrunnlagFlereInntekterDto> { avkortingGrunnlag ->
                     logger.info("Lagrer nytt avkortingsgrunnlag med lister for behandlingId=$behandlingId")
                     val avkorting =
@@ -113,24 +114,26 @@ fun Route.avkorting(
         }
 
         post("/med/{forrigeBehandlingId}") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                logger.info("Kopierer avkorting for behandlingId=$it")
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) { behandlingId ->
+                logger.info("Kopierer avkorting for behandlingId=$behandlingId")
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
-                val avkorting = avkortingService.kopierAvkorting(it, forrigeBehandlingId, brukerTokenInfo)
+                val avkorting = avkortingService.kopierAvkorting(behandlingId, forrigeBehandlingId, brukerTokenInfo)
                 call.respond(avkorting.toDto())
             }
         }
 
         post("/haandter-tidlig-alderspensjon") {
-            withBehandlingId(behandlingKlient) {
-                logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
-                tidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                withBehandlingId(behandlingTilgangsSjekk) {
+                    logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
+                    tidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
 
         delete {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+            withBehandlingId(behandlingTilgangsSjekk, skrivetilgang = true) {
                 logger.info("Sletter avkorting for behandlingId=$it")
                 avkortingService.slettAvkorting(it)
                 call.respond(HttpStatusCode.OK)
@@ -147,24 +150,27 @@ fun Route.avkorting(
         }
 
         post("aarlig-inntektsjustering") {
-            val request = call.receive<AarligInntektsjusteringAvkortingRequest>()
-            logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")
-            val respons =
-                aarligInntektsjusteringService.kopierAarligInntektsjustering(
-                    aar = request.aar,
-                    behandlingId = request.nyBehandling,
-                    forrigeBehandlingId = request.forrigeBehandling,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-            call.respond(respons.toDto())
+            kunSystembruker {
+                val request = call.receive<AarligInntektsjusteringAvkortingRequest>()
+                logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")
+                val respons =
+                    aarligInntektsjusteringService.kopierAarligInntektsjustering(
+                        aar = request.aar,
+                        behandlingId = request.nyBehandling,
+                        forrigeBehandlingId = request.forrigeBehandling,
+                        brukerTokenInfo = brukerTokenInfo,
+                    )
+                call.respond(respons.toDto())
+            }
         }
 
         post("mottatt-inntektsjustering") {
-            val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
-            logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
-            val respons =
-                mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
-            call.respond(respons.toDto())
+            kunSystembruker {
+                val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
+                logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
+                val respons = mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
+                call.respond(respons.toDto())
+            }
         }
 
         route("etteroppgjoer") {
@@ -172,7 +178,7 @@ fun Route.avkorting(
                 val request = call.receive<EtteroppgjoerBeregnetAvkortingRequest>()
                 withBehandlingId(
                     behandlingId = request.forbehandling,
-                    behandlingTilgangsSjekk = behandlingKlient,
+                    behandlingTilgangsSjekk = behandlingTilgangsSjekk,
                     skrivetilgang = false,
                 ) {
                     logger.info(
@@ -194,7 +200,7 @@ fun Route.avkorting(
                 val request = call.receive<EtteroppgjoerBeregnFaktiskInntektRequest>()
                 withBehandlingId(
                     behandlingId = request.forbehandlingId,
-                    behandlingTilgangsSjekk = behandlingKlient,
+                    behandlingTilgangsSjekk = behandlingTilgangsSjekk,
                     skrivetilgang = true,
                 ) {
                     logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
@@ -215,7 +221,7 @@ fun Route.avkorting(
                 val request = call.receive<EtteroppgjoerHentBeregnetResultatRequest>()
                 withBehandlingId(
                     behandlingId = request.forbehandlingId,
-                    behandlingTilgangsSjekk = behandlingKlient,
+                    behandlingTilgangsSjekk = behandlingTilgangsSjekk,
                     skrivetilgang = false,
                 ) {
                     val resultat =

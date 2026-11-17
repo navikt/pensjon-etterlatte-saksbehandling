@@ -21,7 +21,7 @@ val azureAdAttestantGjennyClaim: String by lazy {
 }
 
 val azureAdEgenAnsattClaim: String by lazy {
-    "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d"
+    "8df187e3-f6ab-4a5d-8830-61bf148e59fe"
 }
 
 val azureAdProsesseringRolleClaim: String by lazy {

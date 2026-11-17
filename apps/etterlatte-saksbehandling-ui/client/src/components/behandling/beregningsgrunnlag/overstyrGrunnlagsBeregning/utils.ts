@@ -68,6 +68,13 @@ export const konverterTilSisteDagIMaaneden = (dato: string): string => {
   return formaterTilISOString(lastDayOfMonth(dato))
 }
 
+export const validerPeriode = (fom: string, tom?: Date | string | null): string | undefined => {
+  if (tom && konverterTilSisteDagIMaaneden(formaterTilISOString(tom)) < fom) {
+    return 'Til og med må være lik eller etter Fra og med.'
+  }
+  return undefined
+}
+
 export const validerAarsak = (aarsak: OverstyrtAarsakKey | undefined): string | undefined => {
   if (!aarsak || aarsak === 'VELG_AARSAK') return 'Må settes'
   return undefined

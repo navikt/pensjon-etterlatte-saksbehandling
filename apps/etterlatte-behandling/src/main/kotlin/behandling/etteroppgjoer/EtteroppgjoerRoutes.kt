@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.isDev
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FORBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
@@ -203,25 +204,27 @@ fun Route.etteroppgjoerRoutes(
                 }
 
                 post("beregn-faktisk-inntekt") {
-                    val request = call.receive<BeregnFaktiskInntektRequest>()
-                    val (etteroppgjoerResultatDto, brevSomskalSlettes) =
-                        inTransaction {
-                            forbehandlingService.lagreOgBeregnFaktiskInntekt(forbehandlingId, request, brukerTokenInfo)
+                    kunSaksbehandlerMedSkrivetilgang {
+                        val request = call.receive<BeregnFaktiskInntektRequest>()
+                        val (etteroppgjoerResultatDto, brevSomskalSlettes) =
+                            inTransaction {
+                                forbehandlingService.lagreOgBeregnFaktiskInntekt(forbehandlingId, request, brukerTokenInfo)
+                            }
+
+                        if (brevSomskalSlettes != null) {
+                            logger.info(
+                                "Sletter brevet koblet til forbehandlingen med brevId=${brevSomskalSlettes.first} " +
+                                    "i sak=${brevSomskalSlettes.second}",
+                            )
+                            forbehandlingBrevService.slettVarselbrev(
+                                brevSomskalSlettes = brevSomskalSlettes.first,
+                                sakId = brevSomskalSlettes.second,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
                         }
 
-                    if (brevSomskalSlettes != null) {
-                        logger.info(
-                            "Sletter brevet koblet til forbehandlingen med brevId=${brevSomskalSlettes.first} " +
-                                "i sak=${brevSomskalSlettes.second}",
-                        )
-                        forbehandlingBrevService.slettVarselbrev(
-                            brevSomskalSlettes = brevSomskalSlettes.first,
-                            sakId = brevSomskalSlettes.second,
-                            brukerTokenInfo = brukerTokenInfo,
-                        )
+                        call.respond(etteroppgjoerResultatDto)
                     }
-
-                    call.respond(etteroppgjoerResultatDto)
                 }
 
                 post("ferdigstill") {
@@ -232,10 +235,12 @@ fun Route.etteroppgjoerRoutes(
                     kunSkrivetilgang {
                         inTransaction {
                             runBlocking {
-                                forbehandlingBrevService.ferdigstillForbehandlingMedBrev(
-                                    forbehandlingId,
-                                    brukerTokenInfo,
-                                )
+                                retryOgPakkUt {
+                                    forbehandlingBrevService.ferdigstillForbehandlingMedBrev(
+                                        forbehandlingId,
+                                        brukerTokenInfo,
+                                    )
+                                }
                             }
                         }
                         call.respond(HttpStatusCode.OK)

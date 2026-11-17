@@ -929,7 +929,7 @@ internal class AvkortingServiceTest {
             every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning
             mockkObject(AvkortingValider)
             every {
-                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any(), any(), any())
             } returns emptyList()
             val result =
                 runBlocking {
@@ -947,6 +947,8 @@ internal class AvkortingServiceTest {
                     avkorting,
                     beregning,
                     BehandlingType.REVURDERING,
+                    any(),
+                    any(),
                     any(),
                     any(),
                 )
@@ -975,7 +977,7 @@ internal class AvkortingServiceTest {
             every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning
             mockkObject(AvkortingValider)
             every {
-                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any(), any(), any())
             } returns emptyList()
             val result =
                 runBlocking {
@@ -993,6 +995,8 @@ internal class AvkortingServiceTest {
                     avkorting,
                     beregning,
                     BehandlingType.REVURDERING,
+                    any(),
+                    any(),
                     any(),
                     any(),
                 )
@@ -1021,7 +1025,7 @@ internal class AvkortingServiceTest {
             every { beregningService.hentBeregningNonnull(behandlingId) } returns beregning
             mockkObject(AvkortingValider)
             every {
-                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any())
+                AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(any(), any(), any(), any(), any(), any(), any())
             } returns emptyList()
             val result =
                 runBlocking {
@@ -1039,6 +1043,8 @@ internal class AvkortingServiceTest {
                     avkorting,
                     beregning,
                     BehandlingType.REVURDERING,
+                    any(),
+                    any(),
                     any(),
                     any(),
                 )

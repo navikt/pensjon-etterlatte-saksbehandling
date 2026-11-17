@@ -19,6 +19,7 @@ object AvkortingValider {
         behandlingType: BehandlingType,
         sanksjoner: List<Sanksjon>,
         krevInntektForNesteAar: Boolean,
+        opphoerFom: YearMonth? = null,
         naa: YearMonth = YearMonth.now(),
     ): List<Int> {
         val sortertePerioder = beregning.beregningsperioder.sortedBy { it.datoFOM }
@@ -48,7 +49,7 @@ object AvkortingValider {
         val aarViMaaHaInntekterFor =
             (foersteAar..sisteAar)
                 .toList()
-                .filter { !harSanksjonForHeleAaret(it, sanksjoner) }
+                .filter { !harSanksjonEllerOpphoerForHeleAaret(it, sanksjoner, opphoerFom) }
 
         return aarViMaaHaInntekterFor
     }
@@ -73,6 +74,7 @@ object AvkortingValider {
                 behandling.behandlingType,
                 sanksjoner,
                 krevInntektForNesteAar,
+                opphoerFom = eksisterendeOpphoerFom,
                 naa,
             ).toSet()
         if (!inntekterViHar.containsAll(inntekterViTrenger)) {
@@ -172,17 +174,21 @@ object AvkortingValider {
         }
     }
 
-    fun harSanksjonForHeleAaret(
+    fun harSanksjonEllerOpphoerForHeleAaret(
         aar: Int,
         sanksjoner: List<Sanksjon>,
+        opphoerFom: YearMonth?,
     ): Boolean =
         (1..12)
             .map { YearMonth.of(aar, it) }
-            .all { maned ->
-                sanksjoner.any { sanksjon ->
-                    val tilManed = sanksjon.tom ?: YearMonth.of(9999, 1)
-                    maned in (sanksjon.fom..tilManed)
-                }
+            .all { maaned ->
+                val dekketAvSanksjon =
+                    sanksjoner.any { sanksjon ->
+                        val tilManed = sanksjon.tom ?: YearMonth.of(9999, 1)
+                        maaned in (sanksjon.fom..tilManed)
+                    }
+                val dekketAvOpphoer = opphoerFom != null && maaned >= opphoerFom
+                dekketAvSanksjon || dekketAvOpphoer
             }
 }
 

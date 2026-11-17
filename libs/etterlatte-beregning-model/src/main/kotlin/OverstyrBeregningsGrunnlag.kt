@@ -1,5 +1,7 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import tools.jackson.databind.JsonNode
@@ -21,6 +23,7 @@ data class OverstyrBeregningGrunnlagDao(
     val beskrivelse: String,
     val aarsak: String?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
+    @field:JsonSetter(nulls = Nulls.SKIP)
     val reguleringRegelresultat: JsonNode? = null,
 ) {
     fun tilGrunnlagMedPeriode(): GrunnlagMedPeriode<OverstyrBeregningGrunnlagData> =

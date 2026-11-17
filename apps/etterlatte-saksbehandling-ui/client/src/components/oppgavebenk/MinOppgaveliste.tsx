@@ -135,7 +135,6 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
           setFilter(nyFilter)
           setPage(1)
         }}
-        saksbehandlereIEnhet={saksbehandlereIEnhet}
         oppgavelisteValg={OppgavelisteValg.MIN_OPPGAVELISTE}
       />
       {oppgaver.length >= 0 && !isPending(soekResult) ? (

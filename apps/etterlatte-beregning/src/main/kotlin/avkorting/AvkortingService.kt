@@ -82,6 +82,7 @@ class AvkortingService(
                     behandlingType = behandling.behandlingType,
                     sanksjoner = sanksjonService.hentSanksjon(behandlingId),
                     krevInntektForNesteAar = skalKreveInntektNesteAar,
+                    opphoerFom = behandling.opphoerFraOgMed,
                 ).toSet()
         // Hvis vi har en eksisterende avkorting der den første inntekten ikke gjelder fra januar, og vi har
         // i denne behandlingen som er før den første virk vi allerede har på årsoppgjør må vi også kreve det

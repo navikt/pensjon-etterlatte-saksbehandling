@@ -560,6 +560,60 @@ class AvkortingValiderTest {
         krav shouldContainExactly listOf(2024, 2025)
     }
 
+    @Test
+    fun `påkrevde inntekter ekskluderer år når sanksjon og opphør dekker hele året`() {
+        val avkorting = Avkorting()
+        val beregning =
+            beregning(
+                beregninger =
+                    listOf(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2024, Month.NOVEMBER),
+                            datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                        ),
+                    ),
+            )
+        val krav =
+            AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
+                avkorting = avkorting,
+                beregning = beregning,
+                behandlingType = BehandlingType.REVURDERING,
+                sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.NOVEMBER), tom = YearMonth.of(2025, Month.JANUARY))),
+                krevInntektForNesteAar = false,
+                opphoerFom = YearMonth.of(2025, Month.FEBRUARY),
+                naa = YearMonth.of(2025, Month.NOVEMBER),
+            )
+
+        krav shouldContainExactly listOf(2024)
+    }
+
+    @Test
+    fun `påkrevde inntekter inkluderer år når opphør ikke dekker hele året`() {
+        val avkorting = Avkorting()
+        val beregning =
+            beregning(
+                beregninger =
+                    listOf(
+                        beregningsperiode(
+                            datoFOM = YearMonth.of(2025, Month.JANUARY),
+                            datoTOM = YearMonth.of(2025, Month.DECEMBER),
+                        ),
+                    ),
+            )
+        val krav =
+            AvkortingValider.paakrevdeInntekterForBeregningAvAvkorting(
+                avkorting = avkorting,
+                beregning = beregning,
+                behandlingType = BehandlingType.REVURDERING,
+                sanksjoner = emptyList(),
+                krevInntektForNesteAar = false,
+                opphoerFom = YearMonth.of(2025, Month.FEBRUARY),
+                naa = YearMonth.of(2025, Month.NOVEMBER),
+            )
+
+        krav shouldContainExactly listOf(2025)
+    }
+
     @Nested
     inner class VirkFlyttetBakoverForFoersteAarsoppgjoerFom {
         private val eksisterendeAvkorting =

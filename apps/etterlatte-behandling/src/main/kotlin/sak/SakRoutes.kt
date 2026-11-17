@@ -477,9 +477,15 @@ internal fun Route.sakWebRoutes(
             }
 
             post("arkivergrunnlagsendringshendelse") {
-                kunSaksbehandler { saksbehandler ->
-                    val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()
+                val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()
+                val sakIdForHendelse =
+                    inTransaction { grunnlagsendringshendelseService.hentHendelse(arkivertHendelse.id) }?.sakId
+                        ?: throw IkkeFunnetException(
+                            code = "HENDELSE_IKKE_FUNNET",
+                            detail = "Fant ikke grunnlagsendringshendelse med id=${arkivertHendelse.id}",
+                        )
 
+                kunSaksbehandlerMedSkrivetilgang(sakId = sakIdForHendelse) { saksbehandler ->
                     inTransaction {
                         grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
                             hendelseId = arkivertHendelse.id,

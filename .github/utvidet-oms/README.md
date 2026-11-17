@@ -5,6 +5,7 @@ Agenten `utvidet-oms`, dokumentasjonen og statusskriptet er flyttet til søknads
 - [Veikart og arbeidspakker](https://github.com/navikt/pensjon-etterlatte/blob/main/.github/utvidet-oms/veikart.md)
 - [Beslutninger](https://github.com/navikt/pensjon-etterlatte/blob/main/.github/utvidet-oms/beslutninger.md)
 - [Spesifikasjon](https://github.com/navikt/pensjon-etterlatte/blob/main/.github/utvidet-oms/spesifikasjon.md)
+- [Mottak via prosessering (fase 5)](https://github.com/navikt/pensjon-etterlatte/blob/main/.github/utvidet-oms/prosessering.md): teknisk plan for å flytte mottaket fra `NySoeknadRiver` til tasks i `etterlatte-behandling`, styrt fra efterlatte-verktoy
 - [Agent](https://github.com/navikt/pensjon-etterlatte/blob/main/.github/agents/utvidet-oms.md)
 
 Start `copilot` fra `pensjon-etterlatte`, og velg `utvidet-oms` med `/agent`. Legg til Gjenny med `/add-dir ../pensjon-etterlatte-saksbehandling` når du trenger kode eller domenekontekst herfra. Statusskriptet kjøres fra søknadsrepoet: `.github/scripts/utvidet-oms-status.sh [--fetch]`.

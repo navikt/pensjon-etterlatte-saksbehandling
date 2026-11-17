@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoReq
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
@@ -122,10 +123,12 @@ fun Route.avkorting(
         }
 
         post("/haandter-tidlig-alderspensjon") {
-            withBehandlingId(behandlingKlient) {
-                logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
-                tidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                withBehandlingId(behandlingKlient) {
+                    logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
+                    tidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
 
@@ -147,24 +150,28 @@ fun Route.avkorting(
         }
 
         post("aarlig-inntektsjustering") {
-            val request = call.receive<AarligInntektsjusteringAvkortingRequest>()
-            logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")
-            val respons =
-                aarligInntektsjusteringService.kopierAarligInntektsjustering(
-                    aar = request.aar,
-                    behandlingId = request.nyBehandling,
-                    forrigeBehandlingId = request.forrigeBehandling,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-            call.respond(respons.toDto())
+            kunSystembruker {
+                val request = call.receive<AarligInntektsjusteringAvkortingRequest>()
+                logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")
+                val respons =
+                    aarligInntektsjusteringService.kopierAarligInntektsjustering(
+                        aar = request.aar,
+                        behandlingId = request.nyBehandling,
+                        forrigeBehandlingId = request.forrigeBehandling,
+                        brukerTokenInfo = brukerTokenInfo,
+                    )
+                call.respond(respons.toDto())
+            }
         }
 
         post("mottatt-inntektsjustering") {
-            val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
-            logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
-            val respons =
-                mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
-            call.respond(respons.toDto())
+            kunSystembruker {
+                val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
+                logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
+                val respons =
+                    mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
+                call.respond(respons.toDto())
+            }
         }
 
         route("etteroppgjoer") {

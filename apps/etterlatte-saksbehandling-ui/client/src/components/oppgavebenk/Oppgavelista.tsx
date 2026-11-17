@@ -31,9 +31,10 @@ import { SortKey } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
+  saksbehandlereIFilter: Array<Saksbehandler>
 }
 
-export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
+export const Oppgavelista = ({ saksbehandlereIEnhet, saksbehandlereIFilter }: Props) => {
   const [filter, setFilter] = useFilterMedUrl(
     OPPGAVELISTA_URL_NOKLER,
     hentOppgavelistenFilterFraLocalStorage,
@@ -132,7 +133,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
           setFilter(nyFilter)
           setPage(1)
         }}
-        saksbehandlereIEnhet={saksbehandlereIEnhet}
+        saksbehandlereIFilter={saksbehandlereIFilter}
         oppgavelisteValg={OppgavelisteValg.OPPGAVELISTA}
       />
 

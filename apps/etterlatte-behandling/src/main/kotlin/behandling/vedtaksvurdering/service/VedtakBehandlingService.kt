@@ -411,6 +411,12 @@ class VedtakBehandlingService(
                 )
             }
 
+            VedtakStatus.SAMORDNET -> {
+                logger.warn(
+                    "Vedtak ${vedtak.id} er allerede samordnet [behandlingId=$behandlingId]. Skipper oppdatering",
+                )
+            }
+
             VedtakStatus.IVERKSATT -> {
                 logger.warn(
                     "Behandlet svar på samording for vedtak ${vedtak.id}, " +

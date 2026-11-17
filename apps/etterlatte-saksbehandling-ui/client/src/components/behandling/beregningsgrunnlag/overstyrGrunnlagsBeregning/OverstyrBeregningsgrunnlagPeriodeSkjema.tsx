@@ -35,6 +35,7 @@ import {
   replacePeriodePaaIndex,
   stripWhitespace,
   validerAarsak,
+  validerPeriode,
 } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/utils'
 import { JaNei } from '~shared/types/ISvar'
 import { formaterTilISOString } from '~utils/formatering/dato'
@@ -68,6 +69,7 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
     register,
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>>({
     defaultValues: eksisterendePeriode
@@ -136,6 +138,9 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
             label="Til og med"
             control={control}
             validate={(maaned) => {
+              const periodeFeil = validerPeriode(getValues('fom'), maaned)
+              if (periodeFeil) return periodeFeil
+
               if (behandling.viderefoertOpphoer?.skalViderefoere == JaNei.JA) {
                 if (
                   !maaned ||

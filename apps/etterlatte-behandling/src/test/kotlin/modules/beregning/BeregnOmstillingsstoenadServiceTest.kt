@@ -1,0 +1,702 @@
+package no.nav.etterlatte.modules.beregning
+
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.grunnlag.GrunnlagService
+import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.Regelverk
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
+import no.nav.etterlatte.libs.common.beregning.SanksjonType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
+import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepRepository
+import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.modules.beregning.regler.STANDARDSAK
+import no.nav.etterlatte.modules.beregning.regler.bruker
+import no.nav.etterlatte.modules.beregning.regler.toGrunnlag
+import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
+import no.nav.etterlatte.trygdetid.Trygdetid
+import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.Month
+import java.time.YearMonth
+import java.util.UUID
+import java.util.UUID.randomUUID
+
+@ExtendWith(BeregningTestKontekst::class)
+internal class BeregnOmstillingsstoenadServiceTest {
+    private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
+    private val grunnlagService = mockk<GrunnlagService>()
+    private val trygdetidService = mockk<TrygdetidService>()
+    private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+    private val sanksjonService = mockk<SanksjonService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
+    private lateinit var beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService
+
+    private val periodensSisteDato = LocalDate.of(2024, Month.APRIL, 30)
+
+    @BeforeEach
+    fun setup() {
+        beregnOmstillingsstoenadService =
+            BeregnOmstillingsstoenadService(
+                grunnlagService = grunnlagService,
+                vilkaarsvurderingService = vilkaarsvurderingService,
+                trygdetidService = trygdetidService,
+                beregningsGrunnlagService = beregningsGrunnlagService,
+                featureToggleService = featureToggleService,
+                sanksjonService = sanksjonService,
+            )
+
+        every { featureToggleService.isEnabled(any(), any()) } returns false
+        every { sanksjonService.hentSanksjon(any()) } returns emptyList()
+
+        mockkObject(GrunnbeloepRepository)
+        every { GrunnbeloepRepository.historiskeGrunnbeloep } returns
+            listOf(
+                Grunnbeloep(
+                    dato = YearMonth.of(2023, 5),
+                    grunnbeloep = 118620,
+                    omregningsfaktor = BigDecimal("1.045591"),
+                ),
+                Grunnbeloep(
+                    dato = YearMonth.of(2024, 5),
+                    grunnbeloep = 124028,
+                    omregningsfaktor = BigDecimal("1.064076"),
+                ),
+                Grunnbeloep(
+                    dato = YearMonth.of(2025, 5),
+                    grunnbeloep = 130160,
+                    omregningsfaktor = BigDecimal("1.049440"),
+                ),
+            )
+    }
+
+    @AfterEach
+    fun `unmock grunnbeloep`() {
+        unmockkObject(GrunnbeloepRepository)
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal gi internfeil naar opplysningsgrunnlag eller vilkaarsvurdering mangler`(manglerGrunnlag: Boolean) =
+        runBlocking<Unit> {
+            val behandling = mockBehandling(BehandlingType.REVURDERING)
+            every { grunnlagService.hentOpplysningsgrunnlag(behandling.id) } returns
+                if (manglerGrunnlag) null else GrunnlagTestData().hentOpplysningsgrunnlag()
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(behandling.id, bruker) } returns listOf(mockTrygdetid(behandling.id))
+            every { beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id) } returns
+                omstillingstoenadBeregningsGrunnlag(behandling.id)
+            every { vilkaarsvurderingService.hentVilkaarsvurderingDto(behandling.id) } returns null
+
+            val feil =
+                assertThrows<InternfeilException> {
+                    beregnOmstillingsstoenadService.beregn(behandling, bruker)
+                }
+
+            feil.somJsonRespons().status shouldBe 500
+            feil.detail shouldBe
+                if (manglerGrunnlag) {
+                    "Mangler opplysningsgrunnlag for behandlingId=${behandling.id}"
+                } else {
+                    "Mangler vilkårsvurdering for behandlingId=${behandling.id}"
+                }
+        }
+
+    @Test
+    fun `skal kaste feil hvis beregningsgrunnlag hentet er på en annen behandling`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+            )
+        } returns
+            omstillingstoenadBeregningsGrunnlag(
+                randomUUID(),
+            )
+        assertThrows<BeregningsgrunnlagMangler> {
+            runBlocking {
+                beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne omstillingsstoenad foerstegangsbehandling - nasjonal`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
+
+        runBlocking {
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBe 1
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    soeskenFlokk shouldBe null
+                    this.trygdetid shouldBe TRYGDETID_40_AAR
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_FOM_JAN_2024
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne omstillingsstoenad foerstegangsbehandling - sanksjon`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+        val sanksjon =
+            sanksjon(behandlingId = behandling.id, fom = YearMonth.of(2024, Month.FEBRUARY), tom = YearMonth.of(2024, Month.MARCH))
+
+        every { featureToggleService.isEnabled(any(), any()) } returns true
+        every { sanksjonService.hentSanksjon(any()) } returns listOf(sanksjon)
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
+
+        runBlocking {
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBe 3
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2024, Month.JANUARY)
+                    soeskenFlokk shouldBe null
+                    this.trygdetid shouldBe TRYGDETID_40_AAR
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_FOM_JAN_2024
+                }
+                with(beregningsperioder[1]) {
+                    utbetaltBeloep shouldBe OMS_BELOEP_SANKSJON
+                    datoFOM shouldBe YearMonth.of(2024, Month.FEBRUARY)
+                    datoTOM shouldBe YearMonth.of(2024, Month.MARCH)
+                    soeskenFlokk shouldBe null
+                    this.trygdetid shouldBe TRYGDETID_40_AAR
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_FOM_JAN_2024
+                }
+                with(beregningsperioder[2]) {
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
+                    datoFOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    soeskenFlokk shouldBe null
+                    this.trygdetid shouldBe TRYGDETID_40_AAR
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_FOM_JAN_2024
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne omstillingsstoenad foerstegangsbehandling - prorata`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id, BeregningsMetode.PRORATA)
+
+        runBlocking {
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBe 1
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24_PRORATA
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    soeskenFlokk shouldBe null
+                    this.trygdetid shouldBe PRORATA_TRYGDETID_30_AAR / 2
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne omstillingsstoenad foerstegangsbehandling - best`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id, BeregningsMetode.BEST)
+
+        runBlocking {
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBe 1
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    soeskenFlokk shouldBe null
+                    this.trygdetid shouldBe TRYGDETID_40_AAR
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne omstillingsstoenad ved revurdering`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns
+            mockk {
+                every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
+            }
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
+
+        runBlocking {
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBe 1
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    this.trygdetid shouldBe TRYGDETID_40_AAR
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal opphoere ved revurdering og vilkaarsvurdering ikke oppfylt`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns
+            mockk {
+                every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
+            }
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
+
+        runBlocking {
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBe 1
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe 0
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe null
+                    this.trygdetid shouldBe 0
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal feile hvis trygdetid ikke inneholder beregnet trygdetid`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetidUtenBeregnetTrygdetid(behandling.id)
+
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
+
+        runBlocking {
+            assertThrows<TrygdetidMangler> {
+                beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
+            }
+        }
+    }
+
+    @Test
+    fun `skal feile hvis trygdetid ikke finnes`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns emptyList()
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
+
+        runBlocking {
+            assertThrows<TrygdetidMangler> {
+                beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
+            }
+        }
+    }
+
+    @Nested
+    inner class BeregnOverFlerePerioder {
+        @Test
+        fun `skal bruke vanlig beregning når virkningstidspunkt er etter alle eksisterende vedtaksperioder`() {
+            val tidligereOpphoerstidspunkt = YearMonth.of(2024, 6)
+            val nyVirkningstidspunkt = YearMonth.of(2025, 10)
+            val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = nyVirkningstidspunkt)
+            val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+            val trygdetid = mockTrygdetid(behandling.id)
+
+            every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+            coEvery {
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any())
+            } returns
+                omstillingstoenadBeregningsGrunnlagMedVedtaksperioder(
+                    behandling.id,
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 1),
+                                tilOgMed = tidligereOpphoerstidspunkt,
+                            ),
+                        ),
+                )
+
+            runBlocking {
+                val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
+
+                with(beregning) {
+                    beregningsperioder.size shouldBe 1
+                    with(beregningsperioder.first()) {
+                        datoFOM shouldBe nyVirkningstidspunkt
+                        datoTOM shouldBe null
+                    }
+                }
+            }
+        }
+
+        @Test
+        fun `skal beregne over flere perioder når virkningstidspunkt er innenfor en vedtaksperiode`() {
+            val virkningstidspunkt = YearMonth.of(2024, 3)
+            val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virkningstidspunkt)
+            val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+            val trygdetid = mockTrygdetid(behandling.id)
+
+            every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+            coEvery {
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any())
+            } returns
+                omstillingstoenadBeregningsGrunnlagMedVedtaksperioder(
+                    behandling.id,
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 1),
+                                tilOgMed = YearMonth.of(2024, 6),
+                            ),
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 10),
+                                tilOgMed = null,
+                            ),
+                        ),
+                )
+
+            runBlocking {
+                val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
+
+                with(beregning) {
+                    beregningsperioder.first().datoFOM shouldBe virkningstidspunkt
+                    beregningsperioder.last().datoTOM shouldBe null
+
+                    val perioderFoersteVedtaksperiode =
+                        beregningsperioder.filter {
+                            it.datoFOM <= YearMonth.of(2024, 6)
+                        }
+                    perioderFoersteVedtaksperiode.last().datoTOM shouldBe YearMonth.of(2024, 6)
+
+                    val perioderAndreVedtaksperiode =
+                        beregningsperioder.filter {
+                            it.datoFOM >= YearMonth.of(2024, 10)
+                        }
+                    perioderAndreVedtaksperiode.first().datoFOM shouldBe YearMonth.of(2024, 10)
+                }
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når virkningstidspunkt er mellom to vedtaksperioder`() {
+            val virkningstidspunktMellomPerioder = YearMonth.of(2024, 8)
+            val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virkningstidspunktMellomPerioder)
+            val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+            val trygdetid = mockTrygdetid(behandling.id)
+
+            every { featureToggleService.isEnabled(BeregningToggles.BEREGN_OVER_FLERE_PERIODER, any()) } returns true
+            coEvery { grunnlagService.hentOpplysningsgrunnlag(any()) } returns grunnlag
+            coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns listOf(trygdetid)
+            coEvery {
+                beregningsGrunnlagService.hentBeregningsGrunnlag(any())
+            } returns
+                omstillingstoenadBeregningsGrunnlagMedVedtaksperioder(
+                    behandling.id,
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 1),
+                                tilOgMed = YearMonth.of(2024, 6),
+                            ),
+                            Vedtaksperiode(
+                                fraOgMed = YearMonth.of(2024, 10),
+                                tilOgMed = null,
+                            ),
+                        ),
+                )
+
+            runBlocking {
+                assertThrows<Exception> {
+                    beregnOmstillingsstoenadService.beregn(behandling, bruker)
+                }
+            }
+        }
+    }
+
+    private fun mockBehandling(
+        type: BehandlingType,
+        virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_24,
+    ): DetaljertBehandling =
+        mockk<DetaljertBehandling>().apply {
+            every { id } returns randomUUID()
+            every { sak } returns sakId1
+            every { behandlingType } returns type
+            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
+        }
+
+    private fun mockTrygdetid(behandlingId_: UUID): Trygdetid =
+        mockk<Trygdetid>().apply {
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
+            every { trygdetidGrunnlag } returns emptyList()
+            every { opplysninger } returns emptyList()
+            every { overstyrtNorskPoengaar } returns null
+            every { opplysningerDifferanse } returns mockk()
+            every { begrunnelse } returns null
+            every { id } returns randomUUID()
+            every { behandlingId } returns behandlingId_
+            every { beregnetTrygdetid } returns
+                mockk {
+                    every { resultat } returns
+                        mockk {
+                            every { samletTrygdetidNorge } returns TRYGDETID_40_AAR
+                            every { samletTrygdetidTeoretisk } returns PRORATA_TRYGDETID_30_AAR
+                            every { prorataBroek } returns PRORATA_BROEK
+                        }
+                    every { tidspunkt } returns Tidspunkt.now()
+                }
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
+        }
+
+    private fun mockTrygdetidUtenBeregnetTrygdetid(behandlingId_: UUID): Trygdetid =
+        mockk<Trygdetid>().apply {
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
+            every { trygdetidGrunnlag } returns emptyList()
+            every { opplysninger } returns emptyList()
+            every { overstyrtNorskPoengaar } returns null
+            every { opplysningerDifferanse } returns mockk()
+            every { begrunnelse } returns null
+            every { id } returns randomUUID()
+            every { behandlingId } returns behandlingId_
+            every { beregnetTrygdetid } returns null
+        }
+
+    fun sanksjon(
+        id: UUID? = randomUUID(),
+        behandlingId: UUID,
+        sakId: SakId = STANDARDSAK,
+        fom: YearMonth,
+        tom: YearMonth,
+        type: SanksjonType = SanksjonType.STANS,
+        beskrivelse: String = "Ikke i jobb",
+    ) = Sanksjon(
+        id = id,
+        behandlingId = behandlingId,
+        sakId = sakId,
+        type = type,
+        fom = fom,
+        tom = tom,
+        opprettet = Grunnlagsopplysning.Saksbehandler.create("A12345"),
+        endret = Grunnlagsopplysning.Saksbehandler.create("A12345"),
+        beskrivelse = beskrivelse,
+    )
+
+    companion object {
+        val VIRKNINGSTIDSPUNKT_JAN_24: YearMonth = YearMonth.of(2024, 1)
+        const val TRYGDETID_40_AAR: Int = 40
+        const val PRORATA_TRYGDETID_30_AAR: Int = 30
+        val PRORATA_BROEK: IntBroek = IntBroek(1, 2)
+        const val GRUNNBELOEP_JAN_24: Int = 9885
+        const val OMS_BELOEP_JAN_24: Int = 22241
+        const val OMS_BELOEP_SANKSJON: Int = 0
+        const val OMS_BELOEP_JAN_24_PRORATA: Int = 8340
+    }
+
+    private fun omstillingstoenadBeregningsGrunnlag(
+        behandlingId: UUID,
+        beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
+    ) = BeregningsGrunnlag(
+        behandlingId,
+        mockk {
+            every { ident } returns "Z123456"
+            every { tidspunkt } returns Tidspunkt.now()
+            every { type } returns ""
+        },
+        institusjonsopphold =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                ),
+            ),
+        beregningsMetode = beregningsMetode.toGrunnlag(),
+    )
+
+    private fun omstillingstoenadBeregningsGrunnlagMedVedtaksperioder(
+        behandlingId: UUID,
+        beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
+        vedtaksperioder: List<Vedtaksperiode>,
+    ) = BeregningsGrunnlag(
+        behandlingId,
+        mockk {
+            every { ident } returns "Z123456"
+            every { tidspunkt } returns Tidspunkt.now()
+            every { type } returns ""
+        },
+        institusjonsopphold =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                ),
+            ),
+        beregningsMetode = beregningsMetode.toGrunnlag(),
+        vedtaksperioder = vedtaksperioder,
+    )
+}

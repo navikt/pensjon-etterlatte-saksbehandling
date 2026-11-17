@@ -1,19 +1,20 @@
 package no.nav.etterlatte.grunnlag
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.generellbehandling.SakParameterStemmerIkkeException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
     route("sak/{$SAKID_CALL_PARAMETER}") {
@@ -38,24 +39,37 @@ fun Route.sakGrunnlagRoute(grunnlagService: GrunnlagService) {
         }
 
         post("opprett-grunnlag") {
-            val opplysningsbehov = call.receive<Opplysningsbehov>()
-            grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val opplysningsbehov = call.receive<Opplysningsbehov>()
+                if (opplysningsbehov.sakId != sakId) {
+                    throw SakParameterStemmerIkkeException("Innsendt request har sak-id=${opplysningsbehov.sakId}, men sak i url er $sakId")
+                }
+
+                grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/oppdater-grunnlag") {
-            val request = call.receive<OppdaterGrunnlagRequest>()
-            grunnlagService.oppdaterGrunnlagForSak(request)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val request = call.receive<OppdaterGrunnlagRequest>()
+                grunnlagService.oppdaterGrunnlagForSak(request)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/nye-opplysninger") {
-            val opplysningsbehov = call.receive<NyeSaksopplysninger>()
-            grunnlagService.lagreNyeSaksopplysningerBareSak(
-                opplysningsbehov.sakId,
-                opplysningsbehov.opplysninger,
-            )
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val opplysningsbehov = call.receive<NyeSaksopplysninger>()
+                if (sakId != opplysningsbehov.sakId) {
+                    throw SakParameterStemmerIkkeException("Innsendt request har sak-id=${opplysningsbehov.sakId}, men sak i url er $sakId")
+                }
+                grunnlagService.lagreNyeSaksopplysningerBareSak(
+                    opplysningsbehov.sakId,
+                    opplysningsbehov.opplysninger,
+                )
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

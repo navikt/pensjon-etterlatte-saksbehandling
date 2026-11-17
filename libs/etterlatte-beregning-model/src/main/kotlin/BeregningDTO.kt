@@ -1,7 +1,9 @@
 package no.nav.etterlatte.libs.common.beregning
 
+import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import com.fasterxml.jackson.annotation.Nulls
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Regelverk
@@ -40,6 +42,7 @@ data class Beregningsperiode(
     val samletTeoretiskTrygdetid: Int? = null,
     val broek: IntBroek? = null,
     val avdoedeForeldre: List<String?>? = null,
+    @field:JsonSetter(nulls = Nulls.SKIP)
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
     val regelverk: Regelverk? = null,

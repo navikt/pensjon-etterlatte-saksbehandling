@@ -2,6 +2,7 @@ package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
 import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
@@ -45,6 +46,7 @@ private fun featureToggleProperties(config: Config) =
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
     private val env = Miljoevariabler.systemEnv()
+    val beregningCrudAktivert = env[BRUK_INTERN_BEREGNING] == "true"
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
     val dataSource = DataSourceBuilder.createDataSource(properties)
 
@@ -65,13 +67,14 @@ class ApplicationContext {
         TrygdetidKlient(config, httpClient())
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
 
+    val sanksjonRepository = SanksjonRepository(dataSource)
     val sanksjonService =
         SanksjonService(
-            sanksjonRepository = SanksjonRepository(dataSource),
+            sanksjonRepository = sanksjonRepository,
             behandlingKlient = behandlingKlient,
             featureToggleService = featureToggleService,
         )
-    private val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
+    val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
     val beregningRepository = BeregningRepository(dataSource)
     val anvendtTrygdetidRepository = AnvendtTrygdetidRepository(dataSource)
     val beregningsGrunnlagService =

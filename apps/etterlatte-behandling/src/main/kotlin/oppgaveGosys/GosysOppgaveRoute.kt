@@ -8,12 +8,15 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.gosysOppgaveId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSaksbehandlerrolle
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 
 internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
     route("/api/oppgaver/gosys") {
@@ -53,15 +56,15 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             }
 
             post("/flytt-til-gjenny") {
-                kunSaksbehandler {
-                    val flyttTilGjennyRequest = call.receive<FlyttOppgavetilGjennyRequest>()
+                val flyttTilGjennyRequest = call.receive<FlyttOppgavetilGjennyRequest>()
+                kunSaksbehandlerMedSkrivetilgang(sakId = SakId(flyttTilGjennyRequest.sakid)) {
                     val nyOppgave = gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), flyttTilGjennyRequest, brukerTokenInfo)
                     call.respond(nyOppgave)
                 }
             }
 
             post("tildel-saksbehandler") {
-                kunSaksbehandler {
+                kunSaksbehandlerMedSaksbehandlerrolle {
                     val request = call.receive<SaksbehandlerEndringGosysRequest>()
                     val oppdatertVersjon =
                         gosysService.tildelOppgaveTilSaksbehandler(
@@ -74,7 +77,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             }
 
             post("ferdigstill") {
-                kunSaksbehandler {
+                kunSaksbehandlerMedSaksbehandlerrolle {
                     val ferdigstillGosysOppgaveRequest = call.receive<FerdigstillGosysOppgaveRequest>()
                     call.respond(
                         gosysService.ferdigstill(

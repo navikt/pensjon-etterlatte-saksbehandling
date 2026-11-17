@@ -55,3 +55,15 @@ I brev-api gjelder flagget adresseoppslag for brevmottakere, som også kan være
 
 Kaller: `etterlatte-beregning`, Pesys samordning (via `SamordningsKlient` – avgjør om OMS-ytelsen skal samordnes med TP-ordninger)  
 Publiserer til: Kafka (`etterlatte.vedtakshendelser`)
+
+## Saksbehandlere i oppgavebenken
+
+Saksbehandlervelgeren for tildeling bruker `saksbehandler_info`, filtrert på enhetene til innlogget bruker. `SaksbehandlerJob` oppdaterer enhetene fra Entra-proxy hvert 20. minutt innenfor jobbens åpningstid, for identer som finnes på oppgaver.
+
+`EntraProxyKlient` oversetter HTTP 404 til en tom enhetsliste. Jobben lagrer også tomme lister, slik at saksbehandleren forsvinner fra velgeren hvis ingen enheter matcher. Et senere oppslag med riktige enheter gjør saksbehandleren tilgjengelig igjen når frontend henter listen på nytt. Andre oppslagsfeil hopper over oppdateringen for identen og bevarer lagrede enheter. Denne synkroniseringen endrer ikke oppgavenes tildeling.
+
+Avklart med teamet bak Entra-proxy 2. november 2026: Tjenesten filtrerer bevisst bort ansatte i permisjon for å hindre tildeling av oppgaver i Oppgave/Gosys. Team IdM arbeider med håndtering av tilganger ved permisjon; fremtidig oppførsel i dette endpointet er ikke avklart. En tom enhetsliste er derfor ikke i seg selv tegn på en oppslagsfeil.
+
+Gjenny skiller derfor mellom to lister:
+- **Tildeling** (`GET /api/saksbehandlere?enheter=...`): saksbehandlere med enheter fra Entra-proxy. Ansatte i permisjon er bevisst utelatt.
+- **Saksbehandlerfilteret i Oppgavelista** bruker i tillegg `GET /api/saksbehandlere/med-aapne-oppgaver`: saksbehandlere med åpne oppgaver i enhetene til innlogget bruker, med samme avgrensning som oppgavesøket. Slik kan kolleger finne og overta oppgaver hos noen i permisjon, uten at personen kan få nye oppgaver.

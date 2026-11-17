@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
@@ -12,10 +13,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.modules.beregning.BeregningRepository
+import no.nav.etterlatte.modules.beregning.BeregningTestKontekst
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingService
 import no.nav.etterlatte.modules.beregning.avkorting.Inntektsavkorting
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.modules.beregning.klienter.BehandlingKlient
 import no.nav.etterlatte.modules.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.modules.beregning.regler.avkorting
 import no.nav.etterlatte.modules.beregning.regler.avkortinggrunnlag
@@ -25,20 +26,22 @@ import no.nav.etterlatte.modules.beregning.regler.beregningsperiode
 import no.nav.etterlatte.modules.beregning.regler.bruker
 import no.nav.etterlatte.modules.beregning.ytelseMedGrunnlag.BeregningOgAvkortingBrevService
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
 import java.util.UUID
 
+@ExtendWith(BeregningTestKontekst::class)
 internal class BeregningOgAvkortingBrevServiceTest {
     private val avkortingService = mockk<AvkortingService>()
     private val beregningRepository = mockk<BeregningRepository>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val behandlingService = mockk<BehandlingService>()
     private val service =
         BeregningOgAvkortingBrevService(
             beregningRepository,
             avkortingService,
             beregningsGrunnlagService,
-            behandlingKlient,
+            behandlingService,
         )
 
     @Test
@@ -55,7 +58,7 @@ internal class BeregningOgAvkortingBrevServiceTest {
         val behandlingsId = UUID.randomUUID()
         val virkningstidspunkt = YearMonth.of(2024, 2)
         coEvery {
-            behandlingKlient.hentBehandling(
+            behandlingService.hentDetaljertBehandling(
                 behandlingsId,
                 bruker,
             )

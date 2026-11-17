@@ -1,6 +1,6 @@
 package no.nav.etterlatte.behandling.etteroppgjoer.forbehandling
 
-import io.ktor.server.plugins.*
+import io.ktor.server.plugins.NotFoundException
 import io.ktor.utils.io.CancellationException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
@@ -28,7 +28,11 @@ import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerHentBeregnetResultatRequest
 import no.nav.etterlatte.libs.common.beregning.FaktiskInntektDto
-import no.nav.etterlatte.libs.common.feilhaandtering.*
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -45,7 +49,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 class EtteroppgjoerForbehandlingService(
     private val dao: EtteroppgjoerForbehandlingDao,
@@ -797,19 +801,20 @@ class EtteroppgjoerForbehandlingService(
         return try {
             runBlocking { pensjonsgivendeInntektService.hentSummerteInntekter(sak.ident, forbehandling.aar) }
         } catch (e: NotFoundException) {
-            if (!manglerSkatteoppgjoerOgErBosattIUtlandet(forbehandling)) {
+            if (manglerSkatteoppgjoerOgErBosattIUtlandet(forbehandling)) {
+                logger.info(
+                    "Fant ikke PGI hos Skatt for sak=${sak.id} og inntektsår=${forbehandling.aar} (bosatt i utlandet). " +
+                        "Forbehandlingen opprettes uten PGI.",
+                    e,
+                )
+                return null
+            } else {
                 throw InternfeilException(
                     "Fant ikke PGI hos Skatt for sak=${sak.id} og inntektsår=${forbehandling.aar}. " +
                         "Forbehandlingen kan ikke opprettes. Meld sak hvis det ikke stemmer.",
                     e,
                 )
             }
-            logger.info(
-                "Fant ikke PGI hos Skatt for sak=${sak.id} og inntektsår=${forbehandling.aar} (bosatt i utlandet). " +
-                    "Forbehandlingen opprettes uten PGI.",
-                e,
-            )
-            null
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -826,17 +831,19 @@ class EtteroppgjoerForbehandlingService(
         return try {
             runBlocking { inntektskomponentService.hentSummerteInntekter(sak.ident, forbehandling.aar) }
         } catch (e: Exception) {
-            if (forbehandling.mottattSkatteoppgjoer) {
-                throw InternfeilException(
-                    "Kunne ikke hente inntekter fra A-ordningen. Forbehandlingen kunne ikke opprettes. Prøv igjen senere, og meld sak hvis det ikke fungerer. Sak = ${sak.id}",
+            if (manglerSkatteoppgjoerOgErBosattIUtlandet(forbehandling)) {
+                logger.info(
+                    "Fant ikke A-inntekt for sak=${sak.id} og inntektsår=${forbehandling.aar} (bosatt i utlandet). " +
+                        "Forbehandlingen opprettes uten summerte inntekter.",
                     e,
                 )
+                return null
             } else {
-                logger.warn(
-                    "Kunne ikke hente og lagre ned summerte inntekter fra A-ordningen for forbehandlingen i sakId=${sak.id}",
+                throw InternfeilException(
+                    "Fant ikke A-inntekt for sak=${sak.id} og inntektsår=${forbehandling.aar}. " +
+                        "Forbehandlingen kan ikke opprettes. Meld sak hvis det ikke stemmer.",
                     e,
                 )
-                null
             }
         }
     }

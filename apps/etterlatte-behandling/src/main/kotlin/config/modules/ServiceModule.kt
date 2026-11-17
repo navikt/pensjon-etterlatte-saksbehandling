@@ -434,6 +434,7 @@ class ServiceModule(
         VedtakEtteroppgjoerService(
             repository = daoModule.vedtaksvurderingRepository,
             vedtakSamordningService = vedtakSamordningService,
+            featureToggleService = featureToggleService,
         )
     }
 

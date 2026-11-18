@@ -13,7 +13,6 @@ import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ForlengetOmsInfo } from '~shared/types/RevurderingInfo'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { ForlengetOmsUnderUtvikling } from './ForlengetOmsUnderUtvikling'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { formaterMaanedAar } from '~utils/formatering/dato'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
@@ -55,7 +54,6 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
           Aktivitet – forlenget OMS
         </Heading>
       </Box>
-      <ForlengetOmsUnderUtvikling />
       <VStack paddingInline="space-64 space-32" paddingBlock="space-16" gap="space-24">
         <Heading size="medium" level="2">
           Periode for forlenget OMS

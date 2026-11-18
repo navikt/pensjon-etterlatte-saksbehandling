@@ -31,7 +31,6 @@ import { DetaljertEtteroppgjoerForbehandling } from '~shared/types/Etteroppgjoer
 import { useAppSelector } from '~store/Store'
 import { JaNei } from '~shared/types/ISvar'
 import { ForlengetOmsAktivitet } from '~components/behandling/forlengetOms/ForlengetOmsAktivitet'
-import { ForlengetOmsUnderUtvikling } from '~components/behandling/forlengetOms/ForlengetOmsUnderUtvikling'
 
 type BehandlingRouteTypesPath =
   | 'soeknadsoversikt'
@@ -139,7 +138,7 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
     path: 'brev',
     element: (behandling: IBehandlingReducer) => {
       if (behandling.revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS) {
-        return <ForlengetOmsUnderUtvikling />
+        return <></>
       }
       return <Vedtaksbrev behandling={behandling} />
     },

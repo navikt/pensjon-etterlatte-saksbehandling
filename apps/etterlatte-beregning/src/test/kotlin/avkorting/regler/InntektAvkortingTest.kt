@@ -37,8 +37,8 @@ class InntektAvkortingTest {
     }
      */
 
-    @Test
-    fun `oversteget inntekt er null hvis ingen innvilgede maaneder`() {
+    @Test // Unngår at vi deler på null (antall måneder)
+    fun `oversteget inntekt per maaned er null hvis ingen innvilgede maaneder`() {
         val overstegetInntekt =
             overstegetInntektPerMaaned.anvend(
                 grunnlag =

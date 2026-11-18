@@ -248,6 +248,7 @@ class ServiceModule(
             revurderingDao = daoModule.revurderingDao,
             aktivitetspliktDao = daoModule.aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
+            featureToggleService = featureToggleService,
         )
     }
 

@@ -875,6 +875,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         applicationContext.revurderingDao,
         aktivitetspliktDao,
         aktivitetspliktKopierService,
+        applicationContext.featureToggleService,
     )
 
     private fun behandlingFactory() =

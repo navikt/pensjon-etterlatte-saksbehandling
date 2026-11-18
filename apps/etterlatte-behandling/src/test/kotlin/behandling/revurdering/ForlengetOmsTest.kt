@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -98,6 +99,62 @@ class ForlengetOmsTest {
         verify(exactly = 0) { revurderingDao.lagreRevurderingInfo(any(), any(), any()) }
     }
 
+    @Test
+    fun `forlenget oms kan ikke lagres naar toggle er av`() {
+        val behandling = behandling(null, null)
+        val behandlingDao = mockk<BehandlingDao>(relaxed = true)
+        val revurderingDao = mockk<RevurderingDao>(relaxed = true)
+        every { behandlingDao.hentBehandling(behandling.id) } returns behandling
+
+        shouldThrow<RevurderingaarsakIkkeStoettet> {
+            service(behandlingDao, revurderingDao, forlengetOmsAktivert = false).lagreRevurderingInfo(
+                behandling.id,
+                RevurderingInfoMedBegrunnelse(RevurderingInfo.ForlengetOms(fom, tom), null),
+                "Z123456",
+            )
+        }
+
+        verify(exactly = 0) { behandlingDao.lagreOpphoerFom(any(), any()) }
+        verify(exactly = 0) { revurderingDao.lagreRevurderingInfo(any(), any(), any()) }
+    }
+
+    @Test
+    fun `ordinaer revurderingsinfo lagres som foer uavhengig av toggle`() {
+        listOf(false, true).forEach { forlengetOmsAktivert ->
+            val behandling = revurdering(sakId = sakId1, revurderingAarsak = Revurderingaarsak.ANNEN)
+            val behandlingDao = mockk<BehandlingDao>(relaxed = true)
+            val revurderingDao = mockk<RevurderingDao>(relaxed = true)
+            every { behandlingDao.hentBehandling(behandling.id) } returns behandling
+            val info = RevurderingInfoMedBegrunnelse(RevurderingInfo.RevurderingAarsakAnnen("Begrunnelse"), null)
+
+            service(behandlingDao, revurderingDao, forlengetOmsAktivert).lagreRevurderingInfo(behandling.id, info, "Z123456")
+
+            verify(exactly = 0) { behandlingDao.lagreOpphoerFom(any(), any()) }
+            verify(exactly = 1) { revurderingDao.lagreRevurderingInfo(behandling.id, info, any()) }
+        }
+    }
+
+    @Test
+    fun `periode for forlenget oms kan ikke lagres paa en annen revurderingsaarsak`() {
+        listOf(false, true).forEach { forlengetOmsAktivert ->
+            val behandling = revurdering(sakId = sakId1, revurderingAarsak = Revurderingaarsak.ANNEN)
+            val behandlingDao = mockk<BehandlingDao>(relaxed = true)
+            val revurderingDao = mockk<RevurderingDao>(relaxed = true)
+            every { behandlingDao.hentBehandling(behandling.id) } returns behandling
+
+            shouldThrow<UgyldigForespoerselException> {
+                service(behandlingDao, revurderingDao, forlengetOmsAktivert).lagreRevurderingInfo(
+                    behandling.id,
+                    RevurderingInfoMedBegrunnelse(RevurderingInfo.ForlengetOms(fom, tom), null),
+                    "Z123456",
+                )
+            }
+
+            verify(exactly = 0) { behandlingDao.lagreOpphoerFom(any(), any()) }
+            verify(exactly = 0) { revurderingDao.lagreRevurderingInfo(any(), any(), any()) }
+        }
+    }
+
     private fun behandling(
         periode: RevurderingInfo.ForlengetOms?,
         opphoerFom: YearMonth? = tom.plusMonths(1),
@@ -114,6 +171,7 @@ class ForlengetOmsTest {
     private fun service(
         behandlingDao: BehandlingDao,
         revurderingDao: RevurderingDao,
+        forlengetOmsAktivert: Boolean = true,
     ) = RevurderingService(
         oppgaveService = mockk(),
         grunnlagService = mockk(),
@@ -124,5 +182,9 @@ class ForlengetOmsTest {
         revurderingDao = revurderingDao,
         aktivitetspliktDao = mockk(),
         aktivitetspliktKopierService = mockk(),
+        featureToggleService =
+            mockk<FeatureToggleService> {
+                every { isEnabled(RevurderingToggle.FORLENGET_OMS, false) } returns forlengetOmsAktivert
+            },
     )
 }

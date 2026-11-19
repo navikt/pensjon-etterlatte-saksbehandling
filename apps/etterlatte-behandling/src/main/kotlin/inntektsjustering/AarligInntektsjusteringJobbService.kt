@@ -96,9 +96,9 @@ class AarligInntektsjusteringJobbService(
         oppgaveId: UUID,
         saksbehandler: Saksbehandler,
     ): Revurdering {
-        val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
-        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak.id)
-        if (aapneBehandlinger.isNotEmpty()) {
+        val harAapenBehandlingOppgave = oppgaveService.harSakAapenBehandlingOppgave(sakId)
+
+        if (harAapenBehandlingOppgave) {
             logger.info("Sak har åpne behandlinger, kan ikke opprette revurdering")
             throw UgyldigForespoerselException(
                 "KAN_IKKE_OPPRETTE_REVURDERING_PGA_AAPNE_BEHANDLINGER",
@@ -172,11 +172,7 @@ class AarligInntektsjusteringJobbService(
     ): Boolean {
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
 
-        val aapneOppgaver =
-            oppgaveService
-                .hentOppgaverForSak(sakId)
-                .filter { it.kilde == OppgaveKilde.BEHANDLING }
-                .any { it.erIkkeAvsluttet() }
+        val aapneOppgaver = oppgaveService.harSakAapenBehandlingOppgave(sakId)
 
         if (aapneOppgaver) {
             nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)

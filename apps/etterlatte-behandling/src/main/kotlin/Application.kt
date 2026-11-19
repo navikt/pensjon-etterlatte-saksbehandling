@@ -174,6 +174,7 @@ private fun Route.attachContekst(
 }
 
 private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
+    applicationContext.beregningModule.registrerRoutes(this)
     soeknadSkyggeRoute(applicationContext.soeknadSkyggeDao)
     prosesseringRoutes(applicationContext.prosesseringAdminDao, applicationContext.saksbehandlerGroupIdsByKey)
     feilbarDemoRoute(applicationContext.saksbehandlerGroupIdsByKey)

@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.selftest.SelfTestService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
+import no.nav.etterlatte.config.modules.BeregningModule
 import no.nav.etterlatte.config.modules.BeregningRepositoryModule
 import no.nav.etterlatte.config.modules.DaoModule
 import no.nav.etterlatte.config.modules.HighLevelServiceModule
@@ -103,6 +104,10 @@ internal class ApplicationContext(
             grunnlagServiceOverride = grunnlagServiceOverride,
             vedtakInternalServiceOverride = vedtakInternalServiceOverride,
         )
+
+    val beregningModule by lazy {
+        BeregningModule(env, beregningRepositoryModule, serviceModule, featureToggleService)
+    }
 
     private val highLevelServiceModule =
         HighLevelServiceModule(

@@ -13,6 +13,7 @@ internal class BeregningIsolasjonTest {
     private val beregningsreferanse = Regex("""\b${Regex.escape(beregningspakke)}\b""")
     private val tillatteKoblingsfiler =
         setOf(
+            "apps/etterlatte-behandling/src/main/kotlin/config/modules/BeregningModule.kt",
             "apps/etterlatte-behandling/src/main/kotlin/config/modules/BeregningRepositoryModule.kt",
             "apps/etterlatte-behandling/src/main/kotlin/config/modules/KlientModule.kt",
         )
@@ -86,6 +87,7 @@ internal class BeregningIsolasjonTest {
     @ParameterizedTest
     @ValueSource(
         strings = [
+            "apps/etterlatte-behandling/src/main/kotlin/config/modules/BeregningModule.kt",
             "apps/etterlatte-behandling/src/main/kotlin/config/modules/BeregningRepositoryModule.kt",
             "apps/etterlatte-behandling/src/main/kotlin/config/modules/KlientModule.kt",
         ],
@@ -105,6 +107,7 @@ internal class BeregningIsolasjonTest {
             "apps/etterlatte-behandling/src/main/kotlin/config/modules/ServiceModule.kt",
             "apps/etterlatte-behandling/src/main/kotlin/behandling/klienter/KlientModule.kt",
             "apps/etterlatte-beregning/src/main/kotlin/config/modules/KlientModule.kt",
+            "apps/etterlatte-beregning/src/main/kotlin/config/modules/BeregningModule.kt",
         ],
     )
     fun `avviser referanser fra andre filer selv om mappen eller filnavnet ligner`(filsti: String) {

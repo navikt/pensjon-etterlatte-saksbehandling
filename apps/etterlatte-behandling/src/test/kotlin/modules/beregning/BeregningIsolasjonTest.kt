@@ -11,9 +11,14 @@ internal class BeregningIsolasjonTest {
     private val beregningspakke = "no.nav.etterlatte.modules.beregning"
     private val pakkedeklarasjon = Regex("""(?m)^\s*package\s+([\w.]+)""")
     private val beregningsreferanse = Regex("""\b${Regex.escape(beregningspakke)}\b""")
+    private val tillatteKoblingsfiler =
+        setOf(
+            "apps/etterlatte-behandling/src/main/kotlin/config/modules/BeregningRepositoryModule.kt",
+            "apps/etterlatte-behandling/src/main/kotlin/config/modules/KlientModule.kt",
+        )
 
     @Test
-    fun `beregningsmodulen skal ikke brukes utenfor egen pakke`() {
+    fun `beregningsmodulen skal bare brukes i egen pakke og godkjente koblingsfiler`() {
         val prosjektrot =
             generateSequence(File(".").canonicalFile) { it.parentFile }
                 .first { it.resolve("settings.gradle.kts").isFile }
@@ -27,10 +32,11 @@ internal class BeregningIsolasjonTest {
                 .filter { it.isFile && it.extension in setOf("kt", "kts", "java") }
                 .flatMap { fil ->
                     val kildekode = fil.readText()
-                    if (harEksternBeregningsreferanse(kildekode)) {
+                    val filsti = fil.relativeTo(prosjektrot).invariantSeparatorsPath
+                    if (harEksternBeregningsreferanse(kildekode, filsti)) {
                         kildekode.lineSequence().mapIndexedNotNull { indeks, linje ->
                             if (beregningsreferanse.containsMatchIn(linje)) {
-                                "${fil.relativeTo(prosjektrot)}:${indeks + 1}"
+                                "$filsti:${indeks + 1}"
                             } else {
                                 null
                             }
@@ -42,8 +48,8 @@ internal class BeregningIsolasjonTest {
                 .toList()
 
         assertTrue(referanser.isEmpty()) {
-            "Beregningsmodulen er ikke aktivert og skal bare brukes i $beregningspakke og underpakker.\n" +
-                "Fjern referansene utenfor modulen:\n${referanser.joinToString("\n")}"
+            "Beregningsmodulen skal bare brukes i $beregningspakke, underpakker og godkjente koblingsfiler.\n" +
+                "Fjern referansene utenfor disse:\n${referanser.joinToString("\n")}"
         }
     }
 
@@ -77,6 +83,39 @@ internal class BeregningIsolasjonTest {
         )
     }
 
+    @ParameterizedTest
+    @ValueSource(
+        strings = [
+            "apps/etterlatte-behandling/src/main/kotlin/config/modules/BeregningRepositoryModule.kt",
+            "apps/etterlatte-behandling/src/main/kotlin/config/modules/KlientModule.kt",
+        ],
+    )
+    fun `tillater referanser fra godkjente koblingsfiler`(filsti: String) {
+        assertFalse(
+            harEksternBeregningsreferanse(
+                "package no.nav.etterlatte.config.modules\nimport no.nav.etterlatte.modules.beregning.BeregningRepository",
+                filsti,
+            ),
+        )
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = [
+            "apps/etterlatte-behandling/src/main/kotlin/config/modules/ServiceModule.kt",
+            "apps/etterlatte-behandling/src/main/kotlin/behandling/klienter/KlientModule.kt",
+            "apps/etterlatte-beregning/src/main/kotlin/config/modules/KlientModule.kt",
+        ],
+    )
+    fun `avviser referanser fra andre filer selv om mappen eller filnavnet ligner`(filsti: String) {
+        assertTrue(
+            harEksternBeregningsreferanse(
+                "package no.nav.etterlatte.config.modules\nimport no.nav.etterlatte.modules.beregning.BeregningRepository",
+                filsti,
+            ),
+        )
+    }
+
     @Test
     fun `forveksler ikke beregningsmodulen med pakker med lignende navn`() {
         assertFalse(
@@ -86,9 +125,12 @@ internal class BeregningIsolasjonTest {
         )
     }
 
-    private fun harEksternBeregningsreferanse(kildekode: String): Boolean {
+    private fun harEksternBeregningsreferanse(
+        kildekode: String,
+        filsti: String = "",
+    ): Boolean {
         val pakke = pakkedeklarasjon.find(kildekode)?.groupValues?.get(1)
         val tilhoererBeregningsmodulen = pakke == beregningspakke || pakke?.startsWith("$beregningspakke.") == true
-        return !tilhoererBeregningsmodulen && beregningsreferanse.containsMatchIn(kildekode)
+        return filsti !in tillatteKoblingsfiler && !tilhoererBeregningsmodulen && beregningsreferanse.containsMatchIn(kildekode)
     }
 }

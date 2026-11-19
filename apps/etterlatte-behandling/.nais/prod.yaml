@@ -113,6 +113,8 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
+    - name: BRUK_EGEN_DATABASE_FOR_BEREGNING
+      value: "false"
     - name: ETTERLATTE_TILBAKEKREVING_URL
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING

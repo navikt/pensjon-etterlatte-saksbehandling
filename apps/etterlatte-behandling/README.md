@@ -109,6 +109,22 @@ Appen bygges og deployes automatisk ved commits til `apps/etterlatte-behandling/
 
 For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
 
+### Databasevalg for beregning
+
+`BeregningRepositoryModule` velger database ved oppstart med miljøvariabelen
+`BRUK_EGEN_DATABASE_FOR_BEREGNING`. Standardverdien er `false`: alle lesinger og skrivinger
+går til CRUD-endepunktene under `/api/beregning/intern` i `etterlatte-beregning`.
+Klienten bruker systemtoken fra behandling. Beregning må ha `BRUK_INTERN_BEREGNING=true`
+før disse operasjonene tas i bruk. CRUD-endepunktene er foreløpig deaktivert i prod.
+
+Sett `BRUK_EGEN_DATABASE_FOR_BEREGNING=true` når behandling sin database har de nødvendige
+dataene. Da bruker alle seks repositories behandling sin database, uten HTTP-kall.
+Endringen krever deployment og omstart. Det finnes ingen automatisk fallback eller
+dobbeltskriving; ved bytte må dataene være oppdaterte i databasen som tas i bruk.
+
+Modulen er tilgjengelig i `ApplicationContext`. Kobling til beregningstjenestene og
+registrering av rutene gjøres separat. Eksisterende beregningskall påvirkes ikke.
+
 ## Enhetstester
 
 Noen av testene bruker https://www.testcontainers.org/ for å starte en docker-container.

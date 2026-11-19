@@ -23,7 +23,6 @@ import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
-import no.nav.etterlatte.behandling.klienter.BeregningKlientIntern
 import no.nav.etterlatte.config.modules.BeregningDatabaseKey.BRUK_EGEN_DATABASE_FOR_BEREGNING
 import no.nav.etterlatte.config.modules.BeregningModule
 import no.nav.etterlatte.config.modules.BeregningRepositoryModule

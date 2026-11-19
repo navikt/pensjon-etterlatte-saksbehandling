@@ -3,12 +3,12 @@ package no.nav.etterlatte.config.modules
 import io.ktor.server.routing.Route
 import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.BeregningKlientIntern
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.modules.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.modules.beregning.BeregnOmstillingsstoenadService
 import no.nav.etterlatte.modules.beregning.BeregnOverstyrBeregningService
+import no.nav.etterlatte.modules.beregning.BeregningKlientIntern
 import no.nav.etterlatte.modules.beregning.BeregningService
 import no.nav.etterlatte.modules.beregning.BeregningTilgangService
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingReparerAarsoppgjoeret

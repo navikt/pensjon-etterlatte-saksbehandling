@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.klienter
+package no.nav.etterlatte.modules.beregning
 
 import io.kotest.matchers.shouldBe
 import io.mockk.Called
@@ -32,9 +32,6 @@ import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.IkkeTilgangTilBehandlingException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
-import no.nav.etterlatte.modules.beregning.BeregningService
-import no.nav.etterlatte.modules.beregning.BeregningsgrunnlagMangler
-import no.nav.etterlatte.modules.beregning.OverstyrBeregning
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingService
 import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.modules.beregning.etteroppgjoer.BeregnetEtteroppgjoerResultat
@@ -44,7 +41,6 @@ import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.modules.beregning.regler.beregning
 import no.nav.etterlatte.modules.beregning.regler.sanksjon
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
-import no.nav.etterlatte.modules.beregning.toDTO
 import no.nav.etterlatte.modules.beregning.ytelseMedGrunnlag.BeregningOgAvkortingBrevService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

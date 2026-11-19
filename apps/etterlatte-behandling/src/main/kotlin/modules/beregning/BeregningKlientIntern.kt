@@ -1,5 +1,6 @@
-package no.nav.etterlatte.behandling.klienter
+package no.nav.etterlatte.modules.beregning
 
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
@@ -20,15 +21,12 @@ import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.IkkeTilgangTilBehandlingException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
-import no.nav.etterlatte.modules.beregning.BeregningService
-import no.nav.etterlatte.modules.beregning.BeregningsgrunnlagMangler
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingService
 import no.nav.etterlatte.modules.beregning.avkorting.inntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.modules.beregning.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepService
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
-import no.nav.etterlatte.modules.beregning.toDTO
 import no.nav.etterlatte.modules.beregning.ytelseMedGrunnlag.BeregningOgAvkortingBrevService
 import java.time.YearMonth
 import java.util.UUID

@@ -156,7 +156,7 @@ export const Resultat = (props: Props) => {
           {!vilkaarsvurdering.resultat && !alleVilkaarErVurdert && (
             <BodyShort>Alle vilkår må vurderes før man kan gå videre</BodyShort>
           )}
-          {redigerbar && !vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
+          {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
             <VurderAlleVilkaarBox>
               <VStack gap="space-16">
                 <RadioGroup

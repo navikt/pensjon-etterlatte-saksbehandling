@@ -1,6 +1,8 @@
 package no.nav.etterlatte.modules.beregning
 
+import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -16,11 +18,16 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
 import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
+import no.nav.etterlatte.behandling.klienter.BeregningKlientIntern
 import no.nav.etterlatte.config.modules.BeregningDatabaseKey.BRUK_EGEN_DATABASE_FOR_BEREGNING
 import no.nav.etterlatte.config.modules.BeregningModule
 import no.nav.etterlatte.config.modules.BeregningRepositoryModule
+import no.nav.etterlatte.config.modules.KlientModule
 import no.nav.etterlatte.config.modules.ServiceModule
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.runServer
@@ -31,6 +38,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.Sanksjon
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.modules.beregning.klienter.BeregningCrudKlient
 import no.nav.etterlatte.modules.beregning.regler.behandling
@@ -76,6 +84,8 @@ internal class BeregningModuleTest {
     fun `uten aktivering registreres ingen ruter eller tjenester`(aktivert: String?) {
         val modul = modul(aktivert = aktivert)
 
+        modul.beregningKlient shouldBe null
+
         testApplication {
             val client = runServer(server) { modul.registrerRoutes(this) }
             teststier.forEach { sti ->
@@ -92,6 +102,71 @@ internal class BeregningModuleTest {
             dataSource wasNot Called
             crudKlient wasNot Called
         }
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = ["false"])
+    fun `intern klient er deaktivert som standard og bruker HTTP-klienten naar bryteren er av`(aktivert: String?) {
+        val modul = modul(aktivert = aktivert)
+
+        klientModule(modul).beregningKlient.shouldBeInstanceOf<BeregningKlientImpl>()
+
+        antallCrudKlienter shouldBe 0
+        verify {
+            serviceModule wasNot Called
+            dataSource wasNot Called
+            crudKlient wasNot Called
+        }
+    }
+
+    @Test
+    fun `intern klient opprettes uten aa initialisere tjenester som avhenger av klienten`() {
+        val klient = klientModule(modul()).beregningKlient
+
+        klient.shouldBeInstanceOf<BeregningKlientIntern>()
+        antallCrudKlienter shouldBe 0
+        verify(exactly = 0) {
+            serviceModule.behandlingService
+            serviceModule.vedtaksvurderingService
+            serviceModule.etteroppgjoerForbehandlingService
+        }
+        verify {
+            dataSource wasNot Called
+            crudKlient wasNot Called
+        }
+    }
+
+    @Test
+    fun `alle brukere av klientmodulen faar samme interne klient og den bruker valgte repositories`() =
+        runBlocking<Unit> {
+            val behandlingId = UUID.randomUUID()
+            val sanksjoner = listOf(sanksjon(behandlingId = behandlingId))
+            every { crudKlient.hentSanksjon(behandlingId) } returns sanksjoner
+            val modul = modul()
+            val klientModule = klientModule(modul)
+
+            klientModule.beregningKlient shouldBe modul.beregningKlient
+            klientModule.beregningKlient.hentSanksjoner(behandlingId, HardkodaSystembruker.testdata) shouldBe sanksjoner
+
+            antallCrudKlienter shouldBe 1
+            verify(exactly = 1) { crudKlient.hentSanksjon(behandlingId) }
+            verify { dataSource wasNot Called }
+        }
+
+    @Test
+    fun `eksplisitt klientoverstyring beholdes og initialiserer ikke den interne klienten`() {
+        val overstyrt = mockk<BeregningKlient>()
+        val klientModule =
+            KlientModule(
+                config = ConfigFactory.empty(),
+                env = Miljoevariabler.httpClient(emptyMap()),
+                featureToggleService = featureToggleService,
+                beregningKlientIntern = { error("Skal ikke initialiseres") },
+                beregningKlientOverride = overstyrt,
+            )
+
+        klientModule.beregningKlient shouldBe overstyrt
     }
 
     @Test
@@ -294,6 +369,21 @@ internal class BeregningModuleTest {
             }
         return BeregningModule(env, repositories, serviceModule, featureToggleService)
     }
+
+    private fun klientModule(modul: BeregningModule) =
+        KlientModule(
+            config =
+                ConfigFactory.parseMap(
+                    mapOf(
+                        "azure.app.well.known.url" to server.wellKnownUrl("azure").toString(),
+                        "beregning.client.id" to "beregning",
+                        "beregning.resource.url" to "http://beregning",
+                    ),
+                ),
+            env = Miljoevariabler.httpClient(emptyMap()),
+            featureToggleService = featureToggleService,
+            beregningKlientIntern = { modul.beregningKlient },
+        )
 
     private val teststier =
         listOf(

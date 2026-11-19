@@ -2,6 +2,8 @@ package no.nav.etterlatte.config.modules
 
 import io.ktor.server.routing.Route
 import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.BeregningKlientIntern
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.modules.beregning.BeregnBarnepensjonService
@@ -36,6 +38,26 @@ class BeregningModule(
     private val aktivert = env.getOrDefault(BRUK_INTERN_BEREGNING, "false").toBooleanStrict()
 
     private val tilgangService by lazy { BeregningTilgangService(serviceModule.tilgangService) }
+
+    val beregningKlient: BeregningKlient? by lazy {
+        if (aktivert) {
+            BeregningKlientIntern(
+                beregningService = { beregningService },
+                avkortingService = { avkortingService },
+                beregningsGrunnlagService = { beregningsGrunnlagService },
+                sanksjonService = { sanksjonService },
+                grunnbeloepService = { grunnbeloepService },
+                aarligInntektsjusteringService = { aarligInntektsjusteringService },
+                etteroppgjoerService = { etteroppgjoerService },
+                beregningOgAvkortingBrevService = { beregningOgAvkortingBrevService },
+                behandlingTilgangsSjekk = tilgangService,
+            )
+        } else {
+            null
+        }
+    }
+
+    private val grunnbeloepService by lazy { GrunnbeloepService(GrunnbeloepRepository) }
 
     private val sanksjonService by lazy {
         SanksjonService(
@@ -174,7 +196,7 @@ class BeregningModule(
             )
             sanksjon(sanksjonService, tilgangService)
             ytelseMedGrunnlag(beregningOgAvkortingBrevService, tilgangService)
-            grunnbeloep(GrunnbeloepService(GrunnbeloepRepository))
+            grunnbeloep(grunnbeloepService)
         }
     }
 }

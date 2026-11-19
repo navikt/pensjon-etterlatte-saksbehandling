@@ -593,7 +593,7 @@ class VedtakBehandlingService(
 
         VedtakType.AVSLAG -> {
             if (behandling.revurderingsaarsak == Revurderingaarsak.FORLENGET_OMS) {
-                null
+                null // TODO finne ut av her. Tror beste løsning er å ikke kreve opphørsdato på avslag (flytmessig og kodemessig)
             } else {
                 behandling.opphoerFraOgMed
             }

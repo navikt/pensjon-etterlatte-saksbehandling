@@ -10,7 +10,9 @@ import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerFor
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.revurdering.ForlengetOmsUnderUtvikling
+import no.nav.etterlatte.behandling.revurdering.RevurderingToggle
 import no.nav.etterlatte.behandling.revurdering.validerForlengetOmsPeriode
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -127,6 +129,7 @@ class BehandlingStatusServiceImpl(
     private val forbehandlingService: EtteroppgjoerForbehandlingService,
     private val grunnlagService: GrunnlagService,
     private val vilkaarsvurderingDao: VilkaarsvurderingDao,
+    private val featureToggleService: FeatureToggleService,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
 
@@ -242,7 +245,9 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun behandlingTilFattetVedtak(behandling: Behandling): Behandling {
-        behandling.validerForlengetOmsPeriode()
+        if (featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false)) {
+            behandling.validerForlengetOmsPeriode()
+        }
         if (behandling.revurderingsaarsak() == Revurderingaarsak.FORLENGET_OMS) {
             throw ForlengetOmsUnderUtvikling()
         }

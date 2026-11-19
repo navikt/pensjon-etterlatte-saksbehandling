@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.revurdering.ForlengetOmsUnderUtvikling
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -111,6 +112,7 @@ internal class BehandlingStatusServiceTest {
             etteroppgjoerForbehandlingService,
             grunnlagService,
             vilkaarsvurderingDao,
+            DummyFeatureToggleService(),
         )
 
     @BeforeEach

@@ -632,7 +632,7 @@ class VedtakBehandlingService(
                                 etteroppgjoerResultat?.resultatType == EtteroppgjoerResultatType.INGEN_ENDRING_UTEN_UTBETALING
 
                         if (revurderingaarsak == Revurderingaarsak.FORLENGET_OMS) {
-                            VedtakType.INNVILGELSE
+                            VedtakType.INNVILGELSE // TODO sjekke både på vilkårsvurdering OG på aktivitetsside
                         } else if (revurderingaarsak == Revurderingaarsak.ETTEROPPGJOER && resultatIngenEndring) {
                             VedtakType.INGEN_ENDRING
                         } else {

@@ -6,6 +6,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
@@ -14,9 +15,9 @@ import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
@@ -32,7 +33,7 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InntektsjusteringSelvbetjeningServiceTest {
-    private val oppgaveService: OppgaveService = mockk()
+    private val oppgaveService = spyk(OppgaveService(mockk(), mockk(), mockk(), mockk(), mockk()))
     private val rapid: KafkaProdusent<String, String> = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val behandlingService: BehandlingService = mockk()
@@ -62,10 +63,48 @@ class InntektsjusteringSelvbetjeningServiceTest {
     }
 
     @Test
-    fun `skal behandle inntektsjustering manuelt hvis sak har aapne behandlinger`() {
-        val behandlingOgSakMock = mockk<BehandlingOgSak>()
+    fun `aapen forbehandling gir manuell inntektsjustering selv uten aapen behandling`() {
+        val sakId = SakId(123L)
         every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns listOf(behandlingOgSakMock)
+        every { oppgaveService.hentOppgaverForSak(sakId) } returns
+            listOf(
+                mockk<OppgaveIntern> {
+                    every { kilde } returns OppgaveKilde.BEHANDLING
+                    every { type } returns OppgaveType.ETTEROPPGJOER
+                    every { erIkkeAvsluttet() } returns true
+                },
+            )
+        every { behandlingService.hentAapneBehandlingerForSak(sakId) } returns emptyList()
+
+        runBlocking {
+            service.behandleInntektsjustering(
+                MottattInntektsjustering(
+                    sakId,
+                    UUID.randomUUID(),
+                    "123",
+                    LocalDateTime.now(),
+                    2025,
+                    100,
+                    100,
+                    100,
+                    100,
+                    YearMonth.of(2025, 1),
+                ),
+            )
+        }
+
+        verifyManuellBehandling()
+        verify {
+            vedtakInternalService wasNot Called
+            beregningKlient wasNot Called
+        }
+        verify(exactly = 0) { rapid.publiser("inntektsjustering-123", any()) }
+    }
+
+    @Test
+    fun `skal behandle inntektsjustering manuelt hvis sak har aapne oppgaver`() {
+        every { featureToggleService.isEnabled(any(), any()) } returns true
+        every { oppgaveService.harSakAapenBehandlingOppgave(SakId(123L)) } returns true
 
         val mottattInntektsjustering =
             MottattInntektsjustering(
@@ -85,7 +124,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
         }
 
         verify(exactly = 1) {
-            behandlingService.hentAapneBehandlingerForSak(any())
+            oppgaveService.harSakAapenBehandlingOppgave(SakId(123L))
         }
 
         coVerify(exactly = 0) {
@@ -99,7 +138,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
     @Test
     fun `skal behandle inntektsjustering manuelt hvis sanksjon`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
+        every { oppgaveService.harSakAapenBehandlingOppgave(SakId(123L)) } returns false
 
         val loependeYtelseMock = mockk<LoependeYtelseDTO>(relaxed = true)
         coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
@@ -140,7 +179,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
     @Test
     fun `skal behandle inntektsjustering manuelt hvis vedtak er under samordning`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
+        every { oppgaveService.harSakAapenBehandlingOppgave(SakId(123L)) } returns false
 
         val loependeYtelseMock = mockk<LoependeYtelseDTO>(relaxed = true)
         coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
@@ -165,7 +204,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
         }
 
         coVerify(exactly = 1) {
-            behandlingService.hentAapneBehandlingerForSak(any())
+            oppgaveService.harSakAapenBehandlingOppgave(SakId(123L))
             vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any())
         }
 
@@ -175,7 +214,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
     @Test
     fun `skal behandle inntektsjustering manuelt hvis vedtak ikke er loepende`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
+        every { oppgaveService.harSakAapenBehandlingOppgave(SakId(123L)) } returns false
 
         val loependeYtelseMock = mockk<LoependeYtelseDTO>(relaxed = true)
         coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
@@ -200,7 +239,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
         }
 
         coVerify(exactly = 1) {
-            behandlingService.hentAapneBehandlingerForSak(any())
+            oppgaveService.harSakAapenBehandlingOppgave(SakId(123L))
             vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any())
         }
 
@@ -210,7 +249,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
     @Test
     fun `skal behandle inntektsjustering automatisk hvis featureToggle = true`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
+        every { oppgaveService.harSakAapenBehandlingOppgave(SakId(123L)) } returns false
 
         val loependeYtelseMock = mockk<LoependeYtelseDTO>(relaxed = true)
         coEvery { vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
@@ -270,6 +309,9 @@ class InntektsjusteringSelvbetjeningServiceTest {
         }
 
         verify(exactly = 0) {
+            oppgaveService.harSakAapenBehandlingOppgave(any())
+        }
+        verify {
             behandlingService wasNot Called
             vedtakInternalService wasNot Called
         }
@@ -302,7 +344,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                     // TODO: add args
                 },
             )
-            behandlingService.hentAapneBehandlingerForSak(any())
+            oppgaveService.harSakAapenBehandlingOppgave(SakId(123L))
             vedtakInternalService.sakHarLopendeVedtakPaaDato(any(), any(), any())
             beregningKlient.inntektsjusteringAvkortingInfoSjekk(any(), any(), any(), any())
             rapid.publiser("mottak-inntektsjustering-fullfoert-123", any())

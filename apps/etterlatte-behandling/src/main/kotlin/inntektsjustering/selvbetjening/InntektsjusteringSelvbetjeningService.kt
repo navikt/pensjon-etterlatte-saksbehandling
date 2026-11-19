@@ -105,8 +105,8 @@ class InntektsjusteringSelvbetjeningService(
         val loependeFom = MottattInntektsjustering.utledLoependeFom().atDay(1)
 
         // har åpne behandlinger
-        val harAapneOppgaver = inTransaction { oppgaveService.harSakAapneOppgaver(sakId) }
-        if (harAapneOppgaver) return false
+        val harAapenBehandlingOppgave = inTransaction { oppgaveService.harSakAapenBehandlingOppgave(sakId) }
+        if (harAapenBehandlingOppgave) return false
 
         // ikke loepende || er under samordning
         val vedtak =

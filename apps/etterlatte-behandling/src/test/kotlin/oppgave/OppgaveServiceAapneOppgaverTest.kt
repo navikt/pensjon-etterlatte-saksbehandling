@@ -25,7 +25,7 @@ class OppgaveServiceAapneOppgaverTest {
     fun `sak uten oppgaver har ikke aapne oppgaver`() {
         every { oppgaveDao.hentOppgaverForSakMedType(sakId, OppgaveType.entries) } returns emptyList()
 
-        service.harSakAapneOppgaver(sakId) shouldBe false
+        service.harSakAapenBehandlingOppgave(sakId) shouldBe false
     }
 
     @ParameterizedTest
@@ -34,7 +34,7 @@ class OppgaveServiceAapneOppgaverTest {
         every { oppgaveDao.hentOppgaverForSakMedType(sakId, OppgaveType.entries) } returns
             listOf(oppgave(status = status, type = OppgaveType.ETTEROPPGJOER))
 
-        service.harSakAapneOppgaver(sakId) shouldBe
+        service.harSakAapenBehandlingOppgave(sakId) shouldBe
             (status in setOf(Status.NY, Status.UNDER_BEHANDLING, Status.PAA_VENT, Status.ATTESTERING, Status.UNDERKJENT))
     }
 
@@ -44,7 +44,7 @@ class OppgaveServiceAapneOppgaverTest {
         every { oppgaveDao.hentOppgaverForSakMedType(sakId, OppgaveType.entries) } returns
             listOf(oppgave(status = status))
 
-        service.harSakAapneOppgaver(sakId) shouldBe
+        service.harSakAapenBehandlingOppgave(sakId) shouldBe
             (status in setOf(Status.NY, Status.UNDER_BEHANDLING, Status.PAA_VENT, Status.ATTESTERING, Status.UNDERKJENT))
     }
 
@@ -54,7 +54,7 @@ class OppgaveServiceAapneOppgaverTest {
         every { oppgaveDao.hentOppgaverForSakMedType(sakId, OppgaveType.entries) } returns
             listOf(oppgave(kilde = kilde))
 
-        service.harSakAapneOppgaver(sakId) shouldBe false
+        service.harSakAapenBehandlingOppgave(sakId) shouldBe false
     }
 
     @Test
@@ -66,7 +66,7 @@ class OppgaveServiceAapneOppgaverTest {
                 oppgave(type = OppgaveType.ETTEROPPGJOER),
             )
 
-        service.harSakAapneOppgaver(sakId) shouldBe true
+        service.harSakAapenBehandlingOppgave(sakId) shouldBe true
     }
 
     @Test
@@ -74,7 +74,7 @@ class OppgaveServiceAapneOppgaverTest {
         every { oppgaveDao.hentOppgaverForSakMedType(sakId, OppgaveType.entries) } returns
             listOf(oppgave(kilde = null))
 
-        service.harSakAapneOppgaver(sakId) shouldBe false
+        service.harSakAapenBehandlingOppgave(sakId) shouldBe false
     }
 
     private fun oppgave(

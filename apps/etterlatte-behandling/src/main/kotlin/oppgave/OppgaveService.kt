@@ -559,7 +559,7 @@ class OppgaveService(
         type: OppgaveType,
     ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSakMedType(sakId, listOf(type))
 
-    fun harSakAapneOppgaver(sakId: SakId) =
+    fun harSakAapenBehandlingOppgave(sakId: SakId) =
         hentOppgaverForSak(sakId)
             .filter { it.kilde == OppgaveKilde.BEHANDLING }
             .any { it.erIkkeAvsluttet() }

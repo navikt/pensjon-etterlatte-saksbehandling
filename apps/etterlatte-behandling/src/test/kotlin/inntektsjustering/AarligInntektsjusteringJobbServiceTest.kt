@@ -13,7 +13,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
@@ -121,7 +120,7 @@ class AarligInntektsjusteringJobbServiceTest {
         coEvery { beregningKlient.harOverstyrt(any(), any()) } returns false
         coEvery { aldersovergangService.aldersovergangMaaned(any(), any()) } returns YearMonth.of(2050, 1)
         every { sakService.finnSak(SakId(123L)) } returns gyldigSak
-        every { oppgaveService.harSakAapneOppgaver(any()) } returns false
+        every { oppgaveService.harSakAapenBehandlingOppgave(any()) } returns false
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns
             PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of(fnrGyldigSak),
@@ -188,7 +187,7 @@ class AarligInntektsjusteringJobbServiceTest {
     fun `skal ikke opprette manuell inntektsjustering hvis aapne oppgaver`() {
         val oppgaveId = UUID.randomUUID()
         val sakId = SakId(123L)
-        every { oppgaveService.harSakAapneOppgaver(sakId) } returns true
+        every { oppgaveService.harSakAapenBehandlingOppgave(sakId) } returns true
 
         val exception =
             assertThrows<UgyldigForespoerselException> {
@@ -204,7 +203,7 @@ class AarligInntektsjusteringJobbServiceTest {
     @Test
     fun `aapen forbehandling blokkerer manuell inntektsjustering uten aapen behandling`() {
         val sakId = SakId(123L)
-        every { oppgaveService.harSakAapneOppgaver(sakId) } answers { callOriginal() }
+        every { oppgaveService.harSakAapenBehandlingOppgave(sakId) } answers { callOriginal() }
         every { oppgaveService.hentOppgaverForSak(sakId) } returns
             listOf(
                 mockk<OppgaveIntern> {
@@ -417,7 +416,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 saker = listOf(SakId(123L)),
             )
 
-        every { oppgaveService.harSakAapneOppgaver(SakId(123L)) } returns true
+        every { oppgaveService.harSakAapenBehandlingOppgave(SakId(123L)) } returns true
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
@@ -430,7 +429,7 @@ class AarligInntektsjusteringJobbServiceTest {
         @Test
         fun `aapen forbehandling blokkerer automatisk aarlig inntektsjustering`() {
             val sakId = SakId(123L)
-            every { oppgaveService.harSakAapneOppgaver(sakId) } answers { callOriginal() }
+            every { oppgaveService.harSakAapenBehandlingOppgave(sakId) } answers { callOriginal() }
             every { oppgaveService.hentOppgaverForSak(sakId) } returns
                 listOf(
                     mockk<OppgaveIntern> {

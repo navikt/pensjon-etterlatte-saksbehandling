@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.modules.beregning.BeregningRepository
+import no.nav.etterlatte.modules.beregning.BeregningRepositoryOperasjoner
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingService
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
 import java.util.UUID
@@ -20,7 +20,7 @@ import java.util.UUID
  * Hensikten med denne tjenesten er å la brev hente data om beregning og avkorting i et samlet sted
  */
 class BeregningOgAvkortingBrevService(
-    private val beregningRepository: BeregningRepository,
+    private val beregningRepository: BeregningRepositoryOperasjoner,
     private val avkortingService: AvkortingService,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val behandlingService: BehandlingService,

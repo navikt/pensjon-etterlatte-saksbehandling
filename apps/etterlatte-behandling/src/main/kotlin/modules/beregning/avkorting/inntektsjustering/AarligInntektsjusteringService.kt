@@ -5,10 +5,10 @@ import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoReq
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.modules.beregning.AvkortingRepositoryOperasjoner
 import no.nav.etterlatte.modules.beregning.avkorting.AarsoppgjoerLoepende
 import no.nav.etterlatte.modules.beregning.avkorting.Avkorting
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingFinnesIkkeException
-import no.nav.etterlatte.modules.beregning.avkorting.AvkortingRepository
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingService
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
@@ -17,7 +17,7 @@ import java.util.UUID
 
 class AarligInntektsjusteringService(
     private val avkortingService: AvkortingService,
-    private val avkortingRepository: AvkortingRepository,
+    private val avkortingRepository: AvkortingRepositoryOperasjoner,
     private val sanksjonService: SanksjonService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)

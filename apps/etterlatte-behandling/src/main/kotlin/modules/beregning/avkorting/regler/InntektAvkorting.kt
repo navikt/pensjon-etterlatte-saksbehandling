@@ -69,10 +69,14 @@ val maanedsinntekt =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Inntekt for relevant periode nedrundet til nærmeste tusen oppdelt i relevante måneder",
-        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT", versjon = "1.3"),
+        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT", versjon = "1.4"),
     ) benytter inntektavkortingsgrunnlag med { inntektavkortingsgrunnlag ->
         val (nedrundetInntekt, relevanteMaaneder) = inntektavkortingsgrunnlag
-        nedrundetInntekt.divide(relevanteMaaneder)
+        if (relevanteMaaneder != Beregningstall(0)) {
+            nedrundetInntekt.divide(relevanteMaaneder)
+        } else {
+            Beregningstall(0)
+        }
     }
 
 val overstegetInntektPerMaaned =

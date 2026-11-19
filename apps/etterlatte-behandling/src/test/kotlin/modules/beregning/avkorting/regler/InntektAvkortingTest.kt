@@ -1,6 +1,7 @@
 package no.nav.etterlatte.modules.beregning.avkorting.regler
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.modules.beregning.avkorting.regler.avkortingFaktor
 import no.nav.etterlatte.modules.beregning.avkorting.regler.kroneavrundetInntektAvkorting
@@ -9,6 +10,7 @@ import no.nav.etterlatte.modules.beregning.regler.inntektAvkortingGrunnlag
 import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.UUID
 
 class InntektAvkortingTest {
     @Test
@@ -32,6 +34,29 @@ class InntektAvkortingTest {
         inntekt.verdi.toInteger() shouldBe 45000
     }
      */
+
+    @Test
+    fun `oversteget inntekt er null hvis ingen innvilgede maaneder`() {
+        val overstegetInntekt =
+            overstegetInntektPerMaaned.anvend(
+                grunnlag =
+                    InntektAvkortingGrunnlagWrapper(
+                        inntektAvkortingGrunnlag =
+                            FaktumNode(
+                                verdi =
+                                    InntektAvkortingGrunnlag(
+                                        inntektInnvilgetNedrundet = Beregningstall(65_000),
+                                        relevanteMaaneder = Beregningstall(0),
+                                        grunnlagId = UUID.randomUUID(),
+                                    ),
+                                kilde = "",
+                                beskrivelse = "",
+                            ),
+                    ),
+                periode = RegelPeriode(LocalDate.of(2024, 1, 1)),
+            )
+        overstegetInntekt.verdi.toInteger() shouldBe 0
+    }
 
     @Test
     fun `oversteget inntekt er alt over et halvt maanedlig grunnbeloep`() {

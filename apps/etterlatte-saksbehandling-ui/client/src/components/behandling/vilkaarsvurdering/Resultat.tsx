@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from 'react'
+import React, { Dispatch, SetStateAction, useContext, useState } from 'react'
 import styled from 'styled-components'
 import { VilkaarsvurderingKnapper } from './VilkaarsvurderingKnapper'
 import {
@@ -25,6 +25,8 @@ import { formaterSakstype } from '~utils/formatering/formatering'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
+import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -42,6 +44,9 @@ type Props = {
     onChange: (tekst: string) => void
   }
   innvilgelseFeil?: string
+  forlengetOmsLagrePeriode?: (onSuccess: () => void) => void
+  forlengetOmsLagrerPeriode?: boolean
+  forlengetOmsValiderAktivitet?: () => boolean
 }
 
 export const Resultat = (props: Props) => {
@@ -57,6 +62,9 @@ export const Resultat = (props: Props) => {
     revurderingsaarsak,
     resultatBegrunnelse,
     innvilgelseFeil,
+    forlengetOmsLagrePeriode,
+    forlengetOmsLagrerPeriode,
+    forlengetOmsValiderAktivitet,
   } = props
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
@@ -66,6 +74,11 @@ export const Resultat = (props: Props) => {
   const [slettVurderingStatus, slettTotalVurderingCall] = useApiCall(slettTotalVurdering)
   const alleVilkaarErVurdert = !vilkaarsvurdering.vilkaar.some((vilkaar) => !vilkaar.vurdering)
   const forlengetOmsAktivert = useFeaturetoggle(FeatureToggle.forlenget_oms)
+  const { next } = useContext(BehandlingRouteContext)
+  const lagreForlengetOmsVedNeste =
+    forlengetOmsAktivert &&
+    revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS &&
+    forlengetOmsLagrePeriode !== undefined
 
   const slettVilkaarsvurderingResultat = () =>
     slettTotalVurderingCall(behandlingId, (res) => {
@@ -78,7 +91,47 @@ export const Resultat = (props: Props) => {
       }
     })
 
+  const lagreResultat = (valgtSvar: ISvar) => {
+    oppdaterTotalVurderingCall(
+      { behandlingId, resultat: svarTilTotalResultat(valgtSvar), kommentar: resultatBegrunnelse?.tekst ?? kommentar },
+      (res) => {
+        oppdaterVilkaar(res)
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
+        if (lagreForlengetOmsVedNeste) {
+          next()
+        }
+      }
+    )
+  }
+
   const lagreVilkaarsvurderingResultat = () => {
+    if (lagreForlengetOmsVedNeste) {
+      if (isPending(totalVurderingStatus) || forlengetOmsLagrerPeriode) {
+        return
+      }
+      if (forlengetOmsValiderAktivitet && !forlengetOmsValiderAktivitet()) {
+        return
+      }
+      if (vilkaarsvurdering.resultat) {
+        next()
+        return
+      }
+      if (!(svar && [ISvar.JA, ISvar.NEI].includes(svar))) {
+        setRadioError('Du må velge om forlenget OMS skal innvilges eller avslås')
+        return
+      }
+      if (svar === ISvar.JA && innvilgelseFeil) {
+        setRadioError(innvilgelseFeil)
+        return
+      }
+      setRadioError(undefined)
+      if (svar === ISvar.JA && forlengetOmsLagrePeriode) {
+        forlengetOmsLagrePeriode(() => lagreResultat(svar))
+      } else {
+        lagreResultat(svar)
+      }
+      return
+    }
     if (
       forlengetOmsAktivert &&
       revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS &&
@@ -98,13 +151,7 @@ export const Resultat = (props: Props) => {
       svar !== undefined &&
       (radioError === undefined || (forlengetOmsAktivert && revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS))
     ) {
-      oppdaterTotalVurderingCall(
-        { behandlingId, resultat: svarTilTotalResultat(svar), kommentar: resultatBegrunnelse?.tekst ?? kommentar },
-        (res) => {
-          oppdaterVilkaar(res)
-          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
-        }
-      )
+      lagreResultat(svar)
     }
   }
 
@@ -130,6 +177,30 @@ export const Resultat = (props: Props) => {
   const erRevurdering = behandlingstype === IBehandlingsType.REVURDERING
   const nySoeknad = revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
   const tekster = hentResultatTekster(sakstype, behandlingstype, revurderingsaarsak)
+
+  const handlingKnapper = () => {
+    if (lagreForlengetOmsVedNeste && redigerbar) {
+      return (
+        <BehandlingHandlingKnapper>
+          <Button
+            onClick={lagreVilkaarsvurderingResultat}
+            loading={isPending(totalVurderingStatus) || forlengetOmsLagrerPeriode}
+            disabled={
+              !alleVilkaarErVurdert ||
+              isPending(slettVurderingStatus) ||
+              (!!vilkaarsvurdering.resultat && (!virkningstidspunktSamsvarer || vilkaarsvurdering.isGrunnlagUtdatert))
+            }
+          >
+            Neste
+          </Button>
+        </BehandlingHandlingKnapper>
+      )
+    }
+    if (redigerbar) {
+      return <VilkaarsvurderingKnapper behandlingId={behandlingId} />
+    }
+    return <NesteOgTilbake />
+  }
 
   return (
     <VStack gap="space-16" paddingInline="space-64 space-32">
@@ -210,16 +281,18 @@ export const Resultat = (props: Props) => {
                     autoComplete="off"
                   />
                 )}
-                <Box>
-                  <Button
-                    variant="primary"
-                    size="small"
-                    onClick={lagreVilkaarsvurderingResultat}
-                    loading={isPending(totalVurderingStatus)}
-                  >
-                    Lagre
-                  </Button>
-                </Box>
+                {!lagreForlengetOmsVedNeste && (
+                  <Box>
+                    <Button
+                      variant="primary"
+                      size="small"
+                      onClick={lagreVilkaarsvurderingResultat}
+                      loading={isPending(totalVurderingStatus)}
+                    >
+                      Lagre
+                    </Button>
+                  </Box>
+                )}
               </VStack>
             </VurderAlleVilkaarBox>
           )}
@@ -248,7 +321,7 @@ export const Resultat = (props: Props) => {
             Du må se over vurderingene og sjekke at de fortsatt er riktige.
           </OppdatertGrunnlagAlert>
         )}
-        {redigerbar ? <VilkaarsvurderingKnapper behandlingId={behandlingId} /> : <NesteOgTilbake />}
+        {handlingKnapper()}
       </Box>
     </VStack>
   )

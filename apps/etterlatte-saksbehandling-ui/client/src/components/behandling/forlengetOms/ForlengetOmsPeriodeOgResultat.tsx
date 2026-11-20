@@ -19,6 +19,7 @@ type Props = {
   behandling: IBehandlingReducer
   redigerbar: boolean
   resultatBegrunnelse: { tekst: string; onChange: (tekst: string) => void }
+  validerAktivitet: () => boolean
   innvilgelseFeil?: string
   children: ReactNode
 }
@@ -27,6 +28,7 @@ export const ForlengetOmsPeriodeOgResultat = ({
   behandling,
   redigerbar,
   resultatBegrunnelse,
+  validerAktivitet,
   innvilgelseFeil,
   children,
 }: Props) => {
@@ -45,57 +47,57 @@ export const ForlengetOmsPeriodeOgResultat = ({
     redigerbar && !vilkaarsvurdering?.resultat && behandling.status === IBehandlingStatus.OPPRETTET
   const periodeErLagret = !!fom && lagretPeriode?.fom === fom && lagretPeriode.tom === tom && lagretPeriode.tom >= fom
 
-  const lagre = () => {
+  const lagre = (onSuccess: () => void) => {
+    if (periodeErLagret) {
+      onSuccess()
+      return
+    }
+
     if (!fom || !tom || tom < fom) {
       setError('tom', { message: 'Velg en til og med-måned som er lik eller etter fra og med-måneden.' })
       return
     }
 
     const revurderingInfo: ForlengetOmsInfo = { type: 'FORLENGET_OMS', fom, tom }
-    lagrePeriode({ behandlingId: behandling.id, revurderingInfo }, () =>
+    lagrePeriode({ behandlingId: behandling.id, revurderingInfo }, () => {
       dispatch(oppdaterRevurderingInfo({ revurderingInfo, begrunnelse: undefined }))
-    )
+      onSuccess()
+    })
   }
 
   return (
     <>
-      <VStack paddingInline="space-64 space-32" paddingBlock="space-24 space-0" gap="space-24">
-        <form onSubmit={handleSubmit(lagre)}>
-          <VStack gap="space-16" maxWidth="30rem">
-            <HGrid columns={2} gap="space-16">
-              <TextField label="Fra dato" value={fom ? formaterMaanedAar(fom) : ''} readOnly />
-              {periodeRedigerbar ? (
-                <ControlledMaanedVelger
-                  name="tom"
-                  label="Til dato"
-                  control={control}
-                  fromDate={fom ? new Date(fom) : undefined}
-                  required
-                  kunViseMaanedOgAar
-                  validate={(maaned) => {
-                    if (!fom || !maaned || format(maaned, 'yyyy-MM') < fom) {
-                      return 'Velg en til og med-måned som er lik eller etter fra og med-måneden.'
-                    }
-                  }}
-                />
-              ) : (
-                <TextField label="Til dato" value={tom ? formaterMaanedAar(tom) : ''} readOnly />
-              )}
-            </HGrid>
-            {periodeRedigerbar && (
-              <Button type="submit" loading={isPending(lagrePeriodeStatus)}>
-                Lagre periode
-              </Button>
+      <VStack paddingInline="space-64 space-32" paddingBlock="space-24 space-32" gap="space-24">
+        <VStack gap="space-16" maxWidth="30rem">
+          <HGrid columns={2} gap="space-16">
+            <TextField label="Fra dato" value={fom ? formaterMaanedAar(fom) : ''} readOnly />
+            {periodeRedigerbar ? (
+              <ControlledMaanedVelger
+                name="tom"
+                label="Til dato"
+                control={control}
+                fromDate={fom ? new Date(fom) : undefined}
+                required
+                kunViseMaanedOgAar
+                validate={(maaned) => {
+                  if (!fom || !maaned || format(maaned, 'yyyy-MM') < fom) {
+                    return 'Velg en til og med-måned som er lik eller etter fra og med-måneden.'
+                  }
+                }}
+              />
+            ) : (
+              <TextField label="Til dato" value={tom ? formaterMaanedAar(tom) : ''} readOnly />
             )}
-            {mapFailure(lagrePeriodeStatus, (error) => (
-              <ApiErrorAlert>Kunne ikke lagre perioden: {error.detail}</ApiErrorAlert>
-            ))}
-          </VStack>
-        </form>
+          </HGrid>
+          {mapFailure(lagrePeriodeStatus, (error) => (
+            <ApiErrorAlert>Kunne ikke lagre perioden: {error.detail}</ApiErrorAlert>
+          ))}
+        </VStack>
         {children}
         {!periodeErLagret && (
           <Alert variant="info">
-            Innvilgelse krever en lagret fra og med- og til og med-måned. Avslag krever ingen periode.
+            Innvilgelse krever en fra og med- og til og med-måned. Perioden lagres når du går videre. Avslag krever
+            ingen periode.
           </Alert>
         )}
         {!vilkaarsvurdering && <Alert variant="info">Vilkårene må vurderes på vilkårsvurderingssiden først.</Alert>}
@@ -114,14 +116,16 @@ export const ForlengetOmsPeriodeOgResultat = ({
           vilkaarsvurdering={vilkaarsvurdering}
           oppdaterVilkaar={(vurdering) => dispatch(updateVilkaarsvurdering(vurdering))}
           behandlingId={behandling.id}
-          redigerbar={redigerbar && !isPending(lagrePeriodeStatus)}
+          redigerbar={redigerbar}
           behandlingstype={behandling.behandlingType}
           revurderingsaarsak={behandling.revurderingsaarsak}
           resultatBegrunnelse={resultatBegrunnelse}
-          innvilgelseFeil={
-            innvilgelseFeil ??
-            (periodeErLagret ? undefined : 'Lagre en gyldig periode før forlenget OMS kan innvilges.')
-          }
+          innvilgelseFeil={innvilgelseFeil}
+          forlengetOmsLagrePeriode={(onSuccess) => {
+            void handleSubmit(() => lagre(onSuccess))()
+          }}
+          forlengetOmsLagrerPeriode={isPending(lagrePeriodeStatus)}
+          forlengetOmsValiderAktivitet={validerAktivitet}
         />
       )}
     </>

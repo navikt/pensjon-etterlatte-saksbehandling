@@ -17,12 +17,6 @@ export interface RevurderingAarsakAnnen {
   aarsak: string
 }
 
-export interface ForlengetOmsInfo {
-  type: 'FORLENGET_OMS'
-  fom: string
-  tom: string
-}
-
 export interface RevurderingAarsakAnnenUtenBrev {
   type: 'ANNEN_UTEN_BREV'
   aarsak: string
@@ -69,7 +63,6 @@ export interface Navn {
 }
 
 export type RevurderingInfo =
-  | ForlengetOmsInfo
   | RevurderingAarsakAnnen
   | RevurderingAarsakAnnenUtenBrev
   | SoeskenjusteringInfo

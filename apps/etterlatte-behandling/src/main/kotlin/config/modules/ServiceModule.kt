@@ -248,7 +248,6 @@ class ServiceModule(
             revurderingDao = daoModule.revurderingDao,
             aktivitetspliktDao = daoModule.aktivitetspliktDao,
             aktivitetspliktKopierService = aktivitetspliktKopierService,
-            featureToggleService = featureToggleService,
         )
     }
 
@@ -397,7 +396,6 @@ class ServiceModule(
             forbehandlingService = etteroppgjoerForbehandlingService,
             grunnlagService = grunnlagService,
             vilkaarsvurderingDao = daoModule.vilkaarsvurderingDao,
-            featureToggleService = featureToggleService,
         )
     }
 

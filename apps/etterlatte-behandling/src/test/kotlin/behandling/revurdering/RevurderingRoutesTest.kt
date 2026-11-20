@@ -32,7 +32,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.UUID
@@ -69,17 +68,6 @@ internal class RevurderingRoutesTest {
     fun after() {
         applicationContext.close()
         mockOAuth2Server.shutdown()
-    }
-
-    @BeforeEach
-    fun resetForlengetOmsToggle() {
-        every {
-            applicationContext.featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false)
-        } returns false
-        every { applicationContext.sakService.finnSak(any()) } returns
-            mockk {
-                every { sakType } returns SakType.BARNEPENSJON
-            }
     }
 
     @Test
@@ -178,69 +166,8 @@ internal class RevurderingRoutesTest {
                         it.name !in
                             listOf(
                                 Revurderingaarsak.AARLIG_INNTEKTSJUSTERING.toString(),
-                                Revurderingaarsak.FORLENGET_OMS.toString(),
                             )
                     }
-        }
-    }
-
-    @Test
-    fun `forlenget OMS er kun tilgjengelig for OMS naar toggle er paa`() {
-        every {
-            applicationContext.featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false)
-        } returns true
-
-        withTestApplication { client ->
-            for (sakType in SakType.entries) {
-                val response =
-                    client.get("api/stoettederevurderinger/${sakType.name}") {
-                        header(HttpHeaders.Authorization, "Bearer $token")
-                    }
-                response.status shouldBe HttpStatusCode.OK
-                val aarsaker: List<Revurderingaarsak> = response.body()
-                aarsaker.contains(Revurderingaarsak.FORLENGET_OMS) shouldBe (sakType == SakType.OMSTILLINGSSTOENAD)
-            }
-        }
-    }
-
-    @Test
-    fun `forlenget OMS kan ikke opprettes med toggle av selv ved direkte API-kall`() {
-        every { applicationContext.sakService.finnSak(any()) } returns
-            mockk {
-                every { sakType } returns SakType.OMSTILLINGSSTOENAD
-            }
-
-        withTestApplication { client ->
-            val response =
-                client.post("api/revurdering/1") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                    setBody(OpprettRevurderingRequest(aarsak = Revurderingaarsak.FORLENGET_OMS))
-                }
-
-            response.status shouldBe HttpStatusCode.BadRequest
-        }
-    }
-
-    @Test
-    fun `forlenget OMS kan opprettes med toggle paa`() {
-        every {
-            applicationContext.featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false)
-        } returns true
-        every { applicationContext.sakService.finnSak(any()) } returns
-            mockk {
-                every { sakType } returns SakType.OMSTILLINGSSTOENAD
-            }
-
-        withTestApplication { client ->
-            val response =
-                client.post("api/revurdering/1") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                    setBody(OpprettRevurderingRequest(aarsak = Revurderingaarsak.FORLENGET_OMS))
-                }
-
-            response.status shouldBe HttpStatusCode.OK
         }
     }
 

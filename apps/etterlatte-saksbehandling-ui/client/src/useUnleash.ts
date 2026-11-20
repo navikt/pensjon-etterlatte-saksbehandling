@@ -9,7 +9,6 @@ import { logger } from '~utils/logger'
 import { isPending } from '~shared/api/apiUtils'
 
 export const enum FeatureToggle {
-  forlenget_oms = 'forlenget_oms',
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
@@ -100,7 +99,6 @@ const opprett_annen_sak: Toggle = {
 }
 
 export const unleashStartState: Record<string, Toggle> = {
-  [FeatureToggle.forlenget_oms]: { togglename: FeatureToggle.forlenget_oms, enabled: false },
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:

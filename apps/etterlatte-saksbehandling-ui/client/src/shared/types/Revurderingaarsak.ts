@@ -1,7 +1,6 @@
 //Denne må matche det som er definert i backend Revurderingaarsak.kt
 
 export enum Revurderingaarsak {
-  FORLENGET_OMS = 'FORLENGET_OMS',
   REGULERING = 'REGULERING',
   OMREGNING = 'OMREGNING',
   ANSVARLIGE_FORELDRE = 'ANSVARLIGE_FORELDRE',
@@ -51,7 +50,6 @@ export enum Revurderingaarsak {
 
 // se også behandlingsslistemappere.ts
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
-  FORLENGET_OMS: 'Forlenget OMS',
   REGULERING: 'Regulering',
   OMREGNING: 'Omregning',
   ANSVARLIGE_FORELDRE: 'Ansvarlige foreldre',

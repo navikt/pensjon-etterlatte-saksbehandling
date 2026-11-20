@@ -62,7 +62,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
@@ -134,69 +133,6 @@ internal class VedtakBehandlingServiceTest(
     @AfterEach
     fun afterEach() {
         clearAllMocks()
-    }
-
-    @Test
-    fun `forlenget OMS gir tidsbegrenset innvilgelse og ikke endringsvedtak`() {
-        val behandlingId = randomUUID()
-        val fom = YearMonth.of(2027, 1)
-        val tom = YearMonth.of(2027, 12)
-        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-            mockBehandling(
-                virk = fom,
-                behandlingId = behandlingId,
-                saktype = SakType.OMSTILLINGSSTOENAD,
-                revurderingAarsak = Revurderingaarsak.FORLENGET_OMS,
-                revurderingInfo = RevurderingInfo.ForlengetOms(fom, tom),
-                opphoerFom = tom.plusMonths(1),
-            )
-        every { sakLesDao.hentSak(any()) } returns
-            mockk {
-                every { sakType } returns SakType.OMSTILLINGSSTOENAD
-            }
-        every { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregning(any(), any()) } returns
-            mockBeregning(fom, behandlingId, Beregningstype.OMS)
-        coEvery { beregningKlientMock.hentAvkorting(any(), any()) } returns mockAvkorting(fom)
-        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-
-        val vedtak = service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
-
-        vedtak.type shouldBe VedtakType.INNVILGELSE
-        val innhold = vedtak.innhold as VedtakInnhold.Behandling
-        val utbetaling = innhold.utbetalingsperioder.single { it.type == UtbetalingsperiodeType.UTBETALING }
-        utbetaling.periode.fom shouldBe fom
-        utbetaling.periode.tom shouldBe tom
-    }
-
-    @Test
-    fun `avslag paa forlenget OMS oppretter ikke opphoer av eksisterende ytelse`() {
-        val behandlingId = randomUUID()
-        val fom = YearMonth.of(2027, 1)
-        val tom = YearMonth.of(2027, 12)
-        coEvery { behandlingService.hentDetaljertBehandling(any(), any()) } returns
-            mockBehandling(
-                virk = fom,
-                behandlingId = behandlingId,
-                saktype = SakType.OMSTILLINGSSTOENAD,
-                revurderingAarsak = Revurderingaarsak.FORLENGET_OMS,
-                revurderingInfo = RevurderingInfo.ForlengetOms(fom, tom),
-                opphoerFom = tom.plusMonths(1),
-            )
-        every { sakLesDao.hentSak(any()) } returns
-            mockk {
-                every { sakType } returns SakType.OMSTILLINGSSTOENAD
-            }
-        every { vilkaarsvurderingService.hentVilkaarsvurderingDto(any()) } returns
-            mockVilkaarsvurdering(VilkaarsvurderingUtfall.IKKE_OPPFYLT)
-        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-
-        val vedtak = service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
-
-        vedtak.type shouldBe VedtakType.AVSLAG
-        val innhold = vedtak.innhold as VedtakInnhold.Behandling
-        innhold.utbetalingsperioder shouldBe emptyList()
-        innhold.opphoerFraOgMed shouldBe null
     }
 
     @Test

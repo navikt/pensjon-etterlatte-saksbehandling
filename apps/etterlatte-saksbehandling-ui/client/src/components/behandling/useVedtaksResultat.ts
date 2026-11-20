@@ -14,17 +14,16 @@ export function useVedtaksResultat(): VedtakResultat | null {
   const behandlingType = behandling?.behandlingType
   const vilkaarsresultat = behandling?.vilkaarsvurdering?.resultat?.utfall
   const foerstegangsbehandling = behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-  const forlengetOms = behandling?.revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS
 
   switch (vilkaarsresultat) {
     case VilkaarsvurderingResultat.OPPFYLT:
-      return foerstegangsbehandling || forlengetOms ? 'innvilget' : 'endring'
+      return foerstegangsbehandling ? 'innvilget' : 'endring'
     case VilkaarsvurderingResultat.IKKE_OPPFYLT:
       const revurderingNySoeknad =
         behandlingType === IBehandlingsType.REVURDERING &&
         behandling?.revurderingsaarsak == Revurderingaarsak.NY_SOEKNAD
 
-      if (foerstegangsbehandling || revurderingNySoeknad || forlengetOms) return 'avslag'
+      if (foerstegangsbehandling || revurderingNySoeknad) return 'avslag'
       else return 'opphoer'
     default:
       return null

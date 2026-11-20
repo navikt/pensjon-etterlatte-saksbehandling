@@ -30,8 +30,6 @@ import {
 import { DetaljertEtteroppgjoerForbehandling } from '~shared/types/EtteroppgjoerForbehandling'
 import { useAppSelector } from '~store/Store'
 import { JaNei } from '~shared/types/ISvar'
-import { ForlengetOmsAktivitet } from '~components/behandling/forlengetOms/ForlengetOmsAktivitet'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 type BehandlingRouteTypesPath =
   | 'soeknadsoversikt'
@@ -39,7 +37,6 @@ type BehandlingRouteTypesPath =
   | 'etteroppgjoeroversikt'
   | 'vilkaarsvurdering'
   | 'aktivitetsplikt'
-  | 'forlenget-oms-aktivitet'
   | 'trygdetid'
   | 'beregningsgrunnlag'
   | 'beregne'
@@ -79,27 +76,14 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
     path: 'vilkaarsvurdering',
     description: 'Vilkårsvurdering',
     element: (behandling: IBehandlingReducer) => <Vilkaarsvurdering behandling={behandling} />,
-    kreverBehandlingsstatus: (behandling: IDetaljertBehandling) => {
-      if (behandling.revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS && behandling.virkningstidspunkt) {
-        return IBehandlingStatus.OPPRETTET
-      }
-      return soeknadsoversiktErFerdigUtfylt(behandling)
-        ? IBehandlingStatus.OPPRETTET
-        : IBehandlingStatus.VILKAARSVURDERT
-    },
+    kreverBehandlingsstatus: (behandling: IDetaljertBehandling) =>
+      soeknadsoversiktErFerdigUtfylt(behandling) ? IBehandlingStatus.OPPRETTET : IBehandlingStatus.VILKAARSVURDERT,
   },
   aktivitetsplikt: {
     path: 'aktivitetsplikt',
     description: 'Oppfølging av aktivitet',
     element: (behandling: IBehandlingReducer) => <Aktivitetsplikt behandling={behandling} />,
     kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
-    sakstype: SakType.OMSTILLINGSSTOENAD,
-  },
-  forlengetOmsAktivitet: {
-    path: 'forlenget-oms-aktivitet',
-    description: 'Aktivitet',
-    element: (behandling) => <ForlengetOmsAktivitet behandling={behandling} />,
-    kreverBehandlingsstatus: () => IBehandlingStatus.OPPRETTET,
     sakstype: SakType.OMSTILLINGSSTOENAD,
   },
   trygdetid: {
@@ -137,12 +121,7 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
   },
   brev: {
     path: 'brev',
-    element: (behandling: IBehandlingReducer) => {
-      if (behandling.revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS) {
-        return <></>
-      }
-      return <Vedtaksbrev behandling={behandling} />
-    },
+    element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
     description: 'Vedtaksbrev',
     kreverBehandlingsstatus: (behandling: IBehandlingReducer, etteroppgjoer) => {
       if (behandling.revurderingsaarsak !== Revurderingaarsak.ETTEROPPGJOER) {
@@ -162,7 +141,6 @@ export const useBehandlingRoutes = (): DefaultBehandlingRouteContextType => {
   const behandling = useBehandling()
   const etteroppgjoer = useAppSelector((state) => state.etteroppgjoerReducer.etteroppgjoerForbehandling)
   const personopplysninger = usePersonopplysninger()
-  const forlengetOmsAktivert = useFeaturetoggle(FeatureToggle.forlenget_oms)
 
   const aktuelleRoutes = hentAktuelleRoutes(behandling, personopplysninger)
 
@@ -172,13 +150,7 @@ export const useBehandlingRoutes = (): DefaultBehandlingRouteContextType => {
 
   const routeErGyldig = (route: string | undefined): boolean => {
     const alleRoutes: BehandlingRouteType[] = Object.values(behandlingroutes)
-    let routes = alleRoutes
-    if (forlengetOmsAktivert && behandling?.revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS) {
-      routes = aktuelleRoutes
-    } else if (route === behandlingroutes.forlengetOmsAktivitet.path) {
-      return false
-    }
-    const valgtRoute = routes.filter((value) => value.path === route)
+    const valgtRoute = alleRoutes.filter((value) => value.path === route)
     if (valgtRoute.length) {
       const pathInfo = valgtRoute[0]
 
@@ -329,9 +301,6 @@ function revurderingRoutes(
   if (behandling.revurderingsaarsak === Revurderingaarsak.ETTEROPPGJOER) {
     return [behandlingroutes.etteroppgjoeroversikt, behandlingroutes.beregning, behandlingroutes.brev]
   }
-  if (behandling.revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS) {
-    return forlengetOmsRoutes(behandling, lagVarselbrev, ukjentAvdoed, boddEllerArbeidetUtlandet)
-  }
 
   const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const avslag = opphoer && behandling.revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
@@ -362,30 +331,6 @@ function revurderingRoutes(
   return leggTilBrevHvisKrevesAvBehandling(defaultRoutes, behandling).filter(
     routesAktuelleForSakstype(behandling.sakType)
   )
-}
-
-function forlengetOmsRoutes(
-  behandling: IBehandlingReducer,
-  lagVarselbrev: boolean,
-  ukjentAvdoed: boolean,
-  boddEllerArbeidetUtlandet: boolean
-): BehandlingRouteType[] {
-  const avslag = behandling.vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT
-  const routes = [
-    behandlingroutes.revurderingsoversikt,
-    behandlingroutes.vilkaarsvurdering,
-    behandlingroutes.forlengetOmsAktivitet,
-  ]
-  if (!avslag || (boddEllerArbeidetUtlandet && !ukjentAvdoed)) {
-    routes.push(behandlingroutes.trygdetid)
-  }
-  if (!avslag) {
-    routes.push(behandlingroutes.beregningsgrunnlag, behandlingroutes.beregning)
-  }
-  if (lagVarselbrev) {
-    routes.push(behandlingroutes.varselbrev)
-  }
-  return leggTilBrevHvisKrevesAvBehandling(routes, behandling)
 }
 
 const leggTilBrevHvisKrevesAvBehandling = (

@@ -41,7 +41,6 @@ enum class Revurderingaarsak(
 ) {
     // Endring
     NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    FORLENGET_OMS(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
     SOESKENJUSTERING(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
     OMREGNING(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = false), // TODO

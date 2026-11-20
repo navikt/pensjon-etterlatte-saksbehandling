@@ -28,12 +28,9 @@ import { ClickEvent, trackClick } from '~utils/analytics'
 import { KopierVilkaarAvdoed } from '~components/behandling/vilkaarsvurdering/KopierVilkaarAvdoed'
 import { miljoeErDev } from '~utils/miljoe'
 import { FyllUtVilkaarsvurderingIDev } from '~components/behandling/vilkaarsvurdering/FyllUtVilkaarsvurderingIDev'
-import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { ForlengetOmsVilkaarKnapper } from '~components/behandling/forlengetOms/ForlengetOmsVilkaarKnapper'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
-  const forlengetOms = behandling.revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS
 
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
@@ -66,7 +63,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const createVilkaarsvurdering = (behandlingId: string, kopier: boolean) => {
     opprettNyVilkaarsvurdering({ behandlingId: behandlingId, kopierVedRevurdering: kopier }, (vilkaarsvurdering) => {
       dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
-      if (behandling.behandlingType === IBehandlingsType.REVURDERING && !forlengetOms) {
+      if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
       }
     })
@@ -81,7 +78,6 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const visOppdaterteVilkaar = () =>
     vilkaarsvurdering &&
     redigerbar &&
-    !forlengetOms &&
     behandling.behandlingType == IBehandlingsType.REVURDERING &&
     vilkaarsvurdering?.resultat == undefined
 
@@ -102,14 +98,9 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
           Vilkårsvurdering
         </Heading>
       </Box>
-      {miljoeErDev &&
-        !forlengetOms &&
-        behandlingId &&
-        vilkaarsvurdering &&
-        redigerbar &&
-        !vilkaarsvurdering.resultat && (
-          <FyllUtVilkaarsvurderingIDev behandlingId={behandlingId} vilkaarsvurdering={vilkaarsvurdering} />
-        )}
+      {miljoeErDev && behandlingId && vilkaarsvurdering && redigerbar && !vilkaarsvurdering.resultat && (
+        <FyllUtVilkaarsvurderingIDev behandlingId={behandlingId} vilkaarsvurdering={vilkaarsvurdering} />
+      )}
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
         <VStack gap="space-32">
           {visHarGammelVilkaarsvurdering() && (
@@ -158,22 +149,18 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             </Box>
           ))}
 
-          {forlengetOms ? (
-            <ForlengetOmsVilkaarKnapper vilkaarsvurdering={vilkaarsvurdering} redigerbar={redigerbar} />
-          ) : (
-            <Resultat
-              setRedigerTotalvurdering={setRedigerTotalvurdering}
-              redigerTotalvurdering={redigerTotalvurdering}
-              virkningstidspunktDato={behandling.virkningstidspunkt?.dato}
-              sakstype={behandling.sakType}
-              vilkaarsvurdering={vilkaarsvurdering}
-              oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
-              behandlingId={behandlingId}
-              redigerbar={redigerbar}
-              behandlingstype={behandling.behandlingType}
-              revurderingsaarsak={behandling.revurderingsaarsak}
-            />
-          )}
+          <Resultat
+            setRedigerTotalvurdering={setRedigerTotalvurdering}
+            redigerTotalvurdering={redigerTotalvurdering}
+            virkningstidspunktDato={behandling.virkningstidspunkt?.dato}
+            sakstype={behandling.sakType}
+            vilkaarsvurdering={vilkaarsvurdering}
+            oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
+            behandlingId={behandlingId}
+            redigerbar={redigerbar}
+            behandlingstype={behandling.behandlingType}
+            revurderingsaarsak={behandling.revurderingsaarsak}
+          />
         </VStack>
       )}
       <Spinner visible={isPending(vilkaarsvurderingStatus)} label="Henter vilkårsvurdering" />

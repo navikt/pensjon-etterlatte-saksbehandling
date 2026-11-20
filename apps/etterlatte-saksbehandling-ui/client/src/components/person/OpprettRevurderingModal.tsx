@@ -12,7 +12,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router'
 import Spinner from '~shared/Spinner'
 import { VelgEtteroppgjoersAar } from '~components/etteroppgjoer/components/utils/VelgEtteroppgjoersAar'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 interface OpprettRevurderingSkjema {
   aarsak: Revurderingaarsak
@@ -38,7 +37,6 @@ function sorterRevurderingerKronologisk(revurderinger: Revurderingaarsak[]): Rev
 
 export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseId, oppgaveId }: Props) => {
   const navigate = useNavigate()
-  const forlengetOmsAktivert = useFeaturetoggle(FeatureToggle.forlenget_oms)
 
   const [aapen, setAapen] = useState<boolean>(false)
   const [valgtEtteroppgjoersAar, setValgtEtteroppgjoersAar] = useState<string>('')
@@ -98,11 +96,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
           {mapResult(muligeRevurderingAarsakerResult, {
             pending: <Spinner label="Henter revurderingsårsaker..." />,
             success: (muligeRevurderingAarsaker) => {
-              const sorterteMuligeRevurderingAarsaker = sorterRevurderingerKronologisk(
-                muligeRevurderingAarsaker.filter(
-                  (aarsak) => aarsak !== Revurderingaarsak.FORLENGET_OMS || forlengetOmsAktivert
-                )
-              )
+              const sorterteMuligeRevurderingAarsaker = sorterRevurderingerKronologisk(muligeRevurderingAarsaker)
               return (
                 <>
                   {sorterteMuligeRevurderingAarsaker.length ? (

@@ -8,7 +8,6 @@ import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerForbehandlin
 import no.nav.etterlatte.behandling.etteroppgjoer.brev.EtteroppgjoerRevurderingBrevService
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
-import no.nav.etterlatte.behandling.revurdering.ForlengetOmsUnderUtvikling
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevService
 import no.nav.etterlatte.behandling.vedtaksbehandling.BehandlingMedBrevType
 import no.nav.etterlatte.brev.model.Brev
@@ -104,9 +103,6 @@ class BrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        if (behandling?.revurderingsaarsak() == Revurderingaarsak.FORLENGET_OMS) {
-            throw ForlengetOmsUnderUtvikling()
-        }
         val vedtak = vedtakInternalService.hentVedtak(behandlingId, brukerTokenInfo)
         if (behandling?.sak?.sakType != SakType.OMSTILLINGSSTOENAD) {
             return false

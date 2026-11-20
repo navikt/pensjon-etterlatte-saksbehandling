@@ -29,7 +29,10 @@ class BeregningKlientImpl(
                 .body<BeregningDTO>()
                 .let { Beregning.fraBeregningDTO(it) }
         } catch (e: Exception) {
-            logger.warn("Kunne ikke hente beregningen for behandlingen med id=$behandlingId fra beregning", e)
+            logger.warn(
+                "Kunne ikke hente beregningen for behandlingen med id=$behandlingId " +
+                    "fra beregning",
+            )
             null
         }
 
@@ -40,7 +43,10 @@ class BeregningKlientImpl(
                 .body<AvkortingDto>()
                 .let { Avkorting.fraDTO(it) }
         } catch (e: Exception) {
-            logger.warn("Kunne ikke hente avkorting for behandlingen med id=$behandlingId fra beregning", e)
+            logger.warn(
+                "Kunne ikke hente avkorting for behandlingen med id=$behandlingId " +
+                    "fra beregning",
+            )
             null
         }
 }

@@ -155,9 +155,16 @@ export const ResultatForlengetOms = ({
           )}
           {!alleVilkaarErVurdert && <BodyShort>Alle vilkår må vurderes før man kan gå videre.</BodyShort>}
           {redigerbar && !vilkaarsvurdering?.resultat && (
-            <Button onClick={lagreVurdering} loading={lagrer} disabled={!alleVilkaarErVurdert || !aktivitetErValgt}>
-              Lagre
-            </Button>
+            <Box>
+              <Button
+                size="small"
+                onClick={lagreVurdering}
+                loading={lagrer}
+                disabled={!alleVilkaarErVurdert || !aktivitetErValgt}
+              >
+                Lagre
+              </Button>
+            </Box>
           )}
         </VStack>
       </Box>

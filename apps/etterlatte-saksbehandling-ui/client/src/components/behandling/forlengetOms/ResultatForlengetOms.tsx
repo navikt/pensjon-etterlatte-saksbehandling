@@ -23,7 +23,6 @@ type Props = {
   lagrePeriode?: (onSuccess: () => void) => void
   lagrerPeriode?: boolean
   innvilgelseFeil?: string
-  kunAvslag?: boolean
 }
 
 export const ResultatForlengetOms = ({
@@ -34,7 +33,6 @@ export const ResultatForlengetOms = ({
   lagrePeriode,
   lagrerPeriode = false,
   innvilgelseFeil,
-  kunAvslag = false,
 }: Props) => {
   const dispatch = useAppDispatch()
   const { next } = useContext(BehandlingRouteContext)
@@ -72,10 +70,6 @@ export const ResultatForlengetOms = ({
     const utfall = svar
     if (!utfall) {
       setUtfallFeil('Du må velge om forlenget OMS skal innvilges eller avslås.')
-      return
-    }
-    if (kunAvslag && utfall !== VilkaarsvurderingResultat.IKKE_OPPFYLT) {
-      setUtfallFeil('Forlenget OMS kan ikke innvilges uten utdanning eller arbeidsrettet tiltak.')
       return
     }
     if (utfall === VilkaarsvurderingResultat.OPPFYLT && innvilgelseFeil) {
@@ -122,7 +116,7 @@ export const ResultatForlengetOms = ({
     <VStack paddingInline="space-64 space-32" gap="space-16">
       <Box background="meta-purple-soft" borderRadius="12" padding="space-16">
         <VStack gap="space-16">
-          <Label as="p">Utfall for forlenget OMS</Label>
+          <Label as="p">Utfall for forlenget omstillingsstønad</Label>
           {vilkaarsvurdering?.resultat ? (
             <>
               <BodyShort>
@@ -145,7 +139,7 @@ export const ResultatForlengetOms = ({
             </>
           ) : (
             <RadioGroup
-              legend={kunAvslag ? 'Avslå forlenget OMS' : 'Innvilg eller avslå forlenget OMS'}
+              legend="Innvilg eller avslå forlenget OMS"
               hideLegend
               value={svar ?? ''}
               onChange={(utfall: VilkaarsvurderingResultat) => {
@@ -155,7 +149,7 @@ export const ResultatForlengetOms = ({
               disabled={!redigerbar || lagrer || !alleVilkaarErVurdert || !aktivitetErValgt}
               error={utfallFeil}
             >
-              {!kunAvslag && <Radio value={VilkaarsvurderingResultat.OPPFYLT}>Innvilg forlenget OMS</Radio>}
+              <Radio value={VilkaarsvurderingResultat.OPPFYLT}>Innvilg forlenget OMS</Radio>
               <Radio value={VilkaarsvurderingResultat.IKKE_OPPFYLT}>Avslå forlenget OMS</Radio>
             </RadioGroup>
           )}

@@ -38,7 +38,6 @@ export const ForlengetOmsIngenAktivitet = ({
         redigerbar={redigerbar}
         resultatBegrunnelse={{ tekst: begrunnelse, onChange: setBegrunnelse }}
         validerAktivitet={validerAktivitet}
-        kunAvslag
       />
     </>
   )

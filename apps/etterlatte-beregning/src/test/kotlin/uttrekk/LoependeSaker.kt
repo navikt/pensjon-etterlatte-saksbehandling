@@ -68,6 +68,20 @@ and s.id is null
 limit 100
 """
 
+private val opphoerINesteAar = """
+  select sakid, vedtak.saktype from
+    vedtak where datovirkfom > '2027-01-01'
+and type = 'OPPHOER' 
+"""
+
+private val medOverstyrtBeregning =
+    """
+    select DISTINCT sakid, behandlingid, datofom, aarsak, type, beregnetdato
+    from overstyr_beregningsgrunnlag og
+    join beregningsperiode bp on bp.behandlingid = og.behandlings_id
+    where bp.type = 'OMS'
+    """.trimIndent()
+
 private val loepende = """with RECURSIVE gjeldende_vedtak AS (
     select DISTINCT ON (sakid) sakid,
                                id,
@@ -88,12 +102,15 @@ select sak_id from loepende
 where sak_id = ANY(?);
 """
 
+private val tidligereFamiliepleier =
+    """
+    
+    """.trimIndent()
+
 /**
  * * Saker som har sanksjon
- * * Saker med endret ident
  * * Overstyrt beregning
  * * Er ingen endring i utbetaling
- * * Tidligere familiepleier
  */
 fun main(args: Array<String>) {
     require(args.size == 3) { "Oppgi brukernavn for db-kobling, port til behandling-DB og port til beregning-DB" }

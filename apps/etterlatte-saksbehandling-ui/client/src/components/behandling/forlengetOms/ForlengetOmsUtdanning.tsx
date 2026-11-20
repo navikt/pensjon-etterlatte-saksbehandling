@@ -18,6 +18,7 @@ export const ForlengetOmsUtdanning = ({
     behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
   )
   const vilkaarsvurdering = behandling.vilkaarsvurdering
+  const sporsmaalRedigerbare = redigerbar && !vilkaarsvurdering?.resultat
   const begrunnelseTittel =
     studererMinst50Prosent === 'JA' ? 'Er utdanningen nødvendig og hensiktsmessig?' : 'Begrunn avslaget'
 
@@ -43,7 +44,7 @@ export const ForlengetOmsUtdanning = ({
             hideLabel
             value={skole}
             onChange={(event) => setSkole(event.target.value)}
-            readOnly={!redigerbar}
+            readOnly={!sporsmaalRedigerbare}
             error={visValideringsfeil && !skole.trim() ? 'Oppgi hvilken skole bruker skal studere ved.' : undefined}
           />
         </VStack>
@@ -56,7 +57,7 @@ export const ForlengetOmsUtdanning = ({
             hideLabel
             value={studium}
             onChange={(event) => setStudium(event.target.value)}
-            readOnly={!redigerbar}
+            readOnly={!sporsmaalRedigerbare}
             error={visValideringsfeil && !studium.trim() ? 'Oppgi hva bruker skal studere.' : undefined}
           />
         </VStack>
@@ -79,7 +80,7 @@ export const ForlengetOmsUtdanning = ({
             hideLegend
             value={studererMinst50Prosent}
             onChange={setStudererMinst50Prosent}
-            disabled={!redigerbar}
+            disabled={!sporsmaalRedigerbare}
             error={
               visValideringsfeil && !studererMinst50Prosent ? 'Svar på om bruker studerer minst 50 prosent.' : undefined
             }
@@ -112,7 +113,7 @@ export const ForlengetOmsUtdanning = ({
               value={resultatBegrunnelse}
               onChange={(event) => setResultatBegrunnelse(event.target.value)}
               minRows={6}
-              readOnly={!redigerbar || !!vilkaarsvurdering?.resultat}
+              readOnly={!sporsmaalRedigerbare}
               error={visValideringsfeil && !resultatBegrunnelse.trim() ? 'Oppgi en begrunnelse.' : undefined}
             />
           </VStack>

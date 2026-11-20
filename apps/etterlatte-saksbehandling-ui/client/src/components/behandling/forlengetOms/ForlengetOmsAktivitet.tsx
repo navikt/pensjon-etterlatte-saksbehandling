@@ -1,15 +1,28 @@
 import { useState } from 'react'
-import { Alert, BodyShort, Box, Heading, HGrid, Label, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HGrid, Label, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { addMonths, addYears, isValid } from 'date-fns'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import {
+  IBehandlingReducer,
+  oppdaterBehandlingsstatus,
+  updateVilkaarsvurdering,
+} from '~store/reducers/BehandlingReducer'
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { formaterDato } from '~utils/formatering/dato'
 import { usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
 import { ForlengetOmsUtdanning } from './ForlengetOmsUtdanning'
 import { ForlengetOmsArbeidsrettetTiltak } from './ForlengetOmsArbeidsrettetTiltak'
+import { ForlengetOmsIngenAktivitet } from './ForlengetOmsIngenAktivitet'
+import { useAppDispatch } from '~store/Store'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { slettTotalVurdering } from '~shared/api/vilkaarsvurdering'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingReducer }) => {
+  const dispatch = useAppDispatch()
+  const [slettUtfallStatus, slettUtfall] = useApiCall(slettTotalVurdering)
   const saksbehandler = useInnloggetSaksbehandler()
   const avdoede = usePersonopplysningerOmsAvdoede()
   const doedsdato = avdoede?.opplysning.doedsdato
@@ -58,12 +71,30 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
             hideLegend
             value={utdanningEllerTiltak}
             onChange={setUtdanningEllerTiltak}
-            disabled={!redigerbar}
+            disabled={!redigerbar || !!behandling.vilkaarsvurdering?.resultat}
           >
             <Radio value="UTDANNING">Ja, bruker tar utdanning</Radio>
             <Radio value="ARBEIDSRETTET_TILTAK">Ja, bruker deltar i arbeidsrettet tiltak</Radio>
             <Radio value="NEI">Nei</Radio>
           </RadioGroup>
+          {redigerbar && behandling.vilkaarsvurdering?.resultat && !utdanningEllerTiltak && (
+            <Button
+              variant="tertiary"
+              size="small"
+              loading={isPending(slettUtfallStatus)}
+              onClick={() =>
+                slettUtfall(behandling.id, (vurdering) => {
+                  dispatch(updateVilkaarsvurdering(vurdering))
+                  dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
+                })
+              }
+            >
+              Rediger vurdering
+            </Button>
+          )}
+          {mapFailure(slettUtfallStatus, (error) => (
+            <ApiErrorAlert>Kunne ikke åpne utfallet for redigering: {error.detail}</ApiErrorAlert>
+          ))}
         </VStack>
       </VStack>
       {utdanningEllerTiltak === 'UTDANNING' && (
@@ -72,6 +103,7 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
       {utdanningEllerTiltak === 'ARBEIDSRETTET_TILTAK' && (
         <ForlengetOmsArbeidsrettetTiltak behandling={behandling} redigerbar={redigerbar} />
       )}
+      {utdanningEllerTiltak === 'NEI' && <ForlengetOmsIngenAktivitet behandling={behandling} redigerbar={redigerbar} />}
     </>
   )
 }

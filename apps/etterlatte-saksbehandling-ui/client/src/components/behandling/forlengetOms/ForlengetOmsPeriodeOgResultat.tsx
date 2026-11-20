@@ -95,7 +95,7 @@ export const ForlengetOmsPeriodeOgResultat = ({
         {children}
         {!periodeErLagret && (
           <Alert variant="info">
-            Innvilgelse krever en fra og med- og til og med-måned. Perioden lagres når du går videre. Avslag krever
+            Innvilgelse krever en fra og med- og til og med-måned. Perioden lagres sammen med utfallet. Avslag krever
             ingen periode.
           </Alert>
         )}

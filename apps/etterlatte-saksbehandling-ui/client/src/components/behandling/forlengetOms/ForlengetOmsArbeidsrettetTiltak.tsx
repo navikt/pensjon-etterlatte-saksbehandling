@@ -15,6 +15,7 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
   const [aktivitetsplan, setAktivitetsplan] = useState('')
   const [begrunnelse, setBegrunnelse] = useState(behandling.vilkaarsvurdering?.resultat?.kommentar ?? '')
   const [visValideringsfeil, setVisValideringsfeil] = useState(false)
+  const sporsmaalRedigerbare = redigerbar && !behandling.vilkaarsvurdering?.resultat
 
   const validerAktivitet = () => {
     setVisValideringsfeil(true)
@@ -38,7 +39,7 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
             hideLabel
             value={tiltak}
             onChange={(event) => setTiltak(event.target.value)}
-            readOnly={!redigerbar}
+            readOnly={!sporsmaalRedigerbare}
             error={visValideringsfeil && !tiltak.trim() ? 'Oppgi hvilket tiltak bruker deltar i.' : undefined}
           />
         </VStack>
@@ -51,7 +52,7 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
             hideLegend
             value={omfang}
             onChange={setOmfang}
-            disabled={!redigerbar}
+            disabled={!sporsmaalRedigerbare}
             error={visValideringsfeil && !omfang ? 'Velg om bruker deltar på heltid eller deltid.' : undefined}
           >
             <Radio value="HELTID">Heltid</Radio>
@@ -67,7 +68,7 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
             hideLegend
             value={aktivitetsplan}
             onChange={setAktivitetsplan}
-            disabled={!redigerbar}
+            disabled={!sporsmaalRedigerbare}
             error={visValideringsfeil && !aktivitetsplan ? 'Svar på om bruker har en aktivitetsplan.' : undefined}
           >
             <Radio value="JA">Ja, bruker har en aktivitetsplan</Radio>
@@ -91,7 +92,7 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
             value={begrunnelse}
             onChange={(event) => setBegrunnelse(event.target.value)}
             minRows={6}
-            readOnly={!redigerbar || !!behandling.vilkaarsvurdering?.resultat}
+            readOnly={!sporsmaalRedigerbare}
             error={visValideringsfeil && !begrunnelse.trim() ? 'Oppgi en begrunnelse.' : undefined}
           />
         </VStack>

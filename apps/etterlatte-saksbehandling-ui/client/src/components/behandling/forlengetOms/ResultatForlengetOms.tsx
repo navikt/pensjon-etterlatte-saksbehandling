@@ -20,9 +20,10 @@ type Props = {
   redigerbar: boolean
   resultatBegrunnelse: { tekst: string; onChange: (tekst: string) => void }
   validerAktivitet: () => boolean
-  lagrePeriode: (onSuccess: () => void) => void
-  lagrerPeriode: boolean
+  lagrePeriode?: (onSuccess: () => void) => void
+  lagrerPeriode?: boolean
   innvilgelseFeil?: string
+  kunAvslag?: boolean
 }
 
 export const ResultatForlengetOms = ({
@@ -31,8 +32,9 @@ export const ResultatForlengetOms = ({
   resultatBegrunnelse,
   validerAktivitet,
   lagrePeriode,
-  lagrerPeriode,
+  lagrerPeriode = false,
   innvilgelseFeil,
+  kunAvslag = false,
 }: Props) => {
   const dispatch = useAppDispatch()
   const { next } = useContext(BehandlingRouteContext)
@@ -49,30 +51,29 @@ export const ResultatForlengetOms = ({
       !!vilkaarsvurdering.isGrunnlagUtdatert)
 
   const lagreResultat = (utfall: VilkaarsvurderingResultat) => {
-    if (vilkaarsvurdering?.resultat) {
-      next()
-      return
-    }
     lagreUtfall(
       { behandlingId: behandling.id, resultat: utfall, kommentar: resultatBegrunnelse.tekst },
       (vurdering) => {
         dispatch(updateVilkaarsvurdering(vurdering))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
-        next()
       }
     )
   }
 
-  const gaaVidere = () => {
-    if (lagrer || !alleVilkaarErVurdert || lagretUtfallErUtdatert) {
+  const lagreVurdering = () => {
+    if (!redigerbar || vilkaarsvurdering?.resultat || lagrer || !alleVilkaarErVurdert) {
       return
     }
     if (!validerAktivitet()) {
       return
     }
-    const utfall = vilkaarsvurdering?.resultat?.utfall ?? svar
+    const utfall = svar
     if (!utfall) {
       setUtfallFeil('Du må velge om forlenget OMS skal innvilges eller avslås.')
+      return
+    }
+    if (kunAvslag && utfall !== VilkaarsvurderingResultat.IKKE_OPPFYLT) {
+      setUtfallFeil('Forlenget OMS kan ikke innvilges uten utdanning eller arbeidsrettet tiltak.')
       return
     }
     if (utfall === VilkaarsvurderingResultat.OPPFYLT && innvilgelseFeil) {
@@ -81,9 +82,22 @@ export const ResultatForlengetOms = ({
     }
     setUtfallFeil(undefined)
     if (utfall === VilkaarsvurderingResultat.OPPFYLT) {
+      if (!lagrePeriode) {
+        setUtfallFeil('Innvilgelse krever en gyldig fra og med- og til og med-måned.')
+        return
+      }
       lagrePeriode(() => lagreResultat(utfall))
     } else {
       lagreResultat(utfall)
+    }
+  }
+
+  const gaaVidere = () => {
+    if (!vilkaarsvurdering?.resultat || lagrer || !alleVilkaarErVurdert || lagretUtfallErUtdatert) {
+      return
+    }
+    if (validerAktivitet()) {
+      next()
     }
   }
 
@@ -126,7 +140,7 @@ export const ResultatForlengetOms = ({
             </>
           ) : (
             <RadioGroup
-              legend="Innvilg eller avslå forlenget OMS"
+              legend={kunAvslag ? 'Avslå forlenget OMS' : 'Innvilg eller avslå forlenget OMS'}
               hideLegend
               value={svar ?? ''}
               onChange={(utfall: VilkaarsvurderingResultat) => {
@@ -136,11 +150,16 @@ export const ResultatForlengetOms = ({
               disabled={!redigerbar || lagrer || !alleVilkaarErVurdert}
               error={utfallFeil}
             >
-              <Radio value={VilkaarsvurderingResultat.OPPFYLT}>Innvilg forlenget OMS</Radio>
+              {!kunAvslag && <Radio value={VilkaarsvurderingResultat.OPPFYLT}>Innvilg forlenget OMS</Radio>}
               <Radio value={VilkaarsvurderingResultat.IKKE_OPPFYLT}>Avslå forlenget OMS</Radio>
             </RadioGroup>
           )}
           {!alleVilkaarErVurdert && <BodyShort>Alle vilkår må vurderes før man kan gå videre.</BodyShort>}
+          {redigerbar && !vilkaarsvurdering?.resultat && (
+            <Button onClick={lagreVurdering} loading={lagrer} disabled={!alleVilkaarErVurdert}>
+              Lagre
+            </Button>
+          )}
         </VStack>
       </Box>
       {lagretUtfallErUtdatert && (
@@ -156,7 +175,10 @@ export const ResultatForlengetOms = ({
       ))}
       {redigerbar ? (
         <BehandlingHandlingKnapper>
-          <Button onClick={gaaVidere} loading={lagrer} disabled={!alleVilkaarErVurdert || lagretUtfallErUtdatert}>
+          <Button
+            onClick={gaaVidere}
+            disabled={!vilkaarsvurdering?.resultat || !alleVilkaarErVurdert || lagretUtfallErUtdatert || lagrer}
+          >
             Neste
           </Button>
         </BehandlingHandlingKnapper>

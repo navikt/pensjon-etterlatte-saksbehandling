@@ -24,6 +24,7 @@ import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnla
 import { formaterSakstype } from '~utils/formatering/formatering'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -57,6 +58,7 @@ export const Resultat = (props: Props) => {
   const [totalVurderingStatus, oppdaterTotalVurderingCall] = useApiCall(oppdaterTotalVurdering)
   const [slettVurderingStatus, slettTotalVurderingCall] = useApiCall(slettTotalVurdering)
   const alleVilkaarErVurdert = !vilkaarsvurdering.vilkaar.some((vilkaar) => !vilkaar.vurdering)
+  const forlengetOmsAktivert = useFeaturetoggle(FeatureToggle.forlenget_oms)
 
   const slettVilkaarsvurderingResultat = () =>
     slettTotalVurderingCall(behandlingId, (res) => {
@@ -71,14 +73,16 @@ export const Resultat = (props: Props) => {
   const lagreVilkaarsvurderingResultat = () => {
     if (!(svar && [ISvar.JA, ISvar.NEI].includes(svar))) {
       setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
-      return
+    } else {
+      setRadioError(undefined)
     }
 
-    setRadioError(undefined)
-    oppdaterTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) => {
-      oppdaterVilkaar(res)
-      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
-    })
+    if (radioError === undefined && svar !== undefined) {
+      oppdaterTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) => {
+        oppdaterVilkaar(res)
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
+      })
+    }
   }
 
   const resultatTekst = () => {
@@ -196,12 +200,16 @@ export const Resultat = (props: Props) => {
           )}
         </VStack>
       </Box>
-      {mapFailure(totalVurderingStatus, (error) => (
-        <ApiErrorAlert>Kunne ikke lagre utfallet: {error.detail}</ApiErrorAlert>
-      ))}
-      {mapFailure(slettVurderingStatus, (error) => (
-        <ApiErrorAlert>Kunne ikke åpne utfallet for redigering: {error.detail}</ApiErrorAlert>
-      ))}
+      {forlengetOmsAktivert && revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS && (
+        <>
+          {mapFailure(totalVurderingStatus, (error) => (
+            <ApiErrorAlert>Kunne ikke lagre utfallet: {error.detail}</ApiErrorAlert>
+          ))}
+          {mapFailure(slettVurderingStatus, (error) => (
+            <ApiErrorAlert>Kunne ikke åpne utfallet for redigering: {error.detail}</ApiErrorAlert>
+          ))}
+        </>
+      )}
       {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
         <OppdatertGrunnlagAlert variant="warning">
           Virkningstidspunktet er endret siden vilkårene ble vurdert sist. Du må se over vurderingene og sjekke at de

@@ -2,12 +2,16 @@ package no.nav.etterlatte.ytelseMedGrunnlag
 
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.regler.overstyr.beregnOverstyrRegel
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -60,7 +64,7 @@ class BeregningOgAvkortingBrevService(
                         innvilgaMaaneder = grunnlag.innvilgaMaaneder,
                         grunnbelop = beregningIPeriode.grunnbelop,
                         beregningsMetode = beregningIPeriode.beregningsMetode,
-                        beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
+                        beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag(behandlingsGrunnlag, beregningIPeriode),
                         sanksjon = avkortetYtelse.sanksjon,
                         institusjonsopphold = beregningIPeriode.institusjonsopphold,
                         erOverstyrtInnvilgaMaaneder = grunnlag.overstyrtInnvilgaMaaneder != null,
@@ -79,7 +83,7 @@ class BeregningOgAvkortingBrevService(
                         innvilgaMaaneder = grunnlag.innvilgaMaaneder,
                         grunnbelop = beregningIPeriode.grunnbelop,
                         beregningsMetode = beregningIPeriode.beregningsMetode,
-                        beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
+                        beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag(behandlingsGrunnlag, beregningIPeriode),
                         sanksjon = avkortetYtelse.sanksjon,
                         institusjonsopphold = beregningIPeriode.institusjonsopphold,
                         erOverstyrtInnvilgaMaaneder = false, // TODO
@@ -114,6 +118,16 @@ class BeregningOgAvkortingBrevService(
                 },
         )
     }
+
+    private fun beregningsMetodeFraGrunnlag(
+        beregningsGrunnlag: BeregningsGrunnlag?,
+        beregningsperiode: Beregningsperiode,
+    ): BeregningsMetode? =
+        if (beregningsperiode.kilde?.navn == beregnOverstyrRegel.regelReferanse.id) {
+            beregningsperiode.beregningsMetode
+        } else {
+            beregningsGrunnlag?.beregningsMetode?.beregningsMetode
+        }
 }
 
 class BeregningFinnesIkkeException(

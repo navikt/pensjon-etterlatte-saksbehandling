@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heading, Textarea, VStack } from '@navikt/ds-react'
+import { Textarea, VStack } from '@navikt/ds-react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ResultatForlengetOms } from './ResultatForlengetOms'
 
@@ -23,12 +23,8 @@ export const ForlengetOmsIngenAktivitet = ({
     <>
       <VStack paddingInline="space-64 space-32" paddingBlock="space-24 space-32">
         <VStack gap="space-16" maxWidth="30rem">
-          <Heading size="medium" level="2">
-            Begrunnelse
-          </Heading>
           <Textarea
             label="Begrunnelse"
-            hideLabel
             value={begrunnelse}
             onChange={(event) => setBegrunnelse(event.target.value)}
             minRows={6}

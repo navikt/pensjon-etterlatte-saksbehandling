@@ -45,9 +45,7 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
       </Box>
       <VStack paddingInline="space-64 space-32" paddingBlock="space-16" gap="space-24">
         <VStack gap="space-16">
-          <Heading size="medium" level="2">
-            Viktige datoer
-          </Heading>
+          <Label as="p">Viktige datoer</Label>
           <HGrid columns={4} gap="space-24">
             {viktigeDatoer.map(({ tittel, dato }) => (
               <VStack key={tittel} gap="space-8">
@@ -63,12 +61,8 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
           )}
         </VStack>
         <VStack gap="space-16">
-          <Heading size="medium" level="2">
-            Tar bruker utdanning eller deltar i arbeidsrettet tiltak?
-          </Heading>
           <RadioGroup
             legend="Tar bruker utdanning eller deltar i arbeidsrettet tiltak?"
-            hideLegend
             value={utdanningEllerTiltak}
             onChange={setUtdanningEllerTiltak}
             disabled={!redigerbar || !!behandling.vilkaarsvurdering?.resultat}

@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react'
-import { Alert, BodyShort, Box, Button, Heading, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Label, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
@@ -115,9 +115,7 @@ export const ResultatForlengetOms = ({
     <VStack paddingInline="space-64 space-32" gap="space-16">
       <Box background="meta-purple-soft" borderRadius="12" padding="space-16">
         <VStack gap="space-16">
-          <Heading size="medium" level="2">
-            Utfall for forlenget OMS
-          </Heading>
+          <Label as="p">Utfall for forlenget OMS</Label>
           {vilkaarsvurdering?.resultat ? (
             <>
               <BodyShort>

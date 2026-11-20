@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heading, Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
+import { Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ForlengetOmsPeriodeOgResultat } from './ForlengetOmsPeriodeOgResultat'
 
@@ -31,12 +31,8 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
     <>
       <VStack paddingInline="space-64 space-32" paddingBlock="space-24 space-0" gap="space-24">
         <VStack gap="space-16" maxWidth="30rem">
-          <Heading size="medium" level="2">
-            Hvilket tiltak deltar bruker i?
-          </Heading>
           <TextField
             label="Hvilket tiltak deltar bruker i?"
-            hideLabel
             value={tiltak}
             onChange={(event) => setTiltak(event.target.value)}
             readOnly={!sporsmaalRedigerbare}
@@ -44,12 +40,8 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
           />
         </VStack>
         <VStack gap="space-16">
-          <Heading size="medium" level="2">
-            Deltar bruker i tiltaket på heltid eller deltid?
-          </Heading>
           <RadioGroup
             legend="Deltar bruker i tiltaket på heltid eller deltid?"
-            hideLegend
             value={omfang}
             onChange={setOmfang}
             disabled={!sporsmaalRedigerbare}
@@ -60,12 +52,8 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
           </RadioGroup>
         </VStack>
         <VStack gap="space-16">
-          <Heading size="medium" level="2">
-            Finnes det en aktivitetsplan?
-          </Heading>
           <RadioGroup
             legend="Finnes det en aktivitetsplan?"
-            hideLegend
             value={aktivitetsplan}
             onChange={setAktivitetsplan}
             disabled={!sporsmaalRedigerbare}
@@ -83,12 +71,8 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
         validerAktivitet={validerAktivitet}
       >
         <VStack gap="space-16" maxWidth="30rem">
-          <Heading size="medium" level="2">
-            Begrunnelse
-          </Heading>
           <Textarea
             label="Begrunnelse"
-            hideLabel
             value={begrunnelse}
             onChange={(event) => setBegrunnelse(event.target.value)}
             minRows={6}

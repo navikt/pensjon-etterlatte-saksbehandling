@@ -36,12 +36,8 @@ export const ForlengetOmsUtdanning = ({
     <>
       <VStack paddingInline="space-64 space-32" paddingBlock="space-24 space-0" gap="space-24">
         <VStack gap="space-16" maxWidth="30rem">
-          <Heading size="medium" level="2">
-            Hvilken skole skal bruker studere ved?
-          </Heading>
           <TextField
             label="Hvilken skole skal bruker studere ved?"
-            hideLabel
             value={skole}
             onChange={(event) => setSkole(event.target.value)}
             readOnly={!sporsmaalRedigerbare}
@@ -49,12 +45,8 @@ export const ForlengetOmsUtdanning = ({
           />
         </VStack>
         <VStack gap="space-16" maxWidth="30rem">
-          <Heading size="medium" level="2">
-            Hva skal bruker studere?
-          </Heading>
           <TextField
             label="Hva skal bruker studere?"
-            hideLabel
             value={studium}
             onChange={(event) => setStudium(event.target.value)}
             readOnly={!sporsmaalRedigerbare}
@@ -72,12 +64,8 @@ export const ForlengetOmsUtdanning = ({
         }
       >
         <VStack gap="space-16">
-          <Heading size="medium" level="2">
-            Studerer bruker minst 50 prosent?
-          </Heading>
           <RadioGroup
             legend="Studerer bruker minst 50 prosent?"
-            hideLegend
             value={studererMinst50Prosent}
             onChange={setStudererMinst50Prosent}
             disabled={!sporsmaalRedigerbare}
@@ -99,12 +87,8 @@ export const ForlengetOmsUtdanning = ({
         </VStack>
         {studererMinst50Prosent && (
           <VStack gap="space-16" maxWidth="30rem">
-            <Heading size="medium" level="2">
-              {begrunnelseTittel}
-            </Heading>
             <Textarea
               label={begrunnelseTittel}
-              hideLabel
               description={
                 studererMinst50Prosent === 'JA'
                   ? 'Begrunn hvorfor utdanningen er nødvendig og hensiktsmessig eller ikke'

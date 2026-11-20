@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.modules.beregning.AvkortingRepositoryOperasjoner
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
@@ -16,7 +17,7 @@ import java.util.UUID
 
 class AvkortingTidligAlderspensjonService(
     private val behandlingService: BehandlingService,
-    private val avkortingRepository: AvkortingRepository,
+    private val avkortingRepository: AvkortingRepositoryOperasjoner,
     private val oppgaveService: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)

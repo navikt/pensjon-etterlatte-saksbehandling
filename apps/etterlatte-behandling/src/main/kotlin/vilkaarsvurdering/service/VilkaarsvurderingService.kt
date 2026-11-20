@@ -3,6 +3,7 @@ package no.nav.etterlatte.vilkaarsvurdering.service
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.revurdering.validerForlengetOmsPeriode
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -80,6 +81,7 @@ class VilkaarsvurderingService(
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId)
+            behandling.validerForlengetOmsPeriode()
             val vilkaarsvurdering = hentVilkaarsvurdering(behandlingId) ?: throw VilkaarsvurderingIkkeFunnet()
             val virkningstidspunkt =
                 behandling.virkningstidspunkt?.dato?.atDay(1)
@@ -211,6 +213,7 @@ class VilkaarsvurderingService(
             // TODO denne har blitt rimelig vanskelig å skjønne seg helt på - bør skrives om
             // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
             if (!kopierResultat ||
+                behandling.revurderingsaarsak() == Revurderingaarsak.FORLENGET_OMS ||
                 (
                     (
                         behandling.prosesstype != Prosesstype.AUTOMATISK ||

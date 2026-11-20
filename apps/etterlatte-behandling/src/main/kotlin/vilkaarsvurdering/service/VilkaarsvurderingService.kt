@@ -3,7 +3,9 @@ package no.nav.etterlatte.vilkaarsvurdering.service
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.revurdering.RevurderingToggle
 import no.nav.etterlatte.behandling.revurdering.validerForlengetOmsPeriode
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -26,6 +28,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -46,6 +49,7 @@ class VilkaarsvurderingService(
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagService,
     private val behandlingStatus: BehandlingStatusService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -81,7 +85,12 @@ class VilkaarsvurderingService(
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId)
-            behandling.validerForlengetOmsPeriode()
+            if (behandling.revurderingsaarsak() == Revurderingaarsak.FORLENGET_OMS &&
+                featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false) &&
+                resultat.utfall == VilkaarsvurderingUtfall.OPPFYLT
+            ) {
+                behandling.validerForlengetOmsPeriode()
+            }
             val vilkaarsvurdering = hentVilkaarsvurdering(behandlingId) ?: throw VilkaarsvurderingIkkeFunnet()
             val virkningstidspunkt =
                 behandling.virkningstidspunkt?.dato?.atDay(1)

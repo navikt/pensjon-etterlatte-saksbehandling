@@ -18,13 +18,11 @@ import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
-import { isPending, mapFailure } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { isPending } from '~shared/api/apiUtils'
 import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { formaterSakstype } from '~utils/formatering/formatering'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -58,7 +56,6 @@ export const Resultat = (props: Props) => {
   const [totalVurderingStatus, oppdaterTotalVurderingCall] = useApiCall(oppdaterTotalVurdering)
   const [slettVurderingStatus, slettTotalVurderingCall] = useApiCall(slettTotalVurdering)
   const alleVilkaarErVurdert = !vilkaarsvurdering.vilkaar.some((vilkaar) => !vilkaar.vurdering)
-  const forlengetOmsAktivert = useFeaturetoggle(FeatureToggle.forlenget_oms)
 
   const slettVilkaarsvurderingResultat = () =>
     slettTotalVurderingCall(behandlingId, (res) => {
@@ -86,11 +83,6 @@ export const Resultat = (props: Props) => {
   }
 
   const resultatTekst = () => {
-    if (revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS) {
-      return vilkaarsvurdering.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT
-        ? 'Forlenget OMS innvilges'
-        : 'Forlenget OMS avslås'
-    }
     if (erRevurdering && !nySoeknad) {
       return vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
         ? 'Fortsatt oppfylt'
@@ -106,14 +98,15 @@ export const Resultat = (props: Props) => {
   const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
   const erRevurdering = behandlingstype === IBehandlingsType.REVURDERING
   const nySoeknad = revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
-  const tekster = hentResultatTekster(sakstype, behandlingstype, revurderingsaarsak)
 
   return (
     <VStack gap="space-16" paddingInline="space-64 space-32">
       <Box background="meta-purple-soft" borderRadius="12" padding="space-16">
         <VStack gap="space-16">
           <Heading size="medium" level="2">
-            {tekster.overskrift}
+            {erRevurdering
+              ? 'Utfall etter revurdering'
+              : `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`}
           </Heading>
           {vilkaarsvurdering.resultat && (
             <VStack gap="space-8">
@@ -173,8 +166,10 @@ export const Resultat = (props: Props) => {
                   }}
                   error={radioError ? radioError : false}
                 >
-                  <Radio value={ISvar.JA}>{tekster.ja}</Radio>
-                  <Radio value={ISvar.NEI}>{tekster.nei}</Radio>
+                  <Radio value={ISvar.JA}>{erRevurdering ? 'Fortsatt oppfylt' : 'Ja, vilkår er oppfylt'}</Radio>
+                  <Radio value={ISvar.NEI}>
+                    {erRevurdering && !nySoeknad ? 'Opphør av ytelse' : 'Nei, vilkår er ikke oppfylt'}
+                  </Radio>
                 </RadioGroup>
                 <Textarea
                   label="Begrunnelse"
@@ -200,16 +195,6 @@ export const Resultat = (props: Props) => {
           )}
         </VStack>
       </Box>
-      {forlengetOmsAktivert && revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS && (
-        <>
-          {mapFailure(totalVurderingStatus, (error) => (
-            <ApiErrorAlert>Kunne ikke lagre utfallet: {error.detail}</ApiErrorAlert>
-          ))}
-          {mapFailure(slettVurderingStatus, (error) => (
-            <ApiErrorAlert>Kunne ikke åpne utfallet for redigering: {error.detail}</ApiErrorAlert>
-          ))}
-        </>
-      )}
       {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
         <OppdatertGrunnlagAlert variant="warning">
           Virkningstidspunktet er endret siden vilkårene ble vurdert sist. Du må se over vurderingene og sjekke at de
@@ -227,32 +212,6 @@ export const Resultat = (props: Props) => {
       </Box>
     </VStack>
   )
-}
-
-function hentResultatTekster(
-  sakstype: SakType,
-  behandlingstype: IBehandlingsType,
-  revurderingsaarsak: Revurderingaarsak | null
-) {
-  if (revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS) {
-    return {
-      overskrift: 'Utfall for forlenget OMS',
-      ja: 'Innvilg forlenget OMS',
-      nei: 'Avslå forlenget OMS',
-    }
-  }
-  if (behandlingstype === IBehandlingsType.REVURDERING) {
-    return {
-      overskrift: 'Utfall etter revurdering',
-      ja: 'Fortsatt oppfylt',
-      nei: revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD ? 'Nei, vilkår er ikke oppfylt' : 'Opphør av ytelse',
-    }
-  }
-  return {
-    overskrift: `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`,
-    ja: 'Ja, vilkår er oppfylt',
-    nei: 'Nei, vilkår er ikke oppfylt',
-  }
 }
 
 const VurderAlleVilkaarBox = styled(Box)`

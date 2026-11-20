@@ -31,6 +31,7 @@ import { DetaljertEtteroppgjoerForbehandling } from '~shared/types/Etteroppgjoer
 import { useAppSelector } from '~store/Store'
 import { JaNei } from '~shared/types/ISvar'
 import { ForlengetOmsAktivitet } from '~components/behandling/forlengetOms/ForlengetOmsAktivitet'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 type BehandlingRouteTypesPath =
   | 'soeknadsoversikt'
@@ -161,6 +162,7 @@ export const useBehandlingRoutes = (): DefaultBehandlingRouteContextType => {
   const behandling = useBehandling()
   const etteroppgjoer = useAppSelector((state) => state.etteroppgjoerReducer.etteroppgjoerForbehandling)
   const personopplysninger = usePersonopplysninger()
+  const forlengetOmsAktivert = useFeaturetoggle(FeatureToggle.forlenget_oms)
 
   const aktuelleRoutes = hentAktuelleRoutes(behandling, personopplysninger)
 
@@ -169,7 +171,14 @@ export const useBehandlingRoutes = (): DefaultBehandlingRouteContextType => {
   }
 
   const routeErGyldig = (route: string | undefined): boolean => {
-    const valgtRoute = aktuelleRoutes.filter((value) => value.path === route)
+    const alleRoutes: BehandlingRouteType[] = Object.values(behandlingroutes)
+    let routes = alleRoutes
+    if (forlengetOmsAktivert && behandling?.revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS) {
+      routes = aktuelleRoutes
+    } else if (route === behandlingroutes.forlengetOmsAktivitet.path) {
+      return false
+    }
+    const valgtRoute = routes.filter((value) => value.path === route)
     if (valgtRoute.length) {
       const pathInfo = valgtRoute[0]
 

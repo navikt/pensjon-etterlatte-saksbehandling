@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Alert, Button, HGrid, TextField, VStack } from '@navikt/ds-react'
+import { Alert, HGrid, TextField, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
 import { IBehandlingReducer, oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
@@ -11,7 +11,6 @@ import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ForlengetOmsInfo } from '~shared/types/RevurderingInfo'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { formaterMaanedAar } from '~utils/formatering/dato'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 
@@ -101,24 +100,17 @@ export const ForlengetOmsPeriodeOgResultat = ({
         )}
         {!vilkaarsvurdering && <Alert variant="info">Vilkårene må vurderes på vilkårsvurderingssiden først.</Alert>}
       </VStack>
-      {!vilkaarsvurdering && (
-        <BehandlingHandlingKnapper>
-          <Button disabled>Neste</Button>
-        </BehandlingHandlingKnapper>
-      )}
-      {vilkaarsvurdering && (
-        <ResultatForlengetOms
-          behandling={behandling}
-          redigerbar={redigerbar}
-          resultatBegrunnelse={resultatBegrunnelse}
-          innvilgelseFeil={innvilgelseFeil}
-          lagrePeriode={(onSuccess) => {
-            void handleSubmit(() => lagre(onSuccess))()
-          }}
-          lagrerPeriode={isPending(lagrePeriodeStatus)}
-          validerAktivitet={validerAktivitet}
-        />
-      )}
+      <ResultatForlengetOms
+        behandling={behandling}
+        redigerbar={redigerbar}
+        resultatBegrunnelse={resultatBegrunnelse}
+        innvilgelseFeil={innvilgelseFeil}
+        lagrePeriode={(onSuccess) => {
+          void handleSubmit(() => lagre(onSuccess))()
+        }}
+        lagrerPeriode={isPending(lagrePeriodeStatus)}
+        validerAktivitet={validerAktivitet}
+      />
     </>
   )
 }

@@ -160,11 +160,6 @@ export const ResultatForlengetOms = ({
             </RadioGroup>
           )}
           {!alleVilkaarErVurdert && <BodyShort>Alle vilkår må vurderes før man kan gå videre.</BodyShort>}
-          {!aktivitetErValgt && (
-            <BodyShort>
-              Velg om bruker tar utdanning eller deltar i arbeidsrettet tiltak før utfallet kan lagres.
-            </BodyShort>
-          )}
           {redigerbar && !vilkaarsvurdering?.resultat && (
             <Button onClick={lagreVurdering} loading={lagrer} disabled={!alleVilkaarErVurdert || !aktivitetErValgt}>
               Lagre

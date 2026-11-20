@@ -1,14 +1,18 @@
 package no.nav.etterlatte.beregning.regler.avkorting.regler
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
+import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
 import no.nav.etterlatte.avkorting.regler.avkortingFaktor
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.avkorting.regler.overstegetInntektPerMaaned
 import no.nav.etterlatte.beregning.regler.inntektAvkortingGrunnlag
+import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.UUID
 
 class InntektAvkortingTest {
     @Test
@@ -32,6 +36,29 @@ class InntektAvkortingTest {
         inntekt.verdi.toInteger() shouldBe 45000
     }
      */
+
+    @Test // Unngår at vi deler på null (antall måneder)
+    fun `oversteget inntekt per maaned er null hvis ingen innvilgede maaneder`() {
+        val overstegetInntekt =
+            overstegetInntektPerMaaned.anvend(
+                grunnlag =
+                    InntektAvkortingGrunnlagWrapper(
+                        inntektAvkortingGrunnlag =
+                            FaktumNode(
+                                verdi =
+                                    InntektAvkortingGrunnlag(
+                                        inntektInnvilgetNedrundet = Beregningstall(65_000),
+                                        relevanteMaaneder = Beregningstall(0),
+                                        grunnlagId = UUID.randomUUID(),
+                                    ),
+                                kilde = "",
+                                beskrivelse = "",
+                            ),
+                    ),
+                periode = RegelPeriode(LocalDate.of(2024, 1, 1)),
+            )
+        overstegetInntekt.verdi.toInteger() shouldBe 0
+    }
 
     @Test
     fun `oversteget inntekt er alt over et halvt maanedlig grunnbeloep`() {

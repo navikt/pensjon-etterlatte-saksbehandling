@@ -7,7 +7,7 @@ class LoependeSaker(
     private val beregning: DataSource,
     private val behandling: DataSource,
 ) {
-    fun hentStatus(
+    fun hentSaker(
         beregningSql: String,
         behandlingSql: String,
     ): Map<Long, Boolean> {
@@ -49,12 +49,25 @@ class LoependeSaker(
         }
 }
 
-private val medSanksjon = """select s.sak_id, s.fom, s.tom
+private val medSanksjon = """select distinct s.sak_id
 from sanksjon s
 left outer join avkorting_aarsoppgjoer a on a.behandling_id = s.behandling_id and a.aar = 2027
 where s.fom > date '2026-01-01'
-and a.id is null;
+and a.id is null
+limit 100
 """
+
+private val utenSanksjon = """
+    select distinct bp.sakid
+    from beregningsperiode bp
+         left outer join sanksjon s on s.sak_id = bp.sakid
+         left outer join avkorting_aarsoppgjoer a on a.behandling_id = bp.behandlingid and a.aar = 2027
+where bp.datofom >= '2026-05-01'
+  and a.id is null
+and s.id is null
+limit 100
+"""
+
 private val loepende = """with RECURSIVE gjeldende_vedtak AS (
     select DISTINCT ON (sakid) sakid,
                                id,
@@ -75,6 +88,13 @@ select sak_id from loepende
 where sak_id = ANY(?);
 """
 
+/**
+ * * Saker som har sanksjon
+ * * Saker med endret ident
+ * * Overstyrt beregning
+ * * Er ingen endring i utbetaling
+ * * Tidligere familiepleier
+ */
 fun main(args: Array<String>) {
     require(args.size == 3) { "Oppgi brukernavn for db-kobling, port til behandling-DB og port til beregning-DB" }
     val brukernavn = args[0]
@@ -83,10 +103,20 @@ fun main(args: Array<String>) {
             beregning = lokalDatabase(args[2].toInt(), "beregning", brukernavn),
             behandling = lokalDatabase(args[1].toInt(), "sakogbehandlinger", brukernavn),
         )
-    val status = uttrekk.hentStatus(medSanksjon, loepende)
     println("Løpende med sanksjon")
-    status
+    uttrekk
+        .hentSaker(medSanksjon, loepende)
+        .entries
         .filter { (_, erLoepende) -> erLoepende }
+        .take(10)
+        .forEach { (id, _) -> println(id) }
+
+    println("Løpende uten sanksjon")
+    uttrekk
+        .hentSaker(utenSanksjon, loepende)
+        .entries
+        .filter { (_, erLoepende) -> erLoepende }
+        .take(10)
         .forEach { (id, _) -> println(id) }
 }
 

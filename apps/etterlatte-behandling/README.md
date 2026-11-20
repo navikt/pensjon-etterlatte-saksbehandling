@@ -109,6 +109,57 @@ Appen bygges og deployes automatisk ved commits til `apps/etterlatte-behandling/
 
 For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
 
+### Aktivering og databasevalg for beregning
+
+`BRUK_INTERN_BEREGNING=true` i behandling kobler beregningstjenestene til de valgte
+repositories, registrerer rutene under `/api/beregning` og lar alle interne brukere av
+`BeregningKlient` kalle de flyttede tjenestene direkte. Dette gjelder blant annet etteroppgjør,
+vedtaksbehandling og dataene til `VedtakOgBeregningSammenligner`. Standardverdien er `false`.
+Når bryteren er av, registreres ikke rutene, og de flyttede tjenestene opprettes ikke.
+Da bruker interne kall fortsatt `BeregningKlientImpl` mot beregningsappen.
+Feil fra de flyttede tjenestene sendes videre uten automatisk forsøk mot den gamle klienten.
+UI-ens BFF har en egen miljøvariabel med samme navn som velger hvilken app forespørslene går til.
+
+Manifestene setter disse verdiene:
+
+| App | Miljøvariabel | Dev | Prod |
+| --- | --- | --- | --- |
+| Behandling | `BRUK_INTERN_BEREGNING` | `false` | `false` |
+| UI | `BRUK_INTERN_BEREGNING` | `false` | `false` |
+| Beregning (CRUD-ruter) | `BRUK_INTERN_BEREGNING` | `true` | `false` |
+| Behandling | `BRUK_EGEN_DATABASE_FOR_BEREGNING` | `false` | `false` |
+
+`BeregningRepositoryModule` velger database ved oppstart med miljøvariabelen
+`BRUK_EGEN_DATABASE_FOR_BEREGNING`. Standardverdien er `false`: når de flyttede tjenestene
+aktiveres, går lesinger og skrivinger til CRUD-endepunktene under `/api/beregning/intern`
+i `etterlatte-beregning`.
+Klienten bruker systemtoken fra behandling. Beregning må ha `BRUK_INTERN_BEREGNING=true`
+før disse operasjonene tas i bruk. CRUD-endepunktene er foreløpig deaktivert i prod.
+
+Sett `BRUK_EGEN_DATABASE_FOR_BEREGNING=true` når behandling sin database har de nødvendige
+dataene. Da bruker alle seks repositories behandling sin database, uten HTTP-kall.
+Endringen krever deployment og omstart. Det finnes ingen automatisk fallback eller
+dobbeltskriving; ved bytte må dataene være oppdaterte i databasen som tas i bruk.
+
+Flyttet beregning er deaktivert i både dev og prod. UI bruker fortsatt den frittstående
+beregningsappen. Denne endringen klargjør koblingene og databasevalget; aktivering gjøres
+i en egen PR. Den eksisterende CRUD-bryteren i beregningsappen endres ikke.
+Kafka-konsumenter i andre apper bruker fortsatt beregningsappen.
+
+Ved senere aktivering deployer du først beregning med CRUD-rutene aktivert,
+deretter behandling med `BRUK_INTERN_BEREGNING=true` og til slutt UI med samme verdi.
+Kontroller at beregningsbryterne i Unleash også gjelder `etterlatte-behandling`.
+De flyttede UI-kallene og interne servicekall bruker denne appens Unleash-kontekst.
+Etter aktivering kan du teste begge datakildene i dev ved å endre
+`BRUK_EGEN_DATABASE_FOR_BEREGNING` i behandling og deploye på nytt.
+Bruk testdata som finnes i den valgte databasen,
+og kontroller både lagring, uthenting, oppdatering og sletting.
+For å sende UI-trafikken tilbake til beregningsappen setter du UI-ens
+`BRUK_INTERN_BEREGNING=false` og deployer UI på nytt. Ikke deaktiver rutene i behandling
+mens UI fortsatt sender forespørsler dit.
+Når UI er flyttet tilbake, kan du også sette `BRUK_INTERN_BEREGNING=false` i behandling
+og deploye behandling på nytt for å sende interne kall tilbake til beregningsappen.
+
 ## Enhetstester
 
 Noen av testene bruker https://www.testcontainers.org/ for å starte en docker-container.

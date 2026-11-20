@@ -22,12 +22,13 @@ import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
+import no.nav.etterlatte.modules.beregning.AvkortingRepositoryOperasjoner
 import no.nav.etterlatte.modules.beregning.BeregningToggles
+import no.nav.etterlatte.modules.beregning.EtteroppgjoerRepositoryOperasjoner
 import no.nav.etterlatte.modules.beregning.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.modules.beregning.avkorting.AarsoppgjoerLoepende
 import no.nav.etterlatte.modules.beregning.avkorting.Avkorting
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingReparerAarsoppgjoeret
-import no.nav.etterlatte.modules.beregning.avkorting.AvkortingRepository
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingService
 import no.nav.etterlatte.modules.beregning.avkorting.Etteroppgjoer
 import no.nav.etterlatte.modules.beregning.avkorting.regler.EtteroppgjoerDifferanseGrunnlag
@@ -45,9 +46,9 @@ class EtteroppgjoerBehandlingerTilhoererIkkeSammeSak :
     )
 
 class EtteroppgjoerService(
-    private val avkortingRepository: AvkortingRepository,
+    private val avkortingRepository: AvkortingRepositoryOperasjoner,
     private val sanksjonService: SanksjonService,
-    private val etteroppgjoerRepository: EtteroppgjoerRepository,
+    private val etteroppgjoerRepository: EtteroppgjoerRepositoryOperasjoner,
     private val avkortingService: AvkortingService,
     private val reparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
     private val vedtakEtteroppgjoerService: VedtakEtteroppgjoerService,

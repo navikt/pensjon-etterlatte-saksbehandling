@@ -38,7 +38,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
-import no.nav.etterlatte.modules.beregning.BeregningRepository
+import no.nav.etterlatte.modules.beregning.BeregningRepositoryOperasjoner
+import no.nav.etterlatte.modules.beregning.BeregningsGrunnlagRepositoryOperasjoner
 import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -66,8 +67,8 @@ class UgyldigBeregningsgrunnlag :
     )
 
 class BeregningsGrunnlagService(
-    private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
-    private val beregningRepository: BeregningRepository,
+    private val beregningsGrunnlagRepository: BeregningsGrunnlagRepositoryOperasjoner,
+    private val beregningRepository: BeregningRepositoryOperasjoner,
     private val behandlingService: BehandlingService,
     private val vedtaksvurderingService: VedtaksvurderingService,
     private val grunnlagService: GrunnlagService,

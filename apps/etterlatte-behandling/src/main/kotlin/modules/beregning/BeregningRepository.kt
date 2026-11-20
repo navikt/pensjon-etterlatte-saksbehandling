@@ -29,8 +29,8 @@ import javax.sql.DataSource
 
 class BeregningRepository(
     private val dataSource: DataSource,
-) {
-    fun hent(behandlingId: UUID): Beregning? =
+) : BeregningRepositoryOperasjoner {
+    override fun hent(behandlingId: UUID): Beregning? =
         dataSource.transaction { tx ->
             val beregningsperioder =
                 queryOf(
@@ -44,7 +44,7 @@ class BeregningRepository(
             beregningsperioder?.let { toBeregning(beregningsperioder) }
         }
 
-    fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning {
+    override fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning {
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.slettBeregningperioder,
@@ -61,7 +61,7 @@ class BeregningRepository(
         return hent(beregning.behandlingId)!!
     }
 
-    fun slettOverstyrtBeregningsgrunnlag(behandlingId: UUID) {
+    override fun slettOverstyrtBeregningsgrunnlag(behandlingId: UUID) {
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.slettOverstyrBeregningsgrunnlag,
@@ -72,7 +72,7 @@ class BeregningRepository(
         }
     }
 
-    fun hentOverstyrBeregning(sakId: SakId): OverstyrBeregning? =
+    override fun hentOverstyrBeregning(sakId: SakId): OverstyrBeregning? =
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.hentOverstyrBeregning,
@@ -82,7 +82,7 @@ class BeregningRepository(
             }
         }
 
-    fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning? {
+    override fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning? {
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.opprettOverstyrBeregning,
@@ -107,7 +107,7 @@ class BeregningRepository(
         }
     }
 
-    fun deaktiverOverstyrtBeregning(sakId: SakId) {
+    override fun deaktiverOverstyrtBeregning(sakId: SakId) {
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.updateOverstyrtberegning,

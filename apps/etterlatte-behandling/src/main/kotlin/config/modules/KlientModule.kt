@@ -44,6 +44,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.modules.beregning.klienter.BeregningCrudKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient as TrygdetidPesysKlient
@@ -53,6 +54,7 @@ class KlientModule(
     private val config: Config,
     private val env: Miljoevariabler,
     private val featureToggleService: FeatureToggleService,
+    beregningKlientIntern: () -> BeregningKlient? = { null },
     // Test overrides
     navAnsattKlientOverride: NavAnsattKlient? = null,
     norg2KlientOverride: Norg2Klient? = null,
@@ -104,7 +106,11 @@ class KlientModule(
     }
 
     val beregningKlient: BeregningKlient by lazy {
-        beregningKlientOverride ?: BeregningKlientImpl(config = config, httpClient = standardHttpClient)
+        beregningKlientOverride ?: beregningKlientIntern() ?: BeregningKlientImpl(config = config, httpClient = standardHttpClient)
+    }
+
+    val beregningCrudKlient by lazy {
+        BeregningCrudKlient(httpClientFactory.beregningKlient(), config.getString("beregning.resource.url"))
     }
 
     val gosysOppgaveKlient: GosysOppgaveKlient by lazy {

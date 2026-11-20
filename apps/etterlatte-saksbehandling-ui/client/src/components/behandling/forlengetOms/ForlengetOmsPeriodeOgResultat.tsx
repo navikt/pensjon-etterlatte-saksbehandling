@@ -1,10 +1,10 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
 import { Alert, Button, HGrid, TextField, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
-import { IBehandlingReducer, oppdaterRevurderingInfo, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { Resultat } from '~components/behandling/vilkaarsvurdering/Resultat'
+import { ResultatForlengetOms } from './ResultatForlengetOms'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
@@ -40,7 +40,6 @@ export const ForlengetOmsPeriodeOgResultat = ({
     defaultValues: { tom: lagretPeriode?.tom ? `${lagretPeriode.tom}-01` : null },
   })
   const tom = watch('tom')?.slice(0, 7) ?? ''
-  const [redigerTotalvurdering, setRedigerTotalvurdering] = useState(false)
   const [lagrePeriodeStatus, lagrePeriode] = useApiCall(lagreRevurderingInfo)
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const periodeRedigerbar =
@@ -108,24 +107,16 @@ export const ForlengetOmsPeriodeOgResultat = ({
         </BehandlingHandlingKnapper>
       )}
       {vilkaarsvurdering && (
-        <Resultat
-          setRedigerTotalvurdering={setRedigerTotalvurdering}
-          redigerTotalvurdering={redigerTotalvurdering}
-          virkningstidspunktDato={behandling.virkningstidspunkt?.dato}
-          sakstype={behandling.sakType}
-          vilkaarsvurdering={vilkaarsvurdering}
-          oppdaterVilkaar={(vurdering) => dispatch(updateVilkaarsvurdering(vurdering))}
-          behandlingId={behandling.id}
+        <ResultatForlengetOms
+          behandling={behandling}
           redigerbar={redigerbar}
-          behandlingstype={behandling.behandlingType}
-          revurderingsaarsak={behandling.revurderingsaarsak}
           resultatBegrunnelse={resultatBegrunnelse}
           innvilgelseFeil={innvilgelseFeil}
-          forlengetOmsLagrePeriode={(onSuccess) => {
+          lagrePeriode={(onSuccess) => {
             void handleSubmit(() => lagre(onSuccess))()
           }}
-          forlengetOmsLagrerPeriode={isPending(lagrePeriodeStatus)}
-          forlengetOmsValiderAktivitet={validerAktivitet}
+          lagrerPeriode={isPending(lagrePeriodeStatus)}
+          validerAktivitet={validerAktivitet}
         />
       )}
     </>

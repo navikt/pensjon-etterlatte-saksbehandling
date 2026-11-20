@@ -146,6 +146,7 @@ internal class VilkaarsvurderingServiceTest(
                 behandlingService,
                 grunnlagService,
                 behandlingStatus,
+                mockk(relaxed = true),
             )
     }
 

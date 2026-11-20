@@ -37,6 +37,11 @@ type Props = {
   redigerTotalvurdering: boolean
   setRedigerTotalvurdering: Dispatch<SetStateAction<boolean>>
   revurderingsaarsak: Revurderingaarsak | null
+  resultatBegrunnelse?: {
+    tekst: string
+    onChange: (tekst: string) => void
+  }
+  innvilgelseFeil?: string
 }
 
 export const Resultat = (props: Props) => {
@@ -50,6 +55,8 @@ export const Resultat = (props: Props) => {
     behandlingstype,
     setRedigerTotalvurdering,
     revurderingsaarsak,
+    resultatBegrunnelse,
+    innvilgelseFeil,
   } = props
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
@@ -65,23 +72,39 @@ export const Resultat = (props: Props) => {
       oppdaterVilkaar(res)
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
       setKommentar(vilkaarsvurdering?.resultat?.kommentar || '')
+      resultatBegrunnelse?.onChange(vilkaarsvurdering?.resultat?.kommentar || '')
       if (vilkaarsvurdering.resultat?.utfall) {
         setSvar(totalResultatTilSvar(vilkaarsvurdering.resultat?.utfall))
       }
     })
 
   const lagreVilkaarsvurderingResultat = () => {
+    if (
+      forlengetOmsAktivert &&
+      revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS &&
+      svar === ISvar.JA &&
+      innvilgelseFeil
+    ) {
+      setRadioError(innvilgelseFeil)
+      return
+    }
     if (!(svar && [ISvar.JA, ISvar.NEI].includes(svar))) {
       setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
     } else {
       setRadioError(undefined)
     }
 
-    if (radioError === undefined && svar !== undefined) {
-      oppdaterTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) => {
-        oppdaterVilkaar(res)
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
-      })
+    if (
+      svar !== undefined &&
+      (radioError === undefined || (forlengetOmsAktivert && revurderingsaarsak === Revurderingaarsak.FORLENGET_OMS))
+    ) {
+      oppdaterTotalVurderingCall(
+        { behandlingId, resultat: svarTilTotalResultat(svar), kommentar: resultatBegrunnelse?.tekst ?? kommentar },
+        (res) => {
+          oppdaterVilkaar(res)
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
+        }
+      )
     }
   }
 
@@ -176,15 +199,17 @@ export const Resultat = (props: Props) => {
                   <Radio value={ISvar.JA}>{tekster.ja}</Radio>
                   <Radio value={ISvar.NEI}>{tekster.nei}</Radio>
                 </RadioGroup>
-                <Textarea
-                  label="Begrunnelse"
-                  placeholder="Valgfritt"
-                  value={kommentar}
-                  onChange={(e) => setKommentar(e.target.value)}
-                  minRows={3}
-                  size="medium"
-                  autoComplete="off"
-                />
+                {resultatBegrunnelse === undefined && (
+                  <Textarea
+                    label="Begrunnelse"
+                    placeholder="Valgfritt"
+                    value={kommentar}
+                    onChange={(e) => setKommentar(e.target.value)}
+                    minRows={3}
+                    size="medium"
+                    autoComplete="off"
+                  />
+                )}
                 <Box>
                   <Button
                     variant="primary"

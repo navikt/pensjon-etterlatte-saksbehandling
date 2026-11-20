@@ -53,6 +53,7 @@ class MigrertYrkesskadeTest(
                 behandlingService,
                 grunnlagService = mockk(),
                 mockk(),
+                featureToggleService = mockk(relaxed = true),
             )
         val behandlingId = UUID.randomUUID()
         val vilkaarMigrertYrkesskade =

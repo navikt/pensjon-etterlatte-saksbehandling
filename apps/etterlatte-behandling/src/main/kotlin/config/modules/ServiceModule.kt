@@ -279,6 +279,7 @@ class ServiceModule(
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
             behandlingStatus = behandlingsStatusService,
+            featureToggleService = featureToggleService,
         )
     }
 

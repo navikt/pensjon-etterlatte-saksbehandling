@@ -118,6 +118,9 @@ vedtaksbehandling og dataene til `VedtakOgBeregningSammenligner`. Standardverdie
 Når bryteren er av, registreres ikke rutene, og de flyttede tjenestene opprettes ikke.
 Da bruker interne kall fortsatt `BeregningKlientImpl` mot beregningsappen.
 Feil fra de flyttede tjenestene sendes videre uten automatisk forsøk mot den gamle klienten.
+`BeregningModule` tilbyr en ikke-null intern klient. `KlientModule` velger mellom intern
+klient og HTTP-klient med bryteren. Hvis intern beregning er aktivert uten en konfigurert
+intern klient, feiler klientopprettelsen i stedet for å velge HTTP-klienten.
 UI-ens BFF har en egen miljøvariabel med samme navn som velger hvilken app forespørslene går til.
 
 Manifestene setter disse verdiene:

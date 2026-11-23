@@ -39,22 +39,18 @@ class BeregningModule(
 
     private val tilgangService by lazy { BeregningTilgangService(serviceModule.tilgangService) }
 
-    val beregningKlient: BeregningKlient? by lazy {
-        if (aktivert) {
-            BeregningKlientIntern(
-                beregningService = { beregningService },
-                avkortingService = { avkortingService },
-                beregningsGrunnlagService = { beregningsGrunnlagService },
-                sanksjonService = { sanksjonService },
-                grunnbeloepService = { grunnbeloepService },
-                aarligInntektsjusteringService = { aarligInntektsjusteringService },
-                etteroppgjoerService = { etteroppgjoerService },
-                beregningOgAvkortingBrevService = { beregningOgAvkortingBrevService },
-                behandlingTilgangsSjekk = tilgangService,
-            )
-        } else {
-            null
-        }
+    val beregningKlient: BeregningKlient by lazy {
+        BeregningKlientIntern(
+            beregningService = { beregningService },
+            avkortingService = { avkortingService },
+            beregningsGrunnlagService = { beregningsGrunnlagService },
+            sanksjonService = { sanksjonService },
+            grunnbeloepService = { grunnbeloepService },
+            aarligInntektsjusteringService = { aarligInntektsjusteringService },
+            etteroppgjoerService = { etteroppgjoerService },
+            beregningOgAvkortingBrevService = { beregningOgAvkortingBrevService },
+            behandlingTilgangsSjekk = tilgangService,
+        )
     }
 
     private val grunnbeloepService by lazy { GrunnbeloepService(GrunnbeloepRepository) }

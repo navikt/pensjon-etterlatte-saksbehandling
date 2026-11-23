@@ -33,6 +33,7 @@ class RevurderingServiceTest {
                 revurderingDao = mockk(),
                 aktivitetspliktDao = mockk(),
                 aktivitetspliktKopierService = mockk(),
+                featureToggleService = mockk(),
             )
 
         val tidligereBehandlingId = UUID.randomUUID()

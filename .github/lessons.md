@@ -12,7 +12,7 @@
 
 **2026-04-10 / 2026-11-03 — Sparring / løsningsdesign**
 - Observation: Løsninger ble foreslått før eksisterende sperrer/constraints var kartlagt, og scope vokste uten eksplisitt avklaring. Når jeg sporet hele kjeden først (saksbehandlerfilter → oppgavesøk), viste det seg at søket allerede støttet behovet – bare datakilden for valgene var feil.
-- Action: Før første løsningsskisse – les koden, kartlegg constraints, avklar om systemet eller saksbehandler skal eie løsningen, og spør om scope. Sjekk hva nedstrøms allerede støtter før du bygger nytt; løs det på det smaleste punktet.
+- Action: Før første løsningsskisse – les koden, kartlegg constraints, avklar om systemet eller saksbehandler skal eie løsningen, og spør om scope. Sjekk hva nedstrøms allerede støtter. Når jeg viser til et eksisterende mønster, sjekk at det bruker samme datakilde, ikke bare at det svarer på et lignende spørsmål.
 
 **2026-04-10 — Redigering**
 - Observation: Edits fjerner viktig innhold – enten ved å ikke se nøye på `old_str`, eller ved å bruke et for lite ankerpunkt slik at resten av signaturen forsvinner.
@@ -20,7 +20,7 @@
 
 **2026-04-10 — Dokumentasjon med usikkerhet**
 - Observation: Jeg la inn "ikke referert i kodebasen" som plassholder i stedet for å bare spørre. Det er mer respektfullt og presist å stille spørsmålet direkte.
-- Action: Når en verdi ikke kan verifiseres, spør – ikke dokumenter usikkerheten som et faktum.
+- Action: Når brukeren eier et kriterium, ikke erstatt det med min antakelse. Jeg kan ferdigstille grensesnittet for kriteriet uten å finne på innholdet.
 
 **2026-04-24 / 2026-10-12 — Kompilering og validering**
 - Observation: Én gang committet jeg uten å kompilere, og brukeren fant feilen. En annen gang manglet `yarn` og `npx`, og jeg var nær ved å hoppe over frontend-sjekken. Da `tsc` endelig ble kjørt via node, fant den en manglende import.
@@ -30,9 +30,9 @@
 - Observation: Jeg antok at en API-verdi kunne settes og tilbakestilles symmetrisk, uten å sjekke hvilke tilstandsoverganger som faktisk er lovlige.
 - Action: Sjekk tillatte tilstandsoverganger i et bibliotek før du bruker det – ikke anta at alle verdier er likestilte.
 
-**2026-04-30 — Testskriving**
-- Observation: Jeg antok hvilken metode og hvilken app endringen gjaldt uten å spørre. Begge var feil.
-- Action: Når brukeren sier "linje X", sjekk linje X i riktig app. Spør om usikkerheten er der.
+**2026-04-30 / 2026-11-20 — Endringer i arbeidskopien**
+- Observation: Jeg har lett på feil sted når jeg stolte på minnet om et kallsted. En tidligere beskrivelse av koden kan også være utdatert når brukeren har redigert videre.
+- Action: Les det aktuelle kallstedet i arbeidskopien før jeg bestemmer hva som må endres. Spør hvis det fortsatt er uklart hvilket kall brukeren mener.
 
 **2026-05-04 — Testskriving**
 - Observation: Jeg la inn mock for `SaksbehandlerInfoDao` uten å vurdere om real-DB var mulig og bedre. Brukeren måtte eksplisitt be om det.
@@ -109,3 +109,11 @@
 **2026-11-02 — Feilsøking av synkroniserte data**
 - Observation: En ekstern kilde som forklaring er ikke nok når vår klient oversetter «ikke funnet» til gyldige, tomme data som deretter erstatter lagret tilstand.
 - Action: Spor forskjellen mellom tomt svar og exception helt frem til lagring og visning før ansvaret plasseres utenfor systemet.
+
+**2026-11-19 — Fra brevdata til ferdig brev**
+- Observation: Jeg leste et tomt tekstfelt som bevis på at en hel del av brevet manglet. Det er lett å gjøre samme feil for beregningsmetoden når to brevtyper henter feltet fra ulike kilder.
+- Action: Følg feltet i brevtypen det gjelder. Jeg tok for gitt at et utfylt felt skulle ha forrang; sjekk heller hvilken kilde beregningen faktisk brukte for perioden. For redigering, skill mellom et felt som mangler og et felt som er låst. For mottakerens brev, bruk malen eller et ferdig eksempel.
+
+**2026-11-19 — Historisk oppførsel**
+- Observation: En gammel kommentar og en nullsjekk kan se selvmotsigende ut når jeg leser dem som om de ble skrevet samtidig.
+- Action: Les diffen der sjekken kom inn. Følg verdien tilbake til oppslaget i riktig versjon. For historiske data, skill mellom hva flagget på saken sier nå og hva det lagrede resultatet sier om kjøringen.

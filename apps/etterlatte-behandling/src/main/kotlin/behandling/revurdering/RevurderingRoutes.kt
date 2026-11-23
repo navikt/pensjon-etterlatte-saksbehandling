@@ -8,6 +8,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.libs.common.behandling.BehandlingOpprinnelse
@@ -40,10 +42,15 @@ internal fun Route.revurderingRoutes(
     aarligInntektsjusteringJobbService: AarligInntektsjusteringJobbService,
     etteroppgjoerRevurderingService: EtteroppgjoerRevurderingService,
     sakService: SakService,
+    featureToggleService: FeatureToggleService,
 ) {
     val logger = LoggerFactory.getLogger("RevurderingRoute")
 
-    fun stoettedeRevurderingsaarsaker(sakType: SakType): List<Revurderingaarsak> = hentRevurderingaarsaker(sakType)
+    fun stoettedeRevurderingsaarsaker(sakType: SakType): List<Revurderingaarsak> =
+        hentRevurderingaarsaker(sakType).filter {
+            it != Revurderingaarsak.FORLENGET_OMS ||
+                featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false)
+        }
 
     fun sjekkStoettetRevurderingsaarsak(
         sakId: SakId,
@@ -196,6 +203,13 @@ internal fun Route.revurderingRoutes(
             }
         }
     }
+}
+
+enum class RevurderingToggle : FeatureToggle {
+    FORLENGET_OMS,
+    ;
+
+    override fun key(): String = "forlenget_oms"
 }
 
 private fun hentRevurderingaarsaker(sakType: SakType) =

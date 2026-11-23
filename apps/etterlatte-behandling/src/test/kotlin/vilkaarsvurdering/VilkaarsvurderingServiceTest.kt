@@ -580,6 +580,37 @@ internal class VilkaarsvurderingServiceTest(
     }
 
     @Test
+    fun `forlenget OMS kopierer vilkaar men krever et nytt eksplisitt utfall`() {
+        val opprinneligBehandlingId = randomUUID()
+        val nyBehandlingId = randomUUID()
+        val vilkaar =
+            opprettVilkaarsvurderingMedVurderingOgResultat(
+                opprinneligBehandlingId,
+                OmstillingstoenadVilkaar.loependevilkaar(),
+            )
+        val nyBehandling =
+            revurdering(
+                id = nyBehandlingId,
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                revurderingAarsak = Revurderingaarsak.FORLENGET_OMS,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2027, 1)),
+            )
+        every { behandlingService.hentBehandling(nyBehandlingId) } returns nyBehandling
+
+        val (kopiert) =
+            vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
+                nyBehandlingId,
+                opprinneligBehandlingId,
+                brukerTokenInfo,
+            )
+
+        kopiert.resultat shouldBe null
+        kopiert.vilkaar.map { it.vurdering } shouldBe vilkaar.vilkaar.map { it.vurdering }
+        verify(exactly = 0) { behandlingStatus.settVilkaarsvurdert(nyBehandlingId, brukerTokenInfo, false) }
+    }
+
+    @Test
     fun `kopier vilkaarsvurdering gir NullpointerException hvis det ikke finnes tidligere vilkaarsvurdering`() {
         assertThrows<NullPointerException> {
             vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(

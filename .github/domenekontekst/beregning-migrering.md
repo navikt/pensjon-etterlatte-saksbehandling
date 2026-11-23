@@ -28,8 +28,8 @@ Statusdatoen i dette dokumentet er ikke bevis på at implementasjonene er avstem
 
 ## Nåværende tilstand
 
-Sist kontrollert 19. november 2026 mot `origin/main` på commit
-[`e9408d1ca`](https://github.com/navikt/pensjon-etterlatte-saksbehandling/commit/e9408d1ca).
+Sist kontrollert 23. november 2026 mot `origin/main` på commit
+[`fa81b829e`](https://github.com/navikt/pensjon-etterlatte-saksbehandling/commit/fa81b829e).
 PR-status er kontrollert på GitHub. Miljøverdiene nedenfor kommer fra manifestene,
 ikke fra en live-avlesning av prod eller Unleash.
 
@@ -49,15 +49,16 @@ bytte autoritativ database. Ingen av migreringsstegene nedenfor kopierer produks
 | --- | --- | --- | --- | --- |
 | `etterlatte-beregning` | `BRUK_INTERN_BEREGNING` | `true` | `false` | Registrering av CRUD-rutene under `/api/beregning/intern`. De ordinære beregningsrutene påvirkes ikke. |
 | UI-ens BFF | `BRUK_INTERN_BEREGNING` | `false` | `false` | Backend og token-scope for `/api/beregning`: `false` velger beregning, `true` velger behandling. |
+| `etterlatte-behandling` | `BRUK_INTERN_BEREGNING` | `false` | `false` | Aktivering av den flyttede beregningsmodulen og rutene under `/api/beregning`. |
+| `etterlatte-behandling` | `BRUK_EGEN_DATABASE_FOR_BEREGNING` | `false` | `false` | Datakilde for alle seks repositories: `false` velger CRUD i beregning, `true` velger lokal JDBC. |
 
 Begge er miljøvariabler som leses ved oppstart, ikke Unleash-toggles.
 Samme navn betyr ikke en felles bryter på tvers av apper. Endring krever deployment/omstart.
 CRUD-rutene i prod er altså fortsatt deaktivert, og UI er ikke flyttet i noen av miljøene.
 
-Behandling har ennå ikke disse migreringsbryterne i `main`.
-`BRUK_INTERN_BEREGNING` og `BRUK_EGEN_DATABASE_FOR_BEREGNING` i behandling tilhører den
-åpne [#9069](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/9069),
-beskrevet under «Forberedt, men ikke aktivert».
+Behandling sine migreringsbrytere ble merget i
+[#9069](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/9069) 23. november.
+Begge er fortsatt deaktivert i manifestene, som beskrevet under «Forberedt, men ikke aktivert».
 
 Unleash-bryterne for selve beregningsreglene er separate fra ruting og databasevalg.
 Unleash bruker appnavnet fra `NAIS_APP_NAME` og eventuell brukerident.
@@ -151,14 +152,16 @@ beregningsappen. Tittelen på PR-en betyr derfor ikke at alle beregningskall all
 ### Merget til main
 
 Tabellstruktur, repositories, tjenester, regler, API-ruter, CRUD-endpoints og BFF-ruting
-finnes i `main`. Den kopierte beregningsmodulen er likevel ikke koblet inn i behandling sin
-runtime der. UI-bryteren er av, og CRUD er bare aktivert i dev.
+finnes i `main`. Den kopierte beregningsmodulen er koblet inn i behandling sin
+runtime, men aktiveringsbryteren er av. UI-bryteren er også av, og CRUD er bare aktivert i dev.
 En klasse eller rute i `modules/beregning` er ikke bevis på at produksjon bruker den.
 
-### Åpen PR #9069
+### Merget PR #9069
 
-[#9069](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/9069) er ikke merget
-ved statusdatoen. Den inneholder fire forberedende commits:
+[#9069](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/9069) ble merget
+23. november 2026 med commit
+[`fa81b829e`](https://github.com/navikt/pensjon-etterlatte-saksbehandling/commit/fa81b829e).
+Den inneholder følgende forberedende commits:
 
 | Commit | Endring og hensikt |
 | --- | --- |
@@ -186,7 +189,8 @@ Det finnes ingen automatisk synkronisering, dobbeltskriving eller fallback mello
 
 ### Denne endringen: behandling sine kallere
 
-Arbeidet som dokumenteres her bygger på #9069 og er ennå ikke merget.
+Arbeidet i [#9070](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/9070)
+bygger på den mergede #9069 og er ennå ikke merget.
 Det legger til `BeregningKlientIntern` for alle de 16 operasjonene i `BeregningKlient`.
 `KlientModule` velger den interne adapteren når behandling sin
 `BRUK_INTERN_BEREGNING=true`; ellers beholdes `BeregningKlientImpl` over HTTP.
@@ -198,9 +202,18 @@ en klient; den får beregning og avkorting fra `VedtakBehandlingService`, som br
 Tilgangssjekker beholdes. Feil fra interne tjenester sendes videre, uten automatisk HTTP-retry.
 Manifestverdiene endres ikke, så endringen aktiverer ikke den nye stien.
 
+### Avstemming ved merge av main 23. november
+
+Endringene i beregningsappen og berørte delte biblioteker siden `e9408d1ca` er kontrollert
+mot `fa81b829e`. Den kopierte modulen har fått regelen som gir månedsinntekt lik null når
+ingen måneder er innvilget, med regelversjon `1.4` og tilhørende test. Den har også fått
+valg av beregningsmetode fra overstyrte beregningsperioder i brevdata, uten å gjeninnføre
+HTTP-klienter. `FORLENGET_OMS` kommer fra det delte modellbiblioteket og trenger ingen kopi.
+Det er ingen database- eller Flyway-endringer i beregningsappen siden denne avstemmingen.
+
 ## Gjenstående steg
 
-1. **Merge og aktivering.** Merge forberedelsene og klientomleggingen uten å likestille dette med aktivering.
+1. **Merge og aktivering.** Merge klientomleggingen uten å likestille dette med aktivering.
    Prøv flytene i dev først, også med begge datakilder og relevante testdata.
    Når CRUD brukes, må beregningsappen ha CRUD-rutene aktivert før behandling aktiveres.
    Aktiver behandling før UI sendes dit. Kontroller faktisk deployet versjon, tilgangskontroll,

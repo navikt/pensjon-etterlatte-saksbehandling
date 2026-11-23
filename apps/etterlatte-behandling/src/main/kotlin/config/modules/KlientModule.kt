@@ -2,6 +2,7 @@ package no.nav.etterlatte.config.modules
 
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
 import no.nav.etterlatte.EnvKey.ETTERLATTE_KLAGE_API_URL
 import no.nav.etterlatte.EnvKey.ETTERLATTE_TILBAKEKREVING_URL
 import no.nav.etterlatte.EnvKey.NAVANSATT_URL
@@ -44,6 +45,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.modules.beregning.klienter.BeregningCrudKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient as TrygdetidPesysKlient
@@ -53,6 +55,9 @@ class KlientModule(
     private val config: Config,
     private val env: Miljoevariabler,
     private val featureToggleService: FeatureToggleService,
+    beregningKlientIntern: () -> BeregningKlient = {
+        error("BRUK_INTERN_BEREGNING er aktivert, men intern klient mangler")
+    },
     // Test overrides
     navAnsattKlientOverride: NavAnsattKlient? = null,
     norg2KlientOverride: Norg2Klient? = null,
@@ -78,6 +83,9 @@ class KlientModule(
     private val httpClientFactory by lazy { HttpClientFactory(config) }
     private val standardHttpClient: HttpClient by lazy { httpClient() }
     private val httpClientForventSuksess: HttpClient by lazy { httpClient(forventSuksess = true) }
+    private val brukInternBeregning by lazy {
+        env.getOrDefault(BRUK_INTERN_BEREGNING, "false").toBooleanStrict()
+    }
 
     val navAnsattKlient: NavAnsattKlient by lazy {
         navAnsattKlientOverride ?: NavAnsattKlientImpl(
@@ -104,7 +112,15 @@ class KlientModule(
     }
 
     val beregningKlient: BeregningKlient by lazy {
-        beregningKlientOverride ?: BeregningKlientImpl(config = config, httpClient = standardHttpClient)
+        beregningKlientOverride ?: if (brukInternBeregning) {
+            beregningKlientIntern()
+        } else {
+            BeregningKlientImpl(config = config, httpClient = standardHttpClient)
+        }
+    }
+
+    val beregningCrudKlient by lazy {
+        BeregningCrudKlient(httpClientFactory.beregningKlient(), config.getString("beregning.resource.url"))
     }
 
     val gosysOppgaveKlient: GosysOppgaveKlient by lazy {

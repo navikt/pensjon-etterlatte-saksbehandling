@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.modules.beregning.AvkortingRepositoryOperasjoner
 import tools.jackson.module.kotlin.readValue
 import java.time.YearMonth
 import java.util.UUID
@@ -20,8 +21,8 @@ import javax.sql.DataSource
 
 class AvkortingRepository(
     private val dataSource: DataSource,
-) {
-    fun harSakInntektForAar(harInntektForAarDto: InntektsjusteringAvkortingInfoRequest): Boolean =
+) : AvkortingRepositoryOperasjoner {
+    override fun harSakInntektForAar(harInntektForAarDto: InntektsjusteringAvkortingInfoRequest): Boolean =
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =
                 queryOf(
@@ -37,7 +38,7 @@ class AvkortingRepository(
             alleAarsoppgjoer.isNotEmpty()
         }
 
-    fun hentAvkorting(behandlingId: UUID): Avkorting? =
+    override fun hentAvkorting(behandlingId: UUID): Avkorting? =
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =
                 queryOf(
@@ -152,7 +153,7 @@ class AvkortingRepository(
         )
     }
 
-    fun hentFaktiskInntekt(aarsoppgjoerId: UUID) = dataSource.transaction { tx -> selectFaktiskInntekt(aarsoppgjoerId, tx) }
+    override fun hentFaktiskInntekt(aarsoppgjoerId: UUID) = dataSource.transaction { tx -> selectFaktiskInntekt(aarsoppgjoerId, tx) }
 
     private fun selectFaktiskInntekt(
         aarsoppgjoerId: UUID,
@@ -259,7 +260,7 @@ class AvkortingRepository(
         )
     }
 
-    fun lagreAvkorting(
+    override fun lagreAvkorting(
         behandlingId: UUID,
         sakId: SakId,
         avkorting: Avkorting,
@@ -297,7 +298,7 @@ class AvkortingRepository(
         }
     }
 
-    fun slettForBehandling(behandling: UUID) {
+    override fun slettForBehandling(behandling: UUID) {
         dataSource.transaction { tx ->
             slettAvkorting(behandling, tx)
         }
@@ -737,7 +738,7 @@ class AvkortingRepository(
             sanksjonType = enumValueOf(string("sanksjon_type")),
         )
 
-    fun hentAlleAarsoppgjoer(sakId: SakId): List<AarsoppgjoerLoepende> =
+    override fun hentAlleAarsoppgjoer(sakId: SakId): List<AarsoppgjoerLoepende> =
         dataSource.transaction { tx ->
             queryOf(
                 "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id= ? ORDER BY aar ASC",
@@ -756,7 +757,7 @@ class AvkortingRepository(
             }
         }
 
-    fun hentAlleBehandlingerMedAarsoppgjoer(sakId: SakId): List<UUID> =
+    override fun hentAlleBehandlingerMedAarsoppgjoer(sakId: SakId): List<UUID> =
         dataSource.transaction { tx ->
             queryOf(
                 "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id= ? ORDER BY aar DESC",
@@ -771,7 +772,7 @@ class AvkortingRepository(
             }
         }
 
-    fun hentAlleAarsoppgjoer(behandlinger: List<UUID>): List<AarsoppgjoerLoepende> =
+    override fun hentAlleAarsoppgjoer(behandlinger: List<UUID>): List<AarsoppgjoerLoepende> =
         dataSource.transaction { tx ->
             queryOf(
                 "SELECT * FROM avkorting_aarsoppgjoer WHERE behandling_id = ANY (?) ORDER BY aar ASC",

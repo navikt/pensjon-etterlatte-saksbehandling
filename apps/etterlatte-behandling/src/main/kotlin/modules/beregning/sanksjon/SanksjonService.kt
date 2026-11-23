@@ -17,13 +17,14 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.modules.beregning.BeregningToggles
+import no.nav.etterlatte.modules.beregning.SanksjonRepositoryOperasjoner
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
 class SanksjonService(
     private val behandlingService: BehandlingService,
-    private val sanksjonRepository: SanksjonRepository,
+    private val sanksjonRepository: SanksjonRepositoryOperasjoner,
     private val featureToggleService: FeatureToggleService,
     private val behandlingStatusService: BehandlingStatusService,
 ) {

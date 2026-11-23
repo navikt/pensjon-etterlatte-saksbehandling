@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.modules.beregning.AvkortingRepositoryOperasjoner
 import no.nav.etterlatte.modules.beregning.BeregningService
 import no.nav.etterlatte.modules.beregning.BeregningToggles
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingMapper.avkortingForFrontend
@@ -53,7 +54,7 @@ enum class InntektToggles(
 
 class AvkortingService(
     private val behandlingService: BehandlingService,
-    private val avkortingRepository: AvkortingRepository,
+    private val avkortingRepository: AvkortingRepositoryOperasjoner,
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
     private val aldersovergangService: AldersovergangService,

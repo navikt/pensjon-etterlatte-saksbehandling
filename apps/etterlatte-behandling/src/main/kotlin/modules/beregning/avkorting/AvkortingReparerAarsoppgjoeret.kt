@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.vedtak.InnvilgetPeriodeDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vedtak.erInnvilgetIAar
+import no.nav.etterlatte.modules.beregning.AvkortingRepositoryOperasjoner
 import org.slf4j.LoggerFactory
 
 /*
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory
 *
 */
 class AvkortingReparerAarsoppgjoeret(
-    val avkortingRepository: AvkortingRepository,
+    val avkortingRepository: AvkortingRepositoryOperasjoner,
 ) {
     private val logger = LoggerFactory.getLogger(AvkortingReparerAarsoppgjoeret::class.java)
 

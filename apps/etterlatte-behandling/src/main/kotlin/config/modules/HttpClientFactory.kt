@@ -36,4 +36,6 @@ internal class HttpClientFactory(
     fun sigrunKlient(): HttpClient = lagKlient(config.getString("sigrun.scope"))
 
     fun inntektskomponentKlient(): HttpClient = lagKlient(config.getString("inntektskomponenten.scope"))
+
+    fun beregningKlient(): HttpClient = lagKlient("api://${config.getString("beregning.client.id")}/.default")
 }

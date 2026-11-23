@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.modules.beregning.BeregningsGrunnlagRepositoryOperasjoner
 import org.postgresql.util.PGobject
 import tools.jackson.module.kotlin.readValue
 import java.time.YearMonth
@@ -20,8 +21,8 @@ import javax.sql.DataSource
 
 class BeregningsGrunnlagRepository(
     private val dataSource: DataSource,
-) {
-    fun finnBeregningsGrunnlag(id: UUID): BeregningsGrunnlag? =
+) : BeregningsGrunnlagRepositoryOperasjoner {
+    override fun finnBeregningsGrunnlag(id: UUID): BeregningsGrunnlag? =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
@@ -42,7 +43,7 @@ class BeregningsGrunnlagRepository(
             ).map { it.asVedtaksperiode() }.asList,
         )
 
-    fun lagreBeregningsGrunnlag(beregningsGrunnlag: BeregningsGrunnlag): Boolean {
+    override fun lagreBeregningsGrunnlag(beregningsGrunnlag: BeregningsGrunnlag): Boolean {
         val query =
             if (finnBeregningsGrunnlag(beregningsGrunnlag.behandlingId) == null) {
                 lagreGrunnlagQuery
@@ -116,7 +117,7 @@ class BeregningsGrunnlagRepository(
         }
     }
 
-    fun finnOverstyrBeregningGrunnlagForBehandling(id: UUID): List<OverstyrBeregningGrunnlagDao> =
+    override fun finnOverstyrBeregningGrunnlagForBehandling(id: UUID): List<OverstyrBeregningGrunnlagDao> =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
@@ -126,7 +127,7 @@ class BeregningsGrunnlagRepository(
             )
         }
 
-    fun lagreOverstyrBeregningGrunnlagForBehandling(
+    override fun lagreOverstyrBeregningGrunnlagForBehandling(
         behandlingId: UUID,
         data: List<OverstyrBeregningGrunnlagDao>,
     ) {

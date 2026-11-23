@@ -8,6 +8,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.lagContext
@@ -21,7 +22,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.sql.Connection
 import java.util.UUID.randomUUID
+import javax.sql.DataSource
 
 class BeregningTilgangServiceTest {
     private val tilgangService = mockk<TilgangServiceSjekker>()
@@ -95,5 +98,33 @@ class BeregningTilgangServiceTest {
             assertThrows<IllegalStateException> {
                 service.harTilgangTilBehandling(behandlingId, false, bruker)
             } shouldBeSameInstanceAs feil
+        }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `tilgangssjekken bruker en kort transaksjon i request-konteksten`(skrivetilgang: Boolean) =
+        runBlocking<Unit> {
+            val dataSource = mockk<DataSource>()
+            val connection = mockk<Connection>(relaxed = true)
+            every { dataSource.connection } returns connection
+            val databaseContext = DatabaseContext(dataSource)
+            Kontekst.set(lagContext(saksbehandler, databaseContext, sakTilgangDao))
+            every { sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId) } answers {
+                databaseContext.activeTx() shouldBeSameInstanceAs connection
+                SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
+            }
+            every { tilgangService.harTilgangTilBehandling(behandlingId, saksbehandler.saksbehandlerMedRoller) } answers {
+                databaseContext.activeTx() shouldBeSameInstanceAs connection
+                true
+            }
+
+            service.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker) shouldBe true
+
+            databaseContext.harIntransaction() shouldBe false
+            verify(exactly = 1) {
+                connection.commit()
+                connection.close()
+            }
+            verify(exactly = 0) { connection.rollback() }
         }
 }

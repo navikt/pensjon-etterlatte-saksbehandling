@@ -9,14 +9,15 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.modules.beregning.EtteroppgjoerRepositoryOperasjoner
 import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 import javax.sql.DataSource
 
 class EtteroppgjoerRepository(
     private val dataSource: DataSource,
-) {
-    fun lagreEtteroppgjoerResultat(resultat: BeregnetEtteroppgjoerResultat) =
+) : EtteroppgjoerRepositoryOperasjoner {
+    override fun lagreEtteroppgjoerResultat(resultat: BeregnetEtteroppgjoerResultat) =
         dataSource.transaction { tx ->
             queryOf(
                 statement =
@@ -67,7 +68,7 @@ class EtteroppgjoerRepository(
                 }
         }
 
-    fun hentEtteroppgjoerResultat(
+    override fun hentEtteroppgjoerResultat(
         aar: Int,
         forbehandlingId: UUID,
         sisteIverksatteBehandlingId: UUID,

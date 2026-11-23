@@ -29,7 +29,7 @@ Statusdatoen i dette dokumentet er ikke bevis på at implementasjonene er avstem
 ## Nåværende tilstand
 
 Sist kontrollert 23. november 2026 mot `origin/main` på commit
-[`fa81b829e`](https://github.com/navikt/pensjon-etterlatte-saksbehandling/commit/fa81b829e).
+[`7fe221cbc`](https://github.com/navikt/pensjon-etterlatte-saksbehandling/commit/7fe221cbc).
 PR-status er kontrollert på GitHub. Miljøverdiene nedenfor kommer fra manifestene,
 ikke fra en live-avlesning av prod eller Unleash.
 
@@ -52,7 +52,7 @@ bytte autoritativ database. Ingen av migreringsstegene nedenfor kopierer produks
 | `etterlatte-behandling` | `BRUK_INTERN_BEREGNING` | `false` | `false` | Aktivering av den flyttede beregningsmodulen og rutene under `/api/beregning`. |
 | `etterlatte-behandling` | `BRUK_EGEN_DATABASE_FOR_BEREGNING` | `false` | `false` | Datakilde for alle seks repositories: `false` velger CRUD i beregning, `true` velger lokal JDBC. |
 
-Begge er miljøvariabler som leses ved oppstart, ikke Unleash-toggles.
+Bryterne er miljøvariabler som leses ved oppstart, ikke Unleash-toggles.
 Samme navn betyr ikke en felles bryter på tvers av apper. Endring krever deployment/omstart.
 CRUD-rutene i prod er altså fortsatt deaktivert, og UI er ikke flyttet i noen av miljøene.
 
@@ -187,11 +187,12 @@ behandling/modules.beregning -> BeregningCrudKlient -> beregning/intern -> datab
 Ingen app skal koble seg direkte til den andre appens database.
 Det finnes ingen automatisk synkronisering, dobbeltskriving eller fallback mellom databasene.
 
-### Denne endringen: behandling sine kallere
+### Merget PR #9070: behandling sine kallere
 
-Arbeidet i [#9070](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/9070)
-bygger på den mergede #9069 og er ennå ikke merget.
-Det legger til `BeregningKlientIntern` for alle de 16 operasjonene i `BeregningKlient`.
+[#9070](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/9070) ble merget
+23. november 2026 med commit
+[`7fe221cbc`](https://github.com/navikt/pensjon-etterlatte-saksbehandling/commit/7fe221cbc).
+Den legger til `BeregningKlientIntern` for alle de 16 operasjonene i `BeregningKlient`.
 `KlientModule` velger den interne adapteren når behandling sin
 `BRUK_INTERN_BEREGNING=true`; ellers beholdes `BeregningKlientImpl` over HTTP.
 Avhengighetene initialiseres ved behov for å unngå sirkler mellom behandlingstjenestene og beregningsmodulen.
@@ -211,16 +212,49 @@ valg av beregningsmetode fra overstyrte beregningsperioder i brevdata, uten å g
 HTTP-klienter. `FORLENGET_OMS` kommer fra det delte modellbiblioteket og trenger ingen kopi.
 Det er ingen database- eller Flyway-endringer i beregningsappen siden denne avstemmingen.
 
+### Denne endringen: øvrige konsumenter
+
+Arbeidsgrenen forbereder `BRUK_INTERN_BEREGNING` i beregning-kafka, brev-api,
+statistikk og testdata-behandler. Alle verdier er `false`, både i dev og prod
+der appen er deployet. Dette er ikke dokumentasjon på merge, deployment eller aktivering.
+UI og behandling beholder bryterne fra de tidligere stegene.
+
+| Konsument | Når bryteren er `true` | Konfigurasjon |
+| --- | --- | --- |
+| UI-ens BFF | `/api/beregning` går til behandling med behandling-scope | Eksisterende `BEHANDLING_API_URL` og `BEHANDLING_API_SCOPE`; beregning-verdiene beholdes for rollback. |
+| Brev-api | Alle operasjonene i `BeregningKlient` bruker behandling | Eksisterende `behandling.resource.url` og `behandling.client.id`. Brevflyten endres ikke. |
+| Statistikk | Beregning og ferdig avkorting hentes fra behandling | `BEHANDLING_URL` og eksisterende `BEHANDLING_AZURE_SCOPE`; gammel backend bruker `BEREGNING_URL` og `BEREGNING_AZURE_SCOPE`. |
+| Beregning-kafka | Alle tre rivers bruker behandling gjennom samme `BeregningService` | `BEHANDLING_URL` og `BEHANDLING_AZURE_SCOPE`; gammel backend bruker `BEREGNING_URL` og `BEREGNING_AZURE_SCOPE`. |
+| Testdata-behandler | Beregning, beregningsgrunnlag og avkorting bruker behandling | `behandling.azure.scope`, `behandling.client.id` og `behandling.resource.url`, sistnevnte fra `ETTERLATTE_BEHANDLING_URL`. Bare dev. |
+
+Beregning-kafka får outbound-tilgang til behandling og tilsvarende inbound-regel i
+behandling i begge miljøer. De øvrige konsumentene har allerede nødvendige tilganger.
+Tilgangene til beregning beholdes så lenge gammel ruting og CRUD fortsatt brukes.
+Ingen konsument prøver gammel backend automatisk hvis den valgte backend feiler.
+Kotlin-appene avviser ugyldige bryterverdier ved oppstart.
+
+Søk i sporet kildekode og konfigurasjon fant ingen flere direkte konsumenter.
+Det omfatter også UI-ens lokale Azure-app. Beregning-modellbiblioteker i blant annet
+api og behandling-kafka er ikke HTTP-konsumenter av beregningsappen.
+De seks rutefamiliene beholder metoder og stier under `/api/beregning`, inkludert
+sletting av avkorting, overstyring og sanksjoner.
+
+Oppdatert `origin/main` er kontrollert til `7fe221cbc`. Beregningsappen og delte
+biblioteker er uendret siden `fa81b829e`. En eldre utelatt diagnostikkendring fra
+`e9408d1ca` er nå også overført: feilen for perioder utenfor årsoppgjøret oppgir året.
+Dette endrer ikke valideringen eller beregningsreglene. Ingen nye databaseendringer
+eller uavklarte kildeavvik er funnet i den kontrollerte historikken.
+
 ## Gjenstående steg
 
-1. **Merge og aktivering.** Merge klientomleggingen uten å likestille dette med aktivering.
+1. **Merge og aktivering.** Merge konsumentbryterne uten å likestille dette med aktivering.
    Prøv flytene i dev først, også med begge datakilder og relevante testdata.
    Når CRUD brukes, må beregningsappen ha CRUD-rutene aktivert før behandling aktiveres.
-   Aktiver behandling før UI sendes dit. Kontroller faktisk deployet versjon, tilgangskontroll,
+   Aktiver behandling før noen konsument sendes dit. Kontroller faktisk deployet versjon, tilgangskontroll,
    Unleash-kontekst og flytene for BP, OMS, etteroppgjør og vedtak.
-2. **Øvrige konsumenter.** Flytt `etterlatte-beregning-kafka`, `etterlatte-brev-api` og
-   `etterlatte-statistikk`, samt `etterlatte-testdata-behandler` i dev. Kontroller alle brukte
-   endpoints, inkludert vedlikehold og sletting. Oppdater URL, token-scope og Nais-tilganger.
+2. **Øvrige konsumenter.** Aktiver én konsument om gangen med appens egen
+   `BRUK_INTERN_BEREGNING=true`, først i dev. Prøv også vedlikehold og sletting.
+   Kontroller URL, token-scope og Nais-tilganger i det deployede miljøet.
    Behandling sin bryter endrer ikke konfigurasjonen i andre apper.
 3. **Dataflytting.** Planlegg og gjennomfør flytting fra `beregning` til `sakogbehandlinger`,
    med avklart skrivepunkt, eventuell skrivepause/siste synk og kontroll av data og referanser.
@@ -233,7 +267,7 @@ Det er ingen database- eller Flyway-endringer i beregningsappen siden denne avst
    Fjern utdaterte URL-er, scopes og tilganger. Oppdater permanent domenedokumentasjon og
    arkiver eller fjern denne migreringsstatusen.
 
-Ved rollback av rutingen må UI først flyttes tilbake til beregning før rutene i behandling
+Ved rollback av rutingen må alle konsumenter først flyttes tilbake til beregning før rutene i behandling
 deaktiveres. Et databasebytte kan ikke rulles tilbake bare ved å endre en bryter dersom
 databasene har fått ulike data.
 

@@ -15,4 +15,5 @@ dependencies {
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(libs.cache.caffeine)
     testImplementation(libs.test.navfelles.rapidsandriversktor)
+    testRuntimeOnly(libs.test.junit.platform.launcher)
 }

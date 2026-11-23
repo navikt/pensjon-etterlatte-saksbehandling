@@ -121,7 +121,7 @@ Feil fra de flyttede tjenestene sendes videre uten automatisk forsøk mot den ga
 `BeregningModule` tilbyr en ikke-null intern klient. `KlientModule` velger mellom intern
 klient og HTTP-klient med bryteren. Hvis intern beregning er aktivert uten en konfigurert
 intern klient, feiler klientopprettelsen i stedet for å velge HTTP-klienten.
-UI-ens BFF har en egen miljøvariabel med samme navn som velger hvilken app forespørslene går til.
+Hver konsument har en egen miljøvariabel med samme navn som velger backend og tilhørende token-scope.
 
 Manifestene setter disse verdiene:
 
@@ -129,6 +129,10 @@ Manifestene setter disse verdiene:
 | --- | --- | --- | --- |
 | Behandling | `BRUK_INTERN_BEREGNING` | `false` | `false` |
 | UI | `BRUK_INTERN_BEREGNING` | `false` | `false` |
+| Beregning-kafka | `BRUK_INTERN_BEREGNING` | `false` | `false` |
+| Brev-api | `BRUK_INTERN_BEREGNING` | `false` | `false` |
+| Statistikk | `BRUK_INTERN_BEREGNING` | `false` | `false` |
+| Testdata-behandler | `BRUK_INTERN_BEREGNING` | `false` | Ikke deployet |
 | Beregning (CRUD-ruter) | `BRUK_INTERN_BEREGNING` | `true` | `false` |
 | Behandling | `BRUK_EGEN_DATABASE_FOR_BEREGNING` | `false` | `false` |
 
@@ -147,10 +151,12 @@ dobbeltskriving; ved bytte må dataene være oppdaterte i databasen som tas i br
 Flyttet beregning er deaktivert i både dev og prod. UI bruker fortsatt den frittstående
 beregningsappen. Denne endringen klargjør koblingene og databasevalget; aktivering gjøres
 i en egen PR. Den eksisterende CRUD-bryteren i beregningsappen endres ikke.
-Kafka-konsumenter i andre apper bruker fortsatt beregningsappen.
+De øvrige konsumentene bruker fortsatt beregningsappen til deres egen bryter aktiveres.
 
 Ved senere aktivering deployer du først beregning med CRUD-rutene aktivert,
-deretter behandling med `BRUK_INTERN_BEREGNING=true` og til slutt UI med samme verdi.
+deretter behandling med `BRUK_INTERN_BEREGNING=true`. Aktiver så én konsument om gangen
+med samme verdi i konsumentens eget manifest. URL og scope byttes samlet. Ved rollback
+må konsumentene flyttes tilbake før rutene i behandling deaktiveres.
 Kontroller at beregningsbryterne i Unleash også gjelder `etterlatte-behandling`.
 De flyttede UI-kallene og interne servicekall bruker denne appens Unleash-kontekst.
 Etter aktivering kan du teste begge datakildene i dev ved å endre

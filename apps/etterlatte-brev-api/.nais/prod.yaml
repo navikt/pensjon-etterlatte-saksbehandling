@@ -113,6 +113,8 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
+    - name: BRUK_INTERN_BEREGNING
+      value: "false"
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID

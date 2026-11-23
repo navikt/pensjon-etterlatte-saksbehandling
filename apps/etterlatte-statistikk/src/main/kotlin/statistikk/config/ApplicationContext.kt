@@ -2,7 +2,10 @@ package no.nav.etterlatte.statistikk.config
 
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.BEHANDLING_AZURE_SCOPE
+import no.nav.etterlatte.EnvKey.BEHANDLING_URL
 import no.nav.etterlatte.EnvKey.BEREGNING_AZURE_SCOPE
+import no.nav.etterlatte.EnvKey.BEREGNING_URL
+import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -41,8 +44,10 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
-class ApplicationContext {
-    private val env = Miljoevariabler.systemEnv()
+class ApplicationContext(
+    private val env: Miljoevariabler = Miljoevariabler.systemEnv(),
+) {
+    private val brukInternBeregning = env.getOrDefault(BRUK_INTERN_BEREGNING, "false").toBooleanStrict()
     private val statistikkService: StatistikkService by lazy {
         StatistikkService(
             stoenadRepository = statistikkRepository,
@@ -76,7 +81,7 @@ class ApplicationContext {
     }
 
     private val behandlingKlient: BehandlingKlient by lazy {
-        BehandlingKlientImpl(behandlingHttpClient, "http://etterlatte-behandling")
+        BehandlingKlientImpl(behandlingHttpClient, env.requireEnvValue(BEHANDLING_URL))
     }
 
     private val statistikkRepository: StoenadRepository by lazy {
@@ -88,8 +93,12 @@ class ApplicationContext {
     }
     private val datasource: DataSource by lazy { DataSourceBuilder.createDataSource(env).also { it.migrate() } }
 
-    private val beregningKlient: BeregningKlient by lazy {
-        BeregningKlientImpl(beregningHttpClient, "http://etterlatte-beregning")
+    internal val beregningKlient: BeregningKlient by lazy {
+        if (brukInternBeregning) {
+            BeregningKlientImpl(behandlingHttpClient, env.requireEnvValue(BEHANDLING_URL))
+        } else {
+            BeregningKlientImpl(beregningHttpClient, env.requireEnvValue(BEREGNING_URL))
+        }
     }
 
     private val soeknadStatistikkRepository: SoeknadStatistikkRepository by lazy {

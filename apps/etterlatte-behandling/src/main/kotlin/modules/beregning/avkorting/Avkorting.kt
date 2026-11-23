@@ -1091,7 +1091,7 @@ data class AarsoppgjoerLoepende(
     init {
         fun periodeISammeAar(periode: Periode) {
             if (periode.fom.year != aar || (periode.tom?.year?.let { it != aar } == true)) {
-                throw InternfeilException("Perioder må være innenfor årsoppgjøret sitt år $periode")
+                throw InternfeilException("Perioder må være innenfor årsoppgjøret sitt år: aar=$aar, $periode")
             }
         }
 

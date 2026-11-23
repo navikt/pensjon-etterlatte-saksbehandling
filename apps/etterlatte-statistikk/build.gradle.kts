@@ -17,6 +17,7 @@ dependencies {
 
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor.servertests)
+    testImplementation(libs.ktor.clientmock)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
     testImplementation(libs.test.navfelles.rapidsandriversktor)

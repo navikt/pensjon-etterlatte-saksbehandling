@@ -104,6 +104,8 @@ spec:
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEREGNING_URL
       value: http://etterlatte-beregning
+    - name: BRUK_INTERN_BEREGNING
+      value: "false"
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID

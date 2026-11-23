@@ -203,6 +203,7 @@ spec:
       rules:
         - application: etterlatte-egne-ansatte-lytter
         - application: etterlatte-beregning
+        - application: etterlatte-beregning-kafka
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: efterlatte-verktoy

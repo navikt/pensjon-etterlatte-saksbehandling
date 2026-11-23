@@ -8,9 +8,11 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
@@ -226,6 +228,60 @@ internal class BeregningModuleTest {
         verify { dataSource wasNot Called }
     }
 
+    @Test
+    fun `konsumentenes metoder og stier finnes i behandling ogsaa for vedlikehold og sletting`() {
+        val modul = modul()
+        val stier =
+            listOf(
+                HttpMethod.Get to "/ugyldig-id",
+                HttpMethod.Post to "/ugyldig-id",
+                HttpMethod.Get to "/ugyldig-id/overstyrt",
+                HttpMethod.Post to "/ugyldig-id/overstyrt",
+                HttpMethod.Delete to "/ugyldig-id/overstyrt",
+                HttpMethod.Get to "/beregningsgrunnlag/ugyldig-id",
+                HttpMethod.Post to "/beregningsgrunnlag/ugyldig-id",
+                HttpMethod.Post to "/beregningsgrunnlag/ugyldig-id/fra/ugyldig-id",
+                HttpMethod.Get to "/beregningsgrunnlag/ugyldig-id/overstyr",
+                HttpMethod.Post to "/beregningsgrunnlag/ugyldig-id/overstyr",
+                HttpMethod.Put to "/beregningsgrunnlag/ugyldig-id/overstyr/regulering",
+                HttpMethod.Get to "/avkorting/ugyldig-id",
+                HttpMethod.Get to "/avkorting/ugyldig-id/ferdig",
+                HttpMethod.Get to "/avkorting/ugyldig-id/manglende-inntektsaar",
+                HttpMethod.Get to "/avkorting/ugyldig-id/har-sanksjon-gamle-regler",
+                HttpMethod.Post to "/avkorting/ugyldig-id/liste",
+                HttpMethod.Post to "/avkorting/ugyldig-id/med/ugyldig-id",
+                HttpMethod.Post to "/avkorting/ugyldig-id/haandter-tidlig-alderspensjon",
+                HttpMethod.Delete to "/avkorting/ugyldig-id",
+                HttpMethod.Post to "/avkorting/aarlig-inntektsjustering-sjekk",
+                HttpMethod.Post to "/avkorting/aarlig-inntektsjustering",
+                HttpMethod.Post to "/avkorting/mottatt-inntektsjustering",
+                HttpMethod.Post to "/avkorting/etteroppgjoer/hent",
+                HttpMethod.Post to "/avkorting/etteroppgjoer/beregn-faktisk-inntekt",
+                HttpMethod.Post to "/avkorting/etteroppgjoer/hent-beregnet-resultat",
+                HttpMethod.Get to "/sanksjon/ugyldig-id",
+                HttpMethod.Post to "/sanksjon/ugyldig-id",
+                HttpMethod.Delete to "/sanksjon/ugyldig-id/ugyldig-id",
+                HttpMethod.Get to "/ytelse-med-grunnlag/ugyldig-id",
+            )
+
+        testApplication {
+            val client = runServer(server) { modul.registrerRoutes(this) }
+            stier.forEach { (metode, sti) ->
+                val response =
+                    client.request("/api/beregning$sti") {
+                        method = metode
+                    }
+                response.status shouldBe HttpStatusCode.Unauthorized
+            }
+            client.get("/api/beregning/finnes/ikke").status shouldBe HttpStatusCode.NotFound
+        }
+
+        verify {
+            dataSource wasNot Called
+            crudKlient wasNot Called
+        }
+    }
+
     @ParameterizedTest
     @NullSource
     @ValueSource(booleans = [false])
@@ -366,7 +422,15 @@ internal class BeregningModuleTest {
             generateSequence(File(".").canonicalFile) { it.parentFile }
                 .first { it.resolve("settings.gradle.kts").isFile }
         listOf("dev", "prod").forEach { miljoe ->
-            listOf("etterlatte-behandling", "etterlatte-saksbehandling-ui").forEach { app ->
+            val apper =
+                listOf(
+                    "etterlatte-behandling",
+                    "etterlatte-saksbehandling-ui",
+                    "etterlatte-beregning-kafka",
+                    "etterlatte-brev-api",
+                    "etterlatte-statistikk",
+                ) + if (miljoe == "dev") listOf("etterlatte-testdata-behandler") else emptyList()
+            apper.forEach { app ->
                 val manifest = prosjektrot.resolve("apps/$app/.nais/$miljoe.yaml").readText()
                 Regex("""- name: BRUK_INTERN_BEREGNING\s+value: "(true|false)"""")
                     .find(manifest)
@@ -377,6 +441,71 @@ internal class BeregningModuleTest {
                         .find(manifest)
                         ?.groupValues
                         ?.get(1) shouldBe "false"
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `konsumentene har tilgang til baade behandling og beregning under utrulling`() {
+        val prosjektrot =
+            generateSequence(File(".").canonicalFile) { it.parentFile }
+                .first { it.resolve("settings.gradle.kts").isFile }
+        listOf("dev", "prod").forEach { miljoe ->
+            val behandlingManifest = prosjektrot.resolve("apps/etterlatte-behandling/.nais/$miljoe.yaml").readText()
+            val inbound = behandlingManifest.substringAfter("    inbound:", "").substringBefore("    outbound:")
+            val konsumenter =
+                listOf(
+                    "etterlatte-saksbehandling-ui",
+                    "etterlatte-beregning-kafka",
+                    "etterlatte-brev-api",
+                    "etterlatte-statistikk",
+                ) + if (miljoe == "dev") listOf("etterlatte-testdata-behandler") else emptyList()
+            konsumenter.forEach { app ->
+                Regex("""- application: $app(\s|$)""").containsMatchIn(inbound) shouldBe true
+                val manifest = prosjektrot.resolve("apps/$app/.nais/$miljoe.yaml").readText()
+                val outbound = manifest.substringAfter("    outbound:", "").substringBefore("    inbound:")
+                listOf("etterlatte-behandling", "etterlatte-beregning").forEach { backend ->
+                    Regex("""- application: $backend(\s|$)""").containsMatchIn(outbound) shouldBe true
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `konsumentmanifestene konfigurerer URL og scope for begge backender`() {
+        val prosjektrot =
+            generateSequence(File(".").canonicalFile) { it.parentFile }
+                .first { it.resolve("settings.gradle.kts").isFile }
+        listOf("dev", "prod").forEach { miljoe ->
+            val apper =
+                listOf(
+                    "etterlatte-saksbehandling-ui",
+                    "etterlatte-beregning-kafka",
+                    "etterlatte-brev-api",
+                    "etterlatte-statistikk",
+                ) + if (miljoe == "dev") listOf("etterlatte-testdata-behandler") else emptyList()
+            apper.forEach { app ->
+                val manifest = prosjektrot.resolve("apps/$app/.nais/$miljoe.yaml").readText()
+                val env =
+                    Regex("""- name: (\w+)\s+value: ([^\r\n]+)""")
+                        .findAll(manifest)
+                        .associate { it.groupValues[1] to it.groupValues[2] }
+                listOf("BEREGNING", "BEHANDLING").forEach { backend ->
+                    val urlKey =
+                        when (app) {
+                            "etterlatte-saksbehandling-ui" -> "${backend}_API_URL"
+                            "etterlatte-brev-api", "etterlatte-testdata-behandler" -> "ETTERLATTE_${backend}_URL"
+                            else -> "${backend}_URL"
+                        }
+                    env[urlKey] shouldBe "http://etterlatte-${backend.lowercase()}"
+                    if (app !in listOf("etterlatte-brev-api", "etterlatte-testdata-behandler")) {
+                        val scopeKey =
+                            if (app == "etterlatte-saksbehandling-ui") "${backend}_API_SCOPE" else "${backend}_AZURE_SCOPE"
+                        env[scopeKey] shouldBe "api://$miljoe-gcp.etterlatte.etterlatte-${backend.lowercase()}/.default"
+                    } else {
+                        env["ETTERLATTE_${backend}_CLIENT_ID"].isNullOrBlank() shouldBe false
+                    }
                 }
             }
         }

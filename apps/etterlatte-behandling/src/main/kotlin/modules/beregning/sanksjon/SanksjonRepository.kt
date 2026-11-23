@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.modules.beregning.SanksjonRepositoryOperasjoner
 import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.YearMonth
@@ -16,8 +17,8 @@ import javax.sql.DataSource
 
 class SanksjonRepository(
     private val dataSource: DataSource,
-) {
-    fun hentSanksjon(behandlingId: UUID): List<Sanksjon> =
+) : SanksjonRepositoryOperasjoner {
+    override fun hentSanksjon(behandlingId: UUID): List<Sanksjon> =
         dataSource.transaction { tx ->
             queryOf(
                 statement =
@@ -28,7 +29,7 @@ class SanksjonRepository(
             }
         }
 
-    fun opprettSanksjon(
+    override fun opprettSanksjon(
         behandlingId: UUID,
         sakId: SakId,
         saksbehandlerIdent: String,
@@ -60,7 +61,7 @@ class SanksjonRepository(
         }
     }
 
-    fun opprettSanksjonFraKopi(
+    override fun opprettSanksjonFraKopi(
         behandlingId: UUID,
         sakId: SakId,
         sanksjon: Sanksjon,
@@ -91,7 +92,7 @@ class SanksjonRepository(
         }
     }
 
-    fun oppdaterSanksjon(
+    override fun oppdaterSanksjon(
         sanksjon: LagreSanksjon,
         saksbehandlerIdent: String,
     ) {
@@ -120,7 +121,7 @@ class SanksjonRepository(
         }
     }
 
-    fun slettSanksjon(sanksjonId: UUID): Int =
+    override fun slettSanksjon(sanksjonId: UUID): Int =
         dataSource.transaction { tx ->
             queryOf(
                 statement =
@@ -142,7 +143,7 @@ class SanksjonRepository(
             beskrivelse = string("beskrivelse"),
         )
 
-    fun hentSanksjonMedId(sanksjonId: UUID): Sanksjon? =
+    override fun hentSanksjonMedId(sanksjonId: UUID): Sanksjon? =
         dataSource.transaction { tx ->
             queryOf(
                 statement =

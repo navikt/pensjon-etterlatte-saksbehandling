@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class BeregningService(
-    private val beregningRepository: BeregningRepository,
+    private val beregningRepository: BeregningRepositoryOperasjoner,
     private val behandlingService: BehandlingService,
     private val beregnBarnepensjonService: BeregnBarnepensjonService,
     private val beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService,

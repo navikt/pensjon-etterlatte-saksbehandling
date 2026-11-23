@@ -1,6 +1,7 @@
 package no.nav.etterlatte.modules.beregning
 
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.sak.TilgangServiceSjekker
@@ -13,15 +14,16 @@ class BeregningTilgangService(
         behandlingId: UUID,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
-    ): Boolean {
-        val kontekst = Kontekst.get()
-        val saksbehandler = kontekst.appUserAsSaksbehandler()
-        if (skrivetilgang) {
-            val enhet = kontekst.sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId)?.enhetNr
-            if (enhet == null || enhet !in saksbehandler.hentEnheterMedSkrivetilgang()) {
-                return false
+    ): Boolean =
+        inTransactionIfNeeded {
+            val kontekst = Kontekst.get()
+            val saksbehandler = kontekst.appUserAsSaksbehandler()
+            if (skrivetilgang) {
+                val enhet = kontekst.sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId)?.enhetNr
+                if (enhet == null || enhet !in saksbehandler.hentEnheterMedSkrivetilgang()) {
+                    return@inTransactionIfNeeded false
+                }
             }
+            tilgangService.harTilgangTilBehandling(behandlingId, saksbehandler.saksbehandlerMedRoller)
         }
-        return tilgangService.harTilgangTilBehandling(behandlingId, saksbehandler.saksbehandlerMedRoller)
-    }
 }

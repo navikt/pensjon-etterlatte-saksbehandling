@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.modules.beregning.anvendttrygdetid.AnvendtTrygdetid
-import no.nav.etterlatte.modules.beregning.anvendttrygdetid.AnvendtTrygdetidRepository
 import no.nav.etterlatte.modules.beregning.anvendttrygdetid.BarnepensjonAnvendtTrygdetidPerioder
 import no.nav.etterlatte.modules.beregning.anvendttrygdetid.BarnepensjonAnvendtTrygdetidPerioder.finnForAvdoed
 import no.nav.etterlatte.modules.beregning.grunnbeloep.GrunnbeloepRepository
@@ -63,7 +62,7 @@ class BeregnBarnepensjonService(
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidService: TrygdetidService,
-    private val anvendtTrygdetidRepository: AnvendtTrygdetidRepository,
+    private val anvendtTrygdetidRepository: AnvendtTrygdetidRepositoryOperasjoner,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)

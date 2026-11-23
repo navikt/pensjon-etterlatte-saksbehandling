@@ -101,6 +101,10 @@ yarn lint
 
 ## Domenekontekst
 
+Før du endrer eller gjennomgår beregning-migreringen, les
+[migreringsstatus og historikk](domenekontekst/beregning-migrering.md).
+Skill mellom kode som er merget til `main`, og funksjonalitet som faktisk er aktivert.
+
 For mer detaljert kontekst om domener, se:
 
 - [saksgangen](domenekontekst/saksgangen.md) – fullstendig livssyklus for en sak, fra søknad til iverksatt vedtak

@@ -88,6 +88,7 @@ internal class ApplicationContext(
             config = config,
             env = env,
             featureToggleService = featureToggleService,
+            beregningKlientIntern = { beregningModule.beregningKlient },
         )
 
     val beregningRepositoryModule =
@@ -105,7 +106,7 @@ internal class ApplicationContext(
             vedtakInternalServiceOverride = vedtakInternalServiceOverride,
         )
 
-    val beregningModule by lazy {
+    val beregningModule: BeregningModule by lazy {
         BeregningModule(env, beregningRepositoryModule, serviceModule, featureToggleService)
     }
 

@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerDao
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
 import no.nav.etterlatte.behandling.etteroppgjoer.sigrun.SkatteoppgjoerHendelserDao
+import no.nav.etterlatte.behandling.forlengetoms.ForlengetOmsDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.jobs.hengendebehandling.HengendeBehandlingDao
@@ -58,6 +59,7 @@ class DaoModule(
     val aktivitetspliktUnntakDao by lazy { AktivitetspliktUnntakDao(autoClosingDatabase) }
     val sjekklisteDao by lazy { SjekklisteDao(autoClosingDatabase) }
     val revurderingDao by lazy { RevurderingDao(autoClosingDatabase) }
+    val forlengetOmsDao by lazy { ForlengetOmsDao(autoClosingDatabase) }
 
     val behandlingDao by lazy {
         BehandlingDao(

@@ -1,10 +1,17 @@
 package no.nav.etterlatte.modules.beregning.klienter
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.toByteArray
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
@@ -57,6 +64,9 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.slf4j.LoggerFactory
+import java.io.IOException
+import java.net.SocketTimeoutException
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -388,13 +398,100 @@ internal class BeregningCrudKlientTest {
     @ValueSource(ints = [200, 400, 401, 403, 404, 500, 503])
     fun `skrivefeil og uventede statuser blir ikke tolket som vellykket lagring`(statuskode: Int) {
         val avkorting = Avkorting()
-        medKlient(
-            HttpMethod.Put,
-            "/avkorting/$behandlingId",
-            mapOf("sakId" to sakId, "avkorting" to avkorting),
-            status = HttpStatusCode.fromValue(statuskode),
-        ) {
-            assertThrows(InternfeilException::class.java) { it.lagreAvkorting(behandlingId, sakId, avkorting) }
+        medLogg { hendelser ->
+            medKlient(
+                HttpMethod.Put,
+                "/avkorting/$behandlingId",
+                mapOf("sakId" to sakId, "avkorting" to avkorting),
+                status = HttpStatusCode.fromValue(statuskode),
+            ) {
+                assertThrows(InternfeilException::class.java) { it.lagreAvkorting(behandlingId, sakId, avkorting) }
+            }
+            hendelser.size shouldBe if (statuskode >= 500 || statuskode in 200..299) 1 else 0
+            hendelser.forEach {
+                it.level shouldBe Level.WARN
+                it.formattedMessage shouldContain behandlingId.toString()
+                it.formattedMessage shouldContain "HTTP $statuskode"
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [0, 1, 2])
+    fun `nettverksfeil ved skriving logges med behandling uten aa logge data`(feiltype: Int) {
+        val feil =
+            when (feiltype) {
+                0 -> SocketTimeoutException("skal-ikke-logges")
+                1 -> IOException("skal-ikke-logges")
+                else -> HttpRequestTimeoutException("http://beregning", 1000)
+            }
+        val beregning = beregning().copy(behandlingId = behandlingId)
+        val engine = MockEngine { throw feil }
+        medLogg { hendelser ->
+            HttpClient(engine) {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                }
+            }.use { client ->
+                val kastet =
+                    assertThrows(feil.javaClass) {
+                        BeregningCrudKlient(client, "http://beregning").lagreEllerOppdaterBeregning(beregning)
+                    }
+                kastet.message shouldBe feil.message
+            }
+            hendelser.size shouldBe 1
+            val hendelse = hendelser.single()
+            hendelse.level shouldBe Level.WARN
+            hendelse.formattedMessage shouldContain "PUT /beregning"
+            hendelse.formattedMessage shouldContain "behandlingId=$behandlingId"
+            hendelse.formattedMessage shouldContain feil.javaClass.simpleName
+            hendelse.formattedMessage shouldNotContain "skal-ikke-logges"
+            hendelse.throwableProxy shouldBe null
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `nettverksfeil ved lesing logges ikke som uavklart skriving`(brukPost: Boolean) {
+        val feil = SocketTimeoutException("Lesingen feilet")
+        val engine = MockEngine { throw feil }
+        medLogg { hendelser ->
+            HttpClient(engine) {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                }
+            }.use { client ->
+                val klient = BeregningCrudKlient(client, "http://beregning")
+                assertThrows(SocketTimeoutException::class.java) {
+                    if (brukPost) klient.hentAlleAarsoppgjoer(listOf(behandlingId)) else klient.hent(behandlingId)
+                }
+            }
+            hendelser shouldBe emptyList()
+        }
+    }
+
+    @Test
+    fun `ugyldig JSON i skrivesvar logges som uavklart uten aa logge svaret`() {
+        val beregning = beregning().copy(behandlingId = behandlingId)
+        medLogg { hendelser ->
+            medKlient(HttpMethod.Put, "/beregning", beregning, svar = "skal-ikke-logges") {
+                assertThrows(Exception::class.java) { it.lagreEllerOppdaterBeregning(beregning) }
+            }
+            hendelser.size shouldBe 1
+            hendelser.single().formattedMessage shouldContain "behandlingId=$behandlingId"
+            hendelser.single().formattedMessage shouldNotContain "skal-ikke-logges"
+            hendelser.single().throwableProxy shouldBe null
+        }
+    }
+
+    @Test
+    fun `vellykket skriving logges ikke som uavklart`() {
+        val beregning = beregning().copy(behandlingId = behandlingId)
+        medLogg { hendelser ->
+            medKlient(HttpMethod.Put, "/beregning", beregning, beregning) {
+                it.lagreEllerOppdaterBeregning(beregning) shouldBe beregning
+            }
+            hendelser shouldBe emptyList()
         }
     }
 
@@ -409,6 +506,18 @@ internal class BeregningCrudKlientTest {
     fun `ugyldig JSON i et vellykket svar gir feil`() {
         medKlient(HttpMethod.Get, "/beregning/$behandlingId", svar = "ugyldig beregning") {
             assertThrows(Exception::class.java) { it.hent(behandlingId) }
+        }
+    }
+
+    private fun medLogg(test: (List<ILoggingEvent>) -> Unit) {
+        val logger = LoggerFactory.getLogger(BeregningCrudKlient::class.java) as Logger
+        val appender = ListAppender<ILoggingEvent>().apply { start() }
+        logger.addAppender(appender)
+        try {
+            test(appender.list)
+        } finally {
+            logger.detachAppender(appender)
+            appender.stop()
         }
     }
 

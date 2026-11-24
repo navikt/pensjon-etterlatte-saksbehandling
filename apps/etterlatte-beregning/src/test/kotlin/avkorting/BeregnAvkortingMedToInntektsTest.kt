@@ -8,6 +8,8 @@ import io.mockk.unmockkObject
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
+import no.nav.etterlatte.avkorting.regler.grunnbeloep
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.beregning
@@ -17,6 +19,10 @@ import no.nav.etterlatte.beregning.regler.inntektsavkorting
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.regler.RegelMeta
+import no.nav.etterlatte.libs.regler.RegelReferanse
+import no.nav.etterlatte.libs.regler.definerKonstant
+import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
@@ -28,8 +34,7 @@ import java.time.YearMonth
 class BeregnAvkortingMedToInntektsTest {
     @BeforeEach
     fun `mock grunnbeloep`() {
-        mockkObject(GrunnbeloepRepository)
-        every { GrunnbeloepRepository.historiskeGrunnbeloep } returns
+        val historiskeGrunnbeloep =
             listOf(
                 Grunnbeloep(
                     dato = YearMonth.of(2023, 5),
@@ -47,11 +52,30 @@ class BeregnAvkortingMedToInntektsTest {
                     omregningsfaktor = BigDecimal("1.049440"),
                 ),
             )
+        val testRegel =
+            RegelMeta(
+                gjelderFra = grunnbeloep.gjelderFra,
+                beskrivelse = grunnbeloep.beskrivelse,
+                regelReferanse = grunnbeloep.regelReferanse,
+            ) velgNyesteGyldige
+                historiskeGrunnbeloep.map { beloep ->
+                    definerKonstant<InntektAvkortingGrunnlagWrapper, Grunnbeloep>(
+                        gjelderFra = beloep.dato.atDay(1),
+                        beskrivelse = "Grunnbeløp gyldig fra ${beloep.dato.atDay(1)}",
+                        regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP"),
+                        verdi = beloep,
+                    )
+                }
+
+        mockkObject(GrunnbeloepRepository, grunnbeloep)
+        every { GrunnbeloepRepository.historiskeGrunnbeloep } returns historiskeGrunnbeloep
+        every { grunnbeloep.accept(any()) } answers { testRegel.accept(firstArg()) }
+        every { grunnbeloep.anvend(any(), any()) } answers { testRegel.anvend(firstArg(), secondArg()) }
     }
 
     @AfterEach
     fun `unmock grunnbeloep`() {
-        unmockkObject(GrunnbeloepRepository)
+        unmockkObject(GrunnbeloepRepository, grunnbeloep)
     }
 
     @Test

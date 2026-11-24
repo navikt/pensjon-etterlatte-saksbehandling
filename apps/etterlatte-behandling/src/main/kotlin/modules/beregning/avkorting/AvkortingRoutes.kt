@@ -204,15 +204,8 @@ fun Route.avkorting(
                     skrivetilgang = true,
                 ) {
                     logger.info("Beregner avkorting med faktisk inntekt for etteroppgjør med forbehandling=${request.forbehandlingId}")
-                    etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
                     val resultat =
-                        etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
-                            forbehandlingId = request.forbehandlingId,
-                            sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
-                            etteroppgjoersAar = request.aar,
-                            harDoedsfall = request.harDoedsfall,
-                            sammenlignTilOgMedBehandlingId = request.sammenlignTilOgMedBehandlingId,
-                        )
+                        etteroppgjoerService.beregnOgLagreEtteroppgjoer(request, brukerTokenInfo)
                     call.respond(resultat.toDto())
                 }
             }

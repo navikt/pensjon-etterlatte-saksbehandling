@@ -167,33 +167,17 @@ class BeregningKlientInternTest {
         }
 
     @Test
-    fun `beregner avkorting foer etteroppgjoerresultatet beregnes og lagres`() =
+    fun `beregner og lagrer avkorting og etteroppgjoerresultat samlet`() =
         runBlocking<Unit> {
             val request = faktiskInntektRequest()
             val dto = mockk<BeregnetEtteroppgjoerResultatDto>()
             val resultat = mockk<BeregnetEtteroppgjoerResultat> { every { toDto() } returns dto }
-            justRun { etteroppgjoerService.beregnAvkortingForbehandling(request, bruker) }
-            every {
-                etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
-                    behandlingId,
-                    forrigeBehandlingId,
-                    aar,
-                    request.harDoedsfall,
-                    request.sammenlignTilOgMedBehandlingId,
-                )
-            } returns resultat
+            every { etteroppgjoerService.beregnOgLagreEtteroppgjoer(request, bruker) } returns resultat
 
             klient.beregnAvkortingFaktiskInntekt(request, bruker) shouldBe dto
 
             verifyOrder {
-                etteroppgjoerService.beregnAvkortingForbehandling(request, bruker)
-                etteroppgjoerService.beregnOgLagreEtteroppgjoerResultat(
-                    behandlingId,
-                    forrigeBehandlingId,
-                    aar,
-                    request.harDoedsfall,
-                    request.sammenlignTilOgMedBehandlingId,
-                )
+                etteroppgjoerService.beregnOgLagreEtteroppgjoer(request, bruker)
                 resultat.toDto()
             }
         }

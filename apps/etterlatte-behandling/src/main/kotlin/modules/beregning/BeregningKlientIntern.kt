@@ -114,15 +114,9 @@ class BeregningKlientIntern(
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultatDto {
         sjekkTilgang(request.forbehandlingId, brukerTokenInfo, skrivetilgang = true)
-        etteroppgjoerService.beregnAvkortingForbehandling(request, brukerTokenInfo)
         return etteroppgjoerService
-            .beregnOgLagreEtteroppgjoerResultat(
-                forbehandlingId = request.forbehandlingId,
-                sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
-                etteroppgjoersAar = request.aar,
-                harDoedsfall = request.harDoedsfall,
-                sammenlignTilOgMedBehandlingId = request.sammenlignTilOgMedBehandlingId,
-            ).toDto()
+            .beregnOgLagreEtteroppgjoer(request, brukerTokenInfo)
+            .toDto()
     }
 
     override suspend fun opprettBeregningsgrunnlagFraForrigeBehandling(

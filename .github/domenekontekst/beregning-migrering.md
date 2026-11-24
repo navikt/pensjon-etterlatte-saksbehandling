@@ -232,6 +232,11 @@ skriving så langt avhengighetene tillater. Lokal status oppdateres før det sis
 CRUD-kallet i samme lokale transaksjon. Ved feil i kallet rulles status tilbake.
 Anvendt trygdetid for BP lagres først etter vellykket regelkjøring.
 
+Ved ordinær lagring av beregningsgrunnlag holdes eksisterende `vedtaksperioder`
+utenfor skriveobjektet. De tas bare med i returdataene, slik at lagringen ikke
+sletter og setter inn periodene på nytt. Eksplisitt lagring av perioder, som ved
+kopiering av grunnlag, er fortsatt ikke atomisk i repository-et og må sikres separat.
+
 `AvkortingRepositoryTest` sammenligner DTO-ene før og etter lagring for begge regelsett,
 med flere år, restanse, sanksjoner og faktisk inntekt. Interne objekter er ikke identiske:
 gjenlesing utelater `maanederInnvilgetRegelResultat`, og JSON-tall kan få en annen

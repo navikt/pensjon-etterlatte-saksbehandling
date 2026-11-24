@@ -169,6 +169,9 @@ class BeregningsGrunnlagService(
                         beregningsGrunnlag.beregningsMetodeFlereAvdoede
                             ?: emptyList(),
                     kunEnJuridiskForelder = beregningsGrunnlag.kunEnJuridiskForelder,
+                )
+            val resultat =
+                nyttGrunnlag.copy(
                     vedtaksperioder = beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)?.vedtaksperioder,
                 )
             inTransactionIfNeeded {
@@ -177,7 +180,7 @@ class BeregningsGrunnlagService(
                     "Kunne ikke lagre beregningsgrunnlag for behandlingId=$behandlingId"
                 }
             }
-            nyttGrunnlag
+            resultat
         } else {
             logger.info("Beregningsgrunnlaget er ikke gyldig for behandling $behandlingId")
             sikkerlogger().info(

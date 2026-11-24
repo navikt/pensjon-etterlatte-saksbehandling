@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
@@ -129,6 +130,7 @@ internal class BeregnBarnepensjonServiceTest {
                 } else {
                     "Mangler vilkårsvurdering for behandlingId=${behandling.id}"
                 }
+            verify(exactly = 0) { anvendtTrygdetidRepository.lagreAnvendtTrygdetid(any(), any()) }
         }
 
     @Test

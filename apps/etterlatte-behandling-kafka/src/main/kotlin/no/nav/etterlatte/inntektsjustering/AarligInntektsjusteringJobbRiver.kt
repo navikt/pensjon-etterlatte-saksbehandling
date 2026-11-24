@@ -50,6 +50,10 @@ internal class AarligInntektsjusteringJobbRiver(
         }
 
         val antall = packet.antall
+        if (antall > 150) {
+            logger.info("Avbryter. For mange saker")
+            return
+        }
         val sakType = SakType.OMSTILLINGSSTOENAD
         val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
 

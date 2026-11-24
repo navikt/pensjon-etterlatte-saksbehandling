@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.TopicPartition
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -25,7 +26,20 @@ class KafkaConsumerInstitusjonsopphold(
         topic = env.requireEnvValue(INSTITUSJONSOPPHOLD_TOPIC),
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
+    companion object {
+        private const val UGYLDIG_OFFSET_SOM_SKAL_SKIPPES = 783114L
+        private const val UGYLDIG_PARTITION_SOM_SKAL_SKIPPES = 0
+    }
+
     val sikkerLogg: Logger = sikkerlogger()
+
+    override fun skalSkippeDeserialiseringsfeil(
+        topicPartition: TopicPartition,
+        offset: Long,
+    ): Boolean =
+        topicPartition.topic() == topic &&
+            topicPartition.partition() == UGYLDIG_PARTITION_SOM_SKAL_SKIPPES &&
+            offset == UGYLDIG_OFFSET_SOM_SKAL_SKIPPES
 
     override fun start() {
         pollLoop { meldinger ->

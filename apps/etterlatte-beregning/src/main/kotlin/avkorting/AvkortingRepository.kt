@@ -265,32 +265,41 @@ class AvkortingRepository(
         avkorting: Avkorting,
     ) {
         dataSource.transaction { tx ->
-            slettAvkorting(behandlingId, tx)
-            avkorting.aarsoppgjoer.forEach { aarsoppgjoer ->
-                with(aarsoppgjoer) {
-                    when (this) {
-                        is AarsoppgjoerLoepende -> {
-                            lagreAarsoppgjoer(behandlingId, sakId, this, false, tx)
-                            lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
-                            inntektsavkorting.forEach {
-                                (it.grunnlag.inntektInnvilgetPeriode as? BenyttetInntektInnvilgetPeriode)?.let { inntektInnvilgetPeriode ->
-                                    lagreInntektInnvilgetPeriode(behandlingId, it.grunnlag.id, inntektInnvilgetPeriode, tx)
-                                }
-                                lagreAvkortingGrunnlagForventet(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)
-                                lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, it.avkortingsperioder, tx)
-                                lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, it.avkortetYtelseForventetInntekt, tx)
-                            }
-                            lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, avkortetYtelse, tx)
-                        }
+            lagreAvkorting(behandlingId, sakId, avkorting, tx)
+        }
+    }
 
-                        is Etteroppgjoer -> {
-                            lagreAarsoppgjoer(behandlingId, sakId, this, true, tx)
-                            lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
-                            lagreInntektInnvilgetPeriode(behandlingId, inntekt.id, inntekt.inntektInnvilgetPeriode, tx)
-                            lagreAvkortingGrunnlagFaktisk(behandlingId, aarsoppgjoer.id, inntekt, tx)
-                            lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, avkortingsperioder, tx)
-                            lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, avkortetYtelse, tx)
+    internal fun lagreAvkorting(
+        behandlingId: UUID,
+        sakId: SakId,
+        avkorting: Avkorting,
+        tx: TransactionalSession,
+    ) {
+        slettAvkorting(behandlingId, tx)
+        avkorting.aarsoppgjoer.forEach { aarsoppgjoer ->
+            with(aarsoppgjoer) {
+                when (this) {
+                    is AarsoppgjoerLoepende -> {
+                        lagreAarsoppgjoer(behandlingId, sakId, this, false, tx)
+                        lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
+                        inntektsavkorting.forEach {
+                            (it.grunnlag.inntektInnvilgetPeriode as? BenyttetInntektInnvilgetPeriode)?.let { inntektInnvilgetPeriode ->
+                                lagreInntektInnvilgetPeriode(behandlingId, it.grunnlag.id, inntektInnvilgetPeriode, tx)
+                            }
+                            lagreAvkortingGrunnlagForventet(behandlingId, aarsoppgjoer.id, it.grunnlag, tx)
+                            lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, it.avkortingsperioder, tx)
+                            lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, it.avkortetYtelseForventetInntekt, tx)
                         }
+                        lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, avkortetYtelse, tx)
+                    }
+
+                    is Etteroppgjoer -> {
+                        lagreAarsoppgjoer(behandlingId, sakId, this, true, tx)
+                        lagreYtelseFoerAvkorting(behandlingId, aarsoppgjoer.id, ytelseFoerAvkorting, tx)
+                        lagreInntektInnvilgetPeriode(behandlingId, inntekt.id, inntekt.inntektInnvilgetPeriode, tx)
+                        lagreAvkortingGrunnlagFaktisk(behandlingId, aarsoppgjoer.id, inntekt, tx)
+                        lagreAvkortingsperioder(behandlingId, aarsoppgjoer.id, avkortingsperioder, tx)
+                        lagreAvkortetYtelse(behandlingId, aarsoppgjoer.id, avkortetYtelse, tx)
                     }
                 }
             }

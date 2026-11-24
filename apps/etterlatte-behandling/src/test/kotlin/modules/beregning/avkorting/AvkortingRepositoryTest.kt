@@ -2,21 +2,33 @@ package no.nav.etterlatte.modules.beregning.avkorting
 
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
+import no.nav.etterlatte.libs.common.beregning.Sanksjon
+import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.modules.beregning.aarsoppgjoer
 import no.nav.etterlatte.modules.beregning.avkortetYtelse
 import no.nav.etterlatte.modules.beregning.avkortinggrunnlag
 import no.nav.etterlatte.modules.beregning.avkortingsperiode
+import no.nav.etterlatte.modules.beregning.regler.avkortinggrunnlagLagreDto
+import no.nav.etterlatte.modules.beregning.regler.beregning
+import no.nav.etterlatte.modules.beregning.regler.beregningsperiode
+import no.nav.etterlatte.modules.beregning.regler.bruker
+import no.nav.etterlatte.modules.beregning.regler.lagreSanksjon
+import no.nav.etterlatte.modules.beregning.sanksjon.SanksjonRepository
 import no.nav.etterlatte.modules.beregning.ytelseFoerAvkorting
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -27,6 +39,59 @@ internal class AvkortingRepositoryTest(
     ds: DataSource,
 ) {
     private val avkortingRepository = AvkortingRepository(ds)
+    private val sanksjonRepository = SanksjonRepository(ds)
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `bevarer beregnet avkorting med flere aar restanse og sanksjoner ved lagring`(brukNyeReglerAvkorting: Boolean) {
+        val behandlingId = UUID.randomUUID()
+        val sakId = randomSakId()
+        val sanksjoner = opprettSanksjoner(behandlingId, sakId)
+        val beregnetAvkorting = beregnAvkorting(sanksjoner, brukNyeReglerAvkorting)
+        val dtoFoerLagring = beregnetAvkorting.toDto()
+
+        dtoFoerLagring.avkortingGrunnlag.size shouldBe 4
+        dtoFoerLagring.avkortetYtelse.any { it.restanse != 0 } shouldBe true
+        dtoFoerLagring.avkortetYtelse.mapNotNull { it.sanksjon?.sanksjonType }.toSet() shouldBe
+            setOf(SanksjonType.STANS, SanksjonType.BORTFALL)
+
+        avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
+
+        val lagretAvkorting = requireNotNull(avkortingRepository.hentAvkorting(behandlingId))
+        lagretAvkorting.toDto() shouldBe dtoFoerLagring
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `bevarer beregnet etteroppgjoer og faktisk inntekt ved lagring`(brukNyeReglerAvkorting: Boolean) {
+        val forbehandlingId = UUID.randomUUID()
+        val sakId = randomSakId()
+        val sanksjoner = opprettSanksjoner(forbehandlingId, sakId)
+        val avkorting = beregnAvkorting(sanksjoner, brukNyeReglerAvkorting)
+        val beregnetAvkorting =
+            Avkorting(listOf(avkorting.aarsoppgjoer.first())).beregnEtteroppgjoer(
+                brukerTokenInfo = bruker,
+                aar = 2024,
+                loennsinntekt = 350000,
+                afp = 10000,
+                naeringsinntekt = 20000,
+                utland = 30000,
+                sanksjoner = sanksjoner,
+                spesifikasjon = "Faktisk inntekt",
+                innvilgetPeriodeIEtteroppgjoersAar = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                opphoerFom = null,
+                brukNyeReglerAvkorting = brukNyeReglerAvkorting,
+            )
+        val etteroppgjoer = beregnetAvkorting.aarsoppgjoer.single().shouldBeInstanceOf<Etteroppgjoer>()
+
+        avkortingRepository.lagreAvkorting(forbehandlingId, sakId, beregnetAvkorting)
+
+        val lagretAvkorting = requireNotNull(avkortingRepository.hentAvkorting(forbehandlingId))
+        val lagretInntekt = requireNotNull(avkortingRepository.hentFaktiskInntekt(etteroppgjoer.id))
+        lagretAvkorting.toDto() shouldBe beregnetAvkorting.toDto()
+        lagretInntekt.toDto() shouldBe etteroppgjoer.inntekt.toDto()
+        lagretInntekt.maanederInnvilget shouldBe etteroppgjoer.inntekt.maanederInnvilget
+    }
 
     @Test
     fun `skal returnere true hvis bruker har inntekt for aar`() {
@@ -265,6 +330,61 @@ internal class AvkortingRepositoryTest(
                 it shouldBe nyttArsoppgjoer.avkortetYtelse
             }
         }
+    }
+
+    private fun opprettSanksjoner(
+        behandlingId: UUID,
+        sakId: SakId,
+    ): List<Sanksjon> {
+        listOf(
+            lagreSanksjon(
+                sakId = sakId,
+                type = SanksjonType.STANS,
+                fom = YearMonth.of(2024, 8).atDay(1),
+                tom = YearMonth.of(2024, 8).atEndOfMonth(),
+            ),
+            lagreSanksjon(
+                sakId = sakId,
+                type = SanksjonType.BORTFALL,
+                fom = YearMonth.of(2025, 2).atDay(1),
+                tom = YearMonth.of(2025, 2).atEndOfMonth(),
+            ),
+        ).forEach { sanksjon ->
+            sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident(), sanksjon)
+        }
+        return sanksjonRepository.hentSanksjon(behandlingId)
+    }
+
+    private fun beregnAvkorting(
+        sanksjoner: List<Sanksjon>,
+        brukNyeReglerAvkorting: Boolean,
+    ): Avkorting {
+        val beregning =
+            beregning().copy(
+                beregningsperioder =
+                    listOf(
+                        beregningsperiode(datoFOM = YearMonth.of(2024, 1), datoTOM = YearMonth.of(2024, 4), utbetaltBeloep = 20000),
+                        beregningsperiode(datoFOM = YearMonth.of(2024, 5), datoTOM = YearMonth.of(2025, 4), utbetaltBeloep = 22000),
+                        beregningsperiode(datoFOM = YearMonth.of(2025, 5), datoTOM = YearMonth.of(2025, 12), utbetaltBeloep = 24000),
+                    ),
+            )
+        val opprinneligAvkorting =
+            Avkorting().beregnAvkortingMedNyeGrunnlag(
+                nyttGrunnlag = (2024..2025).map { avkortinggrunnlagLagreDto(aarsinntekt = 500000, fom = YearMonth.of(it, 1)) },
+                bruker = bruker,
+                beregning = beregning,
+                sanksjoner = sanksjoner,
+                opphoerFom = YearMonth.of(2026, 1),
+                brukNyeReglerAvkorting = brukNyeReglerAvkorting,
+            )
+        return opprinneligAvkorting.beregnAvkortingMedNyeGrunnlag(
+            nyttGrunnlag = (2024..2025).map { avkortinggrunnlagLagreDto(aarsinntekt = 300000, fom = YearMonth.of(it, 7)) },
+            bruker = bruker,
+            beregning = beregning,
+            sanksjoner = sanksjoner,
+            opphoerFom = YearMonth.of(2026, 1),
+            brukNyeReglerAvkorting = brukNyeReglerAvkorting,
+        )
     }
 
     private fun nyAvkorting(

@@ -9,7 +9,7 @@ spec:
   image: "{{image}}"
   port: 8080
   liveness:
-    initialDelay: 800
+    initialDelay: 5
     path: /health/isalive
   readiness:
     initialDelay: 5

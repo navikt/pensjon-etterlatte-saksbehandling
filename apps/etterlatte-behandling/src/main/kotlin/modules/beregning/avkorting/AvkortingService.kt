@@ -161,6 +161,7 @@ class AvkortingService(
                 krevIkkeNull(eksisterendeAvkorting ?: forrigeAvkorting) {
                     "Både eksisterende og forrige avkorting er null, men da skulle vi returnert null fra metoden"
                 }
+            val avkortingFrontend = avkortingForFrontend(avkorting, behandling, forrigeAvkorting)
             // Selv om vi ikke reberegner avkortingen må vi lagre ned en kopi slik at vi tar med oss det kopierte
             // når vi legger inn grunnlag senere i behandlingen.
             if (eksisterendeAvkorting == null) {
@@ -170,36 +171,29 @@ class AvkortingService(
                     avkorting.kopierAvkorting(opphoerFom = behandling.opphoerFraOgMed, nullstillAvkortetYtelse = true),
                 )
             }
-            return avkortingForFrontend(avkorting, behandling, forrigeAvkorting)
+            return avkortingFrontend
         }
 
-        if (behandling.status == BehandlingStatus.BEREGNET && eksisterendeAvkorting != null) {
-            val reberegnetAvkorting =
-                reberegnOgLagreAvkorting(
+        val beregnetAvkorting =
+            if (behandling.status == BehandlingStatus.BEREGNET && eksisterendeAvkorting != null) {
+                reberegnAvkorting(
                     behandling,
                     eksisterendeAvkorting,
                     brukerTokenInfo,
                 )
-            return avkortingForFrontend(
-                reberegnetAvkorting,
-                behandling,
-                forrigeAvkorting,
-            )
-        } else if (eksisterendeAvkorting == null && forrigeAvkorting != null) {
-            val nyAvkorting = kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
-            return avkortingForFrontend(
-                nyAvkorting,
-                behandling,
-                forrigeAvkorting,
-            )
-        } else if (eksisterendeAvkorting != null) {
-            return avkortingForFrontend(eksisterendeAvkorting, behandling, forrigeAvkorting)
-        } else {
-            throw InternfeilException(
-                "Vi mangler både avkorting og eksisterende avkorting, som allerede er " +
-                    "sjekket. Dette burde ikke skje. BehandlingId=${behandling.id}",
-            )
-        }
+            } else if (eksisterendeAvkorting == null && forrigeAvkorting != null) {
+                kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
+            } else if (eksisterendeAvkorting != null) {
+                return avkortingForFrontend(eksisterendeAvkorting, behandling, forrigeAvkorting)
+            } else {
+                throw InternfeilException(
+                    "Vi mangler både avkorting og eksisterende avkorting, som allerede er " +
+                        "sjekket. Dette burde ikke skje. BehandlingId=${behandling.id}",
+                )
+            }
+        val avkortingFrontend = avkortingForFrontend(beregnetAvkorting, behandling, forrigeAvkorting)
+        lagreAvkortingOgSettStatus(behandling, beregnetAvkorting, brukerTokenInfo)
+        return avkortingFrontend
     }
 
     fun hentAvkorting(behandlingId: UUID) = avkortingRepository.hentAvkorting(behandlingId)
@@ -306,11 +300,9 @@ class AvkortingService(
                 tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor = tillatRevurderingBehandlingMedFerdigstiltEtteroppgjor,
             )
 
-        avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, oppdatert)
-        val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         val avkortingFrontend =
             if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-                avkortingForFrontend(lagretAvkorting, behandling)
+                avkortingForFrontend(oppdatert, behandling)
             } else {
                 val forrigeAvkorting =
                     hentAvkortingForrigeBehandling(
@@ -319,15 +311,13 @@ class AvkortingService(
                         behandling.virkningstidspunkt().dato,
                     )
                 avkortingForFrontend(
-                    lagretAvkorting,
+                    oppdatert,
                     behandling,
                     forrigeAvkorting,
                 )
             }
 
-        inTransactionIfNeeded {
-            behandlingStatusService.settAvkortet(behandling.id, brukerTokenInfo, dryRun = false)
-        }
+        lagreAvkortingOgSettStatus(behandling, oppdatert, brukerTokenInfo)
         return avkortingFrontend
     }
 
@@ -360,7 +350,9 @@ class AvkortingService(
                     "Dette vil ikke gå. SakId=${behandling.sak.sakId}",
             )
         }
-        return kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
+        val avkorting = kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
+        lagreAvkortingOgSettStatus(behandling, avkorting, brukerTokenInfo)
+        return avkorting
     }
 
     private suspend fun kopierOgReberegnAvkorting(
@@ -371,7 +363,7 @@ class AvkortingService(
         val opphoerFraOgMed = behandling.opphoerFraOgMed
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
 
-        return reberegnOgLagreAvkorting(
+        return reberegnAvkorting(
             behandling = behandling,
             eksisterendeAvkorting = kopiertAvkorting,
             brukerTokenInfo = brukerTokenInfo,
@@ -396,7 +388,7 @@ class AvkortingService(
         return avkortingMedErstattetAarsoppgjoer
     }
 
-    private suspend fun reberegnOgLagreAvkorting(
+    private suspend fun reberegnAvkorting(
         behandling: DetaljertBehandling,
         eksisterendeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
@@ -421,23 +413,27 @@ class AvkortingService(
                     eksisterendeAvkorting
                 }
             }
-        val beregnetAvkorting =
-            avkorting.beregnAvkorting(
-                behandling.virkningstidspunkt().dato,
-                beregning,
-                sanksjoner,
-                behandling.opphoerFraOgMed,
-                featureToggleService.isEnabled(
-                    BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
-                    false,
-                ),
-            )
-        avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
-        val lagretAvkorting = hentAvkortingNonNull(behandling.id)
+        return avkorting.beregnAvkorting(
+            behandling.virkningstidspunkt().dato,
+            beregning,
+            sanksjoner,
+            behandling.opphoerFraOgMed,
+            featureToggleService.isEnabled(
+                BeregningToggles.BEREGNING_BRUK_NYE_BEREGNINGSREGLER,
+                false,
+            ),
+        )
+    }
+
+    private fun lagreAvkortingOgSettStatus(
+        behandling: DetaljertBehandling,
+        avkorting: Avkorting,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         inTransactionIfNeeded {
             behandlingStatusService.settAvkortet(behandling.id, brukerTokenInfo, dryRun = false)
+            avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, avkorting)
         }
-        return lagretAvkorting
     }
 
     private fun hentAvkortingNonNull(behandlingId: UUID) =

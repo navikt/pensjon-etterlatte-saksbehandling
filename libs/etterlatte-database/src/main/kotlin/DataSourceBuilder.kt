@@ -57,6 +57,7 @@ fun DataSource.migrate(processExiter: () -> Unit = { exitProcess(1) }): MigrateR
 
                 if (!appIsInGCP()) {
                     ignoreMigrationPatterns("*:missing")
+                    configuration(mapOf("flyway.postgresql.transactional.lock" to "false"))
                 }
                 if (appIsInGCP()) {
                     dblocationsMiljoe.add("db/gcp")

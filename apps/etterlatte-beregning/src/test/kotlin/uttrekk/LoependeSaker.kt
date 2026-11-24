@@ -58,7 +58,7 @@ limit 100
 """
 
 private val utenSanksjon = """
-    select distinct bp.sakid
+    select distinct bp.sakid sak_id
     from beregningsperiode bp
          left outer join sanksjon s on s.sak_id = bp.sakid
          left outer join avkorting_aarsoppgjoer a on a.behandling_id = bp.behandlingid and a.aar = 2027

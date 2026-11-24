@@ -52,12 +52,12 @@ fun DataSource.migrate(processExiter: () -> Unit = { exitProcess(1) }): MigrateR
         return Flyway
             .configure()
             .dataSource(this)
-            .configuration(mapOf("flyway.postgresql.transactional.lock" to "false"))
             .apply {
                 val dblocationsMiljoe = mutableListOf("db/migration")
 
                 if (!appIsInGCP()) {
                     ignoreMigrationPatterns("*:missing")
+                    configuration(mapOf("flyway.postgresql.transactional.lock" to "false"))
                 }
                 if (appIsInGCP()) {
                     dblocationsMiljoe.add("db/gcp")

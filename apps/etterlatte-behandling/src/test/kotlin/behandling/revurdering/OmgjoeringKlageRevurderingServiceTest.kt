@@ -240,6 +240,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
                 applicationContext.revurderingDao,
                 aktivitetspliktDao,
                 aktivitetspliktKopierService,
+                applicationContext.featureToggleService,
             ),
         oppgaveService = oppgaveService,
         klageService = applicationContext.klageService,

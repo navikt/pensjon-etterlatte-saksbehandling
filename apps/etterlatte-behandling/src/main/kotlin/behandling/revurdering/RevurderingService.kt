@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.GrunnlagUtils.opplysningsbehov
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -31,6 +32,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -92,6 +94,7 @@ class RevurderingService(
     private val revurderingDao: RevurderingDao,
     private val aktivitetspliktDao: AktivitetspliktDao,
     private val aktivitetspliktKopierService: AktivitetspliktKopierService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(RevurderingService::class.java)
 
@@ -127,10 +130,8 @@ class RevurderingService(
         }
     }
 
-    private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingId: UUID) {
-        val behandling =
-            hentBehandling(behandlingId)
-        if (behandling?.type != BehandlingType.REVURDERING) {
+    private fun behandlingErAvTypenRevurderingOgKanEndres(behandling: Behandling) {
+        if (behandling.type != BehandlingType.REVURDERING) {
             throw UgyldigBehandlingTypeForRevurdering()
         }
         if (!behandling.status.kanEndres()) {
@@ -143,7 +144,33 @@ class RevurderingService(
         revurderingInfoMedBegrunnelse: RevurderingInfoMedBegrunnelse,
         navIdent: String,
     ) {
-        behandlingErAvTypenRevurderingOgKanEndres(behandlingId)
+        val behandling = hentBehandling(behandlingId) ?: throw UgyldigBehandlingTypeForRevurdering()
+        behandlingErAvTypenRevurderingOgKanEndres(behandling)
+        if (featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false)) {
+            if (behandling.revurderingsaarsak == Revurderingaarsak.FORLENGET_OMS) {
+                val periode =
+                    revurderingInfoMedBegrunnelse.revurderingInfo as? RevurderingInfo.ForlengetOms
+                        ?: throw UgyldigForespoerselException(
+                            "MANGLER_FORLENGET_OMS_PERIODE",
+                            "Forlenget OMS må ha en fra og med- og til og med-måned.",
+                        )
+                sjekk(behandling.status == BehandlingStatus.OPPRETTET) {
+                    "Utfallet må åpnes for redigering før perioden for forlenget OMS kan endres."
+                }
+                sjekk(periode.fom == behandling.virkningstidspunkt?.dato && periode.tom >= periode.fom) {
+                    "Perioden må starte på virkningstidspunktet, og til og med må være lik eller etter fra og med."
+                }
+                behandlingDao.lagreOpphoerFom(behandlingId, periode.tom.plusMonths(1))
+            } else {
+                sjekk(revurderingInfoMedBegrunnelse.revurderingInfo !is RevurderingInfo.ForlengetOms) {
+                    "Perioden for forlenget OMS kan bare lagres på en revurdering med årsak FORLENGET_OMS."
+                }
+            }
+        } else if (behandling.revurderingsaarsak == Revurderingaarsak.FORLENGET_OMS ||
+            revurderingInfoMedBegrunnelse.revurderingInfo is RevurderingInfo.ForlengetOms
+        ) {
+            throw RevurderingaarsakIkkeStoettet(Revurderingaarsak.FORLENGET_OMS)
+        }
         val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
         revurderingDao.lagreRevurderingInfo(behandlingId, revurderingInfoMedBegrunnelse, kilde)
     }

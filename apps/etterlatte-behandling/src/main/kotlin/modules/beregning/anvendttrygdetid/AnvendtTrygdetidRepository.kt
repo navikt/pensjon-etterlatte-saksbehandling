@@ -3,13 +3,14 @@ package no.nav.etterlatte.modules.beregning.anvendttrygdetid
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.modules.beregning.AnvendtTrygdetidRepositoryOperasjoner
 import java.util.UUID
 import javax.sql.DataSource
 
 class AnvendtTrygdetidRepository(
     private val dataSource: DataSource,
-) {
-    fun lagreAnvendtTrygdetid(
+) : AnvendtTrygdetidRepositoryOperasjoner {
+    override fun lagreAnvendtTrygdetid(
         behandlingId: UUID,
         utrekning: AnvendtTrygdetidPeriodeUtrekning,
     ) = dataSource.transaction { tx ->

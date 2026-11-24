@@ -128,6 +128,7 @@ internal class BehandlingFactoryTest {
             every { it.hentKommerBarnetTilGode(any()) } returns null
         }
     private val revurderingDao = mockk<RevurderingDao>()
+    private val featureToggleService = DummyFeatureToggleService()
     private val revurderingService =
         RevurderingService(
             oppgaveService,
@@ -139,11 +140,11 @@ internal class BehandlingFactoryTest {
             revurderingDao,
             aktivitetspliktDao,
             aktivitetspliktKopierService,
+            featureToggleService,
         )
 
     private val sakLesDaoMock = mockk<SakLesDao>()
     private val sakServiceMock = mockk<SakService>()
-    private val featureToggleService = DummyFeatureToggleService()
     private val behandlingFactory =
         BehandlingFactory(
             oppgaveService,

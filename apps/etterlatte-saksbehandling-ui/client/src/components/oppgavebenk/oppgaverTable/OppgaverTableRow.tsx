@@ -44,7 +44,11 @@ export const OppgaverTableRow = ({
       </HStack>
     </Table.DataCell>
     <Table.DataCell>
-      {oppgave.type ? <OppgavetypeTag oppgavetype={oppgave.type} /> : <div>oppgaveid {oppgave.id}</div>}
+      {oppgave.type ? (
+        <OppgavetypeTag oppgavetype={oppgave.type} merknad={oppgave.merknad} />
+      ) : (
+        <div>oppgaveid {oppgave.id}</div>
+      )}
     </Table.DataCell>
     <Table.DataCell>{oppgave.merknad}</Table.DataCell>
     <Table.DataCell>

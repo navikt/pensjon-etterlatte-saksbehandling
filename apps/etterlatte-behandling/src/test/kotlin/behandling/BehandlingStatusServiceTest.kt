@@ -19,8 +19,11 @@ import no.nav.etterlatte.behandling.etteroppgjoer.EtteroppgjoerService
 import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.behandling.revurdering.ForlengetOmsUnderUtvikling
+import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -36,6 +39,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -66,6 +70,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
@@ -107,6 +112,7 @@ internal class BehandlingStatusServiceTest {
             etteroppgjoerForbehandlingService,
             grunnlagService,
             vilkaarsvurderingDao,
+            DummyFeatureToggleService(),
         )
 
     @BeforeEach
@@ -128,6 +134,29 @@ internal class BehandlingStatusServiceTest {
             generellBehandlingService,
         )
         clearAllMocks(currentThreadOnly = true)
+    }
+
+    @Test
+    fun `forlenget OMS kan ikke ferdigstilles mens nye regler og brev mangler`() {
+        val fom = YearMonth.of(2027, 1)
+        val tom = YearMonth.of(2027, 12)
+        val behandling =
+            revurdering(
+                sakId = sakId1,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                revurderingAarsak = Revurderingaarsak.FORLENGET_OMS,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(fom),
+                revurderingInfo = RevurderingInfoMedBegrunnelse(RevurderingInfo.ForlengetOms(fom, tom), null),
+                opphoerFraOgMed = tom.plusMonths(1),
+            )
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+
+        assertThrows<ForlengetOmsUnderUtvikling> {
+            sut.sjekkOmKanFatteVedtak(behandling.id)
+        }
+
+        verify { behandlingService.hentBehandling(behandling.id) }
+        verify(exactly = 0) { behandlingDao.lagreStatus(any()) }
     }
 
     @Test

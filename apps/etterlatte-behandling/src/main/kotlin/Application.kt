@@ -174,6 +174,7 @@ private fun Route.attachContekst(
 }
 
 private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
+    applicationContext.beregningModule.registrerRoutes(this)
     soeknadSkyggeRoute(applicationContext.soeknadSkyggeDao)
     prosesseringRoutes(applicationContext.prosesseringAdminDao, applicationContext.saksbehandlerGroupIdsByKey)
     feilbarDemoRoute(applicationContext.saksbehandlerGroupIdsByKey)
@@ -235,6 +236,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         aarligInntektsjusteringJobbService = applicationContext.aarligInntektsjusteringJobbService,
         etteroppgjoerRevurderingService = applicationContext.etteroppgjoerRevurderingService,
         sakService = applicationContext.sakService,
+        featureToggleService = applicationContext.featureToggleService,
     )
     omregningRoutes(omregningService = applicationContext.omregningService)
     aarligInntektsjusteringRoute(service = applicationContext.aarligInntektsjusteringJobbService)

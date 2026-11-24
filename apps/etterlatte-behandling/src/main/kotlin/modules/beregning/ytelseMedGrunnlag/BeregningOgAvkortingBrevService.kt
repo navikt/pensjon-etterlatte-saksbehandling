@@ -1,26 +1,30 @@
 package no.nav.etterlatte.modules.beregning.ytelseMedGrunnlag
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.ForventetInntektDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.modules.beregning.BeregningRepository
+import no.nav.etterlatte.modules.beregning.BeregningRepositoryOperasjoner
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingService
 import no.nav.etterlatte.modules.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.modules.beregning.regler.overstyr.beregnOverstyrRegel
 import java.util.UUID
 
 /**
  * Hensikten med denne tjenesten er å la brev hente data om beregning og avkorting i et samlet sted
  */
 class BeregningOgAvkortingBrevService(
-    private val beregningRepository: BeregningRepository,
+    private val beregningRepository: BeregningRepositoryOperasjoner,
     private val avkortingService: AvkortingService,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val behandlingService: BehandlingService,
@@ -64,7 +68,7 @@ class BeregningOgAvkortingBrevService(
                         innvilgaMaaneder = grunnlag.innvilgaMaaneder,
                         grunnbelop = beregningIPeriode.grunnbelop,
                         beregningsMetode = beregningIPeriode.beregningsMetode,
-                        beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
+                        beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag(behandlingsGrunnlag, beregningIPeriode),
                         sanksjon = avkortetYtelse.sanksjon,
                         institusjonsopphold = beregningIPeriode.institusjonsopphold,
                         erOverstyrtInnvilgaMaaneder = grunnlag.overstyrtInnvilgaMaaneder != null,
@@ -83,7 +87,7 @@ class BeregningOgAvkortingBrevService(
                         innvilgaMaaneder = grunnlag.innvilgaMaaneder,
                         grunnbelop = beregningIPeriode.grunnbelop,
                         beregningsMetode = beregningIPeriode.beregningsMetode,
-                        beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
+                        beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag(behandlingsGrunnlag, beregningIPeriode),
                         sanksjon = avkortetYtelse.sanksjon,
                         institusjonsopphold = beregningIPeriode.institusjonsopphold,
                         erOverstyrtInnvilgaMaaneder = false, // TODO
@@ -119,6 +123,16 @@ class BeregningOgAvkortingBrevService(
         )
     }
 }
+
+private fun beregningsMetodeFraGrunnlag(
+    beregningsGrunnlag: BeregningsGrunnlag?,
+    beregningsperiode: Beregningsperiode,
+): BeregningsMetode? =
+    if (beregningsperiode.kilde?.navn == beregnOverstyrRegel.regelReferanse.id) {
+        beregningsperiode.beregningsMetode
+    } else {
+        beregningsGrunnlag?.beregningsMetode?.beregningsMetode
+    }
 
 class BeregningFinnesIkkeException(
     behandlingId: UUID,

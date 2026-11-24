@@ -112,6 +112,16 @@ class BeregningCrudKlient(
     override fun lagreEtteroppgjoerResultat(resultat: BeregnetEtteroppgjoerResultat) =
         utenSvar(HttpMethod.Put, "/etteroppgjoer/resultat", resultat)
 
+    override fun lagreAvkortingOgEtteroppgjoerResultat(
+        sakId: SakId,
+        avkorting: Avkorting,
+        resultat: BeregnetEtteroppgjoerResultat,
+    ) = utenSvar(
+        HttpMethod.Put,
+        "/etteroppgjoer/${resultat.forbehandlingId}",
+        LagreAvkortingOgEtteroppgjoerResultatRequest(sakId, avkorting, resultat),
+    )
+
     override fun hentEtteroppgjoerResultat(
         aar: Int,
         forbehandlingId: UUID,
@@ -199,6 +209,12 @@ class BeregningCrudKlient(
 private data class LagreAvkortingRequest(
     val sakId: SakId,
     val avkorting: Avkorting,
+)
+
+private data class LagreAvkortingOgEtteroppgjoerResultatRequest(
+    val sakId: SakId,
+    val avkorting: Avkorting,
+    val resultat: BeregnetEtteroppgjoerResultat,
 )
 
 private data class OpprettSanksjonRequest(

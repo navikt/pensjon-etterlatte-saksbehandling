@@ -288,6 +288,19 @@ internal class BeregningCrudKlientTest {
         medKlient(HttpMethod.Put, "/etteroppgjoer/resultat", resultat, status = HttpStatusCode.NoContent) {
             it.lagreEtteroppgjoerResultat(resultat)
         }
+        val avkorting = Avkorting(listOf(etteroppgjoer()))
+        val samletResultat =
+            resultat.copy(
+                referanseAvkorting = resultat.referanseAvkorting.copy(avkortingForbehandling = avkorting.aarsoppgjoer.single().id),
+            )
+        medKlient(
+            HttpMethod.Put,
+            "/etteroppgjoer/$behandlingId",
+            mapOf("sakId" to sakId, "avkorting" to avkorting, "resultat" to samletResultat),
+            status = HttpStatusCode.NoContent,
+        ) {
+            it.lagreAvkortingOgEtteroppgjoerResultat(sakId, avkorting, samletResultat)
+        }
     }
 
     @Test

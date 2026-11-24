@@ -1,15 +1,21 @@
 package no.nav.etterlatte.modules.beregning.etteroppgjoer
 
 import kotliquery.Row
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.modules.beregning.EtteroppgjoerRepositoryOperasjoner
+import no.nav.etterlatte.modules.beregning.avkorting.Avkorting
+import no.nav.etterlatte.modules.beregning.avkorting.AvkortingRepository
+import no.nav.etterlatte.modules.beregning.avkorting.Etteroppgjoer
 import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 import javax.sql.DataSource
@@ -17,56 +23,87 @@ import javax.sql.DataSource
 class EtteroppgjoerRepository(
     private val dataSource: DataSource,
 ) : EtteroppgjoerRepositoryOperasjoner {
+    override fun lagreAvkortingOgEtteroppgjoerResultat(
+        sakId: SakId,
+        avkorting: Avkorting,
+        resultat: BeregnetEtteroppgjoerResultat,
+    ) {
+        val aarsoppgjoer = avkorting.aarsoppgjoer.singleOrNull()
+        if (aarsoppgjoer !is Etteroppgjoer ||
+            aarsoppgjoer.aar != resultat.aar ||
+            aarsoppgjoer.id != resultat.referanseAvkorting.avkortingForbehandling
+        ) {
+            throw UgyldigForespoerselException(
+                "INKONSISTENT_ETTEROPPGJOER",
+                "Resultatet må vise til etteroppgjøret i avkortingen for samme år",
+            )
+        }
+        dataSource.transaction { tx ->
+            AvkortingRepository(dataSource).lagreAvkorting(resultat.forbehandlingId, sakId, avkorting, tx)
+            lagreEtteroppgjoerResultat(resultat, tx)
+        }
+    }
+
     override fun lagreEtteroppgjoerResultat(resultat: BeregnetEtteroppgjoerResultat) =
         dataSource.transaction { tx ->
-            queryOf(
-                statement =
-                    """
-                    INSERT INTO etteroppgjoer_beregnet_resultat(id, aar, siste_iverksatte_behandling_id, forbehandling_id, utbetalt_stoenad, ny_brutto_stoenad, differanse, grense, resultat_type,
-                            tidspunkt, regel_resultat, kilde, referanse_avkorting_sist_iverksatte, har_ingen_inntekt,
-                            referanse_avkorting_forbehandling, vedtak_referanse)
-                    VALUES (:id, :aar, :siste_iverksatte_behandling_id, :forbehandling_id, :utbetalt_stoenad, :ny_brutto_stoenad, :differanse, :grense, :resultat_type, :tidspunkt, :regel_resultat,
-                            :kilde, :referanse_avkorting_sist_iverksatte, :har_ingen_inntekt, :referanse_avkorting_forbehandling, :vedtak_referanse)
-                    ON CONFLICT (
-                        aar, siste_iverksatte_behandling_id, forbehandling_id
-                        ) DO UPDATE SET utbetalt_stoenad = excluded.utbetalt_stoenad,
-                                ny_brutto_stoenad = excluded.ny_brutto_stoenad,
-                                differanse = excluded.differanse,
-                                grense = excluded.grense,
-                                resultat_type = excluded.resultat_type,
-                                tidspunkt = excluded.tidspunkt,
-                                har_ingen_inntekt = excluded.har_ingen_inntekt,
-                                regel_resultat = excluded.regel_resultat,
-                                kilde = excluded.kilde
-                    """.trimIndent(),
-                paramMap =
-                    mapOf(
-                        "id" to resultat.id,
-                        "aar" to resultat.aar,
-                        "siste_iverksatte_behandling_id" to resultat.sisteIverksatteBehandlingId,
-                        "forbehandling_id" to resultat.forbehandlingId,
-                        "utbetalt_stoenad" to resultat.utbetaltStoenad,
-                        "ny_brutto_stoenad" to resultat.nyBruttoStoenad,
-                        "differanse" to resultat.differanse,
-                        "grense" to resultat.grense.toJson(),
-                        "resultat_type" to resultat.resultatType.name,
-                        "tidspunkt" to resultat.tidspunkt.toTimestamp(),
-                        "regel_resultat" to resultat.regelResultat.toJson(),
-                        "kilde" to resultat.kilde.toJson(),
-                        "har_ingen_inntekt" to resultat.harIngenInntekt,
-                        "referanse_avkorting_sist_iverksatte" to resultat.referanseAvkorting.avkortingSisteIverksatte,
-                        "referanse_avkorting_forbehandling" to resultat.referanseAvkorting.avkortingForbehandling,
-                        "vedtak_referanse" to objectMapper.writeValueAsString(resultat.referanseAvkorting.vedtakReferanse),
-                    ),
-            ).let { query -> tx.run(query.asUpdate) }
-                .let { antallOppdatert ->
-                    krev(
-                        antallOppdatert == 1,
-                    ) {
-                        "Kunne ikke lagre etteroppgjør resultat, referanse avkorting=${resultat.referanseAvkorting}"
-                    }
-                }
+            lagreEtteroppgjoerResultat(resultat, tx)
         }
+
+    private fun lagreEtteroppgjoerResultat(
+        resultat: BeregnetEtteroppgjoerResultat,
+        tx: TransactionalSession,
+    ) {
+        queryOf(
+            statement =
+                """
+                INSERT INTO etteroppgjoer_beregnet_resultat(id, aar, siste_iverksatte_behandling_id, forbehandling_id, utbetalt_stoenad, ny_brutto_stoenad, differanse, grense, resultat_type,
+                        tidspunkt, regel_resultat, kilde, referanse_avkorting_sist_iverksatte, har_ingen_inntekt,
+                        referanse_avkorting_forbehandling, vedtak_referanse)
+                VALUES (:id, :aar, :siste_iverksatte_behandling_id, :forbehandling_id, :utbetalt_stoenad, :ny_brutto_stoenad, :differanse, :grense, :resultat_type, :tidspunkt, :regel_resultat,
+                        :kilde, :referanse_avkorting_sist_iverksatte, :har_ingen_inntekt, :referanse_avkorting_forbehandling, :vedtak_referanse)
+                ON CONFLICT (
+                    aar, siste_iverksatte_behandling_id, forbehandling_id
+                    ) DO UPDATE SET utbetalt_stoenad = excluded.utbetalt_stoenad,
+                            ny_brutto_stoenad = excluded.ny_brutto_stoenad,
+                            differanse = excluded.differanse,
+                            grense = excluded.grense,
+                            resultat_type = excluded.resultat_type,
+                            tidspunkt = excluded.tidspunkt,
+                            har_ingen_inntekt = excluded.har_ingen_inntekt,
+                            regel_resultat = excluded.regel_resultat,
+                            kilde = excluded.kilde,
+                            referanse_avkorting_forbehandling = excluded.referanse_avkorting_forbehandling,
+                            referanse_avkorting_sist_iverksatte = excluded.referanse_avkorting_sist_iverksatte,
+                            vedtak_referanse = excluded.vedtak_referanse
+                """.trimIndent(),
+            paramMap =
+                mapOf(
+                    "id" to resultat.id,
+                    "aar" to resultat.aar,
+                    "siste_iverksatte_behandling_id" to resultat.sisteIverksatteBehandlingId,
+                    "forbehandling_id" to resultat.forbehandlingId,
+                    "utbetalt_stoenad" to resultat.utbetaltStoenad,
+                    "ny_brutto_stoenad" to resultat.nyBruttoStoenad,
+                    "differanse" to resultat.differanse,
+                    "grense" to resultat.grense.toJson(),
+                    "resultat_type" to resultat.resultatType.name,
+                    "tidspunkt" to resultat.tidspunkt.toTimestamp(),
+                    "regel_resultat" to resultat.regelResultat.toJson(),
+                    "kilde" to resultat.kilde.toJson(),
+                    "har_ingen_inntekt" to resultat.harIngenInntekt,
+                    "referanse_avkorting_sist_iverksatte" to resultat.referanseAvkorting.avkortingSisteIverksatte,
+                    "referanse_avkorting_forbehandling" to resultat.referanseAvkorting.avkortingForbehandling,
+                    "vedtak_referanse" to objectMapper.writeValueAsString(resultat.referanseAvkorting.vedtakReferanse),
+                ),
+        ).let { query -> tx.run(query.asUpdate) }
+            .let { antallOppdatert ->
+                krev(
+                    antallOppdatert == 1,
+                ) {
+                    "Kunne ikke lagre etteroppgjør resultat, referanse avkorting=${resultat.referanseAvkorting}"
+                }
+            }
+    }
 
     override fun hentEtteroppgjoerResultat(
         aar: Int,

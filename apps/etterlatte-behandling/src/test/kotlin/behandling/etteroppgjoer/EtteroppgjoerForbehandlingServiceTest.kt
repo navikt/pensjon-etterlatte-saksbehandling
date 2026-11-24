@@ -2,10 +2,21 @@ package no.nav.etterlatte.behandling.etteroppgjoer
 
 import io.kotest.matchers.equals.shouldNotEqual
 import io.kotest.matchers.shouldBe
-import io.ktor.server.plugins.*
-import io.mockk.*
+import io.ktor.server.plugins.NotFoundException
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.*
+import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.BeregnFaktiskInntektRequest
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandling
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingDao
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingHendelseService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.EtteroppgjoerForbehandlingService
+import no.nav.etterlatte.behandling.etteroppgjoer.forbehandling.FantIkkeEtteroppgjoer
 import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
@@ -14,7 +25,11 @@ import no.nav.etterlatte.behandling.klienter.VedtakInternalService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
-import no.nav.etterlatte.libs.common.behandling.*
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.etteroppgjoer.EtteroppgjoerForbehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.BeregnetEtteroppgjoerResultatDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
@@ -42,10 +57,11 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.net.SocketTimeoutException
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 class EtteroppgjoerForbehandlingServiceTest {
     private class TestContext {
@@ -683,5 +699,41 @@ class EtteroppgjoerForbehandlingServiceTest {
         ctx.service.lagreOgBeregnFaktiskInntekt(forbehandling.id, ctx.faktiskInntektRequest(), simpleSaksbehandler())
 
         request.captured.sammenlignTilOgMedBehandlingId shouldBe null
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `feil i oppslag eller lokal status skal ikke skrive etteroppgjoer i beregning`(feilVedOppslag: Boolean) {
+        val ctx = TestContext()
+        val forbehandling =
+            EtteroppgjoerForbehandling.opprett(
+                sak = ctx.behandling.sak,
+                innvilgetPeriode = Periode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                sisteIverksatteBehandling = UUID.randomUUID(),
+            )
+        ctx.stubLagreOgBeregnFaktiskInntekt(forbehandling)
+        val revurderingId = UUID.randomUUID()
+        val revurdering =
+            mockk<Behandling> {
+                every { id } returns revurderingId
+                every { relatertBehandlingId } returns forbehandling.id
+            }
+        every { ctx.behandlingService.hentBehandlingerForSak(any()) } returns listOf(revurdering)
+        val feil = IllegalStateException("Feil foer beregning")
+        if (feilVedOppslag) {
+            every { ctx.behandlingService.hentUtlandstilknytningForSak(any()) } throws feil
+        } else {
+            every { ctx.behandlingService.settBeregnet(revurderingId, any()) } throws feil
+        }
+
+        assertThrows(IllegalStateException::class.java) {
+            ctx.service.lagreOgBeregnFaktiskInntekt(forbehandling.id, ctx.faktiskInntektRequest(), simpleSaksbehandler())
+        } shouldBe feil
+
+        coVerify(exactly = 0) { ctx.beregningKlient.beregnAvkortingFaktiskInntekt(any(), any()) }
+        verify(exactly = 0) {
+            ctx.dao.lagreForbehandling(any())
+            ctx.hendelserService.registrerOgSendHendelse(any(), any(), any(), any(), any())
+        }
     }
 }

@@ -139,8 +139,32 @@ i `etterlatte-beregning`.
 Klienten bruker systemtoken fra behandling. Beregning må ha `BRUK_INTERN_BEREGNING=true`
 før disse operasjonene tas i bruk. CRUD-endepunktene er foreløpig deaktivert i prod.
 
-Sett `BRUK_EGEN_DATABASE_FOR_BEREGNING=true` når behandling sin database har de nødvendige
-dataene. Da bruker alle seks repositories behandling sin database, uten HTTP-kall.
+De flyttede tjenestene gjør validering, oppslag og responsmapping før CRUD-skriving der
+resultatet ikke avhenger av lagringen. Lokal behandlingsstatus oppdateres før det siste
+CRUD-kallet, og transaksjonen holdes åpen til kallet er fullført. Hvis kallet feiler,
+rulles lokale statusendringer tilbake. En eventuell transaksjon hos kalleren gjenbrukes.
+
+Etteroppgjør beregner både avkorting og resultat før én
+`PUT /api/beregning/intern/etteroppgjoer/{forbehandlingId}` lagrer dem atomisk.
+År og avkortingsreferanse kontrolleres før lagring. Beregning må deployes med dette
+endepunktet før behandling tar det i bruk. Ingen brytere eller databasedata flyttes av endringen.
+
+Dette gir ikke en felles transaksjon mellom appene: ved timeout etter at beregning har
+committet, kan fjernlagringen være gjennomført selv om behandling ruller tilbake.
+Den frittstående appen har allerede tilsvarende risiko fordi den lagrer før status
+oppdateres over HTTP. Ved uavklart utfall av en beregnings- eller avkortingslagring
+gjentas samme steg før arbeidet fortsetter. Dette gjelder ikke automatisk andre
+flertrinnsflyter. CRUD-klienten logger operasjon og tilgjengelig behandlings- eller
+ressursreferanse, uten payload, og sender feilen videre.
+Den samlede repository-operasjonen har også sin egen transaksjon ved lokal JDBC;
+den deltar ikke i behandling sin `DatabaseContext`.
+Resultatavhengig lokal lagring og hendelser i etteroppgjørsforbehandlingen skjer fortsatt
+etter beregningen. For øvrige flertrinnsflyter og gjenstående risiko, se
+[migreringsstatusen](../../.github/domenekontekst/beregning-migrering.md).
+
+Hold `BRUK_EGEN_DATABASE_FOR_BEREGNING=false` i prod gjennom CRUD-mellomsteget.
+Før lokal database aktiveres må dataflytting og de lokale transaksjonsgrensene avklares.
+Med `true` bruker alle seks repositories behandling sin database, uten HTTP-kall.
 Endringen krever deployment og omstart. Det finnes ingen automatisk fallback eller
 dobbeltskriving; ved bytte må dataene være oppdaterte i databasen som tas i bruk.
 
@@ -157,11 +181,14 @@ Etter aktivering kan du teste begge datakildene i dev ved å endre
 `BRUK_EGEN_DATABASE_FOR_BEREGNING` i behandling og deploye på nytt.
 Bruk testdata som finnes i den valgte databasen,
 og kontroller både lagring, uthenting, oppdatering og sletting.
-For å sende UI-trafikken tilbake til beregningsappen setter du UI-ens
-`BRUK_INTERN_BEREGNING=false` og deployer UI på nytt. Ikke deaktiver rutene i behandling
-mens UI fortsatt sender forespørsler dit.
-Når UI er flyttet tilbake, kan du også sette `BRUK_INTERN_BEREGNING=false` i behandling
-og deploye behandling på nytt for å sende interne kall tilbake til beregningsappen.
+Ved rollback flyttes UI og andre eksterne konsumenter tilbake til beregningsappen først.
+For UI setter du `BRUK_INTERN_BEREGNING=false` i BFF-en og deployer UI på nytt.
+Ikke deaktiver rutene i behandling mens konsumenter fortsatt sender forespørsler dit.
+Deretter kan du sette `BRUK_INTERN_BEREGNING=false` i behandling og deploye på nytt for
+å sende interne kall tilbake til beregningsappen. Behold CRUD-rutene i beregningsappen
+til ingen gamle instanser eller pågående kall trenger dem.
+Med uendret autoritativ database og bakoverkompatible datakontrakter krever dette
+ingen datasynkronisering. Rollback av rutingen angrer ikke lagrede endringer.
 
 ## Enhetstester
 

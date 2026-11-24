@@ -11,7 +11,7 @@ spec:
   ingresses:
     - "https://etterlatte-beregning.intern.dev.nav.no"
   liveness:
-    initialDelay: 800
+    initialDelay: 5
     path: /health/isalive
   readiness:
     initialDelay: 5

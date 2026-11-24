@@ -20,6 +20,7 @@ import no.nav.etterlatte.behandling.domain.Behandling.BehandlingStoetterIkkeStat
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -40,6 +41,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.sql.Connection
 import java.time.YearMonth
 import java.util.UUID.randomUUID
+import javax.sql.DataSource
 
 @ExtendWith(BeregningTestKontekst::class)
 internal class BeregningServiceTest {
@@ -82,8 +84,8 @@ internal class BeregningServiceTest {
             coVerifyOrder {
                 behandlingStatusService.settBeregnet(any(), bruker, true)
                 beregnBarnepensjonService.beregn(any(), any())
-                beregningRepository.lagreEllerOppdaterBeregning(any())
                 behandlingStatusService.settBeregnet(any(), bruker, false)
+                beregningRepository.lagreEllerOppdaterBeregning(any())
             }
         }
     }
@@ -450,7 +452,7 @@ internal class BeregningServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    fun `skal viderefoere feil ved statusoppdatering etter lagring`(overstyrt: Boolean) =
+    fun `skal avvise lagring naar statusoppdateringen feiler`(overstyrt: Boolean) =
         runBlocking<Unit> {
             val behandling = mockBehandling(SakType.BARNEPENSJON)
             val behandlingId = behandling.id
@@ -479,10 +481,10 @@ internal class BeregningServiceTest {
             } shouldBeSameInstanceAs feil
 
             if (overstyrt) {
-                verify(exactly = 1) { beregningRepository.opprettOverstyrBeregning(any()) }
+                verify(exactly = 0) { beregningRepository.opprettOverstyrBeregning(any()) }
                 verify(exactly = 1) { behandlingStatusService.settTrygdetidOppdatert(behandlingId, bruker, false) }
             } else {
-                verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
+                verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
                 verify(exactly = 1) { behandlingStatusService.settBeregnet(behandlingId, bruker, false) }
             }
         }
@@ -544,6 +546,35 @@ internal class BeregningServiceTest {
             beregningService.hentOverstyrBeregningPaaBehandlingId(behandlingId, bruker) shouldBe null
 
             nyeTransaksjoner shouldBe if (harTransaksjon) 0 else 1
+        }
+
+    @Test
+    fun `ruller tilbake lokal status naar CRUD-lagringen feiler`() =
+        runBlocking<Unit> {
+            val connection = mockk<Connection>(relaxed = true)
+            every { connection.autoCommit } returns true
+            val dataSource = mockk<DataSource> { every { getConnection() } returns connection }
+            nyKontekstMedBrukerOgDatabaseContext(Self("beregning-test"), DatabaseContext(dataSource))
+            val behandling = mockBehandling(SakType.BARNEPENSJON)
+            val behandlingId = behandling.id
+            val sakId = behandling.sak
+            every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns behandling
+            every { beregningRepository.hentOverstyrBeregning(sakId) } returns null
+            every { behandlingStatusService.settBeregnet(any(), any(), any()) } just runs
+            coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns mockk()
+            val feil = IllegalStateException("CRUD-lagringen feilet")
+            every { beregningRepository.lagreEllerOppdaterBeregning(any()) } throws feil
+
+            assertThrows<IllegalStateException> {
+                beregningService.opprettBeregning(behandlingId, bruker)
+            } shouldBeSameInstanceAs feil
+
+            coVerifyOrder {
+                behandlingStatusService.settBeregnet(behandlingId, bruker, false)
+                beregningRepository.lagreEllerOppdaterBeregning(any())
+                connection.rollback()
+            }
+            verify(exactly = 1) { connection.rollback() }
         }
 
     private fun mockBehandling(type: SakType): DetaljertBehandling =

@@ -82,9 +82,10 @@ class BeregningService(
                 }
             }
 
-        val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
-        inTransactionIfNeeded { behandlingStatusService.settBeregnet(behandlingId, brukerTokenInfo, dryRun = false) }
-        return lagretBeregning.berikMedOverstyrBeregning(brukerTokenInfo) ?: lagretBeregning
+        return inTransactionIfNeeded {
+            behandlingStatusService.settBeregnet(behandlingId, brukerTokenInfo, dryRun = false)
+            beregningRepository.lagreEllerOppdaterBeregning(beregning).copy(overstyrBeregning = overstyrBeregning)
+        }
     }
 
     fun hentOverstyrBeregning(behandling: DetaljertBehandling): OverstyrBeregning? =
@@ -116,7 +117,8 @@ class BeregningService(
 
         validerStatusForOverstyrtBeregning(behandlingId, brukerTokenInfo)
         return hentOverstyrBeregning(behandling).takeIf { it != null } ?: run {
-            val opprettetOverstyrtBeregning =
+            inTransactionIfNeeded {
+                behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
                 beregningRepository.opprettOverstyrBeregning(
                     OverstyrBeregning(
                         behandling.sak,
@@ -125,10 +127,7 @@ class BeregningService(
                         kategori = overstyrBeregning.kategori,
                     ),
                 )
-            inTransactionIfNeeded {
-                behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
             }
-            opprettetOverstyrtBeregning
         }
     }
 
@@ -145,10 +144,10 @@ class BeregningService(
             validerFoersteVirke(behandling)
         }
 
-        beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
-        beregningRepository.slettOverstyrtBeregningsgrunnlag(behandling.id)
         inTransactionIfNeeded {
             behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+            beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
+            beregningRepository.slettOverstyrtBeregningsgrunnlag(behandling.id)
         }
     }
 

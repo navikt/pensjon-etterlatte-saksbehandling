@@ -3,8 +3,6 @@ package no.nav.etterlatte.kafka
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.common.TopicPartition
-import org.apache.kafka.common.errors.RecordDeserializationException
 import org.apache.kafka.common.errors.WakeupException
 import org.slf4j.Logger
 import java.time.Duration
@@ -30,30 +28,12 @@ abstract class Kafkakonsument<K, T>(
 
     abstract fun start()
 
-    protected open fun skalSkippeDeserialiseringsfeil(
-        topicPartition: TopicPartition,
-        offset: Long,
-    ): Boolean = false
-
     protected fun pollLoop(haandter: (ConsumerRecords<K, T>) -> Unit) {
         try {
             logger.info("Starter å lese hendelser fra ${this.javaClass.name}")
             consumer.subscribe(listOf(topic))
             while (!closed.get()) {
-                val meldinger: ConsumerRecords<K, T> =
-                    try {
-                        consumer.poll(pollTimeoutInSeconds)
-                    } catch (e: RecordDeserializationException) {
-                        val topicPartition = e.topicPartition()
-                        val offset = e.offset()
-                        if (skalSkippeDeserialiseringsfeil(topicPartition, offset)) {
-                            logger.warn("Skipper melding med deserialiseringsfeil på $topicPartition offset=$offset")
-                            consumer.seek(topicPartition, offset + 1)
-                            consumer.commitSync()
-                            continue
-                        }
-                        throw e
-                    }
+                val meldinger: ConsumerRecords<K, T> = consumer.poll(pollTimeoutInSeconds)
                 haandter(meldinger)
                 consumer.commitSync()
             }

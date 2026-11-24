@@ -188,6 +188,19 @@ private fun Route.avkortingRepositoryRoutes(repository: AvkortingRepository) {
 }
 
 private fun Route.etteroppgjoerRepositoryRoutes(repository: EtteroppgjoerRepository) {
+    put("/etteroppgjoer/{forbehandlingId}") {
+        val forbehandlingId = call.parameters.parseUuidParameter("forbehandlingId")
+        val request = call.receiveCrudRequest<LagreAvkortingOgEtteroppgjoerResultatRequest>()
+        if (request.resultat.forbehandlingId != forbehandlingId) {
+            throw UgyldigForespoerselException(
+                "ULIK_BEHANDLING_ID",
+                "ForbehandlingId i resultatet må være lik forbehandlingId i URL-en",
+            )
+        }
+        repository.lagreAvkortingOgEtteroppgjoerResultat(request.sakId, request.avkorting, request.resultat)
+        call.respond(HttpStatusCode.NoContent)
+    }
+
     route("/etteroppgjoer/resultat") {
         get("/{forbehandlingId}/{aar}/{sisteIverksatteBehandlingId}") {
             val forbehandlingId = call.parameters.parseUuidParameter("forbehandlingId")

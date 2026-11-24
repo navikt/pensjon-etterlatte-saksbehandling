@@ -45,6 +45,7 @@ Alle stiene under er relative til `/api/beregning/intern`.
 | POST | `/avkorting/inntekt-for-aar` | Sjekk inntekt med `InntektsjusteringAvkortingInfoRequest` |
 | GET | `/etteroppgjoer/resultat/{forbehandlingId}/{aar}/{sisteIverksatteBehandlingId}` | Hent beregnet etteroppgjørsresultat |
 | PUT | `/etteroppgjoer/resultat` | Lagre `BeregnetEtteroppgjoerResultat` |
+| PUT | `/etteroppgjoer/{forbehandlingId}` | Erstatt avkorting og lagre etteroppgjørsresultat i én transaksjon |
 | GET | `/sanksjon/behandling/{behandlingId}` | Hent sanksjoner for behandling |
 | POST | `/sanksjon/behandling/{behandlingId}` | Opprett sanksjon |
 | POST | `/sanksjon/behandling/{behandlingId}/kopi` | Opprett sanksjon fra kopi |
@@ -57,6 +58,14 @@ Anvendt trygdetid bruker konkrete typer for `anvendt`, perioder og regelversjon,
 JSON-struktur som `AnvendtTrygdetidPeriodeUtrekning`. Bare regeltrærne i `utrekning[].resultat`
 bruker `JsonNode` og lagres uendret uten å rekonstruere kjørbare regler.
 Avkorting bruker hele repository-modellen, ikke den flate `AvkortingDto`.
+
+Den samlede etteroppgjørsoperasjonen tar `sakId`, `avkorting` og `resultat`.
+Avkortingen må inneholde nøyaktig ett etteroppgjør med samme år og årsoppgjørs-ID som
+resultatet viser til. URL-en må stemme med resultatets `forbehandlingId`.
+Ulikheter avvises med 400 før skriving. Avkorting, inntektsgrunnlag, perioder og resultat
+lagres med samme databaseforbindelse og transaksjon; en lagringsfeil ruller alt tilbake.
+Ved reberegning oppdateres også resultatets avkortings- og vedtaksreferanser.
+Operasjonen returnerer 204. Den eldre resultatoperasjonen beholdes for eksisterende kallere.
 
 Manglende enkeltressurser gir 404. Lister kan være tomme. Oppretting gir 201, skriving uten
 returverdi gir 204, og øvrige vellykkede kall gir 200. Lagring av en inaktiv overstyring gir 204.

@@ -338,6 +338,43 @@ internal class BeregningCrudRoutesTest {
     }
 
     @Test
+    fun `lagrer avkorting og etteroppgjoersresultat i en samlet operasjon`() {
+        val aarsoppgjoer = etteroppgjoer()
+        val avkorting = Avkorting(listOf(aarsoppgjoer))
+        val resultat =
+            etteroppgjoerResultat().let {
+                it.copy(referanseAvkorting = it.referanseAvkorting.copy(avkortingForbehandling = aarsoppgjoer.id))
+            }
+        every { etteroppgjoerRepository.lagreAvkortingOgEtteroppgjoerResultat(sakId, avkorting, resultat) } just runs
+
+        medServer { client ->
+            client
+                .requestCrud(
+                    HttpMethod.Put,
+                    "/etteroppgjoer/$behandlingId",
+                    LagreAvkortingOgEtteroppgjoerResultatRequest(sakId, avkorting, resultat),
+                ).status shouldBe HttpStatusCode.NoContent
+        }
+
+        verify(exactly = 1) { etteroppgjoerRepository.lagreAvkortingOgEtteroppgjoerResultat(sakId, avkorting, resultat) }
+        verify { avkortingRepository wasNot Called }
+    }
+
+    @Test
+    fun `avviser samlet etteroppgjoer naar forbehandlingId ikke stemmer`() {
+        medServer { client ->
+            client
+                .requestCrud(
+                    HttpMethod.Put,
+                    "/etteroppgjoer/${UUID.randomUUID()}",
+                    LagreAvkortingOgEtteroppgjoerResultatRequest(sakId, Avkorting(listOf(etteroppgjoer())), etteroppgjoerResultat()),
+                ).status shouldBe HttpStatusCode.BadRequest
+        }
+
+        verify { etteroppgjoerRepository wasNot Called }
+    }
+
+    @Test
     fun `henter og lagrer etteroppgjoersresultat med regelresultat og referanser`() {
         val resultat = etteroppgjoerResultat()
         every {
@@ -702,6 +739,7 @@ internal class BeregningCrudRoutesTest {
             Arguments.of(HttpMethod.Post, "/avkorting/inntekt-for-aar"),
             Arguments.of(HttpMethod.Get, "/etteroppgjoer/resultat/$behandlingId/2024/$behandlingId"),
             Arguments.of(HttpMethod.Put, "/etteroppgjoer/resultat"),
+            Arguments.of(HttpMethod.Put, "/etteroppgjoer/$behandlingId"),
             Arguments.of(HttpMethod.Get, "/sanksjon/behandling/$behandlingId"),
             Arguments.of(HttpMethod.Post, "/sanksjon/behandling/$behandlingId"),
             Arguments.of(HttpMethod.Post, "/sanksjon/behandling/$behandlingId/kopi"),

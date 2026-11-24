@@ -19,7 +19,7 @@ class ForlengetOmsDao(
             connection
                 .prepareStatement(
                     """
-                    SELECT behandling_id, aktivitet, begrunnelse, utfall, vurdert, opprettet, endret
+                    SELECT behandling_id, aktivitet, begrunnelse, utfall, opprettet, endret
                     FROM forlenget_oms_vurdering
                     WHERE behandling_id = ?
                     """.trimIndent(),
@@ -43,15 +43,13 @@ class ForlengetOmsDao(
                 .prepareStatement(
                     """
                     INSERT INTO forlenget_oms_vurdering
-                        (behandling_id, aktivitet, begrunnelse, utfall, vurdert, opprettet, endret)
-                    VALUES (?, ?, ?, ?, TRUE, ?, ?)
+                        (behandling_id, aktivitet, begrunnelse, utfall, opprettet, endret)
+                    VALUES (?, ?, ?, ?, ?, ?)
                     ON CONFLICT (behandling_id) DO UPDATE SET
                         aktivitet = excluded.aktivitet,
                         begrunnelse = excluded.begrunnelse,
                         utfall = excluded.utfall,
-                        vurdert = TRUE,
                         endret = excluded.endret
-                    WHERE NOT forlenget_oms_vurdering.vurdert
                     """.trimIndent(),
                 ).use { statement ->
                     statement.setObject(1, behandlingId)
@@ -61,29 +59,7 @@ class ForlengetOmsDao(
                     statement.setJsonb(5, kilde)
                     statement.setJsonb(6, kilde)
                     krev(statement.executeUpdate() == 1) {
-                        "Kunne ikke lagre vurdering for forlenget OMS. Vurderingen må åpnes for redigering: $behandlingId"
-                    }
-                }
-        }
-    }
-
-    fun aapneVurdering(
-        behandlingId: UUID,
-        kilde: Grunnlagsopplysning.Saksbehandler,
-    ) {
-        connectionAutoclosing.hentConnection { connection ->
-            connection
-                .prepareStatement(
-                    """
-                    UPDATE forlenget_oms_vurdering
-                    SET vurdert = FALSE, endret = ?
-                    WHERE behandling_id = ? AND vurdert
-                    """.trimIndent(),
-                ).use { statement ->
-                    statement.setJsonb(1, kilde)
-                    statement.setObject(2, behandlingId)
-                    krev(statement.executeUpdate() == 1) {
-                        "Fant ingen lagret vurdering for forlenget OMS å åpne for redigering: $behandlingId"
+                        "Kunne ikke lagre vurdering for forlenget OMS: $behandlingId"
                     }
                 }
         }
@@ -95,7 +71,6 @@ class ForlengetOmsDao(
             aktivitet = objectMapper.readValue(getString("aktivitet")),
             begrunnelse = getString("begrunnelse"),
             utfall = ForlengetOmsUtfall.valueOf(getString("utfall")),
-            vurdert = getBoolean("vurdert"),
             opprettet = objectMapper.readValue(getString("opprettet")),
             endret = objectMapper.readValue(getString("endret")),
         )

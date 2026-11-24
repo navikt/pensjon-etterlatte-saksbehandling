@@ -11,7 +11,6 @@ data class ForlengetOmsVurdering(
     val aktivitet: ForlengetOmsAktivitet,
     val begrunnelse: String,
     val utfall: ForlengetOmsUtfall,
-    val vurdert: Boolean,
     val opprettet: Grunnlagsopplysning.Saksbehandler,
     val endret: Grunnlagsopplysning.Saksbehandler,
 )

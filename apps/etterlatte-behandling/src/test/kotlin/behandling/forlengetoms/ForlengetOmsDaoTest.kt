@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.opprettBehandling
@@ -58,30 +57,16 @@ class ForlengetOmsDaoTest(
             dao.lagreVurdering(behandlingId, aktivitet, "Begrunnelse", utfall, kilde)
 
             dao.hentVurdering(behandlingId) shouldBe
-                ForlengetOmsVurdering(behandlingId, aktivitet, "Begrunnelse", utfall, true, kilde, kilde)
+                ForlengetOmsVurdering(behandlingId, aktivitet, "Begrunnelse", utfall, kilde, kilde)
         }
     }
 
     @Test
-    fun `beholder svar og opprettet ved redigering og erstatter bare siste vurdering`() {
+    fun `oppdaterer siste vurdering og endret men beholder opprettet`() {
         val behandlingId = nyBehandling()
         dao.lagreVurdering(behandlingId, utdanning, "Begrunnelse", ForlengetOmsUtfall.INNVILGELSE, kilde)
 
-        val redigertAv = Grunnlagsopplysning.Saksbehandler("Z654321", kilde.tidspunkt.plus(1, ChronoUnit.HOURS))
-        dao.aapneVurdering(behandlingId, redigertAv)
-
-        dao.hentVurdering(behandlingId) shouldBe
-            ForlengetOmsVurdering(
-                behandlingId,
-                utdanning,
-                "Begrunnelse",
-                ForlengetOmsUtfall.INNVILGELSE,
-                false,
-                kilde,
-                redigertAv,
-            )
-
-        val lagretAv = redigertAv.copy(tidspunkt = redigertAv.tidspunkt.plus(1, ChronoUnit.HOURS))
+        val lagretAv = Grunnlagsopplysning.Saksbehandler("Z654321", kilde.tidspunkt.plus(1, ChronoUnit.HOURS))
         dao.lagreVurdering(
             behandlingId,
             ForlengetOmsAktivitet.IngenAktivitet,
@@ -96,40 +81,17 @@ class ForlengetOmsDaoTest(
                 ForlengetOmsAktivitet.IngenAktivitet,
                 "Ny begrunnelse",
                 ForlengetOmsUtfall.AVSLAG,
-                true,
                 kilde,
                 lagretAv,
             )
     }
 
     @Test
-    fun `kan ikke overskrive en vurdering uten aa aapne den for redigering`() {
-        val behandlingId = nyBehandling()
-        dao.lagreVurdering(behandlingId, utdanning, "Begrunnelse", ForlengetOmsUtfall.INNVILGELSE, kilde)
-        val lagret = dao.hentVurdering(behandlingId)
-
-        assertThrows<InternfeilException> {
-            dao.lagreVurdering(
-                behandlingId,
-                ForlengetOmsAktivitet.IngenAktivitet,
-                "Ny begrunnelse",
-                ForlengetOmsUtfall.AVSLAG,
-                kilde,
-            )
-        }
-
-        dao.hentVurdering(behandlingId) shouldBe lagret
-    }
-
-    @Test
-    fun `kan ikke lagre vurdering uten tilhoerende behandling eller aapne en manglende vurdering`() {
+    fun `kan ikke lagre vurdering uten tilhoerende behandling`() {
         val behandlingId = UUID.randomUUID()
 
         assertThrows<SQLException> {
             dao.lagreVurdering(behandlingId, utdanning, "Begrunnelse", ForlengetOmsUtfall.INNVILGELSE, kilde)
-        }
-        assertThrows<InternfeilException> {
-            dao.aapneVurdering(behandlingId, kilde)
         }
         dao.hentVurdering(behandlingId) shouldBe null
     }

@@ -106,13 +106,17 @@ class SanksjonService(
 
         if (sanksjon.id === null) {
             logger.info("Oppretter sanksjon med behandlingID=$behandlingId")
-            oppdaterBehandlingstatusEtterOppdateringSanksjon(behandlingId, brukerTokenInfo)
-            return sanksjonRepository.opprettSanksjon(behandlingId, behandling.sak, brukerTokenInfo.ident(), sanksjon)
+            return inTransactionIfNeeded {
+                oppdaterBehandlingstatusEtterOppdateringSanksjon(behandlingId, brukerTokenInfo)
+                sanksjonRepository.opprettSanksjon(behandlingId, behandling.sak, brukerTokenInfo.ident(), sanksjon)
+            }
         }
 
         logger.info("Oppdaterer sanksjon med behandlingID=$behandlingId")
-        oppdaterBehandlingstatusEtterOppdateringSanksjon(behandlingId, brukerTokenInfo)
-        return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
+        return inTransactionIfNeeded {
+            oppdaterBehandlingstatusEtterOppdateringSanksjon(behandlingId, brukerTokenInfo)
+            sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
+        }
     }
 
     private fun sanksjonerErLikeFoerVirk(
@@ -200,9 +204,11 @@ class SanksjonService(
             throw SanksjonEndresFoerVirkException()
         }
 
-        oppdaterBehandlingstatusEtterOppdateringSanksjon(behandlingId, brukerTokenInfo)
         logger.info("Sletter sanksjon med sanksjonID=$sanksjonId")
-        sanksjonRepository.slettSanksjon(sanksjonId)
+        inTransactionIfNeeded {
+            oppdaterBehandlingstatusEtterOppdateringSanksjon(behandlingId, brukerTokenInfo)
+            sanksjonRepository.slettSanksjon(sanksjonId)
+        }
     }
 
     private fun oppdaterBehandlingstatusEtterOppdateringSanksjon(

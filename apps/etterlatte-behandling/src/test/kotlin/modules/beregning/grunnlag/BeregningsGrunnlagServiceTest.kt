@@ -132,7 +132,7 @@ internal class BeregningsGrunnlagServiceTest {
         }
 
     @Test
-    fun `skal viderefoere feil ved statusoppdatering etter lagring av overstyrt grunnlag`() =
+    fun `skal ikke lagre overstyrt grunnlag naar statusoppdateringen feiler`() =
         runBlocking<Unit> {
             val behandlingId = randomUUID()
             val bruker = simpleSaksbehandler()
@@ -149,7 +149,7 @@ internal class BeregningsGrunnlagServiceTest {
                 )
             } shouldBeSameInstanceAs feil
 
-            verify(exactly = 1) {
+            verify(exactly = 0) {
                 beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, emptyList())
             }
             verify(exactly = 0) { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) }

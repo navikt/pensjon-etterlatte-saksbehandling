@@ -78,6 +78,16 @@ class VilkaarsvurderingService(
 
     fun hentBehandlingensGrunnlag(behandlingId: UUID): Grunnlag = hentDataForVilkaarsvurdering(behandlingId).second
 
+    fun sjekkKanLagreTotalVurderingFraApi(behandlingId: UUID) {
+        val behandling = behandlingService.hentBehandling(behandlingId) ?: throw VilkaarsvurderingIkkeFunnet()
+        if (behandling.revurderingsaarsak() == Revurderingaarsak.FORLENGET_OMS) {
+            throw UgyldigForespoerselException(
+                "FORLENGET_OMS_KREVER_AKTIVITETSVURDERING",
+                "Utfallet for forlenget OMS må lagres sammen med vurderingen av aktivitet.",
+            )
+        }
+    }
+
     fun oppdaterTotalVurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

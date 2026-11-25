@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.etteroppgjoer.etteroppgjoerRoutes
+import no.nav.etterlatte.behandling.forlengetoms.forlengetOmsRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
@@ -221,6 +222,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         aktivitetspliktService = applicationContext.aktivitetspliktService,
         aktivitetspliktOppgaveService = applicationContext.aktivitetspliktOppgaveService,
     )
+    forlengetOmsRoutes(applicationContext.forlengetOmsService)
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
     generellbehandlingRoutes(

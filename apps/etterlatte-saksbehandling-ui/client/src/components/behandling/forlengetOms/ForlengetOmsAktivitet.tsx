@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Alert, BodyShort, Box, Heading, HGrid, Label, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { useEffect, useState } from 'react'
+import { Alert, BodyShort, Box, Heading, HGrid, Label, Loader, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { addMonths, addYears, isValid } from 'date-fns'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
@@ -10,6 +10,9 @@ import { ForlengetOmsUtdanning } from './ForlengetOmsUtdanning'
 import { ForlengetOmsArbeidsrettetTiltak } from './ForlengetOmsArbeidsrettetTiltak'
 import { ForlengetOmsIngenAktivitet } from './ForlengetOmsIngenAktivitet'
 import { ResultatForlengetOms } from './ResultatForlengetOms'
+import { ForlengetOmsVurdering, hentForlengetOmsVurdering } from '~shared/api/forlengetOms'
+import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const saksbehandler = useInnloggetSaksbehandler()
@@ -24,6 +27,35 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
   ]
   const redigerbar = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
   const [utdanningEllerTiltak, setUtdanningEllerTiltak] = useState('')
+  const [lagrer, setLagrer] = useState(false)
+  const [vurderingStatus, setVurderingStatus] = useState<Result<ForlengetOmsVurdering | null>>({ status: 'initial' })
+
+  useEffect(() => {
+    let aktiv = true
+    setVurderingStatus({ status: 'pending' })
+    hentForlengetOmsVurdering(behandling.id).then((response) => {
+      if (!aktiv) return
+      if (response.ok) {
+        setVurderingStatus({ status: 'success', data: response.data })
+        setUtdanningEllerTiltak(response.data?.aktivitet.type ?? '')
+      } else {
+        setVurderingStatus({ status: 'error', error: response })
+      }
+    })
+    return () => {
+      aktiv = false
+    }
+  }, [behandling.id])
+
+  if (!isSuccess(vurderingStatus)) {
+    return mapResult(vurderingStatus, {
+      initial: <Loader title="Henter vurdering av aktivitet" />,
+      pending: <Loader title="Henter vurdering av aktivitet" />,
+      error: (error) => <ApiErrorAlert>Kunne ikke hente vurdering av aktivitet: {error.detail}</ApiErrorAlert>,
+    })
+  }
+  const vurdering = vurderingStatus.data ?? undefined
+  const onLagret = (vurdering: ForlengetOmsVurdering) => setVurderingStatus({ status: 'success', data: vurdering })
 
   return (
     <>
@@ -54,7 +86,7 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
             legend="Tar bruker utdanning eller deltar i arbeidsrettet tiltak?"
             value={utdanningEllerTiltak}
             onChange={setUtdanningEllerTiltak}
-            disabled={!redigerbar || !!behandling.vilkaarsvurdering?.resultat}
+            disabled={!redigerbar || lagrer || !!behandling.vilkaarsvurdering?.resultat}
           >
             <Radio value="UTDANNING">Ja, bruker tar utdanning</Radio>
             <Radio value="ARBEIDSRETTET_TILTAK">Ja, bruker deltar i arbeidsrettet tiltak</Radio>
@@ -63,12 +95,35 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
         </VStack>
       </VStack>
       {utdanningEllerTiltak === 'UTDANNING' && (
-        <ForlengetOmsUtdanning behandling={behandling} redigerbar={redigerbar} />
+        <ForlengetOmsUtdanning
+          behandling={behandling}
+          redigerbar={redigerbar}
+          vurdering={vurdering}
+          lagrer={lagrer}
+          onLagrerChange={setLagrer}
+          onLagret={onLagret}
+        />
       )}
       {utdanningEllerTiltak === 'ARBEIDSRETTET_TILTAK' && (
-        <ForlengetOmsArbeidsrettetTiltak behandling={behandling} redigerbar={redigerbar} />
+        <ForlengetOmsArbeidsrettetTiltak
+          behandling={behandling}
+          redigerbar={redigerbar}
+          vurdering={vurdering}
+          lagrer={lagrer}
+          onLagrerChange={setLagrer}
+          onLagret={onLagret}
+        />
       )}
-      {utdanningEllerTiltak === 'NEI' && <ForlengetOmsIngenAktivitet behandling={behandling} redigerbar={redigerbar} />}
+      {utdanningEllerTiltak === 'NEI' && (
+        <ForlengetOmsIngenAktivitet
+          behandling={behandling}
+          redigerbar={redigerbar}
+          vurdering={vurdering}
+          lagrer={lagrer}
+          onLagrerChange={setLagrer}
+          onLagret={onLagret}
+        />
+      )}
       {!utdanningEllerTiltak && <ResultatForlengetOms behandling={behandling} redigerbar={redigerbar} />}
     </>
   )

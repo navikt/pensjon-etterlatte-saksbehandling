@@ -2,20 +2,33 @@ import { useState } from 'react'
 import { Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ForlengetOmsPeriodeOgResultat } from './ForlengetOmsPeriodeOgResultat'
+import { ForlengetOmsVurdering, Tiltaksomfang } from '~shared/api/forlengetOms'
+import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsArbeidsrettetTiltak = ({
   behandling,
   redigerbar,
+  vurdering,
+  lagrer,
+  onLagrerChange,
+  onLagret,
 }: {
   behandling: IBehandlingReducer
   redigerbar: boolean
+  vurdering?: ForlengetOmsVurdering
+  lagrer: boolean
+  onLagrerChange: (lagrer: boolean) => void
+  onLagret: (vurdering: ForlengetOmsVurdering) => void
 }) => {
-  const [tiltak, setTiltak] = useState('')
-  const [omfang, setOmfang] = useState('')
-  const [aktivitetsplan, setAktivitetsplan] = useState('')
-  const [begrunnelse, setBegrunnelse] = useState(behandling.vilkaarsvurdering?.resultat?.kommentar ?? '')
+  const lagretAktivitet = vurdering?.aktivitet.type === 'ARBEIDSRETTET_TILTAK' ? vurdering.aktivitet : undefined
+  const [tiltak, setTiltak] = useState(lagretAktivitet?.tiltak ?? '')
+  const [omfang, setOmfang] = useState<Tiltaksomfang | ''>(lagretAktivitet?.omfang ?? '')
+  const [aktivitetsplan, setAktivitetsplan] = useState<JaNei | ''>(lagretAktivitet?.aktivitetsplan ?? '')
+  const [begrunnelse, setBegrunnelse] = useState(
+    vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
+  )
   const [visValideringsfeil, setVisValideringsfeil] = useState(false)
-  const sporsmaalRedigerbare = redigerbar && !behandling.vilkaarsvurdering?.resultat
+  const sporsmaalRedigerbare = redigerbar && !lagrer && !behandling.vilkaarsvurdering?.resultat
 
   const validerAktivitet = () => {
     setVisValideringsfeil(true)
@@ -67,6 +80,13 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
       <ForlengetOmsPeriodeOgResultat
         behandling={behandling}
         redigerbar={redigerbar}
+        vurdering={vurdering}
+        lagrer={lagrer}
+        onLagrerChange={onLagrerChange}
+        onLagret={onLagret}
+        aktivitet={
+          omfang && aktivitetsplan ? { type: 'ARBEIDSRETTET_TILTAK', tiltak, omfang, aktivitetsplan } : undefined
+        }
         resultatBegrunnelse={{ tekst: begrunnelse, onChange: setBegrunnelse }}
         validerAktivitet={validerAktivitet}
       >

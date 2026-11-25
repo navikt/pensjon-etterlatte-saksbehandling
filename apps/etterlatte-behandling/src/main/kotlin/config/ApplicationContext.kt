@@ -181,6 +181,7 @@ internal class ApplicationContext(
     val gyldighetsproevingService get() = serviceModule.gyldighetsproevingService
     val behandlingService get() = serviceModule.behandlingService
     val vilkaarsvurderingService get() = serviceModule.vilkaarsvurderingService
+    val forlengetOmsService get() = serviceModule.forlengetOmsService
     val generellBehandlingService get() = serviceModule.generellBehandlingService
     val behandlingMedBrevService get() = serviceModule.behandlingMedBrevService
     val sjekklisteService get() = serviceModule.sjekklisteService

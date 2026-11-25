@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.etteroppgjoer.inntektskomponent.Inntektskomp
 import no.nav.etterlatte.behandling.etteroppgjoer.oppgave.EtteroppgjoerOppgaveService
 import no.nav.etterlatte.behandling.etteroppgjoer.pensjonsgivendeinntekt.PensjonsgivendeInntektService
 import no.nav.etterlatte.behandling.etteroppgjoer.revurdering.EtteroppgjoerRevurderingService
+import no.nav.etterlatte.behandling.forlengetoms.ForlengetOmsService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.klienter.TrygdetidKlientIntern
 import no.nav.etterlatte.behandling.klienter.VedtakInternalService
@@ -279,6 +280,16 @@ class ServiceModule(
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
             behandlingStatus = behandlingsStatusService,
+            featureToggleService = featureToggleService,
+        )
+    }
+
+    val forlengetOmsService by lazy {
+        ForlengetOmsService(
+            dao = daoModule.forlengetOmsDao,
+            behandlingService = behandlingService,
+            revurderingService = revurderingService,
+            vilkaarsvurderingService = vilkaarsvurderingService,
             featureToggleService = featureToggleService,
         )
     }

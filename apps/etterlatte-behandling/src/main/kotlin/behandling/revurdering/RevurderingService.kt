@@ -175,6 +175,28 @@ class RevurderingService(
         revurderingDao.lagreRevurderingInfo(behandlingId, revurderingInfoMedBegrunnelse, kilde)
     }
 
+    fun slettForlengetOmsPeriode(
+        behandlingId: UUID,
+        navIdent: String,
+    ) {
+        val behandling = hentBehandling(behandlingId) ?: throw UgyldigBehandlingTypeForRevurdering()
+        behandlingErAvTypenRevurderingOgKanEndres(behandling)
+        sjekk(
+            featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false) &&
+                behandling.revurderingsaarsak == Revurderingaarsak.FORLENGET_OMS &&
+                behandling.status == BehandlingStatus.OPPRETTET,
+        ) { "Perioden kan bare fjernes på en redigerbar revurdering for forlenget OMS." }
+        val periode = behandling.revurderingInfo?.revurderingInfo as? RevurderingInfo.ForlengetOms ?: return
+        if (behandling.opphoerFraOgMed == periode.tom.plusMonths(1)) {
+            behandlingDao.lagreOpphoerFom(behandlingId, null)
+        }
+        revurderingDao.lagreRevurderingInfo(
+            behandlingId,
+            RevurderingInfoMedBegrunnelse(null, null),
+            Grunnlagsopplysning.Saksbehandler.create(navIdent),
+        )
+    }
+
     internal fun opprettRevurdering(
         sakId: SakId,
         forrigeBehandling: Behandling,

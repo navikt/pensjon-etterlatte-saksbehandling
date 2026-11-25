@@ -2,23 +2,36 @@ import { useState } from 'react'
 import { Alert, BodyShort, Heading, Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ForlengetOmsPeriodeOgResultat } from './ForlengetOmsPeriodeOgResultat'
+import { ForlengetOmsVurdering } from '~shared/api/forlengetOms'
+import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsUtdanning = ({
   behandling,
   redigerbar,
+  vurdering,
+  lagrer,
+  onLagrerChange,
+  onLagret,
 }: {
   behandling: IBehandlingReducer
   redigerbar: boolean
+  vurdering?: ForlengetOmsVurdering
+  lagrer: boolean
+  onLagrerChange: (lagrer: boolean) => void
+  onLagret: (vurdering: ForlengetOmsVurdering) => void
 }) => {
-  const [skole, setSkole] = useState('')
-  const [studium, setStudium] = useState('')
-  const [studererMinst50Prosent, setStudererMinst50Prosent] = useState('')
+  const lagretAktivitet = vurdering?.aktivitet.type === 'UTDANNING' ? vurdering.aktivitet : undefined
+  const [skole, setSkole] = useState(lagretAktivitet?.skole ?? '')
+  const [studium, setStudium] = useState(lagretAktivitet?.studium ?? '')
+  const [studererMinst50Prosent, setStudererMinst50Prosent] = useState<JaNei | ''>(
+    lagretAktivitet?.studererMinst50Prosent ?? ''
+  )
   const [visValideringsfeil, setVisValideringsfeil] = useState(false)
   const [resultatBegrunnelse, setResultatBegrunnelse] = useState(
-    behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
+    vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
   )
   const vilkaarsvurdering = behandling.vilkaarsvurdering
-  const sporsmaalRedigerbare = redigerbar && !vilkaarsvurdering?.resultat
+  const sporsmaalRedigerbare = redigerbar && !lagrer && !vilkaarsvurdering?.resultat
   const begrunnelseTittel =
     studererMinst50Prosent === 'JA' ? 'Er utdanningen nødvendig og hensiktsmessig?' : 'Begrunn avslaget'
 
@@ -57,6 +70,11 @@ export const ForlengetOmsUtdanning = ({
       <ForlengetOmsPeriodeOgResultat
         behandling={behandling}
         redigerbar={redigerbar}
+        vurdering={vurdering}
+        lagrer={lagrer}
+        onLagrerChange={onLagrerChange}
+        onLagret={onLagret}
+        aktivitet={studererMinst50Prosent ? { type: 'UTDANNING', skole, studium, studererMinst50Prosent } : undefined}
         resultatBegrunnelse={{ tekst: resultatBegrunnelse, onChange: setResultatBegrunnelse }}
         validerAktivitet={validerAktivitet}
         innvilgelseFeil={

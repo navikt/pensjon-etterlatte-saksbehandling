@@ -71,7 +71,6 @@ export const ForlengetOmsPeriodeOgResultat = ({
               {periodeRedigerbar ? (
                 <ControlledMaanedVelger
                   name="tom"
-
                   label="Til dato"
                   control={control}
                   fromDate={fom ? new Date(fom) : undefined}

@@ -150,6 +150,11 @@ describe('Lagre vurdering av aktivitet', () => {
       periode: { type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06' },
     })
     expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.VILKAARSVURDERT)
+    expect(store.getState().behandlingReducer.behandling?.revurderinginfo?.revurderingInfo).toEqual({
+      type: 'FORLENGET_OMS',
+      fom: '2027-01',
+      tom: '2027-06',
+    })
     expect(container.textContent).toContain('Forlenget OMS innvilges')
     expect(container.textContent).toContain('Rediger vurdering')
   })
@@ -168,6 +173,28 @@ describe('Lagre vurdering av aktivitet', () => {
     })
     expect(container.textContent).toContain('Kunne ikke lagre')
     expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
+  })
+
+  it('fjerner en tidligere periode fra behandling ved lagring av avslag', async () => {
+    const aktivitet: ForlengetOmsAktivitet = { type: 'NEI' }
+    const behandlingMedPeriode: IBehandlingReducer = {
+      ...behandling,
+      revurderinginfo: {
+        revurderingInfo: { type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06' },
+        begrunnelse: undefined,
+      },
+    }
+    store.dispatch(setBehandling(behandlingMedPeriode))
+    vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ok: true,
+      status: 200,
+      data: response(aktivitet, 'AVSLAG'),
+    })
+    await renderResultat(aktivitet)
+    await velgOgLagre(VilkaarsvurderingResultat.IKKE_OPPFYLT)
+
+    expect(store.getState().behandlingReducer.behandling?.revurderinginfo).toBeNull()
+    expect(container.textContent).toContain('Forlenget OMS avslås')
   })
 
   it('henter lagrede svar og beholder dem naar vurderingen aapnes for redigering', async () => {

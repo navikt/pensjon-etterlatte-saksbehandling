@@ -83,7 +83,9 @@ export const ResultatForlengetOms = ({
         onLagrerChange?.(false)
         onLagret?.(lagret.vurdering)
         dispatch(updateVilkaarsvurdering(lagret.vilkaarsvurdering))
-        dispatch(oppdaterRevurderingInfo({ revurderingInfo: lagret.periode ?? undefined, begrunnelse: undefined }))
+        dispatch(
+          oppdaterRevurderingInfo(lagret.periode ? { revurderingInfo: lagret.periode, begrunnelse: undefined } : null)
+        )
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
       },
       () => onLagrerChange?.(false)

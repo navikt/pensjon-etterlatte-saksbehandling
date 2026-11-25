@@ -44,7 +44,7 @@ export const oppdaterViderefoertOpphoer = createAction<ViderefoertOpphoer>('beha
 export const oppdaterBeregningsGrunnlag = createAction<BeregningsGrunnlagDto>('behandling/beregningsgrunnlag')
 export const oppdaterOverstyrBeregningsGrunnlag =
   createAction<OverstyrBeregningGrunnlagPostDTO>('behandling/overstyrBeregning')
-export const oppdaterRevurderingInfo = createAction<RevurderingMedBegrunnelse>('behandling/revurderinginfo')
+export const oppdaterRevurderingInfo = createAction<RevurderingMedBegrunnelse | null>('behandling/revurderinginfo')
 export const oppdaterTidligereFamiliepleier = createAction<ITidligereFamiliepleier>(
   'behandling/tidligere-familiepleier'
 )

@@ -69,7 +69,7 @@ spec:
     - name: JOBB_POLLER_INITIAL_DELAY
       value: "60"
     - name: JOBB_POLLER_INTERVAL
-      value: "PT5M"
+      value: "PT2M"
     - name: JOBB_POLLER_OPENING_HOURS
       value: "09-17"
     - name: OPPRETT_JOBBER_INITIAL_DELAY

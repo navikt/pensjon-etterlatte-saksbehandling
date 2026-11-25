@@ -5,8 +5,13 @@ import { createRoot, Root } from 'react-dom/client'
 import { Provider, useSelector } from 'react-redux'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { apiClient } from '~shared/api/apiClient'
-import { ForlengetOmsAktivitet, LagretForlengetOmsVurdering } from '~shared/api/forlengetOms'
+import { apiClient, ApiError } from '~shared/api/apiClient'
+import {
+  ForlengetOmsAktivitet,
+  ForlengetOmsUtfall,
+  ForlengetOmsVurdering,
+  LagretForlengetOmsVurdering,
+} from '~shared/api/forlengetOms'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingStatus, IBehandlingsType, Opprinnelse, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { KildeType } from '~shared/types/kilde'
@@ -14,8 +19,12 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
 import { store } from '~store/Store'
-import { IBehandlingReducer, resetBehandling, setBehandling } from '~store/reducers/BehandlingReducer'
-import { ResultatForlengetOms } from './ResultatForlengetOms'
+import {
+  IBehandlingReducer,
+  oppdaterRevurderingInfo,
+  resetBehandling,
+  setBehandling,
+} from '~store/reducers/BehandlingReducer'
 import { ForlengetOmsAktivitet as ForlengetOmsAktivitetSide } from './ForlengetOmsAktivitet'
 
 vi.mock('~components/behandling/handlinger/BehandlingHandlingKnapper', () => ({
@@ -78,29 +87,22 @@ describe('Lagre vurdering av aktivitet', () => {
     vi.restoreAllMocks()
   })
 
-  async function renderResultat(aktivitet: ForlengetOmsAktivitet) {
-    function Resultat() {
+  async function renderAktivitet(vurdering: ForlengetOmsVurdering | null) {
+    const get = vi.spyOn(apiClient, 'get').mockResolvedValue({ ok: true, status: 200, data: vurdering })
+    function AktivitetSide() {
       const oppdatertBehandling = useSelector(() => store.getState().behandlingReducer.behandling)
-      return (
-        <ResultatForlengetOms
-          behandling={oppdatertBehandling!}
-          redigerbar
-          aktivitet={aktivitet}
-          resultatBegrunnelse={{ tekst: 'Begrunnelse', onChange: vi.fn() }}
-          validerAktivitet={() => true}
-          validerPeriode={(onSuccess) => onSuccess({ type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06' })}
-        />
-      )
+      return <ForlengetOmsAktivitetSide behandling={oppdatertBehandling!} />
     }
     await act(async () => {
       root.render(
         <Provider store={store}>
           <MemoryRouter>
-            <Resultat />
+            <AktivitetSide />
           </MemoryRouter>
         </Provider>
       )
     })
+    return get
   }
 
   function response(aktivitet: ForlengetOmsAktivitet, utfall: 'INNVILGELSE' | 'AVSLAG'): LagretForlengetOmsVurdering {
@@ -121,7 +123,7 @@ describe('Lagre vurdering av aktivitet', () => {
     }
   }
 
-  async function velgOgLagre(utfall: VilkaarsvurderingResultat) {
+  async function velgOgLagre(utfall: ForlengetOmsUtfall) {
     const radio = container.querySelector<HTMLInputElement>(`input[value="${utfall}"]`)!
     await act(async () => radio.click())
     const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
@@ -140,8 +142,14 @@ describe('Lagre vurdering av aktivitet', () => {
       status: 200,
       data: response(aktivitet, 'INNVILGELSE'),
     })
-    await renderResultat(aktivitet)
-    await velgOgLagre(VilkaarsvurderingResultat.OPPFYLT)
+    store.dispatch(
+      oppdaterRevurderingInfo({
+        revurderingInfo: { type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06' },
+        begrunnelse: undefined,
+      })
+    )
+    await renderAktivitet(response(aktivitet, 'INNVILGELSE').vurdering)
+    await velgOgLagre('INNVILGELSE')
 
     expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
       aktivitet,
@@ -162,8 +170,8 @@ describe('Lagre vurdering av aktivitet', () => {
   it('lagrer avslag uten periode og viser feil uten aa laase ved mislykket lagring', async () => {
     const aktivitet: ForlengetOmsAktivitet = { type: 'NEI' }
     const post = vi.spyOn(apiClient, 'post').mockResolvedValue({ ok: false, status: 400, detail: 'Kunne ikke lagre' })
-    await renderResultat(aktivitet)
-    await velgOgLagre(VilkaarsvurderingResultat.IKKE_OPPFYLT)
+    await renderAktivitet(response(aktivitet, 'AVSLAG').vurdering)
+    await velgOgLagre('AVSLAG')
 
     expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
       aktivitet,
@@ -190,40 +198,39 @@ describe('Lagre vurdering av aktivitet', () => {
       status: 200,
       data: response(aktivitet, 'AVSLAG'),
     })
-    await renderResultat(aktivitet)
-    await velgOgLagre(VilkaarsvurderingResultat.IKKE_OPPFYLT)
+    await renderAktivitet(null)
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="NEI"]')!.click())
+    const begrunnelse = container.querySelector('textarea')!
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(begrunnelse, 'Begrunnelse')
+      begrunnelse.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    const neste = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Neste')!
+    expect(neste.disabled).toBe(true)
+
+    await velgOgLagre('AVSLAG')
 
     expect(store.getState().behandlingReducer.behandling?.revurderinginfo).toBeNull()
     expect(container.textContent).toContain('Forlenget OMS avslås')
+    expect(begrunnelse.readOnly).toBe(true)
+    expect(neste.disabled).toBe(false)
   })
 
   it('henter lagrede svar og beholder dem naar vurderingen aapnes for redigering', async () => {
     const lagret = response({ type: 'NEI' }, 'AVSLAG')
+    lagret.vilkaarsvurdering.resultat!.kommentar = 'Kommentar fra vilkår'
     const lagretBehandling: IBehandlingReducer = {
       ...behandling,
       status: IBehandlingStatus.VILKAARSVURDERT,
       vilkaarsvurdering: lagret.vilkaarsvurdering,
     }
     store.dispatch(setBehandling(lagretBehandling))
-    const get = vi.spyOn(apiClient, 'get').mockResolvedValue({ ok: true, status: 200, data: lagret.vurdering })
     const slett = vi.spyOn(apiClient, 'delete').mockResolvedValue({
       ok: true,
       status: 200,
       data: { ...lagret.vilkaarsvurdering, resultat: undefined },
     })
-    function AktivitetSide() {
-      const oppdatertBehandling = useSelector(() => store.getState().behandlingReducer.behandling)
-      return <ForlengetOmsAktivitetSide behandling={oppdatertBehandling!} />
-    }
-    await act(async () => {
-      root.render(
-        <Provider store={store}>
-          <MemoryRouter>
-            <AktivitetSide />
-          </MemoryRouter>
-        </Provider>
-      )
-    })
+    const get = await renderAktivitet(lagret.vurdering)
 
     expect(get).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms')
     expect(container.querySelector<HTMLInputElement>('input[value="NEI"]')?.checked).toBe(true)
@@ -239,7 +246,69 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(slett).toHaveBeenCalledExactlyOnceWith('/vilkaarsvurdering/resultat/behandling-id')
     expect(begrunnelse.value).toBe('Begrunnelse')
     expect(begrunnelse.readOnly).toBe(false)
-    expect(container.querySelector<HTMLInputElement>('input[value="IKKE_OPPFYLT"]')?.checked).toBe(true)
+    expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')?.checked).toBe(true)
     expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
+  })
+
+  it.each<ForlengetOmsAktivitet>([
+    { type: 'NEI' },
+    { type: 'UTDANNING', skole: 'Skole', studium: 'Studium', studererMinst50Prosent: JaNei.JA },
+    { type: 'ARBEIDSRETTET_TILTAK', tiltak: 'Tiltak', omfang: 'DELTID', aktivitetsplan: JaNei.NEI },
+  ])('laaser aktivitetssvar under lagring og aapner dem etter feil: $type', async (aktivitet) => {
+    let fullfoer!: (error: ApiError) => void
+    const post = vi.spyOn(apiClient, 'post').mockImplementationOnce(
+      () =>
+        new Promise<ApiError>((resolve) => {
+          fullfoer = resolve
+        })
+    )
+    await renderAktivitet(response(aktivitet, 'AVSLAG').vurdering)
+    await velgOgLagre('AVSLAG')
+
+    expect(post).toHaveBeenCalledTimes(1)
+    const aktivitetsvalg = container.querySelector<HTMLInputElement>('input[value="NEI"]')!
+    const begrunnelse = container.querySelector('textarea')!
+    expect(aktivitetsvalg.disabled).toBe(true)
+    expect(begrunnelse.readOnly).toBe(true)
+    expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')?.disabled).toBe(true)
+
+    await act(async () => {
+      fullfoer({ ok: false, status: 400, detail: 'Kunne ikke lagre' })
+    })
+
+    expect(aktivitetsvalg.disabled).toBe(false)
+    expect(begrunnelse.readOnly).toBe(false)
+    expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')?.disabled).toBe(false)
+    expect(container.textContent).toContain('Kunne ikke lagre')
+    expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
+  })
+
+  it('krever periode for innvilgelse men ikke for avslag', async () => {
+    const aktivitet: ForlengetOmsAktivitet = {
+      type: 'UTDANNING',
+      skole: 'Skole',
+      studium: 'Studium',
+      studererMinst50Prosent: JaNei.JA,
+    }
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ok: true,
+      status: 200,
+      data: response(aktivitet, 'AVSLAG'),
+    })
+    await renderAktivitet(response(aktivitet, 'INNVILGELSE').vurdering)
+    await velgOgLagre('INNVILGELSE')
+
+    expect(post).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Må fylles ut')
+
+    await velgOgLagre('AVSLAG')
+
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet,
+      begrunnelse: 'Begrunnelse',
+      utfall: 'AVSLAG',
+      periode: undefined,
+    })
+    expect(container.textContent).toContain('Forlenget OMS avslås')
   })
 })

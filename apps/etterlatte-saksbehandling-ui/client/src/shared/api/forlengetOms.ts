@@ -24,17 +24,18 @@ export interface LagretForlengetOmsVurdering {
   periode: ForlengetOmsInfo | null
 }
 
+export interface LagreForlengetOmsVurdering {
+  aktivitet: ForlengetOmsAktivitet
+  begrunnelse: string
+  utfall: ForlengetOmsUtfall
+  periode?: ForlengetOmsInfo
+}
+
 export const hentForlengetOmsVurdering = (behandlingId: string): Promise<ApiResponse<ForlengetOmsVurdering | null>> =>
   apiClient.get(`/behandling/${behandlingId}/forlenget-oms`)
 
 export const lagreForlengetOmsVurdering = ({
   behandlingId,
   ...request
-}: {
-  behandlingId: string
-  aktivitet: ForlengetOmsAktivitet
-  begrunnelse: string
-  utfall: ForlengetOmsUtfall
-  periode?: ForlengetOmsInfo
-}): Promise<ApiResponse<LagretForlengetOmsVurdering>> =>
+}: LagreForlengetOmsVurdering & { behandlingId: string }): Promise<ApiResponse<LagretForlengetOmsVurdering>> =>
   apiClient.post(`/behandling/${behandlingId}/forlenget-oms`, request)

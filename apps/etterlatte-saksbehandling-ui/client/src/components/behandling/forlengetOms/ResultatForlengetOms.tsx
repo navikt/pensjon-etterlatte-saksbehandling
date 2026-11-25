@@ -6,16 +6,20 @@ import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
-  oppdaterRevurderingInfo,
   updateVilkaarsvurdering,
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { slettTotalVurdering, VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { ForlengetOmsAktivitet, ForlengetOmsVurdering, lagreForlengetOmsVurdering } from '~shared/api/forlengetOms'
+import {
+  ForlengetOmsAktivitet,
+  ForlengetOmsUtfall,
+  ForlengetOmsVurdering,
+  LagreForlengetOmsVurdering,
+} from '~shared/api/forlengetOms'
 import { ForlengetOmsInfo } from '~shared/types/RevurderingInfo'
 
 type Props = {
@@ -23,9 +27,9 @@ type Props = {
   redigerbar: boolean
   vurdering?: ForlengetOmsVurdering
   aktivitet?: ForlengetOmsAktivitet
-  onLagrerChange?: (lagrer: boolean) => void
-  onLagret?: (vurdering: ForlengetOmsVurdering) => void
-  resultatBegrunnelse?: { tekst: string; onChange: (tekst: string) => void }
+  lagrer: boolean
+  onLagre: (request: LagreForlengetOmsVurdering) => void
+  begrunnelse?: string
   validerAktivitet?: () => boolean
   validerPeriode?: (onSuccess: (periode: ForlengetOmsInfo) => void) => void
   innvilgelseFeil?: string
@@ -36,67 +40,40 @@ export const ResultatForlengetOms = ({
   redigerbar,
   vurdering,
   aktivitet,
-  onLagrerChange,
-  onLagret,
-  resultatBegrunnelse,
+  lagrer,
+  onLagre,
+  begrunnelse,
   validerAktivitet,
   validerPeriode,
   innvilgelseFeil,
 }: Props) => {
   const dispatch = useAppDispatch()
   const { next } = useContext(BehandlingRouteContext)
-  const [svar, setSvar] = useState<VilkaarsvurderingResultat | undefined>(
-    vurdering
-      ? vurdering.utfall === 'INNVILGELSE'
-        ? VilkaarsvurderingResultat.OPPFYLT
-        : VilkaarsvurderingResultat.IKKE_OPPFYLT
-      : undefined
-  )
+  const [svar, setSvar] = useState<ForlengetOmsUtfall | undefined>(vurdering?.utfall)
   const [utfallFeil, setUtfallFeil] = useState<string>()
-  const [lagreUtfallStatus, lagreUtfall] = useApiCall(lagreForlengetOmsVurdering)
   const [slettUtfallStatus, slettUtfall] = useApiCall(slettTotalVurdering)
   const vilkaarsvurdering = behandling.vilkaarsvurdering
-  const aktivitetErValgt = resultatBegrunnelse !== undefined && validerAktivitet !== undefined
+  const aktivitetErValgt = begrunnelse !== undefined && validerAktivitet !== undefined
   const alleVilkaarErVurdert = !!vilkaarsvurdering && vilkaarsvurdering.vilkaar.every((vilkaar) => !!vilkaar.vurdering)
-  const lagrer = isPending(lagreUtfallStatus) || isPending(slettUtfallStatus)
-  const lagretVurdering = isSuccess(lagreUtfallStatus) ? lagreUtfallStatus.data.vurdering : vurdering
+  const redigerer = isPending(slettUtfallStatus)
   const lagretUtfallErUtdatert =
     !!vilkaarsvurdering?.resultat &&
     (vilkaarsvurdering.virkningstidspunkt !== behandling.virkningstidspunkt?.dato ||
       !!vilkaarsvurdering.isGrunnlagUtdatert)
 
-  const lagreResultat = (utfall: VilkaarsvurderingResultat, begrunnelse: string, periode?: ForlengetOmsInfo) => {
+  const lagreResultat = (utfall: ForlengetOmsUtfall, begrunnelse: string, periode?: ForlengetOmsInfo) => {
     if (!aktivitet) {
       setUtfallFeil('Svar på spørsmålene om aktivitet før vurderingen lagres.')
       return
     }
-    onLagrerChange?.(true)
-    lagreUtfall(
-      {
-        behandlingId: behandling.id,
-        aktivitet,
-        begrunnelse,
-        utfall: utfall === VilkaarsvurderingResultat.OPPFYLT ? 'INNVILGELSE' : 'AVSLAG',
-        periode,
-      },
-      (lagret) => {
-        onLagrerChange?.(false)
-        onLagret?.(lagret.vurdering)
-        dispatch(updateVilkaarsvurdering(lagret.vilkaarsvurdering))
-        dispatch(
-          oppdaterRevurderingInfo(lagret.periode ? { revurderingInfo: lagret.periode, begrunnelse: undefined } : null)
-        )
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
-      },
-      () => onLagrerChange?.(false)
-    )
+    onLagre({ aktivitet, begrunnelse, utfall, periode })
   }
 
   const lagreVurdering = () => {
-    if (!redigerbar || vilkaarsvurdering?.resultat || lagrer || !alleVilkaarErVurdert) {
+    if (!redigerbar || vilkaarsvurdering?.resultat || lagrer || redigerer || !alleVilkaarErVurdert) {
       return
     }
-    if (!resultatBegrunnelse || !validerAktivitet) {
+    if (begrunnelse === undefined || !validerAktivitet) {
       setUtfallFeil('Velg om bruker tar utdanning eller deltar i arbeidsrettet tiltak.')
       return
     }
@@ -108,25 +85,31 @@ export const ResultatForlengetOms = ({
       setUtfallFeil('Du må velge om forlenget OMS skal innvilges eller avslås.')
       return
     }
-    if (utfall === VilkaarsvurderingResultat.OPPFYLT && innvilgelseFeil) {
+    if (utfall === 'INNVILGELSE' && innvilgelseFeil) {
       setUtfallFeil(innvilgelseFeil)
       return
     }
     setUtfallFeil(undefined)
-    const kommentar = resultatBegrunnelse.tekst
-    if (utfall === VilkaarsvurderingResultat.OPPFYLT) {
+    if (utfall === 'INNVILGELSE') {
       if (!validerPeriode) {
         setUtfallFeil('Innvilgelse krever en gyldig fra og med- og til og med-måned.')
         return
       }
-      validerPeriode((periode) => lagreResultat(utfall, kommentar, periode))
+      validerPeriode((periode) => lagreResultat(utfall, begrunnelse, periode))
     } else {
-      lagreResultat(utfall, kommentar)
+      lagreResultat(utfall, begrunnelse)
     }
   }
 
   const gaaVidere = () => {
-    if (!lagretVurdering || !vilkaarsvurdering?.resultat || lagrer || !alleVilkaarErVurdert || lagretUtfallErUtdatert) {
+    if (
+      !vurdering ||
+      !vilkaarsvurdering?.resultat ||
+      lagrer ||
+      redigerer ||
+      !alleVilkaarErVurdert ||
+      lagretUtfallErUtdatert
+    ) {
       return
     }
     if (!validerAktivitet) {
@@ -140,8 +123,6 @@ export const ResultatForlengetOms = ({
 
   const redigerUtfall = () => {
     slettUtfall(behandling.id, (vurdering) => {
-      resultatBegrunnelse?.onChange(vilkaarsvurdering?.resultat?.kommentar ?? '')
-      setSvar(vilkaarsvurdering?.resultat?.utfall)
       setUtfallFeil(undefined)
       dispatch(updateVilkaarsvurdering(vurdering))
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
@@ -161,13 +142,7 @@ export const ResultatForlengetOms = ({
                   : 'Forlenget OMS avslås'}
               </BodyShort>
               {redigerbar && (
-                <Button
-                  variant="tertiary"
-                  size="small"
-                  onClick={redigerUtfall}
-                  loading={isPending(slettUtfallStatus)}
-                  disabled={isPending(lagreUtfallStatus)}
-                >
+                <Button variant="tertiary" size="small" onClick={redigerUtfall} loading={redigerer} disabled={lagrer}>
                   Rediger vurdering
                 </Button>
               )}
@@ -178,15 +153,15 @@ export const ResultatForlengetOms = ({
               legend="Innvilg eller avslå forlenget OMS"
               hideLegend
               value={svar ?? ''}
-              onChange={(utfall: VilkaarsvurderingResultat) => {
+              onChange={(utfall: ForlengetOmsUtfall) => {
                 setSvar(utfall)
                 setUtfallFeil(undefined)
               }}
-              disabled={!redigerbar || lagrer || !alleVilkaarErVurdert || !aktivitetErValgt}
+              disabled={!redigerbar || lagrer || redigerer || !alleVilkaarErVurdert || !aktivitetErValgt}
               error={utfallFeil}
             >
-              <Radio value={VilkaarsvurderingResultat.OPPFYLT}>Innvilg forlenget OMS</Radio>
-              <Radio value={VilkaarsvurderingResultat.IKKE_OPPFYLT}>Avslå forlenget OMS</Radio>
+              <Radio value="INNVILGELSE">Innvilg forlenget OMS</Radio>
+              <Radio value="AVSLAG">Avslå forlenget OMS</Radio>
             </RadioGroup>
           )}
           {!alleVilkaarErVurdert && <BodyShort>Alle vilkår må vurderes før man kan gå videre.</BodyShort>}
@@ -195,7 +170,7 @@ export const ResultatForlengetOms = ({
               <Button
                 size="small"
                 onClick={lagreVurdering}
-                loading={lagrer}
+                loading={lagrer || redigerer}
                 disabled={!alleVilkaarErVurdert || !aktivitetErValgt}
               >
                 Lagre
@@ -209,9 +184,6 @@ export const ResultatForlengetOms = ({
           Virkningstidspunktet eller grunnlaget er endret. Velg «Rediger vurdering» og vurder utfallet på nytt.
         </Alert>
       )}
-      {mapFailure(lagreUtfallStatus, (error) => (
-        <ApiErrorAlert>Kunne ikke lagre vurderingen av aktivitet: {error.detail}</ApiErrorAlert>
-      ))}
       {mapFailure(slettUtfallStatus, (error) => (
         <ApiErrorAlert>Kunne ikke åpne utfallet for redigering: {error.detail}</ApiErrorAlert>
       ))}
@@ -220,11 +192,12 @@ export const ResultatForlengetOms = ({
           <Button
             onClick={gaaVidere}
             disabled={
-              !lagretVurdering ||
+              !vurdering ||
               !vilkaarsvurdering?.resultat ||
               !alleVilkaarErVurdert ||
               lagretUtfallErUtdatert ||
               lagrer ||
+              redigerer ||
               !aktivitetErValgt
             }
           >

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Alert, BodyShort, Heading, Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ForlengetOmsPeriodeOgResultat } from './ForlengetOmsPeriodeOgResultat'
-import { ForlengetOmsVurdering } from '~shared/api/forlengetOms'
+import { ForlengetOmsVurdering, LagreForlengetOmsVurdering } from '~shared/api/forlengetOms'
 import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsUtdanning = ({
@@ -10,15 +10,13 @@ export const ForlengetOmsUtdanning = ({
   redigerbar,
   vurdering,
   lagrer,
-  onLagrerChange,
-  onLagret,
+  onLagre,
 }: {
   behandling: IBehandlingReducer
   redigerbar: boolean
   vurdering?: ForlengetOmsVurdering
   lagrer: boolean
-  onLagrerChange: (lagrer: boolean) => void
-  onLagret: (vurdering: ForlengetOmsVurdering) => void
+  onLagre: (request: LagreForlengetOmsVurdering) => void
 }) => {
   const lagretAktivitet = vurdering?.aktivitet.type === 'UTDANNING' ? vurdering.aktivitet : undefined
   const [skole, setSkole] = useState(lagretAktivitet?.skole ?? '')
@@ -72,10 +70,9 @@ export const ForlengetOmsUtdanning = ({
         redigerbar={redigerbar}
         vurdering={vurdering}
         lagrer={lagrer}
-        onLagrerChange={onLagrerChange}
-        onLagret={onLagret}
+        onLagre={onLagre}
         aktivitet={studererMinst50Prosent ? { type: 'UTDANNING', skole, studium, studererMinst50Prosent } : undefined}
-        resultatBegrunnelse={{ tekst: resultatBegrunnelse, onChange: setResultatBegrunnelse }}
+        begrunnelse={resultatBegrunnelse}
         validerAktivitet={validerAktivitet}
         innvilgelseFeil={
           studererMinst50Prosent === 'NEI' ? 'Personen må studere minst 50% for å få stønad.' : undefined

@@ -2,22 +2,20 @@ import { useState } from 'react'
 import { Textarea, VStack } from '@navikt/ds-react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ResultatForlengetOms } from './ResultatForlengetOms'
-import { ForlengetOmsVurdering } from '~shared/api/forlengetOms'
+import { ForlengetOmsVurdering, LagreForlengetOmsVurdering } from '~shared/api/forlengetOms'
 
 export const ForlengetOmsIngenAktivitet = ({
   behandling,
   redigerbar,
   vurdering,
   lagrer,
-  onLagrerChange,
-  onLagret,
+  onLagre,
 }: {
   behandling: IBehandlingReducer
   redigerbar: boolean
   vurdering?: ForlengetOmsVurdering
   lagrer: boolean
-  onLagrerChange: (lagrer: boolean) => void
-  onLagret: (vurdering: ForlengetOmsVurdering) => void
+  onLagre: (request: LagreForlengetOmsVurdering) => void
 }) => {
   const [begrunnelse, setBegrunnelse] = useState(
     vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
@@ -48,11 +46,11 @@ export const ForlengetOmsIngenAktivitet = ({
         behandling={behandling}
         redigerbar={redigerbar}
         vurdering={vurdering}
-        onLagrerChange={onLagrerChange}
-        onLagret={onLagret}
+        lagrer={lagrer}
+        onLagre={onLagre}
         aktivitet={{ type: 'NEI' }}
         innvilgelseFeil="Forlenget OMS kan bare avslås når bruker verken tar utdanning eller deltar i tiltak."
-        resultatBegrunnelse={{ tekst: begrunnelse, onChange: setBegrunnelse }}
+        begrunnelse={begrunnelse}
         validerAktivitet={validerAktivitet}
       />
     </>

@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Alert, BodyShort, Box, Heading, HGrid, Label, Loader, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { addMonths, addYears, isValid } from 'date-fns'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import {
+  IBehandlingReducer,
+  oppdaterBehandlingsstatus,
+  oppdaterRevurderingInfo,
+  updateVilkaarsvurdering,
+} from '~store/reducers/BehandlingReducer'
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { formaterDato } from '~utils/formatering/dato'
@@ -10,11 +15,20 @@ import { ForlengetOmsUtdanning } from './ForlengetOmsUtdanning'
 import { ForlengetOmsArbeidsrettetTiltak } from './ForlengetOmsArbeidsrettetTiltak'
 import { ForlengetOmsIngenAktivitet } from './ForlengetOmsIngenAktivitet'
 import { ResultatForlengetOms } from './ResultatForlengetOms'
-import { ForlengetOmsVurdering, hentForlengetOmsVurdering } from '~shared/api/forlengetOms'
-import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import {
+  ForlengetOmsVurdering,
+  hentForlengetOmsVurdering,
+  LagreForlengetOmsVurdering,
+  lagreForlengetOmsVurdering,
+} from '~shared/api/forlengetOms'
+import { isPending, isSuccess, mapFailure, mapResult, Result } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { useAppDispatch } from '~store/Store'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingReducer }) => {
+  const dispatch = useAppDispatch()
   const saksbehandler = useInnloggetSaksbehandler()
   const avdoede = usePersonopplysningerOmsAvdoede()
   const doedsdato = avdoede?.opplysning.doedsdato
@@ -27,7 +41,8 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
   ]
   const redigerbar = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
   const [utdanningEllerTiltak, setUtdanningEllerTiltak] = useState('')
-  const [lagrer, setLagrer] = useState(false)
+  const [lagreStatus, lagreVurdering] = useApiCall(lagreForlengetOmsVurdering)
+  const lagrer = isPending(lagreStatus)
   const [vurderingStatus, setVurderingStatus] = useState<Result<ForlengetOmsVurdering | null>>({ status: 'initial' })
 
   useEffect(() => {
@@ -55,7 +70,16 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
     })
   }
   const vurdering = vurderingStatus.data ?? undefined
-  const onLagret = (vurdering: ForlengetOmsVurdering) => setVurderingStatus({ status: 'success', data: vurdering })
+  const onLagre = (request: LagreForlengetOmsVurdering) => {
+    lagreVurdering({ behandlingId: behandling.id, ...request }, (lagret) => {
+      setVurderingStatus({ status: 'success', data: lagret.vurdering })
+      dispatch(updateVilkaarsvurdering(lagret.vilkaarsvurdering))
+      dispatch(
+        oppdaterRevurderingInfo(lagret.periode ? { revurderingInfo: lagret.periode, begrunnelse: undefined } : null)
+      )
+      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
+    })
+  }
 
   return (
     <>
@@ -93,6 +117,9 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
             <Radio value="NEI">Nei</Radio>
           </RadioGroup>
         </VStack>
+        {mapFailure(lagreStatus, (error) => (
+          <ApiErrorAlert>Kunne ikke lagre vurderingen av aktivitet: {error.detail}</ApiErrorAlert>
+        ))}
       </VStack>
       {utdanningEllerTiltak === 'UTDANNING' && (
         <ForlengetOmsUtdanning
@@ -100,8 +127,7 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
           redigerbar={redigerbar}
           vurdering={vurdering}
           lagrer={lagrer}
-          onLagrerChange={setLagrer}
-          onLagret={onLagret}
+          onLagre={onLagre}
         />
       )}
       {utdanningEllerTiltak === 'ARBEIDSRETTET_TILTAK' && (
@@ -110,8 +136,7 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
           redigerbar={redigerbar}
           vurdering={vurdering}
           lagrer={lagrer}
-          onLagrerChange={setLagrer}
-          onLagret={onLagret}
+          onLagre={onLagre}
         />
       )}
       {utdanningEllerTiltak === 'NEI' && (
@@ -120,11 +145,12 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
           redigerbar={redigerbar}
           vurdering={vurdering}
           lagrer={lagrer}
-          onLagrerChange={setLagrer}
-          onLagret={onLagret}
+          onLagre={onLagre}
         />
       )}
-      {!utdanningEllerTiltak && <ResultatForlengetOms behandling={behandling} redigerbar={redigerbar} />}
+      {!utdanningEllerTiltak && (
+        <ResultatForlengetOms behandling={behandling} redigerbar={redigerbar} lagrer={lagrer} onLagre={onLagre} />
+      )}
     </>
   )
 }

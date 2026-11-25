@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ForlengetOmsPeriodeOgResultat } from './ForlengetOmsPeriodeOgResultat'
-import { ForlengetOmsVurdering, Tiltaksomfang } from '~shared/api/forlengetOms'
+import { ForlengetOmsVurdering, LagreForlengetOmsVurdering, Tiltaksomfang } from '~shared/api/forlengetOms'
 import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsArbeidsrettetTiltak = ({
@@ -10,15 +10,13 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
   redigerbar,
   vurdering,
   lagrer,
-  onLagrerChange,
-  onLagret,
+  onLagre,
 }: {
   behandling: IBehandlingReducer
   redigerbar: boolean
   vurdering?: ForlengetOmsVurdering
   lagrer: boolean
-  onLagrerChange: (lagrer: boolean) => void
-  onLagret: (vurdering: ForlengetOmsVurdering) => void
+  onLagre: (request: LagreForlengetOmsVurdering) => void
 }) => {
   const lagretAktivitet = vurdering?.aktivitet.type === 'ARBEIDSRETTET_TILTAK' ? vurdering.aktivitet : undefined
   const [tiltak, setTiltak] = useState(lagretAktivitet?.tiltak ?? '')
@@ -82,12 +80,11 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
         redigerbar={redigerbar}
         vurdering={vurdering}
         lagrer={lagrer}
-        onLagrerChange={onLagrerChange}
-        onLagret={onLagret}
+        onLagre={onLagre}
         aktivitet={
           omfang && aktivitetsplan ? { type: 'ARBEIDSRETTET_TILTAK', tiltak, omfang, aktivitetsplan } : undefined
         }
-        resultatBegrunnelse={{ tekst: begrunnelse, onChange: setBegrunnelse }}
+        begrunnelse={begrunnelse}
         validerAktivitet={validerAktivitet}
       >
         <VStack gap="space-16" maxWidth="30rem">

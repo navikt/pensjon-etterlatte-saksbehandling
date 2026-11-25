@@ -1,14 +1,13 @@
 import { ReactNode } from 'react'
 import { Alert, HGrid, TextField, VStack } from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
-import { format } from 'date-fns'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ResultatForlengetOms } from './ResultatForlengetOms'
 import { ForlengetOmsInfo } from '~shared/types/RevurderingInfo'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { formaterMaanedAar } from '~utils/formatering/dato'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
-import { ForlengetOmsAktivitet, ForlengetOmsVurdering } from '~shared/api/forlengetOms'
+import { ForlengetOmsAktivitet, ForlengetOmsVurdering, LagreForlengetOmsVurdering } from '~shared/api/forlengetOms'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 
 type Props = {
@@ -17,9 +16,8 @@ type Props = {
   vurdering?: ForlengetOmsVurdering
   aktivitet?: ForlengetOmsAktivitet
   lagrer: boolean
-  onLagrerChange: (lagrer: boolean) => void
-  onLagret: (vurdering: ForlengetOmsVurdering) => void
-  resultatBegrunnelse: { tekst: string; onChange: (tekst: string) => void }
+  onLagre: (request: LagreForlengetOmsVurdering) => void
+  begrunnelse: string
   validerAktivitet: () => boolean
   innvilgelseFeil?: string
   children: ReactNode
@@ -31,9 +29,8 @@ export const ForlengetOmsPeriodeOgResultat = ({
   vurdering,
   aktivitet,
   lagrer,
-  onLagrerChange,
-  onLagret,
-  resultatBegrunnelse,
+  onLagre,
+  begrunnelse,
   validerAktivitet,
   innvilgelseFeil,
   children,
@@ -49,11 +46,12 @@ export const ForlengetOmsPeriodeOgResultat = ({
   const avslagErLagret = vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT
   const periodeRedigerbar =
     redigerbar && !lagrer && !vilkaarsvurdering?.resultat && behandling.status === IBehandlingStatus.OPPRETTET
-  const periodeErLagret = !!fom && lagretPeriode?.fom === fom && lagretPeriode.tom === tom && lagretPeriode.tom >= fom
+  const periodeFeil =
+    !fom || !tom || tom < fom ? 'Velg en til og med-måned som er lik eller etter fra og med-måneden.' : undefined
 
   const validerPeriode = (onSuccess: (periode: ForlengetOmsInfo) => void) => {
-    if (!fom || !tom || tom < fom) {
-      setError('tom', { message: 'Velg en til og med-måned som er lik eller etter fra og med-måneden.' })
+    if (periodeFeil || !fom) {
+      setError('tom', { message: periodeFeil })
       return
     }
 
@@ -76,11 +74,7 @@ export const ForlengetOmsPeriodeOgResultat = ({
                   fromDate={fom ? new Date(fom) : undefined}
                   required
                   kunViseMaanedOgAar
-                  validate={(maaned) => {
-                    if (!fom || !maaned || format(maaned, 'yyyy-MM') < fom) {
-                      return 'Velg en til og med-måned som er lik eller etter fra og med-måneden.'
-                    }
-                  }}
+                  validate={() => periodeFeil}
                 />
               ) : (
                 <TextField label="Til dato" value={tom ? formaterMaanedAar(tom) : ''} readOnly />
@@ -89,7 +83,7 @@ export const ForlengetOmsPeriodeOgResultat = ({
           </VStack>
         )}
         {children}
-        {!periodeErLagret && !vilkaarsvurdering?.resultat && (
+        {!vilkaarsvurdering?.resultat && (
           <Alert variant="info">
             Innvilgelse krever en fra og med- og til og med-måned. Perioden lagres sammen med utfallet. Avslag krever
             ingen periode.
@@ -102,9 +96,9 @@ export const ForlengetOmsPeriodeOgResultat = ({
         redigerbar={redigerbar}
         vurdering={vurdering}
         aktivitet={aktivitet}
-        onLagrerChange={onLagrerChange}
-        onLagret={onLagret}
-        resultatBegrunnelse={resultatBegrunnelse}
+        lagrer={lagrer}
+        onLagre={onLagre}
+        begrunnelse={begrunnelse}
         innvilgelseFeil={innvilgelseFeil}
         validerPeriode={(onSuccess) => {
           void handleSubmit(() => validerPeriode(onSuccess))()

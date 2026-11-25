@@ -90,8 +90,8 @@ class SafService(
     ): ForespoerselException {
         errors.forEach {
             if (errors.all { err -> err.extensions?.code == Error.Code.FORBIDDEN }) {
-                logger.error("Deny for henting mot saf se sikkerlogg")
-                sikkerLogg.error("Deny henting fra SAF for identifikator: $id. error: ${it.toJson()}")
+                logger.warn("Deny for henting mot saf se sikkerlogg")
+                sikkerLogg.warn("Deny henting fra SAF for identifikator: $id. error: ${it.toJson()}")
             } else {
                 logger.error("${errors.size} feil oppsto ved kall mot saf se sikkerlogg.")
                 sikkerLogg.error("Feil mot saf, id: identifikator: $id. feil: ${it.toJson()}")
@@ -101,23 +101,31 @@ class SafService(
         val error = errors.firstOrNull()
 
         return when (error?.extensions?.code) {
-            Error.Code.FORBIDDEN -> IkkeTilgangTilJournalpost()
+            Error.Code.FORBIDDEN -> {
+                IkkeTilgangTilJournalpost()
+            }
 
-            Error.Code.NOT_FOUND ->
+            Error.Code.NOT_FOUND -> {
                 IkkeFunnetException(
                     code = "IKKE_FUNNET",
                     detail = "Fant ikke journalpost(er)",
                 )
+            }
 
-            Error.Code.BAD_REQUEST ->
+            Error.Code.BAD_REQUEST -> {
                 UgyldigForespoerselException(
                     code = "UGYLDIG_FORESPOERSEL_SAF",
                     detail = "Ugyldig forespørsel mot Saf. Hvis problemet vedvarer, opprett sak i Porten",
                 )
+            }
 
-            Error.Code.SERVER_ERROR -> SafServerError()
+            Error.Code.SERVER_ERROR -> {
+                SafServerError()
+            }
 
-            else -> UkjentFeilSaf()
+            else -> {
+                UkjentFeilSaf()
+            }
         }
     }
 }

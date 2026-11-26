@@ -63,9 +63,6 @@ class ForlengetOmsService(
                 val periode =
                     request.periode
                         ?: throw UgyldigForlengetOmsVurdering("Innvilgelse krever en periode.")
-                if (periode.fom != behandling.virkningstidspunkt?.dato) {
-                    throw UgyldigForlengetOmsVurdering("Perioden må starte på virkningstidspunktet.")
-                }
                 revurderingService.lagreRevurderingInfo(
                     behandlingId,
                     RevurderingInfoMedBegrunnelse(periode, null),

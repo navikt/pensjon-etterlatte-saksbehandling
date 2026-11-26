@@ -157,8 +157,8 @@ class RevurderingService(
                 sjekk(behandling.status == BehandlingStatus.OPPRETTET) {
                     "Utfallet må åpnes for redigering før perioden for forlenget OMS kan endres."
                 }
-                sjekk(periode.fom == behandling.virkningstidspunkt?.dato && periode.tom >= periode.fom) {
-                    "Perioden må starte på virkningstidspunktet, og til og med må være lik eller etter fra og med."
+                sjekk(periode.tom >= periode.fom) {
+                    "Til og med må være lik eller etter fra og med."
                 }
                 behandlingDao.lagreOpphoerFom(behandlingId, periode.tom.plusMonths(1))
             } else {

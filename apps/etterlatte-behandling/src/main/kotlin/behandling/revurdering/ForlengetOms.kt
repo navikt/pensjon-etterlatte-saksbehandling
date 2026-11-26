@@ -19,13 +19,12 @@ fun Behandling.validerForlengetOmsPeriode() {
 
     val periode = revurderingInfo?.revurderingInfo as? RevurderingInfo.ForlengetOms
     if (periode == null ||
-        periode.fom != virkningstidspunkt?.dato ||
         periode.tom < periode.fom ||
         opphoerFraOgMed != periode.tom.plusMonths(1)
     ) {
         throw UgyldigForespoerselException(
             "UGYLDIG_FORLENGET_OMS_PERIODE",
-            "Forlenget OMS må ha en lagret periode fra og med virkningstidspunktet til og med siste stønadsmåned.",
+            "Forlenget OMS må ha en gyldig lagret periode og opphør fra måneden etter siste stønadsmåned.",
         )
     }
 }

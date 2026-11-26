@@ -163,7 +163,7 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
 
         const lagretPeriode = behandling.revurderinginfo?.revurderingInfo
         settPeriode({
-          fom: behandling.virkningstidspunkt?.dato.slice(0, 7) ?? '',
+          fom: lagretPeriode?.type === 'FORLENGET_OMS' ? lagretPeriode.fom : '',
           tom: lagretPeriode?.type === 'FORLENGET_OMS' ? lagretPeriode.tom : '',
         })
 
@@ -174,10 +174,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
       }
     })
   }, [behandling.id])
-
-  useEffect(() => {
-    settPeriode((forrige) => ({ ...forrige, fom: behandling.virkningstidspunkt?.dato.slice(0, 7) ?? '' }))
-  }, [behandling.virkningstidspunkt?.dato])
 
   useEffect(() => {
     setPeriodeFeil(undefined)
@@ -221,7 +217,9 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     if (!kanLagre || !aktivitet || !utfall) return
     if (utfall === 'INNVILGELSE' && (!periode.fom || !periode.tom || periode.tom < periode.fom)) {
       setPeriodeFeil(
-        !periode.tom ? 'Må fylles ut' : 'Velg en til og med-måned som er lik eller etter fra og med-måneden.'
+        !periode.fom || !periode.tom
+          ? 'Må fylles ut'
+          : 'Velg en til og med-måned som er lik eller etter fra og med-måneden.'
       )
       return
     }

@@ -49,6 +49,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -168,6 +170,21 @@ class ForlengetOmsServiceTest(
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = [-1, 1])
+    fun `perioden kan starte foer eller etter virkningstidspunktet`(maaneder: Int) {
+        val valgtPeriode = periode.copy(fom = periode.fom.plusMonths(maaneder.toLong()))
+
+        val lagret = inTransaction { service.lagreVurdering(behandlingId, request.copy(periode = valgtPeriode), bruker) }
+
+        lagret.periode shouldBe valgtPeriode
+        inTransaction {
+            val behandling = behandlingDao.hentBehandling(behandlingId) as Revurdering
+            behandling.revurderingInfo?.revurderingInfo shouldBe valgtPeriode
+            behandling.virkningstidspunkt?.dato shouldBe periode.fom
+        }
+    }
+
     @Test
     fun `avslag krever ingen periode og fjerner en tidligere foreslaatt forlengelse`() {
         inTransaction {
@@ -243,7 +260,6 @@ class ForlengetOmsServiceTest(
                 request.copy(aktivitet = ForlengetOmsAktivitet.ArbeidsrettetTiltak(" ", Tiltaksomfang.HELTID, JaNei.JA)),
                 request.copy(periode = null),
                 request.copy(periode = periode.copy(tom = periode.fom.minusMonths(1))),
-                request.copy(periode = periode.copy(fom = periode.fom.plusMonths(1))),
             )
         ugyldige.forEach {
             assertThrows<UgyldigForlengetOmsVurdering> {

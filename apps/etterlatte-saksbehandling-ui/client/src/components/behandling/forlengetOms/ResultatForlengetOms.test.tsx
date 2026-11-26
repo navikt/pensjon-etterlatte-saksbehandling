@@ -473,7 +473,47 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(lagre.disabled).toBe(true)
   })
 
-  it('krever ny periode naar en lagret til-maaned slettes', async () => {
+  it.each([
+    ['2026-12', 'desember 2026'],
+    ['2027-02', 'februar 2027'],
+  ])('henter og lar saksbehandler endre fra-maaned uavhengig av virkningstidspunkt: %s', async (fom, visning) => {
+    const aktivitet: ForlengetOmsAktivitet = {
+      type: 'UTDANNING',
+      skole: 'Skole',
+      studium: 'Studium',
+      studererMinst50Prosent: JaNei.JA,
+    }
+    store.dispatch(
+      oppdaterRevurderingInfo({
+        revurderingInfo: { type: 'FORLENGET_OMS', fom, tom: '2027-06' },
+        begrunnelse: undefined,
+      })
+    )
+    const lagret = response(aktivitet, 'INNVILGELSE')
+    lagret.periode = { type: 'FORLENGET_OMS', fom: '2027-03', tom: '2027-06' }
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({ ok: true, status: 200, data: lagret })
+    await renderAktivitet(lagret.vurdering)
+
+    const fra = container.querySelector<HTMLInputElement>('#fom')!
+    expect(fra.readOnly).toBe(false)
+    expect(fra.value).toBe(visning)
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(fra, 'mars 2027')
+      fra.dispatchEvent(new Event('input', { bubbles: true }))
+      fra.dispatchEvent(new FocusEvent('focusout', { bubbles: true }))
+    })
+    await velgOgLagre('INNVILGELSE')
+
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet,
+      begrunnelse: 'Begrunnelse',
+      utfall: 'INNVILGELSE',
+      periode: { type: 'FORLENGET_OMS', fom: '2027-03', tom: '2027-06' },
+    })
+    expect(store.getState().behandlingReducer.behandling?.virkningstidspunkt?.dato).toBe('2027-01-01')
+  })
+
+  it.each(['fom', 'tom'])('krever ny periode naar en lagret maaned slettes: %s', async (felt) => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'ARBEIDSRETTET_TILTAK',
       tiltak: 'Tiltak',
@@ -488,10 +528,10 @@ describe('Lagre vurdering av aktivitet', () => {
     )
     const post = vi.spyOn(apiClient, 'post')
     await renderAktivitet(response(aktivitet, 'INNVILGELSE').vurdering)
-    const tom = container.querySelector<HTMLInputElement>('#tom')!
+    const maaned = container.querySelector<HTMLInputElement>(`#${felt}`)!
     await act(async () => {
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(tom, '')
-      tom.dispatchEvent(new Event('input', { bubbles: true }))
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(maaned, '')
+      maaned.dispatchEvent(new Event('input', { bubbles: true }))
     })
     await velgOgLagre('INNVILGELSE')
 

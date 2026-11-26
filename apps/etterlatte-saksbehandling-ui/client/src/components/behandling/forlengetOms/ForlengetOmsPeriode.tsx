@@ -7,9 +7,17 @@ import { useForlengetOms } from './ForlengetOmsContext'
 export const ForlengetOmsPeriode = ({ children }: { children?: ReactNode }) => {
   const { periode, settPeriode, periodeFeil, periodeRedigerbar, avslagErLagret, vilkaarsvurdering } = useForlengetOms()
   const { fom, tom } = periode
-  const { monthpickerProps, inputProps } = useMonthpicker({
+  const { monthpickerProps: fomMonthpickerProps, inputProps: fomInputProps } = useMonthpicker({
+    defaultSelected: fom ? new Date(`${fom}-01`) : undefined,
+    locale: 'nb',
+    inputFormat: 'MMMM yyyy',
+    onMonthChange: (dato) => settPeriode((forrige) => ({ ...forrige, fom: dato ? format(dato, 'yyyy-MM') : '' })),
+    onValidate: (validering) => {
+      if (validering.isEmpty) settPeriode((forrige) => ({ ...forrige, fom: '' }))
+    },
+  })
+  const { monthpickerProps: tomMonthpickerProps, inputProps: tomInputProps } = useMonthpicker({
     defaultSelected: tom ? new Date(`${tom}-01`) : undefined,
-    fromDate: fom ? new Date(`${fom}-01`) : undefined,
     locale: 'nb',
     inputFormat: 'MMMM yyyy',
     onMonthChange: (dato) => settPeriode((forrige) => ({ ...forrige, tom: dato ? format(dato, 'yyyy-MM') : '' })),
@@ -23,10 +31,21 @@ export const ForlengetOmsPeriode = ({ children }: { children?: ReactNode }) => {
       {!avslagErLagret && (
         <VStack gap="space-16" maxWidth="30rem">
           <HGrid columns={2} gap="space-16">
-            <TextField label="Fra dato" value={fom ? formaterMaanedAar(fom) : ''} readOnly />
             {periodeRedigerbar ? (
-              <MonthPicker {...monthpickerProps}>
-                <MonthPicker.Input {...inputProps} id="tom" label="Til dato" error={periodeFeil} />
+              <MonthPicker {...fomMonthpickerProps}>
+                <MonthPicker.Input
+                  {...fomInputProps}
+                  id="fom"
+                  label="Fra dato"
+                  error={!fom ? periodeFeil : undefined}
+                />
+              </MonthPicker>
+            ) : (
+              <TextField label="Fra dato" value={fom ? formaterMaanedAar(fom) : ''} readOnly />
+            )}
+            {periodeRedigerbar ? (
+              <MonthPicker {...tomMonthpickerProps}>
+                <MonthPicker.Input {...tomInputProps} id="tom" label="Til dato" error={fom ? periodeFeil : undefined} />
               </MonthPicker>
             ) : (
               <TextField label="Til dato" value={tom ? formaterMaanedAar(tom) : ''} readOnly />

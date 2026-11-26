@@ -254,6 +254,26 @@ class ForlengetOmsServiceTest(
     }
 
     @Test
+    fun `utdanning under 50 prosent krever begrunnelse for avslag`() {
+        val avslag =
+            request.copy(
+                aktivitet = ForlengetOmsAktivitet.Utdanning("Skole", "Studium", JaNei.NEI),
+                begrunnelse = "",
+                utfall = ForlengetOmsUtfall.AVSLAG,
+                periode = null,
+            )
+
+        assertThrows<UgyldigForlengetOmsVurdering> {
+            inTransaction { service.lagreVurdering(behandlingId, avslag, bruker) }
+        }
+
+        val lagret = inTransaction { service.lagreVurdering(behandlingId, avslag.copy(begrunnelse = "Begrunnelse"), bruker) }
+
+        lagret.vurdering.begrunnelse shouldBe "Begrunnelse"
+        lagret.vurdering.utfall shouldBe ForlengetOmsUtfall.AVSLAG
+    }
+
+    @Test
     fun `deltid og manglende aktivitetsplan hindrer ikke innvilgelse`() {
         val tiltak =
             request.copy(

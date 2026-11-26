@@ -20,13 +20,7 @@ export const ForlengetOmsIngenAktivitet = ({
   const [begrunnelse, setBegrunnelse] = useState(
     vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
   )
-  const [visValideringsfeil, setVisValideringsfeil] = useState(false)
   const sporsmaalRedigerbare = redigerbar && !lagrer && !behandling.vilkaarsvurdering?.resultat
-
-  const validerAktivitet = () => {
-    setVisValideringsfeil(true)
-    return !!begrunnelse.trim()
-  }
 
   return (
     <>
@@ -38,7 +32,6 @@ export const ForlengetOmsIngenAktivitet = ({
             onChange={(event) => setBegrunnelse(event.target.value)}
             minRows={6}
             readOnly={!sporsmaalRedigerbare}
-            error={visValideringsfeil && !begrunnelse.trim() ? 'Oppgi en begrunnelse.' : undefined}
           />
         </VStack>
       </VStack>
@@ -51,7 +44,6 @@ export const ForlengetOmsIngenAktivitet = ({
         aktivitet={{ type: 'NEI' }}
         innvilgelseFeil="Forlenget OMS kan bare avslås når bruker verken tar utdanning eller deltar i tiltak."
         begrunnelse={begrunnelse}
-        validerAktivitet={validerAktivitet}
       />
     </>
   )

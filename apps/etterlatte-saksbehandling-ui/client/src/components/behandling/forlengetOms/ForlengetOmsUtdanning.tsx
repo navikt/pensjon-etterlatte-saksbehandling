@@ -24,24 +24,11 @@ export const ForlengetOmsUtdanning = ({
   const [studererMinst50Prosent, setStudererMinst50Prosent] = useState<JaNei | ''>(
     lagretAktivitet?.studererMinst50Prosent ?? ''
   )
-  const [visValideringsfeil, setVisValideringsfeil] = useState(false)
   const [resultatBegrunnelse, setResultatBegrunnelse] = useState(
     vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
   )
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const sporsmaalRedigerbare = redigerbar && !lagrer && !vilkaarsvurdering?.resultat
-  const begrunnelseTittel =
-    studererMinst50Prosent === 'JA' ? 'Er utdanningen nødvendig og hensiktsmessig?' : 'Begrunn avslaget'
-
-  const validerAktivitet = () => {
-    setVisValideringsfeil(true)
-    return (
-      !!skole.trim() &&
-      !!studium.trim() &&
-      ['JA', 'NEI'].includes(studererMinst50Prosent) &&
-      !!resultatBegrunnelse.trim()
-    )
-  }
 
   return (
     <>
@@ -52,7 +39,6 @@ export const ForlengetOmsUtdanning = ({
             value={skole}
             onChange={(event) => setSkole(event.target.value)}
             readOnly={!sporsmaalRedigerbare}
-            error={visValideringsfeil && !skole.trim() ? 'Oppgi hvilken skole bruker skal studere ved.' : undefined}
           />
         </VStack>
         <VStack gap="space-16" maxWidth="30rem">
@@ -61,7 +47,6 @@ export const ForlengetOmsUtdanning = ({
             value={studium}
             onChange={(event) => setStudium(event.target.value)}
             readOnly={!sporsmaalRedigerbare}
-            error={visValideringsfeil && !studium.trim() ? 'Oppgi hva bruker skal studere.' : undefined}
           />
         </VStack>
       </VStack>
@@ -73,7 +58,6 @@ export const ForlengetOmsUtdanning = ({
         onLagre={onLagre}
         aktivitet={studererMinst50Prosent ? { type: 'UTDANNING', skole, studium, studererMinst50Prosent } : undefined}
         begrunnelse={resultatBegrunnelse}
-        validerAktivitet={validerAktivitet}
         innvilgelseFeil={
           studererMinst50Prosent === 'NEI' ? 'Personen må studere minst 50% for å få stønad.' : undefined
         }
@@ -84,9 +68,6 @@ export const ForlengetOmsUtdanning = ({
             value={studererMinst50Prosent}
             onChange={setStudererMinst50Prosent}
             disabled={!sporsmaalRedigerbare}
-            error={
-              visValideringsfeil && !studererMinst50Prosent ? 'Svar på om bruker studerer minst 50 prosent.' : undefined
-            }
           >
             <Radio value="JA">Ja, bruker studerer minst 50 prosent</Radio>
             <Radio value="NEI">Nei, prosenten er lavere</Radio>
@@ -103,7 +84,7 @@ export const ForlengetOmsUtdanning = ({
         {studererMinst50Prosent && (
           <VStack gap="space-16" maxWidth="30rem">
             <Textarea
-              label={begrunnelseTittel}
+              label={studererMinst50Prosent === 'JA' ? 'Er utdanningen nødvendig og hensiktsmessig?' : 'Begrunnelse'}
               description={
                 studererMinst50Prosent === 'JA'
                   ? 'Begrunn hvorfor utdanningen er nødvendig og hensiktsmessig eller ikke'
@@ -113,7 +94,6 @@ export const ForlengetOmsUtdanning = ({
               onChange={(event) => setResultatBegrunnelse(event.target.value)}
               minRows={6}
               readOnly={!sporsmaalRedigerbare}
-              error={visValideringsfeil && !resultatBegrunnelse.trim() ? 'Oppgi en begrunnelse.' : undefined}
             />
           </VStack>
         )}

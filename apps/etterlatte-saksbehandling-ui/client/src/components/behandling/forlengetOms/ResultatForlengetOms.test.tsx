@@ -24,6 +24,7 @@ import {
   oppdaterRevurderingInfo,
   resetBehandling,
   setBehandling,
+  updateVilkaarsvurdering,
 } from '~store/reducers/BehandlingReducer'
 import { ForlengetOmsAktivitet as ForlengetOmsAktivitetSide } from './ForlengetOmsAktivitet'
 
@@ -207,6 +208,8 @@ describe('Lagre vurdering av aktivitet', () => {
     })
     const neste = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Neste')!
     expect(neste.disabled).toBe(true)
+    const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
+    expect(lagre.disabled).toBe(true)
 
     await velgOgLagre('AVSLAG')
 
@@ -310,5 +313,85 @@ describe('Lagre vurdering av aktivitet', () => {
       periode: undefined,
     })
     expect(container.textContent).toContain('Forlenget OMS avslås')
+  })
+
+  it('aktiverer lagre foerst naar utdanningssvarene og vilkaarene er komplette', async () => {
+    await renderAktivitet(null)
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="UTDANNING"]')!.click())
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.click())
+    const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
+    expect(lagre.disabled).toBe(true)
+
+    const [skole, studium] = container.querySelectorAll<HTMLInputElement>('input[type="text"]')
+    for (const felt of [skole, studium]) {
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(felt, 'Svar')
+        felt.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+      expect(lagre.disabled).toBe(true)
+    }
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="JA"]')!.click())
+    expect(lagre.disabled).toBe(true)
+
+    const begrunnelse = container.querySelector('textarea')!
+    for (const tekst of [' ', 'Begrunnelse']) {
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(begrunnelse, tekst)
+        begrunnelse.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+      expect(lagre.disabled).toBe(!tekst.trim())
+    }
+    await act(async () => {
+      store.dispatch(updateVilkaarsvurdering(undefined))
+    })
+    expect(lagre.disabled).toBe(true)
+  })
+
+  it.each<ForlengetOmsAktivitet>([
+    { type: 'ARBEIDSRETTET_TILTAK', tiltak: ' ', omfang: 'DELTID', aktivitetsplan: JaNei.NEI },
+    { type: 'ARBEIDSRETTET_TILTAK', tiltak: 'Tiltak', omfang: 'DELTID', aktivitetsplan: JaNei.NEI },
+    { type: 'NEI' },
+  ])('deaktiverer lagre ved ufullstendige svar: $type', async (aktivitet) => {
+    const begrunnelse = aktivitet.type === 'ARBEIDSRETTET_TILTAK' && !aktivitet.tiltak.trim() ? 'Begrunnelse' : ' '
+    await renderAktivitet({ ...response(aktivitet, 'AVSLAG').vurdering, begrunnelse })
+    const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
+    expect(lagre.disabled).toBe(true)
+  })
+
+  it('krever begrunnelse og tillater bare avslag naar bruker studerer mindre enn 50 prosent', async () => {
+    const aktivitet: ForlengetOmsAktivitet = {
+      type: 'UTDANNING',
+      skole: 'Skole',
+      studium: 'Studium',
+      studererMinst50Prosent: JaNei.NEI,
+    }
+    const lagret = response(aktivitet, 'AVSLAG')
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ok: true,
+      status: 200,
+      data: lagret,
+    })
+    await renderAktivitet({ ...lagret.vurdering, begrunnelse: '' })
+    await velgOgLagre('AVSLAG')
+    expect(post).not.toHaveBeenCalled()
+
+    const begrunnelse = container.querySelector('textarea')!
+    for (const tekst of [' ', 'Begrunnelse']) {
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(begrunnelse, tekst)
+        begrunnelse.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+      const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
+      expect(lagre.disabled).toBe(!tekst.trim())
+    }
+    await velgOgLagre('INNVILGELSE')
+    expect(post).not.toHaveBeenCalled()
+    await velgOgLagre('AVSLAG')
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet,
+      begrunnelse: 'Begrunnelse',
+      utfall: 'AVSLAG',
+      periode: undefined,
+    })
   })
 })

@@ -25,18 +25,7 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
   const [begrunnelse, setBegrunnelse] = useState(
     vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
   )
-  const [visValideringsfeil, setVisValideringsfeil] = useState(false)
   const sporsmaalRedigerbare = redigerbar && !lagrer && !behandling.vilkaarsvurdering?.resultat
-
-  const validerAktivitet = () => {
-    setVisValideringsfeil(true)
-    return (
-      !!tiltak.trim() &&
-      ['HELTID', 'DELTID'].includes(omfang) &&
-      ['JA', 'NEI'].includes(aktivitetsplan) &&
-      !!begrunnelse.trim()
-    )
-  }
 
   return (
     <>
@@ -47,7 +36,6 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
             value={tiltak}
             onChange={(event) => setTiltak(event.target.value)}
             readOnly={!sporsmaalRedigerbare}
-            error={visValideringsfeil && !tiltak.trim() ? 'Oppgi hvilket tiltak bruker deltar i.' : undefined}
           />
         </VStack>
         <VStack gap="space-16">
@@ -56,7 +44,6 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
             value={omfang}
             onChange={setOmfang}
             disabled={!sporsmaalRedigerbare}
-            error={visValideringsfeil && !omfang ? 'Velg om bruker deltar på heltid eller deltid.' : undefined}
           >
             <Radio value="HELTID">Heltid</Radio>
             <Radio value="DELTID">Deltid</Radio>
@@ -68,7 +55,6 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
             value={aktivitetsplan}
             onChange={setAktivitetsplan}
             disabled={!sporsmaalRedigerbare}
-            error={visValideringsfeil && !aktivitetsplan ? 'Svar på om bruker har en aktivitetsplan.' : undefined}
           >
             <Radio value="JA">Ja, bruker har en aktivitetsplan</Radio>
             <Radio value="NEI">Nei, bruker har ikke en aktivitetsplan</Radio>
@@ -85,7 +71,6 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
           omfang && aktivitetsplan ? { type: 'ARBEIDSRETTET_TILTAK', tiltak, omfang, aktivitetsplan } : undefined
         }
         begrunnelse={begrunnelse}
-        validerAktivitet={validerAktivitet}
       >
         <VStack gap="space-16" maxWidth="30rem">
           <Textarea
@@ -94,7 +79,6 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
             onChange={(event) => setBegrunnelse(event.target.value)}
             minRows={6}
             readOnly={!sporsmaalRedigerbare}
-            error={visValideringsfeil && !begrunnelse.trim() ? 'Oppgi en begrunnelse.' : undefined}
           />
         </VStack>
       </ForlengetOmsPeriodeOgResultat>

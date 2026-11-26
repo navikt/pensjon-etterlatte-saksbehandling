@@ -18,7 +18,6 @@ type Props = {
   lagrer: boolean
   onLagre: (request: LagreForlengetOmsVurdering) => void
   begrunnelse: string
-  validerAktivitet: () => boolean
   innvilgelseFeil?: string
   children: ReactNode
 }
@@ -31,7 +30,6 @@ export const ForlengetOmsPeriodeOgResultat = ({
   lagrer,
   onLagre,
   begrunnelse,
-  validerAktivitet,
   innvilgelseFeil,
   children,
 }: Props) => {
@@ -103,7 +101,6 @@ export const ForlengetOmsPeriodeOgResultat = ({
         validerPeriode={(onSuccess) => {
           void handleSubmit(() => validerPeriode(onSuccess))()
         }}
-        validerAktivitet={validerAktivitet}
       />
     </>
   )

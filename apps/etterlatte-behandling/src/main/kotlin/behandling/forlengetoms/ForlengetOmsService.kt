@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.forlengetoms
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -31,7 +32,10 @@ class ForlengetOmsService(
     private val featureToggleService: FeatureToggleService,
 ) {
     fun hentVurdering(behandlingId: UUID): ForlengetOmsVurdering? {
-        hentForlengetOms(behandlingId)
+        val behandling =
+            behandlingService.hentBehandling(behandlingId)
+                ?: throw IkkeFunnetException("BEHANDLING_IKKE_FUNNET", "Fant ikke behandling $behandlingId")
+        validerForlengetOms(behandling)
         return dao.hentVurdering(behandlingId)
     }
 
@@ -40,7 +44,10 @@ class ForlengetOmsService(
         request: LagreForlengetOmsVurdering,
         brukerTokenInfo: BrukerTokenInfo,
     ): LagretForlengetOmsVurdering {
-        val behandling = hentForlengetOms(behandlingId)
+        val behandling =
+            behandlingService.hentBehandling(behandlingId)
+                ?: throw IkkeFunnetException("BEHANDLING_IKKE_FUNNET", "Fant ikke behandling $behandlingId")
+        validerForlengetOms(behandling)
         behandling.tilOpprettet()
         val vilkaarsvurdering =
             vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
@@ -94,20 +101,16 @@ class ForlengetOmsService(
         )
     }
 
-    private fun hentForlengetOms(behandlingId: UUID): Revurdering {
+    private fun validerForlengetOms(behandling: Behandling) {
         if (!featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false)) {
             throw UgyldigForlengetOmsVurdering("Forlenget OMS er ikke aktivert.")
         }
-        val behandling =
-            behandlingService.hentBehandling(behandlingId)
-                ?: throw IkkeFunnetException("BEHANDLING_IKKE_FUNNET", "Fant ikke behandling $behandlingId")
         if (behandling !is Revurdering ||
             behandling.revurderingsaarsak != Revurderingaarsak.FORLENGET_OMS ||
             behandling.sak.sakType != SakType.OMSTILLINGSSTOENAD
         ) {
             throw UgyldigForlengetOmsVurdering("Vurdering av aktivitet gjelder bare revurdering for forlenget OMS.")
         }
-        return behandling
     }
 }
 

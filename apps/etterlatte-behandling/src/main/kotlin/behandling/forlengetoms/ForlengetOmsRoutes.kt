@@ -16,11 +16,11 @@ import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 internal fun Route.forlengetOmsRoutes(service: ForlengetOmsService) {
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/forlenget-oms") {
         get {
-            val vurdering = inTransaction { service.hentVurdering(behandlingId) }
-            if (vurdering == null) {
+            val aktivitetOgUtfall = inTransaction { service.hentAktivitetOgUtfall(behandlingId) }
+            if (aktivitetOgUtfall == null) {
                 call.respond(HttpStatusCode.NoContent)
             } else {
-                call.respond(vurdering)
+                call.respond(aktivitetOgUtfall)
             }
         }
         post {

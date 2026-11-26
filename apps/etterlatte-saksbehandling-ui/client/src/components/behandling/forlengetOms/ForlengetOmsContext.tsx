@@ -1,10 +1,10 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { Loader } from '@navikt/ds-react'
 import {
+  AktivitetOgUtfall,
   ForlengetOmsAktivitet,
   ForlengetOmsUtfall,
-  ForlengetOmsVurdering,
-  hentForlengetOmsVurdering,
+  hentAktivitetOgUtfall,
   lagreForlengetOmsVurdering,
   Tiltaksomfang,
 } from '~shared/api/forlengetOms'
@@ -90,7 +90,9 @@ const erAktivitetKomplett = (aktivitet: ForlengetOmsAktivitet | undefined) => {
 const useForlengetOmsState = (behandling: IBehandlingReducer) => {
   const dispatch = useAppDispatch()
   const saksbehandler = useInnloggetSaksbehandler()
-  const [vurderingStatus, setVurderingStatus] = useState<Result<ForlengetOmsVurdering | null>>({ status: 'initial' })
+  const [hentAktivitetOgUtfallStatus, settHentAktivitetOgUtfallStatus] = useState<Result<AktivitetOgUtfall | null>>({
+    status: 'initial',
+  })
   const [aktivitetType, settAktivitetType] = useState<ForlengetOmsAktivitet['type'] | ''>('')
   const [utfall, settUtfall] = useState<ForlengetOmsUtfall | ''>('')
   const [begrunnelse, settBegrunnelse] = useState('')
@@ -113,13 +115,11 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
   })
 
   useEffect(() => {
-    let aktiv = true
-    setVurderingStatus({ status: 'pending' })
-    hentForlengetOmsVurdering(behandling.id).then((response) => {
-      if (!aktiv) return
+    settHentAktivitetOgUtfallStatus({ status: 'pending' })
+    hentAktivitetOgUtfall(behandling.id).then((response) => {
       if (response.ok) {
         const aktivitet = response.data?.aktivitet
-        setVurderingStatus({ status: 'success', data: response.data })
+        settHentAktivitetOgUtfallStatus({ status: 'success', data: response.data })
         settAktivitetType(aktivitet?.type ?? '')
         const lagretPeriode = behandling.revurderinginfo?.revurderingInfo
         settPeriode({
@@ -139,12 +139,9 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
           aktivitetsplan: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.aktivitetsplan : '',
         })
       } else {
-        setVurderingStatus({ status: 'error', error: response })
+        settHentAktivitetOgUtfallStatus({ status: 'error', error: response })
       }
     })
-    return () => {
-      aktiv = false
-    }
   }, [behandling.id])
 
   useEffect(() => {
@@ -155,7 +152,7 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
     setPeriodeFeil(undefined)
   }, [periode.fom, periode.tom])
 
-  const vurdering = isSuccess(vurderingStatus) ? vurderingStatus.data : undefined
+  const lagretAktivitetOgUtfall = isSuccess(hentAktivitetOgUtfallStatus) ? hentAktivitetOgUtfallStatus.data : undefined
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const redigerbar = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
   const lagrer = isPending(lagreStatus)
@@ -191,14 +188,14 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
   }
 
   const velgAktivitet = (type: ForlengetOmsAktivitet['type'] | '') => {
-    const aktivitet = vurdering?.aktivitet
+    const aktivitet = lagretAktivitetOgUtfall?.aktivitet
     settAktivitetType(type)
     const lagretPeriode = behandling.revurderinginfo?.revurderingInfo
     settPeriode({
       fom: behandling.virkningstidspunkt?.dato.slice(0, 7) ?? '',
       tom: lagretPeriode?.type === 'FORLENGET_OMS' ? lagretPeriode.tom : '',
     })
-    settUtfall(vurdering?.utfall ?? '')
+    settUtfall(lagretAktivitetOgUtfall?.utfall ?? '')
     settAktivitetUtdanning({
       skole: aktivitet?.type === 'UTDANNING' ? aktivitet.skole : '',
       studium: aktivitet?.type === 'UTDANNING' ? aktivitet.studium : '',
@@ -229,7 +226,7 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
         periode: utfall === 'INNVILGELSE' ? { type: 'FORLENGET_OMS', ...periode } : undefined,
       },
       (lagret) => {
-        setVurderingStatus({ status: 'success', data: lagret.vurdering })
+        settHentAktivitetOgUtfallStatus({ status: 'success', data: lagret.vurdering })
         dispatch(updateVilkaarsvurdering(lagret.vilkaarsvurdering))
         dispatch(
           oppdaterRevurderingInfo(lagret.periode ? { revurderingInfo: lagret.periode, begrunnelse: undefined } : null)
@@ -248,7 +245,7 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
   }
 
   return {
-    vurderingStatus,
+    hentAktivitetOgUtfallStatus,
     aktivitetType,
     utfall,
     settUtfall,
@@ -276,7 +273,7 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
     kanLagre,
     kanVelgeUtfall: sporsmaalRedigerbare && alleVilkaarErVurdert && !!aktivitetType,
     kanGaaVidere:
-      !!vurdering &&
+      !!lagretAktivitetOgUtfall &&
       !!vilkaarsvurdering?.resultat &&
       alleVilkaarErVurdert &&
       !lagretUtfallErUtdatert &&
@@ -302,12 +299,12 @@ export const ForlengetOmsProvider = ({
   const state = useForlengetOmsState(behandling)
   return (
     <ForlengetOmsContext.Provider value={state}>
-      {isSuccess(state.vurderingStatus)
+      {isSuccess(state.hentAktivitetOgUtfallStatus)
         ? children
-        : mapResult(state.vurderingStatus, {
-            initial: <Loader title="Henter vurdering av aktivitet" />,
-            pending: <Loader title="Henter vurdering av aktivitet" />,
-            error: (error) => <ApiErrorAlert>Kunne ikke hente vurdering av aktivitet: {error.detail}</ApiErrorAlert>,
+        : mapResult(state.hentAktivitetOgUtfallStatus, {
+            initial: <Loader title="Henter aktivitet og utfall" />,
+            pending: <Loader title="Henter aktivitet og utfall" />,
+            error: (error) => <ApiErrorAlert>Kunne ikke hente aktivitet og utfall: {error.detail}</ApiErrorAlert>,
           })}
     </ForlengetOmsContext.Provider>
   )

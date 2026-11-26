@@ -30,12 +30,12 @@ class ForlengetOmsService(
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val featureToggleService: FeatureToggleService,
 ) {
-    fun hentVurdering(behandlingId: UUID): ForlengetOmsVurdering? {
+    fun hentAktivitetOgUtfall(behandlingId: UUID): AktivitetOgUtfall? {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw IkkeFunnetException("BEHANDLING_IKKE_FUNNET", "Fant ikke behandling $behandlingId")
         validerForlengetOms(behandling)
-        return dao.hentVurdering(behandlingId)
+        return dao.hentAktivitetOgUtfall(behandlingId)
     }
 
     fun lagreVurdering(
@@ -77,7 +77,7 @@ class ForlengetOmsService(
                 null
             }
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        val vurdering = dao.lagreVurdering(behandlingId, request.aktivitet, request.begrunnelse, request.utfall, kilde)
+        val aktivitetOgUtfall = dao.lagreVurdering(behandlingId, request.aktivitet, request.begrunnelse, request.utfall, kilde)
         val (oppdatertVilkaarsvurdering, grunnlagsversjon) =
             vilkaarsvurderingService.oppdaterTotalVurdering(
                 behandlingId,
@@ -94,7 +94,7 @@ class ForlengetOmsService(
                 ),
             )
         return LagretForlengetOmsVurdering(
-            vurdering = vurdering,
+            vurdering = aktivitetOgUtfall,
             vilkaarsvurdering = oppdatertVilkaarsvurdering.toDto(grunnlagsversjon),
             periode = periode,
         )
@@ -156,7 +156,7 @@ data class LagreForlengetOmsVurdering(
 }
 
 data class LagretForlengetOmsVurdering(
-    val vurdering: ForlengetOmsVurdering,
+    val vurdering: AktivitetOgUtfall,
     val vilkaarsvurdering: VilkaarsvurderingDto,
     val periode: RevurderingInfo.ForlengetOms?,
 )

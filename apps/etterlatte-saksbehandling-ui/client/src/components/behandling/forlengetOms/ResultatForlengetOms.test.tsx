@@ -7,9 +7,9 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient, ApiError } from '~shared/api/apiClient'
 import {
+  AktivitetOgUtfall,
   ForlengetOmsAktivitet,
   ForlengetOmsUtfall,
-  ForlengetOmsVurdering,
   LagretForlengetOmsVurdering,
 } from '~shared/api/forlengetOms'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
@@ -88,8 +88,8 @@ describe('Lagre vurdering av aktivitet', () => {
     vi.restoreAllMocks()
   })
 
-  async function renderAktivitet(vurdering: ForlengetOmsVurdering | null) {
-    const get = vi.spyOn(apiClient, 'get').mockResolvedValue({ ok: true, status: 200, data: vurdering })
+  async function renderAktivitet(aktivitetOgUtfall: AktivitetOgUtfall | null) {
+    const get = vi.spyOn(apiClient, 'get').mockResolvedValue({ ok: true, status: 200, data: aktivitetOgUtfall })
     function AktivitetSide() {
       const oppdatertBehandling = useSelector(() => store.getState().behandlingReducer.behandling)
       return <ForlengetOmsAktivitetSide behandling={oppdatertBehandling!} />

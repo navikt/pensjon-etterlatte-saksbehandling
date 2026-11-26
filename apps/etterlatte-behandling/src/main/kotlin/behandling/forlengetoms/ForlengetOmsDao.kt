@@ -14,7 +14,7 @@ import java.util.UUID
 class ForlengetOmsDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun hentVurdering(behandlingId: UUID): ForlengetOmsVurdering? =
+    fun hentAktivitetOgUtfall(behandlingId: UUID): AktivitetOgUtfall? =
         connectionAutoclosing.hentConnection { connection ->
             connection
                 .prepareStatement(
@@ -26,7 +26,7 @@ class ForlengetOmsDao(
                 ).use { statement ->
                     statement.setObject(1, behandlingId)
                     statement.executeQuery().use { resultSet ->
-                        resultSet.singleOrNull { toVurdering() }
+                        resultSet.singleOrNull { toAktivitetOgUtfall() }
                     }
                 }
         }
@@ -37,7 +37,7 @@ class ForlengetOmsDao(
         begrunnelse: String,
         utfall: ForlengetOmsUtfall,
         kilde: Grunnlagsopplysning.Saksbehandler,
-    ): ForlengetOmsVurdering =
+    ): AktivitetOgUtfall =
         connectionAutoclosing.hentConnection { connection ->
             connection
                 .prepareStatement(
@@ -60,13 +60,13 @@ class ForlengetOmsDao(
                     statement.setJsonb(5, kilde)
                     statement.setJsonb(6, kilde)
                     statement.executeQuery().use { resultSet ->
-                        resultSet.single { toVurdering() }
+                        resultSet.single { toAktivitetOgUtfall() }
                     }
                 }
         }
 
-    private fun ResultSet.toVurdering() =
-        ForlengetOmsVurdering(
+    private fun ResultSet.toAktivitetOgUtfall() =
+        AktivitetOgUtfall(
             behandlingId = getUUID("behandling_id"),
             aktivitet = objectMapper.readValue(getString("aktivitet")),
             begrunnelse = getString("begrunnelse"),

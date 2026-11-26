@@ -162,7 +162,7 @@ class ForlengetOmsServiceTest(
         lagret.periode shouldBe periode
         lagret.vilkaarsvurdering.resultat?.utfall shouldBe VilkaarsvurderingUtfall.OPPFYLT
         inTransaction {
-            service.hentVurdering(behandlingId) shouldBe lagret.vurdering
+            service.hentAktivitetOgUtfall(behandlingId) shouldBe lagret.vurdering
             behandlingDao.hentBehandling(behandlingId)?.opphoerFraOgMed shouldBe periode.tom.plusMonths(1)
             behandlingDao.hentBehandling(behandlingId)?.status shouldBe BehandlingStatus.VILKAARSVURDERT
         }
@@ -199,7 +199,7 @@ class ForlengetOmsServiceTest(
         assertThrows<UgyldigForlengetOmsVurdering> {
             inTransaction { service.lagreVurdering(behandlingId, request, bruker) }
         }
-        inTransaction { dao.hentVurdering(behandlingId) shouldBe null }
+        inTransaction { dao.hentAktivitetOgUtfall(behandlingId) shouldBe null }
     }
 
     @Test
@@ -212,7 +212,7 @@ class ForlengetOmsServiceTest(
         }
 
         inTransaction {
-            dao.hentVurdering(behandlingId) shouldBe null
+            dao.hentAktivitetOgUtfall(behandlingId) shouldBe null
             behandlingDao.hentBehandling(behandlingId)?.opphoerFraOgMed shouldBe null
             behandlingDao.hentBehandling(behandlingId)?.status shouldBe BehandlingStatus.OPPRETTET
             (behandlingDao.hentBehandling(behandlingId) as Revurdering).revurderingInfo?.revurderingInfo shouldBe null
@@ -250,7 +250,7 @@ class ForlengetOmsServiceTest(
                 inTransaction { service.lagreVurdering(behandlingId, it, bruker) }
             }
         }
-        inTransaction { dao.hentVurdering(behandlingId) shouldBe null }
+        inTransaction { dao.hentAktivitetOgUtfall(behandlingId) shouldBe null }
     }
 
     @Test
@@ -299,7 +299,7 @@ class ForlengetOmsServiceTest(
                 inTransaction { service.lagreVurdering(behandlingId, request, bruker) }
             }
         }
-        inTransaction { dao.hentVurdering(behandlingId) shouldBe null }
+        inTransaction { dao.hentAktivitetOgUtfall(behandlingId) shouldBe null }
     }
 
     @Test
@@ -315,6 +315,6 @@ class ForlengetOmsServiceTest(
         assertThrows<UgyldigForlengetOmsVurdering> {
             inTransaction { service.lagreVurdering(behandlingId, request, bruker) }
         }
-        inTransaction { dao.hentVurdering(behandlingId) shouldBe null }
+        inTransaction { dao.hentAktivitetOgUtfall(behandlingId) shouldBe null }
     }
 }

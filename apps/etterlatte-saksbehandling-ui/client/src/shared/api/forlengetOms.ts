@@ -11,7 +11,7 @@ export type ForlengetOmsAktivitet =
   | { type: 'ARBEIDSRETTET_TILTAK'; tiltak: string; omfang: Tiltaksomfang; aktivitetsplan: JaNei }
   | { type: 'NEI' }
 
-export interface ForlengetOmsVurdering {
+export interface AktivitetOgUtfall {
   behandlingId: string
   aktivitet: ForlengetOmsAktivitet
   begrunnelse: string
@@ -19,7 +19,7 @@ export interface ForlengetOmsVurdering {
 }
 
 export interface LagretForlengetOmsVurdering {
-  vurdering: ForlengetOmsVurdering
+  vurdering: AktivitetOgUtfall
   vilkaarsvurdering: IVilkaarsvurdering
   periode: ForlengetOmsInfo | null
 }
@@ -31,7 +31,7 @@ export interface LagreForlengetOmsVurdering {
   periode?: ForlengetOmsInfo
 }
 
-export const hentForlengetOmsVurdering = (behandlingId: string): Promise<ApiResponse<ForlengetOmsVurdering | null>> =>
+export const hentAktivitetOgUtfall = (behandlingId: string): Promise<ApiResponse<AktivitetOgUtfall | null>> =>
   apiClient.get(`/behandling/${behandlingId}/forlenget-oms`)
 
 export const lagreForlengetOmsVurdering = ({

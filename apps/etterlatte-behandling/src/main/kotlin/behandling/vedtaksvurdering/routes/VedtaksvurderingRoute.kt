@@ -205,9 +205,6 @@ fun Route.vedtaksvurderingRoute(
                     val (kommentar) = call.receive<AttesterVedtakDto>()
                     val attestert =
                         try {
-                            if (brukerTokenInfo.ident() == "Z993799") {
-                                throw InternfeilException("TEST! Skal slettes! Mocker feil for å teste attestering")
-                            }
                             withSerializableRetry {
                                 inTransaction {
                                     runBlocking {

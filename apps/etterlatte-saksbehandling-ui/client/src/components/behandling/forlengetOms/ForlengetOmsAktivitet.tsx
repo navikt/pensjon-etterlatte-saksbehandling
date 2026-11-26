@@ -5,7 +5,6 @@ import { formaterDato } from '~utils/formatering/dato'
 import { usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
 import { ForlengetOmsUtdanning } from './ForlengetOmsUtdanning'
 import { ForlengetOmsArbeidsrettetTiltak } from './ForlengetOmsArbeidsrettetTiltak'
-import { ForlengetOmsIngenAktivitet } from './ForlengetOmsIngenAktivitet'
 import { ResultatForlengetOms } from './ResultatForlengetOms'
 import { ForlengetOmsProvider, useForlengetOms } from './ForlengetOmsContext'
 
@@ -59,7 +58,6 @@ const ForlengetOmsAktivitetInnhold = () => {
       </VStack>
       {aktivitetType === 'UTDANNING' && <ForlengetOmsUtdanning />}
       {aktivitetType === 'ARBEIDSRETTET_TILTAK' && <ForlengetOmsArbeidsrettetTiltak />}
-      {aktivitetType === 'NEI' && <ForlengetOmsIngenAktivitet />}
       <ResultatForlengetOms />
     </>
   )

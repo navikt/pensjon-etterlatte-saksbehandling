@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 import { formaterMaanedAar } from '~utils/formatering/dato'
 import { useForlengetOms } from './ForlengetOmsContext'
 
-export const ForlengetOmsPeriode = ({ children }: { children: ReactNode }) => {
+export const ForlengetOmsPeriode = ({ children }: { children?: ReactNode }) => {
   const { periode, settPeriode, periodeFeil, periodeRedigerbar, avslagErLagret, vilkaarsvurdering } = useForlengetOms()
   const { fom, tom } = periode
   const { monthpickerProps, inputProps } = useMonthpicker({

@@ -33,18 +33,12 @@ interface AktivitetUtdanning {
   skole: string
   studium: string
   studererMinst50Prosent: JaNei | ''
-  begrunnelse: string
 }
 
 interface ArbeidsrettetTiltak {
   tiltak: string
   omfang: Tiltaksomfang | ''
   aktivitetsplan: JaNei | ''
-  begrunnelse: string
-}
-
-interface IngenAktivitet {
-  begrunnelse: string
 }
 
 const hentAktivitet = (
@@ -99,6 +93,7 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
   const [vurderingStatus, setVurderingStatus] = useState<Result<ForlengetOmsVurdering | null>>({ status: 'initial' })
   const [aktivitetType, settAktivitetType] = useState<ForlengetOmsAktivitet['type'] | ''>('')
   const [utfall, settUtfall] = useState<ForlengetOmsUtfall | ''>('')
+  const [begrunnelse, settBegrunnelse] = useState('')
   const [periode, settPeriode] = useState<Periode>({
     fom: '',
     tom: '',
@@ -110,16 +105,11 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
     skole: '',
     studium: '',
     studererMinst50Prosent: '',
-    begrunnelse: '',
   })
   const [arbeidsrettetTiltak, settArbeidsrettetTiltak] = useState<ArbeidsrettetTiltak>({
     tiltak: '',
     omfang: '',
     aktivitetsplan: '',
-    begrunnelse: '',
-  })
-  const [ingenAktivitet, settIngenAktivitet] = useState<IngenAktivitet>({
-    begrunnelse: '',
   })
 
   useEffect(() => {
@@ -137,20 +127,16 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
           tom: lagretPeriode?.type === 'FORLENGET_OMS' ? lagretPeriode.tom : '',
         })
         settUtfall(response.data?.utfall ?? '')
+        settBegrunnelse(response.data?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? '')
         settAktivitetUtdanning({
           skole: aktivitet?.type === 'UTDANNING' ? aktivitet.skole : '',
           studium: aktivitet?.type === 'UTDANNING' ? aktivitet.studium : '',
           studererMinst50Prosent: aktivitet?.type === 'UTDANNING' ? aktivitet.studererMinst50Prosent : '',
-          begrunnelse: response.data?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? '',
         })
         settArbeidsrettetTiltak({
           tiltak: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.tiltak : '',
           omfang: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.omfang : '',
           aktivitetsplan: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.aktivitetsplan : '',
-          begrunnelse: response.data?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? '',
-        })
-        settIngenAktivitet({
-          begrunnelse: response.data?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? '',
         })
       } else {
         setVurderingStatus({ status: 'error', error: response })
@@ -188,12 +174,6 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
         ? 'Personen må studere minst 50% for å få stønad.'
         : undefined
   const aktivitet = hentAktivitet(aktivitetType, aktivitetUtdanning, arbeidsrettetTiltak)
-  const begrunnelse =
-    aktivitetType === 'UTDANNING'
-      ? aktivitetUtdanning.begrunnelse
-      : aktivitetType === 'ARBEIDSRETTET_TILTAK'
-        ? arbeidsrettetTiltak.begrunnelse
-        : ingenAktivitet.begrunnelse
   const kanLagre =
     sporsmaalRedigerbare &&
     alleVilkaarErVurdert &&
@@ -210,10 +190,6 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
     settArbeidsrettetTiltak((forrige) => ({ ...forrige, ...endringer }))
   }
 
-  const oppdaterIngenAktivitet = (endringer: Partial<IngenAktivitet>) => {
-    settIngenAktivitet((forrige) => ({ ...forrige, ...endringer }))
-  }
-
   const velgAktivitet = (type: ForlengetOmsAktivitet['type'] | '') => {
     const aktivitet = vurdering?.aktivitet
     settAktivitetType(type)
@@ -227,16 +203,11 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
       skole: aktivitet?.type === 'UTDANNING' ? aktivitet.skole : '',
       studium: aktivitet?.type === 'UTDANNING' ? aktivitet.studium : '',
       studererMinst50Prosent: aktivitet?.type === 'UTDANNING' ? aktivitet.studererMinst50Prosent : '',
-      begrunnelse: vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? '',
     })
     settArbeidsrettetTiltak({
       tiltak: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.tiltak : '',
       omfang: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.omfang : '',
       aktivitetsplan: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.aktivitetsplan : '',
-      begrunnelse: vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? '',
-    })
-    settIngenAktivitet({
-      begrunnelse: vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? '',
     })
     setPeriodeFeil(undefined)
   }
@@ -281,6 +252,8 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
     aktivitetType,
     utfall,
     settUtfall,
+    begrunnelse,
+    settBegrunnelse,
     periode,
     settPeriode,
     velgAktivitet,
@@ -313,8 +286,6 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
     oppdaterUtdanning,
     arbeidsrettetTiltak,
     oppdaterArbeidsrettetTiltak,
-    ingenAktivitet,
-    oppdaterIngenAktivitet,
   }
 }
 

@@ -1,11 +1,11 @@
-import { Alert, BodyShort, Heading, Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Heading, Radio, RadioGroup, TextField, VStack } from '@navikt/ds-react'
 import { useForlengetOms } from './ForlengetOmsContext'
 import { ForlengetOmsPeriode } from './ForlengetOmsPeriode'
 import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsUtdanning = () => {
   const { sporsmaalRedigerbare, aktivitetUtdanning, oppdaterUtdanning } = useForlengetOms()
-  const { skole, studium, studererMinst50Prosent, begrunnelse } = aktivitetUtdanning
+  const { skole, studium, studererMinst50Prosent } = aktivitetUtdanning
 
   return (
     <>
@@ -47,22 +47,6 @@ export const ForlengetOmsUtdanning = () => {
             </Alert>
           )}
         </VStack>
-        {studererMinst50Prosent && (
-          <VStack gap="space-16" maxWidth="30rem">
-            <Textarea
-              label={studererMinst50Prosent === 'JA' ? 'Er utdanningen nødvendig og hensiktsmessig?' : 'Begrunnelse'}
-              description={
-                studererMinst50Prosent === 'JA'
-                  ? 'Begrunn hvorfor utdanningen er nødvendig og hensiktsmessig eller ikke'
-                  : undefined
-              }
-              value={begrunnelse}
-              onChange={(event) => oppdaterUtdanning({ begrunnelse: event.target.value })}
-              minRows={6}
-              readOnly={!sporsmaalRedigerbare}
-            />
-          </VStack>
-        )}
       </ForlengetOmsPeriode>
     </>
   )

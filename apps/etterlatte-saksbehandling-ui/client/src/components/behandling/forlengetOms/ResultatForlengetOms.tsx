@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { Alert, BodyShort, Box, Button, Label, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Label, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
@@ -13,6 +13,9 @@ export const ResultatForlengetOms = () => {
   const {
     utfall,
     settUtfall,
+    begrunnelse,
+    settBegrunnelse,
+    sporsmaalRedigerbare,
     redigerbar,
     lagrer,
     opptatt,
@@ -33,6 +36,15 @@ export const ResultatForlengetOms = () => {
 
   return (
     <VStack paddingInline="space-64 space-32" gap="space-16">
+      <VStack gap="space-16" maxWidth="30rem">
+        <Textarea
+          label="Begrunnelse"
+          value={begrunnelse}
+          onChange={(event) => settBegrunnelse(event.target.value)}
+          minRows={6}
+          readOnly={!sporsmaalRedigerbare}
+        />
+      </VStack>
       <Box background="meta-purple-soft" borderRadius="12" padding="space-16">
         <VStack gap="space-16">
           <Label as="p">Utfall for forlenget omstillingsstønad</Label>

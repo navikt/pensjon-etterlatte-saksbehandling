@@ -408,7 +408,26 @@ describe('Lagre vurdering av aktivitet', () => {
     })
   })
 
-  it('nullstiller ulagrede svar ved aktivitetsbytte og gjenoppretter lagrede svar', async () => {
+  it('viser begrunnelse uten at aktivitetssvar er valgt', async () => {
+    await renderAktivitet(null)
+    const begrunnelse = container.querySelector('textarea')!
+    expect(begrunnelse.readOnly).toBe(false)
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(
+        begrunnelse,
+        'Selvstendig begrunnelse'
+      )
+      begrunnelse.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="UTDANNING"]')!.click())
+
+    expect(container.querySelector<HTMLInputElement>('input[value="JA"]')!.checked).toBe(false)
+    expect(container.querySelector('textarea')!.value).toBe('Selvstendig begrunnelse')
+    expect(container.querySelectorAll('textarea')).toHaveLength(1)
+  })
+
+  it('beholder begrunnelse ved aktivitetsbytte og gjenoppretter lagrede aktivitetssvar', async () => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'UTDANNING',
       skole: 'Lagret skole',
@@ -430,12 +449,12 @@ describe('Lagre vurdering av aktivitet', () => {
 
     await act(async () => container.querySelector<HTMLInputElement>('input[value="ARBEIDSRETTET_TILTAK"]')!.click())
     expect(container.querySelector<HTMLInputElement>('input[type="text"]')!.value).toBe('')
-    expect(container.querySelector('textarea')!.value).toBe('Begrunnelse')
+    expect(container.querySelector('textarea')!.value).toBe('Ulagret begrunnelse')
     expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.checked).toBe(true)
 
     await act(async () => container.querySelector<HTMLInputElement>('input[value="UTDANNING"]')!.click())
     expect(container.querySelector<HTMLInputElement>('input[type="text"]')!.value).toBe('Lagret skole')
-    expect(container.querySelector('textarea')!.value).toBe('Begrunnelse')
+    expect(container.querySelector('textarea')!.value).toBe('Ulagret begrunnelse')
   })
 
   it('henter nye svar og nullstiller utkast naar behandling endres', async () => {
@@ -449,7 +468,7 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(get).toHaveBeenLastCalledWith('/behandling/ny-behandling-id/forlenget-oms')
     expect(container.querySelector<HTMLInputElement>('input[value="NEI"]')!.checked).toBe(false)
     expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.checked).toBe(false)
-    expect(container.querySelector('textarea')).toBeNull()
+    expect(container.querySelector('textarea')!.value).toBe('')
     const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
     expect(lagre.disabled).toBe(true)
   })

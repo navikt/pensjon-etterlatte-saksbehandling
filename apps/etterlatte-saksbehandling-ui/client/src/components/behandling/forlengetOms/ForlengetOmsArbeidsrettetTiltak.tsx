@@ -1,4 +1,4 @@
-import { Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
+import { Radio, RadioGroup, TextField, VStack } from '@navikt/ds-react'
 import { ForlengetOmsPeriode } from './ForlengetOmsPeriode'
 import { useForlengetOms } from './ForlengetOmsContext'
 import { Tiltaksomfang } from '~shared/api/forlengetOms'
@@ -6,7 +6,7 @@ import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsArbeidsrettetTiltak = () => {
   const { sporsmaalRedigerbare, arbeidsrettetTiltak, oppdaterArbeidsrettetTiltak } = useForlengetOms()
-  const { tiltak, omfang, aktivitetsplan, begrunnelse } = arbeidsrettetTiltak
+  const { tiltak, omfang, aktivitetsplan } = arbeidsrettetTiltak
 
   return (
     <>
@@ -42,17 +42,7 @@ export const ForlengetOmsArbeidsrettetTiltak = () => {
           </RadioGroup>
         </VStack>
       </VStack>
-      <ForlengetOmsPeriode>
-        <VStack gap="space-16" maxWidth="30rem">
-          <Textarea
-            label="Begrunnelse"
-            value={begrunnelse}
-            onChange={(event) => oppdaterArbeidsrettetTiltak({ begrunnelse: event.target.value })}
-            minRows={6}
-            readOnly={!sporsmaalRedigerbare}
-          />
-        </VStack>
-      </ForlengetOmsPeriode>
+      <ForlengetOmsPeriode />
     </>
   )
 }

@@ -15,7 +15,7 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
 )
 
 const ForlengetOmsAktivitetInnhold = () => {
-  const { aktivitetType, velgAktivitet, sporsmaalRedigerbare } = useForlengetOms()
+  const { aktivitetType, settAktivitetType, sporsmaalRedigerbare } = useForlengetOms()
   const avdoede = usePersonopplysningerOmsAvdoede()
   const doedsdato = avdoede?.opplysning.doedsdato
   const viktigeDatoer = [
@@ -47,7 +47,7 @@ const ForlengetOmsAktivitetInnhold = () => {
           <RadioGroup
             legend="Tar bruker utdanning eller deltar i arbeidsrettet tiltak?"
             value={aktivitetType}
-            onChange={velgAktivitet}
+            onChange={settAktivitetType}
             disabled={!sporsmaalRedigerbare}
           >
             <Radio value="UTDANNING">Ja, bruker tar utdanning</Radio>

@@ -51,7 +51,7 @@ interface ForlengetOmsContextValue {
   settBegrunnelse: Dispatch<SetStateAction<string>>
   periode: Periode
   settPeriode: Dispatch<SetStateAction<Periode>>
-  velgAktivitet: (type: ForlengetOmsAktivitet['type'] | '') => void
+  settAktivitetType: Dispatch<SetStateAction<ForlengetOmsAktivitet['type'] | ''>>
   lagreVurdering: () => void
   redigerVurdering: () => void
   lagreStatus: Result<LagretForlengetOmsVurdering>
@@ -214,28 +214,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     settArbeidsrettetTiltak((forrige) => ({ ...forrige, ...endringer }))
   }
 
-  const velgAktivitet = (type: ForlengetOmsAktivitet['type'] | '') => {
-    const aktivitet = lagretAktivitetOgUtfall?.aktivitet
-    settAktivitetType(type)
-    const lagretPeriode = behandling.revurderinginfo?.revurderingInfo
-    settPeriode({
-      fom: behandling.virkningstidspunkt?.dato.slice(0, 7) ?? '',
-      tom: lagretPeriode?.type === 'FORLENGET_OMS' ? lagretPeriode.tom : '',
-    })
-    settUtfall(lagretAktivitetOgUtfall?.utfall ?? '')
-    settAktivitetUtdanning({
-      skole: aktivitet?.type === 'UTDANNING' ? aktivitet.skole : '',
-      studium: aktivitet?.type === 'UTDANNING' ? aktivitet.studium : '',
-      studererMinst50Prosent: aktivitet?.type === 'UTDANNING' ? aktivitet.studererMinst50Prosent : '',
-    })
-    settArbeidsrettetTiltak({
-      tiltak: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.tiltak : '',
-      omfang: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.omfang : '',
-      aktivitetsplan: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.aktivitetsplan : '',
-    })
-    setPeriodeFeil(undefined)
-  }
-
   const lagreVurdering = () => {
     if (!kanLagre || !aktivitet || !utfall) return
     if (utfall === 'INNVILGELSE' && (!periode.fom || !periode.tom || periode.tom < periode.fom)) {
@@ -280,7 +258,7 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     settBegrunnelse,
     periode,
     settPeriode,
-    velgAktivitet,
+    settAktivitetType,
     lagreVurdering,
     redigerVurdering,
     lagreStatus,

@@ -427,7 +427,7 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(container.querySelectorAll('textarea')).toHaveLength(1)
   })
 
-  it('beholder begrunnelse ved aktivitetsbytte og gjenoppretter lagrede aktivitetssvar', async () => {
+  it('beholder begrunnelse og ulagrede aktivitetssvar ved aktivitetsbytte', async () => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'UTDANNING',
       skole: 'Lagret skole',
@@ -453,7 +453,7 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.checked).toBe(true)
 
     await act(async () => container.querySelector<HTMLInputElement>('input[value="UTDANNING"]')!.click())
-    expect(container.querySelector<HTMLInputElement>('input[type="text"]')!.value).toBe('Lagret skole')
+    expect(container.querySelector<HTMLInputElement>('input[type="text"]')!.value).toBe('Ulagret skole')
     expect(container.querySelector('textarea')!.value).toBe('Ulagret begrunnelse')
   })
 

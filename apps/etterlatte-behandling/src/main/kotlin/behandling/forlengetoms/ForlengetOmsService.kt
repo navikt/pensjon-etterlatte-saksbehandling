@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -78,7 +77,7 @@ class ForlengetOmsService(
                 null
             }
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        dao.lagreVurdering(behandlingId, request.aktivitet, request.begrunnelse, request.utfall, kilde)
+        val vurdering = dao.lagreVurdering(behandlingId, request.aktivitet, request.begrunnelse, request.utfall, kilde)
         val (oppdatertVilkaarsvurdering, grunnlagsversjon) =
             vilkaarsvurderingService.oppdaterTotalVurdering(
                 behandlingId,
@@ -95,7 +94,7 @@ class ForlengetOmsService(
                 ),
             )
         return LagretForlengetOmsVurdering(
-            vurdering = krevIkkeNull(dao.hentVurdering(behandlingId)) { "Fant ikke vurderingen som nettopp ble lagret." },
+            vurdering = vurdering,
             vilkaarsvurdering = oppdatertVilkaarsvurdering.toDto(grunnlagsversjon),
             periode = periode,
         )

@@ -16,7 +16,7 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
 )
 
 const ForlengetOmsAktivitetInnhold = () => {
-  const { utkast, velgAktivitet, sporsmaalRedigerbare } = useForlengetOms()
+  const { aktivitetType, velgAktivitet, sporsmaalRedigerbare } = useForlengetOms()
   const avdoede = usePersonopplysningerOmsAvdoede()
   const doedsdato = avdoede?.opplysning.doedsdato
   const viktigeDatoer = [
@@ -47,7 +47,7 @@ const ForlengetOmsAktivitetInnhold = () => {
         <VStack gap="space-16">
           <RadioGroup
             legend="Tar bruker utdanning eller deltar i arbeidsrettet tiltak?"
-            value={utkast.aktivitetType}
+            value={aktivitetType}
             onChange={velgAktivitet}
             disabled={!sporsmaalRedigerbare}
           >
@@ -57,9 +57,9 @@ const ForlengetOmsAktivitetInnhold = () => {
           </RadioGroup>
         </VStack>
       </VStack>
-      {utkast.aktivitetType === 'UTDANNING' && <ForlengetOmsUtdanning />}
-      {utkast.aktivitetType === 'ARBEIDSRETTET_TILTAK' && <ForlengetOmsArbeidsrettetTiltak />}
-      {utkast.aktivitetType === 'NEI' && <ForlengetOmsIngenAktivitet />}
+      {aktivitetType === 'UTDANNING' && <ForlengetOmsUtdanning />}
+      {aktivitetType === 'ARBEIDSRETTET_TILTAK' && <ForlengetOmsArbeidsrettetTiltak />}
+      {aktivitetType === 'NEI' && <ForlengetOmsIngenAktivitet />}
       <ResultatForlengetOms />
     </>
   )

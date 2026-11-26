@@ -5,16 +5,16 @@ import { formaterMaanedAar } from '~utils/formatering/dato'
 import { useForlengetOms } from './ForlengetOmsContext'
 
 export const ForlengetOmsPeriode = ({ children }: { children: ReactNode }) => {
-  const { utkast, oppdaterFelt, fom, periodeFeil, periodeRedigerbar, avslagErLagret, vilkaarsvurdering } =
-    useForlengetOms()
+  const { periode, settPeriode, periodeFeil, periodeRedigerbar, avslagErLagret, vilkaarsvurdering } = useForlengetOms()
+  const { fom, tom } = periode
   const { monthpickerProps, inputProps } = useMonthpicker({
-    defaultSelected: utkast.tom ? new Date(`${utkast.tom}-01`) : undefined,
+    defaultSelected: tom ? new Date(`${tom}-01`) : undefined,
     fromDate: fom ? new Date(`${fom}-01`) : undefined,
     locale: 'nb',
     inputFormat: 'MMMM yyyy',
-    onMonthChange: (dato) => oppdaterFelt('tom', dato ? format(dato, 'yyyy-MM') : ''),
+    onMonthChange: (dato) => settPeriode((forrige) => ({ ...forrige, tom: dato ? format(dato, 'yyyy-MM') : '' })),
     onValidate: (validering) => {
-      if (validering.isEmpty) oppdaterFelt('tom', '')
+      if (validering.isEmpty) settPeriode((forrige) => ({ ...forrige, tom: '' }))
     },
   })
 
@@ -29,7 +29,7 @@ export const ForlengetOmsPeriode = ({ children }: { children: ReactNode }) => {
                 <MonthPicker.Input {...inputProps} id="tom" label="Til dato" error={periodeFeil} />
               </MonthPicker>
             ) : (
-              <TextField label="Til dato" value={utkast.tom ? formaterMaanedAar(utkast.tom) : ''} readOnly />
+              <TextField label="Til dato" value={tom ? formaterMaanedAar(tom) : ''} readOnly />
             )}
           </HGrid>
         </VStack>

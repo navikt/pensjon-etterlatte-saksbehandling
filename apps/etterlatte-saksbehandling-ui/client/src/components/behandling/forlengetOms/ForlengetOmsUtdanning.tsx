@@ -1,10 +1,11 @@
 import { Alert, BodyShort, Heading, Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { useForlengetOms } from './ForlengetOmsContext'
 import { ForlengetOmsPeriode } from './ForlengetOmsPeriode'
+import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsUtdanning = () => {
-  const { utkast, oppdaterFelt, sporsmaalRedigerbare } = useForlengetOms()
-  const { skole, studium, studererMinst50Prosent, begrunnelse } = utkast
+  const { sporsmaalRedigerbare, aktivitetUtdanning, oppdaterUtdanning } = useForlengetOms()
+  const { skole, studium, studererMinst50Prosent, begrunnelse } = aktivitetUtdanning
 
   return (
     <>
@@ -13,7 +14,7 @@ export const ForlengetOmsUtdanning = () => {
           <TextField
             label="Hvilken skole skal bruker studere ved?"
             value={skole}
-            onChange={(event) => oppdaterFelt('skole', event.target.value)}
+            onChange={(event) => oppdaterUtdanning({ skole: event.target.value })}
             readOnly={!sporsmaalRedigerbare}
           />
         </VStack>
@@ -21,7 +22,7 @@ export const ForlengetOmsUtdanning = () => {
           <TextField
             label="Hva skal bruker studere?"
             value={studium}
-            onChange={(event) => oppdaterFelt('studium', event.target.value)}
+            onChange={(event) => oppdaterUtdanning({ studium: event.target.value })}
             readOnly={!sporsmaalRedigerbare}
           />
         </VStack>
@@ -31,7 +32,7 @@ export const ForlengetOmsUtdanning = () => {
           <RadioGroup
             legend="Studerer bruker minst 50 prosent?"
             value={studererMinst50Prosent}
-            onChange={(verdi) => oppdaterFelt('studererMinst50Prosent', verdi)}
+            onChange={(verdi: JaNei) => oppdaterUtdanning({ studererMinst50Prosent: verdi })}
             disabled={!sporsmaalRedigerbare}
           >
             <Radio value="JA">Ja, bruker studerer minst 50 prosent</Radio>
@@ -56,7 +57,7 @@ export const ForlengetOmsUtdanning = () => {
                   : undefined
               }
               value={begrunnelse}
-              onChange={(event) => oppdaterFelt('begrunnelse', event.target.value)}
+              onChange={(event) => oppdaterUtdanning({ begrunnelse: event.target.value })}
               minRows={6}
               readOnly={!sporsmaalRedigerbare}
             />

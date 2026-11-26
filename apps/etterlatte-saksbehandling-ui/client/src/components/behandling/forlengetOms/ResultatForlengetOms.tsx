@@ -7,11 +7,12 @@ import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForlengetOms } from './ForlengetOmsContext'
+import { ForlengetOmsUtfall } from '~shared/api/forlengetOms'
 
 export const ResultatForlengetOms = () => {
   const {
-    utkast,
-    oppdaterFelt,
+    utfall,
+    settUtfall,
     redigerbar,
     lagrer,
     opptatt,
@@ -58,8 +59,8 @@ export const ResultatForlengetOms = () => {
             <RadioGroup
               legend="Innvilg eller avslå forlenget OMS"
               hideLegend
-              value={utkast.utfall}
-              onChange={(verdi) => oppdaterFelt('utfall', verdi)}
+              value={utfall}
+              onChange={(verdi: ForlengetOmsUtfall) => settUtfall(verdi)}
               disabled={!kanVelgeUtfall}
             >
               <Radio value="INNVILGELSE">Innvilg forlenget OMS</Radio>

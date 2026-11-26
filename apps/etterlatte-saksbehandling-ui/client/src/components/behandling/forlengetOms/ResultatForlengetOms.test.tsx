@@ -315,6 +315,99 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(container.textContent).toContain('Forlenget OMS avslås')
   })
 
+  it('lagrer endrede svar for arbeidsrettet tiltak fra skjemaet', async () => {
+    const aktivitet: ForlengetOmsAktivitet = {
+      type: 'ARBEIDSRETTET_TILTAK',
+      tiltak: 'Nytt tiltak',
+      omfang: 'HELTID',
+      aktivitetsplan: JaNei.JA,
+    }
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ok: true,
+      status: 200,
+      data: response(aktivitet, 'AVSLAG'),
+    })
+    await renderAktivitet(
+      response(
+        { type: 'ARBEIDSRETTET_TILTAK', tiltak: 'Lagret tiltak', omfang: 'DELTID', aktivitetsplan: JaNei.NEI },
+        'AVSLAG'
+      ).vurdering
+    )
+    const tiltak = container.querySelector<HTMLInputElement>('input[type="text"]')!
+    const begrunnelse = container.querySelector('textarea')!
+    expect(tiltak.value).toBe('Lagret tiltak')
+    expect(begrunnelse.value).toBe('Begrunnelse')
+    expect(container.querySelector<HTMLInputElement>('input[value="DELTID"]')!.checked).toBe(true)
+    expect(container.querySelectorAll<HTMLInputElement>('input[value="NEI"]')[1].checked).toBe(true)
+
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(tiltak, aktivitet.tiltak)
+      tiltak.dispatchEvent(new Event('input', { bubbles: true }))
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(
+        begrunnelse,
+        'Oppdatert begrunnelse'
+      )
+      begrunnelse.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="HELTID"]')!.click())
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="JA"]')!.click())
+    await velgOgLagre('AVSLAG')
+
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet,
+      begrunnelse: 'Oppdatert begrunnelse',
+      utfall: 'AVSLAG',
+      periode: undefined,
+    })
+  })
+
+  it('lagrer endrede utdanningssvar fra skjemaet', async () => {
+    const aktivitet: ForlengetOmsAktivitet = {
+      type: 'UTDANNING',
+      skole: 'Ny skole',
+      studium: 'Nytt studium',
+      studererMinst50Prosent: JaNei.NEI,
+    }
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ok: true,
+      status: 200,
+      data: response(aktivitet, 'AVSLAG'),
+    })
+    await renderAktivitet(
+      response(
+        { type: 'UTDANNING', skole: 'Lagret skole', studium: 'Lagret studium', studererMinst50Prosent: JaNei.JA },
+        'AVSLAG'
+      ).vurdering
+    )
+    const [skole, studium] = container.querySelectorAll<HTMLInputElement>('input[type="text"]')
+    for (const [felt, verdi] of [
+      [skole, aktivitet.skole],
+      [studium, aktivitet.studium],
+    ] as const) {
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(felt, verdi)
+        felt.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+    }
+    await act(async () => container.querySelectorAll<HTMLInputElement>('input[value="NEI"]')[1].click())
+    const begrunnelse = container.querySelector('textarea')!
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(
+        begrunnelse,
+        'Oppdatert begrunnelse'
+      )
+      begrunnelse.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    await velgOgLagre('AVSLAG')
+
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet,
+      begrunnelse: 'Oppdatert begrunnelse',
+      utfall: 'AVSLAG',
+      periode: undefined,
+    })
+  })
+
   it('nullstiller ulagrede svar ved aktivitetsbytte og gjenoppretter lagrede svar', async () => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'UTDANNING',

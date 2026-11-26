@@ -1,10 +1,12 @@
 import { Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { ForlengetOmsPeriode } from './ForlengetOmsPeriode'
 import { useForlengetOms } from './ForlengetOmsContext'
+import { Tiltaksomfang } from '~shared/api/forlengetOms'
+import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsArbeidsrettetTiltak = () => {
-  const { utkast, oppdaterFelt, sporsmaalRedigerbare } = useForlengetOms()
-  const { tiltak, omfang, aktivitetsplan, begrunnelse } = utkast
+  const { sporsmaalRedigerbare, arbeidsrettetTiltak, oppdaterArbeidsrettetTiltak } = useForlengetOms()
+  const { tiltak, omfang, aktivitetsplan, begrunnelse } = arbeidsrettetTiltak
 
   return (
     <>
@@ -13,7 +15,7 @@ export const ForlengetOmsArbeidsrettetTiltak = () => {
           <TextField
             label="Hvilket tiltak deltar bruker i?"
             value={tiltak}
-            onChange={(event) => oppdaterFelt('tiltak', event.target.value)}
+            onChange={(event) => oppdaterArbeidsrettetTiltak({ tiltak: event.target.value })}
             readOnly={!sporsmaalRedigerbare}
           />
         </VStack>
@@ -21,7 +23,7 @@ export const ForlengetOmsArbeidsrettetTiltak = () => {
           <RadioGroup
             legend="Deltar bruker i tiltaket på heltid eller deltid?"
             value={omfang}
-            onChange={(verdi) => oppdaterFelt('omfang', verdi)}
+            onChange={(verdi: Tiltaksomfang) => oppdaterArbeidsrettetTiltak({ omfang: verdi })}
             disabled={!sporsmaalRedigerbare}
           >
             <Radio value="HELTID">Heltid</Radio>
@@ -32,7 +34,7 @@ export const ForlengetOmsArbeidsrettetTiltak = () => {
           <RadioGroup
             legend="Finnes det en aktivitetsplan?"
             value={aktivitetsplan}
-            onChange={(verdi) => oppdaterFelt('aktivitetsplan', verdi)}
+            onChange={(verdi: JaNei) => oppdaterArbeidsrettetTiltak({ aktivitetsplan: verdi })}
             disabled={!sporsmaalRedigerbare}
           >
             <Radio value="JA">Ja, bruker har en aktivitetsplan</Radio>
@@ -45,7 +47,7 @@ export const ForlengetOmsArbeidsrettetTiltak = () => {
           <Textarea
             label="Begrunnelse"
             value={begrunnelse}
-            onChange={(event) => oppdaterFelt('begrunnelse', event.target.value)}
+            onChange={(event) => oppdaterArbeidsrettetTiltak({ begrunnelse: event.target.value })}
             minRows={6}
             readOnly={!sporsmaalRedigerbare}
           />

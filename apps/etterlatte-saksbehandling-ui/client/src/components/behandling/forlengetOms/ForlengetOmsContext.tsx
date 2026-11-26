@@ -1,10 +1,11 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
+import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from 'react'
 import { Loader } from '@navikt/ds-react'
 import {
   AktivitetOgUtfall,
   ForlengetOmsAktivitet,
   ForlengetOmsUtfall,
   hentAktivitetOgUtfall,
+  LagretForlengetOmsVurdering,
   lagreForlengetOmsVurdering,
   Tiltaksomfang,
 } from '~shared/api/forlengetOms'
@@ -19,7 +20,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
-import { slettTotalVurdering, VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { IVilkaarsvurdering, slettTotalVurdering, VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { JaNei } from '~shared/types/ISvar'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -40,6 +41,48 @@ interface ArbeidsrettetTiltak {
   omfang: Tiltaksomfang | ''
   aktivitetsplan: JaNei | ''
 }
+
+interface ForlengetOmsContextValue {
+  hentAktivitetOgUtfallStatus: Result<AktivitetOgUtfall | null>
+  aktivitetType: ForlengetOmsAktivitet['type'] | ''
+  utfall: ForlengetOmsUtfall | ''
+  settUtfall: Dispatch<SetStateAction<ForlengetOmsUtfall | ''>>
+  begrunnelse: string
+  settBegrunnelse: Dispatch<SetStateAction<string>>
+  periode: Periode
+  settPeriode: Dispatch<SetStateAction<Periode>>
+  velgAktivitet: (type: ForlengetOmsAktivitet['type'] | '') => void
+  lagreVurdering: () => void
+  redigerVurdering: () => void
+  lagreStatus: Result<LagretForlengetOmsVurdering>
+  redigerStatus: Result<IVilkaarsvurdering>
+  lagrer: boolean
+  redigerer: boolean
+  opptatt: boolean
+  redigerbar: boolean
+  sporsmaalRedigerbare: boolean
+  alleVilkaarErVurdert: boolean
+  lagretUtfallErUtdatert: boolean
+  innvilgelseFeil: string | undefined
+  periodeFeil: string | undefined
+  periodeRedigerbar: boolean
+  avslagErLagret: boolean
+  vilkaarsvurdering: IVilkaarsvurdering | undefined
+  kanLagre: boolean
+  kanVelgeUtfall: boolean
+  kanGaaVidere: boolean
+  aktivitetUtdanning: AktivitetUtdanning
+  oppdaterUtdanning: (endringer: Partial<AktivitetUtdanning>) => void
+  arbeidsrettetTiltak: ArbeidsrettetTiltak
+  oppdaterArbeidsrettetTiltak: (endringer: Partial<ArbeidsrettetTiltak>) => void
+}
+
+interface Props {
+  behandling: IBehandlingReducer
+  children: ReactNode
+}
+
+const ForlengetOmsContext = createContext<ForlengetOmsContextValue | undefined>(undefined)
 
 const tilAktivitet = (
   aktivitetType: ForlengetOmsAktivitet['type'] | '',
@@ -72,7 +115,7 @@ const tilAktivitet = (
   }
 }
 
-const useForlengetOmsState = (behandling: IBehandlingReducer) => {
+export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   const dispatch = useAppDispatch()
   const saksbehandler = useInnloggetSaksbehandler()
   const [hentAktivitetOgUtfallStatus, settHentAktivitetOgUtfallStatus] = useState<Result<AktivitetOgUtfall | null>>({
@@ -228,7 +271,7 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
     })
   }
 
-  return {
+  const value: ForlengetOmsContextValue = {
     hentAktivitetOgUtfallStatus,
     aktivitetType,
     utfall,
@@ -268,24 +311,11 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
     arbeidsrettetTiltak,
     oppdaterArbeidsrettetTiltak,
   }
-}
-
-const ForlengetOmsContext = createContext<ReturnType<typeof useForlengetOmsState> | undefined>(undefined) //TODO rekkefølge/bort
-
-export const ForlengetOmsProvider = ({
-  //TODO rekkefølge/bort
-  behandling,
-  children,
-}: {
-  behandling: IBehandlingReducer
-  children: ReactNode
-}) => {
-  const state = useForlengetOmsState(behandling)
   return (
-    <ForlengetOmsContext.Provider value={state}>
-      {isSuccess(state.hentAktivitetOgUtfallStatus)
+    <ForlengetOmsContext.Provider value={value}>
+      {isSuccess(hentAktivitetOgUtfallStatus)
         ? children
-        : mapResult(state.hentAktivitetOgUtfallStatus, {
+        : mapResult(hentAktivitetOgUtfallStatus, {
             initial: <Loader title="Henter aktivitet og utfall" />,
             pending: <Loader title="Henter aktivitet og utfall" />,
             error: (error) => <ApiErrorAlert>Kunne ikke hente aktivitet og utfall: {error.detail}</ApiErrorAlert>,

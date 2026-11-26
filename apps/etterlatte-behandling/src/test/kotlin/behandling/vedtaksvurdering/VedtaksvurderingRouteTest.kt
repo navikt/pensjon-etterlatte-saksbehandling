@@ -36,6 +36,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingSer
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakKlageService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
+import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -87,6 +88,7 @@ internal class VedtaksvurderingRouteTest(
     private val vedtakBehandlingService: VedtakBehandlingService = mockk()
     private val vedtakKlageService: VedtakKlageService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
+    private val brevService: BrevService = mockk(relaxed = true)
     private val mockOAuth2Server = MockOAuth2Server()
 
     private val user: SaksbehandlerMedEnheterOgRoller = mockk()
@@ -709,6 +711,7 @@ internal class VedtaksvurderingRouteTest(
                     vedtakService = vedtaksvurderingService,
                     vedtakBehandlingService = vedtakBehandlingService,
                     rapidService = rapidService,
+                    brevService = brevService,
                 )
                 klagevedtakRoute(
                     vedtakKlageService = vedtakKlageService,

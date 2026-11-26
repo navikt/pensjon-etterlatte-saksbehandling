@@ -16,9 +16,11 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtakBehandlingSer
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingRapidService
 import no.nav.etterlatte.behandling.vedtaksvurdering.service.VedtaksvurderingService
 import no.nav.etterlatte.behandling.vedtaksvurdering.toVedtakSammendragDto
+import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
@@ -37,6 +39,7 @@ fun Route.vedtaksvurderingRoute(
     vedtakService: VedtaksvurderingService,
     vedtakBehandlingService: VedtakBehandlingService,
     rapidService: VedtaksvurderingRapidService,
+    brevService: BrevService,
 ) {
     route("/api/vedtak") {
         val logger = LoggerFactory.getLogger("VedtaksvurderingRoute")
@@ -201,16 +204,36 @@ fun Route.vedtaksvurderingRoute(
                     logger.info("Attesterer vedtak for behandling $behandlingId")
                     val (kommentar) = call.receive<AttesterVedtakDto>()
                     val attestert =
-                        withSerializableRetry {
+                        try {
+                            if (brukerTokenInfo.ident() == "Z993799") {
+                                throw InternfeilException("TEST! Skal slettes! Mocker feil for å teste attestering")
+                            }
+                            withSerializableRetry {
+                                inTransaction {
+                                    runBlocking {
+                                        vedtakBehandlingService.attesterVedtak(
+                                            behandlingId,
+                                            kommentar,
+                                            brukerTokenInfo,
+                                        )
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
                             inTransaction {
                                 runBlocking {
-                                    vedtakBehandlingService.attesterVedtak(
-                                        behandlingId,
-                                        kommentar,
-                                        brukerTokenInfo,
+                                    brevService.fjernFerdigstillingVedtaksbrevVedAttesteringsfeil(
+                                        behandlingId = behandlingId,
+                                        brukerTokenInfo = brukerTokenInfo,
                                     )
                                 }
                             }
+                            logger.error(
+                                "Attestering feilet for behandling id: $behandlingId." +
+                                    " Ferdigstillingen er rullet tilbake så saksbehandler kan prøve på nytt.",
+                                e,
+                            )
+                            throw e
                         }
                     try {
                         rapidService.sendToRapid(attestert)

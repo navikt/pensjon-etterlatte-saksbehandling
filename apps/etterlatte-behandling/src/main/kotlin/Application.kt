@@ -291,6 +291,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         vedtakService = applicationContext.vedtaksvurderingService,
         vedtakBehandlingService = applicationContext.vedtakBehandlingService,
         rapidService = applicationContext.vedtaksvurderingRapidService,
+        brevService = applicationContext.brevService,
     )
     automatiskVedtakBehandlingRoutes(applicationContext.automatiskVedtakBehandlingService)
     klagevedtakRoute(vedtakKlageService = applicationContext.vedtakKlageService)

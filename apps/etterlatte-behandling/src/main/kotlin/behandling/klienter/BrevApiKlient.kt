@@ -155,6 +155,11 @@ interface BrevApiKlient {
         systembruker: Systembruker,
     )
 
+    suspend fun fjernFerdigstillingVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    )
+
     suspend fun hentPdf(
         sakId: SakId,
         brevID: BrevID,
@@ -436,6 +441,18 @@ class BrevApiKlientObo(
             postBody = { },
             onSuccess = { },
             brukerTokenInfo = systembruker,
+        )
+    }
+
+    override suspend fun fjernFerdigstillingVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ) {
+        post(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak/fjern-ferdigstilt",
+            postBody = { },
+            onSuccess = { },
+            brukerTokenInfo = bruker,
         )
     }
 

@@ -315,6 +315,78 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(container.textContent).toContain('Forlenget OMS avslås')
   })
 
+  it('nullstiller ulagrede svar ved aktivitetsbytte og gjenoppretter lagrede svar', async () => {
+    const aktivitet: ForlengetOmsAktivitet = {
+      type: 'UTDANNING',
+      skole: 'Lagret skole',
+      studium: 'Lagret studium',
+      studererMinst50Prosent: JaNei.JA,
+    }
+    await renderAktivitet(response(aktivitet, 'AVSLAG').vurdering)
+    const skole = container.querySelector<HTMLInputElement>('input[type="text"]')!
+    const begrunnelse = container.querySelector('textarea')!
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(skole, 'Ulagret skole')
+      skole.dispatchEvent(new Event('input', { bubbles: true }))
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(
+        begrunnelse,
+        'Ulagret begrunnelse'
+      )
+      begrunnelse.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="ARBEIDSRETTET_TILTAK"]')!.click())
+    expect(container.querySelector<HTMLInputElement>('input[type="text"]')!.value).toBe('')
+    expect(container.querySelector('textarea')!.value).toBe('Begrunnelse')
+    expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.checked).toBe(true)
+
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="UTDANNING"]')!.click())
+    expect(container.querySelector<HTMLInputElement>('input[type="text"]')!.value).toBe('Lagret skole')
+    expect(container.querySelector('textarea')!.value).toBe('Begrunnelse')
+  })
+
+  it('henter nye svar og nullstiller utkast naar behandling endres', async () => {
+    const get = await renderAktivitet(response({ type: 'NEI' }, 'AVSLAG').vurdering)
+    get.mockResolvedValueOnce({ ok: true, status: 200, data: null })
+
+    await act(async () => {
+      store.dispatch(setBehandling({ ...behandling, id: 'ny-behandling-id' }))
+    })
+
+    expect(get).toHaveBeenLastCalledWith('/behandling/ny-behandling-id/forlenget-oms')
+    expect(container.querySelector<HTMLInputElement>('input[value="NEI"]')!.checked).toBe(false)
+    expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.checked).toBe(false)
+    expect(container.querySelector('textarea')).toBeNull()
+    const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
+    expect(lagre.disabled).toBe(true)
+  })
+
+  it('krever ny periode naar en lagret til-maaned slettes', async () => {
+    const aktivitet: ForlengetOmsAktivitet = {
+      type: 'ARBEIDSRETTET_TILTAK',
+      tiltak: 'Tiltak',
+      omfang: 'HELTID',
+      aktivitetsplan: JaNei.JA,
+    }
+    store.dispatch(
+      oppdaterRevurderingInfo({
+        revurderingInfo: { type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06' },
+        begrunnelse: undefined,
+      })
+    )
+    const post = vi.spyOn(apiClient, 'post')
+    await renderAktivitet(response(aktivitet, 'INNVILGELSE').vurdering)
+    const tom = container.querySelector<HTMLInputElement>('#tom')!
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(tom, '')
+      tom.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    await velgOgLagre('INNVILGELSE')
+
+    expect(post).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Må fylles ut')
+  })
+
   it('aktiverer lagre foerst naar utdanningssvarene og vilkaarene er komplette', async () => {
     await renderAktivitet(null)
     await act(async () => container.querySelector<HTMLInputElement>('input[value="UTDANNING"]')!.click())

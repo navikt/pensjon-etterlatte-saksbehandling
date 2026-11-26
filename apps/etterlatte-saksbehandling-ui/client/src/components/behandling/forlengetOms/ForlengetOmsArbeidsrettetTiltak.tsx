@@ -1,31 +1,10 @@
-import { useState } from 'react'
 import { Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { ForlengetOmsPeriodeOgResultat } from './ForlengetOmsPeriodeOgResultat'
-import { ForlengetOmsVurdering, LagreForlengetOmsVurdering, Tiltaksomfang } from '~shared/api/forlengetOms'
-import { JaNei } from '~shared/types/ISvar'
+import { ForlengetOmsPeriode } from './ForlengetOmsPeriode'
+import { useForlengetOms } from './ForlengetOmsContext'
 
-export const ForlengetOmsArbeidsrettetTiltak = ({
-  behandling,
-  redigerbar,
-  vurdering,
-  lagrer,
-  onLagre,
-}: {
-  behandling: IBehandlingReducer
-  redigerbar: boolean
-  vurdering?: ForlengetOmsVurdering
-  lagrer: boolean
-  onLagre: (request: LagreForlengetOmsVurdering) => void
-}) => {
-  const lagretAktivitet = vurdering?.aktivitet.type === 'ARBEIDSRETTET_TILTAK' ? vurdering.aktivitet : undefined
-  const [tiltak, setTiltak] = useState(lagretAktivitet?.tiltak ?? '')
-  const [omfang, setOmfang] = useState<Tiltaksomfang | ''>(lagretAktivitet?.omfang ?? '')
-  const [aktivitetsplan, setAktivitetsplan] = useState<JaNei | ''>(lagretAktivitet?.aktivitetsplan ?? '')
-  const [begrunnelse, setBegrunnelse] = useState(
-    vurdering?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
-  )
-  const sporsmaalRedigerbare = redigerbar && !lagrer && !behandling.vilkaarsvurdering?.resultat
+export const ForlengetOmsArbeidsrettetTiltak = () => {
+  const { utkast, oppdaterFelt, sporsmaalRedigerbare } = useForlengetOms()
+  const { tiltak, omfang, aktivitetsplan, begrunnelse } = utkast
 
   return (
     <>
@@ -34,7 +13,7 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
           <TextField
             label="Hvilket tiltak deltar bruker i?"
             value={tiltak}
-            onChange={(event) => setTiltak(event.target.value)}
+            onChange={(event) => oppdaterFelt('tiltak', event.target.value)}
             readOnly={!sporsmaalRedigerbare}
           />
         </VStack>
@@ -42,7 +21,7 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
           <RadioGroup
             legend="Deltar bruker i tiltaket på heltid eller deltid?"
             value={omfang}
-            onChange={setOmfang}
+            onChange={(verdi) => oppdaterFelt('omfang', verdi)}
             disabled={!sporsmaalRedigerbare}
           >
             <Radio value="HELTID">Heltid</Radio>
@@ -53,7 +32,7 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
           <RadioGroup
             legend="Finnes det en aktivitetsplan?"
             value={aktivitetsplan}
-            onChange={setAktivitetsplan}
+            onChange={(verdi) => oppdaterFelt('aktivitetsplan', verdi)}
             disabled={!sporsmaalRedigerbare}
           >
             <Radio value="JA">Ja, bruker har en aktivitetsplan</Radio>
@@ -61,27 +40,17 @@ export const ForlengetOmsArbeidsrettetTiltak = ({
           </RadioGroup>
         </VStack>
       </VStack>
-      <ForlengetOmsPeriodeOgResultat
-        behandling={behandling}
-        redigerbar={redigerbar}
-        vurdering={vurdering}
-        lagrer={lagrer}
-        onLagre={onLagre}
-        aktivitet={
-          omfang && aktivitetsplan ? { type: 'ARBEIDSRETTET_TILTAK', tiltak, omfang, aktivitetsplan } : undefined
-        }
-        begrunnelse={begrunnelse}
-      >
+      <ForlengetOmsPeriode>
         <VStack gap="space-16" maxWidth="30rem">
           <Textarea
             label="Begrunnelse"
             value={begrunnelse}
-            onChange={(event) => setBegrunnelse(event.target.value)}
+            onChange={(event) => oppdaterFelt('begrunnelse', event.target.value)}
             minRows={6}
             readOnly={!sporsmaalRedigerbare}
           />
         </VStack>
-      </ForlengetOmsPeriodeOgResultat>
+      </ForlengetOmsPeriode>
     </>
   )
 }

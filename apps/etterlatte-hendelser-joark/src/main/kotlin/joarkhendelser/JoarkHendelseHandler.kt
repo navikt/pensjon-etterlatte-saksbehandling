@@ -270,8 +270,8 @@ class JoarkHendelseHandler(
     ): Exception {
         errors.forEach {
             if (errors.all { err -> err.extensions?.code == Error.Code.FORBIDDEN }) {
-                logger.error("Deny for henting mot saf se sikkerlogg")
-                sikkerLogg.error("Deny henting fra SAF for identifikator: $journalpostId. error: ${it.toJson()}")
+                logger.warn("Deny for henting mot saf se sikkerlogg")
+                sikkerLogg.warn("Deny henting fra SAF for identifikator: $journalpostId. error: ${it.toJson()}")
             } else {
                 logger.error("${errors.size} feil oppsto ved kall mot saf se sikkerlogg.")
                 sikkerLogg.error("Feil mot saf, id: identifikator: $journalpostId. feil: ${it.toJson()}")

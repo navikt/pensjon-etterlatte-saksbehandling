@@ -137,6 +137,7 @@ internal class VilkaarsvurderingIntegrationTest(
                 behandlingService,
                 grunnService,
                 behandlingStatus,
+                applicationContext.featureToggleService,
             )
 
         val grunnlagMock = grunnlagMedVersjon(grunnlagVersjon)

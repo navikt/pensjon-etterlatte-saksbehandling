@@ -2,7 +2,15 @@ import React from 'react'
 import { Oppgavetype } from '~shared/types/oppgave'
 import { Tag } from '@navikt/ds-react'
 
-export const OppgavetypeTag = ({ oppgavetype }: { oppgavetype: Oppgavetype }) => {
+export const OppgavetypeTag = ({ oppgavetype, merknad }: { oppgavetype: Oppgavetype; merknad?: string }) => {
+  if (merknad?.toLowerCase() === 'forlenget oms') {
+    return (
+      <Tag data-color="brand-magenta" variant="outline">
+        Forlenget omstillingsstønad
+      </Tag>
+    )
+  }
+
   switch (oppgavetype) {
     case Oppgavetype.FOERSTEGANGSBEHANDLING:
       return <Tag variant="success">Førstegangsbehandling</Tag>

@@ -110,6 +110,7 @@ internal class VilkaarsvurderingRoutesTest(
                 behandlingService,
                 grunnlagService,
                 behandlingStatus,
+                mockk(relaxed = true),
             )
         context = nyKontekstMedBrukerOgDatabase(saksbehandler, ds)
     }
@@ -749,6 +750,7 @@ internal class VilkaarsvurderingRoutesTest(
                 behandlingServiceLocal,
                 grunnlagService,
                 behandlingStatusServiceLocal,
+                mockk(relaxed = true),
             )
 
         testApplication(Kontekst.asContextElement(context)) {
@@ -781,6 +783,7 @@ internal class VilkaarsvurderingRoutesTest(
                 behandlingService,
                 grunnlagService,
                 behandlingStatusService,
+                mockk(relaxed = true),
             )
 
         testApplication(Kontekst.asContextElement(context)) {
@@ -811,6 +814,7 @@ internal class VilkaarsvurderingRoutesTest(
                 behandlingService,
                 grunnlagService,
                 behandlingStatusService,
+                mockk(relaxed = true),
             )
 
         testApplication(Kontekst.asContextElement(context)) {

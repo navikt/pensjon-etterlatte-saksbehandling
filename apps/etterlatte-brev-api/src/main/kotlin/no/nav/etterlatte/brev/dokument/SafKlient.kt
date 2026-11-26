@@ -55,8 +55,8 @@ class SafKlient(
             when (re.response.status) {
                 HttpStatusCode.Forbidden -> {
                     val errorMessage = re.response.body<JsonNode>()["message"]?.asString()
-                    logger.error("Deny for henting mot saf se sikkerlogg journalpostId: $journalpostId")
-                    sikkerLogg.error("Deny melding fra SAF for journalpostId: $journalpostId. error: $errorMessage")
+                    logger.warn("Deny for henting mot saf se sikkerlogg journalpostId: $journalpostId")
+                    sikkerLogg.warn("Deny melding fra SAF for journalpostId: $journalpostId. error: $errorMessage")
                     throw IkkeTilgangTilJournalpost("Du mangler tilgang til tema ressursen tilhører eller geografisk område.")
                 }
 

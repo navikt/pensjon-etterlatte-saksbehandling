@@ -43,7 +43,6 @@ interface ArbeidsrettetTiltak {
 }
 
 interface ForlengetOmsContextValue {
-  hentAktivitetOgUtfallStatus: Result<AktivitetOgUtfall | null>
   aktivitetType: ForlengetOmsAktivitet['type'] | ''
   utfall: ForlengetOmsUtfall | ''
   settUtfall: Dispatch<SetStateAction<ForlengetOmsUtfall | ''>>
@@ -122,15 +121,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     status: 'initial',
   })
   const [aktivitetType, settAktivitetType] = useState<ForlengetOmsAktivitet['type'] | ''>('')
-  const [periode, settPeriode] = useState<Periode>({
-    fom: '',
-    tom: '',
-  })
-  const [begrunnelse, settBegrunnelse] = useState('')
-  const [utfall, settUtfall] = useState<ForlengetOmsUtfall | ''>('')
-  const [periodeFeil, setPeriodeFeil] = useState<string>()
-  const [lagreStatus, lagre] = useApiCall(lagreForlengetOmsVurdering)
-  const [redigerStatus, rediger] = useApiCall(slettTotalVurdering)
   const [aktivitetUtdanning, settAktivitetUtdanning] = useState<AktivitetUtdanning>({
     skole: '',
     studium: '',
@@ -141,6 +131,15 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     omfang: '',
     aktivitetsplan: '',
   })
+  const [periode, settPeriode] = useState<Periode>({
+    fom: '',
+    tom: '',
+  })
+  const [begrunnelse, settBegrunnelse] = useState('')
+  const [utfall, settUtfall] = useState<ForlengetOmsUtfall | ''>('')
+  const [periodeFeil, setPeriodeFeil] = useState<string>()
+  const [lagreStatus, lagre] = useApiCall(lagreForlengetOmsVurdering)
+  const [redigerStatus, rediger] = useApiCall(slettTotalVurdering)
 
   useEffect(() => {
     settHentAktivitetOgUtfallStatus({ status: 'pending' })
@@ -148,14 +147,9 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
       if (response.ok) {
         const aktivitet = response.data?.aktivitet
         settHentAktivitetOgUtfallStatus({ status: 'success', data: response.data })
+
         settAktivitetType(aktivitet?.type ?? '')
-        const lagretPeriode = behandling.revurderinginfo?.revurderingInfo
-        settPeriode({
-          fom: behandling.virkningstidspunkt?.dato.slice(0, 7) ?? '',
-          tom: lagretPeriode?.type === 'FORLENGET_OMS' ? lagretPeriode.tom : '',
-        })
-        settUtfall(response.data?.utfall ?? '')
-        settBegrunnelse(response.data?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? '')
+
         settAktivitetUtdanning({
           skole: aktivitet?.type === 'UTDANNING' ? aktivitet.skole : '',
           studium: aktivitet?.type === 'UTDANNING' ? aktivitet.studium : '',
@@ -166,6 +160,15 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
           omfang: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.omfang : '',
           aktivitetsplan: aktivitet?.type === 'ARBEIDSRETTET_TILTAK' ? aktivitet.aktivitetsplan : '',
         })
+
+        const lagretPeriode = behandling.revurderinginfo?.revurderingInfo
+        settPeriode({
+          fom: behandling.virkningstidspunkt?.dato.slice(0, 7) ?? '',
+          tom: lagretPeriode?.type === 'FORLENGET_OMS' ? lagretPeriode.tom : '',
+        })
+
+        settBegrunnelse(response.data?.begrunnelse ?? behandling.vilkaarsvurdering?.resultat?.kommentar ?? '')
+        settUtfall(response.data?.utfall ?? '')
       } else {
         settHentAktivitetOgUtfallStatus({ status: 'error', error: response })
       }
@@ -250,15 +253,14 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   }
 
   const value: ForlengetOmsContextValue = {
-    hentAktivitetOgUtfallStatus,
     aktivitetType,
+    settAktivitetType,
     utfall,
     settUtfall,
     begrunnelse,
     settBegrunnelse,
     periode,
     settPeriode,
-    settAktivitetType,
     lagreVurdering,
     redigerVurdering,
     lagreStatus,

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import no.nav.etterlatte.etterCommit
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -60,25 +61,26 @@ class BehandlingsHendelserKafkaProducerImpl(
         overstyrtTekniskTid: Tidspunkt?,
     ) {
         val correlationId = getCorrelationId()
-
-        rapid
-            .publiser(
-                statistikkBehandling.id.toString(),
-                JsonMessage
-                    .newMessage(
-                        hendelseType.lagEventnameForType(),
-                        mapOf(
-                            CORRELATION_ID_KEY to correlationId,
-                            TEKNISK_TID_KEY to (overstyrtTekniskTid ?: Tidspunkt.now()),
-                            STATISTIKKBEHANDLING_RIVER_KEY to statistikkBehandling,
-                        ),
-                    ).toJson(),
-            ).also { (partition, offset) ->
-                logger.info(
-                    "Posted event ${hendelseType.lagEventnameForType()} for behandling ${statistikkBehandling.id}" +
-                        " to partiton $partition, offset $offset correlationid: $correlationId",
-                )
-            }
+        val melding =
+            JsonMessage
+                .newMessage(
+                    hendelseType.lagEventnameForType(),
+                    mapOf(
+                        CORRELATION_ID_KEY to correlationId,
+                        TEKNISK_TID_KEY to (overstyrtTekniskTid ?: Tidspunkt.now()),
+                        STATISTIKKBEHANDLING_RIVER_KEY to statistikkBehandling,
+                    ),
+                ).toJson()
+        etterCommit {
+            rapid
+                .publiser(statistikkBehandling.id.toString(), melding)
+                .also { (partition, offset) ->
+                    logger.info(
+                        "Posted event ${hendelseType.lagEventnameForType()} for behandling ${statistikkBehandling.id}" +
+                            " to partiton $partition, offset $offset correlationid: $correlationId",
+                    )
+                }
+        }
     }
 
     override fun sendMeldingForEndretEnhet(
@@ -88,25 +90,27 @@ class BehandlingsHendelserKafkaProducerImpl(
     ) {
         val correlationId = getCorrelationId()
         val hendelse = BehandlingHendelseType.ENDRET_ENHET
-        rapid
-            .publiser(
-                oppgaveReferanse,
-                JsonMessage
-                    .newMessage(
-                        hendelse.lagEventnameForType(),
-                        mapOf(
-                            CORRELATION_ID_KEY to correlationId,
-                            TEKNISK_TID_KEY to (overstyrtTekniskTid ?: Tidspunkt.now()),
-                            REFERANSE_ENDRET_ENHET_KEY to oppgaveReferanse,
-                            NY_ENHET_KEY to enhet.enhetNr,
-                        ),
-                    ).toJson(),
-            ).also { (partition, offset) ->
-                logger.info(
-                    "Postet hendelse ${hendelse.lagEventnameForType()} for oppgave med referanse " +
-                        "$oppgaveReferanse til partisjon $partition, offset $offset correlationid: $correlationId",
-                )
-            }
+        val melding =
+            JsonMessage
+                .newMessage(
+                    hendelse.lagEventnameForType(),
+                    mapOf(
+                        CORRELATION_ID_KEY to correlationId,
+                        TEKNISK_TID_KEY to (overstyrtTekniskTid ?: Tidspunkt.now()),
+                        REFERANSE_ENDRET_ENHET_KEY to oppgaveReferanse,
+                        NY_ENHET_KEY to enhet.enhetNr,
+                    ),
+                ).toJson()
+        etterCommit {
+            rapid
+                .publiser(oppgaveReferanse, melding)
+                .also { (partition, offset) ->
+                    logger.info(
+                        "Postet hendelse ${hendelse.lagEventnameForType()} for oppgave med referanse " +
+                            "$oppgaveReferanse til partisjon $partition, offset $offset correlationid: $correlationId",
+                    )
+                }
+        }
     }
 
     override fun sendMeldingForHendelsePaaVent(

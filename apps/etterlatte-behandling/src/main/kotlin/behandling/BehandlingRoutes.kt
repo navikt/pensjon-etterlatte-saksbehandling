@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.database.withSerializableRetry
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -437,29 +438,28 @@ internal fun Route.behandlingRoutes(
             post {
                 val behandlingsBehov = call.receive<BehandlingsBehov>()
 
-                kunSkrivetilgang(sakId = behandlingsBehov.sakId) {
-                    val request =
-                        inTransaction {
-                            behandlingFactory.hentDataForOpprettBehandling(behandlingsBehov.sakId)
+                val behandlingOgOppgave =
+                    withSerializableRetry {
+                        kunSkrivetilgang(sakId = behandlingsBehov.sakId) {
+                            inTransaction {
+                                val request = behandlingFactory.hentDataForOpprettBehandling(behandlingsBehov.sakId)
+                                behandlingFactory.opprettBehandling(
+                                    behandlingsBehov.sakId,
+                                    behandlingsBehov.persongalleri,
+                                    behandlingsBehov.mottattDato,
+                                    Vedtaksloesning.GJENNY,
+                                    request = request,
+                                    opprinnelse =
+                                        when (request.sak.sakType) {
+                                            SakType.BARNEPENSJON -> BehandlingOpprinnelse.BARNEPENSJON_SOEKNAD
+                                            SakType.OMSTILLINGSSTOENAD -> BehandlingOpprinnelse.OMSTILLINGSSTOENAD_SOEKNAD
+                                        },
+                                )
+                            }
                         }
-                    val behandlingOgOppgave =
-                        inTransaction {
-                            behandlingFactory.opprettBehandling(
-                                behandlingsBehov.sakId,
-                                behandlingsBehov.persongalleri,
-                                behandlingsBehov.mottattDato,
-                                Vedtaksloesning.GJENNY,
-                                request = request,
-                                opprinnelse =
-                                    when (request.sak.sakType) {
-                                        SakType.BARNEPENSJON -> BehandlingOpprinnelse.BARNEPENSJON_SOEKNAD
-                                        SakType.OMSTILLINGSSTOENAD -> BehandlingOpprinnelse.OMSTILLINGSSTOENAD_SOEKNAD
-                                    },
-                            )
-                        }
-                    behandlingOgOppgave.sendMeldingForHendelse()
-                    call.respondText(behandlingOgOppgave.behandling.id.toString())
-                }
+                    }
+                behandlingOgOppgave.sendMeldingForHendelse()
+                call.respondText(behandlingOgOppgave.behandling.id.toString())
             }
         }
     }

@@ -117,6 +117,8 @@ fun lagContext(
 
             override fun harIntransaction(): Boolean = false
 
+            override fun etterCommit(block: () -> Unit) = block()
+
             override fun <T> inTransaction(block: () -> T): T = block()
         },
     sakTilgangDao: SakTilgangDao = mockedSakTilgangDao(),

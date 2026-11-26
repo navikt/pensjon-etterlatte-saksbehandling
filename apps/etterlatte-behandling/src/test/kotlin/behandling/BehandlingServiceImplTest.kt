@@ -396,6 +396,8 @@ internal class BehandlingServiceImplTest {
 
                 override fun harIntransaction(): Boolean = throw NotImplementedException("not implemented")
 
+                override fun etterCommit(block: () -> Unit) = block()
+
                 override fun <T> inTransaction(block: () -> T): T {
                     try {
                         return block()

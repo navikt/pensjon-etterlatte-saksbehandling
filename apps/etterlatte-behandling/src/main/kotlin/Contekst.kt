@@ -137,6 +137,17 @@ interface DatabaseKontekst {
     fun harIntransaction(): Boolean
 
     fun <T> inTransaction(block: () -> T): T
+
+    fun etterCommit(block: () -> Unit)
+}
+
+fun etterCommit(block: () -> Unit) {
+    val kontekst = Kontekst.get()
+    if (kontekst == null) {
+        block()
+    } else {
+        kontekst.databasecontxt.etterCommit(block)
+    }
 }
 
 fun <T> inTransaction(block: () -> T): T =

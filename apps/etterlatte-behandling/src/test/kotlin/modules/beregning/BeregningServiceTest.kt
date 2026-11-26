@@ -529,6 +529,8 @@ internal class BeregningServiceTest {
 
                     override fun harIntransaction(): Boolean = harTransaksjon
 
+                    override fun etterCommit(block: () -> Unit) = block()
+
                     override fun <T> inTransaction(block: () -> T): T {
                         nyeTransaksjoner++
                         return block()

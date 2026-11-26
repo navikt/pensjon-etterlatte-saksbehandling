@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.AvbrytBehandlingRequest
+import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -58,6 +59,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.sql.SQLException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -333,6 +335,124 @@ internal class BehandlingRoutesTest {
                 }
             coVerify(exactly = 1) { behandlingService.lagreAnnenForelder(behandlingId, any(), null) }
             assertEquals(200, response.status.value)
+        }
+    }
+
+    @Test
+    fun `henter oppdaterte data og oppretter behandling paa nytt ved serialiseringsfeil`() {
+        val sak = Sak("soeker", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, false)
+        val foersteRequest = DataHentetForOpprettBehandling(sak, emptyList())
+        val andreRequest = foersteRequest.copy(alleBehandlingerISak = listOf(mockk()))
+        val sendMelding = mockk<() -> Unit>(relaxed = true)
+        val behandling = mockk<Behandling> { every { id } returns behandlingId }
+        every { behandlingFactory.hentDataForOpprettBehandling(sakId1) } returnsMany listOf(foersteRequest, andreRequest)
+        every {
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), foersteRequest, any())
+        } throws SQLException("Konflikt", "40001")
+        every {
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), andreRequest, any())
+        } returns BehandlingOgOppgave(behandling, null, sendMelding)
+
+        withTestApplication { client ->
+            val response =
+                client.post("/behandlinger/opprettbehandling") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(BehandlingsBehov(sakId1, Persongalleri("soeker"), LocalDateTime.now().toString()))
+                }
+
+            assertEquals(200, response.status.value)
+            assertEquals(behandlingId.toString(), response.body<String>())
+        }
+
+        verify(exactly = 2) { behandlingFactory.hentDataForOpprettBehandling(sakId1) }
+        verify(exactly = 1) {
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), foersteRequest, any())
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), andreRequest, any())
+            sendMelding.invoke()
+        }
+    }
+
+    @Test
+    fun `returnerer feil etter tre mislykkede forsoek paa aa opprette behandling`() {
+        val sak = Sak("soeker", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, false)
+        every { behandlingFactory.hentDataForOpprettBehandling(sakId1) } returns DataHentetForOpprettBehandling(sak, emptyList())
+        every {
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), any(), any())
+        } throws SQLException("Konflikt", "40001")
+
+        withTestApplication { client ->
+            val response =
+                client.post("/behandlinger/opprettbehandling") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(BehandlingsBehov(sakId1, Persongalleri("soeker"), LocalDateTime.now().toString()))
+                }
+
+            assertEquals(500, response.status.value)
+        }
+
+        verify(exactly = 3) {
+            behandlingFactory.hentDataForOpprettBehandling(sakId1)
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `gjentar ikke opprettelse av behandling ved andre databasefeil`() {
+        val sak = Sak("soeker", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, false)
+        every { behandlingFactory.hentDataForOpprettBehandling(sakId1) } returns DataHentetForOpprettBehandling(sak, emptyList())
+        every {
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), any(), any())
+        } throws SQLException("Unikhetsbrudd", "23505")
+
+        withTestApplication { client ->
+            val response =
+                client.post("/behandlinger/opprettbehandling") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(BehandlingsBehov(sakId1, Persongalleri("soeker"), LocalDateTime.now().toString()))
+                }
+
+            assertEquals(500, response.status.value)
+        }
+
+        verify(exactly = 1) {
+            behandlingFactory.hentDataForOpprettBehandling(sakId1)
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `sjekker skrivetilgang paa nytt etter serialiseringsfeil`() {
+        val sak = Sak("soeker", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr, null, false)
+        val user =
+            mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { name() } returns "saksbehandler"
+                every { hentEnheterMedSkrivetilgang() } returnsMany listOf(listOf(sak.enhet), emptyList())
+            }
+        every { behandlingFactory.hentDataForOpprettBehandling(sakId1) } returns DataHentetForOpprettBehandling(sak, emptyList())
+        every {
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), any(), any())
+        } throws SQLException("Konflikt", "40001")
+
+        withTestApplication(user) { client ->
+            val response =
+                client.post("/behandlinger/opprettbehandling") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(BehandlingsBehov(sakId1, Persongalleri("soeker"), LocalDateTime.now().toString()))
+                }
+
+            assertEquals(403, response.status.value)
+        }
+
+        verify(exactly = 2) {
+            user.hentEnheterMedSkrivetilgang()
+        }
+        verify(exactly = 1) {
+            behandlingFactory.hentDataForOpprettBehandling(sakId1)
+            behandlingFactory.opprettBehandling(any(), any(), any(), any(), any(), any())
         }
     }
 

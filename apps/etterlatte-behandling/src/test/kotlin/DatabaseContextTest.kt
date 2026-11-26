@@ -20,6 +20,8 @@ class DatabaseContextTest(
 
     override fun harIntransaction(): Boolean = true
 
+    override fun etterCommit(block: () -> Unit) = block()
+
     override fun <T> inTransaction(block: () -> T): T {
         // NOOPP
         return block()

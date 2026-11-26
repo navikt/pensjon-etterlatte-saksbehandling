@@ -283,13 +283,13 @@ private fun RoutingContext.finnSkriveTilgangForId(sakId: SakId? = null): Enhetsn
     }
 }
 
-inline fun RoutingContext.kunSkrivetilgang(
+inline fun <T> RoutingContext.kunSkrivetilgang(
     sakId: SakId? = null,
     enhetNr: Enhetsnummer? = null,
-    onSuccess: () -> Unit,
-) {
+    onSuccess: () -> T,
+): T {
     call.application.log.debug("Sjekker skrivetilgang")
-    when (sjekkSkrivetilgang(sakId, enhetNr)) {
+    return when (sjekkSkrivetilgang(sakId, enhetNr)) {
         true -> {
             call.application.log.debug("Har skrivetilgang, fortsetter")
             onSuccess()

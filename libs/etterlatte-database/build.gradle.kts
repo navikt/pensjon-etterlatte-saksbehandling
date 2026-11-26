@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.database.flywaydbpostgres)
     implementation(libs.database.hikaricp)
     implementation(libs.database.kotliquery)
+    implementation(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.test.mockk)

@@ -1,5 +1,5 @@
-import { Alert, BodyShort, Box, Heading, HGrid, Label, Radio, RadioGroup, VStack } from '@navikt/ds-react'
-import { addMonths, addYears, isValid } from 'date-fns'
+import { BodyShort, Box, Heading, HGrid, Label, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { addMonths, addYears } from 'date-fns'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { formaterDato } from '~utils/formatering/dato'
 import { usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
@@ -7,8 +7,6 @@ import { ForlengetOmsUtdanning } from './ForlengetOmsUtdanning'
 import { ForlengetOmsArbeidsrettetTiltak } from './ForlengetOmsArbeidsrettetTiltak'
 import { ForlengetOmsIngenAktivitet } from './ForlengetOmsIngenAktivitet'
 import { ResultatForlengetOms } from './ResultatForlengetOms'
-import { mapFailure } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { ForlengetOmsProvider, useForlengetOms } from './ForlengetOmsContext'
 
 export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingReducer }) => (
@@ -18,15 +16,14 @@ export const ForlengetOmsAktivitet = ({ behandling }: { behandling: IBehandlingR
 )
 
 const ForlengetOmsAktivitetInnhold = () => {
-  const { utkast, velgAktivitet, sporsmaalRedigerbare, lagreStatus } = useForlengetOms()
+  const { utkast, velgAktivitet, sporsmaalRedigerbare } = useForlengetOms()
   const avdoede = usePersonopplysningerOmsAvdoede()
   const doedsdato = avdoede?.opplysning.doedsdato
-  const gyldigDoedsdato = doedsdato && isValid(new Date(doedsdato)) ? new Date(doedsdato) : undefined
   const viktigeDatoer = [
-    { tittel: 'Avdødes dødsdato', dato: gyldigDoedsdato },
-    { tittel: '6 mnd etter dødsfall', dato: gyldigDoedsdato ? addMonths(gyldigDoedsdato, 6) : undefined },
-    { tittel: '12 mnd etter dødsfall', dato: gyldigDoedsdato ? addMonths(gyldigDoedsdato, 12) : undefined },
-    { tittel: '3 år etter dødsfall', dato: gyldigDoedsdato ? addYears(gyldigDoedsdato, 3) : undefined },
+    { tittel: 'Avdødes dødsdato', dato: doedsdato },
+    { tittel: '6 mnd etter dødsfall', dato: doedsdato ? addMonths(doedsdato, 6) : undefined },
+    { tittel: '12 mnd etter dødsfall', dato: doedsdato ? addMonths(doedsdato, 12) : undefined },
+    { tittel: '3 år etter dødsfall', dato: doedsdato ? addYears(doedsdato, 3) : undefined },
   ]
   return (
     <>
@@ -46,11 +43,6 @@ const ForlengetOmsAktivitetInnhold = () => {
               </VStack>
             ))}
           </HGrid>
-          {!gyldigDoedsdato && (
-            <Alert variant="warning">
-              Dødsdato mangler eller er ugyldig. Datoene etter dødsfall kan ikke beregnes.
-            </Alert>
-          )}
         </VStack>
         <VStack gap="space-16">
           <RadioGroup
@@ -64,9 +56,6 @@ const ForlengetOmsAktivitetInnhold = () => {
             <Radio value="NEI">Nei</Radio>
           </RadioGroup>
         </VStack>
-        {mapFailure(lagreStatus, (error) => (
-          <ApiErrorAlert>Kunne ikke lagre vurderingen av aktivitet: {error.detail}</ApiErrorAlert>
-        ))}
       </VStack>
       {utkast.aktivitetType === 'UTDANNING' && <ForlengetOmsUtdanning />}
       {utkast.aktivitetType === 'ARBEIDSRETTET_TILTAK' && <ForlengetOmsArbeidsrettetTiltak />}

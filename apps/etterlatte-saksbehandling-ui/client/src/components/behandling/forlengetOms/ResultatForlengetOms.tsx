@@ -26,6 +26,7 @@ export const ResultatForlengetOms = () => {
     kanLagre,
     kanVelgeUtfall,
     kanGaaVidere,
+    lagreStatus,
   } = useForlengetOms()
   const { next } = useContext(BehandlingRouteContext)
 
@@ -76,6 +77,9 @@ export const ResultatForlengetOms = () => {
           )}
         </VStack>
       </Box>
+      {mapFailure(lagreStatus, (error) => (
+        <ApiErrorAlert>Kunne ikke lagre vurderingen av aktivitet: {error.detail}</ApiErrorAlert>
+      ))}
       {lagretUtfallErUtdatert && (
         <Alert variant="warning">
           Virkningstidspunktet eller grunnlaget er endret. Velg «Rediger vurdering» og vurder utfallet på nytt.

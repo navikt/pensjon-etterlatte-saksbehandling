@@ -41,8 +41,7 @@ interface ArbeidsrettetTiltak {
   aktivitetsplan: JaNei | ''
 }
 
-const hentAktivitet = (
-  //TODO bort
+const tilAktivitet = (
   aktivitetType: ForlengetOmsAktivitet['type'] | '',
   aktivitetUtdanning: AktivitetUtdanning,
   arbeidsrettetTiltak: ArbeidsrettetTiltak
@@ -73,20 +72,6 @@ const hentAktivitet = (
   }
 }
 
-const erAktivitetKomplett = (aktivitet: ForlengetOmsAktivitet | undefined) => {
-  //TODO bort
-  switch (aktivitet?.type) {
-    case 'UTDANNING':
-      return !!aktivitet.skole.trim() && !!aktivitet.studium.trim()
-    case 'ARBEIDSRETTET_TILTAK':
-      return !!aktivitet.tiltak.trim()
-    case 'NEI':
-      return true
-    default:
-      return false
-  }
-}
-
 const useForlengetOmsState = (behandling: IBehandlingReducer) => {
   const dispatch = useAppDispatch()
   const saksbehandler = useInnloggetSaksbehandler()
@@ -94,12 +79,12 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
     status: 'initial',
   })
   const [aktivitetType, settAktivitetType] = useState<ForlengetOmsAktivitet['type'] | ''>('')
-  const [utfall, settUtfall] = useState<ForlengetOmsUtfall | ''>('')
-  const [begrunnelse, settBegrunnelse] = useState('')
   const [periode, settPeriode] = useState<Periode>({
     fom: '',
     tom: '',
   })
+  const [begrunnelse, settBegrunnelse] = useState('')
+  const [utfall, settUtfall] = useState<ForlengetOmsUtfall | ''>('')
   const [periodeFeil, setPeriodeFeil] = useState<string>()
   const [lagreStatus, lagre] = useApiCall(lagreForlengetOmsVurdering)
   const [redigerStatus, rediger] = useApiCall(slettTotalVurdering)
@@ -170,11 +155,10 @@ const useForlengetOmsState = (behandling: IBehandlingReducer) => {
       : aktivitetType === 'UTDANNING' && aktivitetUtdanning.studererMinst50Prosent === JaNei.NEI
         ? 'Personen må studere minst 50% for å få stønad.'
         : undefined
-  const aktivitet = hentAktivitet(aktivitetType, aktivitetUtdanning, arbeidsrettetTiltak)
+  const aktivitet = tilAktivitet(aktivitetType, aktivitetUtdanning, arbeidsrettetTiltak)
   const kanLagre =
     sporsmaalRedigerbare &&
     alleVilkaarErVurdert &&
-    erAktivitetKomplett(aktivitet) &&
     !!begrunnelse.trim() &&
     !!utfall &&
     !(utfall === 'INNVILGELSE' && !!innvilgelseFeil)

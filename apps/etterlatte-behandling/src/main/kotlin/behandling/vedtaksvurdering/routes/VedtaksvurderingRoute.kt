@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.toVedtakSammendragDto
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
@@ -199,6 +200,9 @@ fun Route.vedtaksvurderingRoute(
             kunAttestant {
                 kunSkrivetilgang {
                     logger.info("Attesterer vedtak for behandling $behandlingId")
+                    if (brukerTokenInfo.ident() == "Z993799") {
+                        throw InternfeilException("TEST! Skal slettes! Mocker feil for å teste attestering")
+                    }
                     val (kommentar) = call.receive<AttesterVedtakDto>()
                     val attestert =
                         withSerializableRetry {
@@ -212,6 +216,7 @@ fun Route.vedtaksvurderingRoute(
                                 }
                             }
                         }
+
                     try {
                         rapidService.sendToRapid(attestert)
                     } catch (e: Exception) {

@@ -101,26 +101,6 @@ export const ResultatForlengetOms = ({
     }
   }
 
-  const gaaVidere = () => {
-    if (
-      !vurdering ||
-      !vilkaarsvurdering?.resultat ||
-      lagrer ||
-      redigerer ||
-      !alleVilkaarErVurdert ||
-      lagretUtfallErUtdatert
-    ) {
-      return
-    }
-    if (!validerAktivitet) {
-      setUtfallFeil('Velg om bruker tar utdanning eller deltar i arbeidsrettet tiltak.')
-      return
-    }
-    if (validerAktivitet()) {
-      next()
-    }
-  }
-
   const redigerUtfall = () => {
     slettUtfall(behandling.id, (vurdering) => {
       setUtfallFeil(undefined)
@@ -190,7 +170,7 @@ export const ResultatForlengetOms = ({
       {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Button
-            onClick={gaaVidere}
+            onClick={next}
             disabled={
               !vurdering ||
               !vilkaarsvurdering?.resultat ||

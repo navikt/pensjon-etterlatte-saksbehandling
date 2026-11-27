@@ -75,6 +75,7 @@ describe('Lagre vurdering av aktivitet', () => {
   let root: Root
 
   beforeEach(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
     store.dispatch(resetBehandling())
     store.dispatch(setBehandling(behandling))
     container = document.createElement('div')
@@ -86,6 +87,7 @@ describe('Lagre vurdering av aktivitet', () => {
     await act(async () => root.unmount())
     container.remove()
     vi.restoreAllMocks()
+    vi.unstubAllGlobals()
   })
 
   async function renderAktivitet(aktivitetOgUtfall: AktivitetOgUtfall | null) {
@@ -107,7 +109,7 @@ describe('Lagre vurdering av aktivitet', () => {
   }
 
   function response(aktivitet: ForlengetOmsAktivitet, utfall: 'INNVILGELSE' | 'AVSLAG'): LagretForlengetOmsVurdering {
-    return {
+    const data: LagretForlengetOmsVurdering = {
       vurdering: { behandlingId: behandling.id, aktivitet, begrunnelse: 'Begrunnelse', utfall },
       periode: utfall === 'INNVILGELSE' ? { type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06' } : null,
       vilkaarsvurdering: {
@@ -117,11 +119,12 @@ describe('Lagre vurdering av aktivitet', () => {
         resultat: {
           utfall: utfall === 'INNVILGELSE' ? VilkaarsvurderingResultat.OPPFYLT : VilkaarsvurderingResultat.IKKE_OPPFYLT,
           saksbehandler: 'Z123456',
-          tidspunkt: new Date(),
+          tidspunkt: new Date('2026-11-16T12:00:00Z'),
           kommentar: 'Begrunnelse',
         },
       },
     }
+    return JSON.parse(JSON.stringify(data))
   }
 
   async function velgOgLagre(utfall: ForlengetOmsUtfall) {
@@ -424,7 +427,9 @@ describe('Lagre vurdering av aktivitet', () => {
 
     expect(container.querySelector<HTMLInputElement>('input[value="JA"]')!.checked).toBe(false)
     expect(container.querySelector('textarea')!.value).toBe('Selvstendig begrunnelse')
-    expect(container.querySelectorAll('textarea')).toHaveLength(1)
+    expect(
+      Array.from(container.querySelectorAll('label')).filter((label) => label.textContent === 'Begrunnelse')
+    ).toHaveLength(1)
   })
 
   it('beholder begrunnelse og ulagrede aktivitetssvar ved aktivitetsbytte', async () => {
@@ -539,7 +544,7 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(container.textContent).toContain('Må fylles ut')
   })
 
-  it('aktiverer lagre foerst naar utdanningssvarene og vilkaarene er komplette', async () => {
+  it('krever begrunnelse og vurderte vilkaar for aa aktivere lagre', async () => {
     await renderAktivitet(null)
     await act(async () => container.querySelector<HTMLInputElement>('input[value="UTDANNING"]')!.click())
     await act(async () => container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.click())
@@ -571,13 +576,39 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(lagre.disabled).toBe(true)
   })
 
+  it('lar backend validere ufullstendige tiltakssvar ved lagring', async () => {
+    const aktivitet: ForlengetOmsAktivitet = {
+      type: 'ARBEIDSRETTET_TILTAK',
+      tiltak: ' ',
+      omfang: 'DELTID',
+      aktivitetsplan: JaNei.NEI,
+    }
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ok: false,
+      status: 400,
+      detail: 'Tiltak må fylles ut',
+    })
+    await renderAktivitet(response(aktivitet, 'AVSLAG').vurdering)
+    const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
+    expect(lagre.disabled).toBe(false)
+
+    await velgOgLagre('AVSLAG')
+
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet,
+      begrunnelse: 'Begrunnelse',
+      utfall: 'AVSLAG',
+      periode: undefined,
+    })
+    expect(container.textContent).toContain('Tiltak må fylles ut')
+    expect(lagre.disabled).toBe(false)
+  })
+
   it.each<ForlengetOmsAktivitet>([
-    { type: 'ARBEIDSRETTET_TILTAK', tiltak: ' ', omfang: 'DELTID', aktivitetsplan: JaNei.NEI },
     { type: 'ARBEIDSRETTET_TILTAK', tiltak: 'Tiltak', omfang: 'DELTID', aktivitetsplan: JaNei.NEI },
     { type: 'NEI' },
-  ])('deaktiverer lagre ved ufullstendige svar: $type', async (aktivitet) => {
-    const begrunnelse = aktivitet.type === 'ARBEIDSRETTET_TILTAK' && !aktivitet.tiltak.trim() ? 'Begrunnelse' : ' '
-    await renderAktivitet({ ...response(aktivitet, 'AVSLAG').vurdering, begrunnelse })
+  ])('deaktiverer lagre uten begrunnelse: $type', async (aktivitet) => {
+    await renderAktivitet({ ...response(aktivitet, 'AVSLAG').vurdering, begrunnelse: ' ' })
     const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
     expect(lagre.disabled).toBe(true)
   })

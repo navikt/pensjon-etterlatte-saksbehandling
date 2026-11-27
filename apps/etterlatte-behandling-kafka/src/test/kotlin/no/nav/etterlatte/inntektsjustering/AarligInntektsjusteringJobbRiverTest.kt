@@ -83,7 +83,7 @@ internal class AarligInntektsjusteringJobbRiverTest {
                 mapOf(
                     InntektsjusteringHendelseType.START_INNTEKTSJUSTERING_JOBB.lagParMedEventNameKey(),
                     KJOERING to kjoering,
-                    ANTALL to 25,
+                    ANTALL to 1,
                     SPESIFIKKE_SAKER to listOf<SakId>(),
                     EKSKLUDERTE_SAKER to listOf<SakId>(),
                 ),

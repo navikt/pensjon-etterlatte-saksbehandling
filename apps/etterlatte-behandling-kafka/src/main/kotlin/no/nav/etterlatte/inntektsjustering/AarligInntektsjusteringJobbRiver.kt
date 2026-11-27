@@ -50,7 +50,7 @@ internal class AarligInntektsjusteringJobbRiver(
         }
 
         val antall = packet.antall
-        if (antall > 25) {
+        if (antall > 1) {
             logger.info("Avbryter. For mange saker")
             return
         }

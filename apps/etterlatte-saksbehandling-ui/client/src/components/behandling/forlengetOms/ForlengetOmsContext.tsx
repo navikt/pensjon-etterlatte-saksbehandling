@@ -57,7 +57,6 @@ interface ForlengetOmsContextValue {
   redigerStatus: Result<IVilkaarsvurdering>
   lagrer: boolean
   redigerer: boolean
-  opptatt: boolean
   redigerbar: boolean
   sporsmaalRedigerbare: boolean
   alleVilkaarErVurdert: boolean
@@ -178,8 +177,7 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   const redigerbar = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
   const lagrer = isPending(lagreStatus)
   const redigerer = isPending(redigerStatus)
-  const opptatt = lagrer || redigerer
-  const sporsmaalRedigerbare = redigerbar && !opptatt && !vilkaarsvurdering?.resultat
+  const sporsmaalRedigerbare = redigerbar && !(redigerer || lagrer) && !vilkaarsvurdering?.resultat
   const alleVilkaarErVurdert = !!vilkaarsvurdering && vilkaarsvurdering.vilkaar.every((vilkaar) => !!vilkaar.vurdering)
   const lagretUtfallErUtdatert =
     !!vilkaarsvurdering?.resultat &&
@@ -229,7 +227,7 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   }
 
   const redigerVurdering = () => {
-    if (!redigerbar || opptatt || !vilkaarsvurdering?.resultat) return
+    if (!redigerbar || redigerer || lagrer || !vilkaarsvurdering?.resultat) return
     rediger(behandling.id, (oppdatert) => {
       dispatch(updateVilkaarsvurdering(oppdatert))
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
@@ -251,7 +249,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     redigerStatus,
     lagrer,
     redigerer,
-    opptatt,
     redigerbar,
     sporsmaalRedigerbare,
     alleVilkaarErVurdert,
@@ -267,7 +264,7 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
       !!vilkaarsvurdering?.resultat &&
       alleVilkaarErVurdert &&
       !lagretUtfallErUtdatert &&
-      !opptatt &&
+      (!lagrer || !redigerer) &&
       !!aktivitetType,
     aktivitetUtdanning,
     oppdaterUtdanning,

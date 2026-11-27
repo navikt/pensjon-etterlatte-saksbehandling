@@ -18,7 +18,6 @@ export const ResultatForlengetOms = () => {
     sporsmaalRedigerbare,
     redigerbar,
     lagrer,
-    opptatt,
     lagreVurdering,
     redigerVurdering,
     redigerStatus,
@@ -83,7 +82,7 @@ export const ResultatForlengetOms = () => {
           {!alleVilkaarErVurdert && <BodyShort>Alle vilkår må vurderes før man kan gå videre.</BodyShort>}
           {redigerbar && !vilkaarsvurdering?.resultat && (
             <Box>
-              <Button size="small" onClick={lagreVurdering} loading={opptatt} disabled={!kanLagre}>
+              <Button size="small" onClick={lagreVurdering} loading={lagrer || redigerer} disabled={!kanLagre}>
                 Lagre
               </Button>
             </Box>

@@ -43,7 +43,7 @@ class BrevBatchJobServiceTest {
     private var aktivert = true
     private val config = BrevBatchConfig { mapOf("BREV_BATCH_AKTIVERT" to aktivert.toString()) }
     private val service = BrevBatchJobService(dao, mapper, klient, config)
-    private val bruker = HardkodaSystembruker.oppgave
+    private val bruker = HardkodaSystembruker.brevBatch
 
     private fun arbeid(
         steg: BrevBatchSteg = BrevBatchSteg.GRUNNLAG,
@@ -63,6 +63,29 @@ class BrevBatchJobServiceTest {
     private fun oppdateringer() {
         every { dao.oppdater(any(), any(), any(), any(), any(), any(), any()) } returns true
     }
+
+    @Test
+    fun `eksplisitt trygg feilrespons foer ekstern effekt retries begrenset paa samme brev`() =
+        runBlocking {
+            oppdateringer()
+            for (forsoek in listOf(1, 3)) {
+                val a = arbeid(BrevBatchSteg.OPPRETT_BREV, forsoek)
+                coEvery { klient.hentInformasjonsbrev(any(), any(), any()) } returns svar(a, InformasjonsbrevUtsendingStatus.PDF_LAGRET)
+                coEvery { klient.sendInformasjonsbrev(any(), any(), any()) } returns
+                    svar(
+                        a,
+                        InformasjonsbrevUtsendingStatus.PDF_LAGRET,
+                    ).copy(feilkode = "MIDLERTIDIG_PDF_LAGRET")
+                service.behandle(a, bruker)
+            }
+            verify {
+                dao.oppdater(any(), BrevBatchSakStatus.KLAR, BrevBatchSteg.OPPRETT_BREV, 42, "MIDLERTIDIG_FEIL", any(), any())
+            }
+            verify {
+                dao.oppdater(any(), BrevBatchSakStatus.FEILA, BrevBatchSteg.OPPRETT_BREV, 42, "MIDLERTIDIG_FEIL", any(), any())
+            }
+            coVerify(exactly = 0) { klient.opprettInformasjonsbrev(any(), any(), any()) }
+        }
 
     @Test
     fun `snapshot lagres foer opprettelse og samme brev sendes`() =
@@ -112,8 +135,56 @@ class BrevBatchJobServiceTest {
                     any(),
                 )
             }
-            service.behandle(a.copy(resultat = a.resultat.copy(steg = BrevBatchSteg.SEND_BREV)), bruker)
+            every { dao.reserver() } returns null
+            service.kjoer(bruker)
             coVerify(exactly = 1) { klient.sendInformasjonsbrev(any(), any(), any()) }
+        }
+
+    @Test
+    fun `utloept lease gjenopptar samme brev bare etter GET bekrefter trygg tilstand`() =
+        runBlocking {
+            oppdateringer()
+            val trygge =
+                listOf(
+                    InformasjonsbrevUtsendingStatus.OPPRETTET,
+                    InformasjonsbrevUtsendingStatus.PDF_LAGRET,
+                    InformasjonsbrevUtsendingStatus.FERDIGSTILT,
+                    InformasjonsbrevUtsendingStatus.JOURNALFOERT,
+                )
+            for (status in trygge) {
+                val a = arbeid(BrevBatchSteg.SEND_BREV, 2)
+                coEvery { klient.hentInformasjonsbrev(a.resultat.utsendingsId, SakId(1), bruker) } returns svar(a, status)
+                coEvery { klient.sendInformasjonsbrev(a.resultat.utsendingsId, SakId(1), bruker) } returns
+                    svar(a, InformasjonsbrevUtsendingStatus.FERDIG)
+                service.behandle(a, bruker)
+            }
+            verify(exactly = 4) { dao.oppdater(any(), BrevBatchSakStatus.FERDIG, BrevBatchSteg.FERDIG, 42, null, any(), any()) }
+            coVerify(exactly = 0) { klient.opprettInformasjonsbrev(any(), any(), any()) }
+            verify(exactly = 0) { mapper.bygg(any(), any()) }
+        }
+
+    @Test
+    fun `utloept send lease med manglende utsending eller ukjent feilkode krever avklaring`() =
+        runBlocking {
+            oppdateringer()
+            for (mangler in listOf(true, false)) {
+                val a = arbeid(BrevBatchSteg.SEND_BREV, 2)
+                coEvery { klient.hentInformasjonsbrev(any(), any(), any()) } returns
+                    if (mangler) null else svar(a, InformasjonsbrevUtsendingStatus.PDF_LAGRET).copy(feilkode = "UKJENT")
+                service.behandle(a, bruker)
+            }
+            verify(exactly = 2) {
+                dao.oppdater(
+                    any(),
+                    BrevBatchSakStatus.AVVENTER_AVKLARING,
+                    BrevBatchSteg.SEND_BREV,
+                    any(),
+                    "SEND_RESULTAT_UAVKLART",
+                    any(),
+                    any(),
+                )
+            }
+            coVerify(exactly = 0) { klient.sendInformasjonsbrev(any(), any(), any()) }
         }
 
     @Test

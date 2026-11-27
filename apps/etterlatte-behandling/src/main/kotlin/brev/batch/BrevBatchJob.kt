@@ -31,10 +31,10 @@ class BrevBatchJob(
             loggerInfo = LoggerInfo(logger, loggTilSikkerLogg = false),
         ) {
             if (config.aktivert && erLeader()) {
-                val context = Context(Self("BrevBatchJob"), DatabaseContext(dataSource), sakTilgangDao, HardkodaSystembruker.oppgave)
+                val context = Context(Self("BrevBatchJob"), DatabaseContext(dataSource), sakTilgangDao, HardkodaSystembruker.brevBatch)
                 Kontekst.set(context)
                 try {
-                    runBlocking { service.kjoer(HardkodaSystembruker.oppgave, erLeader) }
+                    runBlocking { service.kjoer(HardkodaSystembruker.brevBatch, erLeader) }
                 } catch (_: Exception) {
                     logger.warn("Brevbatch feilkode=BREV_BATCH_JOBB_FEIL")
                 } finally {

@@ -72,10 +72,10 @@ class InformasjonsbrevService(
     ): InformasjonsbrevUtsending {
         konfigurasjon.kontrollerTilgang(bruker, true)
         if (request.sak.id != sakId) throw UgyldigForespoerselException("SAKID_AVVIK", "Sak i request samsvarer ikke med stien.")
-        validerInformasjonsbrev(request.tittel, request.innhold)
         repository.hent(id)?.let {
-            return repository.kontroller(it, sakId, bruker.ident(), InformasjonsbrevRepository.fingerprint(request)).resultat
+            return repository.kontroller(it, sakId, bruker.ident(), InformasjonsbrevRepository.fingerprint(request)).resultat.synligStatus()
         }
+        validerInformasjonsbrev(request.tittel, request.innhold)
         val mottakere =
             adresseService.hentMottakere(
                 request.sak.sakType,
@@ -91,6 +91,7 @@ class InformasjonsbrevService(
                 krevAvklartMottaker = true,
             )
         if (mottakere.size !in 1..3 || mottakere.any { it.erGyldig().isNotEmpty() } ||
+            mottakere.any { it.foedselsnummer?.value.isNullOrBlank() && it.orgnummer.isNullOrBlank() } ||
             mottakere.map { it.foedselsnummer?.value ?: it.orgnummer }.distinct().size != mottakere.size
         ) {
             throw UgyldigForespoerselException("UAVKLART_MOTTAKER", "Informasjonsbrevet mangler gyldige, entydige mottakere.")
@@ -108,7 +109,7 @@ class InformasjonsbrevService(
                 brevtype = Brevtype.INFORMASJON,
                 brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
-        return repository.opprett(id, request, brev, bruker).resultat
+        return repository.opprett(id, request, brev, bruker).resultat.synligStatus()
     }
 
     fun hent(

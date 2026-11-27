@@ -179,3 +179,79 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 ### For Nav-ansatte
 
 Interne henvendelser kan sendes via Slack i kanalen #team-etterlatte.
+
+## Masseutsending av informasjonsbrev
+
+Batch-API-et tar imot opptil 1 000 unike sak-ID-er, en felles tittel, Slate-tekst og ett språk.
+Timerjobben behandler én sak om gangen. Den oppretter ikke behandlinger og endrer ikke vedtak.
+Innsenderen må ha godkjent teksten og sakslisten faglig før innsending. Gjenny har ingen forhåndsvisning eller godkjenning for denne flyten.
+
+### Opprette og følge en batch
+
+Bruk et systembrukertoken fra den eksplisitt tillatte klienten. Eksemplet har fiktive sak-ID-er:
+
+```http
+POST /api/brev/batcher
+Content-Type: application/json
+Idempotency-Key: 90ca626c-c776-4e4a-923e-f828dc9ea188
+Authorization: Bearer <systembrukertoken>
+
+{
+  "sakIder": [100001, 100002],
+  "tittel": "Informasjon om din ytelse",
+  "innhold": [
+    {
+      "type": "paragraph",
+      "children": [{"text": "Dette brevet er til informasjon. Du trenger ikke svare."}]
+    }
+  ],
+  "spraak": "nb"
+}
+```
+
+Svaret er `202 Accepted`, med batch-ID og statusadresse i `Location`.
+Les oversikten med `GET /api/brev/batcher/{batchId}`, og resultater per sak med
+`GET /api/brev/batcher/{batchId}/saker?offset=0&limit=100`. Bare batchens tillatte innsender kan lese resultatene.
+
+Hvis svaret på opprettelsen uteblir, send samme request med samme `Idempotency-Key`.
+Samme innsender, nøkkel og innhold gir samme batch. Sak-ID-er dedupliseres og sorteres.
+Endret saksliste, tittel, tekst eller språk med samme nøkkel gir `409 Conflict`.
+En ny nøkkel betyr en ny utsending, også til saker som allerede har fått teksten.
+
+Requesten kan være opptil 256 KiB, tittelen opptil 200 tegn og samlet tekst opptil 50 000 tegn.
+Slate kan ha opptil 2 000 noder og åtte nivåer. HTML, maluttrykk og uutfylte tekstfelt avvises.
+Språkverdiene i JSON er `nb`, `nn` og `en`. Sakens registrerte språk må stemme med batchens språk.
+Ukjent språk, uavklart verge eller manglende grunnlag gir feil på den aktuelle saken. De andre sakene fortsetter.
+Tekst, språk og datagrunnlag lagres før første brevkall og gjenbrukes ved gjenopptakelse.
+
+### Konfigurasjon og stopp
+
+Funksjonen er avslått som standard.
+
+| Miljøvariabel | App | Standard |
+| --- | --- | --- |
+| `BREV_BATCH_AKTIVERT` | behandling og brev-api | `false` |
+| `BREV_BATCH_TILLATT_INNSENDER` | behandling | Tom, ingen innsender er tillatt |
+| `BREV_BATCH_TILLATT_BEHANDLING` | brev-api | Tom, ingen intern klient er tillatt |
+| `BREV_BATCH_INTERVALL_SEKUNDER` | behandling | `10` |
+| `BREV_BATCH_MAKS_FORSOEK` | behandling | `3` |
+
+Tillatt identitet sammenlignes med `azp_name` i det validerte systembrukertokenet, ikke med requestdata.
+Avklar riktige identiteter for miljøet før aktivering. Ingen produksjonsidentiteter er lagt inn som standard.
+Sett `BREV_BATCH_AKTIVERT=false` og deploy for å stanse nye batcher og nye utsendinger.
+Ventende saker beholdes; et eksternt kall som allerede har startet, kan fortsatt fullføres.
+
+### Feil og uavklarte utsendinger
+
+`FERDIG` betyr journalført brev og akseptert distribusjonsbestilling for alle mottakere, ikke bekreftet levering.
+`FEILA` avslutter saken med en feilkode. `AVVENTER_AVKLARING` betyr at et avbrutt eksternt kall kan ha lykkes.
+Jobben bruker samme utsendings-ID, datagrunnlag og brev-ID ved gjenopptakelse.
+Den gjentar ikke blindt et avbrutt kall under journalføring eller distribusjon.
+
+Ved `AVVENTER_AVKLARING` må operatøren undersøke utsendingsstatus i brev-api, Joark og Brevdistribusjon før retting.
+Ikke opprett en ny batch eller nullstill et påbegynt steg for å forsøke på nytt.
+Første versjon har ikke et API for operatøravklaring. Ikke legg token, personopplysninger eller brevtekst i logger.
+
+Før produksjonsaktivering må teamet bekrefte faktisk PDF-rendering av `TOM_MAL_INFORMASJONSBREV`,
+valgt språk, mottakerregler og automatisk avsender. Kjør databasetestene og test avbrudd mellom eksternt kall og lokal lagring.
+Lokale idempotensnøkler er ikke bevis på «exactly once» hos eksterne tjenester.

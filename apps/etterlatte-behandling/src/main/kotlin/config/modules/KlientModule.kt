@@ -86,6 +86,23 @@ class KlientModule(
     private val brukInternBeregning by lazy {
         env.getOrDefault(BRUK_INTERN_BEREGNING, "false").toBooleanStrict()
     }
+    private val informasjonsbrevHttpClientDelegate =
+        lazy {
+            httpClient(
+                forventSuksess = true,
+                auth = { httpConfig ->
+                    httpConfig.engine {
+                        config {
+                            retryOnConnectionFailure(false)
+                        }
+                    }
+                },
+            )
+        }
+
+    fun lukkInformasjonsbrevKlient() {
+        if (informasjonsbrevHttpClientDelegate.isInitialized()) informasjonsbrevHttpClientDelegate.value.close()
+    }
 
     val navAnsattKlient: NavAnsattKlient by lazy {
         navAnsattKlientOverride ?: NavAnsattKlientImpl(
@@ -132,7 +149,11 @@ class KlientModule(
     }
 
     val brevKlient: BrevKlient by lazy {
-        brevKlientOverride ?: BrevKlientImpl(config = config, client = httpClientForventSuksess)
+        brevKlientOverride ?: BrevKlientImpl(
+            config = config,
+            client = httpClientForventSuksess,
+            informasjonsbrevClient = informasjonsbrevHttpClientDelegate.value,
+        )
     }
 
     val klageHttpClient: HttpClient by lazy {

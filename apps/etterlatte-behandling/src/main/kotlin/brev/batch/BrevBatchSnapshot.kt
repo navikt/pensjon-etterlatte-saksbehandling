@@ -13,6 +13,8 @@ import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentErForeldreloes
+import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
@@ -96,6 +98,19 @@ class BrevBatchSnapshot(
                 return Vergemaal(navn, ident)
             }
             if (sak.sakType == SakType.BARNEPENSJON && !grunnlag.erOver18(null)) {
+                val ansvarligeForeldre =
+                    grunnlag.soeker
+                        .hentFamilierelasjon()
+                        ?.verdi
+                        ?.ansvarligeForeldre
+                        .orEmpty()
+                val ansvarligeGjenlevende =
+                    grunnlag.hentGjenlevende().distinct().filter { ident ->
+                        ansvarligeForeldre.any { it.value == ident }
+                    }
+                if (ansvarligeGjenlevende.size > 1) throw BrevBatchSakFeil("MOTTAKER_UAVKLART")
+                if (grunnlag.sak.hentErForeldreloes()?.verdi == true) return null
+                if (ansvarligeGjenlevende.size != 1) throw BrevBatchSakFeil("MOTTAKER_UAVKLART")
                 return grunnlag.hentForelderVerge() ?: throw BrevBatchSakFeil("MOTTAKER_UAVKLART")
             }
             return null

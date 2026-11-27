@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.batch
 
+import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.brev.BrevBatchSakStatus
 import no.nav.etterlatte.brev.BrevBatchSteg
 import no.nav.etterlatte.brev.BrevKlient
@@ -45,12 +46,22 @@ class BrevBatchJobService(
                 validerSvar(arbeid, utsending)
                 if (avsluttHvisAvklart(arbeid, utsending)) return
             }
-            if (steg == BrevBatchSteg.SEND_BREV) {
+            // Brev-api reserverer kun trygge steg atomisk; påbegynte eksterne steg kan aldri overtas.
+            if (steg == BrevBatchSteg.SEND_BREV && (utsending == null || !tryggTilstandFoerEksterntSteg(utsending))) {
                 dao.oppdater(arbeid, BrevBatchSakStatus.AVVENTER_AVKLARING, steg, feilkode = "SEND_RESULTAT_UAVKLART")
                 return
             }
             if (arbeid.resultat.antallForsoek > config.maksForsoek) {
-                dao.oppdater(arbeid, BrevBatchSakStatus.FEILA, steg, feilkode = "MAKS_FORSOEK")
+                dao.oppdater(
+                    arbeid,
+                    if (steg == BrevBatchSteg.SEND_BREV && utsending?.feilkode == null) {
+                        BrevBatchSakStatus.AVVENTER_AVKLARING
+                    } else {
+                        BrevBatchSakStatus.FEILA
+                    },
+                    steg,
+                    feilkode = "MAKS_FORSOEK",
+                )
                 return
             }
             if (!config.aktivert) {
@@ -76,14 +87,34 @@ class BrevBatchJobService(
             val sendt = brevKlient.sendInformasjonsbrev(id, sakId, bruker)
             validerSvar(arbeid, sendt)
             if (!avsluttHvisAvklart(arbeid, sendt)) {
-                dao.oppdater(arbeid, BrevBatchSakStatus.AVVENTER_AVKLARING, steg, feilkode = "SEND_RESULTAT_UAVKLART")
+                if (tryggTilstandFoerEksterntSteg(sendt)) {
+                    dao.oppdater(
+                        arbeid,
+                        when {
+                            arbeid.resultat.antallForsoek < config.maksForsoek -> BrevBatchSakStatus.KLAR
+                            sendt.feilkode != null -> BrevBatchSakStatus.FEILA
+                            else -> BrevBatchSakStatus.AVVENTER_AVKLARING
+                        },
+                        BrevBatchSteg.OPPRETT_BREV,
+                        feilkode = "MIDLERTIDIG_FEIL",
+                        nesteForsoek = Instant.now().plusSeconds(30),
+                    )
+                } else {
+                    dao.oppdater(arbeid, BrevBatchSakStatus.AVVENTER_AVKLARING, steg, feilkode = "SEND_RESULTAT_UAVKLART")
+                }
             }
         } catch (e: Exception) {
+            val httpStatus =
+                when (e) {
+                    is ForespoerselException -> e.status
+                    is ResponseException -> e.response.status.value
+                    else -> null
+                }
             val kode =
                 when {
                     steg == BrevBatchSteg.SEND_BREV -> "SEND_RESULTAT_UAVKLART"
                     e is BrevBatchSakFeil -> e.kode
-                    e is ForespoerselException && e.status in 400..499 -> "BREV_REQUEST_AVVIST"
+                    httpStatus != null && httpStatus in 400..499 && httpStatus !in listOf(408, 429) -> "BREV_REQUEST_AVVIST"
                     else -> "MIDLERTIDIG_FEIL"
                 }
             val status =
@@ -108,6 +139,15 @@ class BrevBatchJobService(
             throw BrevBatchSakFeil("BREV_IDENTITET_AVVIK")
         }
     }
+
+    private fun tryggTilstandFoerEksterntSteg(svar: InformasjonsbrevUtsending): Boolean =
+        svar.status in
+            setOf(
+                InformasjonsbrevUtsendingStatus.OPPRETTET,
+                InformasjonsbrevUtsendingStatus.PDF_LAGRET,
+                InformasjonsbrevUtsendingStatus.FERDIGSTILT,
+                InformasjonsbrevUtsendingStatus.JOURNALFOERT,
+            ) && (svar.feilkode == null || svar.feilkode == "MIDLERTIDIG_${svar.status.name}")
 
     private fun avsluttHvisAvklart(
         arbeid: BrevBatchArbeid,

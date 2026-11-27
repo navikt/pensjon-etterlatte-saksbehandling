@@ -98,9 +98,11 @@ interface BrevKlient {
 class BrevKlientImpl(
     config: Config,
     client: HttpClient,
+    informasjonsbrevClient: HttpClient = client,
 ) : BrevKlient {
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, client)
+    private val informasjonsbrevDownstreamClient = DownstreamResourceClient(azureAdClient, informasjonsbrevClient)
 
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
@@ -115,6 +117,7 @@ class BrevKlientImpl(
             postBody = request,
             onSuccess = { deserialize(it.response!!.toJson()) },
             brukerTokenInfo = bruker,
+            downstreamClient = informasjonsbrevDownstreamClient,
         )
 
     override suspend fun hentInformasjonsbrev(
@@ -126,6 +129,7 @@ class BrevKlientImpl(
             url = "$resourceUrl/api/brev/strukturert/sak/${sakId.sakId}/utsending/$utsendingsId",
             onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
             brukerTokenInfo = bruker,
+            downstreamClient = informasjonsbrevDownstreamClient,
         )
 
     override suspend fun sendInformasjonsbrev(
@@ -137,6 +141,7 @@ class BrevKlientImpl(
             url = "$resourceUrl/api/brev/strukturert/sak/${sakId.sakId}/utsending/$utsendingsId/send",
             onSuccess = { deserialize(it.response!!.toJson()) },
             brukerTokenInfo = bruker,
+            downstreamClient = informasjonsbrevDownstreamClient,
         )
 
     override suspend fun opprettStrukturertBrev(
@@ -269,8 +274,9 @@ class BrevKlientImpl(
         url: String,
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
+        downstreamClient: DownstreamResourceClient = downstreamResourceClient,
     ): T =
-        downstreamResourceClient
+        downstreamClient
             .get(
                 resource = Resource(clientId = clientId, url = url),
                 brukerTokenInfo = brukerTokenInfo,
@@ -285,8 +291,9 @@ class BrevKlientImpl(
         onSuccess: (Resource) -> T,
         brukerTokenInfo: BrukerTokenInfo,
         timeoutConfig: (HttpTimeoutConfig.() -> Unit)? = null,
+        downstreamClient: DownstreamResourceClient = downstreamResourceClient,
     ): T =
-        downstreamResourceClient
+        downstreamClient
             .post(
                 resource = Resource(clientId = clientId, url = url),
                 brukerTokenInfo = brukerTokenInfo,

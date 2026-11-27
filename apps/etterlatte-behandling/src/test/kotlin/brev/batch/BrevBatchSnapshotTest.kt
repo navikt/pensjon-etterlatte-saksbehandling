@@ -3,20 +3,82 @@ package no.nav.etterlatte.brev.batch
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.UUID
 
 class BrevBatchSnapshotTest {
     private val sak = snapshotRequest().sak
+
+    @Test
+    fun `foreldreloes mindreaarig BP uten verge har avklart soekermottaker`() {
+        val grunnlag =
+            GrunnlagTestData(
+                opplysningsmapSoekerOverrides =
+                    mapOf(
+                        Opplysningstype.FOEDSELSDATO to
+                            Opplysning.Konstant(
+                                UUID.randomUUID(),
+                                Grunnlagsopplysning.automatiskSaksbehandler,
+                                LocalDate.now().minusYears(12).toJsonNode(),
+                            ),
+                    ),
+                opplysningsmapSakOverrides =
+                    mapOf(
+                        Opplysningstype.FORELDRELOES to
+                            Opplysning.Konstant(
+                                UUID.randomUUID(),
+                                Grunnlagsopplysning.automatiskSaksbehandler,
+                                true.toJsonNode(),
+                            ),
+                    ),
+            ).hentOpplysningsgrunnlag()
+        val utenForelder = Grunnlag(grunnlag.soeker, emptyList(), grunnlag.sak, grunnlag.metadata)
+        val snapshot = BrevBatchSnapshot.map(sak.copy(sakType = SakType.BARNEPENSJON), utenForelder, batchRequest())
+        assertEquals(true, snapshot.soeker.foreldreloes)
+        assertNull(snapshot.verge)
+    }
+
+    @Test
+    fun `BP med flere ansvarlige gjenlevende foreldre blokkeres foer brevopprettelse`() {
+        val foreldre = listOf(INNSENDER_FOEDSELSNUMMER, SOEKER2_FOEDSELSNUMMER)
+
+        fun opplysning(verdi: Any) = Opplysning.Konstant(UUID.randomUUID(), Grunnlagsopplysning.automatiskSaksbehandler, verdi.toJsonNode())
+        val grunnlag =
+            GrunnlagTestData(
+                opplysningsmapSoekerOverrides =
+                    mapOf(
+                        Opplysningstype.FOEDSELSDATO to opplysning(LocalDate.now().minusYears(12)),
+                        Opplysningstype.FAMILIERELASJON to opplysning(FamilieRelasjon(foreldre, foreldre, null)),
+                    ),
+                opplysningsmapSakOverrides =
+                    mapOf(
+                        Opplysningstype.PERSONGALLERI_V1 to
+                            opplysning(
+                                GrunnlagTestData().hentPersonGalleri().copy(gjenlevende = foreldre.map { it.value }),
+                            ),
+                    ),
+            ).hentOpplysningsgrunnlag()
+        assertEquals(
+            "MOTTAKER_UAVKLART",
+            assertThrows(BrevBatchSakFeil::class.java) {
+                BrevBatchSnapshot.map(sak.copy(sakType = SakType.BARNEPENSJON), grunnlag, batchRequest())
+            }.kode,
+        )
+    }
 
     private fun uten(
         g: Grunnlag,

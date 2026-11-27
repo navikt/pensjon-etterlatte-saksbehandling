@@ -268,6 +268,7 @@ internal class ApplicationContext(
     val outboxJob get() = jobModule.outboxJob
 
     fun close() {
+        klientModule.lukkInformasjonsbrevKlient()
         (dataSource as HikariDataSource).close()
     }
 }

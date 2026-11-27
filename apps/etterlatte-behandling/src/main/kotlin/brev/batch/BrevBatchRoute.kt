@@ -44,9 +44,11 @@ fun Route.brevBatchRoute(service: BrevBatchService) {
             call.respond(HttpStatusCode.Accepted, batch)
         }
         get("/{batchId}") {
+            service.autoriser(brukerTokenInfo)
             call.respond(service.hent(brukerTokenInfo, uuid(call.parameters["batchId"])))
         }
         get("/{batchId}/saker") {
+            service.autoriser(brukerTokenInfo)
             val offset = call.request.queryParameters["offset"]?.let { heltall(it) } ?: 0
             val limit = call.request.queryParameters["limit"]?.let { heltall(it) } ?: 100
             call.respond(service.hentSaker(brukerTokenInfo, uuid(call.parameters["batchId"]), offset, limit))

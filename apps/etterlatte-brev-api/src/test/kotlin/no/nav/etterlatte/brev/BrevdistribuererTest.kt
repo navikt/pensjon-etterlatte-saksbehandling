@@ -48,6 +48,7 @@ internal class BrevdistribuererTest {
 
     @AfterEach
     fun afterEach() {
+        verify(atLeast = 0) { db.krevUtsendingEier(any(), any(), any()) }
         confirmVerified(db, distribusjonService)
     }
 

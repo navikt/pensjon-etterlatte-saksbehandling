@@ -62,6 +62,10 @@ spec:
     max: 4
     min: 2
   env:
+    - name: BREV_BATCH_AKTIVERT
+      value: "false"
+    - name: BREV_BATCH_TILLATT_BEHANDLING
+      value: ""
     - name: JAVA_TOOL_OPTIONS
       value: "-XX:MaxRAMPercentage=50"
     - name: BREVBAKER_URL

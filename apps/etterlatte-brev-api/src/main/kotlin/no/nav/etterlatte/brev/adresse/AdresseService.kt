@@ -39,10 +39,36 @@ class AdresseService(
         personerISak: PersonerISak,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
+        krevAvklartMottaker: Boolean = false,
     ): List<Mottaker> =
         with(personerISak) {
             val soekerFoedselsdato = pdltjenesterKlient.hentFoedselsdato(soeker.fnr.value, brukerTokenInfo)
             val soekerErMyndig = soekerFoedselsdato != null && soekerFoedselsdato.hentAlder() >= 18
+            val antallAnsvarligeForeldre = gjenlevende.distinct().count { it in soeker.ansvarligeForeldre }
+            val uavklartForeldremottaker =
+                sakType == SakType.BARNEPENSJON &&
+                    (
+                        soeker.under18 != !soekerErMyndig ||
+                            (
+                                !soekerErMyndig &&
+                                    (
+                                        antallAnsvarligeForeldre > 1 ||
+                                            (!soeker.foreldreloes && verge == null && antallAnsvarligeForeldre == 0)
+                                    )
+                            )
+                    )
+            if (krevAvklartMottaker &&
+                (
+                    soekerFoedselsdato == null ||
+                        verge is UkjentVergemaal ||
+                        uavklartForeldremottaker
+                )
+            ) {
+                throw no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException(
+                    "UAVKLART_MOTTAKER",
+                    "Kan ikke utlede en entydig mottaker for informasjonsbrevet.",
+                )
+            }
             val soekerSkalHaBrev = soekerFoedselsdato == null || soekerFoedselsdato.hentAlder() >= 15
 
             val soekerMottaker: Mottaker? =
@@ -94,6 +120,13 @@ class AdresseService(
                 } else {
                     listOfNotNull(vergeMottaker, gjenlevendeMottaker, innsenderMottaker, soekerMottaker)
                 }
+
+            if (krevAvklartMottaker && mottakereIPrioritertRekkefoelge.isEmpty()) {
+                throw no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException(
+                    "UAVKLART_MOTTAKER",
+                    "Kan ikke utlede mottaker for informasjonsbrevet.",
+                )
+            }
 
             val hovedmottaker =
                 mottakereIPrioritertRekkefoelge.firstOrNull()

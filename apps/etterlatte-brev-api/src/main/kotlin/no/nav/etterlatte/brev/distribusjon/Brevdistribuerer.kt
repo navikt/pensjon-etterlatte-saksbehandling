@@ -19,7 +19,9 @@ class Brevdistribuerer(
         brevId: BrevID,
         distribusjonsType: DistribusjonsType = DistribusjonsType.ANNET,
         bruker: BrukerTokenInfo,
+        utsendingEier: UUID? = null,
     ): List<BestillingsID> {
+        db.krevUtsendingEier(brevId, utsendingEier, "DISTRIBUSJON_PAABEGYNT")
         logger.info("Starter distribuering av brev $brevId.")
 
         val brev = db.hentBrev(brevId)
@@ -42,7 +44,7 @@ class Brevdistribuerer(
         return brev.mottakere
             .filter { it.bestillingId.isNullOrBlank() }
             .map { mottaker -> sendTilMottaker(brevId, mottaker, distribusjonsType, bruker) }
-            .also { db.settBrevDistribuert(brevId, it, bruker) }
+            .also { db.settBrevDistribuert(brevId, it, bruker, utsendingEier) }
             .map { it.bestillingsId }
     }
 

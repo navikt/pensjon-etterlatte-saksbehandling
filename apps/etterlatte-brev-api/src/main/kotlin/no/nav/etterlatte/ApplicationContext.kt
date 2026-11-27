@@ -14,8 +14,10 @@ import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.EnvKey.NORG2_URL
 import no.nav.etterlatte.EnvKey.PDFGENRS_URL
 import no.nav.etterlatte.EnvKey.PDFGEN_URL
+import no.nav.etterlatte.brev.BrevBatchKonfigurasjon
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
+import no.nav.etterlatte.brev.InformasjonsbrevService
 import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
@@ -31,6 +33,7 @@ import no.nav.etterlatte.brev.behandlingklient.OppgaveKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.db.InformasjonsbrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
@@ -236,6 +239,23 @@ internal class ApplicationContext {
             db,
             journalfoerBrevService,
             brevdistribuerer,
+        )
+
+    val brevBatchKonfigurasjon =
+        BrevBatchKonfigurasjon(
+            aktivert = config.getBoolean("brevBatch.aktivert"),
+            tillattBehandling = config.getString("brevBatch.tillattBehandling"),
+        )
+    val informasjonsbrevRepository = InformasjonsbrevRepository(datasource, db)
+    val informasjonsbrevService =
+        InformasjonsbrevService(
+            informasjonsbrevRepository,
+            db,
+            adresseService,
+            brevbakerService,
+            journalfoerBrevService,
+            brevdistribuerer,
+            brevBatchKonfigurasjon,
         )
 
     private fun httpClient(

@@ -119,7 +119,7 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
         )
 
-    private val jobModule =
+    private val jobModule by lazy {
         JobModule(
             env = env,
             dataSource = dataSource,
@@ -129,7 +129,33 @@ internal class ApplicationContext(
             serviceModule = serviceModule,
             featureToggleService = featureToggleService,
             rapid = rapid,
+            brevBatchJobService = brevBatchJobService,
+            brevBatchConfig = brevBatchConfig,
         )
+    }
+
+    val brevBatchConfig by lazy {
+        no.nav.etterlatte.brev.batch
+            .BrevBatchConfig(env)
+    }
+    val brevBatchDao by lazy {
+        no.nav.etterlatte.brev.batch
+            .BrevBatchDao(dataSource)
+    }
+    val brevBatchService by lazy {
+        no.nav.etterlatte.brev.batch
+            .BrevBatchService(brevBatchDao, brevBatchConfig)
+    }
+    val brevBatchJobService by lazy {
+        no.nav.etterlatte.brev.batch.BrevBatchJobService(
+            brevBatchDao,
+            no.nav.etterlatte.brev.batch
+                .BrevBatchSnapshot(sakService, grunnlagService),
+            brevKlient,
+            brevBatchConfig,
+        )
+    }
+    val brevBatchJob get() = jobModule.brevBatchJob
 
     // Dao
     val hendelseDao get() = daoModule.hendelseDao
@@ -242,6 +268,7 @@ internal class ApplicationContext(
     val outboxJob get() = jobModule.outboxJob
 
     fun close() {
+        klientModule.lukkInformasjonsbrevKlient()
         (dataSource as HikariDataSource).close()
     }
 }

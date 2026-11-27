@@ -761,6 +761,24 @@ class KodeverkKlientTest : KodeverkKlient {
 }
 
 class BrevKlientTest : BrevKlient {
+    override suspend fun opprettInformasjonsbrev(
+        utsendingsId: UUID,
+        request: no.nav.etterlatte.brev.StrukturertInformasjonsbrevRequest,
+        bruker: BrukerTokenInfo,
+    ): no.nav.etterlatte.brev.InformasjonsbrevUtsending = error("Bruk MockK for informasjonsbrev")
+
+    override suspend fun hentInformasjonsbrev(
+        utsendingsId: UUID,
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): no.nav.etterlatte.brev.InformasjonsbrevUtsending? = error("Bruk MockK for informasjonsbrev")
+
+    override suspend fun sendInformasjonsbrev(
+        utsendingsId: UUID,
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): no.nav.etterlatte.brev.InformasjonsbrevUtsending = error("Bruk MockK for informasjonsbrev")
+
     override suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,
         behandlingId: UUID,

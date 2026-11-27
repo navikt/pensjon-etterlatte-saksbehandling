@@ -82,6 +82,14 @@ spec:
     max: 4
     min: 2
   env:
+    - name: BREV_BATCH_AKTIVERT
+      value: "false"
+    - name: BREV_BATCH_TILLATT_INNSENDER
+      value: ""
+    - name: BREV_BATCH_INTERVALL_SEKUNDER
+      value: "10"
+    - name: BREV_BATCH_MAKS_FORSOEK
+      value: "3"
     - name: JAVA_TOOL_OPTIONS
       value: "-XX:MaxRAMPercentage=50"
     - name: KODEVERK_URL

@@ -48,12 +48,24 @@ class JobModule(
     private val serviceModule: ServiceModule,
     private val featureToggleService: FeatureToggleService,
     private val rapid: KafkaProdusent<String, String>,
+    private val brevBatchJobService: no.nav.etterlatte.brev.batch.BrevBatchJobService,
+    private val brevBatchConfig: no.nav.etterlatte.brev.batch.BrevBatchConfig,
 ) {
     private val leaderElectionKlient by lazy {
         LeaderElection(env[ELECTOR_PATH], klientModule.leaderElectionHttpClient)
     }
 
     private fun erLeader(): Boolean = leaderElectionKlient.isLeader()
+
+    val brevBatchJob by lazy {
+        no.nav.etterlatte.brev.batch.BrevBatchJob(
+            brevBatchJobService,
+            brevBatchConfig,
+            ::erLeader,
+            dataSource,
+            daoModule.sakTilgangDao,
+        )
+    }
 
     private val saksbehandlerJobService by lazy {
         SaksbehandlerJobService(

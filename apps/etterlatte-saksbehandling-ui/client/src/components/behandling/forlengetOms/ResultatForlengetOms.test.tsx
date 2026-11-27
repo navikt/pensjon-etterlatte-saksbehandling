@@ -234,9 +234,9 @@ describe('Lagre vurdering av aktivitet', () => {
       setBehandling({
         ...behandling,
         status: IBehandlingStatus.VILKAARSVURDERT,
-        vilkaarsvurdering: { ...lagret.vilkaarsvurdering, virkningstidspunkt, isGrunnlagUtdatert },
       })
     )
+    store.dispatch(updateVilkaarsvurdering({ ...lagret.vilkaarsvurdering, virkningstidspunkt, isGrunnlagUtdatert }))
     await renderAktivitet(lagret.vurdering)
 
     expect(container.textContent?.includes('Virkningstidspunktet er endret siden vilkårene ble vurdert sist.')).toBe(

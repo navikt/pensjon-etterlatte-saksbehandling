@@ -163,7 +163,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     })
   }, [behandling.id])
 
-  const lagretAktivitetOgUtfall = isSuccess(hentAktivitetOgUtfallStatus) ? hentAktivitetOgUtfallStatus.data : undefined
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const harTilgang = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
   const kanRedigere = harTilgang && !vilkaarsvurdering?.resultat && !isPending(lagreStatus) && !isPending(redigerStatus)
@@ -225,13 +224,11 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     kanRedigere,
     vilkaarsvurdering,
     kanGaaVidere:
-      !!lagretAktivitetOgUtfall &&
       !!vilkaarsvurdering?.resultat &&
       vilkaarsvurdering.virkningstidspunkt === behandling.virkningstidspunkt?.dato &&
       !vilkaarsvurdering.isGrunnlagUtdatert &&
       !isPending(lagreStatus) &&
-      !isPending(redigerStatus) &&
-      !!aktivitetType,
+      !isPending(redigerStatus),
     aktivitetUtdanning,
     oppdaterUtdanning,
     arbeidsrettetTiltak,

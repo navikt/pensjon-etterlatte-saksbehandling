@@ -6,7 +6,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
@@ -22,14 +24,17 @@ import java.util.UUID
 class BeregningKlient(
     config: Config,
     httpClient: HttpClient,
+    env: Miljoevariabler = Miljoevariabler.systemEnv(),
 ) {
     private val logger = LoggerFactory.getLogger(BeregningKlient::class.java)
 
+    private val appnavn =
+        if (env.getOrDefault(BRUK_INTERN_BEREGNING, "false").toBooleanStrict()) "behandling" else "beregning"
+    private val clientId = config.getString("$appnavn.client.id")
+    private val resourceUrl = config.getString("$appnavn.resource.url")
+
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
-
-    private val clientId = config.getString("beregning.client.id")
-    private val resourceUrl = config.getString("beregning.resource.url")
 
     internal suspend fun hentBeregning(
         behandlingId: UUID,

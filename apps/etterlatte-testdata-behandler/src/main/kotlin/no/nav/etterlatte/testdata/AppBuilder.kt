@@ -2,6 +2,8 @@ package no.nav.etterlatte.testdata
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.EnvKey.BRUK_INTERN_BEREGNING
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -14,8 +16,12 @@ import no.nav.etterlatte.testdata.automatisk.TrygdetidService
 import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
 import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
 
-class AppBuilder {
-    private val config: Config = ConfigFactory.load()
+class AppBuilder(
+    private val config: Config = ConfigFactory.load(),
+    env: Miljoevariabler = Miljoevariabler.systemEnv(),
+) {
+    private val beregningApp =
+        if (env.getOrDefault(BRUK_INTERN_BEREGNING, "false").toBooleanStrict()) "behandling" else "beregning"
 
     private fun settOppHttpClient(appnavn: String) =
         DownstreamResourceClient(
@@ -54,19 +60,9 @@ class AppBuilder {
                 "http://etterlatte-behandling",
                 config.getString("behandling.client.id"),
             )
-        val httpClientBeregning = settOppHttpClient("beregning")
-        val avkortingService =
-            AvkortingService(
-                httpClientBeregning,
-                "http://etterlatte-beregning",
-                config.getString("beregning.client.id"),
-            )
-        val beregningService =
-            BeregningService(
-                httpClientBeregning,
-                "http://etterlatte-beregning",
-                config.getString("beregning.client.id"),
-            )
+        val httpClientBeregning = settOppHttpClient(beregningApp)
+        val avkortingService = lagAvkortingService(httpClientBeregning)
+        val beregningService = lagBeregningService(httpClientBeregning)
         val vedtaksvurderingService =
             VedtaksvurderingService(
                 settOppHttpClient("behandling"),
@@ -91,6 +87,20 @@ class AppBuilder {
             vilkaarsvurderingService = behandlingVilkaarsvurderingService,
         )
     }
+
+    internal fun lagAvkortingService(httpClient: DownstreamResourceClient): AvkortingService =
+        AvkortingService(
+            httpClient,
+            config.getString("$beregningApp.resource.url"),
+            config.getString("$beregningApp.client.id"),
+        )
+
+    internal fun lagBeregningService(httpClient: DownstreamResourceClient): BeregningService =
+        BeregningService(
+            httpClient,
+            config.getString("$beregningApp.resource.url"),
+            config.getString("$beregningApp.client.id"),
+        )
 }
 
 const val BEGRUNNELSE = "Automatisk behandla testsak"

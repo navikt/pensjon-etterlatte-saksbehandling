@@ -8,6 +8,7 @@ import { mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForlengetOms } from './ForlengetOmsContext'
 import { ForlengetOmsUtfall } from '~shared/api/forlengetOms'
+import { isPending } from '@reduxjs/toolkit'
 
 export const ResultatForlengetOms = () => {
   const {
@@ -17,11 +18,9 @@ export const ResultatForlengetOms = () => {
     settBegrunnelse,
     sporsmaalRedigerbare,
     redigerbar,
-    lagrer,
     lagreVurdering,
     redigerVurdering,
     redigerStatus,
-    redigerer,
     vilkaarsvurdering,
     alleVilkaarErVurdert,
     lagretUtfallErUtdatert,
@@ -59,8 +58,8 @@ export const ResultatForlengetOms = () => {
                   variant="tertiary"
                   size="small"
                   onClick={redigerVurdering}
-                  loading={redigerer}
-                  disabled={lagrer}
+                  loading={isPending(redigerStatus)}
+                  disabled={isPending(lagreStatus)}
                 >
                   Rediger vurdering
                 </Button>
@@ -82,7 +81,12 @@ export const ResultatForlengetOms = () => {
           {!alleVilkaarErVurdert && <BodyShort>Alle vilkår må vurderes før man kan gå videre.</BodyShort>}
           {redigerbar && !vilkaarsvurdering?.resultat && (
             <Box>
-              <Button size="small" onClick={lagreVurdering} loading={lagrer || redigerer} disabled={!kanLagre}>
+              <Button
+                size="small"
+                onClick={lagreVurdering}
+                loading={isPending(lagreStatus) || isPending(redigerStatus)}
+                disabled={!kanLagre}
+              >
                 Lagre
               </Button>
             </Box>

@@ -55,8 +55,6 @@ interface ForlengetOmsContextValue {
   redigerVurdering: () => void
   lagreStatus: Result<LagretForlengetOmsVurdering>
   redigerStatus: Result<IVilkaarsvurdering>
-  lagrer: boolean
-  redigerer: boolean
   redigerbar: boolean
   sporsmaalRedigerbare: boolean
   alleVilkaarErVurdert: boolean
@@ -175,9 +173,8 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   const lagretAktivitetOgUtfall = isSuccess(hentAktivitetOgUtfallStatus) ? hentAktivitetOgUtfallStatus.data : undefined
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const redigerbar = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
-  const lagrer = isPending(lagreStatus)
-  const redigerer = isPending(redigerStatus)
-  const sporsmaalRedigerbare = redigerbar && !(redigerer || lagrer) && !vilkaarsvurdering?.resultat
+  const sporsmaalRedigerbare =
+    redigerbar && !(isPending(redigerStatus) || isPending(lagreStatus)) && !vilkaarsvurdering?.resultat
   const alleVilkaarErVurdert = !!vilkaarsvurdering && vilkaarsvurdering.vilkaar.every((vilkaar) => !!vilkaar.vurdering)
   const lagretUtfallErUtdatert =
     !!vilkaarsvurdering?.resultat &&
@@ -227,7 +224,7 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   }
 
   const redigerVurdering = () => {
-    if (!redigerbar || redigerer || lagrer || !vilkaarsvurdering?.resultat) return
+    if (!redigerbar || isPending(redigerStatus) || isPending(lagreStatus) || !vilkaarsvurdering?.resultat) return
     rediger(behandling.id, (oppdatert) => {
       dispatch(updateVilkaarsvurdering(oppdatert))
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
@@ -247,8 +244,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     redigerVurdering,
     lagreStatus,
     redigerStatus,
-    lagrer,
-    redigerer,
     redigerbar,
     sporsmaalRedigerbare,
     alleVilkaarErVurdert,
@@ -264,7 +259,7 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
       !!vilkaarsvurdering?.resultat &&
       alleVilkaarErVurdert &&
       !lagretUtfallErUtdatert &&
-      (!lagrer || !redigerer) &&
+      (!isPending(lagreStatus) || !isPending(redigerStatus)) &&
       !!aktivitetType,
     aktivitetUtdanning,
     oppdaterUtdanning,

@@ -22,7 +22,6 @@ export const ResultatForlengetOms = () => {
     redigerVurdering,
     redigerStatus,
     vilkaarsvurdering,
-    alleVilkaarErVurdert,
     lagretUtfallErUtdatert,
     kanLagre,
     kanVelgeUtfall,
@@ -76,7 +75,6 @@ export const ResultatForlengetOms = () => {
               <Radio value="AVSLAG">Avslå forlenget OMS</Radio>
             </RadioGroup>
           )}
-          {!alleVilkaarErVurdert && <BodyShort>Alle vilkår må vurderes før man kan gå videre.</BodyShort>}
           {harTilgang && !vilkaarsvurdering?.resultat && (
             <Box>
               <Button

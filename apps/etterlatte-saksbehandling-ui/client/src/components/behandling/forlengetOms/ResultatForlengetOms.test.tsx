@@ -600,7 +600,12 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
   })
 
-  it('krever begrunnelse og vurderte vilkaar for aa aktivere lagre', async () => {
+  it('krever begrunnelse og viser backendfeil ved manglende vilkaarsvurdering', async () => {
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ok: false,
+      status: 400,
+      detail: 'Vilkårene må vurderes før vurderingen av aktivitet kan lagres.',
+    })
     await renderAktivitet(null)
     await act(async () => container.querySelector<HTMLInputElement>('input[value="UTDANNING"]')!.click())
     await act(async () => container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.click())
@@ -629,7 +634,21 @@ describe('Lagre vurdering av aktivitet', () => {
     await act(async () => {
       store.dispatch(updateVilkaarsvurdering(undefined))
     })
-    expect(lagre.disabled).toBe(true)
+    expect(lagre.disabled).toBe(false)
+
+    await velgOgLagre('AVSLAG')
+
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet: { type: 'UTDANNING', skole: 'Svar', studium: 'Svar', studererMinst50Prosent: JaNei.JA },
+      begrunnelse: 'Begrunnelse',
+      utfall: 'AVSLAG',
+      periode: undefined,
+    })
+    expect(container.textContent).toContain(
+      'Kunne ikke lagre vurderingen av aktivitet: Vilkårene må vurderes før vurderingen av aktivitet kan lagres.'
+    )
+    const neste = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Neste')!
+    expect(neste.disabled).toBe(true)
   })
 
   it('lar backend validere ufullstendige tiltakssvar ved lagring', async () => {

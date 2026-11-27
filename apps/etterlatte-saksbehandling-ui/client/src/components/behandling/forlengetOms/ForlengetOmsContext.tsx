@@ -57,7 +57,6 @@ interface ForlengetOmsContextValue {
   redigerStatus: Result<IVilkaarsvurdering>
   harTilgang: boolean
   kanRedigere: boolean
-  alleVilkaarErVurdert: boolean
   lagretUtfallErUtdatert: boolean
   vilkaarsvurdering: IVilkaarsvurdering | undefined
   kanLagre: boolean
@@ -171,13 +170,12 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const harTilgang = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
   const kanRedigere = harTilgang && !vilkaarsvurdering?.resultat && !isPending(lagreStatus) && !isPending(redigerStatus)
-  const alleVilkaarErVurdert = !!vilkaarsvurdering && vilkaarsvurdering.vilkaar.every((vilkaar) => !!vilkaar.vurdering)
   const lagretUtfallErUtdatert =
     !!vilkaarsvurdering?.resultat &&
     (vilkaarsvurdering.virkningstidspunkt !== behandling.virkningstidspunkt?.dato ||
       !!vilkaarsvurdering.isGrunnlagUtdatert)
   const aktivitet = tilAktivitet(aktivitetType, aktivitetUtdanning, arbeidsrettetTiltak)
-  const kanLagre = kanRedigere && alleVilkaarErVurdert && !!begrunnelse.trim() && !!utfall
+  const kanLagre = kanRedigere && !!begrunnelse.trim() && !!utfall
 
   const oppdaterUtdanning = (endringer: Partial<AktivitetUtdanning>) => {
     settAktivitetUtdanning((forrige) => ({ ...forrige, ...endringer }))
@@ -233,15 +231,13 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     redigerStatus,
     harTilgang,
     kanRedigere,
-    alleVilkaarErVurdert,
     lagretUtfallErUtdatert,
     vilkaarsvurdering,
     kanLagre,
-    kanVelgeUtfall: kanRedigere && alleVilkaarErVurdert && !!aktivitetType,
+    kanVelgeUtfall: kanRedigere && !!aktivitetType,
     kanGaaVidere:
       !!lagretAktivitetOgUtfall &&
       !!vilkaarsvurdering?.resultat &&
-      alleVilkaarErVurdert &&
       !lagretUtfallErUtdatert &&
       !isPending(lagreStatus) &&
       !isPending(redigerStatus) &&

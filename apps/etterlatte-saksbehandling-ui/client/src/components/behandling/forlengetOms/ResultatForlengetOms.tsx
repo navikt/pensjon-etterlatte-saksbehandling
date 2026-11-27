@@ -1,5 +1,5 @@
-import { useContext } from 'react'
-import { BodyShort, Box, Button, Label, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
+import { useContext, useState } from 'react'
+import { Alert, BodyShort, Box, Button, Label, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
@@ -13,6 +13,10 @@ import { ForlengetOmsUtfall } from '~shared/api/forlengetOms'
 
 export const ResultatForlengetOms = () => {
   const {
+    aktivitetType,
+    aktivitetUtdanning,
+    arbeidsrettetTiltak,
+    periode,
     utfall,
     settUtfall,
     begrunnelse,
@@ -23,14 +27,44 @@ export const ResultatForlengetOms = () => {
     redigerVurdering,
     redigerStatus,
     vilkaarsvurdering,
-    kanLagre,
-    kanVelgeUtfall,
     kanGaaVidere,
     lagreStatus,
   } = useForlengetOms()
   const { next } = useContext(BehandlingRouteContext)
   const behandling = useBehandling()
   const virkningstidspunktSamsvarer = behandling?.virkningstidspunkt?.dato === vilkaarsvurdering?.virkningstidspunkt
+  const [valideringsfeil, settValideringsfeil] = useState<string[]>([])
+
+  const validerOgLagre = () => {
+    if (!kanRedigere) return
+    const feil: string[] = []
+    if (!aktivitetType) {
+      feil.push('Velg om bruker tar utdanning eller deltar i arbeidsrettet tiltak.')
+    } else if (
+      aktivitetType === 'UTDANNING' &&
+      (!aktivitetUtdanning.skole.trim() ||
+        !aktivitetUtdanning.studium.trim() ||
+        !aktivitetUtdanning.studererMinst50Prosent)
+    ) {
+      feil.push('Fyll ut skole, studium og om bruker studerer minst 50 prosent.')
+    } else if (
+      aktivitetType === 'ARBEIDSRETTET_TILTAK' &&
+      (!arbeidsrettetTiltak.tiltak.trim() || !arbeidsrettetTiltak.omfang || !arbeidsrettetTiltak.aktivitetsplan)
+    ) {
+      feil.push('Fyll ut tiltak, omfang og om bruker har en aktivitetsplan.')
+    }
+    if (!utfall) feil.push('Velg om forlenget OMS innvilges eller avslås.')
+    if (!begrunnelse.trim()) feil.push('Oppgi en begrunnelse.')
+    if (utfall === 'INNVILGELSE') {
+      if (!periode.fom || !periode.tom) {
+        feil.push('Innvilgelse krever en fra og med- og til og med-måned.')
+      } else if (periode.tom < periode.fom) {
+        feil.push('Til og med-måneden må være lik eller etter fra og med-måneden.')
+      }
+    }
+    settValideringsfeil(feil)
+    if (feil.length === 0) lagreVurdering()
+  }
 
   return (
     <VStack paddingInline="space-64 space-32" gap="space-16">
@@ -71,7 +105,7 @@ export const ResultatForlengetOms = () => {
               hideLegend
               value={utfall}
               onChange={(verdi: ForlengetOmsUtfall) => settUtfall(verdi)}
-              disabled={!kanVelgeUtfall}
+              disabled={!kanRedigere}
             >
               <Radio value="INNVILGELSE">Innvilg forlenget OMS</Radio>
               <Radio value="AVSLAG">Avslå forlenget OMS</Radio>
@@ -81,12 +115,21 @@ export const ResultatForlengetOms = () => {
             <Box>
               <Button
                 size="small"
-                onClick={lagreVurdering}
+                onClick={validerOgLagre}
                 loading={isPending(lagreStatus) || isPending(redigerStatus)}
-                disabled={!kanLagre}
+                disabled={!kanRedigere}
               >
                 Lagre
               </Button>
+              {valideringsfeil.length > 0 && (
+                <Alert variant="error">
+                  <ul>
+                    {valideringsfeil.map((feil) => (
+                      <li key={feil}>{feil}</li>
+                    ))}
+                  </ul>
+                </Alert>
+              )}
             </Box>
           )}
         </VStack>

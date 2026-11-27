@@ -215,7 +215,7 @@ describe('Lagre vurdering av aktivitet', () => {
     const neste = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Neste')!
     expect(neste.disabled).toBe(true)
     const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
-    expect(lagre.disabled).toBe(true)
+    expect(lagre.disabled).toBe(false)
 
     await velgOgLagre('AVSLAG')
 
@@ -348,34 +348,28 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
   })
 
-  it('viser periodefeil fra backend ved innvilgelse og lagrer avslag uten periode', async () => {
+  it('validerer periode ved innvilgelse og lagrer avslag uten periode', async () => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'UTDANNING',
       skole: 'Skole',
       studium: 'Studium',
       studererMinst50Prosent: JaNei.JA,
     }
-    const post = vi
-      .spyOn(apiClient, 'post')
-      .mockResolvedValueOnce({ ok: false, status: 400, detail: 'Innvilgelse krever en gyldig periode.' })
-      .mockResolvedValue({ ok: true, status: 200, data: response(aktivitet, 'AVSLAG') })
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ok: true,
+      status: 200,
+      data: response(aktivitet, 'AVSLAG'),
+    })
     await renderAktivitet(response(aktivitet, 'INNVILGELSE').vurdering)
     await velgOgLagre('INNVILGELSE')
 
-    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
-      aktivitet,
-      begrunnelse: 'Begrunnelse',
-      utfall: 'INNVILGELSE',
-      periode: { type: 'FORLENGET_OMS', fom: '', tom: '' },
-    })
-    expect(container.textContent).toContain(
-      'Kunne ikke lagre vurderingen av aktivitet: Innvilgelse krever en gyldig periode.'
-    )
+    expect(post).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Innvilgelse krever en fra og med- og til og med-måned.')
     expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
 
     await velgOgLagre('AVSLAG')
 
-    expect(post).toHaveBeenNthCalledWith(2, '/behandling/behandling-id/forlenget-oms', {
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
       aktivitet,
       begrunnelse: 'Begrunnelse',
       utfall: 'AVSLAG',
@@ -500,6 +494,24 @@ describe('Lagre vurdering av aktivitet', () => {
     ).toHaveLength(1)
   })
 
+  it('tillater valg av utfall foer aktivitet og viser manglende svar ved lagring', async () => {
+    const post = vi.spyOn(apiClient, 'post')
+    await renderAktivitet(null)
+    const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
+    expect(lagre.disabled).toBe(false)
+    expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.disabled).toBe(false)
+
+    await act(async () => lagre.click())
+
+    expect(post).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Velg om bruker tar utdanning eller deltar i arbeidsrettet tiltak.')
+    expect(container.textContent).toContain('Velg om forlenget OMS innvilges eller avslås.')
+    expect(container.textContent).toContain('Oppgi en begrunnelse.')
+
+    await act(async () => container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.click())
+    expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.checked).toBe(true)
+  })
+
   it('beholder begrunnelse og ulagrede aktivitetssvar ved aktivitetsbytte', async () => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'UTDANNING',
@@ -543,7 +555,7 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.checked).toBe(false)
     expect(container.querySelector('textarea')!.value).toBe('')
     const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
-    expect(lagre.disabled).toBe(true)
+    expect(lagre.disabled).toBe(false)
   })
 
   it.each([
@@ -586,7 +598,11 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(store.getState().behandlingReducer.behandling?.virkningstidspunkt?.dato).toBe('2027-01-01')
   })
 
-  it.each(['fom', 'tom'])('viser backendfeil naar en lagret maaned slettes: %s', async (felt) => {
+  it.each([
+    { felt: 'fom', verdi: '', melding: 'Innvilgelse krever en fra og med- og til og med-måned.' },
+    { felt: 'tom', verdi: '', melding: 'Innvilgelse krever en fra og med- og til og med-måned.' },
+    { felt: 'tom', verdi: 'desember 2026', melding: 'Til og med-måneden må være lik eller etter fra og med-måneden.' },
+  ])('validerer en endret periode ved lagring: $felt $verdi', async ({ felt, verdi, melding }) => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'ARBEIDSRETTET_TILTAK',
       tiltak: 'Tiltak',
@@ -599,32 +615,22 @@ describe('Lagre vurdering av aktivitet', () => {
         begrunnelse: undefined,
       })
     )
-    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
-      ok: false,
-      status: 400,
-      detail: 'Innvilgelse krever en gyldig periode.',
-    })
+    const post = vi.spyOn(apiClient, 'post')
     await renderAktivitet(response(aktivitet, 'INNVILGELSE').vurdering)
     const maaned = container.querySelector<HTMLInputElement>(`#${felt}`)!
     await act(async () => {
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(maaned, '')
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(maaned, verdi)
       maaned.dispatchEvent(new Event('input', { bubbles: true }))
+      maaned.dispatchEvent(new FocusEvent('focusout', { bubbles: true }))
     })
     await velgOgLagre('INNVILGELSE')
 
-    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
-      aktivitet,
-      begrunnelse: 'Begrunnelse',
-      utfall: 'INNVILGELSE',
-      periode: { type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06', [felt]: '' },
-    })
-    expect(container.textContent).toContain(
-      'Kunne ikke lagre vurderingen av aktivitet: Innvilgelse krever en gyldig periode.'
-    )
+    expect(post).not.toHaveBeenCalled()
+    expect(container.textContent).toContain(melding)
     expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
   })
 
-  it('krever begrunnelse og viser backendfeil ved manglende vilkaarsvurdering', async () => {
+  it('viser backendfeil ved manglende vilkaarsvurdering', async () => {
     const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
       ok: false,
       status: 400,
@@ -634,7 +640,7 @@ describe('Lagre vurdering av aktivitet', () => {
     await act(async () => container.querySelector<HTMLInputElement>('input[value="UTDANNING"]')!.click())
     await act(async () => container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')!.click())
     const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
-    expect(lagre.disabled).toBe(true)
+    expect(lagre.disabled).toBe(false)
 
     const [skole, studium] = container.querySelectorAll<HTMLInputElement>('input[type="text"]')
     for (const felt of [skole, studium]) {
@@ -642,10 +648,10 @@ describe('Lagre vurdering av aktivitet', () => {
         Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(felt, 'Svar')
         felt.dispatchEvent(new Event('input', { bubbles: true }))
       })
-      expect(lagre.disabled).toBe(true)
+      expect(lagre.disabled).toBe(false)
     }
     await act(async () => container.querySelector<HTMLInputElement>('input[value="JA"]')!.click())
-    expect(lagre.disabled).toBe(true)
+    expect(lagre.disabled).toBe(false)
 
     const begrunnelse = container.querySelector('textarea')!
     for (const tekst of [' ', 'Begrunnelse']) {
@@ -653,7 +659,7 @@ describe('Lagre vurdering av aktivitet', () => {
         Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(begrunnelse, tekst)
         begrunnelse.dispatchEvent(new Event('input', { bubbles: true }))
       })
-      expect(lagre.disabled).toBe(!tekst.trim())
+      expect(lagre.disabled).toBe(false)
     }
     await act(async () => {
       store.dispatch(updateVilkaarsvurdering(undefined))
@@ -675,41 +681,51 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(neste.disabled).toBe(true)
   })
 
-  it('lar backend validere ufullstendige tiltakssvar ved lagring', async () => {
+  it.each([
+    { type: 'UTDANNING', melding: 'Fyll ut skole, studium og om bruker studerer minst 50 prosent.' },
+    { type: 'ARBEIDSRETTET_TILTAK', melding: 'Fyll ut tiltak, omfang og om bruker har en aktivitetsplan.' },
+  ])('validerer ubesvarte aktivitetsspoersmaal ved lagring: $type', async ({ type, melding }) => {
+    const post = vi.spyOn(apiClient, 'post')
+    await renderAktivitet(null)
+    await act(async () => container.querySelector<HTMLInputElement>(`input[value="${type}"]`)!.click())
+
+    await velgOgLagre('AVSLAG')
+
+    expect(post).not.toHaveBeenCalled()
+    expect(container.textContent).toContain(melding)
+  })
+
+  it('validerer ufullstendige tiltakssvar ved lagring', async () => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'ARBEIDSRETTET_TILTAK',
       tiltak: ' ',
       omfang: 'DELTID',
       aktivitetsplan: JaNei.NEI,
     }
-    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
-      ok: false,
-      status: 400,
-      detail: 'Tiltak må fylles ut',
-    })
+    const post = vi.spyOn(apiClient, 'post')
     await renderAktivitet(response(aktivitet, 'AVSLAG').vurdering)
     const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
     expect(lagre.disabled).toBe(false)
 
     await velgOgLagre('AVSLAG')
 
-    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
-      aktivitet,
-      begrunnelse: 'Begrunnelse',
-      utfall: 'AVSLAG',
-      periode: undefined,
-    })
-    expect(container.textContent).toContain('Tiltak må fylles ut')
+    expect(post).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Fyll ut tiltak, omfang og om bruker har en aktivitetsplan.')
     expect(lagre.disabled).toBe(false)
   })
 
   it.each<ForlengetOmsAktivitet>([
     { type: 'ARBEIDSRETTET_TILTAK', tiltak: 'Tiltak', omfang: 'DELTID', aktivitetsplan: JaNei.NEI },
     { type: 'NEI' },
-  ])('deaktiverer lagre uten begrunnelse: $type', async (aktivitet) => {
+  ])('viser valideringsfeil uten aa deaktivere lagre ved manglende begrunnelse: $type', async (aktivitet) => {
+    const post = vi.spyOn(apiClient, 'post')
     await renderAktivitet({ ...response(aktivitet, 'AVSLAG').vurdering, begrunnelse: ' ' })
     const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
-    expect(lagre.disabled).toBe(true)
+    expect(lagre.disabled).toBe(false)
+    await velgOgLagre('AVSLAG')
+
+    expect(post).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Oppgi en begrunnelse.')
   })
 
   it.each<ForlengetOmsAktivitet>([
@@ -743,7 +759,7 @@ describe('Lagre vurdering av aktivitet', () => {
         begrunnelse.dispatchEvent(new Event('input', { bubbles: true }))
       })
       const lagre = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Lagre')!
-      expect(lagre.disabled).toBe(!tekst.trim())
+      expect(lagre.disabled).toBe(false)
     }
     await velgOgLagre('INNVILGELSE')
     expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {

@@ -109,6 +109,15 @@ fun Route.vedtaksbrevRoute(
             }
         }
 
+        route("vedtak/fjern-ferdigstilt") {
+            post {
+                withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
+                    service.fjernFerdigstiltVedtaksbrev(behandlingId)
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+        }
+
         route("tilbakekreving/fjern-ferdigstilt") {
             post {
                 kunSystembruker {

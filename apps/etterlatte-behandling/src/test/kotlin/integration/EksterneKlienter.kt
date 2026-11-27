@@ -537,6 +537,13 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
+    override suspend fun fjernFerdigstillingVedtaksbrev(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ) {
+        return
+    }
+
     override suspend fun hentPdf(
         sakId: SakId,
         brevID: BrevID,

@@ -369,6 +369,8 @@ describe('Lagre vurdering av aktivitet', () => {
       utfall: 'AVSLAG',
       periode: undefined,
     })
+    expect(container.textContent).toContain('Fra dato')
+    expect(container.textContent).toContain('Til dato')
   })
 
   it('lagrer endrede utdanningssvar fra skjemaet', async () => {

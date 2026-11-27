@@ -20,7 +20,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { erBehandlingRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
-import { IVilkaarsvurdering, slettTotalVurdering, VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { IVilkaarsvurdering, slettTotalVurdering } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { JaNei } from '~shared/types/ISvar'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -60,7 +60,6 @@ interface ForlengetOmsContextValue {
   alleVilkaarErVurdert: boolean
   lagretUtfallErUtdatert: boolean
   periodeRedigerbar: boolean
-  avslagErLagret: boolean
   vilkaarsvurdering: IVilkaarsvurdering | undefined
   kanLagre: boolean
   kanVelgeUtfall: boolean
@@ -237,7 +236,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     alleVilkaarErVurdert,
     lagretUtfallErUtdatert,
     periodeRedigerbar: sporsmaalRedigerbare && behandling.status === IBehandlingStatus.OPPRETTET,
-    avslagErLagret: vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT,
     vilkaarsvurdering,
     kanLagre,
     kanVelgeUtfall: sporsmaalRedigerbare && alleVilkaarErVurdert && !!aktivitetType,

@@ -44,6 +44,10 @@ export const SimulerUtbetaling = (props: { behandling: IBehandlingReducer }) => 
   }, [behandling.status, avkorting])
 
   const simuler = () => {
+    const venterPaaAvkorting = behandling.sakType === SakType.OMSTILLINGSSTOENAD && !erOpphoer && !avkorting
+    if (venterPaaAvkorting) {
+      return
+    }
     if (
       behandling.status === IBehandlingStatus.BEREGNET ||
       behandling.status === IBehandlingStatus.AVKORTET ||

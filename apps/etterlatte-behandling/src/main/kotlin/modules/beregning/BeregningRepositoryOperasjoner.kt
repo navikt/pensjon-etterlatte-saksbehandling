@@ -70,6 +70,12 @@ interface AvkortingRepositoryOperasjoner {
 }
 
 interface EtteroppgjoerRepositoryOperasjoner {
+    fun lagreAvkortingOgEtteroppgjoerResultat(
+        sakId: SakId,
+        avkorting: Avkorting,
+        resultat: BeregnetEtteroppgjoerResultat,
+    )
+
     fun lagreEtteroppgjoerResultat(resultat: BeregnetEtteroppgjoerResultat)
 
     fun hentEtteroppgjoerResultat(

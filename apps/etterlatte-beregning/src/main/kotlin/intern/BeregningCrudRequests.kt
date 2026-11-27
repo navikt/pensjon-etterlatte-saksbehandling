@@ -1,6 +1,7 @@
 package no.nav.etterlatte.intern
 
 import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.etteroppgjoer.BeregnetEtteroppgjoerResultat
 import no.nav.etterlatte.beregning.AnvendtTrygdetidRegelresultat
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
@@ -16,6 +17,12 @@ data class LagreAnvendtTrygdetidRequest(
 data class LagreAvkortingRequest(
     val sakId: SakId,
     val avkorting: Avkorting,
+)
+
+data class LagreAvkortingOgEtteroppgjoerResultatRequest(
+    val sakId: SakId,
+    val avkorting: Avkorting,
+    val resultat: BeregnetEtteroppgjoerResultat,
 )
 
 data class OpprettSanksjonRequest(

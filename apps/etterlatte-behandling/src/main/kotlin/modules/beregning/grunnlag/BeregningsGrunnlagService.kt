@@ -157,7 +157,7 @@ class BeregningsGrunnlagService(
 
         return if (kanLagreDetteGrunnlaget) {
             logger.info("Beregningsgrunnlaget er gyldig for behandling $behandlingId - lagrer")
-            beregningsGrunnlagRepository.lagreBeregningsGrunnlag(
+            val nyttGrunnlag =
                 BeregningsGrunnlag(
                     behandlingId = behandlingId,
                     kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
@@ -169,11 +169,18 @@ class BeregningsGrunnlagService(
                         beregningsGrunnlag.beregningsMetodeFlereAvdoede
                             ?: emptyList(),
                     kunEnJuridiskForelder = beregningsGrunnlag.kunEnJuridiskForelder,
-                ),
-            )
-
-            inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
-            beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
+                )
+            val resultat =
+                nyttGrunnlag.copy(
+                    vedtaksperioder = beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)?.vedtaksperioder,
+                )
+            inTransactionIfNeeded {
+                behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+                krev(beregningsGrunnlagRepository.lagreBeregningsGrunnlag(nyttGrunnlag)) {
+                    "Kunne ikke lagre beregningsgrunnlag for behandlingId=$behandlingId"
+                }
+            }
+            resultat
         } else {
             logger.info("Beregningsgrunnlaget er ikke gyldig for behandling $behandlingId")
             sikkerlogger().info(
@@ -324,8 +331,9 @@ class BeregningsGrunnlagService(
                 behandlingId = behandlingId,
                 vedtaksperioder = vedtaksperioder.takeIf { it.isNotEmpty() },
             )
-        beregningsGrunnlagRepository.lagreBeregningsGrunnlag(nyttGrunnlag)
-
+        krev(beregningsGrunnlagRepository.lagreBeregningsGrunnlag(nyttGrunnlag)) {
+            "Kunne ikke kopiere beregningsgrunnlag for behandlingId=$behandlingId"
+        }
         if (behandling.sakType == SakType.OMSTILLINGSSTOENAD && behandling.behandlingType == BehandlingType.REVURDERING) {
             sanksjonService.kopierSanksjon(behandlingId, forrigeBehandlingId, brukerTokenInfo)
         }
@@ -444,8 +452,7 @@ class BeregningsGrunnlagService(
         if (!kanSetteStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)) {
             throw OverstyrtBeregningFeilBehandlingStatusException(behandlingId, behandling.status)
         }
-        beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
-            behandlingId,
+        val nyttGrunnlag =
             data.perioder.map {
                 val gyldigTrygdetid = it.data.trygdetid in 0..40
                 if (!gyldigTrygdetid) {
@@ -470,10 +477,13 @@ class BeregningsGrunnlagService(
                     aarsak = it.data.aarsak,
                     kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                 )
-            },
-        )
-        inTransactionIfNeeded { behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
-        return hentOverstyrBeregningGrunnlag(behandlingId)
+            }
+        val resultat = toOverstyrBeregningGrunnlag(nyttGrunnlag)
+        inTransactionIfNeeded {
+            behandlingStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false)
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, nyttGrunnlag)
+        }
+        return resultat
     }
 
     fun tilpassOverstyrtBeregningsgrunnlagForRegulering(

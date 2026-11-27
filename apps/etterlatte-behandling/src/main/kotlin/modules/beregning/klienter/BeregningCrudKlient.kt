@@ -1,6 +1,7 @@
 package no.nav.etterlatte.modules.beregning.klienter
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.client.call.body
 import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.request
@@ -10,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.serialization.ContentConvertException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
@@ -31,6 +33,8 @@ import no.nav.etterlatte.modules.beregning.avkorting.Avkorting
 import no.nav.etterlatte.modules.beregning.avkorting.FaktiskInntekt
 import no.nav.etterlatte.modules.beregning.etteroppgjoer.BeregnetEtteroppgjoerResultat
 import no.nav.etterlatte.modules.beregning.sanksjon.LagreSanksjon
+import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.util.UUID
 
 class BeregningCrudKlient(
@@ -42,11 +46,13 @@ class BeregningCrudKlient(
     AvkortingRepositoryOperasjoner,
     EtteroppgjoerRepositoryOperasjoner,
     SanksjonRepositoryOperasjoner {
+    private val logger = LoggerFactory.getLogger(BeregningCrudKlient::class.java)
     private val url = "${resourceUrl.trimEnd('/')}/api/beregning/intern"
 
     override fun hent(behandlingId: UUID): Beregning? = hentValgfritt("/beregning/$behandlingId")
 
-    override fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning = medSvar(HttpMethod.Put, "/beregning", beregning)
+    override fun lagreEllerOppdaterBeregning(beregning: Beregning): Beregning =
+        medSvar(HttpMethod.Put, "/beregning", beregning, referanse = "behandlingId=${beregning.behandlingId}")
 
     override fun slettOverstyrtBeregningsgrunnlag(behandlingId: UUID) =
         utenSvar(HttpMethod.Delete, "/beregning/$behandlingId/overstyrt-grunnlag")
@@ -55,14 +61,15 @@ class BeregningCrudKlient(
 
     override fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning? =
         runBlocking {
-            val response =
-                kall(
-                    HttpMethod.Put,
-                    "/beregning/overstyring",
-                    overstyrBeregning,
-                    setOf(HttpStatusCode.OK, HttpStatusCode.NoContent),
-                )
-            if (response.status == HttpStatusCode.NoContent) null else response.body<OverstyrBeregning>()
+            kall(
+                HttpMethod.Put,
+                "/beregning/overstyring",
+                overstyrBeregning,
+                setOf(HttpStatusCode.OK, HttpStatusCode.NoContent),
+                referanse = "sakId=${overstyrBeregning.sakId.sakId}",
+            ) { response ->
+                if (response.status == HttpStatusCode.NoContent) null else response.body<OverstyrBeregning>()
+            }
         }
 
     override fun deaktiverOverstyrtBeregning(sakId: SakId) = utenSvar(HttpMethod.Delete, "/beregning/overstyring/${sakId.sakId}")
@@ -70,7 +77,12 @@ class BeregningCrudKlient(
     override fun finnBeregningsGrunnlag(id: UUID): BeregningsGrunnlag? = hentValgfritt("/beregningsgrunnlag/$id")
 
     override fun lagreBeregningsGrunnlag(beregningsGrunnlag: BeregningsGrunnlag): Boolean =
-        medSvar(HttpMethod.Put, "/beregningsgrunnlag", beregningsGrunnlag)
+        medSvar(
+            HttpMethod.Put,
+            "/beregningsgrunnlag",
+            beregningsGrunnlag,
+            referanse = "behandlingId=${beregningsGrunnlag.behandlingId}",
+        )
 
     override fun finnOverstyrBeregningGrunnlagForBehandling(id: UUID): List<OverstyrBeregningGrunnlagDao> =
         medSvar(HttpMethod.Get, "/beregningsgrunnlag/$id/overstyrt")
@@ -86,7 +98,7 @@ class BeregningCrudKlient(
     ): Int = medSvar(HttpMethod.Post, "/anvendt-trygdetid/$behandlingId", utrekning, HttpStatusCode.Created)
 
     override fun harSakInntektForAar(harInntektForAarDto: InntektsjusteringAvkortingInfoRequest): Boolean =
-        medSvar(HttpMethod.Post, "/avkorting/inntekt-for-aar", harInntektForAarDto)
+        medSvar(HttpMethod.Post, "/avkorting/inntekt-for-aar", harInntektForAarDto, skriver = false)
 
     override fun hentAvkorting(behandlingId: UUID): Avkorting? = hentValgfritt("/avkorting/$behandlingId")
 
@@ -107,10 +119,25 @@ class BeregningCrudKlient(
         medSvar(HttpMethod.Get, "/avkorting/sak/${sakId.sakId}/behandlinger")
 
     override fun hentAlleAarsoppgjoer(behandlinger: List<UUID>): List<AarsoppgjoerLoepende> =
-        medSvar(HttpMethod.Post, "/avkorting/aarsoppgjoer", behandlinger)
+        medSvar(HttpMethod.Post, "/avkorting/aarsoppgjoer", behandlinger, skriver = false)
 
     override fun lagreEtteroppgjoerResultat(resultat: BeregnetEtteroppgjoerResultat) =
-        utenSvar(HttpMethod.Put, "/etteroppgjoer/resultat", resultat)
+        utenSvar(
+            HttpMethod.Put,
+            "/etteroppgjoer/resultat",
+            resultat,
+            referanse = "forbehandlingId=${resultat.forbehandlingId}",
+        )
+
+    override fun lagreAvkortingOgEtteroppgjoerResultat(
+        sakId: SakId,
+        avkorting: Avkorting,
+        resultat: BeregnetEtteroppgjoerResultat,
+    ) = utenSvar(
+        HttpMethod.Put,
+        "/etteroppgjoer/${resultat.forbehandlingId}",
+        LagreAvkortingOgEtteroppgjoerResultatRequest(sakId, avkorting, resultat),
+    )
 
     override fun hentEtteroppgjoerResultat(
         aar: Int,
@@ -146,7 +173,12 @@ class BeregningCrudKlient(
     override fun oppdaterSanksjon(
         sanksjon: LagreSanksjon,
         saksbehandlerIdent: String,
-    ) = utenSvar(HttpMethod.Put, "/sanksjon", OppdaterSanksjonRequest(saksbehandlerIdent, sanksjon))
+    ) = utenSvar(
+        HttpMethod.Put,
+        "/sanksjon",
+        OppdaterSanksjonRequest(saksbehandlerIdent, sanksjon),
+        referanse = "sanksjonId=${sanksjon.id}",
+    )
 
     override fun slettSanksjon(sanksjonId: UUID): Int = medSvar(HttpMethod.Delete, "/sanksjon/$sanksjonId")
 
@@ -154,8 +186,9 @@ class BeregningCrudKlient(
 
     private inline fun <reified T : Any> hentValgfritt(sti: String): T? =
         runBlocking {
-            val response = kall(HttpMethod.Get, sti, statuser = setOf(HttpStatusCode.OK, HttpStatusCode.NotFound))
-            if (response.status == HttpStatusCode.NotFound) null else response.body<T>()
+            kall(HttpMethod.Get, sti, statuser = setOf(HttpStatusCode.OK, HttpStatusCode.NotFound)) { response ->
+                if (response.status == HttpStatusCode.NotFound) null else response.body<T>()
+            }
         }
 
     private inline fun <reified T : Any> medSvar(
@@ -163,42 +196,83 @@ class BeregningCrudKlient(
         sti: String,
         data: Any? = null,
         status: HttpStatusCode = HttpStatusCode.OK,
-    ): T = runBlocking { kall(metode, sti, data, setOf(status)).body<T>() }
+        skriver: Boolean = metode != HttpMethod.Get,
+        referanse: String? = null,
+    ): T = runBlocking { kall(metode, sti, data, setOf(status), skriver, referanse) { it.body<T>() } }
 
     private fun utenSvar(
         metode: HttpMethod,
         sti: String,
         data: Any? = null,
         status: HttpStatusCode = HttpStatusCode.NoContent,
+        referanse: String? = null,
     ) {
-        runBlocking { kall(metode, sti, data, setOf(status)) }
+        runBlocking { kall(metode, sti, data, setOf(status), referanse = referanse) {} }
     }
 
-    private suspend fun kall(
+    private suspend fun <T> kall(
         metode: HttpMethod,
         sti: String,
         data: Any? = null,
         statuser: Set<HttpStatusCode>,
-    ): HttpResponse {
-        val response =
-            httpClient.request("$url$sti") {
-                method = metode
-                expectSuccess = false
-                if (data != null) {
-                    contentType(ContentType.Application.Json)
-                    setBody(data)
+        skriver: Boolean = metode != HttpMethod.Get,
+        referanse: String? = null,
+        lesSvar: suspend (HttpResponse) -> T,
+    ): T =
+        try {
+            val response =
+                httpClient.request("$url$sti") {
+                    method = metode
+                    expectSuccess = false
+                    if (data != null) {
+                        contentType(ContentType.Application.Json)
+                        setBody(data)
+                    }
                 }
+            if (response.status !in statuser) {
+                if (skriver && (response.status.value >= 500 || response.status.value in 200..299)) {
+                    loggUavklartSkriveutfall(metode, sti, referanse, "HTTP ${response.status.value}")
+                }
+                throw InternfeilException("Beregning CRUD svarte med ${response.status} på ${metode.value} $sti")
             }
-        if (response.status !in statuser) {
-            throw InternfeilException("Beregning CRUD svarte med ${response.status} på ${metode.value} $sti")
+            lesSvar(response)
+        } catch (feil: IOException) {
+            if (skriver) loggUavklartSkriveutfall(metode, sti, referanse, feil.javaClass.simpleName)
+            throw feil
+        } catch (feil: ContentConvertException) {
+            if (skriver) loggUavklartSkriveutfall(metode, sti, referanse, feil.javaClass.simpleName)
+            throw feil
+        } catch (feil: NoTransformationFoundException) {
+            if (skriver) loggUavklartSkriveutfall(metode, sti, referanse, feil.javaClass.simpleName)
+            throw feil
         }
-        return response
+
+    private fun loggUavklartSkriveutfall(
+        metode: HttpMethod,
+        sti: String,
+        referanse: String?,
+        feiltype: String,
+    ) {
+        logger.warn(
+            "Uavklart utfall av Beregning CRUD {} {}{}. Feiltype={}. " +
+                "Skrivingen kan være gjennomført selv om behandling ruller tilbake.",
+            metode.value,
+            sti,
+            referanse?.let { " ($it)" } ?: "",
+            feiltype,
+        )
     }
 }
 
 private data class LagreAvkortingRequest(
     val sakId: SakId,
     val avkorting: Avkorting,
+)
+
+private data class LagreAvkortingOgEtteroppgjoerResultatRequest(
+    val sakId: SakId,
+    val avkorting: Avkorting,
+    val resultat: BeregnetEtteroppgjoerResultat,
 )
 
 private data class OpprettSanksjonRequest(

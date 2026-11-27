@@ -8,10 +8,8 @@ import no.nav.etterlatte.inTransactionIfNeeded
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnFaktiskInntektRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkorting
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -25,7 +23,6 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.modules.beregning.AvkortingRepositoryOperasjoner
 import no.nav.etterlatte.modules.beregning.BeregningToggles
 import no.nav.etterlatte.modules.beregning.EtteroppgjoerRepositoryOperasjoner
-import no.nav.etterlatte.modules.beregning.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.modules.beregning.avkorting.AarsoppgjoerLoepende
 import no.nav.etterlatte.modules.beregning.avkorting.Avkorting
 import no.nav.etterlatte.modules.beregning.avkorting.AvkortingReparerAarsoppgjoeret
@@ -58,23 +55,14 @@ class EtteroppgjoerService(
 ) {
     private val logger = LoggerFactory.getLogger(EtteroppgjoerService::class.java)
 
-    fun beregnOgLagreEtteroppgjoerResultat(
-        forbehandlingId: UUID,
-        sisteIverksatteBehandlingId: UUID,
-        etteroppgjoersAar: Int,
-        harDoedsfall: Boolean,
-        sammenlignTilOgMedBehandlingId: UUID?,
+    fun beregnOgLagreEtteroppgjoer(
+        request: EtteroppgjoerBeregnFaktiskInntektRequest,
+        brukerTokenInfo: BrukerTokenInfo,
     ): BeregnetEtteroppgjoerResultat {
-        val etteroppgjoerResultat =
-            beregnEtteroppgjoerResultat(
-                etteroppgjoersAar,
-                forbehandlingId,
-                sisteIverksatteBehandlingId,
-                harDoedsfall,
-                sammenlignTilOgMedBehandlingId,
-            )
-        etteroppgjoerRepository.lagreEtteroppgjoerResultat(etteroppgjoerResultat)
-        return etteroppgjoerResultat
+        val avkorting = beregnAvkortingForbehandling(request, brukerTokenInfo)
+        val resultat = beregnEtteroppgjoerResultat(request, avkorting)
+        etteroppgjoerRepository.lagreAvkortingOgEtteroppgjoerResultat(request.sakId, avkorting, resultat)
+        return resultat
     }
 
     fun hentBeregnetEtteroppgjoerResultat(
@@ -110,10 +98,10 @@ class EtteroppgjoerService(
         )
     }
 
-    fun beregnAvkortingForbehandling(
+    private fun beregnAvkortingForbehandling(
         request: EtteroppgjoerBeregnFaktiskInntektRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): Avkorting {
         validerBehandlingerTilhoererSammeSak(request.forbehandlingId, request.sisteIverksatteBehandling, request.sakId)
         val sanksjoner = sanksjonService.hentSanksjon(request.sisteIverksatteBehandling)
 
@@ -147,38 +135,32 @@ class EtteroppgjoerService(
                 )
             }
 
-        avkortingRepository.lagreAvkorting(request.forbehandlingId, request.sakId, avkorting) // TODO lagre med flagg forbehandling?
+        return avkorting
     }
 
     private fun beregnEtteroppgjoerResultat(
-        etteroppgjoersAar: Int,
-        forbehandlingId: UUID,
-        sisteIverksatteBehandlingId: UUID,
-        harDoedsfall: Boolean,
-        sammenlignTilOgMedBehandlingId: UUID?,
+        request: EtteroppgjoerBeregnFaktiskInntektRequest,
+        avkortingForbehandling: Avkorting,
     ): BeregnetEtteroppgjoerResultat {
         // For å sikre at rettsgebyret forblir konsekvent i senere kjøringer, setter vi regelperioden basert på etteroppgjørsåret og ikke tidspunktet for kjøringen.
         // vi skal og bruke siste gjeldene rettsgebyr for etteroppgjoersAaret dvs det som er gjeldende 31. Desember
-        val fomTom = LocalDate.of(etteroppgjoersAar, 12, 31)
+        val fomTom = LocalDate.of(request.aar, 12, 31)
         val regelPeriode = RegelPeriode(fomTom, fomTom)
 
-        val sakId = validerBehandlingerTilhoererSammeSak(forbehandlingId, sisteIverksatteBehandlingId)
-
         val (vedtakReferanse, vedtakPerioder) =
-            hentVedtakslisteIEtteroppgjoersAar(sakId, etteroppgjoersAar, sammenlignTilOgMedBehandlingId)
-        val nyForbehandlingAvkorting = finnAarsoppgjoerForEtteroppgjoer(etteroppgjoersAar, forbehandlingId)
+            hentVedtakslisteIEtteroppgjoersAar(request.sakId, request.aar, request.sammenlignTilOgMedBehandlingId)
+        val nyForbehandlingAvkorting =
+            avkortingForbehandling.aarsoppgjoer.singleOrNull { it.aar == request.aar } as? Etteroppgjoer
+                ?: throw InternfeilException("Avkortingen for etteroppgjøret må ha faktisk inntekt")
 
-        val inntektsgrunnlag =
-            krevIkkeNull(avkortingRepository.hentFaktiskInntekt(nyForbehandlingAvkorting.id)) {
-                "Avkortingen for etteroppgjøret må ha lagret et inntektsgrunnlag"
-            }
+        val inntektsgrunnlag = nyForbehandlingAvkorting.inntekt
 
         val differanseGrunnlag =
             EtteroppgjoerDifferanseGrunnlag(
                 FaktumNode(vedtakPerioder, "", ""),
-                FaktumNode(nyForbehandlingAvkorting, forbehandlingId, ""),
+                FaktumNode(nyForbehandlingAvkorting, request.forbehandlingId, ""),
                 FaktumNode(inntektsgrunnlag, nyForbehandlingAvkorting.id, ""),
-                FaktumNode(harDoedsfall, forbehandlingId, ""),
+                FaktumNode(request.harDoedsfall, request.forbehandlingId, ""),
             )
 
         return when (
@@ -193,8 +175,8 @@ class EtteroppgjoerService(
 
                 BeregnetEtteroppgjoerResultat(
                     id = UUID.randomUUID(),
-                    forbehandlingId = forbehandlingId,
-                    sisteIverksatteBehandlingId = sisteIverksatteBehandlingId,
+                    forbehandlingId = request.forbehandlingId,
+                    sisteIverksatteBehandlingId = request.sisteIverksatteBehandling,
                     utbetaltStoenad = data.differanse.utbetaltStoenad,
                     nyBruttoStoenad = data.differanse.nyBruttoStoenad,
                     differanse = data.differanse.differanse,
@@ -215,7 +197,7 @@ class EtteroppgjoerService(
                             vedtakReferanse = vedtakReferanse,
                         ),
                     harIngenInntekt = data.harIngenInntekt,
-                    aar = etteroppgjoersAar,
+                    aar = request.aar,
                 )
             }
 
@@ -292,20 +274,6 @@ class EtteroppgjoerService(
             else -> {
                 null
             }
-        }
-    }
-
-    private fun finnAarsoppgjoerForEtteroppgjoer(
-        aar: Int,
-        behandlingId: UUID,
-    ): Aarsoppgjoer {
-        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw GenerellIkkeFunnetException()
-        val aarsoppgjoer = avkorting.aarsoppgjoer.filter { it.aar == aar }
-
-        return when (aarsoppgjoer.size) {
-            1 -> aarsoppgjoer.single()
-            0 -> throw InternfeilException("Fant ikke aarsoppgjoer for $aar, selv etter reparasjon")
-            else -> throw InternfeilException("Fant ${aarsoppgjoer.size} for $aar som ikke håndteres riktig")
         }
     }
 }

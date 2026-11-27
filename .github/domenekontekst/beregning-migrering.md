@@ -28,9 +28,9 @@ Statusdatoen i dette dokumentet er ikke bevis på at implementasjonene er avstem
 
 ## Nåværende tilstand
 
-Sist kontrollert 23. november 2026 mot `origin/main` på commit
-[`fa81b829e`](https://github.com/navikt/pensjon-etterlatte-saksbehandling/commit/fa81b829e).
-PR-status er kontrollert på GitHub. Miljøverdiene nedenfor kommer fra manifestene,
+Kildehistorikken er sist kontrollert 24. november 2026 mot `origin/main` på commit
+[`668d269a0`](https://github.com/navikt/pensjon-etterlatte-saksbehandling/commit/668d269a0).
+PR-status er sist kontrollert på GitHub 23. november. Miljøverdiene nedenfor kommer fra manifestene,
 ikke fra en live-avlesning av prod eller Unleash.
 
 Med produksjonsoppsettet i `main` kjører beregningslogikken fortsatt i
@@ -187,11 +187,12 @@ behandling/modules.beregning -> BeregningCrudKlient -> beregning/intern -> datab
 Ingen app skal koble seg direkte til den andre appens database.
 Det finnes ingen automatisk synkronisering, dobbeltskriving eller fallback mellom databasene.
 
-### Denne endringen: behandling sine kallere
+### Merget PR #9070: behandling sine kallere
 
-Arbeidet i [#9070](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/9070)
-bygger på den mergede #9069 og er ennå ikke merget.
-Det legger til `BeregningKlientIntern` for alle de 16 operasjonene i `BeregningKlient`.
+[#9070](https://github.com/navikt/pensjon-etterlatte-saksbehandling/pull/9070) ble merget
+23. november 2026 med commit
+[`7fe221cbc`](https://github.com/navikt/pensjon-etterlatte-saksbehandling/commit/7fe221cbc).
+Den legger til `BeregningKlientIntern` for alle de 16 operasjonene i `BeregningKlient`.
 `KlientModule` velger den interne adapteren når behandling sin
 `BRUK_INTERN_BEREGNING=true`; ellers beholdes `BeregningKlientImpl` over HTTP.
 Avhengighetene initialiseres ved behov for å unngå sirkler mellom behandlingstjenestene og beregningsmodulen.
@@ -211,9 +212,103 @@ valg av beregningsmetode fra overstyrte beregningsperioder i brevdata, uten å g
 HTTP-klienter. `FORLENGET_OMS` kommer fra det delte modellbiblioteket og trenger ingen kopi.
 Det er ingen database- eller Flyway-endringer i beregningsappen siden denne avstemmingen.
 
+Kildehistorikken er kontrollert på nytt mot `7fe221cbc`. Endringene siden `e9408d1ca`
+(`cae0ab2e4`, `dd0d6c693` og `bfb73088c`) er dekket av avstemmingen ovenfor.
+Fra `fa81b829e` til `7fe221cbc` er det ingen nye endringer i beregningsappen eller de
+berørte delte bibliotekene som må overføres.
+
+Ved kontroll mot `668d269a0` 24. november er det ingen nye kildeendringer i
+beregningsappen eller de berørte delte beregnings- og databasebibliotekene siden
+`7fe221cbc` som må overføres.
+
+### Arbeidsgren: sikrere skriving via CRUD
+
+Denne endringen er ikke merget eller aktivert. Mellomsteget bruker fortsatt CRUD mot
+databasen `beregning`; ingen URL-konfigurasjon, brytere eller produksjonsdata flyttes.
+Endringene i repository-laget er gjort i både beregningsappen og den kopierte modulen.
+
+I de flyttede tjenestene forberedes beregning, validering, oppslag og returdata før
+skriving så langt avhengighetene tillater. Lokal status oppdateres før det siste
+CRUD-kallet i samme lokale transaksjon. Ved feil i kallet rulles status tilbake.
+Anvendt trygdetid for BP lagres først etter vellykket regelkjøring.
+
+Ved ordinær lagring av beregningsgrunnlag holdes eksisterende `vedtaksperioder`
+utenfor skriveobjektet. De tas bare med i returdataene, slik at lagringen ikke
+sletter og setter inn periodene på nytt. Eksplisitt lagring av perioder, som ved
+kopiering av grunnlag, er fortsatt ikke atomisk i repository-et og må sikres separat.
+
+`AvkortingRepositoryTest` sammenligner DTO-ene før og etter lagring for begge regelsett,
+med flere år, restanse, sanksjoner og faktisk inntekt. Interne objekter er ikke identiske:
+gjenlesing utelater `maanederInnvilgetRegelResultat`, og JSON-tall kan få en annen
+representasjon i databasen. Testene kontrollerer API-dataene og innvilgede måneder.
+
+`EtteroppgjoerService` beregner avkorting og resultat i minnet før én ny
+`PUT /api/beregning/intern/etteroppgjoer/{forbehandlingId}` lagrer begge med samme
+`TransactionalSession`. Kontrollen krever nøyaktig ett etteroppgjør, riktig år og en
+resultatreferanse til dette årsoppgjøret. Ulikheter avvises før eksisterende data slettes.
+En lagringsfeil ruller tilbake både avkorting og resultat. Ved reberegning oppdateres
+referansene til avkorting og vedtak, slik at resultatet ikke peker på slettede data.
+En ekstra gjenlesing etter commit er ikke nødvendig for denne atomisiteten.
+
+#### Risiko som også finnes i dagens produksjonssti
+
+Den frittstående beregningsappen lagrer allerede beregning og avkorting før den ber
+behandling oppdatere status over HTTP. Se
+[`BeregningService`](../../apps/etterlatte-beregning/src/main/kotlin/beregning/BeregningService.kt)
+og [`AvkortingService`](../../apps/etterlatte-beregning/src/main/kotlin/avkorting/AvkortingService.kt).
+Hvis statuskallet feiler etter commit, blir dataene lagret selv om behandling beholder
+gammel status. CRUD-mellomsteget har samme type risiko, men en ny plassering av
+nettverksgrensen. Det gir ikke garanti for at feil oppstår like ofte i de to stiene.
+
+I den flyttede stien rulles lokal status tilbake hvis CRUD-kallet feiler. En timeout
+eller et ugyldig svar kan likevel komme etter at beregning har committet.
+`BeregningCrudKlient` logger da en advarsel med operasjon og behandlings-ID når den er
+tilgjengelig, ellers ressursens ID eller sti. Skrivefeil med HTTP 5xx og uventede
+vellykkede statuskoder logges også som uavklart utfall. Payload og feilmelding fra
+transport eller deserialisering tas ikke med i denne advarselen. Feilen sendes videre.
+Lesinger logges ikke som uavklart skriving, heller ikke lesinger som bruker POST.
+
+#### Gjenoppretting ved nytt beregningsforsøk
+
+Ved uavklart utfall gjentar saksbehandler beregnings- eller avkortingssteget på samme
+behandling før arbeidet fortsetter. Disse lagringene erstatter tidligere rader.
+Et nytt vellykket forsøk lagrer resultatet og oppdaterer lokal status.
+Testen `BeregningCrudRecoveryTest` dekker commit etterfulgt av tapt svar, lokal rollback
+og et nytt forsøk uten dupliserte beregningsperioder.
+
+Dette er ikke en generell retry-regel for opprettelse av revurderinger, sanksjoner,
+Kafka-publisering eller andre flertrinnsflyter. Avklar hvilke delsteg som er fullført
+før slike flyter gjentas. Ved gjentatte feil eller mistanke om inkonsistente data
+må saken avklares før vedtak fattes. Ikke slett tidligere lagrede data eller endre
+status manuelt for å komme videre.
+
+En gammel status er heller ingen garanti for at neste steg er sperret, særlig når
+behandlingen allerede var avkortet. En egen kontroll av samsvar mellom grunnlag,
+beregning og avkorting før vedtak fattes er et separat tiltak. Denne endringen
+innfører ikke en slik kontroll, kompensasjon eller en vedvarende migreringssperre.
+
+Følgende flyter har fortsatt flere transaksjoner:
+
+- Lokal status og CRUD har ikke distribuert rollback. Ved timeout etter commit i
+  beregning kan bare behandling sin lokale transaksjon rulles tilbake. Også ved lokal
+  JDBC har den samlede repository-operasjonen en egen transaksjon.
+- `lagreOgBeregnFaktiskInntekt` gjør nå utlandsoppslag og oppdaterer relatert revurderingsstatus
+  før beregningskallet. Lagring av forbehandlingen og hendelser trenger resultatet og må
+  fortsatt skje etterpå; de inngår ikke i beregningsdatabasens transaksjon.
+- Årlig og mottatt inntektsjustering oppretter avkorting før nye grunnlag beregnes, og
+  gjenleser deretter avkortingen. Hver lagring er atomisk, men hele flyten er ikke det.
+- Opprettelse av etteroppgjørsrevurdering committer behandlingen før kopiering og
+  beregning. Feil senere i flyten kan fortsatt etterlate en delvis opprettet revurdering.
+- Beregning med anvendt trygdetid, kopiering av grunnlag og sanksjoner samt deaktivering
+  av overstyring bruker fortsatt flere CRUD-kall. Disse har ikke felles rollback.
+
+Full atomisitet krever at hele flyten bruker én transaksjon. Avbrutte flertrinnsflyter
+må inntil videre avklares før de eventuelt gjenopptas. Det er ikke nok å flytte et metodekall.
+Beregning må deployes med det nye samlede endepunktet før behandling tar det i bruk.
+
 ## Gjenstående steg
 
-1. **Merge og aktivering.** Merge klientomleggingen uten å likestille dette med aktivering.
+1. **Merge og aktivering.** Merge sikrere CRUD-skriving uten å likestille dette med aktivering.
    Prøv flytene i dev først, også med begge datakilder og relevante testdata.
    Når CRUD brukes, må beregningsappen ha CRUD-rutene aktivert før behandling aktiveres.
    Aktiver behandling før UI sendes dit. Kontroller faktisk deployet versjon, tilgangskontroll,
@@ -233,8 +328,25 @@ Det er ingen database- eller Flyway-endringer i beregningsappen siden denne avst
    Fjern utdaterte URL-er, scopes og tilganger. Oppdater permanent domenedokumentasjon og
    arkiver eller fjern denne migreringsstatusen.
 
-Ved rollback av rutingen må UI først flyttes tilbake til beregning før rutene i behandling
-deaktiveres. Et databasebytte kan ikke rulles tilbake bare ved å endre en bryter dersom
+### Rollback av rutingen mens CRUD brukes
+
+Hold `BRUK_EGEN_DATABASE_FOR_BEREGNING=false` i prod gjennom CRUD-mellomsteget.
+Så lenge begge stier bruker databasen `beregning` og kode og datakontrakter er
+bakoverkompatible, krever rollback av rutingen ingen dataflytting eller synkronisering.
+Rollback av rutingen angrer ikke allerede lagrede endringer eller uavklarte kall.
+
+1. Flytt UI og andre konsumenter tilbake til beregningsappen først. For UI betyr det
+   `BRUK_INTERN_BEREGNING=false` i BFF-en og ny deployment. For andre konsumenter må
+   URL, token-scope og Nais-tilganger peke tilbake på beregningsappen.
+2. Når ingen eksterne konsumenter bruker beregningsrutene i behandling, sett
+   `BRUK_INTERN_BEREGNING=false` i behandling og deploy på nytt. Da går også behandling
+   sine interne beregningskall tilbake til den frittstående appen.
+3. Behold CRUD-rutene aktivert i beregningsappen til ingen instanser av behandling
+   lenger bruker dem, inkludert pågående kall fra gammel deployment. Først da kan
+   beregningsappen eventuelt deployes med `BRUK_INTERN_BEREGNING=false`.
+
+Før lokal database tas i bruk må både dataflytting og de lokale transaksjonsgrensene
+avklares. Et databasebytte kan ikke rulles tilbake bare ved å endre en bryter dersom
 databasene har fått ulike data.
 
 ## Kilder i koden

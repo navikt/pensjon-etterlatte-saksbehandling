@@ -404,19 +404,17 @@ class EtteroppgjoerForbehandlingService(
                 sammenlignTilOgMedBehandlingId = sammenlignTilOgMedBehandlingId,
             )
 
+        val utlandstilknytning = hentUtlandstilknytning(forbehandling)
+        behandlingService
+            .hentBehandlingerForSak(forbehandling.sak.id)
+            .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id }
+            ?.let { revurdering -> behandlingService.settBeregnet(revurdering.id, brukerTokenInfo) }
+
         val beregnetEtteroppgjoerResultat =
             runBlocking { beregningKlient.beregnAvkortingFaktiskInntekt(beregningRequest, brukerTokenInfo) }
 
-        val beregnetForbehandling =
-            forbehandling
-                .tilBeregnet(beregnetEtteroppgjoerResultat)
-                .also {
-                    dao.lagreForbehandling(it)
-                    behandlingService
-                        .hentBehandlingerForSak(it.sak.id)
-                        .firstOrNull { revurdering -> revurdering.relatertBehandlingId == forbehandling.id }
-                        ?.let { revurdering -> behandlingService.settBeregnet(revurdering.id, brukerTokenInfo) }
-                }
+        val beregnetForbehandling = forbehandling.tilBeregnet(beregnetEtteroppgjoerResultat)
+        dao.lagreForbehandling(beregnetForbehandling)
 
         // Hvis forbehandlingen ikke lengre henviser til brevet når den er beregnet skal brevet slettes
         val brevSomSkalSlettes = forbehandling.brevId?.takeIf { beregnetForbehandling.brevId == null }
@@ -426,7 +424,7 @@ class EtteroppgjoerForbehandlingService(
             etteroppgjoerResultat = beregnetEtteroppgjoerResultat,
             hendelseType = EtteroppgjoerForbehandlingHendelser.BEREGNET,
             saksbehandler = brukerTokenInfo.ident().takeIf { brukerTokenInfo is Saksbehandler },
-            utlandstilknytning = hentUtlandstilknytning(beregnetForbehandling),
+            utlandstilknytning = utlandstilknytning,
         )
 
         return BeregnetResultatOgBrevSomSkalSlettes(

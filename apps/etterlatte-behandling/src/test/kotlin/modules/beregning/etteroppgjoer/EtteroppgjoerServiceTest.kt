@@ -1,13 +1,12 @@
 package no.nav.etterlatte.modules.beregning.etteroppgjoer
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
@@ -139,7 +138,7 @@ internal class EtteroppgjoerServiceTest {
 
         assertThrows<EtteroppgjoerBehandlingerTilhoererIkkeSammeSak> {
             if (beregn) {
-                service.beregnAvkortingForbehandling(
+                service.beregnOgLagreEtteroppgjoer(
                     beregnRequest(forbehandlingId, behandlingId).copy(sakId = SakId(requestSak)),
                     bruker,
                 )
@@ -168,7 +167,7 @@ internal class EtteroppgjoerServiceTest {
 
         assertThrows<EtteroppgjoerBehandlingerTilhoererIkkeSammeSak> {
             if (beregn) {
-                service.beregnOgLagreEtteroppgjoerResultat(forbehandlingId, behandlingId, aar, false, null)
+                service.beregnOgLagreEtteroppgjoer(beregnRequest(forbehandlingId, behandlingId), bruker)
             } else {
                 service.hentBeregnetEtteroppgjoerResultat(forbehandlingId, behandlingId, aar)
             }
@@ -197,10 +196,45 @@ internal class EtteroppgjoerServiceTest {
         verify(exactly = 1) { avkortingRepository.hentAvkorting(forbehandlingId) }
     }
 
-    @Test
-    fun `skal beregne og lagre avkorting naar alle ID-er tilhoerer samme sak`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `skal beregne avkorting og resultat foer de lagres samlet`(feilVedBeregning: Boolean) {
         val forbehandlingId = UUID.randomUUID()
         val behandlingId = UUID.randomUUID()
+        mockBeregningAvForbehandling(behandlingId)
+        val feil = IllegalStateException("Kunne ikke hente vedtak")
+        every { vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(sakId, aar, null) } answers {
+            if (feilVedBeregning) throw feil
+            vedtakHeleAaret
+        }
+
+        if (feilVedBeregning) {
+            assertThrows<IllegalStateException> {
+                service.beregnOgLagreEtteroppgjoer(beregnRequest(forbehandlingId, behandlingId), bruker)
+            } shouldBeSameInstanceAs feil
+            verify(exactly = 0) { etteroppgjoerRepository.lagreAvkortingOgEtteroppgjoerResultat(any(), any(), any()) }
+        } else {
+            val resultat = service.beregnOgLagreEtteroppgjoer(beregnRequest(forbehandlingId, behandlingId), bruker)
+
+            verify(exactly = 1) {
+                etteroppgjoerRepository.lagreAvkortingOgEtteroppgjoerResultat(
+                    sakId,
+                    withArg {
+                        it.aarsoppgjoer.single().aar shouldBe aar
+                        it.aarsoppgjoer.single().id shouldBe resultat.referanseAvkorting.avkortingForbehandling
+                    },
+                    resultat,
+                )
+            }
+        }
+        verify(exactly = 0) {
+            avkortingRepository.lagreAvkorting(any(), any(), any())
+            avkortingRepository.hentAvkorting(forbehandlingId)
+            etteroppgjoerRepository.lagreEtteroppgjoerResultat(any())
+        }
+    }
+
+    private fun mockBeregningAvForbehandling(behandlingId: UUID) {
         mockForbehandlingMedAvkorting()
         val tidligereAvkorting =
             Avkorting(
@@ -221,17 +255,6 @@ internal class EtteroppgjoerServiceTest {
         every { avkortingService.hentAvkortingMedReparertAarsoppgjoer(sakId, behandlingId, bruker) } returns tidligereAvkorting
         every { sanksjonService.hentSanksjon(behandlingId) } returns emptyList()
         every { featureToggleService.isEnabled(any(), any(), any()) } returns false
-        every { avkortingRepository.lagreAvkorting(any(), any(), any()) } just runs
-
-        service.beregnAvkortingForbehandling(beregnRequest(forbehandlingId, behandlingId), bruker)
-
-        verify(exactly = 1) {
-            avkortingRepository.lagreAvkorting(
-                forbehandlingId,
-                sakId,
-                withArg { it.aarsoppgjoer.single().aar shouldBe aar },
-            )
-        }
     }
 
     private fun beregnRequest(
@@ -254,18 +277,14 @@ internal class EtteroppgjoerServiceTest {
 
     @Test
     fun `uten omgjoering hentes hele vedtakslisten og det avgrenses ikke til en behandling`() {
-        mockForbehandlingMedAvkorting()
+        val forbehandlingId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        mockBeregningAvForbehandling(behandlingId)
         coEvery { vedtakEtteroppgjoerService.hentVedtakslisteIEtteroppgjoersAar(any(), any(), any()) } returns vedtakHeleAaret
 
         val resultat =
             runBlocking {
-                service.beregnOgLagreEtteroppgjoerResultat(
-                    forbehandlingId = UUID.randomUUID(),
-                    sisteIverksatteBehandlingId = UUID.randomUUID(),
-                    etteroppgjoersAar = aar,
-                    harDoedsfall = false,
-                    sammenlignTilOgMedBehandlingId = null,
-                )
+                service.beregnOgLagreEtteroppgjoer(beregnRequest(forbehandlingId, behandlingId), bruker)
             }
 
         // Begge vedtakene teller med: 6000 + 6000
@@ -278,7 +297,9 @@ internal class EtteroppgjoerServiceTest {
 
     @Test
     fun `ved klage-omgjoering avgrenses vedtakslisten til og med sammenlign-behandlingen`() {
-        mockForbehandlingMedAvkorting()
+        val forbehandlingId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        mockBeregningAvForbehandling(behandlingId)
         val sammenlignTilOgMedBehandlingId = UUID.randomUUID()
         // Behandling-id-en vi avgrenser tidslinjen til – returnerer kun vedtaket som gjaldt før det opprinnelige etteroppgjøret
         coEvery {
@@ -287,12 +308,9 @@ internal class EtteroppgjoerServiceTest {
 
         val resultat =
             runBlocking {
-                service.beregnOgLagreEtteroppgjoerResultat(
-                    forbehandlingId = UUID.randomUUID(),
-                    sisteIverksatteBehandlingId = UUID.randomUUID(),
-                    etteroppgjoersAar = aar,
-                    harDoedsfall = false,
-                    sammenlignTilOgMedBehandlingId = sammenlignTilOgMedBehandlingId,
+                service.beregnOgLagreEtteroppgjoer(
+                    beregnRequest(forbehandlingId, behandlingId).copy(sammenlignTilOgMedBehandlingId = sammenlignTilOgMedBehandlingId),
+                    bruker,
                 )
             }
 

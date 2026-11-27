@@ -1,14 +1,18 @@
 package no.nav.etterlatte.beregning.regler.avkorting
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.avkorting.Avkorting
+import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.etteroppgjoer.BeregnetEtteroppgjoerResultat
 import no.nav.etterlatte.avkorting.etteroppgjoer.EtteroppgjoerRepository
 import no.nav.etterlatte.avkorting.etteroppgjoer.ReferanseEtteroppgjoer
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerGrense
 import no.nav.etterlatte.avkorting.regler.EtteroppgjoerRettsgebyr
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
+import no.nav.etterlatte.beregning.regler.etteroppgjoer
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerBeregnetAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.EtteroppgjoerResultatType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -16,7 +20,11 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import org.postgresql.util.PSQLException
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
@@ -27,6 +35,79 @@ internal class EtteroppgjoerRepositoryTest(
     ds: DataSource,
 ) {
     private val etteroppgjoerRepository = EtteroppgjoerRepository(ds)
+    private val avkortingRepository = AvkortingRepository(ds)
+
+    @Test
+    fun `lagrer avkorting og resultat samlet og oppdaterer referanser ved reberegning`() {
+        val forbehandlingId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        val resultat = beregnetEtteroppgjoerResultat(2024, forbehandlingId, behandlingId, 1000, 1000)
+
+        repeat(2) { indeks ->
+            val aarsoppgjoer = etteroppgjoer()
+            val avkorting = Avkorting(listOf(aarsoppgjoer))
+            val oppdatert =
+                resultat.copy(
+                    referanseAvkorting =
+                        resultat.referanseAvkorting.copy(
+                            avkortingForbehandling = aarsoppgjoer.id,
+                            vedtakReferanse = listOf(indeks.toLong()),
+                        ),
+                )
+
+            etteroppgjoerRepository.lagreAvkortingOgEtteroppgjoerResultat(SakId(1L), avkorting, oppdatert)
+
+            avkortingRepository.hentAvkorting(forbehandlingId) shouldBe avkorting
+            etteroppgjoerRepository.hentEtteroppgjoerResultat(2024, forbehandlingId, behandlingId) shouldBe oppdatert
+        }
+    }
+
+    @Test
+    fun `ruller tilbake avkortingen naar lagring av resultatet feiler`() {
+        val sakId = SakId(1L)
+        val forbehandlingId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        val gammelAvkorting = Avkorting(listOf(etteroppgjoer()))
+        avkortingRepository.lagreAvkorting(forbehandlingId, sakId, gammelAvkorting)
+        val eksisterendeResultat = beregnetEtteroppgjoerResultat(2024, UUID.randomUUID(), behandlingId, 1000, 1000)
+        etteroppgjoerRepository.lagreEtteroppgjoerResultat(eksisterendeResultat)
+        val nyttAarsoppgjoer = etteroppgjoer()
+        val nyttResultat =
+            eksisterendeResultat.copy(
+                forbehandlingId = forbehandlingId,
+                referanseAvkorting = eksisterendeResultat.referanseAvkorting.copy(avkortingForbehandling = nyttAarsoppgjoer.id),
+            )
+
+        assertThrows<PSQLException> {
+            etteroppgjoerRepository.lagreAvkortingOgEtteroppgjoerResultat(sakId, Avkorting(listOf(nyttAarsoppgjoer)), nyttResultat)
+        }
+
+        avkortingRepository.hentAvkorting(forbehandlingId) shouldBe gammelAvkorting
+        etteroppgjoerRepository.hentEtteroppgjoerResultat(2024, forbehandlingId, behandlingId) shouldBe null
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `avviser ulikt aar eller avkortingsreferanse uten aa skrive`(feilAar: Boolean) {
+        val forbehandlingId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        val gammelAvkorting = Avkorting(listOf(etteroppgjoer()))
+        avkortingRepository.lagreAvkorting(forbehandlingId, SakId(1L), gammelAvkorting)
+        val aarsoppgjoer = etteroppgjoer()
+        val resultat = beregnetEtteroppgjoerResultat(if (feilAar) 2025 else 2024, forbehandlingId, behandlingId, 1000, 1000)
+        val referanse = if (feilAar) aarsoppgjoer.id else UUID.randomUUID()
+
+        assertThrows<UgyldigForespoerselException> {
+            etteroppgjoerRepository.lagreAvkortingOgEtteroppgjoerResultat(
+                SakId(1L),
+                Avkorting(listOf(aarsoppgjoer)),
+                resultat.copy(referanseAvkorting = resultat.referanseAvkorting.copy(avkortingForbehandling = referanse)),
+            )
+        }
+
+        avkortingRepository.hentAvkorting(forbehandlingId) shouldBe gammelAvkorting
+        etteroppgjoerRepository.hentEtteroppgjoerResultat(resultat.aar, forbehandlingId, behandlingId) shouldBe null
+    }
 
     @Test
     fun `skal oppdatere BeregnetEtteroppgjoerResultat hvis aar og forbehandlingId og sisteIverksattteBehandlingId eksisterer`() {

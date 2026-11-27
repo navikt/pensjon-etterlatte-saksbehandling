@@ -168,16 +168,27 @@ class BeregnBarnepensjonService(
             throw TrygdetidIkkeOpprettet()
         }
 
-        val anvendtTrygdetider =
+        val periodiserteTrygdetider =
             BarnepensjonAnvendtTrygdetidPerioder
                 .finnAnvendtTrygdetidPerioder(trygdetidListe, beregningsGrunnlag)
-                .also { anvendtTrygdetidRepository.lagreAnvendtTrygdetid(behandling.id, it) }
+        val anvendtTrygdetider =
+            periodiserteTrygdetider.let {
+                if (it.anvendt.isEmpty()) {
+                    BarnepensjonAnvendtTrygdetidPerioder.finnKonstantTrygdetidPerioder(
+                        trygdetidListe,
+                        beregningsGrunnlag,
+                        virkningstidspunkt.atDay(1),
+                    )
+                } else {
+                    it
+                }
+            }
 
         val barnepensjonGrunnlag =
             opprettBeregningsgrunnlag(
                 beregningsGrunnlag,
                 trygdetidListe,
-                anvendtTrygdetider.anvendt,
+                periodiserteTrygdetider.anvendt,
                 virkningstidspunkt.atDay(1),
                 null,
                 beregningsGrunnlag.vedtaksperioder,
@@ -284,6 +295,8 @@ class BeregnBarnepensjonService(
                     }
                 }
             }
+        }.also {
+            anvendtTrygdetidRepository.lagreAnvendtTrygdetid(behandling.id, anvendtTrygdetider)
         }
     }
 
@@ -481,12 +494,7 @@ class BeregnBarnepensjonService(
                                     trygdetider,
                                     beregningsGrunnlag,
                                     virkFom,
-                                ).also {
-                                    anvendtTrygdetidRepository.lagreAnvendtTrygdetid(
-                                        beregningsGrunnlag.behandlingId,
-                                        it,
-                                    )
-                                }.anvendt
+                                ).anvendt
                                 .first()
                                 .data,
                         kilde = beregningsGrunnlag.kilde,

@@ -493,7 +493,7 @@ internal class BeregningsGrunnlagRoutesTest {
     }
 
     @Test
-    fun `skal returnere conflict fra opprettelse `() {
+    fun `skal returnere internfeil hvis lagring av grunnlag mislykkes`() {
         coEvery { behandlingTilgangsSjekk.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), true) } returns Unit
         coEvery { behandlingStatusService.settTrygdetidOppdatert(any(), any(), any()) } returns Unit
@@ -561,9 +561,10 @@ internal class BeregningsGrunnlagRoutesTest {
                         ),
                     )
                 }.let {
-                    it.status shouldBe HttpStatusCode.Conflict
+                    it.status shouldBe HttpStatusCode.InternalServerError
                 }
         }
+        verify(exactly = 1) { repository.lagreBeregningsGrunnlag(any()) }
     }
 
     @Test

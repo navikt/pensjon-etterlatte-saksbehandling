@@ -32,6 +32,7 @@ import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.beregning.grunnlag.Vedtaksperiode
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -67,6 +68,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import java.net.SocketTimeoutException
 import java.time.LocalDate
 import java.time.Month.APRIL
 import java.time.Month.JANUARY
@@ -131,8 +135,40 @@ internal class BeregningsGrunnlagServiceTest {
             verify(exactly = 0) { behandlingStatusService.settTrygdetidOppdatert(any(), any(), false) }
         }
 
+    @ParameterizedTest
+    @EnumSource(value = SakType::class, names = ["BARNEPENSJON", "OMSTILLINGSSTOENAD"])
+    fun `skal bevare vedtaksperioder uten aa skrive dem ved feil og nytt forsoek`(sakType: SakType) {
+        val behandlingId = randomUUID()
+        val bruker = simpleSaksbehandler()
+        val vedtaksperioder =
+            listOf(
+                Vedtaksperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 6)),
+                Vedtaksperiode(YearMonth.of(2024, 9)),
+            )
+        val eksisterendeGrunnlag = beregningsgrunnlag(behandlingId).copy(vedtaksperioder = vedtaksperioder)
+        val skriveforsok = mutableListOf<BeregningsGrunnlag>()
+        val feil = SocketTimeoutException("Svaret fra lagringen gikk tapt")
+        val forespoersel = LagreBeregningsGrunnlag(emptyList(), null)
+        every { behandlingService.hentDetaljertBehandling(behandlingId, bruker) } returns mockBehandling(sakType, behandlingId)
+        every { grunnlagService.hentOpplysningsgrunnlag(behandlingId) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId) } returns eksisterendeGrunnlag
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(skriveforsok)) } throws feil andThen true
+
+        assertThrows<SocketTimeoutException> {
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(behandlingId, forespoersel, bruker)
+        } shouldBeSameInstanceAs feil
+        skriveforsok.single().vedtaksperioder shouldBe null
+
+        val resultat = beregningsGrunnlagService.lagreBeregningsGrunnlag(behandlingId, forespoersel, bruker)
+
+        skriveforsok.size shouldBe 2
+        skriveforsok.last().vedtaksperioder shouldBe null
+        resultat shouldBe skriveforsok.last().copy(vedtaksperioder = vedtaksperioder)
+        verify(exactly = 2) { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId) }
+    }
+
     @Test
-    fun `skal viderefoere feil ved statusoppdatering etter lagring av overstyrt grunnlag`() =
+    fun `skal ikke lagre overstyrt grunnlag naar statusoppdateringen feiler`() =
         runBlocking<Unit> {
             val behandlingId = randomUUID()
             val bruker = simpleSaksbehandler()
@@ -149,7 +185,7 @@ internal class BeregningsGrunnlagServiceTest {
                 )
             } shouldBeSameInstanceAs feil
 
-            verify(exactly = 1) {
+            verify(exactly = 0) {
                 beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, emptyList())
             }
             verify(exactly = 0) { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) }

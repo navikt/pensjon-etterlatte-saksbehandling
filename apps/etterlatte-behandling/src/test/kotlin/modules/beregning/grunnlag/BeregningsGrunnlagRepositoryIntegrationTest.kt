@@ -232,6 +232,33 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
     }
 
     @Test
+    fun `oppdatering uten vedtaksperioder bevarer eksisterende perioder`() {
+        val behandlingId = UUID.randomUUID()
+        val vedtaksperioder =
+            listOf(
+                Vedtaksperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 6)),
+                Vedtaksperiode(YearMonth.of(2024, 9)),
+            )
+        val grunnlag =
+            BeregningsGrunnlag(
+                behandlingId = behandlingId,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+                beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
+                vedtaksperioder = vedtaksperioder,
+            )
+        repository.lagreBeregningsGrunnlag(grunnlag) shouldBe true
+
+        val oppdatertGrunnlag =
+            grunnlag.copy(
+                beregningsMetode = BeregningsMetode.PRORATA.toGrunnlag(),
+                vedtaksperioder = null,
+            )
+        repository.lagreBeregningsGrunnlag(oppdatertGrunnlag) shouldBe true
+
+        repository.finnBeregningsGrunnlag(behandlingId) shouldBe oppdatertGrunnlag.copy(vedtaksperioder = vedtaksperioder)
+    }
+
+    @Test
     fun `Oppdatering fungerer for OMS`() {
         val id = UUID.randomUUID()
 

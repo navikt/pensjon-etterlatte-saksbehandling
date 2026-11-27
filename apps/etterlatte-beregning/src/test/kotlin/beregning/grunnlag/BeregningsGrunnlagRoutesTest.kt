@@ -60,6 +60,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -327,16 +328,18 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal opprettere`() {
+        val behandlingId = randomUUID()
+        val lagretGrunnlag = slot<BeregningsGrunnlag>()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
         coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
-        every { repository.finnBeregningsGrunnlag(any()) } returns mockk(relaxed = true)
-        every { repository.lagreBeregningsGrunnlag(any()) } returns true
+        every { repository.finnBeregningsGrunnlag(behandlingId) } answers { lagretGrunnlag.captured }
+        every { repository.lagreBeregningsGrunnlag(capture(lagretGrunnlag)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
-                id = randomUUID(),
+                id = behandlingId,
                 sak = randomSakId(),
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
@@ -372,7 +375,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 }
 
             client
-                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}") {
+                .post("/api/beregning/beregningsgrunnlag/$behandlingId") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                     setBody(
@@ -383,6 +386,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     )
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
+                    objectMapper.readValue<BeregningsGrunnlag>(it.bodyAsText()) shouldBe lagretGrunnlag.captured
                 }
         }
     }

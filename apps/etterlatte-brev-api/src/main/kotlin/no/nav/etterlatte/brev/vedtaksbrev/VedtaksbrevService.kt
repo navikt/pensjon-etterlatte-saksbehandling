@@ -314,6 +314,22 @@ class VedtaksbrevService(
         }
         db.fjernFerdigstiltStatus(brev.id)
     }
+
+    fun fjernFerdigstiltVedtaksbrev(behandlingId: UUID) {
+        val brev = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() ?: return
+        if (brev.kanEndres()) {
+            // Det er ikke ferdigstilt så vi trenger ikke gjøre noe
+            return
+        }
+        if (brev.status == Status.FERDIGSTILT) {
+            db.fjernFerdigstiltStatus(brev.id)
+        } else {
+            throw UgyldigForespoerselException(
+                "FERDIGSTILT_KAN_IKKE_FJERNES",
+                "Brevet har status ${brev.status}, og vi kan ikke fjerne ferdigstillingen",
+            )
+        }
+    }
 }
 
 class UgyldigStatusKanIkkeFerdigstilles(

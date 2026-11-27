@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -338,6 +339,30 @@ class BrevService(
                     brevApiKlient.tilbakestillVedtaksbrev(brevID, behandlingId, sakId, brevType, bruker)
                 }
             }
+        }
+    }
+
+    suspend fun fjernFerdigstillingVedtaksbrevVedAttesteringsfeil(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val vedtak =
+            vedtakInternalService.hentVedtak(behandlingId, brukerTokenInfo)
+                ?: throw InternfeilException("Fant ikke vedtak for behandling (id=$behandlingId)")
+
+        if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
+            logger.info(
+                "Fjerner ikke ferdigstilling av vedtaksbrev for behandling=$behandlingId " +
+                    "fordi vedtakstatus er ${vedtak.status}",
+            )
+            return
+        }
+
+        videresendInterneFeil {
+            brevApiKlient.fjernFerdigstillingVedtaksbrev(
+                behandlingId = behandlingId,
+                bruker = brukerTokenInfo,
+            )
         }
     }
 

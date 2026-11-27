@@ -247,7 +247,10 @@ class BeregningKlientImpl(
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: ResponseException) {
-            throw InternfeilException("Henting av om behandling (id=$behandlingId) har avkorting med sanksjon gamle regler feilet", e)
+            throw InternfeilException(
+                "Henting av om behandling (id=$behandlingId) har avkorting med sanksjon gamle regler feilet",
+                e,
+            )
         }
 
     override suspend fun hentBeregningOgAvkorting(

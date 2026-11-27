@@ -169,6 +169,9 @@ describe('Lagre vurdering av aktivitet', () => {
     })
     expect(container.textContent).toContain('Forlenget OMS innvilges')
     expect(container.textContent).toContain('Rediger vurdering')
+    for (const felt of container.querySelectorAll<HTMLInputElement>('input[type="text"]')) {
+      expect(felt.readOnly).toBe(true)
+    }
   })
 
   it('lagrer avslag uten periode og viser feil uten aa laase ved mislykket lagring', async () => {
@@ -222,7 +225,7 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(neste.disabled).toBe(false)
   })
 
-  it('henter lagrede svar og beholder dem naar vurderingen aapnes for redigering', async () => {
+  it('beholder lagrede svar laast til backend har aapnet vurderingen for redigering', async () => {
     const lagret = response({ type: 'NEI' }, 'AVSLAG')
     lagret.vilkaarsvurdering.resultat!.kommentar = 'Kommentar fra vilkår'
     const lagretBehandling: IBehandlingReducer = {
@@ -231,11 +234,20 @@ describe('Lagre vurdering av aktivitet', () => {
       vilkaarsvurdering: lagret.vilkaarsvurdering,
     }
     store.dispatch(setBehandling(lagretBehandling))
-    const slett = vi.spyOn(apiClient, 'delete').mockResolvedValue({
-      ok: true,
-      status: 200,
-      data: { ...lagret.vilkaarsvurdering, resultat: undefined },
-    })
+    let fullfoer!: (error: ApiError) => void
+    const slett = vi
+      .spyOn(apiClient, 'delete')
+      .mockImplementationOnce(
+        () =>
+          new Promise<ApiError>((resolve) => {
+            fullfoer = resolve
+          })
+      )
+      .mockResolvedValue({
+        ok: true,
+        status: 200,
+        data: { ...lagret.vilkaarsvurdering, resultat: undefined },
+      })
     const get = await renderAktivitet(lagret.vurdering)
 
     expect(get).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms')
@@ -250,6 +262,23 @@ describe('Lagre vurdering av aktivitet', () => {
     await act(async () => rediger.click())
 
     expect(slett).toHaveBeenCalledExactlyOnceWith('/vilkaarsvurdering/resultat/behandling-id')
+    expect(begrunnelse.readOnly).toBe(true)
+    const neste = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Neste')!
+    expect(neste.disabled).toBe(true)
+
+    await act(async () => {
+      fullfoer({ ok: false, status: 400, detail: 'Kunne ikke åpne vurderingen' })
+    })
+
+    expect(begrunnelse.readOnly).toBe(true)
+    expect(store.getState().behandlingReducer.behandling?.vilkaarsvurdering?.resultat).toEqual(
+      lagret.vilkaarsvurdering.resultat
+    )
+    expect(container.textContent).toContain('Kunne ikke åpne vurderingen')
+
+    await act(async () => rediger.click())
+
+    expect(slett).toHaveBeenCalledTimes(2)
     expect(begrunnelse.value).toBe('Begrunnelse')
     expect(begrunnelse.readOnly).toBe(false)
     expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')?.checked).toBe(true)
@@ -277,6 +306,9 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(aktivitetsvalg.disabled).toBe(true)
     expect(begrunnelse.readOnly).toBe(true)
     expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')?.disabled).toBe(true)
+    for (const felt of container.querySelectorAll<HTMLInputElement>('input[type="text"]')) {
+      expect(felt.readOnly).toBe(true)
+    }
 
     await act(async () => {
       fullfoer({ ok: false, status: 400, detail: 'Kunne ikke lagre' })
@@ -285,6 +317,9 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(aktivitetsvalg.disabled).toBe(false)
     expect(begrunnelse.readOnly).toBe(false)
     expect(container.querySelector<HTMLInputElement>('input[value="AVSLAG"]')?.disabled).toBe(false)
+    for (const felt of container.querySelectorAll<HTMLInputElement>('input[type="text"]')) {
+      expect(felt.readOnly).toBe(false)
+    }
     expect(container.textContent).toContain('Kunne ikke lagre')
     expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
   })

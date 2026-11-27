@@ -55,11 +55,10 @@ interface ForlengetOmsContextValue {
   redigerVurdering: () => void
   lagreStatus: Result<LagretForlengetOmsVurdering>
   redigerStatus: Result<IVilkaarsvurdering>
-  redigerbar: boolean
-  sporsmaalRedigerbare: boolean
+  harTilgang: boolean
+  kanRedigere: boolean
   alleVilkaarErVurdert: boolean
   lagretUtfallErUtdatert: boolean
-  periodeRedigerbar: boolean
   vilkaarsvurdering: IVilkaarsvurdering | undefined
   kanLagre: boolean
   kanVelgeUtfall: boolean
@@ -170,16 +169,15 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
 
   const lagretAktivitetOgUtfall = isSuccess(hentAktivitetOgUtfallStatus) ? hentAktivitetOgUtfallStatus.data : undefined
   const vilkaarsvurdering = behandling.vilkaarsvurdering
-  const redigerbar = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
-  const sporsmaalRedigerbare =
-    redigerbar && !(isPending(redigerStatus) || isPending(lagreStatus)) && !vilkaarsvurdering?.resultat
+  const harTilgang = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
+  const kanRedigere = harTilgang && !vilkaarsvurdering?.resultat && !isPending(lagreStatus) && !isPending(redigerStatus)
   const alleVilkaarErVurdert = !!vilkaarsvurdering && vilkaarsvurdering.vilkaar.every((vilkaar) => !!vilkaar.vurdering)
   const lagretUtfallErUtdatert =
     !!vilkaarsvurdering?.resultat &&
     (vilkaarsvurdering.virkningstidspunkt !== behandling.virkningstidspunkt?.dato ||
       !!vilkaarsvurdering.isGrunnlagUtdatert)
   const aktivitet = tilAktivitet(aktivitetType, aktivitetUtdanning, arbeidsrettetTiltak)
-  const kanLagre = sporsmaalRedigerbare && alleVilkaarErVurdert && !!begrunnelse.trim() && !!utfall
+  const kanLagre = kanRedigere && alleVilkaarErVurdert && !!begrunnelse.trim() && !!utfall
 
   const oppdaterUtdanning = (endringer: Partial<AktivitetUtdanning>) => {
     settAktivitetUtdanning((forrige) => ({ ...forrige, ...endringer }))
@@ -211,7 +209,9 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   }
 
   const redigerVurdering = () => {
-    if (!redigerbar || isPending(redigerStatus) || isPending(lagreStatus) || !vilkaarsvurdering?.resultat) return
+    if (!harTilgang || isPending(redigerStatus) || isPending(lagreStatus) || !vilkaarsvurdering?.resultat) {
+      return
+    }
     rediger(behandling.id, (oppdatert) => {
       dispatch(updateVilkaarsvurdering(oppdatert))
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
@@ -231,20 +231,20 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     redigerVurdering,
     lagreStatus,
     redigerStatus,
-    redigerbar,
-    sporsmaalRedigerbare,
+    harTilgang,
+    kanRedigere,
     alleVilkaarErVurdert,
     lagretUtfallErUtdatert,
-    periodeRedigerbar: sporsmaalRedigerbare && behandling.status === IBehandlingStatus.OPPRETTET,
     vilkaarsvurdering,
     kanLagre,
-    kanVelgeUtfall: sporsmaalRedigerbare && alleVilkaarErVurdert && !!aktivitetType,
+    kanVelgeUtfall: kanRedigere && alleVilkaarErVurdert && !!aktivitetType,
     kanGaaVidere:
       !!lagretAktivitetOgUtfall &&
       !!vilkaarsvurdering?.resultat &&
       alleVilkaarErVurdert &&
       !lagretUtfallErUtdatert &&
-      (!isPending(lagreStatus) || !isPending(redigerStatus)) &&
+      !isPending(lagreStatus) &&
+      !isPending(redigerStatus) &&
       !!aktivitetType,
     aktivitetUtdanning,
     oppdaterUtdanning,

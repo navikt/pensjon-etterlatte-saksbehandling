@@ -16,8 +16,8 @@ export const ResultatForlengetOms = () => {
     settUtfall,
     begrunnelse,
     settBegrunnelse,
-    sporsmaalRedigerbare,
-    redigerbar,
+    harTilgang,
+    kanRedigere,
     lagreVurdering,
     redigerVurdering,
     redigerStatus,
@@ -39,7 +39,7 @@ export const ResultatForlengetOms = () => {
           value={begrunnelse}
           onChange={(event) => settBegrunnelse(event.target.value)}
           minRows={6}
-          readOnly={!sporsmaalRedigerbare}
+          readOnly={!kanRedigere}
         />
       </VStack>
       <Box background="meta-purple-soft" borderRadius="12" padding="space-16">
@@ -52,7 +52,7 @@ export const ResultatForlengetOms = () => {
                   ? 'Forlenget OMS innvilges'
                   : 'Forlenget OMS avslås'}
               </BodyShort>
-              {redigerbar && (
+              {harTilgang && (
                 <Button
                   variant="tertiary"
                   size="small"
@@ -77,7 +77,7 @@ export const ResultatForlengetOms = () => {
             </RadioGroup>
           )}
           {!alleVilkaarErVurdert && <BodyShort>Alle vilkår må vurderes før man kan gå videre.</BodyShort>}
-          {redigerbar && !vilkaarsvurdering?.resultat && (
+          {harTilgang && !vilkaarsvurdering?.resultat && (
             <Box>
               <Button
                 size="small"
@@ -102,7 +102,7 @@ export const ResultatForlengetOms = () => {
       {mapFailure(redigerStatus, (error) => (
         <ApiErrorAlert>Kunne ikke åpne utfallet for redigering: {error.detail}</ApiErrorAlert>
       ))}
-      {redigerbar ? (
+      {harTilgang ? (
         <BehandlingHandlingKnapper>
           <Button onClick={next} disabled={!kanGaaVidere}>
             Neste

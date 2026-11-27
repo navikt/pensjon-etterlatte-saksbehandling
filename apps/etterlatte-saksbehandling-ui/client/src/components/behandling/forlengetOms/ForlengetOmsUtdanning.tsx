@@ -4,7 +4,7 @@ import { ForlengetOmsPeriode } from './ForlengetOmsPeriode'
 import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsUtdanning = () => {
-  const { sporsmaalRedigerbare, aktivitetUtdanning, oppdaterUtdanning } = useForlengetOms()
+  const { kanRedigere, aktivitetUtdanning, oppdaterUtdanning } = useForlengetOms()
   const { skole, studium, studererMinst50Prosent } = aktivitetUtdanning
 
   return (
@@ -15,7 +15,7 @@ export const ForlengetOmsUtdanning = () => {
             label="Hvilken skole skal bruker studere ved?"
             value={skole}
             onChange={(event) => oppdaterUtdanning({ skole: event.target.value })}
-            readOnly={!sporsmaalRedigerbare}
+            readOnly={!kanRedigere}
           />
         </VStack>
         <VStack gap="space-16" maxWidth="30rem">
@@ -23,7 +23,7 @@ export const ForlengetOmsUtdanning = () => {
             label="Hva skal bruker studere?"
             value={studium}
             onChange={(event) => oppdaterUtdanning({ studium: event.target.value })}
-            readOnly={!sporsmaalRedigerbare}
+            readOnly={!kanRedigere}
           />
         </VStack>
       </VStack>
@@ -33,7 +33,7 @@ export const ForlengetOmsUtdanning = () => {
             legend="Studerer bruker minst 50 prosent?"
             value={studererMinst50Prosent}
             onChange={(verdi: JaNei) => oppdaterUtdanning({ studererMinst50Prosent: verdi })}
-            disabled={!sporsmaalRedigerbare}
+            disabled={!kanRedigere}
           >
             <Radio value="JA">Ja, bruker studerer minst 50 prosent</Radio>
             <Radio value="NEI">Nei, prosenten er lavere</Radio>

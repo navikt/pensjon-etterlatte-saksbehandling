@@ -5,7 +5,7 @@ import { Tiltaksomfang } from '~shared/api/forlengetOms'
 import { JaNei } from '~shared/types/ISvar'
 
 export const ForlengetOmsArbeidsrettetTiltak = () => {
-  const { sporsmaalRedigerbare, arbeidsrettetTiltak, oppdaterArbeidsrettetTiltak } = useForlengetOms()
+  const { kanRedigere, arbeidsrettetTiltak, oppdaterArbeidsrettetTiltak } = useForlengetOms()
   const { tiltak, omfang, aktivitetsplan } = arbeidsrettetTiltak
 
   return (
@@ -16,7 +16,7 @@ export const ForlengetOmsArbeidsrettetTiltak = () => {
             label="Hvilket tiltak deltar bruker i?"
             value={tiltak}
             onChange={(event) => oppdaterArbeidsrettetTiltak({ tiltak: event.target.value })}
-            readOnly={!sporsmaalRedigerbare}
+            readOnly={!kanRedigere}
           />
         </VStack>
         <VStack gap="space-16">
@@ -24,7 +24,7 @@ export const ForlengetOmsArbeidsrettetTiltak = () => {
             legend="Deltar bruker i tiltaket på heltid eller deltid?"
             value={omfang}
             onChange={(verdi: Tiltaksomfang) => oppdaterArbeidsrettetTiltak({ omfang: verdi })}
-            disabled={!sporsmaalRedigerbare}
+            disabled={!kanRedigere}
           >
             <Radio value="HELTID">Heltid</Radio>
             <Radio value="DELTID">Deltid</Radio>
@@ -35,7 +35,7 @@ export const ForlengetOmsArbeidsrettetTiltak = () => {
             legend="Finnes det en aktivitetsplan?"
             value={aktivitetsplan}
             onChange={(verdi: JaNei) => oppdaterArbeidsrettetTiltak({ aktivitetsplan: verdi })}
-            disabled={!sporsmaalRedigerbare}
+            disabled={!kanRedigere}
           >
             <Radio value="JA">Ja, bruker har en aktivitetsplan</Radio>
             <Radio value="NEI">Nei, bruker har ikke en aktivitetsplan</Radio>

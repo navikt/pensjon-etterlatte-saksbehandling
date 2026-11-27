@@ -289,27 +289,34 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
   })
 
-  it('krever periode for innvilgelse men ikke for avslag', async () => {
+  it('viser periodefeil fra backend ved innvilgelse og lagrer avslag uten periode', async () => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'UTDANNING',
       skole: 'Skole',
       studium: 'Studium',
       studererMinst50Prosent: JaNei.JA,
     }
-    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
-      ok: true,
-      status: 200,
-      data: response(aktivitet, 'AVSLAG'),
-    })
+    const post = vi
+      .spyOn(apiClient, 'post')
+      .mockResolvedValueOnce({ ok: false, status: 400, detail: 'Innvilgelse krever en gyldig periode.' })
+      .mockResolvedValue({ ok: true, status: 200, data: response(aktivitet, 'AVSLAG') })
     await renderAktivitet(response(aktivitet, 'INNVILGELSE').vurdering)
     await velgOgLagre('INNVILGELSE')
 
-    expect(post).not.toHaveBeenCalled()
-    expect(container.textContent).toContain('Må fylles ut')
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet,
+      begrunnelse: 'Begrunnelse',
+      utfall: 'INNVILGELSE',
+      periode: { type: 'FORLENGET_OMS', fom: '', tom: '' },
+    })
+    expect(container.textContent).toContain(
+      'Kunne ikke lagre vurderingen av aktivitet: Innvilgelse krever en gyldig periode.'
+    )
+    expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
 
     await velgOgLagre('AVSLAG')
 
-    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+    expect(post).toHaveBeenNthCalledWith(2, '/behandling/behandling-id/forlenget-oms', {
       aktivitet,
       begrunnelse: 'Begrunnelse',
       utfall: 'AVSLAG',
@@ -518,7 +525,7 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(store.getState().behandlingReducer.behandling?.virkningstidspunkt?.dato).toBe('2027-01-01')
   })
 
-  it.each(['fom', 'tom'])('krever ny periode naar en lagret maaned slettes: %s', async (felt) => {
+  it.each(['fom', 'tom'])('viser backendfeil naar en lagret maaned slettes: %s', async (felt) => {
     const aktivitet: ForlengetOmsAktivitet = {
       type: 'ARBEIDSRETTET_TILTAK',
       tiltak: 'Tiltak',
@@ -531,7 +538,11 @@ describe('Lagre vurdering av aktivitet', () => {
         begrunnelse: undefined,
       })
     )
-    const post = vi.spyOn(apiClient, 'post')
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ok: false,
+      status: 400,
+      detail: 'Innvilgelse krever en gyldig periode.',
+    })
     await renderAktivitet(response(aktivitet, 'INNVILGELSE').vurdering)
     const maaned = container.querySelector<HTMLInputElement>(`#${felt}`)!
     await act(async () => {
@@ -540,8 +551,16 @@ describe('Lagre vurdering av aktivitet', () => {
     })
     await velgOgLagre('INNVILGELSE')
 
-    expect(post).not.toHaveBeenCalled()
-    expect(container.textContent).toContain('Må fylles ut')
+    expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet,
+      begrunnelse: 'Begrunnelse',
+      utfall: 'INNVILGELSE',
+      periode: { type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06', [felt]: '' },
+    })
+    expect(container.textContent).toContain(
+      'Kunne ikke lagre vurderingen av aktivitet: Innvilgelse krever en gyldig periode.'
+    )
+    expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
   })
 
   it('krever begrunnelse og vurderte vilkaar for aa aktivere lagre', async () => {

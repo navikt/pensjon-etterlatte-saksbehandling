@@ -63,7 +63,6 @@ interface ForlengetOmsContextValue {
   alleVilkaarErVurdert: boolean
   lagretUtfallErUtdatert: boolean
   innvilgelseFeil: string | undefined
-  periodeFeil: string | undefined
   periodeRedigerbar: boolean
   avslagErLagret: boolean
   vilkaarsvurdering: IVilkaarsvurdering | undefined
@@ -137,7 +136,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   })
   const [begrunnelse, settBegrunnelse] = useState('')
   const [utfall, settUtfall] = useState<ForlengetOmsUtfall | ''>('')
-  const [periodeFeil, setPeriodeFeil] = useState<string>()
   const [lagreStatus, lagre] = useApiCall(lagreForlengetOmsVurdering)
   const [redigerStatus, rediger] = useApiCall(slettTotalVurdering)
 
@@ -175,10 +173,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     })
   }, [behandling.id])
 
-  useEffect(() => {
-    setPeriodeFeil(undefined)
-  }, [periode.fom, periode.tom])
-
   const lagretAktivitetOgUtfall = isSuccess(hentAktivitetOgUtfallStatus) ? hentAktivitetOgUtfallStatus.data : undefined
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const redigerbar = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
@@ -215,14 +209,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
 
   const lagreVurdering = () => {
     if (!kanLagre || !aktivitet || !utfall) return
-    if (utfall === 'INNVILGELSE' && (!periode.fom || !periode.tom || periode.tom < periode.fom)) {
-      setPeriodeFeil(
-        !periode.fom || !periode.tom
-          ? 'Må fylles ut'
-          : 'Velg en til og med-måned som er lik eller etter fra og med-måneden.'
-      )
-      return
-    }
     lagre(
       {
         behandlingId: behandling.id,
@@ -271,7 +257,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     alleVilkaarErVurdert,
     lagretUtfallErUtdatert,
     innvilgelseFeil,
-    periodeFeil,
     periodeRedigerbar: sporsmaalRedigerbare && behandling.status === IBehandlingStatus.OPPRETTET,
     avslagErLagret: vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT,
     vilkaarsvurdering,
@@ -303,7 +288,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
 }
 
 export const useForlengetOms = () => {
-  //TODO rekkefølge/bort
   const context = useContext(ForlengetOmsContext)
   if (!context) throw new Error('useForlengetOms må brukes innenfor ForlengetOmsProvider')
   return context

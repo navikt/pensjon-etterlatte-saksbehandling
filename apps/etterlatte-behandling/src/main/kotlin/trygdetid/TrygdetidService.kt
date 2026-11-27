@@ -303,7 +303,15 @@ class TrygdetidServiceImpl(
                     }
                 }
             }
-        }.also { inTransactionIfNeeded { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) } }
+        }.also {
+            inTransactionIfNeeded {
+                behandlingsStatusService.settTrygdetidOppdatert(
+                    behandlingId,
+                    brukerTokenInfo,
+                    dryRun = false,
+                )
+            }
+        }
 
     private suspend fun opprettTrygdetiderForRevurdering(
         behandling: DetaljertBehandling,
@@ -719,7 +727,13 @@ class TrygdetidServiceImpl(
             if (!erOverstyrt && behandling.prosesstype != Prosesstype.AUTOMATISK) {
                 oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
             } else {
-                inTransactionIfNeeded { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
+                inTransactionIfNeeded {
+                    behandlingsStatusService.settTrygdetidOppdatert(
+                        behandlingId,
+                        brukerTokenInfo,
+                        dryRun = false,
+                    )
+                }
             }
         }
         return alleTrygdetider
@@ -1078,7 +1092,13 @@ class TrygdetidServiceImpl(
             // Dersom forrige steg (vilkårsvurdering) har blitt endret vil statusen være VILKAARSVURDERT. Når man
             // trykker videre fra vilkårsvurdering skal denne validere tilstand og sette status TRYGDETID_OPPDATERT.
             if (behandling.status == BehandlingStatus.VILKAARSVURDERT) {
-                inTransactionIfNeeded { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
+                inTransactionIfNeeded {
+                    behandlingsStatusService.settTrygdetidOppdatert(
+                        behandlingId,
+                        brukerTokenInfo,
+                        dryRun = false,
+                    )
+                }
                 true
             } else {
                 false
@@ -1202,7 +1222,13 @@ class TrygdetidServiceImpl(
             else -> trygdetid.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
         }.also { nyTrygdetid ->
             trygdetidRepository.oppdaterTrygdetid(nyTrygdetid)
-            inTransactionIfNeeded { behandlingsStatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, dryRun = false) }
+            inTransactionIfNeeded {
+                behandlingsStatusService.settTrygdetidOppdatert(
+                    behandlingId,
+                    brukerTokenInfo,
+                    dryRun = false,
+                )
+            }
         }
     }
 
@@ -1295,8 +1321,8 @@ class TrygdetidServiceImpl(
                 """
                 $feilmelding ved kopiering av trygdetidsgrunnlag 
                 fra $behandlingIdKilde til $behandlingIdMaal
-                Mål: ${trygdetiderKilde.joinToString { it.ident }}
-                Kilde: ${trygdetiderMaal.joinToString { it.ident }}
+                Mål: ${trygdetiderMaal.joinToString { it.ident }}
+                Kilde: ${trygdetiderKilde.joinToString { it.ident }}
                 """.trimIndent(),
             )
             feilmelding

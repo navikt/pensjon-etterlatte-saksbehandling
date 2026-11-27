@@ -11,6 +11,7 @@ import no.nav.etterlatte.samordning.serverRequestLoggerPlugin
 import no.nav.etterlatte.samordning.userIdMdcPlugin
 import no.nav.etterlatte.samordning.vedtak.barnepensjonVedtakRoute
 import no.nav.etterlatte.samordning.vedtak.samordningVedtakRoute
+import no.nav.etterlatte.soeknadsmottak.soeknadsmottakRoutes
 import no.nav.etterlatte.vedtak.vedtakRoute
 
 fun main() {
@@ -50,6 +51,8 @@ class Server(
             vedtakRoute(vedtakService = applicationContext.vedtakService)
 
             oppgaveRoute(applicationContext.oppgaveService)
+
+            soeknadsmottakRoutes(applicationContext.soeknadsmottakKlient)
 
             install(userIdMdcPlugin)
             install(serverRequestLoggerPlugin)

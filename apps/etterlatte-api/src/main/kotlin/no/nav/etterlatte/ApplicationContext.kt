@@ -16,6 +16,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.samordning.vedtak.SamordningVedtakService
 import no.nav.etterlatte.samordning.vedtak.TjenestepensjonKlient
 import no.nav.etterlatte.samordning.vedtak.VedtaksvurderingSamordningKlient
+import no.nav.etterlatte.soeknadsmottak.SoeknadsmottakKlient
 import no.nav.etterlatte.vedtak.VedtakService
 import no.nav.etterlatte.vedtak.VedtaksvurderingKlient
 
@@ -66,5 +67,6 @@ class ApplicationContext(
     val vedtakService = VedtakService(vedtakKlient)
 
     private val oppgaveKlient = OppgaveKlient(config, behandlingHttpClient)
+    val soeknadsmottakKlient = SoeknadsmottakKlient(config, behandlingHttpClient)
     val oppgaveService = OppgaveService(oppgaveKlient)
 }

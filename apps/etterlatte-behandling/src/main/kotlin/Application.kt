@@ -69,6 +69,7 @@ import no.nav.etterlatte.prosessering.soeknadSkyggeRoute
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
+import no.nav.etterlatte.soeknadsmottak.soeknadsmottakRoutes
 import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
 import no.nav.etterlatte.tilgangsstyring.SpesialTilgangPlugin
 import no.nav.etterlatte.trygdetid.avtale.avtale
@@ -176,6 +177,7 @@ private fun Route.attachContekst(
 private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     applicationContext.beregningModule.registrerRoutes(this)
     soeknadSkyggeRoute(applicationContext.soeknadSkyggeDao)
+    soeknadsmottakRoutes(applicationContext.soeknadsmottakService)
     prosesseringRoutes(applicationContext.prosesseringAdminDao, applicationContext.saksbehandlerGroupIdsByKey)
     feilbarDemoRoute(applicationContext.saksbehandlerGroupIdsByKey)
 

@@ -46,9 +46,20 @@ Søknadstypen er definert i `pensjon-etterlatte-felles/common` (`UtvidetOmstilli
 
 Behandlingsløpet er ikke avklart ennå. Inntil videre gjør `NySoeknadRiver` dette:
 1. Finner eller oppretter OMS-sak
-2. Journalfører søknaden på saken med tittel «Søknad om utvidet omstillingsstønad» (PDF-mal `utvidet_omstillingsstoenad_v<versjon>` i ey-pdfgen)
+2. Journalfører søknaden på saken med tittel «Søknad om utvidet omstillingsstønad» (PDF-mal `utvidet_omstillingsstoenad_v1` i ey-pdfgenrs, uten toggle)
 3. Oppretter en `TILLEGGSINFORMASJON`-oppgave som saksbehandler håndterer manuelt
 4. Svarer med `soeknadFordelt = false`, slik at det **ikke** opprettes behandling
+
+**Planlagt ansvarsdeling etter B12 (2026-11-27):** Innsendt-soeknad skal kjøre mottakskjeden
+med prosessering i sin egen database og eie PDF, journalføring og mottaksstatus. Gjenny skal
+levere journalføringskontekst og håndtere overleveringen idempotent, med deduplisering og
+oppgave/resultat i samme transaksjon. Avgjørelsen om oppgave eller behandling forblir i
+Gjenny. Ingen ny kopi av hele søknaden eller journalføringsklienter i behandling inngår.
+Dette er ikke aktivert. Dagens Kafka-flyt over gjelder fortsatt.
+
+Sb #9049 og felles #642 erstattes av denne planen. Se
+[fase 5](https://github.com/navikt/pensjon-etterlatte/blob/main/.github/utvidet-oms/prosessering.md).
+BP og vanlig OMS flyttes ikke nå, og revurderingsløpet for utvidet OMS er fortsatt uavklart.
 
 #### Selvbetjening (selvbetjening-backend → Gjenny)
 
@@ -82,7 +93,7 @@ Det opprettes **ikke** automatisk en revurdering – det er saksbehandleroppgave
 inkluderer `/api/v1/genpdf`. JSON-kontrakter og malstier er uendret.
 
 Unleash-bryterne under velger generator per mal. Standard er **av**, som beholder
-`ey-pdfgen`. Ukjente maler bruker alltid gammel generator.
+`ey-pdfgen`. Utvidet OMS bruker alltid `ey-pdfgenrs`, uten toggle. Andre ukjente maler bruker gammel generator.
 
 | Unleash-bryter | Konsument |
 |---------------|-----------|

@@ -107,6 +107,7 @@ spec:
           permissions:
             roles:
               - les-oms-sak
+              - soeknadsmottak # Søknadsmottak for utvidet OMS (B12), bare i dev
         - application: selvbetjening-backend
           namespace: etterlatte
           cluster: dev-gcp

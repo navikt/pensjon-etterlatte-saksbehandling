@@ -34,6 +34,8 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.prosessering.ProsesseringAdminDao
 import no.nav.etterlatte.prosessering.SoeknadSkyggeDao
+import no.nav.etterlatte.soeknadsmottak.SoeknadOverleveringDao
+import no.nav.etterlatte.soeknadsmottak.SoeknadsmottakService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 
 private fun featureToggleProperties(config: Config) =
@@ -171,6 +173,9 @@ internal class ApplicationContext(
     val kodeverkService get() = serviceModule.kodeverkService
     val tilgangService get() = serviceModule.tilgangService
     val sakService get() = serviceModule.sakService
+    val soeknadsmottakService by lazy {
+        SoeknadsmottakService(sakService, oppgaveService, SoeknadOverleveringDao(autoClosingDatabase))
+    }
     val doedshendelseService get() = serviceModule.doedshendelseService
     val etteroppgjoerOppgaveService get() = serviceModule.etteroppgjoerOppgaveService
     val etteroppgjoerService get() = serviceModule.etteroppgjoerService

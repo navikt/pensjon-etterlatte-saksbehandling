@@ -632,19 +632,26 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(lagre.disabled).toBe(true)
   })
 
-  it('krever begrunnelse og tillater bare avslag naar bruker studerer mindre enn 50 prosent', async () => {
-    const aktivitet: ForlengetOmsAktivitet = {
+  it.each<ForlengetOmsAktivitet>([
+    { type: 'NEI' },
+    {
       type: 'UTDANNING',
       skole: 'Skole',
       studium: 'Studium',
       studererMinst50Prosent: JaNei.NEI,
-    }
+    },
+  ])('krever begrunnelse og viser backendfeil ved ugyldig innvilgelse: $type', async (aktivitet) => {
     const lagret = response(aktivitet, 'AVSLAG')
-    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({
-      ok: true,
-      status: 200,
-      data: lagret,
-    })
+    const post = vi
+      .spyOn(apiClient, 'post')
+      .mockResolvedValueOnce({ ok: false, status: 400, detail: 'Ugyldig innvilgelse' })
+      .mockResolvedValue({ ok: true, status: 200, data: lagret })
+    store.dispatch(
+      oppdaterRevurderingInfo({
+        revurderingInfo: { type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06' },
+        begrunnelse: undefined,
+      })
+    )
     await renderAktivitet({ ...lagret.vurdering, begrunnelse: '' })
     await velgOgLagre('AVSLAG')
     expect(post).not.toHaveBeenCalled()
@@ -659,9 +666,16 @@ describe('Lagre vurdering av aktivitet', () => {
       expect(lagre.disabled).toBe(!tekst.trim())
     }
     await velgOgLagre('INNVILGELSE')
-    expect(post).not.toHaveBeenCalled()
-    await velgOgLagre('AVSLAG')
     expect(post).toHaveBeenCalledExactlyOnceWith('/behandling/behandling-id/forlenget-oms', {
+      aktivitet,
+      begrunnelse: 'Begrunnelse',
+      utfall: 'INNVILGELSE',
+      periode: { type: 'FORLENGET_OMS', fom: '2027-01', tom: '2027-06' },
+    })
+    expect(container.textContent).toContain('Kunne ikke lagre vurderingen av aktivitet: Ugyldig innvilgelse')
+    expect(store.getState().behandlingReducer.behandling?.status).toBe(IBehandlingStatus.OPPRETTET)
+    await velgOgLagre('AVSLAG')
+    expect(post).toHaveBeenNthCalledWith(2, '/behandling/behandling-id/forlenget-oms', {
       aktivitet,
       begrunnelse: 'Begrunnelse',
       utfall: 'AVSLAG',

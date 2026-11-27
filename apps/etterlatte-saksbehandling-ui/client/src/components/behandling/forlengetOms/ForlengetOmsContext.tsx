@@ -59,7 +59,6 @@ interface ForlengetOmsContextValue {
   sporsmaalRedigerbare: boolean
   alleVilkaarErVurdert: boolean
   lagretUtfallErUtdatert: boolean
-  innvilgelseFeil: string | undefined
   periodeRedigerbar: boolean
   avslagErLagret: boolean
   vilkaarsvurdering: IVilkaarsvurdering | undefined
@@ -180,19 +179,8 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     !!vilkaarsvurdering?.resultat &&
     (vilkaarsvurdering.virkningstidspunkt !== behandling.virkningstidspunkt?.dato ||
       !!vilkaarsvurdering.isGrunnlagUtdatert)
-  const innvilgelseFeil =
-    aktivitetType === 'NEI'
-      ? 'Forlenget OMS kan bare avslås når bruker verken tar utdanning eller deltar i tiltak.'
-      : aktivitetType === 'UTDANNING' && aktivitetUtdanning.studererMinst50Prosent === JaNei.NEI
-        ? 'Personen må studere minst 50% for å få stønad.'
-        : undefined
   const aktivitet = tilAktivitet(aktivitetType, aktivitetUtdanning, arbeidsrettetTiltak)
-  const kanLagre =
-    sporsmaalRedigerbare &&
-    alleVilkaarErVurdert &&
-    !!begrunnelse.trim() &&
-    !!utfall &&
-    !(utfall === 'INNVILGELSE' && !!innvilgelseFeil)
+  const kanLagre = sporsmaalRedigerbare && alleVilkaarErVurdert && !!begrunnelse.trim() && !!utfall
 
   const oppdaterUtdanning = (endringer: Partial<AktivitetUtdanning>) => {
     settAktivitetUtdanning((forrige) => ({ ...forrige, ...endringer }))
@@ -248,7 +236,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     sporsmaalRedigerbare,
     alleVilkaarErVurdert,
     lagretUtfallErUtdatert,
-    innvilgelseFeil,
     periodeRedigerbar: sporsmaalRedigerbare && behandling.status === IBehandlingStatus.OPPRETTET,
     avslagErLagret: vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT,
     vilkaarsvurdering,

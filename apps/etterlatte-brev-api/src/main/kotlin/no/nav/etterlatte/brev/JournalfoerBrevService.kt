@@ -41,14 +41,16 @@ class JournalfoerBrevService(
     suspend fun journalfoer(
         id: BrevID,
         bruker: BrukerTokenInfo,
+        utsendingEier: java.util.UUID? = null,
     ): List<OpprettJournalpostResponse> {
+        db.krevUtsendingEier(id, utsendingEier, "JOURNALFOERING_PAABEGYNT")
         val brev = db.hentBrev(id)
         if (brev.brevtype == Brevtype.NOTAT) {
             throw IllegalArgumentException("Kan ikke journalføre et notat som et brev (id = $id).")
         }
         val sak = behandlingService.hentSak(brev.sakId, bruker)
 
-        return journalfoer(brev, sak, bruker)
+        return journalfoer(brev, sak, bruker, utsendingEier)
     }
 
     suspend fun journalfoerVedtaksbrev(
@@ -110,6 +112,7 @@ class JournalfoerBrevService(
         brev: Brev,
         sak: Sak,
         bruker: BrukerTokenInfo,
+        utsendingEier: java.util.UUID? = null,
     ): List<OpprettJournalpostResponse> {
         logger.info("Journalfører brev ${brev.id} på ${brev.mottakere.size} mottaker(e)")
 
@@ -118,8 +121,8 @@ class JournalfoerBrevService(
         }
 
         return brev.mottakere
-            .map { mottaker -> journalfoerPaaMottaker(brev.id, brev.soekerFnr, mottaker, sak, bruker) }
-            .also { db.settBrevJournalfoert(brev.id, it, bruker) }
+            .map { mottaker -> journalfoerPaaMottaker(brev.id, brev.soekerFnr, mottaker, sak, bruker, utsendingEier != null) }
+            .also { db.settBrevJournalfoert(brev.id, it, bruker, utsendingEier) }
     }
 
     private suspend fun journalfoerPaaMottaker(
@@ -128,6 +131,7 @@ class JournalfoerBrevService(
         mottaker: Mottaker,
         sak: Sak,
         bruker: BrukerTokenInfo,
+        krevFerdigstilling: Boolean = false,
     ): OpprettJournalpostResponse {
         val request = mapTilJournalpostRequest(brevId, soekerFnr, mottaker, sak)
 
@@ -135,7 +139,10 @@ class JournalfoerBrevService(
 
         if (!response.journalpostferdigstilt) {
             logger.warn("Kunne ikke ferdigstille journalpost. Forsøker på nytt...")
-            dokarkivService.ferdigstillJournalpost(response.journalpostId, sak.enhet, bruker)
+            val ferdigstilt = dokarkivService.ferdigstillJournalpost(response.journalpostId, sak.enhet, bruker)
+            if (krevFerdigstilling && !ferdigstilt) {
+                throw UgyldigForespoerselException("JOURNALPOST_IKKE_FERDIGSTILT", "Journalposten ble ikke ferdigstilt.")
+            }
         }
 
         db.lagreJournalpostId(mottaker.id, response)
@@ -171,8 +178,14 @@ class JournalfoerBrevService(
                     id = foedselsnummer?.value ?: orgnummer,
                     idType =
                         when {
-                            foedselsnummer != null -> AvsenderMottakerIdType.FNR
-                            orgnummer != null -> AvsenderMottakerIdType.ORGNR
+                            foedselsnummer != null -> {
+                                AvsenderMottakerIdType.FNR
+                            }
+
+                            orgnummer != null -> {
+                                AvsenderMottakerIdType.ORGNR
+                            }
+
                             else -> {
                                 logger.warn("Kunne ikke utlede type på avsenderMottaker fra brev-mottaker")
                                 null

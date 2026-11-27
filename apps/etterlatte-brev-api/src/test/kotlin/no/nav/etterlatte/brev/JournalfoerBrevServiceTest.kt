@@ -73,6 +73,7 @@ internal class JournalfoerBrevServiceTest {
 
     @AfterEach
     fun after() {
+        verify(atLeast = 0) { db.krevUtsendingEier(any(), any(), any()) }
         confirmVerified(db, behandlingService, dokarkivService, vedtaksbrevService)
     }
 

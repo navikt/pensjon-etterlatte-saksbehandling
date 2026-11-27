@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.dokument.dokumentRoute
+import no.nav.etterlatte.brev.informasjonsbrevRoute
 import no.nav.etterlatte.brev.notat.notatRoute
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
@@ -46,6 +47,12 @@ private class Server(
             oversendelseBrevRoute(context.oversendelseBrevService, context.tilgangssjekker)
 
             strukturertBrevRoute(context.tilbakekrevingBrevService, context.tilgangssjekker)
+            informasjonsbrevRoute(
+                context.informasjonsbrevService,
+                context.tilgangssjekker,
+                context.behandlingService,
+                context.brevBatchKonfigurasjon,
+            )
         }
 
     fun runServer() =

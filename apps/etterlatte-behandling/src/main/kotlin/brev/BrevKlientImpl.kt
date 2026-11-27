@@ -21,6 +21,24 @@ import java.time.Duration
 import java.util.UUID
 
 interface BrevKlient {
+    suspend fun opprettInformasjonsbrev(
+        utsendingsId: UUID,
+        request: StrukturertInformasjonsbrevRequest,
+        bruker: BrukerTokenInfo,
+    ): InformasjonsbrevUtsending
+
+    suspend fun hentInformasjonsbrev(
+        utsendingsId: UUID,
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): InformasjonsbrevUtsending?
+
+    suspend fun sendInformasjonsbrev(
+        utsendingsId: UUID,
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): InformasjonsbrevUtsending
+
     suspend fun tilbakestillStrukturertBrev(
         brevID: BrevID,
         behandlingId: UUID,
@@ -86,6 +104,40 @@ class BrevKlientImpl(
 
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
+
+    override suspend fun opprettInformasjonsbrev(
+        utsendingsId: UUID,
+        request: StrukturertInformasjonsbrevRequest,
+        bruker: BrukerTokenInfo,
+    ): InformasjonsbrevUtsending =
+        post(
+            url = "$resourceUrl/api/brev/strukturert/sak/${request.sak.id.sakId}/utsending/$utsendingsId",
+            postBody = request,
+            onSuccess = { deserialize(it.response!!.toJson()) },
+            brukerTokenInfo = bruker,
+        )
+
+    override suspend fun hentInformasjonsbrev(
+        utsendingsId: UUID,
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): InformasjonsbrevUtsending? =
+        get(
+            url = "$resourceUrl/api/brev/strukturert/sak/${sakId.sakId}/utsending/$utsendingsId",
+            onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
+            brukerTokenInfo = bruker,
+        )
+
+    override suspend fun sendInformasjonsbrev(
+        utsendingsId: UUID,
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): InformasjonsbrevUtsending =
+        post(
+            url = "$resourceUrl/api/brev/strukturert/sak/${sakId.sakId}/utsending/$utsendingsId/send",
+            onSuccess = { deserialize(it.response!!.toJson()) },
+            brukerTokenInfo = bruker,
+        )
 
     override suspend fun opprettStrukturertBrev(
         behandlingId: UUID,

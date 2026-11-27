@@ -37,6 +37,7 @@ import no.nav.etterlatte.behandling.vedtaksvurdering.routes.klagevedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.samordningSystembrukerVedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.tilbakekrevingvedtakRoute
 import no.nav.etterlatte.behandling.vedtaksvurdering.routes.vedtaksvurderingRoute
+import no.nav.etterlatte.brev.batch.brevBatchRoute
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
@@ -117,6 +118,7 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
         context.etteroppgjoerSvarfristUtloeptJob,
+        context.brevBatchJob,
         context.aktivitetspliktOppgaveUnntakUtloeperJob,
         context.sjekkAdressebeskyttelseJob,
         context.hengendeBehandlingJob,
@@ -217,6 +219,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     )
 
     brevRoute(service = applicationContext.brevService)
+    brevBatchRoute(applicationContext.brevBatchService)
 
     aktivitetspliktRoutes(
         aktivitetspliktService = applicationContext.aktivitetspliktService,

@@ -365,53 +365,62 @@ class BrevRepository(
         nyBrevloesning: Boolean = false,
     ): Brev =
         ds.transaction(true) { tx ->
-            val brevId =
-                tx.run(
-                    queryOf(
-                        OPPRETT_BREV_QUERY,
-                        mapOf(
-                            "sak_id" to ulagretBrev.sakId.sakId,
-                            "behandling_id" to ulagretBrev.behandlingId,
-                            "prosess_type" to ulagretBrev.prosessType.name,
-                            "soeker_fnr" to ulagretBrev.soekerFnr,
-                            "opprettet" to ulagretBrev.opprettet.toTimestamp(),
-                            "brevtype" to ulagretBrev.brevtype.name,
-                            "brevkoder" to ulagretBrev.brevkoder.name,
-                            "ny_brevloesning" to nyBrevloesning,
-                        ),
-                    ).asUpdateAndReturnGeneratedKey,
-                )
-
-            krevIkkeNull(brevId) { "Brev ikke opprettet!" }
-
-            ulagretBrev.mottakere
-                .sumOf { tx.opprettMottaker(brevId, it) }
-                .also { opprettet ->
-                    krev(opprettet == ulagretBrev.mottakere.size) {
-                        "Mottaker ble ikke opprettet for id $brevId"
-                    }
-                }
-
-            tx
-                .run(
-                    queryOf(
-                        OPPRETT_INNHOLD_QUERY,
-                        mapOf(
-                            "brev_id" to brevId,
-                            "tittel" to ulagretBrev.innhold.tittel,
-                            "spraak" to ulagretBrev.innhold.spraak.name,
-                            "payload" to ulagretBrev.innhold.payload?.toJson(),
-                            "payload_vedlegg" to ulagretBrev.innholdVedlegg?.toJson(),
-                        ),
-                    ).asUpdate,
-                ).also { opprettet -> krev(opprettet == 1) { "Innhold ble ikke opprettet for id $brevId" } }
-
-            tx
-                .lagreHendelse(brevId, Status.OPPRETTET, ulagretBrev.opprettet, bruker = bruker)
-                .also { oppdatert -> krev(oppdatert == 1) { "Hendelse ble ikke satt til opprettet for id $brevId" } }
-
-            opprettBrevFra(brevId, ulagretBrev)
+            opprettBrev(tx, ulagretBrev, bruker, nyBrevloesning)
         }
+
+    internal fun opprettBrev(
+        tx: Session,
+        ulagretBrev: OpprettNyttBrev,
+        bruker: BrukerTokenInfo,
+        nyBrevloesning: Boolean,
+    ): Brev {
+        val brevId =
+            tx.run(
+                queryOf(
+                    OPPRETT_BREV_QUERY,
+                    mapOf(
+                        "sak_id" to ulagretBrev.sakId.sakId,
+                        "behandling_id" to ulagretBrev.behandlingId,
+                        "prosess_type" to ulagretBrev.prosessType.name,
+                        "soeker_fnr" to ulagretBrev.soekerFnr,
+                        "opprettet" to ulagretBrev.opprettet.toTimestamp(),
+                        "brevtype" to ulagretBrev.brevtype.name,
+                        "brevkoder" to ulagretBrev.brevkoder.name,
+                        "ny_brevloesning" to nyBrevloesning,
+                    ),
+                ).asUpdateAndReturnGeneratedKey,
+            )
+
+        krevIkkeNull(brevId) { "Brev ikke opprettet!" }
+
+        ulagretBrev.mottakere
+            .sumOf { tx.opprettMottaker(brevId, it) }
+            .also { opprettet ->
+                krev(opprettet == ulagretBrev.mottakere.size) {
+                    "Mottaker ble ikke opprettet for id $brevId"
+                }
+            }
+
+        tx
+            .run(
+                queryOf(
+                    OPPRETT_INNHOLD_QUERY,
+                    mapOf(
+                        "brev_id" to brevId,
+                        "tittel" to ulagretBrev.innhold.tittel,
+                        "spraak" to ulagretBrev.innhold.spraak.name,
+                        "payload" to ulagretBrev.innhold.payload?.toJson(),
+                        "payload_vedlegg" to ulagretBrev.innholdVedlegg?.toJson(),
+                    ),
+                ).asUpdate,
+            ).also { opprettet -> krev(opprettet == 1) { "Innhold ble ikke opprettet for id $brevId" } }
+
+        tx
+            .lagreHendelse(brevId, Status.OPPRETTET, ulagretBrev.opprettet, bruker = bruker)
+            .also { oppdatert -> krev(oppdatert == 1) { "Hendelse ble ikke satt til opprettet for id $brevId" } }
+
+        return opprettBrevFra(brevId, ulagretBrev)
+    }
 
     fun lagreJournalpostId(
         mottakerId: UUID,
@@ -431,9 +440,11 @@ class BrevRepository(
         brevId: BrevID,
         journalpostResponse: List<OpprettJournalpostResponse>,
         bruker: BrukerTokenInfo,
+        utsendingEier: UUID? = null,
     ): Boolean =
-        using(sessionOf(ds)) {
-            it.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson(), bruker) > 0
+        ds.transaction { tx ->
+            settUtsendingEier(tx, utsendingEier)
+            tx.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson(), bruker) > 0
         }
 
     fun lagreBestillingId(
@@ -454,8 +465,48 @@ class BrevRepository(
         brevId: BrevID,
         distResponse: List<DistribuerJournalpostResponse>,
         bruker: BrukerTokenInfo,
-    ) = using(sessionOf(ds)) {
-        it.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson(), bruker)
+        utsendingEier: UUID? = null,
+    ) = ds.transaction { tx ->
+        settUtsendingEier(tx, utsendingEier)
+        tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson(), bruker)
+    }
+
+    fun krevUtsendingEier(
+        brevId: BrevID,
+        eier: UUID?,
+        steg: String,
+    ) {
+        using(sessionOf(ds)) { tx ->
+            val tillatt =
+                tx.run(
+                    queryOf(
+                        """SELECT NOT EXISTS (
+                        SELECT 1 FROM informasjonsbrev_utsending WHERE brev_id = ?
+                        AND (eier IS DISTINCT FROM ?::uuid OR status <> ?)
+                    ) AS tillatt""",
+                        brevId,
+                        eier,
+                        steg,
+                    ).map { it.boolean("tillatt") }.asSingle,
+                )
+            if (tillatt != true) {
+                throw no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException(
+                    "BATCHBREV_KAN_IKKE_ENDRES",
+                    "Batchbrev må sendes gjennom den sakstilknyttede utsendingen.",
+                )
+            }
+        }
+    }
+
+    private fun settUtsendingEier(
+        tx: Session,
+        eier: UUID?,
+    ) {
+        if (eier != null) {
+            tx.run(
+                queryOf("SELECT set_config('etterlatte.batch_eier', ?, true) AS eier", eier.toString()).map { it.string("eier") }.asSingle,
+            )
+        }
     }
 
     fun settBrevSlettet(

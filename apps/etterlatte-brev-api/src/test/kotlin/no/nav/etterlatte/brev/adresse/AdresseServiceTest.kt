@@ -29,10 +29,12 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.BrevbakerType.Foedselsnummer
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
 internal class AdresseServiceTest {
@@ -57,6 +59,67 @@ internal class AdresseServiceTest {
     @AfterEach
     fun after() {
         confirmVerified(norg2Mock, saksbehandlerKlient, regoppslagMock)
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class)
+    fun `batchbrev avviser ukjent fødselsdato fremfor å anta myndig mottaker`(sakType: SakType) {
+        val personer =
+            PersonerISak(
+                null,
+                Soeker("Fiktiv", etternavn = "Person", fnr = Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                emptyList(),
+                null,
+                emptyList(),
+            )
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns null
+        assertThrows(no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException::class.java) {
+            runBlocking { adresseService.hentMottakere(sakType, personer, SAK_ID, simpleSaksbehandler(), true) }
+        }
+        coVerify(exactly = 0) { regoppslagMock.hentMottakerAdresse(any(), any()) }
+    }
+
+    @Test
+    fun `batchbrev avviser flere mulige ansvarlige foreldre uten å velge den første`() {
+        val foreldre = listOf(GJENLEVENDE_FOEDSELSNUMMER.value, INNSENDER_FOEDSELSNUMMER.value)
+        val personer =
+            PersonerISak(
+                null,
+                Soeker("Fiktiv", etternavn = "Barn", fnr = Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), ansvarligeForeldre = foreldre),
+                emptyList(),
+                null,
+                foreldre,
+            )
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.now().minusYears(16)
+        assertThrows(no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException::class.java) {
+            runBlocking { adresseService.hentMottakere(SakType.BARNEPENSJON, personer, SAK_ID, simpleSaksbehandler(), true) }
+        }
+        coVerify(exactly = 0) { regoppslagMock.hentMottakerAdresse(any(), any()) }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [14, 16, 19])
+    fun `batchbrev følger eksisterende aldersgrenser og foreldremottakere`(alder: Int) {
+        val personer =
+            PersonerISak(
+                null,
+                Soeker(
+                    "Fiktiv",
+                    etternavn = "Barn",
+                    fnr = Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                    ansvarligeForeldre = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+                    under18 = alder < 18,
+                ),
+                emptyList(),
+                null,
+                listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+            )
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.now().minusYears(alder.toLong())
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        val mottakere = runBlocking { adresseService.hentMottakere(SakType.BARNEPENSJON, personer, SAK_ID, simpleSaksbehandler(), true) }
+        mottakere.size shouldBe if (alder in 15..17) 2 else 1
+        mottakere.first().foedselsnummer?.value shouldBe if (alder < 18) GJENLEVENDE_FOEDSELSNUMMER.value else SOEKER_FOEDSELSNUMMER.value
+        coVerify { regoppslagMock.hentMottakerAdresse(any(), any()) }
     }
 
     @Test

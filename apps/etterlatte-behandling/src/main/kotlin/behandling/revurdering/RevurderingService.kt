@@ -157,8 +157,8 @@ class RevurderingService(
                 sjekk(behandling.status == BehandlingStatus.OPPRETTET) {
                     "Utfallet må åpnes for redigering før perioden for forlenget OMS kan endres."
                 }
-                sjekk(periode.fom == behandling.virkningstidspunkt?.dato && periode.tom >= periode.fom) {
-                    "Perioden må starte på virkningstidspunktet, og til og med må være lik eller etter fra og med."
+                sjekk(periode.tom >= periode.fom) {
+                    "Til og med må være lik eller etter fra og med."
                 }
                 behandlingDao.lagreOpphoerFom(behandlingId, periode.tom.plusMonths(1))
             } else {
@@ -173,6 +173,28 @@ class RevurderingService(
         }
         val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
         revurderingDao.lagreRevurderingInfo(behandlingId, revurderingInfoMedBegrunnelse, kilde)
+    }
+
+    fun slettForlengetOmsPeriode(
+        behandlingId: UUID,
+        navIdent: String,
+    ) {
+        val behandling = hentBehandling(behandlingId) ?: throw UgyldigBehandlingTypeForRevurdering()
+        behandlingErAvTypenRevurderingOgKanEndres(behandling)
+        sjekk(
+            featureToggleService.isEnabled(RevurderingToggle.FORLENGET_OMS, false) &&
+                behandling.revurderingsaarsak == Revurderingaarsak.FORLENGET_OMS &&
+                behandling.status == BehandlingStatus.OPPRETTET,
+        ) { "Perioden kan bare fjernes på en redigerbar revurdering for forlenget OMS." }
+        val periode = behandling.revurderingInfo?.revurderingInfo as? RevurderingInfo.ForlengetOms ?: return
+        if (behandling.opphoerFraOgMed == periode.tom.plusMonths(1)) {
+            behandlingDao.lagreOpphoerFom(behandlingId, null)
+        }
+        revurderingDao.lagreRevurderingInfo(
+            behandlingId,
+            RevurderingInfoMedBegrunnelse(null, null),
+            Grunnlagsopplysning.Saksbehandler.create(navIdent),
+        )
     }
 
     internal fun opprettRevurdering(

@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.util.UUID
 
-data class ForlengetOmsVurdering(
+data class AktivitetOgUtfall(
     val behandlingId: UUID,
     val aktivitet: ForlengetOmsAktivitet,
     val begrunnelse: String,

@@ -277,6 +277,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                     try {
                         val (vilkaarsvurdering, behandlingGrunnlagversjon) =
                             inTransaction {
+                                vilkaarsvurderingService.sjekkKanLagreTotalVurderingFraApi(behandlingId)
                                 vilkaarsvurderingService.oppdaterTotalVurdering(
                                     behandlingId,
                                     brukerTokenInfo,

@@ -52,12 +52,12 @@ class ForlengetOmsDaoTest(
 
         aktiviteter.forEach { (aktivitet, utfall) ->
             val behandlingId = nyBehandling()
-            dao.hentVurdering(behandlingId) shouldBe null
+            dao.hentAktivitetOgUtfall(behandlingId) shouldBe null
 
             dao.lagreVurdering(behandlingId, aktivitet, "Begrunnelse", utfall, kilde)
 
-            dao.hentVurdering(behandlingId) shouldBe
-                ForlengetOmsVurdering(behandlingId, aktivitet, "Begrunnelse", utfall, kilde, kilde)
+            dao.hentAktivitetOgUtfall(behandlingId) shouldBe
+                AktivitetOgUtfall(behandlingId, aktivitet, "Begrunnelse", utfall, kilde, kilde)
         }
     }
 
@@ -75,8 +75,8 @@ class ForlengetOmsDaoTest(
             lagretAv,
         )
 
-        dao.hentVurdering(behandlingId) shouldBe
-            ForlengetOmsVurdering(
+        dao.hentAktivitetOgUtfall(behandlingId) shouldBe
+            AktivitetOgUtfall(
                 behandlingId,
                 ForlengetOmsAktivitet.IngenAktivitet,
                 "Ny begrunnelse",
@@ -93,7 +93,7 @@ class ForlengetOmsDaoTest(
         assertThrows<SQLException> {
             dao.lagreVurdering(behandlingId, utdanning, "Begrunnelse", ForlengetOmsUtfall.INNVILGELSE, kilde)
         }
-        dao.hentVurdering(behandlingId) shouldBe null
+        dao.hentAktivitetOgUtfall(behandlingId) shouldBe null
     }
 
     private fun nyBehandling(): UUID {

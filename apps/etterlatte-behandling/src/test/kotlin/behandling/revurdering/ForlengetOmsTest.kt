@@ -27,12 +27,18 @@ class ForlengetOmsTest {
     }
 
     @Test
+    fun `perioden kan starte foer eller etter virkningstidspunktet`() {
+        listOf(fom.minusMonths(1), fom.plusMonths(1)).forEach { valgtFom ->
+            behandling(RevurderingInfo.ForlengetOms(valgtFom, tom)).validerForlengetOmsPeriode()
+        }
+    }
+
+    @Test
     fun `manglende periode og perioder som ikke samsvarer med behandlingen avvises`() {
         val ugyldigePerioder =
             listOf(
                 null,
                 RevurderingInfo.ForlengetOms(fom, fom.minusMonths(1)),
-                RevurderingInfo.ForlengetOms(fom.plusMonths(1), tom),
                 RevurderingInfo.ForlengetOms(fom, tom.minusMonths(1)),
             )
 
@@ -53,7 +59,7 @@ class ForlengetOmsTest {
         val revurderingDao = mockk<RevurderingDao>(relaxed = true)
         every { behandlingDao.hentBehandling(behandling.id) } returns behandling
         val service = service(behandlingDao, revurderingDao)
-        val info = RevurderingInfoMedBegrunnelse(RevurderingInfo.ForlengetOms(fom, tom), null)
+        val info = RevurderingInfoMedBegrunnelse(RevurderingInfo.ForlengetOms(fom.minusMonths(1), tom), null)
 
         service.lagreRevurderingInfo(behandling.id, info, "Z123456")
 

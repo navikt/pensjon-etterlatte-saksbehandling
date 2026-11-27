@@ -1,36 +1,11 @@
-import { useState } from 'react'
-import { Alert, BodyShort, Heading, Radio, RadioGroup, Textarea, TextField, VStack } from '@navikt/ds-react'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { ForlengetOmsPeriodeOgResultat } from './ForlengetOmsPeriodeOgResultat'
+import { Alert, BodyShort, Heading, Radio, RadioGroup, TextField, VStack } from '@navikt/ds-react'
+import { useForlengetOms } from './ForlengetOmsContext'
+import { ForlengetOmsPeriode } from './ForlengetOmsPeriode'
+import { JaNei } from '~shared/types/ISvar'
 
-export const ForlengetOmsUtdanning = ({
-  behandling,
-  redigerbar,
-}: {
-  behandling: IBehandlingReducer
-  redigerbar: boolean
-}) => {
-  const [skole, setSkole] = useState('')
-  const [studium, setStudium] = useState('')
-  const [studererMinst50Prosent, setStudererMinst50Prosent] = useState('')
-  const [visValideringsfeil, setVisValideringsfeil] = useState(false)
-  const [resultatBegrunnelse, setResultatBegrunnelse] = useState(
-    behandling.vilkaarsvurdering?.resultat?.kommentar ?? ''
-  )
-  const vilkaarsvurdering = behandling.vilkaarsvurdering
-  const sporsmaalRedigerbare = redigerbar && !vilkaarsvurdering?.resultat
-  const begrunnelseTittel =
-    studererMinst50Prosent === 'JA' ? 'Er utdanningen nødvendig og hensiktsmessig?' : 'Begrunn avslaget'
-
-  const validerAktivitet = () => {
-    setVisValideringsfeil(true)
-    return (
-      !!skole.trim() &&
-      !!studium.trim() &&
-      ['JA', 'NEI'].includes(studererMinst50Prosent) &&
-      !!resultatBegrunnelse.trim()
-    )
-  }
+export const ForlengetOmsUtdanning = () => {
+  const { kanRedigere, aktivitetUtdanning, oppdaterUtdanning } = useForlengetOms()
+  const { skole, studium, studererMinst50Prosent } = aktivitetUtdanning
 
   return (
     <>
@@ -39,39 +14,26 @@ export const ForlengetOmsUtdanning = ({
           <TextField
             label="Hvilken skole skal bruker studere ved?"
             value={skole}
-            onChange={(event) => setSkole(event.target.value)}
-            readOnly={!sporsmaalRedigerbare}
-            error={visValideringsfeil && !skole.trim() ? 'Oppgi hvilken skole bruker skal studere ved.' : undefined}
+            onChange={(event) => oppdaterUtdanning({ skole: event.target.value })}
+            readOnly={!kanRedigere}
           />
         </VStack>
         <VStack gap="space-16" maxWidth="30rem">
           <TextField
             label="Hva skal bruker studere?"
             value={studium}
-            onChange={(event) => setStudium(event.target.value)}
-            readOnly={!sporsmaalRedigerbare}
-            error={visValideringsfeil && !studium.trim() ? 'Oppgi hva bruker skal studere.' : undefined}
+            onChange={(event) => oppdaterUtdanning({ studium: event.target.value })}
+            readOnly={!kanRedigere}
           />
         </VStack>
       </VStack>
-      <ForlengetOmsPeriodeOgResultat
-        behandling={behandling}
-        redigerbar={redigerbar}
-        resultatBegrunnelse={{ tekst: resultatBegrunnelse, onChange: setResultatBegrunnelse }}
-        validerAktivitet={validerAktivitet}
-        innvilgelseFeil={
-          studererMinst50Prosent === 'NEI' ? 'Personen må studere minst 50% for å få stønad.' : undefined
-        }
-      >
+      <ForlengetOmsPeriode>
         <VStack gap="space-16">
           <RadioGroup
             legend="Studerer bruker minst 50 prosent?"
             value={studererMinst50Prosent}
-            onChange={setStudererMinst50Prosent}
-            disabled={!sporsmaalRedigerbare}
-            error={
-              visValideringsfeil && !studererMinst50Prosent ? 'Svar på om bruker studerer minst 50 prosent.' : undefined
-            }
+            onChange={(verdi: JaNei) => oppdaterUtdanning({ studererMinst50Prosent: verdi })}
+            disabled={!kanRedigere}
           >
             <Radio value="JA">Ja, bruker studerer minst 50 prosent</Radio>
             <Radio value="NEI">Nei, prosenten er lavere</Radio>
@@ -85,24 +47,7 @@ export const ForlengetOmsUtdanning = ({
             </Alert>
           )}
         </VStack>
-        {studererMinst50Prosent && (
-          <VStack gap="space-16" maxWidth="30rem">
-            <Textarea
-              label={begrunnelseTittel}
-              description={
-                studererMinst50Prosent === 'JA'
-                  ? 'Begrunn hvorfor utdanningen er nødvendig og hensiktsmessig eller ikke'
-                  : undefined
-              }
-              value={resultatBegrunnelse}
-              onChange={(event) => setResultatBegrunnelse(event.target.value)}
-              minRows={6}
-              readOnly={!sporsmaalRedigerbare}
-              error={visValideringsfeil && !resultatBegrunnelse.trim() ? 'Oppgi en begrunnelse.' : undefined}
-            />
-          </VStack>
-        )}
-      </ForlengetOmsPeriodeOgResultat>
+      </ForlengetOmsPeriode>
     </>
   )
 }

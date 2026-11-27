@@ -225,6 +225,30 @@ describe('Lagre vurdering av aktivitet', () => {
     expect(neste.disabled).toBe(false)
   })
 
+  it.each([
+    { virkningstidspunkt: '2026-12-01', isGrunnlagUtdatert: false },
+    { virkningstidspunkt: '2027-01-01', isGrunnlagUtdatert: true },
+  ])('varsler og hindrer neste ved utdatert vurdering: %j', async ({ virkningstidspunkt, isGrunnlagUtdatert }) => {
+    const lagret = response({ type: 'NEI' }, 'AVSLAG')
+    store.dispatch(
+      setBehandling({
+        ...behandling,
+        status: IBehandlingStatus.VILKAARSVURDERT,
+        vilkaarsvurdering: { ...lagret.vilkaarsvurdering, virkningstidspunkt, isGrunnlagUtdatert },
+      })
+    )
+    await renderAktivitet(lagret.vurdering)
+
+    expect(container.textContent?.includes('Virkningstidspunktet er endret siden vilkårene ble vurdert sist.')).toBe(
+      !isGrunnlagUtdatert
+    )
+    expect(
+      container.textContent?.includes('OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist.')
+    ).toBe(isGrunnlagUtdatert)
+    const neste = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Neste')!
+    expect(neste.disabled).toBe(true)
+  })
+
   it('beholder lagrede svar laast til backend har aapnet vurderingen for redigering', async () => {
     const lagret = response({ type: 'NEI' }, 'AVSLAG')
     lagret.vilkaarsvurdering.resultat!.kommentar = 'Kommentar fra vilkår'

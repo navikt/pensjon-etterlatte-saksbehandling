@@ -1,14 +1,15 @@
 import { useContext } from 'react'
-import { Alert, BodyShort, Box, Button, Label, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Label, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
+import { useBehandling } from '~components/behandling/useBehandling'
+import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { mapFailure } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForlengetOms } from './ForlengetOmsContext'
 import { ForlengetOmsUtfall } from '~shared/api/forlengetOms'
-import { isPending } from '@reduxjs/toolkit'
 
 export const ResultatForlengetOms = () => {
   const {
@@ -22,13 +23,14 @@ export const ResultatForlengetOms = () => {
     redigerVurdering,
     redigerStatus,
     vilkaarsvurdering,
-    lagretUtfallErUtdatert,
     kanLagre,
     kanVelgeUtfall,
     kanGaaVidere,
     lagreStatus,
   } = useForlengetOms()
   const { next } = useContext(BehandlingRouteContext)
+  const behandling = useBehandling()
+  const virkningstidspunktSamsvarer = behandling?.virkningstidspunkt?.dato === vilkaarsvurdering?.virkningstidspunkt
 
   return (
     <VStack paddingInline="space-64 space-32" gap="space-16">
@@ -92,10 +94,17 @@ export const ResultatForlengetOms = () => {
       {mapFailure(lagreStatus, (error) => (
         <ApiErrorAlert>Kunne ikke lagre vurderingen av aktivitet: {error.detail}</ApiErrorAlert>
       ))}
-      {lagretUtfallErUtdatert && (
-        <Alert variant="warning">
-          Virkningstidspunktet eller grunnlaget er endret. Velg «Rediger vurdering» og vurder utfallet på nytt.
-        </Alert>
+      {vilkaarsvurdering?.resultat && !virkningstidspunktSamsvarer && (
+        <OppdatertGrunnlagAlert variant="warning">
+          Virkningstidspunktet er endret siden vilkårene ble vurdert sist. Du må se over vurderingene og sjekke at de
+          fortsatt er riktige. Velg &quot;Rediger vurdering&quot; for å gjøre dette.
+        </OppdatertGrunnlagAlert>
+      )}
+      {harTilgang && vilkaarsvurdering?.isGrunnlagUtdatert && (
+        <OppdatertGrunnlagAlert variant="warning">
+          OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />
+          Du må se over vurderingene og sjekke at de fortsatt er riktige.
+        </OppdatertGrunnlagAlert>
       )}
       {mapFailure(redigerStatus, (error) => (
         <ApiErrorAlert>Kunne ikke åpne utfallet for redigering: {error.detail}</ApiErrorAlert>

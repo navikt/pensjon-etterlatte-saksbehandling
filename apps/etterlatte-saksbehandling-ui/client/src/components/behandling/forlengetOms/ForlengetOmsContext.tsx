@@ -57,7 +57,6 @@ interface ForlengetOmsContextValue {
   redigerStatus: Result<IVilkaarsvurdering>
   harTilgang: boolean
   kanRedigere: boolean
-  lagretUtfallErUtdatert: boolean
   vilkaarsvurdering: IVilkaarsvurdering | undefined
   kanLagre: boolean
   kanVelgeUtfall: boolean
@@ -170,10 +169,6 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const harTilgang = erBehandlingRedigerbar(behandling.status, behandling.sakEnhetId, saksbehandler.skriveEnheter)
   const kanRedigere = harTilgang && !vilkaarsvurdering?.resultat && !isPending(lagreStatus) && !isPending(redigerStatus)
-  const lagretUtfallErUtdatert =
-    !!vilkaarsvurdering?.resultat &&
-    (vilkaarsvurdering.virkningstidspunkt !== behandling.virkningstidspunkt?.dato ||
-      !!vilkaarsvurdering.isGrunnlagUtdatert)
   const aktivitet = tilAktivitet(aktivitetType, aktivitetUtdanning, arbeidsrettetTiltak)
   const kanLagre = kanRedigere && !!begrunnelse.trim() && !!utfall
 
@@ -231,14 +226,14 @@ export const ForlengetOmsProvider = ({ behandling, children }: Props) => {
     redigerStatus,
     harTilgang,
     kanRedigere,
-    lagretUtfallErUtdatert,
     vilkaarsvurdering,
     kanLagre,
     kanVelgeUtfall: kanRedigere && !!aktivitetType,
     kanGaaVidere:
       !!lagretAktivitetOgUtfall &&
       !!vilkaarsvurdering?.resultat &&
-      !lagretUtfallErUtdatert &&
+      vilkaarsvurdering.virkningstidspunkt === behandling.virkningstidspunkt?.dato &&
+      !vilkaarsvurdering.isGrunnlagUtdatert &&
       !isPending(lagreStatus) &&
       !isPending(redigerStatus) &&
       !!aktivitetType,
